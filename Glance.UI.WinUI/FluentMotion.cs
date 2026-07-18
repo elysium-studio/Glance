@@ -79,40 +79,6 @@ public static class FluentMotion
         visual.StartAnimation(nameof(Visual.Opacity), opacity);
     }
 
-    public static void StartActivityPulse(
-        FrameworkElement element,
-        float peakScale = 1.05f,
-        int durationMilliseconds = 2200)
-    {
-        Visual visual = ElementCompositionPreview.GetElementVisual(element);
-        Compositor compositor = visual.Compositor;
-        CubicBezierEasingFunction easing = CreateEasing(compositor);
-
-        visual.CenterPoint = new Vector3(
-            (float)element.ActualWidth / 2,
-            (float)element.ActualHeight / 2,
-            0);
-
-        Vector3KeyFrameAnimation animation = compositor.CreateVector3KeyFrameAnimation();
-        animation.InsertKeyFrame(0, Vector3.One);
-        animation.InsertKeyFrame(
-            0.45f,
-            new Vector3(peakScale, peakScale, 1),
-            easing);
-        animation.InsertKeyFrame(1, Vector3.One, easing);
-        animation.Duration = TimeSpan.FromMilliseconds(durationMilliseconds);
-        animation.IterationBehavior = AnimationIterationBehavior.Forever;
-
-        visual.StartAnimation(nameof(Visual.Scale), animation);
-    }
-
-    public static void StopActivityPulse(FrameworkElement element)
-    {
-        Visual visual = ElementCompositionPreview.GetElementVisual(element);
-        visual.StopAnimation(nameof(Visual.Scale));
-        visual.Scale = Vector3.One;
-    }
-
     private static CubicBezierEasingFunction CreateEasing(Compositor compositor) =>
         compositor.CreateCubicBezierEasingFunction(
             new Vector2(0.16f, 1f),
