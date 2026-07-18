@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.22000.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>Glance.Clipboard.WinUI</RootNamespace>
+    <UseWinUI>true</UseWinUI>
+    <Nullable>enable</Nullable>
+    <Platforms>AnyCPU;x64</Platforms>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Glance.Application.Abstractions\Glance.Application.Abstractions.csproj" />
+    <ProjectReference Include="..\Glance.Clipboard\Glance.Clipboard.csproj" />
+    <ProjectReference Include="..\Glance.UI.WinUI\Glance.UI.WinUI.csproj" />
+  </ItemGroup>
+</Project>
