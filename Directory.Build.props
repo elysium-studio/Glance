@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <Authors>Elysium Studio</Authors>
+    <Company>Elysium Studio</Company>
+    <Deterministic>true</Deterministic>
+    <ElysiumVersion>0.1.0-preview.10-local</ElysiumVersion>
+    <ElysiumPublishedVersion>0.1.0-preview.10</ElysiumPublishedVersion>
+  </PropertyGroup>
+</Project>

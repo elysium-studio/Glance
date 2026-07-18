@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.22000.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>Glance.Shell.WinUI</RootNamespace>
+    <AssemblyName>Glance</AssemblyName>
+    <AssemblyTitle>Glance</AssemblyTitle>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x64</Platforms>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <UseWinUI>true</UseWinUI>
+    <EnableMsixTooling>false</EnableMsixTooling>
+    <WindowsPackageType>None</WindowsPackageType>
+    <Nullable>enable</Nullable>
+    <EnablePreviewFeatures>true</EnablePreviewFeatures>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <StartupObject>Glance.Shell.WinUI.Start</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Elysium.UI.Controls.WinUI" Version="$(ElysiumVersion)" />
+    <PackageReference Include="Elysium.Application.DependencyInjection" Version="$(ElysiumPublishedVersion)" />
+    <PackageReference Include="Elysium.Presentation" Version="$(ElysiumPublishedVersion)" />
+    <PackageReference Include="Elysium.Presentation.Abstractions" Version="$(ElysiumPublishedVersion)" />
+    <PackageReference Include="Elysium.Presentation.DependencyInjection" Version="$(ElysiumPublishedVersion)" />
+    <PackageReference Include="Elysium.UI.WinUI" Version="$(ElysiumPublishedVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
+    <PackageReference Include="WinUIEx" Version="2.9.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Glance.Shell\Glance.Shell.csproj" />
+  </ItemGroup>
+</Project>

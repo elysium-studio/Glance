@@ -1,0 +1,9 @@
+<Controls:DesktopIsland
+    x:Class="Glance.Shell.WinUI.DesktopIslandView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Controls="using:Elysium.UI.Controls.WinUI"
+    xmlns:WinUI="using:Elysium.UI.WinUI"
+    DataContext="{WinUI:ViewModel Key=DesktopIslandView}"
+    IsOpen="{x:Bind ViewModel.IsOpen, Mode=TwoWay}"
+    IsTabStop="False" />
