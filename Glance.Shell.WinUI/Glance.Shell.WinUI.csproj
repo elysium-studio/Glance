@@ -35,6 +35,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Glance.Application.Abstractions\Glance.Application.Abstractions.csproj" />
     <ProjectReference Include="..\Glance.Media.WinUI\Glance.Media.WinUI.csproj" />
+    <ProjectReference Include="..\Glance.Power.WinUI\Glance.Power.WinUI.csproj" />
     <ProjectReference Include="..\Glance.Shell\Glance.Shell.csproj" />
     <ProjectReference Include="..\Glance.Stopwatch.WinUI\Glance.Stopwatch.WinUI.csproj" />
     <ProjectReference Include="..\Glance.SystemMonitor.WinUI\Glance.SystemMonitor.WinUI.csproj" />

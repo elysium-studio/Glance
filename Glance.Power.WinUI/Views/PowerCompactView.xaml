@@ -1,0 +1,53 @@
+<UserControl
+    x:Class="Glance.Power.WinUI.PowerCompactView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Padding="10,0" ColumnSpacing="8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid
+            x:Name="StatusIndicator"
+            Width="30"
+            Height="26">
+            <Grid Width="28" Height="14">
+                <Border
+                    Width="24"
+                    Height="14"
+                    HorizontalAlignment="Left"
+                    BorderBrush="{ThemeResource GlancePowerIconBrush}"
+                    BorderThickness="1.5"
+                    CornerRadius="3">
+                    <ProgressBar
+                        Height="7"
+                        Margin="2"
+                        Background="Transparent"
+                        Foreground="{ThemeResource GlancePowerIconBrush}"
+                        Maximum="100"
+                        Value="{Binding ChargePercent}" />
+                </Border>
+                <Border
+                    Width="3"
+                    Height="7"
+                    HorizontalAlignment="Right"
+                    Background="{ThemeResource GlancePowerIconBrush}"
+                    CornerRadius="0,1,1,0" />
+            </Grid>
+        </Grid>
+        <TextBlock
+            Grid.Column="1"
+            VerticalAlignment="Center"
+            FontSize="15"
+            FontWeight="SemiBold"
+            Text="{Binding ChargeText}" />
+        <TextBlock
+            Grid.Column="2"
+            VerticalAlignment="Center"
+            FontSize="11"
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            Text="{Binding CompactStatusText}"
+            TextTrimming="CharacterEllipsis" />
+    </Grid>
+</UserControl>
