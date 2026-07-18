@@ -30,10 +30,10 @@
             Padding="8,6"
             VerticalAlignment="Center"
             Background="{ThemeResource ControlFillColorSecondaryBrush}"
-            CornerRadius="8">
+            CornerRadius="{StaticResource OverlayCornerRadius}">
             <StackPanel Spacing="4">
                 <TextBlock
-                    FontSize="9"
+                    FontSize="11"
                     FontWeight="SemiBold"
                     Foreground="{ThemeResource GlanceSystemIconBrush}"
                     Text="PROCESSOR" />
@@ -54,10 +54,10 @@
             Padding="8,6"
             VerticalAlignment="Center"
             Background="{ThemeResource ControlFillColorSecondaryBrush}"
-            CornerRadius="8">
+            CornerRadius="{StaticResource OverlayCornerRadius}">
             <StackPanel Spacing="3">
                 <TextBlock
-                    FontSize="9"
+                    FontSize="11"
                     FontWeight="SemiBold"
                     Foreground="{ThemeResource GlanceSystemIconBrush}"
                     Text="MEMORY" />
@@ -78,21 +78,33 @@
             Padding="8,6"
             VerticalAlignment="Center"
             Background="{ThemeResource ControlFillColorSecondaryBrush}"
-            CornerRadius="8">
+            CornerRadius="{StaticResource OverlayCornerRadius}">
             <StackPanel Spacing="3">
                 <TextBlock
-                    FontSize="9"
+                    FontSize="11"
                     FontWeight="SemiBold"
                     Foreground="{ThemeResource GlanceSystemIconBrush}"
                     Text="NETWORK" />
                 <StackPanel Spacing="3">
                     <StackPanel Orientation="Horizontal" Spacing="3">
-                    <FontIcon FontSize="9" Foreground="{ThemeResource GlanceSystemIconBrush}" Glyph="&#xE74B;" />
-                    <TextBlock FontSize="11" FontWeight="SemiBold" Text="{Binding DownloadText}" />
+                        <FontIcon
+                            FontSize="9"
+                            Foreground="{ThemeResource GlanceSystemIconBrush}"
+                            Glyph="&#xE74B;" />
+                        <TextBlock
+                            FontSize="11"
+                            FontWeight="SemiBold"
+                            Text="{Binding DownloadText}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Spacing="3">
-                        <FontIcon FontSize="9" Foreground="{ThemeResource GlanceSystemIconBrush}" Glyph="&#xE74A;" />
-                        <TextBlock FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding UploadText}" />
+                        <FontIcon
+                            FontSize="9"
+                            Foreground="{ThemeResource GlanceSystemIconBrush}"
+                            Glyph="&#xE74A;" />
+                        <TextBlock
+                            FontSize="10"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{Binding UploadText}" />
                     </StackPanel>
                 </StackPanel>
             </StackPanel>
