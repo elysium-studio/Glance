@@ -19,10 +19,12 @@
     <StartupObject>Glance.Shell.WinUI.Start</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.3.260402-preview2" />
+    <PackageReference Include="Elysium.Application.Abstractions" Version="$(ElysiumVersion)" />
     <PackageReference Include="Elysium.UI.Controls.WinUI" Version="$(ElysiumVersion)" />
-    <PackageReference Include="Elysium.Application.DependencyInjection" Version="$(ElysiumPublishedVersion)" />
+    <PackageReference Include="Elysium.Application.DependencyInjection" Version="$(ElysiumVersion)" />
     <PackageReference Include="Elysium.Presentation" Version="$(ElysiumPublishedVersion)" />
-    <PackageReference Include="Elysium.Presentation.Abstractions" Version="$(ElysiumPublishedVersion)" />
+    <PackageReference Include="Elysium.Presentation.Abstractions" Version="$(ElysiumVersion)" />
     <PackageReference Include="Elysium.Presentation.DependencyInjection" Version="$(ElysiumPublishedVersion)" />
     <PackageReference Include="Elysium.UI.WinUI" Version="$(ElysiumPublishedVersion)" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
@@ -31,6 +33,12 @@
     <PackageReference Include="WinUIEx" Version="2.9.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Glance.Application.Abstractions\Glance.Application.Abstractions.csproj" />
+    <ProjectReference Include="..\Glance.Media.WinUI\Glance.Media.WinUI.csproj" />
     <ProjectReference Include="..\Glance.Shell\Glance.Shell.csproj" />
+    <ProjectReference Include="..\Glance.Stopwatch.WinUI\Glance.Stopwatch.WinUI.csproj" />
+    <ProjectReference Include="..\Glance.SystemMonitor.WinUI\Glance.SystemMonitor.WinUI.csproj" />
+    <ProjectReference Include="..\Glance.Timer.WinUI\Glance.Timer.WinUI.csproj" />
+    <ProjectReference Include="..\Glance.UI.WinUI\Glance.UI.WinUI.csproj" />
   </ItemGroup>
 </Project>

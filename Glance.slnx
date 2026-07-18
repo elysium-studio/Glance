@@ -1,11 +1,42 @@
 <Solution>
   <Configurations>
+    <Platform Name="Any CPU" />
     <Platform Name="x64" />
   </Configurations>
+  <Project Path="Glance.Application.Abstractions/Glance.Application.Abstractions.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="Glance.Shell.WinUI/Glance.Shell.WinUI.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.Media.WinUI/Glance.Media.WinUI.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.Media/Glance.Media.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="Glance.Shell/Glance.Shell.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.Stopwatch.WinUI/Glance.Stopwatch.WinUI.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.Stopwatch/Glance.Stopwatch.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.SystemMonitor.WinUI/Glance.SystemMonitor.WinUI.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.SystemMonitor/Glance.SystemMonitor.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.Timer.WinUI/Glance.Timer.WinUI.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.Timer/Glance.Timer.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.UI.WinUI/Glance.UI.WinUI.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
 </Solution>
