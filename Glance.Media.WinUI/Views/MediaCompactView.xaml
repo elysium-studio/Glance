@@ -26,27 +26,14 @@
         </Border>
         <StackPanel Grid.Column="1" VerticalAlignment="Center">
             <TextBlock
-                FontSize="13"
-                FontWeight="SemiBold"
+                Style="{StaticResource BaseTextBlockStyle}"
                 Text="{Binding Title}"
                 TextTrimming="CharacterEllipsis" />
             <TextBlock
-                FontSize="11"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{Binding Artist}"
                 TextTrimming="CharacterEllipsis" />
         </StackPanel>
-        <Button
-            Grid.Column="2"
-            Width="26"
-            Height="26"
-            Padding="0"
-            VerticalAlignment="Center"
-            Command="{Binding TogglePlaybackCommand}"
-            CornerRadius="13"
-            FontFamily="Segoe Fluent Icons"
-            FontSize="14"
-            Content="{Binding PlayPauseGlyph}"
-            Style="{StaticResource AccentButtonStyle}" />
     </Grid>
 </UserControl>

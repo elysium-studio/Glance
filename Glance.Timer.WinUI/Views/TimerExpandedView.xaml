@@ -12,30 +12,16 @@
             x:Name="StatusIndicator"
             Width="36"
             Height="36"
-            VerticalAlignment="Center"
-            UseLayoutRounding="True">
-            <Viewbox
+            VerticalAlignment="Center">
+            <FontIcon
                 Width="30"
                 Height="30"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Center">
-                <Canvas Width="14" Height="14">
-                    <Ellipse
-                        Canvas.Left="1.5"
-                        Canvas.Top="1.5"
-                        Width="11"
-                        Height="11"
-                        Stroke="{ThemeResource GlanceTimerIconBrush}"
-                        StrokeThickness="0.9" />
-                    <Path
-                        Data="M 7,4 L 7,7.1 L 9.2,8.35"
-                        Stroke="{ThemeResource GlanceTimerIconBrush}"
-                        StrokeEndLineCap="Round"
-                        StrokeLineJoin="Round"
-                        StrokeStartLineCap="Round"
-                        StrokeThickness="0.9" />
-                </Canvas>
-            </Viewbox>
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="30"
+                Foreground="{ThemeResource GlanceTimerIconBrush}"
+                Glyph="&#xE917;" />
         </Grid>
         <StackPanel
             Grid.Column="1"

@@ -8,21 +8,12 @@
     <Window.SystemBackdrop>
         <MicaBackdrop />
     </Window.SystemBackdrop>
-    <Grid
-        x:Name="Root"
-        DataContext="{WinUI:ViewModel Key=SettingsWindow}">
+    <Grid x:Name="Root" DataContext="{WinUI:ViewModel Key=SettingsWindow}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <TitleBar
-            x:Name="AppTitleBar"
-            Subtitle="Preferences"
-            Title="Glance">
-            <TitleBar.IconSource>
-                <FontIconSource Glyph="&#xE713;" />
-            </TitleBar.IconSource>
-        </TitleBar>
+        <TitleBar x:Name="AppTitleBar" Title="Settings" />
         <NavigationView
             Grid.Row="1"
             Margin="0,8,0,0"
@@ -55,7 +46,8 @@
                         Text="Modules" />
                     <TextBlock
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="Choose which modules appear in Glance and drag them into your preferred order." />
+                        Text="Choose which modules appear in Glance and drag them into your preferred order."
+                        TextWrapping="Wrap" />
                 </StackPanel>
                 <ListView
                     x:Name="ModulesList"
@@ -81,9 +73,7 @@
                                 Description="{x:Bind Description}"
                                 Header="{x:Bind DisplayName}"
                                 IsClickEnabled="False">
-                                <ToggleSwitch
-                                    AutomationProperties.Name="{x:Bind DisplayName}"
-                                    IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
+                                <ToggleSwitch AutomationProperties.Name="{x:Bind DisplayName}" IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
                             </Toolkit:SettingsCard>
                         </DataTemplate>
                     </ListView.ItemTemplate>

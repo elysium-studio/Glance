@@ -10,38 +10,23 @@
         <Grid
             x:Name="StatusIndicator"
             Width="26"
-            Height="26"
-            UseLayoutRounding="True">
-            <Viewbox
+            Height="26">
+            <FontIcon
                 Width="24"
                 Height="24"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Center">
-                <Canvas Width="14" Height="14">
-                    <Ellipse
-                        Canvas.Left="1.5"
-                        Canvas.Top="1.5"
-                        Width="11"
-                        Height="11"
-                        Stroke="{ThemeResource GlanceTimerIconBrush}"
-                        StrokeThickness="0.9" />
-                    <Path
-                        Data="M 7,4 L 7,7.1 L 9.2,8.35"
-                        Stroke="{ThemeResource GlanceTimerIconBrush}"
-                        StrokeEndLineCap="Round"
-                        StrokeLineJoin="Round"
-                        StrokeStartLineCap="Round"
-                        StrokeThickness="0.9" />
-                </Canvas>
-            </Viewbox>
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="24"
+                Foreground="{ThemeResource GlanceTimerIconBrush}"
+                Glyph="&#xE917;" />
         </Grid>
         <TextBlock
             Grid.Column="1"
             Margin="8,0,0,0"
             VerticalAlignment="Center"
-            FontSize="15"
-            FontWeight="SemiBold"
             Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+            Style="{StaticResource BodyLargeTextBlockStyle}"
             Text="{Binding RemainingText}" />
     </Grid>
 </UserControl>
