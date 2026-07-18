@@ -31,7 +31,7 @@
             <TextBlock
                 FontSize="11"
                 FontWeight="SemiBold"
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Foreground="{ThemeResource GlanceTimerIconBrush}"
                 Text="TIMER" />
             <TextBlock
                 FontSize="27"

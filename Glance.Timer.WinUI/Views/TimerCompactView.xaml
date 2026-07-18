@@ -24,6 +24,7 @@
         <TextBlock
             Grid.Column="1"
             Margin="8,0,0,0"
+            FontWeight="SemiBold"
             VerticalAlignment="Center"
             Foreground="{ThemeResource TextFillColorPrimaryBrush}"
             Style="{StaticResource BodyLargeTextBlockStyle}"

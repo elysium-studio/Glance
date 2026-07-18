@@ -31,7 +31,7 @@
             <TextBlock
                 FontSize="11"
                 FontWeight="SemiBold"
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Foreground="{ThemeResource GlanceStopwatchIconBrush}"
                 Text="STOPWATCH" />
             <TextBlock
                 FontSize="27"
