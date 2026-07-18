@@ -6,6 +6,12 @@
   <Project Path="Glance.Application.Abstractions/Glance.Application.Abstractions.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="Glance.Clipboard.WinUI/Glance.Clipboard.WinUI.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.Clipboard/Glance.Clipboard.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="Glance.Shell.WinUI/Glance.Shell.WinUI.csproj">
     <Platform Project="x64" />
   </Project>
