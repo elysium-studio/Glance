@@ -16,9 +16,6 @@ public partial class DesktopIslandViewModel :
     [ObservableProperty]
     private bool isExpanded;
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(SelectedComponent))]
-    [NotifyPropertyChangedFor(nameof(PageText))]
     private int selectedIndex;
 
     private IReadOnlyList<IGlanceComponent> components;
@@ -43,8 +40,30 @@ public partial class DesktopIslandViewModel :
 
     public event EventHandler<GlanceAttentionRequest>? AttentionReceived;
 
+    public int SelectedIndex
+    {
+        get => selectedIndex;
+        set
+        {
+            int normalizedIndex = Math.Clamp(
+                value,
+                0,
+                Math.Max(0, components.Count - 1));
+
+            if (!SetProperty(ref selectedIndex, normalizedIndex))
+            {
+                return;
+            }
+
+            OnPropertyChanged(nameof(SelectedComponent));
+            OnPropertyChanged(nameof(PageText));
+        }
+    }
+
     public IGlanceComponent? SelectedComponent =>
-        components.Count == 0 ? null : components[SelectedIndex];
+        SelectedIndex >= 0 && SelectedIndex < components.Count
+            ? components[SelectedIndex]
+            : null;
 
     public bool HasMultipleComponents => components.Count > 1;
 
@@ -93,20 +112,23 @@ public partial class DesktopIslandViewModel :
     private void ApplyPreferences()
     {
         string? selectedId = SelectedComponent?.Id;
-        components = modulePreferences.GetActiveComponents();
+        int previousSelectedIndex = SelectedIndex;
+        IReadOnlyList<IGlanceComponent> activeComponents =
+            modulePreferences.GetActiveComponents();
 
         int selectedComponentIndex = selectedId is null
             ? -1
-            : components
+            : activeComponents
                 .Select((component, index) => (component, index))
                 .Where(item => string.Equals(item.component.Id, selectedId, StringComparison.OrdinalIgnoreCase))
                 .Select(item => item.index)
                 .DefaultIfEmpty(-1)
                 .First();
 
+        components = activeComponents;
         SelectedIndex = selectedComponentIndex >= 0
             ? selectedComponentIndex
-            : Math.Clamp(SelectedIndex, 0, Math.Max(0, components.Count - 1));
+            : Math.Clamp(previousSelectedIndex, 0, Math.Max(0, components.Count - 1));
 
         OnPropertyChanged(nameof(SelectedComponent));
         OnPropertyChanged(nameof(HasMultipleComponents));
