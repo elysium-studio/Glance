@@ -28,6 +28,7 @@ public partial class SettingsViewModel : ObservableObject
             "Timer" => ("Timer", "Run a countdown and receive attention when it completes."),
             "Media" => ("Media playback", "See the current track and control system media playback."),
             "SystemMonitor" => ("System monitor", "See live processor and memory usage."),
+            "Power" => ("Battery and power", "See charge, power source, and estimated battery time."),
             _ => (preference.Id, "Glance module")
         };
 

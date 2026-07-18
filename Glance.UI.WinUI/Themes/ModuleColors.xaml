@@ -7,11 +7,13 @@
             <SolidColorBrush x:Key="GlanceTimerIconBrush" Color="#5AAEF2" />
             <SolidColorBrush x:Key="GlanceStopwatchIconBrush" Color="#B69AF7" />
             <SolidColorBrush x:Key="GlanceSystemIconBrush" Color="#61C9A8" />
+            <SolidColorBrush x:Key="GlancePowerIconBrush" Color="#F6C75C" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="GlanceTimerIconBrush" Color="#0067A3" />
             <SolidColorBrush x:Key="GlanceStopwatchIconBrush" Color="#6941C6" />
             <SolidColorBrush x:Key="GlanceSystemIconBrush" Color="#087E62" />
+            <SolidColorBrush x:Key="GlancePowerIconBrush" Color="#7A5200" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <SolidColorBrush
@@ -22,6 +24,9 @@
                 Color="{ThemeResource SystemColorHighlightColor}" />
             <SolidColorBrush
                 x:Key="GlanceSystemIconBrush"
+                Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush
+                x:Key="GlancePowerIconBrush"
                 Color="{ThemeResource SystemColorHighlightColor}" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
