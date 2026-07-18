@@ -82,7 +82,9 @@ public partial class DesktopIslandView :
 
     private void PlayConnectedExpansionAnimation()
     {
-        if (ViewModel.SelectedComponent is not IGlanceConnectedAnimationComponent component)
+        IGlanceComponent? selectedComponent = ViewModel.SelectedComponent;
+
+        if (selectedComponent is not IGlanceConnectedAnimationComponent component)
         {
             return;
         }
@@ -102,7 +104,7 @@ public partial class DesktopIslandView :
 
         ConnectedAnimationService animationService =
             ConnectedAnimationService.GetForCurrentView();
-        string animationKey = $"DesktopIsland.{ViewModel.SelectedComponent.Id}.Status";
+        string animationKey = $"DesktopIsland.{selectedComponent.Id}.Status";
 
         animationService.PrepareToAnimate(animationKey, source);
 
