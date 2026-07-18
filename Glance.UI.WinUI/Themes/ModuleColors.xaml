@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="GlanceTimerIconBrush" Color="#5AAEF2" />
+            <SolidColorBrush x:Key="GlanceStopwatchIconBrush" Color="#B69AF7" />
+            <SolidColorBrush x:Key="GlanceSystemIconBrush" Color="#61C9A8" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="GlanceTimerIconBrush" Color="#0067A3" />
+            <SolidColorBrush x:Key="GlanceStopwatchIconBrush" Color="#6941C6" />
+            <SolidColorBrush x:Key="GlanceSystemIconBrush" Color="#087E62" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="HighContrast">
+            <SolidColorBrush
+                x:Key="GlanceTimerIconBrush"
+                Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush
+                x:Key="GlanceStopwatchIconBrush"
+                Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush
+                x:Key="GlanceSystemIconBrush"
+                Color="{ThemeResource SystemColorHighlightColor}" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

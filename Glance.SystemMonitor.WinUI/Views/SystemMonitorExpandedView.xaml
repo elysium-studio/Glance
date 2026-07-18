@@ -1,0 +1,101 @@
+<UserControl
+    x:Class="Glance.SystemMonitor.WinUI.SystemMonitorExpandedView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Padding="14,12,14,28" ColumnSpacing="8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid
+            x:Name="StatusIndicator"
+            Width="36"
+            Height="36"
+            VerticalAlignment="Center">
+            <FontIcon
+                Width="30"
+                Height="30"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="30"
+                Foreground="{ThemeResource GlanceSystemIconBrush}"
+                Glyph="&#xEEA1;" />
+        </Grid>
+        <Border
+            x:Name="CpuMetric"
+            Grid.Column="1"
+            Padding="8,6"
+            VerticalAlignment="Center"
+            Background="{ThemeResource ControlFillColorSecondaryBrush}"
+            CornerRadius="8">
+            <StackPanel Spacing="4">
+                <TextBlock
+                    FontSize="9"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource GlanceSystemIconBrush}"
+                    Text="PROCESSOR" />
+                <TextBlock
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Text="{Binding CpuText}" />
+                <ProgressBar
+                    Height="3"
+                    Foreground="{ThemeResource GlanceSystemIconBrush}"
+                    Maximum="100"
+                    Value="{Binding CpuUsage}" />
+            </StackPanel>
+        </Border>
+        <Border
+            x:Name="MemoryMetric"
+            Grid.Column="2"
+            Padding="8,6"
+            VerticalAlignment="Center"
+            Background="{ThemeResource ControlFillColorSecondaryBrush}"
+            CornerRadius="8">
+            <StackPanel Spacing="3">
+                <TextBlock
+                    FontSize="9"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource GlanceSystemIconBrush}"
+                    Text="MEMORY" />
+                <TextBlock
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Text="{Binding MemoryText}" />
+                <ProgressBar
+                    Height="3"
+                    Foreground="{ThemeResource GlanceSystemIconBrush}"
+                    Maximum="100"
+                    Value="{Binding MemoryUsage}" />
+            </StackPanel>
+        </Border>
+        <Border
+            x:Name="NetworkMetric"
+            Grid.Column="3"
+            Padding="8,6"
+            VerticalAlignment="Center"
+            Background="{ThemeResource ControlFillColorSecondaryBrush}"
+            CornerRadius="8">
+            <StackPanel Spacing="3">
+                <TextBlock
+                    FontSize="9"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource GlanceSystemIconBrush}"
+                    Text="NETWORK" />
+                <StackPanel Spacing="3">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                    <FontIcon FontSize="9" Foreground="{ThemeResource GlanceSystemIconBrush}" Glyph="&#xE74B;" />
+                    <TextBlock FontSize="11" FontWeight="SemiBold" Text="{Binding DownloadText}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <FontIcon FontSize="9" Foreground="{ThemeResource GlanceSystemIconBrush}" Glyph="&#xE74A;" />
+                        <TextBlock FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding UploadText}" />
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

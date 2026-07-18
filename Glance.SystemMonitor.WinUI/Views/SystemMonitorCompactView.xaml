@@ -1,0 +1,42 @@
+<UserControl
+    x:Class="Glance.SystemMonitor.WinUI.SystemMonitorCompactView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Padding="10,0" ColumnSpacing="9">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid
+            x:Name="StatusIndicator"
+            Width="26"
+            Height="26">
+            <FontIcon
+                Width="24"
+                Height="24"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="24"
+                Foreground="{ThemeResource GlanceSystemIconBrush}"
+                Glyph="&#xEEA1;" />
+        </Grid>
+        <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
+            <TextBlock
+                VerticalAlignment="Center"
+                FontSize="15"
+                FontWeight="SemiBold"
+                Text="{Binding CpuText}" />
+            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="3">
+                <TextBlock
+                    FontSize="11"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="RAM" />
+                <TextBlock
+                    FontSize="11"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{Binding MemoryText}" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>
