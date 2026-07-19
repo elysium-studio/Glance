@@ -2,6 +2,9 @@
     x:Class="Glance.SystemMonitor.WinUI.SystemMonitorExpandedView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Themes/System.xaml" />
+    </UserControl.Resources>
     <Grid Padding="14,12,14,28" ColumnSpacing="8">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />

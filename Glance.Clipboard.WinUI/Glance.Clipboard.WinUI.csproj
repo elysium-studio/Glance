@@ -17,4 +17,9 @@
     <ProjectReference Include="..\Glance.Clipboard\Glance.Clipboard.csproj" />
     <ProjectReference Include="..\Glance.UI.WinUI\Glance.UI.WinUI.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Page Update="Themes\Clipboard.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
 </Project>
