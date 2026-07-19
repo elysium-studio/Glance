@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Diagnostics;
 
 namespace Glance.Stopwatch;
 
@@ -9,13 +8,13 @@ public partial class StopwatchViewModel : ObservableObject
     private readonly System.Diagnostics.Stopwatch stopwatch = new();
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ToggleText))]
+    [NotifyPropertyChangedFor(nameof(ToggleGlyph))]
     private bool isRunning;
 
     [ObservableProperty]
     private string elapsed = "00:00.00";
 
-    public string ToggleText => IsRunning ? "Pause" : "Start";
+    public string ToggleGlyph => IsRunning ? "\uF8AE" : "\uF5B0";
 
     [RelayCommand]
     private void Toggle()

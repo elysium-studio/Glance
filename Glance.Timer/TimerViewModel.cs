@@ -11,13 +11,13 @@ public partial class TimerViewModel : ObservableObject
     private long lastTimestamp;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ToggleText))]
+    [NotifyPropertyChangedFor(nameof(ToggleGlyph))]
     private bool isRunning;
 
     [ObservableProperty]
     private string remainingText = "05:00";
 
-    public string ToggleText => IsRunning ? "Pause" : "Start";
+    public string ToggleGlyph => IsRunning ? "\uF8AE" : "\uF5B0";
 
     [RelayCommand]
     private void Toggle()

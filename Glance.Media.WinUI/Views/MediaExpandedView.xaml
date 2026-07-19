@@ -70,7 +70,7 @@
                 Content="{Binding PlayPauseGlyph}"
                 CornerRadius="19"
                 FontFamily="Segoe Fluent Icons"
-                FontSize="16"
+                FontSize="18"
                 Style="{StaticResource AccentButtonStyle}"
                 ToolTipService.ToolTip="Play or pause" />
             <Button

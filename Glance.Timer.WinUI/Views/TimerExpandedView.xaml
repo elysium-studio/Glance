@@ -2,6 +2,9 @@
     x:Class="Glance.Timer.WinUI.TimerExpandedView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Themes/Timer.xaml" />
+    </UserControl.Resources>
     <Grid x:Name="LayoutRoot" Padding="20,12,20,26">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -51,12 +54,13 @@
                 Content="+1 min"
                 CornerRadius="16" />
             <Button
+                Width="32"
                 Height="32"
-                MinWidth="62"
-                Padding="14,0"
+                Padding="0"
                 Command="{Binding ToggleCommand}"
-                Content="{Binding ToggleText}"
+                Content="{Binding ToggleGlyph}"
                 CornerRadius="16"
+                FontFamily="Segoe Fluent Icons"
                 Style="{StaticResource AccentButtonStyle}" />
             <Button
                 Width="32"

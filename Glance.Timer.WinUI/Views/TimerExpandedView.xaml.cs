@@ -3,7 +3,8 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.Timer.WinUI;
 
-public sealed partial class TimerExpandedView : UserControl
+public sealed partial class TimerExpandedView : 
+    UserControl
 {
     public TimerExpandedView(TimerViewModel viewModel)
     {

@@ -1,0 +1,22 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Default">
+            <SolidColorBrush x:Key="GlanceStopwatchIconBrush" Color="#B69AF7" />
+
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FFB69AF7" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E6B69AF7" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CCB69AF7" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#28FFFFFF" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="GlanceStopwatchIconBrush" Color="#6941C6" />
+
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FF6941C6" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E66941C6" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CC6941C6" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#28FFFFFF" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>
