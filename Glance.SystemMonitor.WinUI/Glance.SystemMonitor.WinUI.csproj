@@ -17,4 +17,7 @@
     <ProjectReference Include="..\Glance.SystemMonitor\Glance.SystemMonitor.csproj" />
     <ProjectReference Include="..\Glance.UI.WinUI\Glance.UI.WinUI.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Themes\" />
+  </ItemGroup>
 </Project>
