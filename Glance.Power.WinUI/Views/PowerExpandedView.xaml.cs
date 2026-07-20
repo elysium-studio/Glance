@@ -16,4 +16,7 @@ public sealed partial class PowerExpandedView : UserControl
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
     private string ToUpper(string value) => value.ToUpperInvariant();
+
+    private Visibility WhenPresent(bool hasBattery) =>
+        hasBattery ? Visibility.Visible : Visibility.Collapsed;
 }

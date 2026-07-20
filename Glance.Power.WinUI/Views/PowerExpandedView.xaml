@@ -60,7 +60,8 @@
             Padding="12,7"
             VerticalAlignment="Center"
             Background="{ThemeResource ControlFillColorSecondaryBrush}"
-            CornerRadius="10">
+            CornerRadius="10"
+            Visibility="{x:Bind WhenPresent(ViewModel.HasBattery), Mode=OneWay}">
             <StackPanel Spacing="2">
                 <TextBlock
                     FontSize="12"
@@ -71,10 +72,6 @@
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Text="{x:Bind ViewModel.DetailText, Mode=OneWay}"
                     TextTrimming="CharacterEllipsis" />
-                <TextBlock
-                    FontSize="10"
-                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="{x:Bind ViewModel.PowerSourceText, Mode=OneWay}" />
             </StackPanel>
         </Border>
     </Grid>
