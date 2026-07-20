@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>ファイルシェルフ</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>ファイルとフォルダーのシェルフ</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>ファイルやフォルダーを一時的に置き、まとめて別の場所へドラッグできます。</value>
+  </data>
+  <data name="EmptySummary" xml:space="preserve">
+    <value>ここにファイルをドロップ</value>
+  </data>
+  <data name="EmptyDetail" xml:space="preserve">
+    <value>ファイルとフォルダーに対応しています</value>
+  </data>
+  <data name="OneItemSummary" xml:space="preserve">
+    <value>1 個の項目を準備しました</value>
+  </data>
+  <data name="ManyItemsSummary" xml:space="preserve">
+    <value>{0} 個の項目を準備しました</value>
+  </data>
+  <data name="ReadyDetail" xml:space="preserve">
+    <value>シェルフをドラッグしてすべて移動</value>
+  </data>
+  <data name="DragCaption" xml:space="preserve">
+    <value>準備した項目を移動</value>
+  </data>
+  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>シェルフを空にする</value>
+  </data>
+</root>

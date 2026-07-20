@@ -4,7 +4,12 @@ using Glance.UI.WinUI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Animation;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage;
 
 namespace Glance.Shell.WinUI;
 
@@ -130,6 +135,59 @@ public partial class DesktopIslandView :
         {
             ViewModel.Move(delta < 0 ? 1 : -1);
             args.Handled = true;
+        }
+    }
+
+    private void HandleDragEnter(object sender, DragEventArgs args) =>
+        HandleDragOver(sender, args);
+
+    private void HandleDragOver(object sender, DragEventArgs args)
+    {
+        if (!args.DataView.Contains(StandardDataFormats.StorageItems) ||
+            !ViewModel.TryActivateContent(GlanceContentKind.FilesAndFolders))
+        {
+            args.AcceptedOperation = DataPackageOperation.None;
+            return;
+        }
+
+        args.AcceptedOperation = DataPackageOperation.Copy;
+    }
+
+    private async void HandleDrop(object sender, DragEventArgs args)
+    {
+        if (!args.DataView.Contains(StandardDataFormats.StorageItems))
+        {
+            return;
+        }
+
+        var deferral = args.GetDeferral();
+
+        try
+        {
+            IReadOnlyList<IStorageItem> storageItems =
+                await args.DataView.GetStorageItemsAsync();
+            GlanceStorageItem[] items = storageItems
+                .Where(item => !string.IsNullOrWhiteSpace(item.Path))
+                .Select(item => new GlanceStorageItem(
+                    item.Path,
+                    item.Name,
+                    item is StorageFolder))
+                .ToArray();
+
+            if (items.Length > 0)
+            {
+                await ViewModel.HandleContentAsync(new GlanceContentContext(
+                    GlanceContentKind.FilesAndFolders,
+                    items));
+            }
+        }
+        catch (Exception)
+        {
+            args.AcceptedOperation = DataPackageOperation.None;
+        }
+        finally
+        {
+            deferral.Complete();
         }
     }
 }

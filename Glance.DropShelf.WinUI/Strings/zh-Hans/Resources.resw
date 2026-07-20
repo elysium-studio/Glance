@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>文件架</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>文件和文件夹架</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>暂存文件和文件夹，然后将它们一起拖到其他位置。</value>
+  </data>
+  <data name="EmptySummary" xml:space="preserve">
+    <value>将文件拖放到此处</value>
+  </data>
+  <data name="EmptyDetail" xml:space="preserve">
+    <value>支持文件和文件夹</value>
+  </data>
+  <data name="OneItemSummary" xml:space="preserve">
+    <value>已准备 1 个项目</value>
+  </data>
+  <data name="ManyItemsSummary" xml:space="preserve">
+    <value>已准备 {0} 个项目</value>
+  </data>
+  <data name="ReadyDetail" xml:space="preserve">
+    <value>拖动文件架以移动全部项目</value>
+  </data>
+  <data name="DragCaption" xml:space="preserve">
+    <value>移动暂存的项目</value>
+  </data>
+  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>清空文件架</value>
+  </data>
+</root>

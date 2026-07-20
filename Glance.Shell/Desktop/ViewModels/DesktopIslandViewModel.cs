@@ -78,6 +78,38 @@ public partial class DesktopIslandViewModel :
 
     public void OpenSettings() => settingsLauncher.Show();
 
+    public bool TryActivateContent(GlanceContentKind kind)
+    {
+        int componentIndex = FindContextComponentIndex(kind);
+
+        if (componentIndex < 0)
+        {
+            return false;
+        }
+
+        SelectedIndex = componentIndex;
+        IsOpen = true;
+        IsExpanded = true;
+        return true;
+    }
+
+    public async Task<bool> HandleContentAsync(GlanceContentContext context)
+    {
+        int componentIndex = FindContextComponentIndex(context.Kind);
+
+        if (componentIndex < 0 ||
+            components[componentIndex] is not IGlanceContextAwareComponent component)
+        {
+            return false;
+        }
+
+        SelectedIndex = componentIndex;
+        IsOpen = true;
+        IsExpanded = true;
+        await component.HandleAsync(context);
+        return true;
+    }
+
     public void Move(int offset)
     {
         if (components.Count < 2)
@@ -158,4 +190,14 @@ public partial class DesktopIslandViewModel :
 
         AttentionReceived?.Invoke(this, request);
     }
+
+    private int FindContextComponentIndex(GlanceContentKind kind) =>
+        components
+            .Select((component, index) => (component, index))
+            .Where(item =>
+                item.component is IGlanceContextAwareComponent contextAware &&
+                contextAware.CanHandle(kind))
+            .Select(item => item.index)
+            .DefaultIfEmpty(-1)
+            .First();
 }

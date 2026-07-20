@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>Półka plików</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>Półka na pliki i foldery</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>Odłóż pliki i foldery, a następnie przeciągnij je razem do innej lokalizacji.</value>
+  </data>
+  <data name="EmptySummary" xml:space="preserve">
+    <value>Upuść pliki tutaj</value>
+  </data>
+  <data name="EmptyDetail" xml:space="preserve">
+    <value>Obsługiwane są pliki i foldery</value>
+  </data>
+  <data name="OneItemSummary" xml:space="preserve">
+    <value>1 element gotowy</value>
+  </data>
+  <data name="ManyItemsSummary" xml:space="preserve">
+    <value>Gotowe elementy: {0}</value>
+  </data>
+  <data name="ReadyDetail" xml:space="preserve">
+    <value>Przeciągnij półkę, aby przenieść wszystko</value>
+  </data>
+  <data name="DragCaption" xml:space="preserve">
+    <value>Przenieś odłożone elementy</value>
+  </data>
+  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Wyczyść półkę</value>
+  </data>
+</root>

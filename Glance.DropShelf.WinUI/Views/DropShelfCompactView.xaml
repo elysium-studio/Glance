@@ -1,0 +1,44 @@
+<UserControl
+    x:Class="Glance.DropShelf.WinUI.DropShelfCompactView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Themes/DropShelf.xaml" />
+    </UserControl.Resources>
+    <Grid Padding="8,0" ColumnSpacing="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid
+            x:Name="StatusIndicator"
+            Width="28"
+            Height="28">
+            <FontIcon
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="26"
+                Foreground="{ThemeResource GlanceDropShelfIconBrush}"
+                Glyph="&#xE8B7;" />
+        </Grid>
+        <StackPanel
+            Grid.Column="1"
+            VerticalAlignment="Center"
+            Spacing="0">
+            <TextBlock
+                MaxLines="1"
+                Style="{StaticResource BaseTextBlockStyle}"
+                Text="{x:Bind ViewModel.Summary, Mode=OneWay}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap" />
+            <TextBlock
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                MaxLines="1"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{x:Bind ViewModel.Detail, Mode=OneWay}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap" />
+        </StackPanel>
+    </Grid>
+</UserControl>

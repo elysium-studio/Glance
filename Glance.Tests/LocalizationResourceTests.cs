@@ -9,6 +9,7 @@ public sealed class LocalizationResourceTests
     private static readonly string[] ExpectedModules =
     [
         "Clipboard",
+        "DropShelf",
         "Media",
         "Power",
         "Shell",

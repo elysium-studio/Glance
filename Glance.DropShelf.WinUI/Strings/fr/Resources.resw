@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>Plateau de fichiers</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>Plateau de fichiers et dossiers</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>Placez des fichiers et des dossiers, puis faites-les glisser ensemble vers un autre emplacement.</value>
+  </data>
+  <data name="EmptySummary" xml:space="preserve">
+    <value>Déposez des fichiers ici</value>
+  </data>
+  <data name="EmptyDetail" xml:space="preserve">
+    <value>Les fichiers et dossiers sont pris en charge</value>
+  </data>
+  <data name="OneItemSummary" xml:space="preserve">
+    <value>1 élément prêt</value>
+  </data>
+  <data name="ManyItemsSummary" xml:space="preserve">
+    <value>{0} éléments prêts</value>
+  </data>
+  <data name="ReadyDetail" xml:space="preserve">
+    <value>Faites glisser le plateau pour tout déplacer</value>
+  </data>
+  <data name="DragCaption" xml:space="preserve">
+    <value>Déplacer les éléments déposés</value>
+  </data>
+  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Vider le plateau</value>
+  </data>
+</root>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>Dateiablage</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>Datei- und Ordnerablage</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>Dateien und Ordner ablegen und anschließend gemeinsam an einen anderen Ort ziehen.</value>
+  </data>
+  <data name="EmptySummary" xml:space="preserve">
+    <value>Dateien hier ablegen</value>
+  </data>
+  <data name="EmptyDetail" xml:space="preserve">
+    <value>Dateien und Ordner werden unterstützt</value>
+  </data>
+  <data name="OneItemSummary" xml:space="preserve">
+    <value>1 Element bereit</value>
+  </data>
+  <data name="ManyItemsSummary" xml:space="preserve">
+    <value>{0} Elemente bereit</value>
+  </data>
+  <data name="ReadyDetail" xml:space="preserve">
+    <value>Ablage ziehen, um alles zu verschieben</value>
+  </data>
+  <data name="DragCaption" xml:space="preserve">
+    <value>Abgelegte Elemente verschieben</value>
+  </data>
+  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Ablage leeren</value>
+  </data>
+</root>

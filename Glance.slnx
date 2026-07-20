@@ -12,6 +12,15 @@
   <Project Path="Glance.Clipboard/Glance.Clipboard.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="Glance.DropShelf.WinUI/Glance.DropShelf.WinUI.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.DropShelf/Glance.DropShelf.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.DropShelf.Tests/Glance.DropShelf.Tests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="Glance.Clipboard.Tests/Glance.Clipboard.Tests.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>

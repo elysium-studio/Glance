@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>Prateleira de arquivos</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>Prateleira de arquivos e pastas</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>Guarde arquivos e pastas e arraste-os juntos para outro local.</value>
+  </data>
+  <data name="EmptySummary" xml:space="preserve">
+    <value>Solte arquivos aqui</value>
+  </data>
+  <data name="EmptyDetail" xml:space="preserve">
+    <value>Arquivos e pastas são compatíveis</value>
+  </data>
+  <data name="OneItemSummary" xml:space="preserve">
+    <value>1 item pronto</value>
+  </data>
+  <data name="ManyItemsSummary" xml:space="preserve">
+    <value>{0} itens prontos</value>
+  </data>
+  <data name="ReadyDetail" xml:space="preserve">
+    <value>Arraste a prateleira para mover tudo</value>
+  </data>
+  <data name="DragCaption" xml:space="preserve">
+    <value>Mover itens guardados</value>
+  </data>
+  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Limpar prateleira</value>
+  </data>
+</root>

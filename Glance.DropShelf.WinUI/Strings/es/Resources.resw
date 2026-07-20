@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>Bandeja de archivos</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>Bandeja de archivos y carpetas</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>Guarda archivos y carpetas y arrástralos juntos a otra ubicación.</value>
+  </data>
+  <data name="EmptySummary" xml:space="preserve">
+    <value>Suelta archivos aquí</value>
+  </data>
+  <data name="EmptyDetail" xml:space="preserve">
+    <value>Se admiten archivos y carpetas</value>
+  </data>
+  <data name="OneItemSummary" xml:space="preserve">
+    <value>1 elemento listo</value>
+  </data>
+  <data name="ManyItemsSummary" xml:space="preserve">
+    <value>{0} elementos listos</value>
+  </data>
+  <data name="ReadyDetail" xml:space="preserve">
+    <value>Arrastra la bandeja para moverlo todo</value>
+  </data>
+  <data name="DragCaption" xml:space="preserve">
+    <value>Mover elementos guardados</value>
+  </data>
+  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Vaciar bandeja</value>
+  </data>
+</root>
