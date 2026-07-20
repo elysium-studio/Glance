@@ -8,136 +8,122 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Themes/Clipboard.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <Style x:Key="ClipboardShelfItemStyle" TargetType="ListViewItem">
-                <Setter Property="MinWidth" Value="0" />
-                <Setter Property="MinHeight" Value="0" />
+            <Style x:Key="ClipboardFlipViewItemStyle" TargetType="FlipViewItem">
                 <Setter Property="Padding" Value="0" />
-                <Setter Property="Margin" Value="0,0,5,0" />
-                <Setter Property="CornerRadius" Value="8" />
                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="VerticalContentAlignment" Value="Stretch" />
             </Style>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid Padding="14,10,14,28" ColumnSpacing="8">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="28" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
-        <FontIcon
-            x:Name="StatusIndicator"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            FontFamily="Segoe Fluent Icons"
-            FontSize="24"
-            Foreground="{ThemeResource GlanceClipboardIconBrush}"
-            Glyph="&#xF0E3;" />
-        <ListView
-            Grid.Column="1"
-            Height="36"
+    <Grid Padding="14,8,14,28">
+        <FlipView
+            x:Name="ClipboardFlipView"
+            Height="58"
             Padding="0"
             VerticalAlignment="Center"
             Background="Transparent"
             BorderThickness="0"
-            ItemContainerStyle="{StaticResource ClipboardShelfItemStyle}"
+            ItemContainerStyle="{StaticResource ClipboardFlipViewItemStyle}"
             ItemsSource="{x:Bind ViewModel.ShelfItems}"
-            SelectedItem="{x:Bind ViewModel.SelectedEntry, Mode=TwoWay}"
-            SelectionMode="Single"
-            ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-            ScrollViewer.HorizontalScrollMode="Enabled"
-            ScrollViewer.VerticalScrollBarVisibility="Disabled"
-            ScrollViewer.VerticalScrollMode="Disabled">
-            <ListView.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <ItemsStackPanel Orientation="Horizontal" />
-                </ItemsPanelTemplate>
-            </ListView.ItemsPanel>
-            <ListView.ItemTemplate>
+            SelectedItem="{x:Bind ViewModel.SelectedEntry, Mode=TwoWay}">
+            <FlipView.ItemTemplate>
                 <DataTemplate x:DataType="Clipboard:ClipboardEntry">
-                    <Grid
-                        Width="104"
-                        Height="34"
-                        Padding="8,0"
-                        ColumnSpacing="6"
-                        ToolTipService.ToolTip="{x:Bind Preview}">
+                    <Grid Padding="34,0" ColumnSpacing="9">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="28" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <FontIcon
+                            HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             FontFamily="Segoe Fluent Icons"
-                            FontSize="11"
+                            FontSize="20"
                             Foreground="{ThemeResource GlanceClipboardIconBrush}"
                             Glyph="{x:Bind Glyph}" />
-                        <TextBlock
+                        <StackPanel
                             Grid.Column="1"
                             VerticalAlignment="Center"
-                            FontSize="12"
-                            MaxLines="1"
-                            Text="{x:Bind Preview}"
-                            TextTrimming="CharacterEllipsis"
-                            TextWrapping="NoWrap" />
+                            Spacing="1"
+                            ToolTipService.ToolTip="{x:Bind Preview}">
+                            <TextBlock
+                                FontSize="14"
+                                FontWeight="SemiBold"
+                                MaxLines="1"
+                                Text="{x:Bind Preview}"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="NoWrap" />
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <TextBlock
+                                    FontSize="10"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="{x:Bind KindLabel}" />
+                                <TextBlock
+                                    FontSize="10"
+                                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                    Text="•" />
+                                <TextBlock
+                                    FontSize="10"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="{x:Bind TimeText}" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal"
+                            Spacing="3">
+                            <Button
+                                Width="27"
+                                Height="27"
+                                Padding="0"
+                                AutomationProperties.Name="Copy this clip"
+                                Click="HandleCopyClick"
+                                Content="&#xE8C8;"
+                                CornerRadius="14"
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="11"
+                                ToolTipService.ToolTip="Copy" />
+                            <Button
+                                Width="29"
+                                Height="29"
+                                Padding="0"
+                                AutomationProperties.Name="Send this clip to focused app"
+                                Click="HandlePasteClick"
+                                Content="&#xE72D;"
+                                CornerRadius="15"
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="12"
+                                Style="{StaticResource AccentButtonStyle}"
+                                ToolTipService.ToolTip="Send to focused app" />
+                            <Button
+                                Width="27"
+                                Height="27"
+                                Padding="0"
+                                AutomationProperties.Name="Remove this clip"
+                                Click="HandleRemoveClick"
+                                Content="&#xE74D;"
+                                CornerRadius="14"
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="11"
+                                ToolTipService.ToolTip="Remove" />
+                            <Button
+                                Width="27"
+                                Height="27"
+                                Padding="0"
+                                AutomationProperties.Name="Clear clipboard shelf"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Click="HandleClearClick"
+                                Content="&#xE894;"
+                                CornerRadius="14"
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="11"
+                                ToolTipService.ToolTip="Clear shelf" />
+                        </StackPanel>
                     </Grid>
                 </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-        <StackPanel
-            Grid.Column="2"
-            VerticalAlignment="Center"
-            Orientation="Horizontal"
-            Spacing="4">
-            <Button
-                Width="28"
-                Height="28"
-                Padding="0"
-                AutomationProperties.Name="Copy selected clip"
-                Click="{x:Bind HandleCopyClick}"
-                Content="&#xE8C8;"
-                CornerRadius="14"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="11"
-                IsEnabled="{x:Bind ViewModel.CanUseSelectedEntry, Mode=OneWay}"
-                ToolTipService.ToolTip="Copy" />
-            <Button
-                Width="30"
-                Height="30"
-                Padding="0"
-                AutomationProperties.Name="Send selected clip to focused app"
-                Click="{x:Bind HandlePasteClick}"
-                Content="&#xE72D;"
-                CornerRadius="15"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="12"
-                IsEnabled="{x:Bind ViewModel.CanUseSelectedEntry, Mode=OneWay}"
-                Style="{StaticResource AccentButtonStyle}"
-                ToolTipService.ToolTip="Send to focused app" />
-            <Button
-                Width="28"
-                Height="28"
-                Padding="0"
-                AutomationProperties.Name="Remove selected clip"
-                Click="{x:Bind HandleRemoveClick}"
-                Content="&#xE74D;"
-                CornerRadius="14"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="11"
-                IsEnabled="{x:Bind ViewModel.CanUseSelectedEntry, Mode=OneWay}"
-                ToolTipService.ToolTip="Remove" />
-            <Button
-                Width="28"
-                Height="28"
-                Padding="0"
-                AutomationProperties.Name="Clear clipboard shelf"
-                Background="Transparent"
-                BorderThickness="0"
-                Click="{x:Bind HandleClearClick}"
-                Content="&#xE894;"
-                CornerRadius="14"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="11"
-                IsEnabled="{x:Bind ViewModel.CanClearHistory, Mode=OneWay}"
-                ToolTipService.ToolTip="Clear shelf" />
-        </StackPanel>
+            </FlipView.ItemTemplate>
+        </FlipView>
     </Grid>
 </UserControl>

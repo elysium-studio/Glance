@@ -13,17 +13,35 @@ public sealed partial class ClipboardExpandedView : UserControl
 
     public ClipboardShelfViewModel ViewModel { get; }
 
-    public FrameworkElement ConnectedAnimationElement => StatusIndicator;
+    public FrameworkElement ConnectedAnimationElement => ClipboardFlipView;
 
     private async void HandleClearClick(object sender, RoutedEventArgs args) =>
         await ViewModel.ClearAsync();
 
-    private async void HandleCopyClick(object sender, RoutedEventArgs args) =>
-        await ViewModel.CopySelectedAsync();
+    private async void HandleCopyClick(object sender, RoutedEventArgs args)
+    {
+        if (GetEntry(sender) is ClipboardEntry entry)
+        {
+            await ViewModel.CopyAsync(entry);
+        }
+    }
 
-    private async void HandlePasteClick(object sender, RoutedEventArgs args) =>
-        await ViewModel.PasteSelectedAsync();
+    private async void HandlePasteClick(object sender, RoutedEventArgs args)
+    {
+        if (GetEntry(sender) is ClipboardEntry entry)
+        {
+            await ViewModel.PasteAsync(entry);
+        }
+    }
 
-    private async void HandleRemoveClick(object sender, RoutedEventArgs args) =>
-        await ViewModel.RemoveSelectedAsync();
+    private async void HandleRemoveClick(object sender, RoutedEventArgs args)
+    {
+        if (GetEntry(sender) is ClipboardEntry entry)
+        {
+            await ViewModel.RemoveAsync(entry);
+        }
+    }
+
+    private static ClipboardEntry? GetEntry(object sender) =>
+        (sender as FrameworkElement)?.DataContext as ClipboardEntry;
 }
