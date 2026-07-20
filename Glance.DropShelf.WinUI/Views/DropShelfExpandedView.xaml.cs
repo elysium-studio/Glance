@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
@@ -53,22 +54,29 @@ public sealed partial class DropShelfExpandedView : UserControl
                         : await StorageFile.GetFileFromPathAsync(item.Path);
                     storageItems.Add(storageItem);
                 }
-                catch (Exception)
+                catch (Exception exception)
                 {
-                    // The item may have moved or been deleted since it was staged.
+                    Debug.WriteLine(
+                        $"DropShelf: cannot add '{item.Path}' to outgoing drag: {exception}");
                 }
             }
 
             if (storageItems.Count == 0)
             {
+                Debug.WriteLine("DropShelf: outgoing drag contains no accessible items.");
                 args.Cancel = true;
                 ViewModel.RemoveMissingItems();
                 return;
             }
 
-            args.Data.SetStorageItems(storageItems);
+            args.Data.SetStorageItems(storageItems, false);
             args.Data.RequestedOperation = DataPackageOperation.Move;
             args.Data.Properties.Title = ViewModel.DragCaption;
+        }
+        catch (Exception exception)
+        {
+            Debug.WriteLine($"DropShelf: failed to start outgoing drag: {exception}");
+            args.Cancel = true;
         }
         finally
         {

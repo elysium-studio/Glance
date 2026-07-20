@@ -90,9 +90,8 @@
             <TextBlock
                 Grid.Row="1"
                 VerticalAlignment="Center"
-                FontSize="14"
-                FontWeight="SemiBold"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ViewModel.Summary, Mode=OneWay}"
                 Visibility="{x:Bind WhenEmpty(ViewModel.HasItems), Mode=OneWay}" />
             <Grid
@@ -116,21 +115,26 @@
                         </ItemsControl.ItemsPanel>
                     </ItemsControl>
                 </ScrollViewer>
-                <Button
+                <Border
                     x:Uid="MoveShelfButton"
                     Grid.Column="1"
                     Width="32"
                     Height="32"
-                    Padding="0"
                     VerticalAlignment="Center"
+                    Background="{ThemeResource SubtleFillColorTransparentBrush}"
                     CanDrag="True"
-                    Content="&#xE7C2;"
+                    CornerRadius="6"
                     DragStarting="HandleDragStarting"
-                    DropCompleted="HandleDropCompleted"
-                    FontFamily="Segoe Fluent Icons"
-                    FontSize="13"
-                    Foreground="{ThemeResource GlanceDropShelfIconBrush}"
-                    Style="{StaticResource SubtleButtonStyle}" />
+                    DropCompleted="HandleDropCompleted">
+                    <FontIcon
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="13"
+                        Foreground="{ThemeResource GlanceDropShelfIconBrush}"
+                        Glyph="&#xE7C2;"
+                        IsHitTestVisible="False" />
+                </Border>
             </Grid>
         </Grid>
     </Grid>
