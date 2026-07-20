@@ -19,6 +19,7 @@ public sealed class ClipboardComponent :
     private const int MaximumShelfItems = 6;
 
     private readonly ClipboardChangeListener? clipboardChangeListener;
+    private readonly DispatcherQueueTimer clipboardPollTimer;
     private readonly DispatcherQueue dispatcherQueue;
     private readonly Dictionary<string, ClipboardHistoryItem> historyItems =
         new(StringComparer.Ordinal);
@@ -36,6 +37,9 @@ public sealed class ClipboardComponent :
     {
         this.viewModel = viewModel;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        clipboardPollTimer = dispatcherQueue.CreateTimer();
+        clipboardPollTimer.Interval = TimeSpan.FromMilliseconds(500);
+        clipboardPollTimer.Tick += HandleClipboardPoll;
 
         ClipboardCompactView compactView = new(viewModel);
         ClipboardExpandedView expandedView = new(viewModel);
@@ -64,6 +68,7 @@ public sealed class ClipboardComponent :
         Windows.ApplicationModel.DataTransfer.Clipboard.HistoryEnabledChanged +=
             HandleClipboardChanged;
 
+        clipboardPollTimer.Start();
         _ = RefreshAsync();
     }
 
@@ -90,6 +95,9 @@ public sealed class ClipboardComponent :
         Windows.ApplicationModel.DataTransfer.Clipboard.HistoryEnabledChanged -=
             HandleClipboardChanged;
 
+        clipboardPollTimer.Stop();
+        clipboardPollTimer.Tick -= HandleClipboardPoll;
+
         if (clipboardChangeListener is not null)
         {
             clipboardChangeListener.ClipboardChanged -= HandleClipboardChanged;
@@ -99,6 +107,15 @@ public sealed class ClipboardComponent :
 
     private void HandleClipboardChanged(object? sender, object args) =>
         dispatcherQueue.TryEnqueue(() => _ = RefreshAsync());
+
+    private void HandleClipboardPoll(DispatcherQueueTimer sender, object args)
+    {
+        uint sequenceNumber = PInvoke.GetClipboardSequenceNumber();
+        if (sequenceNumber != 0 && sequenceNumber != lastSequenceNumber)
+        {
+            _ = RefreshAsync();
+        }
+    }
 
     private async Task RefreshAsync()
     {
@@ -167,16 +184,13 @@ public sealed class ClipboardComponent :
             return;
         }
 
-        DataPackageView content =
-            Windows.ApplicationModel.DataTransfer.Clipboard.GetContent();
-
-        if (content.AvailableFormats.Count == 0)
+        NativeClipboardCapture capture = await NativeClipboardReader.CaptureAsync();
+        if (!capture.WasRead)
         {
-            lastSequenceNumber = sequenceNumber;
             return;
         }
 
-        ClipboardSnapshot? snapshot = await ClipboardSnapshot.CaptureAsync(content);
+        ClipboardSnapshot? snapshot = capture.Snapshot;
         if (snapshot is null)
         {
             lastSequenceNumber = sequenceNumber;
@@ -184,7 +198,7 @@ public sealed class ClipboardComponent :
         }
 
         string id = $"Local.{Guid.NewGuid():N}";
-        ClipboardEntry entry = await ReadEntryAsync(id, DateTimeOffset.Now, content);
+        ClipboardEntry entry = CreateEntryFromSnapshot(id, DateTimeOffset.Now, snapshot);
 
         localEntries.Insert(0, entry);
         localSnapshots[id] = snapshot;
@@ -436,6 +450,55 @@ public sealed class ClipboardComponent :
         catch
         {
             return CreateEntry(id, "Protected clipboard content", "Unavailable", "\uE72E", timestamp);
+        }
+
+        return CreateEntry(id, "Unsupported clipboard content", "Other", "\uE77F", timestamp);
+    }
+
+    private static ClipboardEntry CreateEntryFromSnapshot(
+        string id,
+        DateTimeOffset timestamp,
+        ClipboardSnapshot snapshot)
+    {
+        if (snapshot.StorageItems is { Count: > 0 } items)
+        {
+            string preview = items.Count == 1
+                ? items[0].Name
+                : $"{items[0].Name} and {items.Count - 1} more";
+
+            return CreateEntry(id, preview, "Files", "\uE8B7", timestamp);
+        }
+
+        if (snapshot.Bitmap is not null)
+        {
+            return CreateEntry(id, "Copied image", "Image", "\uEB9F", timestamp);
+        }
+
+        string? link = snapshot.WebLink ?? snapshot.ApplicationLink;
+        if (!string.IsNullOrWhiteSpace(link))
+        {
+            return CreateEntry(id, link, "Link", "\uE71B", timestamp);
+        }
+
+        if (!string.IsNullOrWhiteSpace(snapshot.Text))
+        {
+            string preview = Normalize(snapshot.Text);
+            return CreateEntry(
+                id,
+                string.IsNullOrWhiteSpace(preview) ? "Copied text" : preview,
+                "Text",
+                "\uE8A5",
+                timestamp);
+        }
+
+        if (snapshot.Html is not null)
+        {
+            return CreateEntry(id, "Rich HTML content", "HTML", "\uE8D2", timestamp);
+        }
+
+        if (snapshot.Rtf is not null)
+        {
+            return CreateEntry(id, "Formatted text", "Rich text", "\uE8D2", timestamp);
         }
 
         return CreateEntry(id, "Unsupported clipboard content", "Other", "\uE77F", timestamp);

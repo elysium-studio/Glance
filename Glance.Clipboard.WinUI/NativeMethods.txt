@@ -7,5 +7,13 @@ UnregisterClassW
 DefWindowProcW
 GetModuleHandleW
 GetClipboardSequenceNumber
+OpenClipboard
+CloseClipboard
+GetClipboardData
+IsClipboardFormatAvailable
+RegisterClipboardFormatW
+GlobalLock
+GlobalUnlock
+GlobalSize
 SendInput
 HWND_MESSAGE

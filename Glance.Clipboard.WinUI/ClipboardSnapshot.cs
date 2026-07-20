@@ -11,23 +11,23 @@ internal sealed class ClipboardSnapshot
 {
     private const ulong MaximumBitmapBytes = 32 * 1024 * 1024;
 
-    private ClipboardSnapshot()
+    internal ClipboardSnapshot()
     {
     }
 
-    public string? ApplicationLink { get; private set; }
+    public string? ApplicationLink { get; internal set; }
 
-    public byte[]? Bitmap { get; private set; }
+    public byte[]? Bitmap { get; internal set; }
 
-    public string? Html { get; private set; }
+    public string? Html { get; internal set; }
 
-    public string? Rtf { get; private set; }
+    public string? Rtf { get; internal set; }
 
-    public IReadOnlyList<IStorageItem>? StorageItems { get; private set; }
+    public IReadOnlyList<IStorageItem>? StorageItems { get; internal set; }
 
-    public string? Text { get; private set; }
+    public string? Text { get; internal set; }
 
-    public string? WebLink { get; private set; }
+    public string? WebLink { get; internal set; }
 
     public bool HasContent =>
         ApplicationLink is not null ||
