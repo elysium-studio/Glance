@@ -18,6 +18,7 @@ namespace Glance.Shell.WinUI;
 public partial class DesktopIslandView : 
     DesktopIsland
 {
+    private DataPackageView? activeDragDataView;
     private int previousIndex;
 
     public DesktopIslandView()
@@ -140,13 +141,24 @@ public partial class DesktopIslandView :
         }
     }
 
-    private void HandleDragEnter(object sender, DragEventArgs args) =>
-        HandleDragOver(sender, args);
+    private void HandleDragEnter(object sender, DragEventArgs args)
+    {
+        activeDragDataView = args.DataView;
+
+        if (!CanAcceptContent(activeDragDataView))
+        {
+            args.AcceptedOperation = DataPackageOperation.None;
+            return;
+        }
+
+        args.AcceptedOperation = DataPackageOperation.Copy;
+        DispatcherQueue.TryEnqueue(() =>
+            ViewModel.TryActivateContent(GlanceContentKind.FilesAndFolders));
+    }
 
     private void HandleDragOver(object sender, DragEventArgs args)
     {
-        if (!args.DataView.Contains(StandardDataFormats.StorageItems) ||
-            !ViewModel.TryActivateContent(GlanceContentKind.FilesAndFolders))
+        if (!CanAcceptContent(args.DataView))
         {
             args.AcceptedOperation = DataPackageOperation.None;
             return;
@@ -155,19 +167,33 @@ public partial class DesktopIslandView :
         args.AcceptedOperation = DataPackageOperation.Copy;
     }
 
+    private bool CanAcceptContent(DataPackageView dataView)
+    {
+        try
+        {
+            return dataView.Contains(StandardDataFormats.StorageItems) &&
+                ViewModel.CanHandleContent(GlanceContentKind.FilesAndFolders);
+        }
+        catch (COMException)
+        {
+            return false;
+        }
+    }
+
     private async void HandleDrop(object sender, DragEventArgs args)
     {
-        if (!args.DataView.Contains(StandardDataFormats.StorageItems))
-        {
-            return;
-        }
-
-        var deferral = args.GetDeferral();
+        DataPackageView dataView = activeDragDataView ?? args.DataView;
+        activeDragDataView = null;
 
         try
         {
+            if (!dataView.Contains(StandardDataFormats.StorageItems))
+            {
+                return;
+            }
+
             IReadOnlyList<IStorageItem> storageItems =
-                await args.DataView.GetStorageItemsAsync();
+                await dataView.GetStorageItemsAsync();
             GlanceStorageItem[] items = storageItems
                 .Select(CreateStorageItem)
                 .OfType<GlanceStorageItem>()
@@ -187,17 +213,6 @@ public partial class DesktopIslandView :
         catch (Exception)
         {
             // Unsupported virtual shell items are ignored without destabilizing the island.
-        }
-        finally
-        {
-            try
-            {
-                deferral.Complete();
-            }
-            catch (COMException)
-            {
-                // The native drag operation may already have completed or been cancelled.
-            }
         }
     }
 

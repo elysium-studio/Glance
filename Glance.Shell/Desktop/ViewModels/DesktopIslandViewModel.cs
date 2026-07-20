@@ -78,6 +78,9 @@ public partial class DesktopIslandViewModel :
 
     public void OpenSettings() => settingsLauncher.Show();
 
+    public bool CanHandleContent(GlanceContentKind kind) =>
+        FindContextComponentIndex(kind) >= 0;
+
     public bool TryActivateContent(GlanceContentKind kind)
     {
         int componentIndex = FindContextComponentIndex(kind);
@@ -89,6 +92,7 @@ public partial class DesktopIslandViewModel :
 
         SelectedIndex = componentIndex;
         IsOpen = true;
+        IsExpanded = true;
         return true;
     }
 
