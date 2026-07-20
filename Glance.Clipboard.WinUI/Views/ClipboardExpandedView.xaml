@@ -83,7 +83,7 @@
             </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid Padding="20,12,20,26">
+    <Grid Padding="20,12,16,26">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
@@ -121,7 +121,7 @@
             <Controls:CompactFlipView
                 x:Name="ClipboardFlipView"
                 Grid.Row="1"
-                Margin="-20,0,-20,0"
+                Margin="-20,0,-16,0"
                 Background="Transparent"
                 ItemTemplate="{StaticResource ClipboardItemTemplate}"
                 ItemsSource="{x:Bind ViewModel.ShelfItems}"
