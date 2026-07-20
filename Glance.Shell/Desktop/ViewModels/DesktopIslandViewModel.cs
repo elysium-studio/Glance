@@ -89,7 +89,6 @@ public partial class DesktopIslandViewModel :
 
         SelectedIndex = componentIndex;
         IsOpen = true;
-        IsExpanded = true;
         return true;
     }
 

@@ -7,7 +7,9 @@ using Microsoft.UI.Xaml.Media.Animation;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 
@@ -167,11 +169,8 @@ public partial class DesktopIslandView :
             IReadOnlyList<IStorageItem> storageItems =
                 await args.DataView.GetStorageItemsAsync();
             GlanceStorageItem[] items = storageItems
-                .Where(item => !string.IsNullOrWhiteSpace(item.Path))
-                .Select(item => new GlanceStorageItem(
-                    item.Path,
-                    item.Name,
-                    item is StorageFolder))
+                .Select(CreateStorageItem)
+                .OfType<GlanceStorageItem>()
                 .ToArray();
 
             if (items.Length > 0)
@@ -181,13 +180,51 @@ public partial class DesktopIslandView :
                     items));
             }
         }
+        catch (COMException)
+        {
+            // Explorer can withdraw a projected item while the drag is completing.
+        }
         catch (Exception)
         {
-            args.AcceptedOperation = DataPackageOperation.None;
+            // Unsupported virtual shell items are ignored without destabilizing the island.
         }
         finally
         {
-            deferral.Complete();
+            try
+            {
+                deferral.Complete();
+            }
+            catch (COMException)
+            {
+                // The native drag operation may already have completed or been cancelled.
+            }
+        }
+    }
+
+    private static GlanceStorageItem? CreateStorageItem(IStorageItem storageItem)
+    {
+        try
+        {
+            string path = storageItem.Path;
+
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return null;
+            }
+
+            string normalizedPath = path.TrimEnd(
+                Path.DirectorySeparatorChar,
+                Path.AltDirectorySeparatorChar);
+            string name = Path.GetFileName(normalizedPath);
+
+            return new GlanceStorageItem(
+                path,
+                string.IsNullOrWhiteSpace(name) ? storageItem.Name : name,
+                storageItem is StorageFolder);
+        }
+        catch (COMException)
+        {
+            return null;
         }
     }
 }

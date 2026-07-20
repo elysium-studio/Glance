@@ -68,27 +68,14 @@
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource GlanceDropShelfIconBrush}"
                 Text="{x:Bind ToUpper(ViewModel.Title)}" />
-            <Border
+            <TextBlock
                 Grid.Row="1"
-                Padding="10,6"
-                Background="{ThemeResource GlanceDropShelfSurfaceBrush}"
-                BorderBrush="{ThemeResource GlanceDropShelfStrokeBrush}"
-                BorderThickness="1"
-                CornerRadius="8"
-                Visibility="{x:Bind WhenEmpty(ViewModel.HasItems), Mode=OneWay}">
-                <StackPanel VerticalAlignment="Center" Spacing="0">
-                    <TextBlock
-                        FontSize="13"
-                        FontWeight="SemiBold"
-                        Text="{x:Bind ViewModel.Summary, Mode=OneWay}" />
-                    <TextBlock
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        MaxLines="1"
-                        Style="{StaticResource CaptionTextBlockStyle}"
-                        Text="{x:Bind ViewModel.Detail, Mode=OneWay}"
-                        TextTrimming="CharacterEllipsis" />
-                </StackPanel>
-            </Border>
+                VerticalAlignment="Center"
+                FontSize="14"
+                FontWeight="SemiBold"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="{x:Bind ViewModel.Summary, Mode=OneWay}"
+                Visibility="{x:Bind WhenEmpty(ViewModel.HasItems), Mode=OneWay}" />
             <Border
                 x:Name="ShelfDragSurface"
                 Grid.Row="1"

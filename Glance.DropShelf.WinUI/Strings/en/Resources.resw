@@ -14,7 +14,7 @@
     <value>Stage files and folders, then drag them together to another location.</value>
   </data>
   <data name="EmptySummary" xml:space="preserve">
-    <value>Drop files here</value>
+    <value>Drop files or folders</value>
   </data>
   <data name="EmptyDetail" xml:space="preserve">
     <value>Files and folders are supported</value>
