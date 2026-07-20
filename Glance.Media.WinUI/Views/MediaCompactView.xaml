@@ -31,12 +31,14 @@
             <TextBlock
                 Style="{StaticResource BaseTextBlockStyle}"
                 Text="{Binding Title}"
-                TextTrimming="CharacterEllipsis" />
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap" />
             <TextBlock
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{Binding Artist}"
-                TextTrimming="CharacterEllipsis" />
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap" />
         </StackPanel>
     </Grid>
 </UserControl>
