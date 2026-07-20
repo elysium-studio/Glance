@@ -18,6 +18,12 @@ public sealed partial class ClipboardExpandedView : UserControl
 
     private string ToUpper(string value) => value.ToUpperInvariant();
 
+    private Visibility WhenEmpty(bool hasItems) =>
+        hasItems ? Visibility.Collapsed : Visibility.Visible;
+
+    private Visibility WhenPopulated(bool hasItems) =>
+        hasItems ? Visibility.Visible : Visibility.Collapsed;
+
     private async void HandleCopyClick(object sender, RoutedEventArgs args)
     {
         using IDisposable operation = ClipboardDiagnostics.Begin("UI.Copy");
