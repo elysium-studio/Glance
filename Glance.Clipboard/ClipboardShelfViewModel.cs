@@ -5,7 +5,10 @@ namespace Glance.Clipboard;
 
 public partial class ClipboardShelfViewModel : ObservableObject
 {
-    private Func<ClipboardEntry, Task<bool>>? restoreEntry;
+    private Func<ClipboardEntry, Task<bool>>? copyEntry;
+    private Func<ClipboardEntry, Task<bool>>? pasteEntry;
+    private Func<ClipboardEntry, Task<bool>>? removeEntry;
+    private Func<Task<bool>>? clearHistory;
 
     [ObservableProperty]
     private string latestPreview = "Clipboard is empty";
@@ -19,12 +22,24 @@ public partial class ClipboardShelfViewModel : ObservableObject
     [ObservableProperty]
     private string historyStatus = "Waiting for clipboard content";
 
+    [ObservableProperty]
+    private bool canClearHistory;
+
     public string Title => "Clipboard";
 
     public ObservableCollection<ClipboardEntry> ShelfItems { get; } = [];
 
-    public void ConfigureRestore(Func<ClipboardEntry, Task<bool>> restore) =>
-        restoreEntry = restore;
+    public void ConfigureActions(
+        Func<ClipboardEntry, Task<bool>> copy,
+        Func<ClipboardEntry, Task<bool>> paste,
+        Func<ClipboardEntry, Task<bool>> remove,
+        Func<Task<bool>> clear)
+    {
+        copyEntry = copy;
+        pasteEntry = paste;
+        removeEntry = remove;
+        clearHistory = clear;
+    }
 
     public void Update(
         IReadOnlyList<ClipboardEntry> entries,
@@ -36,24 +51,61 @@ public partial class ClipboardShelfViewModel : ObservableObject
         LatestKind = latest?.KindLabel ?? "Nothing copied";
         LatestGlyph = latest?.Glyph ?? "\uE77F";
         HistoryStatus = status;
+        CanClearHistory = entries.Count > 0;
 
         ShelfItems.Clear();
 
-        foreach (ClipboardEntry entry in entries.Skip(1).Take(3))
+        foreach (ClipboardEntry entry in entries.Take(6))
         {
             ShelfItems.Add(entry);
         }
     }
 
-    public async Task RestoreAsync(ClipboardEntry entry)
+    public async Task CopyAsync(ClipboardEntry entry)
     {
-        if (restoreEntry is null)
+        if (copyEntry is null)
         {
             return;
         }
 
-        HistoryStatus = await restoreEntry(entry)
-            ? "Restored to clipboard"
-            : "Could not restore this item";
+        HistoryStatus = await copyEntry(entry)
+            ? "Copied to clipboard"
+            : "Could not copy this item";
+    }
+
+    public async Task PasteAsync(ClipboardEntry entry)
+    {
+        if (pasteEntry is null)
+        {
+            return;
+        }
+
+        HistoryStatus = await pasteEntry(entry)
+            ? "Sent to the focused app"
+            : "Could not send this item";
+    }
+
+    public async Task RemoveAsync(ClipboardEntry entry)
+    {
+        if (removeEntry is null)
+        {
+            return;
+        }
+
+        HistoryStatus = await removeEntry(entry)
+            ? "Removed from clipboard history"
+            : "Could not remove this item";
+    }
+
+    public async Task ClearAsync()
+    {
+        if (clearHistory is null)
+        {
+            return;
+        }
+
+        HistoryStatus = await clearHistory()
+            ? "Clipboard history cleared"
+            : "Could not clear clipboard history";
     }
 }

@@ -29,7 +29,7 @@ public partial class SettingsViewModel : ObservableObject
             "Media" => ("Media playback", "See the current track and control system media playback."),
             "SystemMonitor" => ("System monitor", "See live processor and memory usage."),
             "Power" => ("Battery and power", "See charge, power source, and estimated battery time."),
-            "Clipboard" => ("Clipboard shelf", "Preview recent clipboard items and restore them with one click."),
+            "Clipboard" => ("Clipboard shelf", "Browse recent clips, send them to the focused app, or manage clipboard history."),
             _ => (preference.Id, "Glance module")
         };
 

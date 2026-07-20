@@ -17,11 +17,30 @@ public sealed partial class ClipboardExpandedView : UserControl
 
     private string ToUpper(string value) => value.ToUpperInvariant();
 
-    private async void HandleItemClick(object sender, ItemClickEventArgs args)
+    private async void HandleClearClick(object sender, RoutedEventArgs args) =>
+        await ViewModel.ClearAsync();
+
+    private async void HandleCopyClick(object sender, RoutedEventArgs args)
     {
-        if (args.ClickedItem is ClipboardEntry entry)
+        if ((sender as FrameworkElement)?.Tag is ClipboardEntry entry)
         {
-            await ViewModel.RestoreAsync(entry);
+            await ViewModel.CopyAsync(entry);
+        }
+    }
+
+    private async void HandlePasteClick(object sender, RoutedEventArgs args)
+    {
+        if ((sender as FrameworkElement)?.Tag is ClipboardEntry entry)
+        {
+            await ViewModel.PasteAsync(entry);
+        }
+    }
+
+    private async void HandleRemoveClick(object sender, RoutedEventArgs args)
+    {
+        if ((sender as FrameworkElement)?.Tag is ClipboardEntry entry)
+        {
+            await ViewModel.RemoveAsync(entry);
         }
     }
 }

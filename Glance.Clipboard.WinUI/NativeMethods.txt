@@ -1,0 +1,10 @@
+AddClipboardFormatListener
+RemoveClipboardFormatListener
+RegisterClassW
+CreateWindowExW
+DestroyWindow
+UnregisterClassW
+DefWindowProcW
+GetModuleHandleW
+SendInput
+HWND_MESSAGE

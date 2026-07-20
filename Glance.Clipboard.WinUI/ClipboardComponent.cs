@@ -20,6 +20,7 @@ public sealed class ClipboardComponent :
     private readonly Dictionary<string, ClipboardHistoryItem> historyItems =
         new(StringComparer.Ordinal);
     private readonly ClipboardShelfViewModel viewModel;
+    private readonly ClipboardChangeListener? clipboardChangeListener;
     private bool isDisposed;
 
     public ClipboardComponent(ClipboardShelfViewModel viewModel)
@@ -35,7 +36,18 @@ public sealed class ClipboardComponent :
         CompactAnimationElement = compactView.ConnectedAnimationElement;
         ExpandedAnimationElement = expandedView.ConnectedAnimationElement;
 
-        viewModel.ConfigureRestore(RestoreAsync);
+        viewModel.ConfigureActions(CopyAsync, PasteAsync, RemoveAsync, ClearAsync);
+
+        try
+        {
+            clipboardChangeListener = new ClipboardChangeListener();
+            clipboardChangeListener.ClipboardChanged += HandleClipboardChanged;
+        }
+        catch
+        {
+            // The WinRT events below remain as a fallback if native listener
+            // registration is unavailable on the current Windows session.
+        }
 
         Windows.ApplicationModel.DataTransfer.Clipboard.ContentChanged +=
             HandleClipboardChanged;
@@ -70,6 +82,11 @@ public sealed class ClipboardComponent :
         Windows.ApplicationModel.DataTransfer.Clipboard.HistoryEnabledChanged -=
             HandleClipboardChanged;
 
+        if (clipboardChangeListener is not null)
+        {
+            clipboardChangeListener.ClipboardChanged -= HandleClipboardChanged;
+            clipboardChangeListener.Dispose();
+        }
     }
 
     private void HandleClipboardChanged(object? sender, object args) =>
@@ -95,7 +112,7 @@ public sealed class ClipboardComponent :
 
             if (historyResult.Status == ClipboardHistoryItemsResultStatus.Success)
             {
-                foreach (ClipboardHistoryItem item in historyResult.Items.Take(4))
+                foreach (ClipboardHistoryItem item in historyResult.Items.Take(6))
                 {
                     ClipboardEntry entry = await ReadEntryAsync(
                         item.Id,
@@ -106,9 +123,12 @@ public sealed class ClipboardComponent :
                     historyItems[item.Id] = item;
                 }
 
-                status = entries.Count > 1
-                    ? $"{entries.Count - 1} recent item{(entries.Count == 2 ? string.Empty : "s")}"
-                    : "Copy more items to build your shelf";
+                status = entries.Count switch
+                {
+                    0 => "Clipboard history is empty",
+                    1 => "1 recent item",
+                    _ => $"{entries.Count} recent items"
+                };
             }
             else
             {
@@ -146,11 +166,16 @@ public sealed class ClipboardComponent :
         }
     }
 
-    private async Task<bool> RestoreAsync(ClipboardEntry entry)
+    private Task<bool> CopyAsync(ClipboardEntry entry)
     {
+        if (entry.Id == "Current")
+        {
+            return Task.FromResult(true);
+        }
+
         if (!historyItems.TryGetValue(entry.Id, out ClipboardHistoryItem? historyItem))
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         try
@@ -158,7 +183,62 @@ public sealed class ClipboardComponent :
             SetHistoryItemAsContentStatus status =
                 Windows.ApplicationModel.DataTransfer.Clipboard.SetHistoryItemAsContent(historyItem);
 
-            return status == SetHistoryItemAsContentStatus.Success;
+            return Task.FromResult(status == SetHistoryItemAsContentStatus.Success);
+        }
+        catch
+        {
+            return Task.FromResult(false);
+        }
+    }
+
+    private async Task<bool> PasteAsync(ClipboardEntry entry)
+    {
+        if (!await CopyAsync(entry))
+        {
+            return false;
+        }
+
+        await Task.Delay(40);
+        return FocusedWindowPaste.Send();
+    }
+
+    private async Task<bool> RemoveAsync(ClipboardEntry entry)
+    {
+        try
+        {
+            bool removed;
+
+            if (entry.Id == "Current")
+            {
+                Windows.ApplicationModel.DataTransfer.Clipboard.Clear();
+                removed = true;
+            }
+            else if (historyItems.TryGetValue(entry.Id, out ClipboardHistoryItem? historyItem))
+            {
+                removed = Windows.ApplicationModel.DataTransfer.Clipboard.DeleteItemFromHistory(historyItem);
+            }
+            else
+            {
+                return false;
+            }
+
+            await RefreshAsync();
+            return removed;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private async Task<bool> ClearAsync()
+    {
+        try
+        {
+            Windows.ApplicationModel.DataTransfer.Clipboard.ClearHistory();
+            Windows.ApplicationModel.DataTransfer.Clipboard.Clear();
+            await RefreshAsync();
+            return true;
         }
         catch
         {
@@ -189,17 +269,10 @@ public sealed class ClipboardComponent :
                 return CreateEntry(id, link.ToString(), "Link", "\uE71B", timestamp);
             }
 
-            if (content.Contains(StandardDataFormats.Text))
+            if (content.Contains(StandardDataFormats.ApplicationLink))
             {
-                string text = await content.GetTextAsync();
-                string preview = Normalize(text);
-
-                return CreateEntry(
-                    id,
-                    string.IsNullOrWhiteSpace(preview) ? "Copied text" : preview,
-                    "Text",
-                    "\uE8A5",
-                    timestamp);
+                Uri link = await content.GetApplicationLinkAsync();
+                return CreateEntry(id, link.ToString(), "App link", "\uE71B", timestamp);
             }
 
             if (content.Contains(StandardDataFormats.StorageItems))
@@ -222,7 +295,25 @@ public sealed class ClipboardComponent :
 
             if (content.Contains(StandardDataFormats.Html))
             {
-                return CreateEntry(id, "Rich HTML content", "Rich text", "\uE8D2", timestamp);
+                return CreateEntry(id, "Rich HTML content", "HTML", "\uE8D2", timestamp);
+            }
+
+            if (content.Contains(StandardDataFormats.Rtf))
+            {
+                return CreateEntry(id, "Formatted text", "Rich text", "\uE8D2", timestamp);
+            }
+
+            if (content.Contains(StandardDataFormats.Text))
+            {
+                string text = await content.GetTextAsync();
+                string preview = Normalize(text);
+
+                return CreateEntry(
+                    id,
+                    string.IsNullOrWhiteSpace(preview) ? "Copied text" : preview,
+                    "Text",
+                    "\uE8A5",
+                    timestamp);
             }
         }
         catch
