@@ -52,7 +52,6 @@ public partial class ClipboardShelfViewModel : ObservableObject
         string status)
     {
         ClipboardEntry? latest = entries.FirstOrDefault();
-        string? selectedId = SelectedEntry?.Id;
 
         LatestPreview = latest?.Preview ?? "Clipboard is empty";
         LatestKind = latest?.KindLabel ?? "Nothing copied";
@@ -67,7 +66,7 @@ public partial class ClipboardShelfViewModel : ObservableObject
             ShelfItems.Add(entry);
         }
 
-        SelectedEntry = entries.FirstOrDefault(entry => entry.Id == selectedId) ?? latest;
+        SelectedEntry = latest;
     }
 
     partial void OnSelectedEntryChanged(ClipboardEntry? value) =>
