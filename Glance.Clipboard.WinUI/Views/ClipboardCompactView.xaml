@@ -29,13 +29,18 @@
             VerticalAlignment="Center"
             Spacing="0">
             <TextBlock
+                MaxLines="1"
                 Style="{StaticResource BaseTextBlockStyle}"
                 Text="{x:Bind ViewModel.LatestPreview, Mode=OneWay}"
-                TextTrimming="CharacterEllipsis" />
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap" />
             <TextBlock
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                MaxLines="1"
                 Style="{StaticResource CaptionTextBlockStyle}"
-                Text="{x:Bind ViewModel.LatestKind, Mode=OneWay}" />
+                Text="{x:Bind ViewModel.LatestKind, Mode=OneWay}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap" />
         </StackPanel>
     </Grid>
 </UserControl>

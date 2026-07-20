@@ -25,6 +25,12 @@ public partial class ClipboardShelfViewModel : ObservableObject
     [ObservableProperty]
     private bool canClearHistory;
 
+    [ObservableProperty]
+    private bool canUseSelectedEntry;
+
+    [ObservableProperty]
+    private ClipboardEntry? selectedEntry;
+
     public string Title => "Clipboard";
 
     public ObservableCollection<ClipboardEntry> ShelfItems { get; } = [];
@@ -46,6 +52,7 @@ public partial class ClipboardShelfViewModel : ObservableObject
         string status)
     {
         ClipboardEntry? latest = entries.FirstOrDefault();
+        string? selectedId = SelectedEntry?.Id;
 
         LatestPreview = latest?.Preview ?? "Clipboard is empty";
         LatestKind = latest?.KindLabel ?? "Nothing copied";
@@ -59,7 +66,12 @@ public partial class ClipboardShelfViewModel : ObservableObject
         {
             ShelfItems.Add(entry);
         }
+
+        SelectedEntry = entries.FirstOrDefault(entry => entry.Id == selectedId) ?? latest;
     }
+
+    partial void OnSelectedEntryChanged(ClipboardEntry? value) =>
+        CanUseSelectedEntry = value is not null;
 
     public async Task CopyAsync(ClipboardEntry entry)
     {
@@ -107,5 +119,29 @@ public partial class ClipboardShelfViewModel : ObservableObject
         HistoryStatus = await clearHistory()
             ? "Clipboard history cleared"
             : "Could not clear clipboard history";
+    }
+
+    public async Task CopySelectedAsync()
+    {
+        if (SelectedEntry is not null)
+        {
+            await CopyAsync(SelectedEntry);
+        }
+    }
+
+    public async Task PasteSelectedAsync()
+    {
+        if (SelectedEntry is not null)
+        {
+            await PasteAsync(SelectedEntry);
+        }
+    }
+
+    public async Task RemoveSelectedAsync()
+    {
+        if (SelectedEntry is not null)
+        {
+            await RemoveAsync(SelectedEntry);
+        }
     }
 }

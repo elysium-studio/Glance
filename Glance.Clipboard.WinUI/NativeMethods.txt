@@ -6,5 +6,6 @@ DestroyWindow
 UnregisterClassW
 DefWindowProcW
 GetModuleHandleW
+GetClipboardSequenceNumber
 SendInput
 HWND_MESSAGE
