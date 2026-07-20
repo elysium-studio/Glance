@@ -7,9 +7,11 @@ using Microsoft.UI.Xaml.Media.Animation;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 
@@ -18,7 +20,6 @@ namespace Glance.Shell.WinUI;
 public partial class DesktopIslandView : 
     DesktopIsland
 {
-    private DataPackageView? activeDragDataView;
     private int previousIndex;
     private bool skipNextConnectedExpansion;
 
@@ -171,9 +172,7 @@ public partial class DesktopIslandView :
 
     private void HandleDragEnter(object sender, DragEventArgs args)
     {
-        activeDragDataView = args.DataView;
-
-        if (!CanAcceptContent(activeDragDataView))
+        if (!CanAcceptContent(args.DataView))
         {
             args.AcceptedOperation = DataPackageOperation.None;
             return;
@@ -210,11 +209,10 @@ public partial class DesktopIslandView :
 
     private async void HandleDrop(object sender, DragEventArgs args)
     {
-        DataPackageView dataView = activeDragDataView ?? args.DataView;
-        activeDragDataView = null;
-
         try
         {
+            DataPackageView dataView = args.DataView;
+
             if (!dataView.Contains(StandardDataFormats.StorageItems))
             {
                 return;
@@ -222,25 +220,61 @@ public partial class DesktopIslandView :
 
             IReadOnlyList<IStorageItem> storageItems =
                 await dataView.GetStorageItemsAsync();
-            GlanceStorageItem[] items = storageItems
-                .Select(CreateStorageItem)
-                .OfType<GlanceStorageItem>()
-                .ToArray();
+            await ProcessStorageItemsAsync(storageItems);
+        }
+        catch (COMException exception)
+        {
+            Debug.WriteLine(
+                $"DropShelf: failed to read dropped storage items " +
+                $"(0x{exception.HResult:X8}): {exception.Message}");
+        }
+        catch (Exception exception)
+        {
+            Debug.WriteLine($"DropShelf: failed to process drop: {exception}");
+        }
+    }
 
-            if (items.Length > 0)
+    private Task ProcessStorageItemsAsync(IReadOnlyList<IStorageItem> storageItems)
+    {
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            return AddStorageItemsAsync(storageItems);
+        }
+
+        TaskCompletionSource<bool> completion = new(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (!DispatcherQueue.TryEnqueue(async () =>
+        {
+            try
             {
-                await ViewModel.HandleContentAsync(new GlanceContentContext(
-                    GlanceContentKind.FilesAndFolders,
-                    items));
+                await AddStorageItemsAsync(storageItems);
+                completion.TrySetResult(true);
             }
-        }
-        catch (COMException)
+            catch (Exception exception)
+            {
+                completion.TrySetException(exception);
+            }
+        }))
         {
-            // Explorer can withdraw a projected item while the drag is completing.
+            completion.TrySetResult(false);
         }
-        catch (Exception)
+
+        return completion.Task;
+    }
+
+    private async Task AddStorageItemsAsync(IReadOnlyList<IStorageItem> storageItems)
+    {
+        GlanceStorageItem[] items = storageItems
+            .Select(CreateStorageItem)
+            .OfType<GlanceStorageItem>()
+            .ToArray();
+
+        if (items.Length > 0)
         {
-            // Unsupported virtual shell items are ignored without destabilizing the island.
+            await ViewModel.HandleContentAsync(new GlanceContentContext(
+                GlanceContentKind.FilesAndFolders,
+                items));
         }
     }
 
@@ -265,8 +299,11 @@ public partial class DesktopIslandView :
                 string.IsNullOrWhiteSpace(name) ? storageItem.Name : name,
                 storageItem is StorageFolder);
         }
-        catch (COMException)
+        catch (COMException exception)
         {
+            Debug.WriteLine(
+                $"DropShelf: rejected shell item " +
+                $"(0x{exception.HResult:X8}): {exception.Message}");
             return null;
         }
     }
