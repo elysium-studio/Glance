@@ -9,9 +9,13 @@ GetModuleHandleW
 GetClipboardSequenceNumber
 OpenClipboard
 CloseClipboard
+EmptyClipboard
 GetClipboardData
+SetClipboardData
 IsClipboardFormatAvailable
 RegisterClipboardFormatW
+GlobalAlloc
+GlobalFree
 GlobalLock
 GlobalUnlock
 GlobalSize

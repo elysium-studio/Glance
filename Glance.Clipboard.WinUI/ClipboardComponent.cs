@@ -2,11 +2,9 @@ using Glance.Application.Abstractions;
 using Microsoft.UI.Dispatching;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.ApplicationModel.DataTransfer;
-using Windows.Storage;
 using Windows.Win32;
 
 namespace Glance.Clipboard.WinUI;
@@ -21,15 +19,11 @@ public sealed class ClipboardComponent :
     private readonly ClipboardChangeListener? clipboardChangeListener;
     private readonly DispatcherQueueTimer clipboardPollTimer;
     private readonly DispatcherQueue dispatcherQueue;
-    private readonly Dictionary<string, ClipboardHistoryItem> historyItems =
-        new(StringComparer.Ordinal);
     private readonly List<ClipboardEntry> localEntries = [];
     private readonly Dictionary<string, ClipboardSnapshot> localSnapshots =
         new(StringComparer.Ordinal);
     private readonly SemaphoreSlim refreshGate = new(1, 1);
-    private readonly List<ClipboardEntry> systemEntries = [];
     private readonly ClipboardShelfViewModel viewModel;
-    private bool hasSeededHistory;
     private bool isDisposed;
     private uint lastSequenceNumber;
 
@@ -58,15 +52,8 @@ public sealed class ClipboardComponent :
         }
         catch
         {
-            // WinRT notifications remain as a fallback if native registration fails.
+            // Sequence polling remains available if native notification registration fails.
         }
-
-        Windows.ApplicationModel.DataTransfer.Clipboard.ContentChanged +=
-            HandleClipboardChanged;
-        Windows.ApplicationModel.DataTransfer.Clipboard.HistoryChanged +=
-            HandleClipboardChanged;
-        Windows.ApplicationModel.DataTransfer.Clipboard.HistoryEnabledChanged +=
-            HandleClipboardChanged;
 
         clipboardPollTimer.Start();
         _ = RefreshAsync();
@@ -87,14 +74,6 @@ public sealed class ClipboardComponent :
     public void Dispose()
     {
         isDisposed = true;
-
-        Windows.ApplicationModel.DataTransfer.Clipboard.ContentChanged -=
-            HandleClipboardChanged;
-        Windows.ApplicationModel.DataTransfer.Clipboard.HistoryChanged -=
-            HandleClipboardChanged;
-        Windows.ApplicationModel.DataTransfer.Clipboard.HistoryEnabledChanged -=
-            HandleClipboardChanged;
-
         clipboardPollTimer.Stop();
         clipboardPollTimer.Tick -= HandleClipboardPoll;
 
@@ -128,11 +107,6 @@ public sealed class ClipboardComponent :
                 return;
             }
 
-            if (!hasSeededHistory)
-            {
-                await SeedSystemHistoryAsync();
-            }
-
             await CaptureCurrentClipboardAsync();
             PublishEntries();
         }
@@ -143,36 +117,6 @@ public sealed class ClipboardComponent :
         finally
         {
             refreshGate.Release();
-        }
-    }
-
-    private async Task SeedSystemHistoryAsync()
-    {
-        hasSeededHistory = true;
-
-        try
-        {
-            ClipboardHistoryItemsResult result =
-                await Windows.ApplicationModel.DataTransfer.Clipboard.GetHistoryItemsAsync();
-
-            if (result.Status != ClipboardHistoryItemsResultStatus.Success)
-            {
-                return;
-            }
-
-            foreach (ClipboardHistoryItem item in result.Items.Take(MaximumShelfItems))
-            {
-                ClipboardEntry entry = await ReadEntryAsync(
-                    item.Id,
-                    item.Timestamp,
-                    item.Content);
-
-                systemEntries.Add(entry);
-                historyItems[item.Id] = item;
-            }
-        }
-        catch
-        {
         }
     }
 
@@ -215,60 +159,27 @@ public sealed class ClipboardComponent :
 
     private void PublishEntries()
     {
-        List<ClipboardEntry> entries = [.. localEntries];
-
-        foreach (ClipboardEntry entry in systemEntries)
-        {
-            if (entries.Count >= MaximumShelfItems)
-            {
-                break;
-            }
-
-            bool isDuplicate = entries.Any(existing =>
-                existing.Preview == entry.Preview &&
-                existing.KindLabel == entry.KindLabel);
-
-            if (!isDuplicate)
-            {
-                entries.Add(entry);
-            }
-        }
-
-        string status = entries.Count switch
+        string status = localEntries.Count switch
         {
             0 => "No recent clips",
             1 => "1 recent clip",
-            _ => $"{entries.Count} recent clips"
+            _ => $"{localEntries.Count} recent clips"
         };
 
-        viewModel.Update(entries, status);
+        viewModel.Update(localEntries, status);
     }
 
     private async Task<bool> CopyAsync(ClipboardEntry entry)
     {
-        bool copied;
+        if (clipboardChangeListener is null ||
+            !localSnapshots.TryGetValue(entry.Id, out ClipboardSnapshot? snapshot))
+        {
+            return false;
+        }
 
-        if (localSnapshots.TryGetValue(entry.Id, out ClipboardSnapshot? snapshot))
-        {
-            copied = await snapshot.CopyAsync();
-        }
-        else if (historyItems.TryGetValue(entry.Id, out ClipboardHistoryItem? historyItem))
-        {
-            try
-            {
-                SetHistoryItemAsContentStatus status =
-                    Windows.ApplicationModel.DataTransfer.Clipboard.SetHistoryItemAsContent(historyItem);
-                copied = status == SetHistoryItemAsContentStatus.Success;
-            }
-            catch
-            {
-                copied = false;
-            }
-        }
-        else
-        {
-            copied = false;
-        }
+        bool copied = await NativeClipboardWriter.WriteAsync(
+            snapshot,
+            clipboardChangeListener.WindowHandle);
 
         if (copied)
         {
@@ -293,84 +204,29 @@ public sealed class ClipboardComponent :
 
     private Task<bool> RemoveAsync(ClipboardEntry entry)
     {
-        try
+        bool removed = localSnapshots.Remove(entry.Id);
+        if (removed)
         {
-            bool removed = false;
-
-            if (localSnapshots.Remove(entry.Id))
-            {
-                localEntries.RemoveAll(candidate => candidate.Id == entry.Id);
-                removed = true;
-
-                foreach (ClipboardEntry duplicate in systemEntries
-                    .Where(candidate =>
-                        candidate.Preview == entry.Preview &&
-                        candidate.KindLabel == entry.KindLabel)
-                    .ToArray())
-                {
-                    RemoveSystemEntry(duplicate);
-                }
-            }
-            else if (historyItems.ContainsKey(entry.Id))
-            {
-                removed = RemoveSystemEntry(entry);
-            }
-
+            localEntries.RemoveAll(candidate => candidate.Id == entry.Id);
             PublishEntries();
-            return Task.FromResult(removed);
         }
-        catch
-        {
-            return Task.FromResult(false);
-        }
+
+        return Task.FromResult(removed);
     }
 
-    private bool RemoveSystemEntry(ClipboardEntry entry)
+    private async Task<bool> ClearAsync()
     {
-        if (!historyItems.Remove(entry.Id, out ClipboardHistoryItem? historyItem))
+        if (clipboardChangeListener is null ||
+            !await NativeClipboardWriter.ClearAsync(clipboardChangeListener.WindowHandle))
         {
             return false;
         }
 
-        systemEntries.RemoveAll(candidate => candidate.Id == entry.Id);
-
-        try
-        {
-            Windows.ApplicationModel.DataTransfer.Clipboard.DeleteItemFromHistory(historyItem);
-        }
-        catch
-        {
-        }
-
+        localEntries.Clear();
+        localSnapshots.Clear();
+        lastSequenceNumber = PInvoke.GetClipboardSequenceNumber();
+        PublishEntries();
         return true;
-    }
-
-    private Task<bool> ClearAsync()
-    {
-        try
-        {
-            localEntries.Clear();
-            localSnapshots.Clear();
-            systemEntries.Clear();
-            historyItems.Clear();
-
-            try
-            {
-                Windows.ApplicationModel.DataTransfer.Clipboard.ClearHistory();
-            }
-            catch
-            {
-            }
-
-            Windows.ApplicationModel.DataTransfer.Clipboard.Clear();
-            lastSequenceNumber = PInvoke.GetClipboardSequenceNumber();
-            PublishEntries();
-            return Task.FromResult(true);
-        }
-        catch
-        {
-            return Task.FromResult(false);
-        }
     }
 
     private void PromoteEntry(ClipboardEntry entry)
@@ -378,81 +234,7 @@ public sealed class ClipboardComponent :
         if (localEntries.Remove(entry))
         {
             localEntries.Insert(0, entry);
-            return;
         }
-
-        if (systemEntries.Remove(entry))
-        {
-            systemEntries.Insert(0, entry);
-        }
-    }
-
-    private static async Task<ClipboardEntry> ReadEntryAsync(
-        string id,
-        DateTimeOffset timestamp,
-        DataPackageView content)
-    {
-        try
-        {
-            if (content.Contains(StandardDataFormats.WebLink))
-            {
-                Uri link = await content.GetWebLinkAsync();
-                return CreateEntry(id, link.ToString(), "Link", "\uE71B", timestamp);
-            }
-
-            if (content.Contains(StandardDataFormats.ApplicationLink))
-            {
-                Uri link = await content.GetApplicationLinkAsync();
-                return CreateEntry(id, link.ToString(), "App link", "\uE71B", timestamp);
-            }
-
-            if (content.Contains(StandardDataFormats.StorageItems))
-            {
-                IReadOnlyList<IStorageItem> items = await content.GetStorageItemsAsync();
-                string preview = items.Count switch
-                {
-                    0 => "File or folder",
-                    1 => items[0].Name,
-                    _ => $"{items[0].Name} and {items.Count - 1} more"
-                };
-
-                return CreateEntry(id, preview, "Files", "\uE8B7", timestamp);
-            }
-
-            if (content.Contains(StandardDataFormats.Bitmap))
-            {
-                return CreateEntry(id, "Copied image", "Image", "\uEB9F", timestamp);
-            }
-
-            if (content.Contains(StandardDataFormats.Html))
-            {
-                return CreateEntry(id, "Rich HTML content", "HTML", "\uE8D2", timestamp);
-            }
-
-            if (content.Contains(StandardDataFormats.Rtf))
-            {
-                return CreateEntry(id, "Formatted text", "Rich text", "\uE8D2", timestamp);
-            }
-
-            if (content.Contains(StandardDataFormats.Text))
-            {
-                string text = await content.GetTextAsync();
-                string preview = Normalize(text);
-
-                return CreateEntry(
-                    id,
-                    string.IsNullOrWhiteSpace(preview) ? "Copied text" : preview,
-                    "Text",
-                    "\uE8A5",
-                    timestamp);
-            }
-        }
-        catch
-        {
-            return CreateEntry(id, "Protected clipboard content", "Unavailable", "\uE72E", timestamp);
-        }
-
-        return CreateEntry(id, "Unsupported clipboard content", "Other", "\uE77F", timestamp);
     }
 
     private static ClipboardEntry CreateEntryFromSnapshot(
@@ -460,11 +242,12 @@ public sealed class ClipboardComponent :
         DateTimeOffset timestamp,
         ClipboardSnapshot snapshot)
     {
-        if (snapshot.StorageItems is { Count: > 0 } items)
+        if (snapshot.FilePaths is { Count: > 0 } paths)
         {
-            string preview = items.Count == 1
-                ? items[0].Name
-                : $"{items[0].Name} and {items.Count - 1} more";
+            string firstName = GetFileName(paths[0]);
+            string preview = paths.Count == 1
+                ? firstName
+                : $"{firstName} and {paths.Count - 1} more";
 
             return CreateEntry(id, preview, "Files", "\uE8B7", timestamp);
         }
@@ -511,6 +294,15 @@ public sealed class ClipboardComponent :
         string glyph,
         DateTimeOffset timestamp) =>
         new(id, Truncate(preview), kind, glyph, timestamp);
+
+    private static string GetFileName(string path)
+    {
+        string normalizedPath = path.TrimEnd(
+            Path.DirectorySeparatorChar,
+            Path.AltDirectorySeparatorChar);
+        string name = Path.GetFileName(normalizedPath);
+        return string.IsNullOrWhiteSpace(name) ? path : name;
+    }
 
     private static string Normalize(string value) =>
         string.Join(

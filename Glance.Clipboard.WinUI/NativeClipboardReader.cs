@@ -1,10 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.Storage;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 
@@ -23,22 +20,17 @@ internal static class NativeClipboardReader
         {
             if (PInvoke.OpenClipboard(HWND.Null))
             {
-                ClipboardSnapshot snapshot;
-                string[] fileDropPaths;
-
                 try
                 {
-                    (snapshot, fileDropPaths) = CaptureOpenClipboard();
+                    ClipboardSnapshot snapshot = CaptureOpenClipboard();
+                    return new NativeClipboardCapture(
+                        true,
+                        snapshot.HasContent ? snapshot : null);
                 }
                 finally
                 {
                     _ = PInvoke.CloseClipboard();
                 }
-
-                snapshot.StorageItems = await ResolveStorageItemsAsync(fileDropPaths);
-                return new NativeClipboardCapture(
-                    true,
-                    snapshot.HasContent ? snapshot : null);
             }
 
             await Task.Delay(25);
@@ -47,11 +39,12 @@ internal static class NativeClipboardReader
         return new NativeClipboardCapture(false, null);
     }
 
-    private static (ClipboardSnapshot Snapshot, string[] FileDropPaths) CaptureOpenClipboard()
+    private static ClipboardSnapshot CaptureOpenClipboard()
     {
         ClipboardSnapshot snapshot = new()
         {
-            Text = ReadUnicodeText(ClipboardFormatUnicodeText)
+            Text = ReadUnicodeText(ClipboardFormatUnicodeText),
+            FilePaths = ReadFileDropPaths()
         };
 
         uint htmlFormat = PInvoke.RegisterClipboardFormat("HTML Format");
@@ -69,7 +62,7 @@ internal static class NativeClipboardReader
             snapshot.WebLink = link.ToString();
         }
 
-        return (snapshot, ReadFileDropPaths());
+        return snapshot;
     }
 
     private static string? ReadUnicodeText(uint format)
@@ -143,11 +136,6 @@ internal static class NativeClipboardReader
 
     private static string[] ReadFileDropPaths()
     {
-        if (!PInvoke.IsClipboardFormatAvailable(ClipboardFormatFileDrop))
-        {
-            return [];
-        }
-
         byte[]? fileDrop = ReadBytes(ClipboardFormatFileDrop);
         if (fileDrop is null || fileDrop.Length < 20)
         {
@@ -166,29 +154,6 @@ internal static class NativeClipboardReader
             : Encoding.Default.GetString(fileDrop, pathsOffset, fileDrop.Length - pathsOffset);
 
         return paths.Split('\0', StringSplitOptions.RemoveEmptyEntries);
-    }
-
-    private static async Task<IReadOnlyList<IStorageItem>?> ResolveStorageItemsAsync(
-        IReadOnlyList<string> paths)
-    {
-        List<IStorageItem> items = [];
-
-        foreach (string itemPath in paths)
-        {
-            try
-            {
-                IStorageItem item = Directory.Exists(itemPath)
-                    ? await StorageFolder.GetFolderFromPathAsync(itemPath)
-                    : await StorageFile.GetFileFromPathAsync(itemPath);
-
-                items.Add(item);
-            }
-            catch
-            {
-            }
-        }
-
-        return items.Count == 0 ? null : items;
     }
 }
 

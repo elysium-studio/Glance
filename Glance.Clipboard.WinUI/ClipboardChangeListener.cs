@@ -68,6 +68,8 @@ internal sealed unsafe class ClipboardChangeListener : IDisposable
 
     public event EventHandler? ClipboardChanged;
 
+    public HWND WindowHandle => windowHandle;
+
     public void Dispose()
     {
         if (disposed)
