@@ -11,17 +11,20 @@ public sealed class DropShelfComponent :
     IGlanceContextAwareComponent
 {
     private readonly ITextLocalizer localizer;
+    private readonly DropShelfTransferStore transferStore;
     private readonly DropShelfViewModel viewModel;
 
     public DropShelfComponent(
         DropShelfViewModel viewModel,
+        DropShelfTransferStore transferStore,
         ModuleResourceTextLocalizer<DropShelfModule> localizer)
     {
         this.viewModel = viewModel;
+        this.transferStore = transferStore;
         this.localizer = localizer;
 
         DropShelfCompactView compactView = new(viewModel);
-        DropShelfExpandedView expandedView = new(viewModel);
+        DropShelfExpandedView expandedView = new(viewModel, transferStore);
 
         CompactContent = compactView;
         ExpandedContent = expandedView;
@@ -48,17 +51,20 @@ public sealed class DropShelfComponent :
     public bool CanHandle(GlanceContentKind kind) =>
         kind == GlanceContentKind.FilesAndFolders;
 
-    public Task HandleAsync(GlanceContentContext context)
+    public async Task HandleAsync(GlanceContentContext context)
     {
         if (!CanHandle(context.Kind))
         {
-            return Task.CompletedTask;
+            return;
         }
 
-        viewModel.AddItems(context.StorageItems.Select(item => new DropShelfItem(
-            item.Path,
-            item.Name,
-            item.IsFolder)));
-        return Task.CompletedTask;
+        DropShelfItem[] items = context.StorageItems
+            .Select(item => new DropShelfItem(
+                item.Path,
+                item.Name,
+                item.IsFolder))
+            .ToArray();
+
+        viewModel.AddItems(await transferStore.StageAsync(items));
     }
 }

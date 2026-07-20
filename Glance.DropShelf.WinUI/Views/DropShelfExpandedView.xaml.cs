@@ -3,7 +3,6 @@ using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 
@@ -11,9 +10,14 @@ namespace Glance.DropShelf.WinUI;
 
 public sealed partial class DropShelfExpandedView : UserControl
 {
-    public DropShelfExpandedView(DropShelfViewModel viewModel)
+    private readonly DropShelfTransferStore transferStore;
+
+    public DropShelfExpandedView(
+        DropShelfViewModel viewModel,
+        DropShelfTransferStore transferStore)
     {
         ViewModel = viewModel;
+        this.transferStore = transferStore;
         InitializeComponent();
     }
 
@@ -33,33 +37,17 @@ public sealed partial class DropShelfExpandedView : UserControl
     {
         if ((sender as FrameworkElement)?.DataContext is DropShelfItem item)
         {
+            transferStore.Remove(item.Path);
             ViewModel.Remove(item);
         }
     }
 
-    private async void HandleDragStarting(UIElement sender, DragStartingEventArgs args)
+    private void HandleDragStarting(UIElement sender, DragStartingEventArgs args)
     {
-        var deferral = args.GetDeferral();
-
         try
         {
-            List<IStorageItem> storageItems = [];
-
-            foreach (DropShelfItem item in ViewModel.Items)
-            {
-                try
-                {
-                    IStorageItem storageItem = item.IsFolder
-                        ? await StorageFolder.GetFolderFromPathAsync(item.Path)
-                        : await StorageFile.GetFileFromPathAsync(item.Path);
-                    storageItems.Add(storageItem);
-                }
-                catch (Exception exception)
-                {
-                    Debug.WriteLine(
-                        $"DropShelf: cannot add '{item.Path}' to outgoing drag: {exception}");
-                }
-            }
+            IReadOnlyList<IStorageItem> storageItems =
+                transferStore.GetStorageItems(ViewModel.Items);
 
             if (storageItems.Count == 0)
             {
@@ -78,16 +66,13 @@ public sealed partial class DropShelfExpandedView : UserControl
             Debug.WriteLine($"DropShelf: failed to start outgoing drag: {exception}");
             args.Cancel = true;
         }
-        finally
-        {
-            deferral.Complete();
-        }
     }
 
     private void HandleDropCompleted(UIElement sender, DropCompletedEventArgs args)
     {
         if (args.DropResult == DataPackageOperation.Move)
         {
+            transferStore.Clear();
             ViewModel.Clear();
         }
     }
