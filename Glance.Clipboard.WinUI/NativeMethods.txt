@@ -7,6 +7,8 @@ UnregisterClassW
 DefWindowProcW
 GetModuleHandleW
 GetClipboardSequenceNumber
+GetClipboardOwner
+GetOpenClipboardWindow
 OpenClipboard
 CloseClipboard
 EmptyClipboard

@@ -70,6 +70,8 @@ internal sealed unsafe class ClipboardChangeListener : IDisposable
 
     public HWND WindowHandle => windowHandle;
 
+    public nint Handle => (nint)windowHandle.Value;
+
     public void Dispose()
     {
         if (disposed)
@@ -105,7 +107,17 @@ internal sealed unsafe class ClipboardChangeListener : IDisposable
     {
         if (message == ClipboardUpdateMessage)
         {
-            ClipboardChanged?.Invoke(this, EventArgs.Empty);
+            using IDisposable operation = ClipboardDiagnostics.Begin("Notification");
+
+            try
+            {
+                ClipboardChanged?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception exception)
+            {
+                ClipboardDiagnostics.WriteException("NotificationFailed", exception);
+            }
+
             return default;
         }
 

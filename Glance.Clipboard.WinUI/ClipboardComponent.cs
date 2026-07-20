@@ -29,6 +29,9 @@ public sealed class ClipboardComponent :
 
     public ClipboardComponent(ClipboardShelfViewModel viewModel)
     {
+        ClipboardDiagnostics.Initialize();
+        ClipboardDiagnostics.Write("Component", $"Creating. Diagnostics={ClipboardDiagnostics.FilePath}");
+
         this.viewModel = viewModel;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         clipboardPollTimer = dispatcherQueue.CreateTimer();
@@ -49,9 +52,13 @@ public sealed class ClipboardComponent :
         {
             clipboardChangeListener = new ClipboardChangeListener();
             clipboardChangeListener.ClipboardChanged += HandleClipboardChanged;
+            ClipboardDiagnostics.Write(
+                "Listener",
+                $"Registered. Window=0x{clipboardChangeListener.Handle:X}");
         }
-        catch
+        catch (Exception exception)
         {
+            ClipboardDiagnostics.WriteException("ListenerRegistrationFailed", exception);
             // Sequence polling remains available if native notification registration fails.
         }
 
@@ -84,8 +91,14 @@ public sealed class ClipboardComponent :
         }
     }
 
-    private void HandleClipboardChanged(object? sender, object args) =>
-        dispatcherQueue.TryEnqueue(() => _ = RefreshAsync());
+    private void HandleClipboardChanged(object? sender, object args)
+    {
+        uint sequenceNumber = PInvoke.GetClipboardSequenceNumber();
+        bool queued = dispatcherQueue.TryEnqueue(() => _ = RefreshAsync());
+        ClipboardDiagnostics.Write(
+            "ClipboardChanged",
+            $"Sequence={sequenceNumber}; DispatcherQueued={queued}");
+    }
 
     private void HandleClipboardPoll(DispatcherQueueTimer sender, object args)
     {
@@ -98,6 +111,7 @@ public sealed class ClipboardComponent :
 
     private async Task RefreshAsync()
     {
+        using IDisposable operation = ClipboardDiagnostics.Begin("Refresh");
         await refreshGate.WaitAsync();
 
         try
@@ -110,8 +124,9 @@ public sealed class ClipboardComponent :
             await CaptureCurrentClipboardAsync();
             PublishEntries();
         }
-        catch
+        catch (Exception exception)
         {
+            ClipboardDiagnostics.WriteException("RefreshFailed", exception);
             PublishEntries();
         }
         finally
@@ -131,6 +146,9 @@ public sealed class ClipboardComponent :
         NativeClipboardCapture capture = await NativeClipboardReader.CaptureAsync();
         if (!capture.WasRead)
         {
+            ClipboardDiagnostics.Write(
+                "CaptureSkipped",
+                $"Could not open clipboard. Sequence={sequenceNumber}");
             return;
         }
 
@@ -138,6 +156,7 @@ public sealed class ClipboardComponent :
         if (snapshot is null)
         {
             lastSequenceNumber = sequenceNumber;
+            ClipboardDiagnostics.Write("Capture", $"No supported content. Sequence={sequenceNumber}");
             return;
         }
 
@@ -155,6 +174,9 @@ public sealed class ClipboardComponent :
         }
 
         lastSequenceNumber = sequenceNumber;
+        ClipboardDiagnostics.Write(
+            "Capture",
+            $"Added {DescribeSnapshot(snapshot)}. Sequence={sequenceNumber}; Count={localEntries.Count}");
     }
 
     private void PublishEntries()
@@ -171,35 +193,66 @@ public sealed class ClipboardComponent :
 
     private async Task<bool> CopyAsync(ClipboardEntry entry)
     {
-        if (clipboardChangeListener is null ||
-            !localSnapshots.TryGetValue(entry.Id, out ClipboardSnapshot? snapshot))
+        using IDisposable operation = ClipboardDiagnostics.Begin("Copy");
+
+        try
         {
+            bool snapshotAvailable =
+                localSnapshots.TryGetValue(entry.Id, out ClipboardSnapshot? snapshot);
+
+            if (clipboardChangeListener is null || !snapshotAvailable)
+            {
+                ClipboardDiagnostics.Write(
+                    "CopyRejected",
+                    $"ListenerAvailable={clipboardChangeListener is not null}; SnapshotAvailable={snapshotAvailable}");
+                return false;
+            }
+
+            ClipboardDiagnostics.Write("Copy", $"Starting {DescribeSnapshot(snapshot!)}");
+            bool copied = await NativeClipboardWriter.WriteAsync(
+                snapshot!,
+                clipboardChangeListener.WindowHandle);
+
+            if (copied)
+            {
+                lastSequenceNumber = PInvoke.GetClipboardSequenceNumber();
+                PromoteEntry(entry);
+                PublishEntries();
+            }
+
+            ClipboardDiagnostics.Write(
+                "Copy",
+                $"Completed={copied}; Sequence={PInvoke.GetClipboardSequenceNumber()}");
+            return copied;
+        }
+        catch (Exception exception)
+        {
+            ClipboardDiagnostics.WriteException("CopyFailed", exception);
             return false;
         }
-
-        bool copied = await NativeClipboardWriter.WriteAsync(
-            snapshot,
-            clipboardChangeListener.WindowHandle);
-
-        if (copied)
-        {
-            lastSequenceNumber = PInvoke.GetClipboardSequenceNumber();
-            PromoteEntry(entry);
-            PublishEntries();
-        }
-
-        return copied;
     }
 
     private async Task<bool> PasteAsync(ClipboardEntry entry)
     {
-        if (!await CopyAsync(entry))
+        using IDisposable operation = ClipboardDiagnostics.Begin("Paste");
+
+        try
         {
+            if (!await CopyAsync(entry))
+            {
+                return false;
+            }
+
+            await Task.Delay(40);
+            bool sent = FocusedWindowPaste.Send();
+            ClipboardDiagnostics.Write("Paste", $"InputSent={sent}");
+            return sent;
+        }
+        catch (Exception exception)
+        {
+            ClipboardDiagnostics.WriteException("PasteFailed", exception);
             return false;
         }
-
-        await Task.Delay(40);
-        return FocusedWindowPaste.Send();
     }
 
     private Task<bool> RemoveAsync(ClipboardEntry entry)
@@ -216,17 +269,28 @@ public sealed class ClipboardComponent :
 
     private async Task<bool> ClearAsync()
     {
-        if (clipboardChangeListener is null ||
-            !await NativeClipboardWriter.ClearAsync(clipboardChangeListener.WindowHandle))
+        using IDisposable operation = ClipboardDiagnostics.Begin("Clear");
+
+        try
         {
+            if (clipboardChangeListener is null ||
+                !await NativeClipboardWriter.ClearAsync(clipboardChangeListener.WindowHandle))
+            {
+                return false;
+            }
+
+            localEntries.Clear();
+            localSnapshots.Clear();
+            lastSequenceNumber = PInvoke.GetClipboardSequenceNumber();
+            PublishEntries();
+            ClipboardDiagnostics.Write("Clear", $"Completed. Sequence={lastSequenceNumber}");
+            return true;
+        }
+        catch (Exception exception)
+        {
+            ClipboardDiagnostics.WriteException("ClearFailed", exception);
             return false;
         }
-
-        localEntries.Clear();
-        localSnapshots.Clear();
-        lastSequenceNumber = PInvoke.GetClipboardSequenceNumber();
-        PublishEntries();
-        return true;
     }
 
     private void PromoteEntry(ClipboardEntry entry)
@@ -313,4 +377,41 @@ public sealed class ClipboardComponent :
 
     private static string Truncate(string value) =>
         value.Length <= 120 ? value : $"{value[..117]}...";
+
+    private static string DescribeSnapshot(ClipboardSnapshot snapshot)
+    {
+        List<string> formats = [];
+
+        if (snapshot.Text is not null)
+        {
+            formats.Add($"Text({snapshot.Text.Length})");
+        }
+
+        if (snapshot.Html is not null)
+        {
+            formats.Add($"Html({snapshot.Html.Length})");
+        }
+
+        if (snapshot.Rtf is not null)
+        {
+            formats.Add($"Rtf({snapshot.Rtf.Length})");
+        }
+
+        if (snapshot.Bitmap is not null)
+        {
+            formats.Add($"Png({snapshot.Bitmap.Length})");
+        }
+
+        if (snapshot.FilePaths is { Count: > 0 } paths)
+        {
+            formats.Add($"Files({paths.Count})");
+        }
+
+        if (snapshot.WebLink is not null || snapshot.ApplicationLink is not null)
+        {
+            formats.Add("Link");
+        }
+
+        return formats.Count == 0 ? "Formats=None" : $"Formats={string.Join(',', formats)}";
+    }
 }

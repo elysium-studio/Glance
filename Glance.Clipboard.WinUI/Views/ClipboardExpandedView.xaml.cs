@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
 
 namespace Glance.Clipboard.WinUI;
 
@@ -19,25 +20,52 @@ public sealed partial class ClipboardExpandedView : UserControl
 
     private async void HandleCopyClick(object sender, RoutedEventArgs args)
     {
-        if (GetEntry(sender) is ClipboardEntry entry)
+        using IDisposable operation = ClipboardDiagnostics.Begin("UI.Copy");
+
+        try
         {
-            await ViewModel.CopyAsync(entry);
+            if (GetEntry(sender) is ClipboardEntry entry)
+            {
+                await ViewModel.CopyAsync(entry);
+            }
+        }
+        catch (Exception exception)
+        {
+            ClipboardDiagnostics.WriteException("UICopyFailed", exception);
         }
     }
 
     private async void HandlePasteClick(object sender, RoutedEventArgs args)
     {
-        if (GetEntry(sender) is ClipboardEntry entry)
+        using IDisposable operation = ClipboardDiagnostics.Begin("UI.Paste");
+
+        try
         {
-            await ViewModel.PasteAsync(entry);
+            if (GetEntry(sender) is ClipboardEntry entry)
+            {
+                await ViewModel.PasteAsync(entry);
+            }
+        }
+        catch (Exception exception)
+        {
+            ClipboardDiagnostics.WriteException("UIPasteFailed", exception);
         }
     }
 
     private async void HandleRemoveClick(object sender, RoutedEventArgs args)
     {
-        if (GetEntry(sender) is ClipboardEntry entry)
+        using IDisposable operation = ClipboardDiagnostics.Begin("UI.Remove");
+
+        try
         {
-            await ViewModel.RemoveAsync(entry);
+            if (GetEntry(sender) is ClipboardEntry entry)
+            {
+                await ViewModel.RemoveAsync(entry);
+            }
+        }
+        catch (Exception exception)
+        {
+            ClipboardDiagnostics.WriteException("UIRemoveFailed", exception);
         }
     }
 

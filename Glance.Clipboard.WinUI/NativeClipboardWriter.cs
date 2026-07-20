@@ -24,23 +24,36 @@ internal static class NativeClipboardWriter
             return false;
         }
 
+        int lastError = 0;
+
         for (int attempt = 0; attempt < MaximumAttempts; attempt++)
         {
             if (PInvoke.OpenClipboard(ownerWindow))
             {
+                if (attempt > 0)
+                {
+                    ClipboardDiagnostics.Write(
+                        "OpenClipboardForWrite",
+                        $"Succeeded after {attempt + 1} attempts; PreviousError={lastError}");
+                }
+
                 try
                 {
                     return WriteOpenClipboard(snapshot);
                 }
                 finally
                 {
-                    _ = PInvoke.CloseClipboard();
+                    LogCloseClipboardFailure("Write");
                 }
             }
 
+            lastError = Marshal.GetLastWin32Error();
             await Task.Delay(25);
         }
 
+        ClipboardDiagnostics.Write(
+            "OpenClipboardForWriteFailed",
+            DescribeClipboardState(lastError));
         return false;
     }
 
@@ -50,6 +63,8 @@ internal static class NativeClipboardWriter
         {
             return false;
         }
+
+        int lastError = 0;
 
         for (int attempt = 0; attempt < MaximumAttempts; attempt++)
         {
@@ -61,13 +76,17 @@ internal static class NativeClipboardWriter
                 }
                 finally
                 {
-                    _ = PInvoke.CloseClipboard();
+                    LogCloseClipboardFailure("Clear");
                 }
             }
 
+            lastError = Marshal.GetLastWin32Error();
             await Task.Delay(25);
         }
 
+        ClipboardDiagnostics.Write(
+            "OpenClipboardForClearFailed",
+            DescribeClipboardState(lastError));
         return false;
     }
 
@@ -75,6 +94,9 @@ internal static class NativeClipboardWriter
     {
         if (!PInvoke.EmptyClipboard())
         {
+            ClipboardDiagnostics.Write(
+                "EmptyClipboardFailed",
+                $"Error={Marshal.GetLastWin32Error()}");
             return false;
         }
 
@@ -153,6 +175,9 @@ internal static class NativeClipboardWriter
 
         if (memory.IsNull)
         {
+            ClipboardDiagnostics.Write(
+                "GlobalAllocFailed",
+                $"Format={format}; Bytes={bytes.Length}; Error={Marshal.GetLastWin32Error()}");
             return false;
         }
 
@@ -163,6 +188,9 @@ internal static class NativeClipboardWriter
             void* destination = PInvoke.GlobalLock(memory);
             if (destination is null)
             {
+                ClipboardDiagnostics.Write(
+                    "GlobalLockFailed",
+                    $"Format={format}; Bytes={bytes.Length}; Error={Marshal.GetLastWin32Error()}");
                 return false;
             }
 
@@ -177,6 +205,14 @@ internal static class NativeClipboardWriter
 
             HANDLE result = PInvoke.SetClipboardData(format, new HANDLE(memory.Value));
             ownershipTransferred = !result.IsNull;
+
+            if (!ownershipTransferred)
+            {
+                ClipboardDiagnostics.Write(
+                    "SetClipboardDataFailed",
+                    $"Format={format}; Bytes={bytes.Length}; Error={Marshal.GetLastWin32Error()}");
+            }
+
             return ownershipTransferred;
         }
         finally
@@ -185,6 +221,24 @@ internal static class NativeClipboardWriter
             {
                 _ = PInvoke.GlobalFree(memory);
             }
+        }
+    }
+
+    private static unsafe string DescribeClipboardState(int error)
+    {
+        HWND owner = PInvoke.GetClipboardOwner();
+        HWND openWindow = PInvoke.GetOpenClipboardWindow();
+        return $"Attempts={MaximumAttempts}; Error={error}; " +
+            $"Owner=0x{(nuint)owner.Value:X}; OpenWindow=0x{(nuint)openWindow.Value:X}";
+    }
+
+    private static void LogCloseClipboardFailure(string operation)
+    {
+        if (!PInvoke.CloseClipboard())
+        {
+            ClipboardDiagnostics.Write(
+                $"CloseClipboardAfter{operation}Failed",
+                $"Error={Marshal.GetLastWin32Error()}");
         }
     }
 }

@@ -16,10 +16,19 @@ internal static class NativeClipboardReader
 
     public static async Task<NativeClipboardCapture> CaptureAsync()
     {
+        int lastError = 0;
+
         for (int attempt = 0; attempt < MaximumAttempts; attempt++)
         {
             if (PInvoke.OpenClipboard(HWND.Null))
             {
+                if (attempt > 0)
+                {
+                    ClipboardDiagnostics.Write(
+                        "OpenClipboardForRead",
+                        $"Succeeded after {attempt + 1} attempts; PreviousError={lastError}");
+                }
+
                 try
                 {
                     ClipboardSnapshot snapshot = CaptureOpenClipboard();
@@ -29,13 +38,22 @@ internal static class NativeClipboardReader
                 }
                 finally
                 {
-                    _ = PInvoke.CloseClipboard();
+                    if (!PInvoke.CloseClipboard())
+                    {
+                        ClipboardDiagnostics.Write(
+                            "CloseClipboardAfterReadFailed",
+                            $"Error={Marshal.GetLastWin32Error()}");
+                    }
                 }
             }
 
+            lastError = Marshal.GetLastWin32Error();
             await Task.Delay(25);
         }
 
+        ClipboardDiagnostics.Write(
+            "OpenClipboardForReadFailed",
+            DescribeClipboardState(lastError));
         return new NativeClipboardCapture(false, null);
     }
 
@@ -106,19 +124,36 @@ internal static class NativeClipboardReader
         HANDLE handle = PInvoke.GetClipboardData(format);
         if (handle.IsNull)
         {
+            ClipboardDiagnostics.Write(
+                "GetClipboardDataFailed",
+                $"Format={format}; Error={Marshal.GetLastWin32Error()}");
             return null;
         }
 
         HGLOBAL global = new(handle.Value);
         nuint size = PInvoke.GlobalSize(global);
-        if (size == 0 || size > MaximumPayloadBytes)
+        if (size == 0)
         {
+            ClipboardDiagnostics.Write(
+                "GlobalSizeFailed",
+                $"Format={format}; Error={Marshal.GetLastWin32Error()}");
+            return null;
+        }
+
+        if (size > MaximumPayloadBytes)
+        {
+            ClipboardDiagnostics.Write(
+                "ClipboardPayloadTooLarge",
+                $"Format={format}; Bytes={size}; MaximumBytes={MaximumPayloadBytes}");
             return null;
         }
 
         void* source = PInvoke.GlobalLock(global);
         if (source is null)
         {
+            ClipboardDiagnostics.Write(
+                "GlobalLockForReadFailed",
+                $"Format={format}; Bytes={size}; Error={Marshal.GetLastWin32Error()}");
             return null;
         }
 
@@ -154,6 +189,14 @@ internal static class NativeClipboardReader
             : Encoding.Default.GetString(fileDrop, pathsOffset, fileDrop.Length - pathsOffset);
 
         return paths.Split('\0', StringSplitOptions.RemoveEmptyEntries);
+    }
+
+    private static unsafe string DescribeClipboardState(int error)
+    {
+        HWND owner = PInvoke.GetClipboardOwner();
+        HWND openWindow = PInvoke.GetOpenClipboardWindow();
+        return $"Attempts={MaximumAttempts}; Error={error}; " +
+            $"Owner=0x{(nuint)owner.Value:X}; OpenWindow=0x{(nuint)openWindow.Value:X}";
     }
 }
 
