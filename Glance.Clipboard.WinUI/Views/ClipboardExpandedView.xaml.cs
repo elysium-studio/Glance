@@ -15,12 +15,6 @@ public sealed partial class ClipboardExpandedView : UserControl
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
-    private string ToUpper(string value) => value.ToUpperInvariant();
-
-    private string ToKind(ClipboardEntry? entry) => entry?.KindLabel ?? "Nothing copied";
-
-    private string ToPreview(ClipboardEntry? entry) => entry?.Preview ?? "Clipboard is empty";
-
     private async void HandleClearClick(object sender, RoutedEventArgs args) =>
         await ViewModel.ClearAsync();
 
