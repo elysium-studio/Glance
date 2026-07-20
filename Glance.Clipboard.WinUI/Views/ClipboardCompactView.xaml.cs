@@ -14,4 +14,7 @@ public sealed partial class ClipboardCompactView : UserControl
     public ClipboardShelfViewModel ViewModel { get; }
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
+
+    private Visibility WhenPopulated(bool hasItems) =>
+        hasItems ? Visibility.Visible : Visibility.Collapsed;
 }

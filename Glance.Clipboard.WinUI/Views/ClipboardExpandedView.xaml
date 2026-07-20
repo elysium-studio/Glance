@@ -119,9 +119,9 @@
             <TextBlock
                 Grid.Row="1"
                 VerticalAlignment="Center"
-                FontSize="13"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                Text="Nothing copied yet"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="Nothing copied"
                 Visibility="{x:Bind WhenEmpty(ViewModel.CanClearHistory), Mode=OneWay}" />
             <Controls:CompactFlipView
                 x:Name="ClipboardFlipView"

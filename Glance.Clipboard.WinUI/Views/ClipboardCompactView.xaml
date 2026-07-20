@@ -40,7 +40,8 @@
                 Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ViewModel.LatestKind, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
-                TextWrapping="NoWrap" />
+                TextWrapping="NoWrap"
+                Visibility="{x:Bind WhenPopulated(ViewModel.CanClearHistory), Mode=OneWay}" />
         </StackPanel>
     </Grid>
 </UserControl>
