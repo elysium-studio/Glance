@@ -118,7 +118,7 @@
                 Text="{x:Bind ToUpper(ViewModel.Title)}" />
             <TextBlock
                 Grid.Row="1"
-                VerticalAlignment="Center"
+                VerticalAlignment="Top"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
                 Text="Nothing copied"

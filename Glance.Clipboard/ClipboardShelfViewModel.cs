@@ -11,10 +11,10 @@ public partial class ClipboardShelfViewModel : ObservableObject
     private Func<Task<bool>>? clearHistory;
 
     [ObservableProperty]
-    private string latestPreview = "Nothing copied";
+    private string latestPreview = "Clipboard is empty";
 
     [ObservableProperty]
-    private string latestKind = "Nothing copied";
+    private string latestKind = "Copy something to begin";
 
     [ObservableProperty]
     private string latestGlyph = "\uE77F";
@@ -53,8 +53,8 @@ public partial class ClipboardShelfViewModel : ObservableObject
     {
         ClipboardEntry? latest = entries.FirstOrDefault();
 
-        LatestPreview = latest?.Preview ?? "Nothing copied";
-        LatestKind = latest?.KindLabel ?? "Nothing copied";
+        LatestPreview = latest?.Preview ?? "Clipboard is empty";
+        LatestKind = latest?.KindLabel ?? "Copy something to begin";
         LatestGlyph = latest?.Glyph ?? "\uE77F";
         HistoryStatus = status;
         CanClearHistory = entries.Count > 0;
