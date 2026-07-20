@@ -32,10 +32,10 @@
             VerticalAlignment="Center"
             Spacing="2">
             <TextBlock
+                x:Uid="ModuleTitle"
                 FontSize="11"
                 FontWeight="SemiBold"
-                Foreground="{ThemeResource GlanceTimerIconBrush}"
-                Text="{x:Bind ToUpper(ViewModel.Title)}" />
+                Foreground="{ThemeResource GlanceTimerIconBrush}" />
             <TextBlock
                 FontSize="27"
                 FontWeight="SemiBold"
@@ -48,27 +48,26 @@
             Orientation="Horizontal"
             Spacing="5">
             <Button
+                x:Uid="DecreaseButton"
                 Width="32"
                 Height="32"
                 Padding="0"
-                AutomationProperties.Name="Decrease by one minute"
                 Click="{x:Bind ViewModel.DecreaseMinute}"
                 Content="&#xE738;"
                 CornerRadius="16"
                 FontFamily="Segoe Fluent Icons"
-                IsEnabled="{x:Bind ViewModel.CanDecreaseMinute, Mode=OneWay}"
-                ToolTipService.ToolTip="Decrease by one minute" />
+                IsEnabled="{x:Bind ViewModel.CanDecreaseMinute, Mode=OneWay}" />
             <Button
+                x:Uid="IncreaseButton"
                 Width="32"
                 Height="32"
                 Padding="0"
-                AutomationProperties.Name="Increase by one minute"
                 Click="{x:Bind ViewModel.AddMinute}"
                 Content="&#xE710;"
                 CornerRadius="16"
-                FontFamily="Segoe Fluent Icons"
-                ToolTipService.ToolTip="Increase by one minute" />
+                FontFamily="Segoe Fluent Icons" />
             <Button
+                x:Uid="ToggleButton"
                 Width="32"
                 Height="32"
                 Padding="0"
@@ -78,14 +77,14 @@
                 FontFamily="Segoe Fluent Icons"
                 Style="{StaticResource AccentButtonStyle}" />
             <Button
+                x:Uid="ResetButton"
                 Width="32"
                 Height="32"
                 Padding="0"
                 Click="{x:Bind ViewModel.Reset}"
                 Content="&#xE777;"
                 CornerRadius="16"
-                FontFamily="Segoe Fluent Icons"
-                ToolTipService.ToolTip="Reset" />
+                FontFamily="Segoe Fluent Icons" />
         </StackPanel>
     </Grid>
 </UserControl>

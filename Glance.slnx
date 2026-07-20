@@ -42,6 +42,9 @@
   <Project Path="Glance.SystemMonitor/Glance.SystemMonitor.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="Glance.Tests/Glance.Tests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="Glance.Timer.WinUI/Glance.Timer.WinUI.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>

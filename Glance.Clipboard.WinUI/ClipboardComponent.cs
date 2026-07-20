@@ -1,4 +1,5 @@
 using Glance.Application.Abstractions;
+using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
 using System.Collections.Generic;
@@ -23,16 +24,20 @@ public sealed class ClipboardComponent :
     private readonly Dictionary<string, ClipboardSnapshot> localSnapshots =
         new(StringComparer.Ordinal);
     private readonly SemaphoreSlim refreshGate = new(1, 1);
+    private readonly ITextLocalizer localizer;
     private readonly ClipboardShelfViewModel viewModel;
     private bool isDisposed;
     private uint lastSequenceNumber;
 
-    public ClipboardComponent(ClipboardShelfViewModel viewModel)
+    public ClipboardComponent(
+        ClipboardShelfViewModel viewModel,
+        ModuleResourceTextLocalizer<ClipboardModule> localizer)
     {
         ClipboardDiagnostics.Initialize();
         ClipboardDiagnostics.Write("Component", $"Creating. Diagnostics={ClipboardDiagnostics.FilePath}");
 
         this.viewModel = viewModel;
+        this.localizer = localizer;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         clipboardPollTimer = dispatcherQueue.CreateTimer();
         clipboardPollTimer.Interval = TimeSpan.FromMilliseconds(500);
@@ -67,6 +72,10 @@ public sealed class ClipboardComponent :
     }
 
     public string Id => "Clipboard";
+
+    public string DisplayName => localizer.GetText("ModuleDisplayName");
+
+    public string Description => localizer.GetText("ModuleDescription");
 
     public int Order => 50;
 
@@ -183,9 +192,9 @@ public sealed class ClipboardComponent :
     {
         string status = localEntries.Count switch
         {
-            0 => "No recent clips",
-            1 => "1 recent clip",
-            _ => $"{localEntries.Count} recent clips"
+            0 => localizer.GetText("RecentClipsNone"),
+            1 => localizer.GetText("RecentClipsOne"),
+            _ => localizer.GetText("RecentClipsMany", localEntries.Count)
         };
 
         viewModel.Update(localEntries, status);
@@ -301,7 +310,7 @@ public sealed class ClipboardComponent :
         }
     }
 
-    private static ClipboardEntry CreateEntryFromSnapshot(
+    private ClipboardEntry CreateEntryFromSnapshot(
         string id,
         DateTimeOffset timestamp,
         ClipboardSnapshot snapshot)
@@ -311,20 +320,25 @@ public sealed class ClipboardComponent :
             string firstName = GetFileName(paths[0]);
             string preview = paths.Count == 1
                 ? firstName
-                : $"{firstName} and {paths.Count - 1} more";
+                : localizer.GetText("FilesAndMore", firstName, paths.Count - 1);
 
-            return CreateEntry(id, preview, "Files", "\uE8B7", timestamp);
+            return CreateEntry(id, preview, localizer.GetText("KindFiles"), "\uE8B7", timestamp);
         }
 
         if (snapshot.Bitmap is not null)
         {
-            return CreateEntry(id, "Copied image", "Image", "\uEB9F", timestamp);
+            return CreateEntry(
+                id,
+                localizer.GetText("CopiedImage"),
+                localizer.GetText("KindImage"),
+                "\uEB9F",
+                timestamp);
         }
 
         string? link = snapshot.WebLink ?? snapshot.ApplicationLink;
         if (!string.IsNullOrWhiteSpace(link))
         {
-            return CreateEntry(id, link, "Link", "\uE71B", timestamp);
+            return CreateEntry(id, link, localizer.GetText("KindLink"), "\uE71B", timestamp);
         }
 
         if (!string.IsNullOrWhiteSpace(snapshot.Text))
@@ -332,32 +346,47 @@ public sealed class ClipboardComponent :
             string preview = Normalize(snapshot.Text);
             return CreateEntry(
                 id,
-                string.IsNullOrWhiteSpace(preview) ? "Copied text" : preview,
-                "Text",
+                string.IsNullOrWhiteSpace(preview) ? localizer.GetText("CopiedText") : preview,
+                localizer.GetText("KindText"),
                 "\uE8A5",
                 timestamp);
         }
 
         if (snapshot.Html is not null)
         {
-            return CreateEntry(id, "Rich HTML content", "HTML", "\uE8D2", timestamp);
+            return CreateEntry(
+                id,
+                localizer.GetText("RichHtmlContent"),
+                localizer.GetText("KindHtml"),
+                "\uE8D2",
+                timestamp);
         }
 
         if (snapshot.Rtf is not null)
         {
-            return CreateEntry(id, "Formatted text", "Rich text", "\uE8D2", timestamp);
+            return CreateEntry(
+                id,
+                localizer.GetText("FormattedText"),
+                localizer.GetText("KindRichText"),
+                "\uE8D2",
+                timestamp);
         }
 
-        return CreateEntry(id, "Unsupported clipboard content", "Other", "\uE77F", timestamp);
+        return CreateEntry(
+            id,
+            localizer.GetText("UnsupportedContent"),
+            localizer.GetText("KindOther"),
+            "\uE77F",
+            timestamp);
     }
 
-    private static ClipboardEntry CreateEntry(
+    private ClipboardEntry CreateEntry(
         string id,
         string preview,
         string kind,
         string glyph,
         DateTimeOffset timestamp) =>
-        new(id, Truncate(preview), kind, glyph, timestamp);
+        new(id, Truncate(preview), kind, glyph, timestamp, localizer);
 
     private static string GetFileName(string path)
     {

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>電源</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>バッテリーと電源</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>充電状態、電源、推定バッテリー残量時間を表示します。</value>
+  </data>
+  <data name="Connected" xml:space="preserve">
+    <value>接続済み</value>
+  </data>
+  <data name="PowerStatus" xml:space="preserve">
+    <value>電源の状態</value>
+  </data>
+  <data name="Unavailable" xml:space="preserve">
+    <value>利用できません</value>
+  </data>
+  <data name="Charging" xml:space="preserve">
+    <value>充電中</value>
+  </data>
+  <data name="OnBattery" xml:space="preserve">
+    <value>バッテリー駆動</value>
+  </data>
+  <data name="UsingBattery" xml:space="preserve">
+    <value>バッテリーを使用中</value>
+  </data>
+  <data name="Charged" xml:space="preserve">
+    <value>充電済み</value>
+  </data>
+  <data name="FullyCharged" xml:space="preserve">
+    <value>充電完了</value>
+  </data>
+  <data name="ConnectedToPower" xml:space="preserve">
+    <value>電源に接続済み</value>
+  </data>
+  <data name="ConnectedAndCharging" xml:space="preserve">
+    <value>接続して充電中</value>
+  </data>
+  <data name="BatteryFullyCharged" xml:space="preserve">
+    <value>バッテリーは完全に充電されています</value>
+  </data>
+  <data name="ConnectedToExternalPower" xml:space="preserve">
+    <value>外部電源に接続済み</value>
+  </data>
+  <data name="PowerStatusUnavailable" xml:space="preserve">
+    <value>電源の状態を利用できません</value>
+  </data>
+  <data name="EstimatingRemainingTime" xml:space="preserve">
+    <value>残り時間を計算しています</value>
+  </data>
+  <data name="HoursMinutesRemaining" xml:space="preserve">
+    <value>残り {0} 時間 {1} 分</value>
+  </data>
+  <data name="HoursRemaining" xml:space="preserve">
+    <value>残り {0} 時間</value>
+  </data>
+  <data name="MinutesRemaining" xml:space="preserve">
+    <value>残り {0} 分</value>
+  </data>
+</root>
+

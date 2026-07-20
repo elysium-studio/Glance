@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>剪贴板</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>剪贴板架</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>浏览最近的剪贴内容，将其发送到活动应用，或管理剪贴板历史记录。</value>
+  </data>
+  <data name="ClipboardEmpty" xml:space="preserve">
+    <value>剪贴板为空</value>
+  </data>
+  <data name="CopySomethingToBegin" xml:space="preserve">
+    <value>复制一些内容即可开始</value>
+  </data>
+  <data name="WaitingForClipboard" xml:space="preserve">
+    <value>正在等待剪贴板内容</value>
+  </data>
+  <data name="CopiedToClipboard" xml:space="preserve">
+    <value>已复制到剪贴板</value>
+  </data>
+  <data name="CopyFailed" xml:space="preserve">
+    <value>无法复制此项目</value>
+  </data>
+  <data name="SentToFocusedApp" xml:space="preserve">
+    <value>已发送到活动应用</value>
+  </data>
+  <data name="SendFailed" xml:space="preserve">
+    <value>无法发送此项目</value>
+  </data>
+  <data name="RemovedFromHistory" xml:space="preserve">
+    <value>已从剪贴板历史记录中移除</value>
+  </data>
+  <data name="RemoveFailed" xml:space="preserve">
+    <value>无法移除此项目</value>
+  </data>
+  <data name="HistoryCleared" xml:space="preserve">
+    <value>已清除剪贴板历史记录</value>
+  </data>
+  <data name="ClearFailed" xml:space="preserve">
+    <value>无法清除剪贴板历史记录</value>
+  </data>
+  <data name="RecentClipsNone" xml:space="preserve">
+    <value>没有最近的内容</value>
+  </data>
+  <data name="RecentClipsOne" xml:space="preserve">
+    <value>1 个最近的内容</value>
+  </data>
+  <data name="RecentClipsMany" xml:space="preserve">
+    <value>{0} 个最近的内容</value>
+  </data>
+  <data name="FilesAndMore" xml:space="preserve">
+    <value>{0} 和另外 {1} 个</value>
+  </data>
+  <data name="KindFiles" xml:space="preserve">
+    <value>文件</value>
+  </data>
+  <data name="CopiedImage" xml:space="preserve">
+    <value>已复制的图像</value>
+  </data>
+  <data name="KindImage" xml:space="preserve">
+    <value>图像</value>
+  </data>
+  <data name="KindLink" xml:space="preserve">
+    <value>链接</value>
+  </data>
+  <data name="CopiedText" xml:space="preserve">
+    <value>已复制的文本</value>
+  </data>
+  <data name="KindText" xml:space="preserve">
+    <value>文本</value>
+  </data>
+  <data name="RichHtmlContent" xml:space="preserve">
+    <value>富 HTML 内容</value>
+  </data>
+  <data name="KindHtml" xml:space="preserve">
+    <value>HTML</value>
+  </data>
+  <data name="FormattedText" xml:space="preserve">
+    <value>带格式文本</value>
+  </data>
+  <data name="KindRichText" xml:space="preserve">
+    <value>富文本</value>
+  </data>
+  <data name="UnsupportedContent" xml:space="preserve">
+    <value>不支持的剪贴板内容</value>
+  </data>
+  <data name="KindOther" xml:space="preserve">
+    <value>其他</value>
+  </data>
+  <data name="TimeNow" xml:space="preserve">
+    <value>刚刚</value>
+  </data>
+  <data name="EmptyMessage.Text" xml:space="preserve">
+    <value>未复制任何内容</value>
+  </data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>复制此内容</value>
+  </data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>复制</value>
+  </data>
+  <data name="SendButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>将此内容发送到活动应用</value>
+  </data>
+  <data name="SendButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>发送到活动应用</value>
+  </data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>移除此内容</value>
+  </data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>移除</value>
+  </data>
+</root>
+

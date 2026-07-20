@@ -37,6 +37,8 @@ public partial class App
             .UseWritableContentRoot(applicationData)
             .ConfigureServices(services =>
             {
+                new LocalizationModule().Register(services);
+
                 WritableOptionsBuilder<GlanceSettings> settingsBuilder =
                     new(services, "Settings", "settings.dat");
 

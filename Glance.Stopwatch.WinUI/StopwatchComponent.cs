@@ -1,4 +1,5 @@
 using Glance.Application.Abstractions;
+using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
 using System.ComponentModel;
@@ -11,11 +12,15 @@ public sealed class StopwatchComponent :
     IDisposable
 {
     private readonly DispatcherQueueTimer timer;
+    private readonly ITextLocalizer localizer;
     private readonly StopwatchViewModel viewModel;
 
-    public StopwatchComponent(StopwatchViewModel viewModel)
+    public StopwatchComponent(
+        StopwatchViewModel viewModel,
+        ModuleResourceTextLocalizer<StopwatchModule> localizer)
     {
         this.viewModel = viewModel;
+        this.localizer = localizer;
 
         StopwatchCompactView compactView = new(viewModel);
         StopwatchExpandedView expandedView = new(viewModel);
@@ -34,6 +39,10 @@ public sealed class StopwatchComponent :
     }
 
     public string Id => "Stopwatch";
+
+    public string DisplayName => localizer.GetText("ModuleDisplayName");
+
+    public string Description => localizer.GetText("ModuleDescription");
 
     public int Order => 0;
 

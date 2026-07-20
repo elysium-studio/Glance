@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>システム モニター</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>プロセッサ、メモリ、ネットワークの使用状況をリアルタイムで表示します。</value>
+  </data>
+  <data name="CalculatingMemory" xml:space="preserve">
+    <value>メモリを計算しています</value>
+  </data>
+  <data name="MemoryUsageFormat" xml:space="preserve">
+    <value>{1} 中 {0}</value>
+  </data>
+  <data name="RamLabel.Text" xml:space="preserve">
+    <value>RAM</value>
+  </data>
+  <data name="ProcessorLabel.Text" xml:space="preserve">
+    <value>プロセッサ</value>
+  </data>
+  <data name="MemoryLabel.Text" xml:space="preserve">
+    <value>メモリ</value>
+  </data>
+  <data name="NetworkLabel.Text" xml:space="preserve">
+    <value>ネットワーク</value>
+  </data>
+</root>
+

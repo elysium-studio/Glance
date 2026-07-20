@@ -13,7 +13,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <TitleBar x:Name="AppTitleBar" Title="Settings" />
+        <TitleBar x:Name="AppTitleBar" x:Uid="SettingsTitleBar" />
         <NavigationView
             Grid.Row="1"
             Margin="0,8,0,0"
@@ -27,7 +27,7 @@
                 <Thickness x:Key="NavigationViewContentGridBorderThickness">0</Thickness>
             </NavigationView.Resources>
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="Modules" IsSelected="True">
+                <NavigationViewItem x:Uid="ModulesNavigationItem" IsSelected="True">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE74C;" />
                     </NavigationViewItem.Icon>
@@ -40,13 +40,13 @@
                 </Grid.RowDefinitions>
                 <StackPanel Margin="36,8,36,20" Spacing="4">
                     <TextBlock
+                        x:Uid="ModulesTitle"
                         FontFamily="Segoe UI Variable Display"
                         FontSize="28"
-                        FontWeight="SemiBold"
-                        Text="Modules" />
+                        FontWeight="SemiBold" />
                     <TextBlock
+                        x:Uid="ModulesDescription"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="Choose which modules appear in Glance and drag them into your preferred order."
                         TextWrapping="Wrap" />
                 </StackPanel>
                 <ListView

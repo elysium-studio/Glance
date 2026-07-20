@@ -7,7 +7,11 @@
     <Nullable>enable</Nullable>
     <EnablePreviewFeatures>true</EnablePreviewFeatures>
     <Platforms>AnyCPU;x64</Platforms>
+    <DefaultLanguage>en</DefaultLanguage>
   </PropertyGroup>
+  <ItemGroup>
+    <PRIResource Include="Strings\**\*.resw" />
+  </ItemGroup>
   <ItemGroup>
     <None Remove="Themes\Media.xaml" />
   </ItemGroup>

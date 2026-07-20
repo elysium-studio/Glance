@@ -39,6 +39,10 @@ public sealed class ModulePreferenceService
             })
             .ToArray();
 
+    public IGlanceComponent? GetComponent(string id) =>
+        allComponents.FirstOrDefault(component =>
+            string.Equals(component.Id, id, StringComparison.OrdinalIgnoreCase));
+
     public async Task<bool> SetEnabledAsync(string id, bool isEnabled)
     {
         GlanceModulePreference? preference = settings.Modules.FirstOrDefault(item =>

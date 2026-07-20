@@ -1,10 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Glance.Application.Abstractions;
 
 namespace Glance.Power;
 
 public partial class PowerViewModel : ObservableObject
 {
-    public string Title => "Power";
+    private readonly ITextLocalizer localizer;
 
     [ObservableProperty]
     private double chargePercent = 100;
@@ -13,16 +14,26 @@ public partial class PowerViewModel : ObservableObject
     private string chargeText = "AC";
 
     [ObservableProperty]
-    private string compactStatusText = "Connected";
+    private string compactStatusText;
 
     [ObservableProperty]
     private bool hasBattery;
 
     [ObservableProperty]
-    private string statusText = "Power status";
+    private string statusText;
 
     [ObservableProperty]
-    private string detailText = "Unavailable";
+    private string detailText;
+
+    public PowerViewModel(ITextLocalizer localizer)
+    {
+        this.localizer = localizer;
+        compactStatusText = localizer.GetText("Connected");
+        statusText = localizer.GetText("PowerStatus");
+        detailText = localizer.GetText("Unavailable");
+    }
+
+    public string Title => localizer.GetText("ModuleTitle");
 
     public void Update(PowerSnapshot snapshot)
     {
@@ -35,29 +46,39 @@ public partial class PowerViewModel : ObservableObject
 
         (CompactStatusText, StatusText) = snapshot.BatteryState switch
         {
-            BatteryState.Charging => ("Charging", "Charging"),
-            BatteryState.Discharging => ("On battery", "Using battery"),
-            BatteryState.Idle when percentage >= 99 => ("Charged", "Fully charged"),
-            BatteryState.Idle => ("Connected", "Connected to power"),
-            _ => ("Connected", "Power status")
+            BatteryState.Charging => (
+                localizer.GetText("Charging"),
+                localizer.GetText("Charging")),
+            BatteryState.Discharging => (
+                localizer.GetText("OnBattery"),
+                localizer.GetText("UsingBattery")),
+            BatteryState.Idle when percentage >= 99 => (
+                localizer.GetText("Charged"),
+                localizer.GetText("FullyCharged")),
+            BatteryState.Idle => (
+                localizer.GetText("Connected"),
+                localizer.GetText("ConnectedToPower")),
+            _ => (
+                localizer.GetText("Connected"),
+                localizer.GetText("PowerStatus"))
         };
 
         DetailText = snapshot.BatteryState switch
         {
-            BatteryState.NotPresent => "Unavailable",
-            BatteryState.Charging => "Connected and charging",
-            BatteryState.Idle when percentage >= 99 => "Battery is fully charged",
-            BatteryState.Idle => "Connected to external power",
+            BatteryState.NotPresent => localizer.GetText("Unavailable"),
+            BatteryState.Charging => localizer.GetText("ConnectedAndCharging"),
+            BatteryState.Idle when percentage >= 99 => localizer.GetText("BatteryFullyCharged"),
+            BatteryState.Idle => localizer.GetText("ConnectedToExternalPower"),
             BatteryState.Discharging => FormatRemainingTime(snapshot.RemainingTime),
-            _ => "Power status unavailable"
+            _ => localizer.GetText("PowerStatusUnavailable")
         };
     }
 
-    private static string FormatRemainingTime(TimeSpan? remainingTime)
+    private string FormatRemainingTime(TimeSpan? remainingTime)
     {
         if (remainingTime is not { } value || value <= TimeSpan.Zero)
         {
-            return "Estimating time remaining";
+            return localizer.GetText("EstimatingRemainingTime");
         }
 
         int hours = (int)value.TotalHours;
@@ -65,9 +86,12 @@ public partial class PowerViewModel : ObservableObject
 
         return hours switch
         {
-            > 0 when minutes > 0 => $"{hours} hr {minutes} min remaining",
-            > 0 => $"{hours} hr remaining",
-            _ => $"{Math.Max(1, minutes)} min remaining"
+            > 0 when minutes > 0 => localizer.GetText(
+                "HoursMinutesRemaining",
+                hours,
+                minutes),
+            > 0 => localizer.GetText("HoursRemaining", hours),
+            _ => localizer.GetText("MinutesRemaining", Math.Max(1, minutes))
         };
     }
 }

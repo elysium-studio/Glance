@@ -59,23 +59,20 @@
                         Orientation="Horizontal"
                         Spacing="2">
                         <Button
-                            AutomationProperties.Name="Copy this clip"
+                            x:Uid="CopyButton"
                             Click="HandleCopyClick"
                             Content="&#xE8C8;"
-                            Style="{StaticResource ClipboardActionButtonStyle}"
-                            ToolTipService.ToolTip="Copy" />
+                            Style="{StaticResource ClipboardActionButtonStyle}" />
                         <Button
-                            AutomationProperties.Name="Send this clip to focused app"
+                            x:Uid="SendButton"
                             Click="HandlePasteClick"
                             Content="&#xE72D;"
-                            Style="{StaticResource ClipboardActionButtonStyle}"
-                            ToolTipService.ToolTip="Send to focused app" />
+                            Style="{StaticResource ClipboardActionButtonStyle}" />
                         <Button
-                            AutomationProperties.Name="Remove this clip"
+                            x:Uid="RemoveButton"
                             Click="HandleRemoveClick"
                             Content="&#xE74D;"
-                            Style="{StaticResource ClipboardActionButtonStyle}"
-                            ToolTipService.ToolTip="Remove" />
+                            Style="{StaticResource ClipboardActionButtonStyle}" />
                     </StackPanel>
                 </Grid>
             </DataTemplate>
@@ -117,11 +114,11 @@
                 Foreground="{ThemeResource GlanceClipboardIconBrush}"
                 Text="{x:Bind ToUpper(ViewModel.Title)}" />
             <TextBlock
+                x:Uid="EmptyMessage"
                 Grid.Row="1"
                 VerticalAlignment="Top"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
-                Text="Nothing copied"
                 Visibility="{x:Bind WhenEmpty(ViewModel.CanClearHistory), Mode=OneWay}" />
             <Controls:CompactFlipView
                 x:Name="ClipboardFlipView"

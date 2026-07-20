@@ -66,42 +66,39 @@
                 Orientation="Horizontal"
                 Spacing="5">
                 <Button
+                    x:Uid="PreviousButton"
                     Width="32"
                     Height="32"
                     Padding="0"
-                    AutomationProperties.Name="Previous"
                     Click="{x:Bind ViewModel.Previous}"
                     Content="&#xE622;"
                     CornerRadius="16"
                     FontFamily="Segoe Fluent Icons"
                     FontSize="14"
-                    IsEnabled="{x:Bind ViewModel.CanSkipPrevious, Mode=OneWay}"
-                    ToolTipService.ToolTip="Previous" />
+                    IsEnabled="{x:Bind ViewModel.CanSkipPrevious, Mode=OneWay}" />
                 <Button
+                    x:Uid="ToggleButton"
                     Width="38"
                     Height="38"
                     Padding="0"
-                    AutomationProperties.Name="Play or pause"
                     Click="{x:Bind ViewModel.TogglePlayback}"
                     Content="{x:Bind ViewModel.PlayPauseGlyph, Mode=OneWay}"
                     CornerRadius="19"
                     FontFamily="Segoe Fluent Icons"
                     FontSize="18"
                     IsEnabled="{x:Bind ViewModel.CanTogglePlayback, Mode=OneWay}"
-                    Style="{StaticResource AccentButtonStyle}"
-                    ToolTipService.ToolTip="Play or pause" />
+                    Style="{StaticResource AccentButtonStyle}" />
                 <Button
+                    x:Uid="NextButton"
                     Width="32"
                     Height="32"
                     Padding="0"
-                    AutomationProperties.Name="Next"
                     Click="{x:Bind ViewModel.Next}"
                     Content="&#xE623;"
                     CornerRadius="16"
                     FontFamily="Segoe Fluent Icons"
                     FontSize="14"
-                    IsEnabled="{x:Bind ViewModel.CanSkipNext, Mode=OneWay}"
-                    ToolTipService.ToolTip="Next" />
+                    IsEnabled="{x:Bind ViewModel.CanSkipNext, Mode=OneWay}" />
             </StackPanel>
         </StackPanel>
     </Grid>

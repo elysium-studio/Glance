@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>媒体</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>媒体播放</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>查看当前曲目并控制系统媒体播放。</value>
+  </data>
+  <data name="NothingPlaying" xml:space="preserve">
+    <value>未在播放</value>
+  </data>
+  <data name="OpenMediaApp" xml:space="preserve">
+    <value>打开媒体应用即可开始</value>
+  </data>
+  <data name="UnknownTrack" xml:space="preserve">
+    <value>未知曲目</value>
+  </data>
+  <data name="UnknownArtist" xml:space="preserve">
+    <value>未知艺术家</value>
+  </data>
+  <data name="PreviousButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>上一首</value>
+  </data>
+  <data name="PreviousButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>上一首</value>
+  </data>
+  <data name="ToggleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>播放或暂停</value>
+  </data>
+  <data name="ToggleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>播放或暂停</value>
+  </data>
+  <data name="NextButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>下一首</value>
+  </data>
+  <data name="NextButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>下一首</value>
+  </data>
+</root>
+

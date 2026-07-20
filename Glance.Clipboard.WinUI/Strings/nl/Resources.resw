@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>Klembord</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>Klembordplank</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>Blader door recente items, stuur ze naar de actieve app of beheer de geschiedenis.</value>
+  </data>
+  <data name="ClipboardEmpty" xml:space="preserve">
+    <value>Het klembord is leeg</value>
+  </data>
+  <data name="CopySomethingToBegin" xml:space="preserve">
+    <value>Kopieer iets om te beginnen</value>
+  </data>
+  <data name="WaitingForClipboard" xml:space="preserve">
+    <value>Wachten op klembordinhoud</value>
+  </data>
+  <data name="CopiedToClipboard" xml:space="preserve">
+    <value>Gekopieerd naar het klembord</value>
+  </data>
+  <data name="CopyFailed" xml:space="preserve">
+    <value>Dit item kon niet worden gekopieerd</value>
+  </data>
+  <data name="SentToFocusedApp" xml:space="preserve">
+    <value>Naar de actieve app verzonden</value>
+  </data>
+  <data name="SendFailed" xml:space="preserve">
+    <value>Dit item kon niet worden verzonden</value>
+  </data>
+  <data name="RemovedFromHistory" xml:space="preserve">
+    <value>Uit de klembordgeschiedenis verwijderd</value>
+  </data>
+  <data name="RemoveFailed" xml:space="preserve">
+    <value>Dit item kon niet worden verwijderd</value>
+  </data>
+  <data name="HistoryCleared" xml:space="preserve">
+    <value>Klembordgeschiedenis gewist</value>
+  </data>
+  <data name="ClearFailed" xml:space="preserve">
+    <value>Klembordgeschiedenis kon niet worden gewist</value>
+  </data>
+  <data name="RecentClipsNone" xml:space="preserve">
+    <value>Geen recente items</value>
+  </data>
+  <data name="RecentClipsOne" xml:space="preserve">
+    <value>1 recent item</value>
+  </data>
+  <data name="RecentClipsMany" xml:space="preserve">
+    <value>{0} recente items</value>
+  </data>
+  <data name="FilesAndMore" xml:space="preserve">
+    <value>{0} en nog {1}</value>
+  </data>
+  <data name="KindFiles" xml:space="preserve">
+    <value>Bestanden</value>
+  </data>
+  <data name="CopiedImage" xml:space="preserve">
+    <value>Gekopieerde afbeelding</value>
+  </data>
+  <data name="KindImage" xml:space="preserve">
+    <value>Afbeelding</value>
+  </data>
+  <data name="KindLink" xml:space="preserve">
+    <value>Koppeling</value>
+  </data>
+  <data name="CopiedText" xml:space="preserve">
+    <value>Gekopieerde tekst</value>
+  </data>
+  <data name="KindText" xml:space="preserve">
+    <value>Tekst</value>
+  </data>
+  <data name="RichHtmlContent" xml:space="preserve">
+    <value>Uitgebreide HTML-inhoud</value>
+  </data>
+  <data name="KindHtml" xml:space="preserve">
+    <value>HTML</value>
+  </data>
+  <data name="FormattedText" xml:space="preserve">
+    <value>Opgemaakte tekst</value>
+  </data>
+  <data name="KindRichText" xml:space="preserve">
+    <value>Tekst met opmaak</value>
+  </data>
+  <data name="UnsupportedContent" xml:space="preserve">
+    <value>Niet-ondersteunde klembordinhoud</value>
+  </data>
+  <data name="KindOther" xml:space="preserve">
+    <value>Overig</value>
+  </data>
+  <data name="TimeNow" xml:space="preserve">
+    <value>Nu</value>
+  </data>
+  <data name="EmptyMessage.Text" xml:space="preserve">
+    <value>Niets gekopieerd</value>
+  </data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Dit item kopiëren</value>
+  </data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Kopiëren</value>
+  </data>
+  <data name="SendButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Dit item naar de actieve app sturen</value>
+  </data>
+  <data name="SendButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Naar actieve app sturen</value>
+  </data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Dit item verwijderen</value>
+  </data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Verwijderen</value>
+  </data>
+</root>
+

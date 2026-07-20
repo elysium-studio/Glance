@@ -41,6 +41,7 @@
                     VerticalAlignment="Center"
                     Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
                 <Button
+                    x:Uid="SettingsButton"
                     Width="24"
                     Height="24"
                     Padding="0"
@@ -52,8 +53,7 @@
                     CornerRadius="6"
                     FontFamily="Segoe Fluent Icons"
                     FontSize="12"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    ToolTipService.ToolTip="Settings" />
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </StackPanel>
         </Grid>
     </Controls:DesktopIsland.ExpandedContent>

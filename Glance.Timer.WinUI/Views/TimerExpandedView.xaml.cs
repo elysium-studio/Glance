@@ -15,6 +15,4 @@ public sealed partial class TimerExpandedView :
     public TimerViewModel ViewModel { get; }
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
-
-    private string ToUpper(string value) => value.ToUpperInvariant();
 }

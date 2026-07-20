@@ -18,8 +18,6 @@ public partial class TimerViewModel : ObservableObject
     [ObservableProperty]
     private string remainingText = "05:00";
 
-    public string Title => "Timer";
-
     public bool CanDecreaseMinute => duration > Minute;
 
     public string ToggleGlyph => IsRunning ? "\uF8AE" : "\uF5B0";

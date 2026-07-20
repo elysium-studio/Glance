@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>Multimedia</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>Odtwarzanie multimediów</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>Wyświetlaj bieżący utwór i steruj odtwarzaniem multimediów w systemie.</value>
+  </data>
+  <data name="NothingPlaying" xml:space="preserve">
+    <value>Nic nie jest odtwarzane</value>
+  </data>
+  <data name="OpenMediaApp" xml:space="preserve">
+    <value>Otwórz aplikację multimedialną, aby rozpocząć</value>
+  </data>
+  <data name="UnknownTrack" xml:space="preserve">
+    <value>Nieznany utwór</value>
+  </data>
+  <data name="UnknownArtist" xml:space="preserve">
+    <value>Nieznany wykonawca</value>
+  </data>
+  <data name="PreviousButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Poprzedni</value>
+  </data>
+  <data name="PreviousButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Poprzedni</value>
+  </data>
+  <data name="ToggleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Odtwórz lub wstrzymaj</value>
+  </data>
+  <data name="ToggleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Odtwórz lub wstrzymaj</value>
+  </data>
+  <data name="NextButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Następny</value>
+  </data>
+  <data name="NextButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Następny</value>
+  </data>
+</root>
+

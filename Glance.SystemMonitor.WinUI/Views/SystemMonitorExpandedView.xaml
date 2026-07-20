@@ -36,10 +36,10 @@
             CornerRadius="{StaticResource OverlayCornerRadius}">
             <StackPanel Spacing="4">
                 <TextBlock
+                    x:Uid="ProcessorLabel"
                     FontSize="11"
                     FontWeight="SemiBold"
-                    Foreground="{ThemeResource GlanceSystemIconBrush}"
-                    Text="PROCESSOR" />
+                    Foreground="{ThemeResource GlanceSystemIconBrush}" />
                 <TextBlock
                     FontSize="16"
                     FontWeight="SemiBold"
@@ -60,10 +60,10 @@
             CornerRadius="{StaticResource OverlayCornerRadius}">
             <StackPanel Spacing="3">
                 <TextBlock
+                    x:Uid="MemoryLabel"
                     FontSize="11"
                     FontWeight="SemiBold"
-                    Foreground="{ThemeResource GlanceSystemIconBrush}"
-                    Text="MEMORY" />
+                    Foreground="{ThemeResource GlanceSystemIconBrush}" />
                 <TextBlock
                     FontSize="16"
                     FontWeight="SemiBold"
@@ -84,10 +84,10 @@
             CornerRadius="{StaticResource OverlayCornerRadius}">
             <StackPanel Spacing="3">
                 <TextBlock
+                    x:Uid="NetworkLabel"
                     FontSize="11"
                     FontWeight="SemiBold"
-                    Foreground="{ThemeResource GlanceSystemIconBrush}"
-                    Text="NETWORK" />
+                    Foreground="{ThemeResource GlanceSystemIconBrush}" />
                 <StackPanel Spacing="3">
                     <StackPanel Orientation="Horizontal" Spacing="3">
                         <FontIcon

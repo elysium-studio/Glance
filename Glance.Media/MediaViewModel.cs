@@ -1,17 +1,18 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Glance.Application.Abstractions;
 
 namespace Glance.Media;
 
 public partial class MediaViewModel : ObservableObject
 {
     [ObservableProperty]
-    private string title = "Nothing playing";
+    private string title;
 
     [ObservableProperty]
-    private string artist = "Open a media app to begin";
+    private string artist;
 
     [ObservableProperty]
-    private string source = "Media";
+    private string source;
 
     [ObservableProperty]
     private object? artwork;
@@ -31,6 +32,13 @@ public partial class MediaViewModel : ObservableObject
 
     [ObservableProperty]
     private bool canTogglePlayback;
+
+    public MediaViewModel(ITextLocalizer localizer)
+    {
+        title = localizer.GetText("NothingPlaying");
+        artist = localizer.GetText("OpenMediaApp");
+        source = localizer.GetText("ModuleTitle");
+    }
 
     public string PlayPauseGlyph => IsPlaying ? "\uF8AE" : "\uF5B0";
 

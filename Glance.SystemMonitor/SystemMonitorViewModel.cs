@@ -1,9 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Glance.Application.Abstractions;
 
 namespace Glance.SystemMonitor;
 
 public partial class SystemMonitorViewModel : ObservableObject
 {
+    private readonly ITextLocalizer localizer;
+
     [ObservableProperty]
     private double cpuUsage;
 
@@ -17,13 +20,19 @@ public partial class SystemMonitorViewModel : ObservableObject
     private string memoryText = "0%";
 
     [ObservableProperty]
-    private string memoryDetail = "Calculating memory";
+    private string memoryDetail;
 
     [ObservableProperty]
     private string downloadText = "0 KB/s";
 
     [ObservableProperty]
     private string uploadText = "0 KB/s";
+
+    public SystemMonitorViewModel(ITextLocalizer localizer)
+    {
+        this.localizer = localizer;
+        memoryDetail = localizer.GetText("CalculatingMemory");
+    }
 
     public void Update(
         double cpu,
@@ -37,7 +46,10 @@ public partial class SystemMonitorViewModel : ObservableObject
         MemoryUsage = memory;
         CpuText = $"{cpu:0}%";
         MemoryText = $"{memory:0}%";
-        MemoryDetail = $"{FormatBytes(usedBytes)} of {FormatBytes(totalBytes)}";
+        MemoryDetail = localizer.GetText(
+            "MemoryUsageFormat",
+            FormatBytes(usedBytes),
+            FormatBytes(totalBytes));
         DownloadText = FormatRate(downloadBytesPerSecond);
         UploadText = FormatRate(uploadBytesPerSecond);
     }

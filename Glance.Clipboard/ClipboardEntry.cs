@@ -1,3 +1,6 @@
+using Glance.Application.Abstractions;
+using System.Globalization;
+
 namespace Glance.Clipboard;
 
 public sealed record ClipboardEntry(
@@ -5,7 +8,8 @@ public sealed record ClipboardEntry(
     string Preview,
     string KindLabel,
     string Glyph,
-    DateTimeOffset Timestamp)
+    DateTimeOffset Timestamp,
+    ITextLocalizer Localizer)
 {
     public string TimeText
     {
@@ -15,10 +19,10 @@ public sealed record ClipboardEntry(
 
             return age switch
             {
-                { TotalMinutes: < 1 } => "Now",
+                { TotalMinutes: < 1 } => Localizer.GetText("TimeNow"),
                 { TotalHours: < 1 } => $"{Math.Max(1, (int)age.TotalMinutes)}m",
                 { TotalDays: < 1 } => $"{Math.Max(1, (int)age.TotalHours)}h",
-                _ => Timestamp.ToString("d MMM")
+                _ => Timestamp.ToString("d MMM", CultureInfo.CurrentCulture)
             };
         }
     }

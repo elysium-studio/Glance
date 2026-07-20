@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle.Text" xml:space="preserve">
+    <value>STOPPUHR</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>Stoppuhr</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>Miss die verstrichene Zeit mit Start- und Zurücksetzen-Steuerung.</value>
+  </data>
+  <data name="ToggleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Starten oder pausieren</value>
+  </data>
+  <data name="ToggleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Starten oder pausieren</value>
+  </data>
+  <data name="ResetButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Zurücksetzen</value>
+  </data>
+  <data name="ResetButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Zurücksetzen</value>
+  </data>
+</root>
+

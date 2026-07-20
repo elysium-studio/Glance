@@ -14,6 +14,4 @@ public sealed partial class StopwatchExpandedView : UserControl
     public StopwatchViewModel ViewModel { get; }
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
-
-    private string ToUpper(string value) => value.ToUpperInvariant();
 }

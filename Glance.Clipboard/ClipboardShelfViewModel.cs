@@ -1,26 +1,28 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Glance.Application.Abstractions;
 using System.Collections.ObjectModel;
 
 namespace Glance.Clipboard;
 
 public partial class ClipboardShelfViewModel : ObservableObject
 {
+    private readonly ITextLocalizer localizer;
     private Func<ClipboardEntry, Task<bool>>? copyEntry;
     private Func<ClipboardEntry, Task<bool>>? pasteEntry;
     private Func<ClipboardEntry, Task<bool>>? removeEntry;
     private Func<Task<bool>>? clearHistory;
 
     [ObservableProperty]
-    private string latestPreview = "Clipboard is empty";
+    private string latestPreview;
 
     [ObservableProperty]
-    private string latestKind = "Copy something to begin";
+    private string latestKind;
 
     [ObservableProperty]
     private string latestGlyph = "\uE77F";
 
     [ObservableProperty]
-    private string historyStatus = "Waiting for clipboard content";
+    private string historyStatus;
 
     [ObservableProperty]
     private bool canClearHistory;
@@ -31,7 +33,15 @@ public partial class ClipboardShelfViewModel : ObservableObject
     [ObservableProperty]
     private ClipboardEntry? selectedEntry;
 
-    public string Title => "Clipboard";
+    public ClipboardShelfViewModel(ITextLocalizer localizer)
+    {
+        this.localizer = localizer;
+        latestPreview = localizer.GetText("ClipboardEmpty");
+        latestKind = localizer.GetText("CopySomethingToBegin");
+        historyStatus = localizer.GetText("WaitingForClipboard");
+    }
+
+    public string Title => localizer.GetText("ModuleTitle");
 
     public ObservableCollection<ClipboardEntry> ShelfItems { get; } = [];
 
@@ -53,8 +63,8 @@ public partial class ClipboardShelfViewModel : ObservableObject
     {
         ClipboardEntry? latest = entries.FirstOrDefault();
 
-        LatestPreview = latest?.Preview ?? "Clipboard is empty";
-        LatestKind = latest?.KindLabel ?? "Copy something to begin";
+        LatestPreview = latest?.Preview ?? localizer.GetText("ClipboardEmpty");
+        LatestKind = latest?.KindLabel ?? localizer.GetText("CopySomethingToBegin");
         LatestGlyph = latest?.Glyph ?? "\uE77F";
         HistoryStatus = status;
         CanClearHistory = entries.Count > 0;
@@ -80,8 +90,8 @@ public partial class ClipboardShelfViewModel : ObservableObject
         }
 
         HistoryStatus = await copyEntry(entry)
-            ? "Copied to clipboard"
-            : "Could not copy this item";
+            ? localizer.GetText("CopiedToClipboard")
+            : localizer.GetText("CopyFailed");
     }
 
     public async Task PasteAsync(ClipboardEntry entry)
@@ -92,8 +102,8 @@ public partial class ClipboardShelfViewModel : ObservableObject
         }
 
         HistoryStatus = await pasteEntry(entry)
-            ? "Sent to the focused app"
-            : "Could not send this item";
+            ? localizer.GetText("SentToFocusedApp")
+            : localizer.GetText("SendFailed");
     }
 
     public async Task RemoveAsync(ClipboardEntry entry)
@@ -104,8 +114,8 @@ public partial class ClipboardShelfViewModel : ObservableObject
         }
 
         HistoryStatus = await removeEntry(entry)
-            ? "Removed from clipboard history"
-            : "Could not remove this item";
+            ? localizer.GetText("RemovedFromHistory")
+            : localizer.GetText("RemoveFailed");
     }
 
     public async Task ClearAsync()
@@ -116,8 +126,8 @@ public partial class ClipboardShelfViewModel : ObservableObject
         }
 
         HistoryStatus = await clearHistory()
-            ? "Clipboard history cleared"
-            : "Could not clear clipboard history";
+            ? localizer.GetText("HistoryCleared")
+            : localizer.GetText("ClearFailed");
     }
 
     public async Task CopySelectedAsync()

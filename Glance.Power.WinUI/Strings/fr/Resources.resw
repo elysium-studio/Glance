@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>Alimentation</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>Batterie et alimentation</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>Consultez la charge, la source d’alimentation et l’autonomie estimée.</value>
+  </data>
+  <data name="Connected" xml:space="preserve">
+    <value>Connecté</value>
+  </data>
+  <data name="PowerStatus" xml:space="preserve">
+    <value>État de l’alimentation</value>
+  </data>
+  <data name="Unavailable" xml:space="preserve">
+    <value>Indisponible</value>
+  </data>
+  <data name="Charging" xml:space="preserve">
+    <value>En charge</value>
+  </data>
+  <data name="OnBattery" xml:space="preserve">
+    <value>Sur batterie</value>
+  </data>
+  <data name="UsingBattery" xml:space="preserve">
+    <value>Utilisation de la batterie</value>
+  </data>
+  <data name="Charged" xml:space="preserve">
+    <value>Chargée</value>
+  </data>
+  <data name="FullyCharged" xml:space="preserve">
+    <value>Charge complète</value>
+  </data>
+  <data name="ConnectedToPower" xml:space="preserve">
+    <value>Branché</value>
+  </data>
+  <data name="ConnectedAndCharging" xml:space="preserve">
+    <value>Branché et en charge</value>
+  </data>
+  <data name="BatteryFullyCharged" xml:space="preserve">
+    <value>La batterie est complètement chargée</value>
+  </data>
+  <data name="ConnectedToExternalPower" xml:space="preserve">
+    <value>Connecté à une alimentation externe</value>
+  </data>
+  <data name="PowerStatusUnavailable" xml:space="preserve">
+    <value>État de l’alimentation indisponible</value>
+  </data>
+  <data name="EstimatingRemainingTime" xml:space="preserve">
+    <value>Estimation du temps restant</value>
+  </data>
+  <data name="HoursMinutesRemaining" xml:space="preserve">
+    <value>{0} h {1} min restantes</value>
+  </data>
+  <data name="HoursRemaining" xml:space="preserve">
+    <value>{0} h restantes</value>
+  </data>
+  <data name="MinutesRemaining" xml:space="preserve">
+    <value>{0} min restantes</value>
+  </data>
+</root>
+

@@ -1,4 +1,5 @@
 using Glance.Application.Abstractions;
+using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
 
@@ -10,12 +11,16 @@ public sealed class SystemMonitorComponent :
     IDisposable
 {
     private readonly DispatcherQueueTimer timer;
+    private readonly ITextLocalizer localizer;
     private readonly SystemMetricsReader metricsReader = new();
     private readonly SystemMonitorViewModel viewModel;
 
-    public SystemMonitorComponent(SystemMonitorViewModel viewModel)
+    public SystemMonitorComponent(
+        SystemMonitorViewModel viewModel,
+        ModuleResourceTextLocalizer<SystemMonitorModule> localizer)
     {
         this.viewModel = viewModel;
+        this.localizer = localizer;
 
         SystemMonitorCompactView compactView = new(viewModel);
         SystemMonitorExpandedView expandedView = new(viewModel);
@@ -35,6 +40,10 @@ public sealed class SystemMonitorComponent :
     }
 
     public string Id => "SystemMonitor";
+
+    public string DisplayName => localizer.GetText("ModuleDisplayName");
+
+    public string Description => localizer.GetText("ModuleDescription");
 
     public int Order => 30;
 

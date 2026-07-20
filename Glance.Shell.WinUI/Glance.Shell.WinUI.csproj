@@ -17,7 +17,11 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <StartupObject>Glance.Shell.WinUI.Start</StartupObject>
+    <DefaultLanguage>en</DefaultLanguage>
   </PropertyGroup>
+  <ItemGroup>
+    <PRIResource Include="Strings\**\*.resw" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.3.260402-preview2" />
     <PackageReference Include="Elysium.Application.Abstractions" Version="$(ElysiumVersion)" />

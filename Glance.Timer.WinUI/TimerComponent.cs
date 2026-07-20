@@ -1,4 +1,5 @@
 using Glance.Application.Abstractions;
+using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
 using System.ComponentModel;
@@ -11,14 +12,18 @@ public sealed class TimerComponent :
     IDisposable
 {
     private readonly DispatcherQueueTimer timer;
+    private readonly ITextLocalizer localizer;
     private readonly TimerViewModel viewModel;
     private readonly IGlanceAttentionService attentionService;
 
-    public TimerComponent(TimerViewModel viewModel,
-        IGlanceAttentionService attentionService)
+    public TimerComponent(
+        TimerViewModel viewModel,
+        IGlanceAttentionService attentionService,
+        ModuleResourceTextLocalizer<TimerModule> localizer)
     {
         this.viewModel = viewModel;
         this.attentionService = attentionService;
+        this.localizer = localizer;
 
         TimerCompactView compactView = new(viewModel);
         TimerExpandedView expandedView = new(viewModel);
@@ -37,6 +42,10 @@ public sealed class TimerComponent :
     }
 
     public string Id => "Timer";
+
+    public string DisplayName => localizer.GetText("ModuleDisplayName");
+
+    public string Description => localizer.GetText("ModuleDescription");
 
     public int Order => 10;
 

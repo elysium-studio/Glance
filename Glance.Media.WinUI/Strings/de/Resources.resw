@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>Medien</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>Medienwiedergabe</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>Zeigt den aktuellen Titel und steuert die systemweite Medienwiedergabe.</value>
+  </data>
+  <data name="NothingPlaying" xml:space="preserve">
+    <value>Keine Wiedergabe</value>
+  </data>
+  <data name="OpenMediaApp" xml:space="preserve">
+    <value>Öffne eine Medien-App, um zu beginnen</value>
+  </data>
+  <data name="UnknownTrack" xml:space="preserve">
+    <value>Unbekannter Titel</value>
+  </data>
+  <data name="UnknownArtist" xml:space="preserve">
+    <value>Unbekannter Interpret</value>
+  </data>
+  <data name="PreviousButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Zurück</value>
+  </data>
+  <data name="PreviousButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Zurück</value>
+  </data>
+  <data name="ToggleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Wiedergeben oder pausieren</value>
+  </data>
+  <data name="ToggleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Wiedergeben oder pausieren</value>
+  </data>
+  <data name="NextButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Weiter</value>
+  </data>
+  <data name="NextButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Weiter</value>
+  </data>
+</root>
+

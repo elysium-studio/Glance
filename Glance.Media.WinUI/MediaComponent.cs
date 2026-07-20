@@ -1,4 +1,5 @@
 using Glance.Application.Abstractions;
+using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
@@ -17,6 +18,7 @@ public sealed class MediaComponent :
     private static readonly double[] SilentAudioLevels = [0, 0, 0, 0, 0];
 
     private readonly MediaViewModel viewModel;
+    private readonly ITextLocalizer localizer;
     private readonly IGlanceAttentionService attentionService;
     private readonly DispatcherQueue dispatcherQueue;
     private readonly AudioLevelMonitor audioLevelMonitor;
@@ -26,10 +28,12 @@ public sealed class MediaComponent :
 
     public MediaComponent(
         MediaViewModel viewModel,
-        IGlanceAttentionService attentionService)
+        IGlanceAttentionService attentionService,
+        ModuleResourceTextLocalizer<MediaModule> localizer)
     {
         this.viewModel = viewModel;
         this.attentionService = attentionService;
+        this.localizer = localizer;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         audioLevelMonitor = new AudioLevelMonitor();
 
@@ -47,6 +51,10 @@ public sealed class MediaComponent :
     }
 
     public string Id => "Media";
+
+    public string DisplayName => localizer.GetText("ModuleDisplayName");
+
+    public string Description => localizer.GetText("ModuleDescription");
 
     public int Order => 20;
 
@@ -178,10 +186,10 @@ public sealed class MediaComponent :
             await mediaSession.TryGetMediaPropertiesAsync();
 
         string title = string.IsNullOrWhiteSpace(properties.Title)
-            ? "Unknown track"
+            ? localizer.GetText("UnknownTrack")
             : properties.Title;
         string artist = string.IsNullOrWhiteSpace(properties.Artist)
-            ? "Unknown artist"
+            ? localizer.GetText("UnknownArtist")
             : properties.Artist;
         string source = FormatSourceName(mediaSession.SourceAppUserModelId);
         GlobalSystemMediaTransportControlsSessionPlaybackInfo? playbackInfo =
@@ -247,9 +255,9 @@ public sealed class MediaComponent :
     private void ShowEmptyState()
     {
         currentTitle = null;
-        viewModel.Title = "Nothing playing";
-        viewModel.Artist = "Open a media app to begin";
-        viewModel.Source = "Media";
+        viewModel.Title = localizer.GetText("NothingPlaying");
+        viewModel.Artist = localizer.GetText("OpenMediaApp");
+        viewModel.Source = localizer.GetText("ModuleTitle");
         viewModel.Artwork = null;
         viewModel.IsPlaying = false;
         viewModel.HasSession = false;

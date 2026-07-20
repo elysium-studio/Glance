@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>클립보드</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>클립보드 선반</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>최근 클립을 찾아보고 활성 앱으로 보내거나 기록을 관리합니다.</value>
+  </data>
+  <data name="ClipboardEmpty" xml:space="preserve">
+    <value>클립보드가 비어 있습니다</value>
+  </data>
+  <data name="CopySomethingToBegin" xml:space="preserve">
+    <value>무언가를 복사하여 시작하세요</value>
+  </data>
+  <data name="WaitingForClipboard" xml:space="preserve">
+    <value>클립보드 콘텐츠 대기 중</value>
+  </data>
+  <data name="CopiedToClipboard" xml:space="preserve">
+    <value>클립보드에 복사됨</value>
+  </data>
+  <data name="CopyFailed" xml:space="preserve">
+    <value>이 항목을 복사할 수 없습니다</value>
+  </data>
+  <data name="SentToFocusedApp" xml:space="preserve">
+    <value>활성 앱으로 보냄</value>
+  </data>
+  <data name="SendFailed" xml:space="preserve">
+    <value>이 항목을 보낼 수 없습니다</value>
+  </data>
+  <data name="RemovedFromHistory" xml:space="preserve">
+    <value>클립보드 기록에서 제거됨</value>
+  </data>
+  <data name="RemoveFailed" xml:space="preserve">
+    <value>이 항목을 제거할 수 없습니다</value>
+  </data>
+  <data name="HistoryCleared" xml:space="preserve">
+    <value>클립보드 기록을 지움</value>
+  </data>
+  <data name="ClearFailed" xml:space="preserve">
+    <value>클립보드 기록을 지울 수 없습니다</value>
+  </data>
+  <data name="RecentClipsNone" xml:space="preserve">
+    <value>최근 클립 없음</value>
+  </data>
+  <data name="RecentClipsOne" xml:space="preserve">
+    <value>최근 클립 1개</value>
+  </data>
+  <data name="RecentClipsMany" xml:space="preserve">
+    <value>최근 클립 {0}개</value>
+  </data>
+  <data name="FilesAndMore" xml:space="preserve">
+    <value>{0} 외 {1}개</value>
+  </data>
+  <data name="KindFiles" xml:space="preserve">
+    <value>파일</value>
+  </data>
+  <data name="CopiedImage" xml:space="preserve">
+    <value>복사한 이미지</value>
+  </data>
+  <data name="KindImage" xml:space="preserve">
+    <value>이미지</value>
+  </data>
+  <data name="KindLink" xml:space="preserve">
+    <value>링크</value>
+  </data>
+  <data name="CopiedText" xml:space="preserve">
+    <value>복사한 텍스트</value>
+  </data>
+  <data name="KindText" xml:space="preserve">
+    <value>텍스트</value>
+  </data>
+  <data name="RichHtmlContent" xml:space="preserve">
+    <value>리치 HTML 콘텐츠</value>
+  </data>
+  <data name="KindHtml" xml:space="preserve">
+    <value>HTML</value>
+  </data>
+  <data name="FormattedText" xml:space="preserve">
+    <value>서식 있는 텍스트</value>
+  </data>
+  <data name="KindRichText" xml:space="preserve">
+    <value>리치 텍스트</value>
+  </data>
+  <data name="UnsupportedContent" xml:space="preserve">
+    <value>지원되지 않는 클립보드 콘텐츠</value>
+  </data>
+  <data name="KindOther" xml:space="preserve">
+    <value>기타</value>
+  </data>
+  <data name="TimeNow" xml:space="preserve">
+    <value>지금</value>
+  </data>
+  <data name="EmptyMessage.Text" xml:space="preserve">
+    <value>복사한 항목 없음</value>
+  </data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>이 클립 복사</value>
+  </data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>복사</value>
+  </data>
+  <data name="SendButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>이 클립을 활성 앱으로 보내기</value>
+  </data>
+  <data name="SendButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>활성 앱으로 보내기</value>
+  </data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>이 클립 제거</value>
+  </data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>제거</value>
+  </data>
+</root>
+

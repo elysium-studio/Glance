@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>Portapapeles</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>Estante del portapapeles</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>Explora elementos recientes, envíalos a la aplicación activa o administra el historial.</value>
+  </data>
+  <data name="ClipboardEmpty" xml:space="preserve">
+    <value>El portapapeles está vacío</value>
+  </data>
+  <data name="CopySomethingToBegin" xml:space="preserve">
+    <value>Copia algo para empezar</value>
+  </data>
+  <data name="WaitingForClipboard" xml:space="preserve">
+    <value>Esperando contenido del portapapeles</value>
+  </data>
+  <data name="CopiedToClipboard" xml:space="preserve">
+    <value>Copiado al portapapeles</value>
+  </data>
+  <data name="CopyFailed" xml:space="preserve">
+    <value>No se pudo copiar este elemento</value>
+  </data>
+  <data name="SentToFocusedApp" xml:space="preserve">
+    <value>Enviado a la aplicación activa</value>
+  </data>
+  <data name="SendFailed" xml:space="preserve">
+    <value>No se pudo enviar este elemento</value>
+  </data>
+  <data name="RemovedFromHistory" xml:space="preserve">
+    <value>Eliminado del historial del portapapeles</value>
+  </data>
+  <data name="RemoveFailed" xml:space="preserve">
+    <value>No se pudo eliminar este elemento</value>
+  </data>
+  <data name="HistoryCleared" xml:space="preserve">
+    <value>Historial del portapapeles borrado</value>
+  </data>
+  <data name="ClearFailed" xml:space="preserve">
+    <value>No se pudo borrar el historial del portapapeles</value>
+  </data>
+  <data name="RecentClipsNone" xml:space="preserve">
+    <value>No hay elementos recientes</value>
+  </data>
+  <data name="RecentClipsOne" xml:space="preserve">
+    <value>1 elemento reciente</value>
+  </data>
+  <data name="RecentClipsMany" xml:space="preserve">
+    <value>{0} elementos recientes</value>
+  </data>
+  <data name="FilesAndMore" xml:space="preserve">
+    <value>{0} y {1} más</value>
+  </data>
+  <data name="KindFiles" xml:space="preserve">
+    <value>Archivos</value>
+  </data>
+  <data name="CopiedImage" xml:space="preserve">
+    <value>Imagen copiada</value>
+  </data>
+  <data name="KindImage" xml:space="preserve">
+    <value>Imagen</value>
+  </data>
+  <data name="KindLink" xml:space="preserve">
+    <value>Enlace</value>
+  </data>
+  <data name="CopiedText" xml:space="preserve">
+    <value>Texto copiado</value>
+  </data>
+  <data name="KindText" xml:space="preserve">
+    <value>Texto</value>
+  </data>
+  <data name="RichHtmlContent" xml:space="preserve">
+    <value>Contenido HTML enriquecido</value>
+  </data>
+  <data name="KindHtml" xml:space="preserve">
+    <value>HTML</value>
+  </data>
+  <data name="FormattedText" xml:space="preserve">
+    <value>Texto con formato</value>
+  </data>
+  <data name="KindRichText" xml:space="preserve">
+    <value>Texto enriquecido</value>
+  </data>
+  <data name="UnsupportedContent" xml:space="preserve">
+    <value>Contenido del portapapeles no compatible</value>
+  </data>
+  <data name="KindOther" xml:space="preserve">
+    <value>Otro</value>
+  </data>
+  <data name="TimeNow" xml:space="preserve">
+    <value>Ahora</value>
+  </data>
+  <data name="EmptyMessage.Text" xml:space="preserve">
+    <value>No se ha copiado nada</value>
+  </data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Copiar este elemento</value>
+  </data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Copiar</value>
+  </data>
+  <data name="SendButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Enviar este elemento a la aplicación activa</value>
+  </data>
+  <data name="SendButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Enviar a la aplicación activa</value>
+  </data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Eliminar este elemento</value>
+  </data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+</root>
+

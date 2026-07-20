@@ -1,4 +1,5 @@
 using Glance.Application.Abstractions;
+using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using Microsoft.Windows.System.Power;
 using System;
@@ -11,16 +12,19 @@ public sealed class PowerComponent :
     IDisposable
 {
     private readonly DispatcherQueue dispatcherQueue;
+    private readonly ITextLocalizer localizer;
     private readonly PowerViewModel viewModel;
     private readonly IGlanceAttentionService attentionService;
     private int attentionBand;
 
     public PowerComponent(
         PowerViewModel viewModel,
-        IGlanceAttentionService attentionService)
+        IGlanceAttentionService attentionService,
+        ModuleResourceTextLocalizer<PowerModule> localizer)
     {
         this.viewModel = viewModel;
         this.attentionService = attentionService;
+        this.localizer = localizer;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
         PowerCompactView compactView = new(viewModel);
@@ -42,6 +46,10 @@ public sealed class PowerComponent :
     }
 
     public string Id => "Power";
+
+    public string DisplayName => localizer.GetText("ModuleDisplayName");
+
+    public string Description => localizer.GetText("ModuleDescription");
 
     public int Order => 40;
 

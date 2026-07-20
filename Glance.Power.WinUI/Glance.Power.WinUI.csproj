@@ -6,7 +6,11 @@
     <UseWinUI>true</UseWinUI>
     <Nullable>enable</Nullable>
     <Platforms>AnyCPU;x64</Platforms>
+    <DefaultLanguage>en</DefaultLanguage>
   </PropertyGroup>
+  <ItemGroup>
+    <PRIResource Include="Strings\**\*.resw" />
+  </ItemGroup>
   <ItemGroup>
     <None Remove="Themes\Power.xaml" />
   </ItemGroup>

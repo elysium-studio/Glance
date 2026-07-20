@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>Monitor do sistema</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>Veja em tempo real o uso do processador, da memória e da rede.</value>
+  </data>
+  <data name="CalculatingMemory" xml:space="preserve">
+    <value>Calculando memória</value>
+  </data>
+  <data name="MemoryUsageFormat" xml:space="preserve">
+    <value>{0} de {1}</value>
+  </data>
+  <data name="RamLabel.Text" xml:space="preserve">
+    <value>RAM</value>
+  </data>
+  <data name="ProcessorLabel.Text" xml:space="preserve">
+    <value>PROCESSADOR</value>
+  </data>
+  <data name="MemoryLabel.Text" xml:space="preserve">
+    <value>MEMÓRIA</value>
+  </data>
+  <data name="NetworkLabel.Text" xml:space="preserve">
+    <value>REDE</value>
+  </data>
+</root>
+

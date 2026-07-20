@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>Schowek</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>Półka schowka</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>Przeglądaj ostatnie elementy, wysyłaj je do aktywnej aplikacji lub zarządzaj historią.</value>
+  </data>
+  <data name="ClipboardEmpty" xml:space="preserve">
+    <value>Schowek jest pusty</value>
+  </data>
+  <data name="CopySomethingToBegin" xml:space="preserve">
+    <value>Skopiuj coś, aby rozpocząć</value>
+  </data>
+  <data name="WaitingForClipboard" xml:space="preserve">
+    <value>Oczekiwanie na zawartość schowka</value>
+  </data>
+  <data name="CopiedToClipboard" xml:space="preserve">
+    <value>Skopiowano do schowka</value>
+  </data>
+  <data name="CopyFailed" xml:space="preserve">
+    <value>Nie można skopiować tego elementu</value>
+  </data>
+  <data name="SentToFocusedApp" xml:space="preserve">
+    <value>Wysłano do aktywnej aplikacji</value>
+  </data>
+  <data name="SendFailed" xml:space="preserve">
+    <value>Nie można wysłać tego elementu</value>
+  </data>
+  <data name="RemovedFromHistory" xml:space="preserve">
+    <value>Usunięto z historii schowka</value>
+  </data>
+  <data name="RemoveFailed" xml:space="preserve">
+    <value>Nie można usunąć tego elementu</value>
+  </data>
+  <data name="HistoryCleared" xml:space="preserve">
+    <value>Wyczyszczono historię schowka</value>
+  </data>
+  <data name="ClearFailed" xml:space="preserve">
+    <value>Nie można wyczyścić historii schowka</value>
+  </data>
+  <data name="RecentClipsNone" xml:space="preserve">
+    <value>Brak ostatnich elementów</value>
+  </data>
+  <data name="RecentClipsOne" xml:space="preserve">
+    <value>1 ostatni element</value>
+  </data>
+  <data name="RecentClipsMany" xml:space="preserve">
+    <value>Ostatnie elementy: {0}</value>
+  </data>
+  <data name="FilesAndMore" xml:space="preserve">
+    <value>{0} i jeszcze {1}</value>
+  </data>
+  <data name="KindFiles" xml:space="preserve">
+    <value>Pliki</value>
+  </data>
+  <data name="CopiedImage" xml:space="preserve">
+    <value>Skopiowany obraz</value>
+  </data>
+  <data name="KindImage" xml:space="preserve">
+    <value>Obraz</value>
+  </data>
+  <data name="KindLink" xml:space="preserve">
+    <value>Łącze</value>
+  </data>
+  <data name="CopiedText" xml:space="preserve">
+    <value>Skopiowany tekst</value>
+  </data>
+  <data name="KindText" xml:space="preserve">
+    <value>Tekst</value>
+  </data>
+  <data name="RichHtmlContent" xml:space="preserve">
+    <value>Rozbudowana zawartość HTML</value>
+  </data>
+  <data name="KindHtml" xml:space="preserve">
+    <value>HTML</value>
+  </data>
+  <data name="FormattedText" xml:space="preserve">
+    <value>Sformatowany tekst</value>
+  </data>
+  <data name="KindRichText" xml:space="preserve">
+    <value>Tekst sformatowany</value>
+  </data>
+  <data name="UnsupportedContent" xml:space="preserve">
+    <value>Nieobsługiwana zawartość schowka</value>
+  </data>
+  <data name="KindOther" xml:space="preserve">
+    <value>Inne</value>
+  </data>
+  <data name="TimeNow" xml:space="preserve">
+    <value>Teraz</value>
+  </data>
+  <data name="EmptyMessage.Text" xml:space="preserve">
+    <value>Nic nie skopiowano</value>
+  </data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Kopiuj ten element</value>
+  </data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Kopiuj</value>
+  </data>
+  <data name="SendButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Wyślij ten element do aktywnej aplikacji</value>
+  </data>
+  <data name="SendButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Wyślij do aktywnej aplikacji</value>
+  </data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Usuń ten element</value>
+  </data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Usuń</value>
+  </data>
+</root>
+

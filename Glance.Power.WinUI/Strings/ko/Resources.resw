@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>전원</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>배터리 및 전원</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>충전량, 전원 공급원 및 예상 배터리 시간을 확인합니다.</value>
+  </data>
+  <data name="Connected" xml:space="preserve">
+    <value>연결됨</value>
+  </data>
+  <data name="PowerStatus" xml:space="preserve">
+    <value>전원 상태</value>
+  </data>
+  <data name="Unavailable" xml:space="preserve">
+    <value>사용할 수 없음</value>
+  </data>
+  <data name="Charging" xml:space="preserve">
+    <value>충전 중</value>
+  </data>
+  <data name="OnBattery" xml:space="preserve">
+    <value>배터리 사용</value>
+  </data>
+  <data name="UsingBattery" xml:space="preserve">
+    <value>배터리 사용 중</value>
+  </data>
+  <data name="Charged" xml:space="preserve">
+    <value>충전됨</value>
+  </data>
+  <data name="FullyCharged" xml:space="preserve">
+    <value>완전히 충전됨</value>
+  </data>
+  <data name="ConnectedToPower" xml:space="preserve">
+    <value>전원에 연결됨</value>
+  </data>
+  <data name="ConnectedAndCharging" xml:space="preserve">
+    <value>연결 및 충전 중</value>
+  </data>
+  <data name="BatteryFullyCharged" xml:space="preserve">
+    <value>배터리가 완전히 충전되었습니다</value>
+  </data>
+  <data name="ConnectedToExternalPower" xml:space="preserve">
+    <value>외부 전원에 연결됨</value>
+  </data>
+  <data name="PowerStatusUnavailable" xml:space="preserve">
+    <value>전원 상태를 사용할 수 없음</value>
+  </data>
+  <data name="EstimatingRemainingTime" xml:space="preserve">
+    <value>남은 시간 계산 중</value>
+  </data>
+  <data name="HoursMinutesRemaining" xml:space="preserve">
+    <value>{0}시간 {1}분 남음</value>
+  </data>
+  <data name="HoursRemaining" xml:space="preserve">
+    <value>{0}시간 남음</value>
+  </data>
+  <data name="MinutesRemaining" xml:space="preserve">
+    <value>{0}분 남음</value>
+  </data>
+</root>
+

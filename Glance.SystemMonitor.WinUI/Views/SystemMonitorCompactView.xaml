@@ -32,9 +32,9 @@
                 Text="{x:Bind ViewModel.CpuText, Mode=OneWay}" />
             <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="3">
                 <TextBlock
+                    x:Uid="RamLabel"
                     FontSize="11"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="RAM" />
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 <TextBlock
                     FontSize="11"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"

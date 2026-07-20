@@ -13,8 +13,6 @@ public partial class StopwatchViewModel : ObservableObject
     [ObservableProperty]
     private string elapsed = "00:00.00";
 
-    public string Title => "Stopwatch";
-
     public string ToggleGlyph => IsRunning ? "\uF8AE" : "\uF5B0";
 
     public void Toggle()

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle.Text" xml:space="preserve">
+    <value>타이머</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>타이머</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>카운트다운을 실행하고 완료되면 알림을 받습니다.</value>
+  </data>
+  <data name="DecreaseButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>1분 줄이기</value>
+  </data>
+  <data name="DecreaseButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>1분 줄이기</value>
+  </data>
+  <data name="IncreaseButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>1분 늘리기</value>
+  </data>
+  <data name="IncreaseButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>1분 늘리기</value>
+  </data>
+  <data name="ToggleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>시작 또는 일시 중지</value>
+  </data>
+  <data name="ToggleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>시작 또는 일시 중지</value>
+  </data>
+  <data name="ResetButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>초기화</value>
+  </data>
+  <data name="ResetButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>초기화</value>
+  </data>
+</root>
+

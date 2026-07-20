@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>Energie</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>Batterij en energie</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>Bekijk lading, voedingsbron en geschatte resterende batterijduur.</value>
+  </data>
+  <data name="Connected" xml:space="preserve">
+    <value>Verbonden</value>
+  </data>
+  <data name="PowerStatus" xml:space="preserve">
+    <value>Energiestatus</value>
+  </data>
+  <data name="Unavailable" xml:space="preserve">
+    <value>Niet beschikbaar</value>
+  </data>
+  <data name="Charging" xml:space="preserve">
+    <value>Bezig met opladen</value>
+  </data>
+  <data name="OnBattery" xml:space="preserve">
+    <value>Op batterij</value>
+  </data>
+  <data name="UsingBattery" xml:space="preserve">
+    <value>Batterij wordt gebruikt</value>
+  </data>
+  <data name="Charged" xml:space="preserve">
+    <value>Opgeladen</value>
+  </data>
+  <data name="FullyCharged" xml:space="preserve">
+    <value>Volledig opgeladen</value>
+  </data>
+  <data name="ConnectedToPower" xml:space="preserve">
+    <value>Aangesloten op voeding</value>
+  </data>
+  <data name="ConnectedAndCharging" xml:space="preserve">
+    <value>Aangesloten en wordt opgeladen</value>
+  </data>
+  <data name="BatteryFullyCharged" xml:space="preserve">
+    <value>De batterij is volledig opgeladen</value>
+  </data>
+  <data name="ConnectedToExternalPower" xml:space="preserve">
+    <value>Aangesloten op externe voeding</value>
+  </data>
+  <data name="PowerStatusUnavailable" xml:space="preserve">
+    <value>Energiestatus niet beschikbaar</value>
+  </data>
+  <data name="EstimatingRemainingTime" xml:space="preserve">
+    <value>Resterende tijd schatten</value>
+  </data>
+  <data name="HoursMinutesRemaining" xml:space="preserve">
+    <value>Nog {0} uur en {1} min.</value>
+  </data>
+  <data name="HoursRemaining" xml:space="preserve">
+    <value>Nog {0} uur</value>
+  </data>
+  <data name="MinutesRemaining" xml:space="preserve">
+    <value>Nog {0} min.</value>
+  </data>
+</root>
+

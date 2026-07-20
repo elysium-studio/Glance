@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>Media</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>Media afspelen</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>Bekijk het huidige nummer en bedien het afspelen van systeemmedia.</value>
+  </data>
+  <data name="NothingPlaying" xml:space="preserve">
+    <value>Er wordt niets afgespeeld</value>
+  </data>
+  <data name="OpenMediaApp" xml:space="preserve">
+    <value>Open een media-app om te beginnen</value>
+  </data>
+  <data name="UnknownTrack" xml:space="preserve">
+    <value>Onbekend nummer</value>
+  </data>
+  <data name="UnknownArtist" xml:space="preserve">
+    <value>Onbekende artiest</value>
+  </data>
+  <data name="PreviousButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Vorige</value>
+  </data>
+  <data name="PreviousButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Vorige</value>
+  </data>
+  <data name="ToggleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Afspelen of pauzeren</value>
+  </data>
+  <data name="ToggleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Afspelen of pauzeren</value>
+  </data>
+  <data name="NextButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Volgende</value>
+  </data>
+  <data name="NextButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Volgende</value>
+  </data>
+</root>
+

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve">
+    <value>クリップボード</value>
+  </data>
+  <data name="ModuleDisplayName" xml:space="preserve">
+    <value>クリップボード シェルフ</value>
+  </data>
+  <data name="ModuleDescription" xml:space="preserve">
+    <value>最近のクリップを参照し、アクティブなアプリに送信したり履歴を管理したりします。</value>
+  </data>
+  <data name="ClipboardEmpty" xml:space="preserve">
+    <value>クリップボードは空です</value>
+  </data>
+  <data name="CopySomethingToBegin" xml:space="preserve">
+    <value>何かをコピーして開始します</value>
+  </data>
+  <data name="WaitingForClipboard" xml:space="preserve">
+    <value>クリップボードの内容を待機しています</value>
+  </data>
+  <data name="CopiedToClipboard" xml:space="preserve">
+    <value>クリップボードにコピーしました</value>
+  </data>
+  <data name="CopyFailed" xml:space="preserve">
+    <value>この項目をコピーできませんでした</value>
+  </data>
+  <data name="SentToFocusedApp" xml:space="preserve">
+    <value>アクティブなアプリに送信しました</value>
+  </data>
+  <data name="SendFailed" xml:space="preserve">
+    <value>この項目を送信できませんでした</value>
+  </data>
+  <data name="RemovedFromHistory" xml:space="preserve">
+    <value>クリップボード履歴から削除しました</value>
+  </data>
+  <data name="RemoveFailed" xml:space="preserve">
+    <value>この項目を削除できませんでした</value>
+  </data>
+  <data name="HistoryCleared" xml:space="preserve">
+    <value>クリップボード履歴を消去しました</value>
+  </data>
+  <data name="ClearFailed" xml:space="preserve">
+    <value>クリップボード履歴を消去できませんでした</value>
+  </data>
+  <data name="RecentClipsNone" xml:space="preserve">
+    <value>最近のクリップはありません</value>
+  </data>
+  <data name="RecentClipsOne" xml:space="preserve">
+    <value>最近のクリップ 1 件</value>
+  </data>
+  <data name="RecentClipsMany" xml:space="preserve">
+    <value>最近のクリップ {0} 件</value>
+  </data>
+  <data name="FilesAndMore" xml:space="preserve">
+    <value>{0}、他 {1} 件</value>
+  </data>
+  <data name="KindFiles" xml:space="preserve">
+    <value>ファイル</value>
+  </data>
+  <data name="CopiedImage" xml:space="preserve">
+    <value>コピーした画像</value>
+  </data>
+  <data name="KindImage" xml:space="preserve">
+    <value>画像</value>
+  </data>
+  <data name="KindLink" xml:space="preserve">
+    <value>リンク</value>
+  </data>
+  <data name="CopiedText" xml:space="preserve">
+    <value>コピーしたテキスト</value>
+  </data>
+  <data name="KindText" xml:space="preserve">
+    <value>テキスト</value>
+  </data>
+  <data name="RichHtmlContent" xml:space="preserve">
+    <value>リッチ HTML コンテンツ</value>
+  </data>
+  <data name="KindHtml" xml:space="preserve">
+    <value>HTML</value>
+  </data>
+  <data name="FormattedText" xml:space="preserve">
+    <value>書式付きテキスト</value>
+  </data>
+  <data name="KindRichText" xml:space="preserve">
+    <value>リッチ テキスト</value>
+  </data>
+  <data name="UnsupportedContent" xml:space="preserve">
+    <value>サポートされていないクリップボード コンテンツ</value>
+  </data>
+  <data name="KindOther" xml:space="preserve">
+    <value>その他</value>
+  </data>
+  <data name="TimeNow" xml:space="preserve">
+    <value>たった今</value>
+  </data>
+  <data name="EmptyMessage.Text" xml:space="preserve">
+    <value>コピーした項目はありません</value>
+  </data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>このクリップをコピー</value>
+  </data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>コピー</value>
+  </data>
+  <data name="SendButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>このクリップをアクティブなアプリに送信</value>
+  </data>
+  <data name="SendButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>アクティブなアプリに送信</value>
+  </data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>このクリップを削除</value>
+  </data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>削除</value>
+  </data>
+</root>
+
