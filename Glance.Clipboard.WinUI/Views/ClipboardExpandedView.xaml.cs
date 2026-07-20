@@ -15,6 +15,8 @@ public sealed partial class ClipboardExpandedView : UserControl
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
+    private string ToUpper(string value) => value.ToUpperInvariant();
+
     private async void HandleCopyClick(object sender, RoutedEventArgs args)
     {
         if (GetEntry(sender) is ClipboardEntry entry)

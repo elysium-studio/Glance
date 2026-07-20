@@ -2,17 +2,13 @@
     x:Class="Glance.Clipboard.WinUI.ClipboardExpandedView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:Clipboard="using:Glance.Clipboard">
+    xmlns:Clipboard="using:Glance.Clipboard"
+    xmlns:Controls="using:Elysium.UI.Controls.WinUI">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Themes/Clipboard.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <Style x:Key="ClipboardFlipViewItemStyle" TargetType="FlipViewItem">
-                <Setter Property="Padding" Value="0" />
-                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                <Setter Property="VerticalContentAlignment" Value="Stretch" />
-            </Style>
             <Style
                 x:Key="ClipboardActionButtonStyle"
                 BasedOn="{StaticResource SubtleButtonStyle}"
@@ -25,92 +21,110 @@
                 <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
                 <Setter Property="FontSize" Value="12" />
             </Style>
+            <DataTemplate
+                x:Key="ClipboardItemTemplate"
+                x:DataType="Clipboard:ClipboardEntry">
+                <Grid Padding="0,0,20,0" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel
+                        VerticalAlignment="Center"
+                        Spacing="1"
+                        ToolTipService.ToolTip="{x:Bind Preview}">
+                        <TextBlock
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            MaxLines="1"
+                            Text="{x:Bind Preview}"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="NoWrap" />
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <TextBlock
+                                FontSize="10"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind KindLabel}" />
+                            <TextBlock
+                                FontSize="10"
+                                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                Text="&#x2022;" />
+                            <TextBlock
+                                FontSize="10"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind TimeText}" />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="2">
+                        <Button
+                            AutomationProperties.Name="Copy this clip"
+                            Click="HandleCopyClick"
+                            Content="&#xE8C8;"
+                            Style="{StaticResource ClipboardActionButtonStyle}"
+                            ToolTipService.ToolTip="Copy" />
+                        <Button
+                            AutomationProperties.Name="Send this clip to focused app"
+                            Click="HandlePasteClick"
+                            Content="&#xE72D;"
+                            Style="{StaticResource ClipboardActionButtonStyle}"
+                            ToolTipService.ToolTip="Send to focused app" />
+                        <Button
+                            AutomationProperties.Name="Remove this clip"
+                            Click="HandleRemoveClick"
+                            Content="&#xE74D;"
+                            Style="{StaticResource ClipboardActionButtonStyle}"
+                            ToolTipService.ToolTip="Remove" />
+                    </StackPanel>
+                </Grid>
+            </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid Padding="14,8,14,28" ColumnSpacing="8">
+    <Grid Padding="20,12,14,26">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="32" />
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <FontIcon
+        <Grid
             x:Name="StatusIndicator"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            FontFamily="Segoe Fluent Icons"
-            FontSize="24"
-            Foreground="{ThemeResource GlanceClipboardIconBrush}"
-            Glyph="&#xF0E3;" />
-        <FlipView
-            x:Name="ClipboardFlipView"
+            Width="36"
+            Height="36"
+            VerticalAlignment="Center">
+            <FontIcon
+                Width="30"
+                Height="30"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="30"
+                Foreground="{ThemeResource GlanceClipboardIconBrush}"
+                Glyph="&#xF0E3;" />
+        </Grid>
+        <Grid
             Grid.Column="1"
             Height="58"
-            Padding="0"
+            Margin="12,0,0,0"
             VerticalAlignment="Center"
-            Background="Transparent"
-            BorderThickness="0"
-            ItemContainerStyle="{StaticResource ClipboardFlipViewItemStyle}"
-            ItemsSource="{x:Bind ViewModel.ShelfItems}"
-            SelectedItem="{x:Bind ViewModel.SelectedEntry, Mode=TwoWay}">
-            <FlipView.ItemTemplate>
-                <DataTemplate x:DataType="Clipboard:ClipboardEntry">
-                    <Grid Padding="34,0" ColumnSpacing="9">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel
-                            VerticalAlignment="Center"
-                            Spacing="1"
-                            ToolTipService.ToolTip="{x:Bind Preview}">
-                            <TextBlock
-                                FontSize="14"
-                                FontWeight="SemiBold"
-                                MaxLines="1"
-                                Text="{x:Bind Preview}"
-                                TextTrimming="CharacterEllipsis"
-                                TextWrapping="NoWrap" />
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <TextBlock
-                                    FontSize="10"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="{x:Bind KindLabel}" />
-                                <TextBlock
-                                    FontSize="10"
-                                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                                    Text="&#x2022;" />
-                                <TextBlock
-                                    FontSize="10"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="{x:Bind TimeText}" />
-                            </StackPanel>
-                        </StackPanel>
-                        <StackPanel
-                            Grid.Column="1"
-                            VerticalAlignment="Center"
-                            Orientation="Horizontal"
-                            Spacing="2">
-                            <Button
-                                AutomationProperties.Name="Copy this clip"
-                                Click="HandleCopyClick"
-                                Content="&#xE8C8;"
-                                Style="{StaticResource ClipboardActionButtonStyle}"
-                                ToolTipService.ToolTip="Copy" />
-                            <Button
-                                AutomationProperties.Name="Send this clip to focused app"
-                                Click="HandlePasteClick"
-                                Content="&#xE72D;"
-                                Style="{StaticResource ClipboardActionButtonStyle}"
-                                ToolTipService.ToolTip="Send to focused app" />
-                            <Button
-                                AutomationProperties.Name="Remove this clip"
-                                Click="HandleRemoveClick"
-                                Content="&#xE74D;"
-                                Style="{StaticResource ClipboardActionButtonStyle}"
-                                ToolTipService.ToolTip="Remove" />
-                        </StackPanel>
-                    </Grid>
-                </DataTemplate>
-            </FlipView.ItemTemplate>
-        </FlipView>
+            RowSpacing="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="14" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBlock
+                FontSize="11"
+                FontWeight="SemiBold"
+                Foreground="{ThemeResource GlanceClipboardIconBrush}"
+                Text="{x:Bind ToUpper(ViewModel.Title)}" />
+            <Controls:CompactFlipView
+                x:Name="ClipboardFlipView"
+                Grid.Row="1"
+                Background="Transparent"
+                ItemTemplate="{StaticResource ClipboardItemTemplate}"
+                ItemsSource="{x:Bind ViewModel.ShelfItems}"
+                SelectedItem="{x:Bind ViewModel.SelectedEntry, Mode=TwoWay}" />
+        </Grid>
     </Grid>
 </UserControl>
