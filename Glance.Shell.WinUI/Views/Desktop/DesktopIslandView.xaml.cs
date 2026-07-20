@@ -20,6 +20,7 @@ public partial class DesktopIslandView :
 {
     private DataPackageView? activeDragDataView;
     private int previousIndex;
+    private bool skipNextConnectedExpansion;
 
     public DesktopIslandView()
     {
@@ -58,6 +59,12 @@ public partial class DesktopIslandView :
     {
         if (args.PropertyName == nameof(DesktopIslandViewModel.IsExpanded))
         {
+            if (skipNextConnectedExpansion)
+            {
+                skipNextConnectedExpansion = false;
+                return;
+            }
+
             PlayConnectedExpansionAnimation();
             return;
         }
@@ -69,6 +76,7 @@ public partial class DesktopIslandView :
 
         int selectedIndex = ViewModel.SelectedIndex;
         int direction = selectedIndex > previousIndex ? 1 : -1;
+        skipNextConnectedExpansion = true;
 
         if (previousIndex == ViewModel.ComponentCount - 1 && selectedIndex == 0)
         {
@@ -83,6 +91,7 @@ public partial class DesktopIslandView :
 
         DispatcherQueue.TryEnqueue(() =>
         {
+            skipNextConnectedExpansion = false;
             FluentMotion.PlayHorizontalPageTransition(CompactPresenter, direction);
             FluentMotion.PlayHorizontalPageTransition(ExpandedPresenter, direction);
         });
@@ -105,7 +114,8 @@ public partial class DesktopIslandView :
             : component.CompactAnimationElement;
 
         if (sourceElement is not FrameworkElement source ||
-            destinationElement is not FrameworkElement destination)
+            destinationElement is not FrameworkElement destination ||
+            !IsInElementTree(source))
         {
             return;
         }
@@ -114,21 +124,39 @@ public partial class DesktopIslandView :
             ConnectedAnimationService.GetForCurrentView();
         string animationKey = $"DesktopIsland.{selectedComponent.Id}.Status";
 
-        animationService.PrepareToAnimate(animationKey, source);
+        try
+        {
+            animationService.PrepareToAnimate(animationKey, source);
+        }
+        catch (ArgumentException)
+        {
+            return;
+        }
 
         DispatcherQueue.TryEnqueue(() =>
         {
             ConnectedAnimation? animation = animationService.GetAnimation(animationKey);
 
-            if (animation is null)
+            if (animation is null || !IsInElementTree(destination))
             {
                 return;
             }
 
             animation.Configuration = new DirectConnectedAnimationConfiguration();
-            animation.TryStart(destination);
+
+            try
+            {
+                animation.TryStart(destination);
+            }
+            catch (ArgumentException)
+            {
+                // The destination can detach if the island changes state again mid-transition.
+            }
         });
     }
+
+    private static bool IsInElementTree(FrameworkElement element) =>
+        element.IsLoaded && element.XamlRoot is not null;
 
     private void HandlePointerWheelChanged(object sender, PointerRoutedEventArgs args)
     {
