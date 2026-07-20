@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using Glance.Application.Abstractions;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,13 +72,10 @@ public partial class DesktopIslandViewModel :
         ? "0 / 0"
         : $"{SelectedIndex + 1} / {components.Count}";
 
-    [RelayCommand]
     public void MoveNext() => Move(1);
 
-    [RelayCommand]
     public void MovePrevious() => Move(-1);
 
-    [RelayCommand]
     public void OpenSettings() => settingsLauncher.Show();
 
     public void Move(int offset)

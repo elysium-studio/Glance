@@ -31,6 +31,6 @@
             FontWeight="SemiBold"
             Foreground="{ThemeResource TextFillColorPrimaryBrush}"
             Style="{StaticResource BodyLargeTextBlockStyle}"
-            Text="{Binding RemainingText}" />
+            Text="{x:Bind ViewModel.RemainingText, Mode=OneWay}" />
     </Grid>
 </UserControl>

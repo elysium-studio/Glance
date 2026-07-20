@@ -7,9 +7,11 @@ public sealed partial class ClipboardCompactView : UserControl
 {
     public ClipboardCompactView(ClipboardShelfViewModel viewModel)
     {
+        ViewModel = viewModel;
         InitializeComponent();
-        DataContext = viewModel;
     }
+
+    public ClipboardShelfViewModel ViewModel { get; }
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 }

@@ -31,6 +31,6 @@
             FontWeight="SemiBold"
             Foreground="{ThemeResource TextFillColorPrimaryBrush}"
             Style="{StaticResource BodyLargeTextBlockStyle}"
-            Text="{Binding Elapsed}" />
+            Text="{x:Bind ViewModel.Elapsed, Mode=OneWay}" />
     </Grid>
 </UserControl>

@@ -35,12 +35,12 @@
                 FontSize="11"
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource GlanceTimerIconBrush}"
-                Text="TIMER" />
+                Text="{x:Bind ToUpper(ViewModel.Title)}" />
             <TextBlock
                 FontSize="27"
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                Text="{Binding RemainingText}" />
+                Text="{x:Bind ViewModel.RemainingText, Mode=OneWay}" />
         </StackPanel>
         <StackPanel
             Grid.Column="2"
@@ -50,15 +50,15 @@
             <Button
                 Height="32"
                 Padding="12,0"
-                Command="{Binding AddMinuteCommand}"
+                Click="{x:Bind ViewModel.AddMinute}"
                 Content="+1 min"
                 CornerRadius="16" />
             <Button
                 Width="32"
                 Height="32"
                 Padding="0"
-                Command="{Binding ToggleCommand}"
-                Content="{Binding ToggleGlyph}"
+                Click="{x:Bind ViewModel.Toggle}"
+                Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}"
                 CornerRadius="16"
                 FontFamily="Segoe Fluent Icons"
                 Style="{StaticResource AccentButtonStyle}" />
@@ -66,7 +66,7 @@
                 Width="32"
                 Height="32"
                 Padding="0"
-                Command="{Binding ResetCommand}"
+                Click="{x:Bind ViewModel.Reset}"
                 Content="&#xE777;"
                 CornerRadius="16"
                 FontFamily="Segoe Fluent Icons"

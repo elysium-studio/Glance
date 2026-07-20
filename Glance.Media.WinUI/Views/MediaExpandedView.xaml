@@ -24,7 +24,7 @@
                     FontSize="26"
                     Foreground="{ThemeResource GlanceMediaIconBrush}"
                     Glyph="&#xE8D6;" />
-                <Image Source="{Binding Artwork}" Stretch="UniformToFill" />
+                <Image Source="{x:Bind ToImageSource(ViewModel.Artwork), Mode=OneWay}" Stretch="UniformToFill" />
             </Grid>
         </Border>
         <StackPanel
@@ -35,18 +35,18 @@
                 FontSize="11"
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource GlanceMediaIconBrush}"
-                Text="{Binding Source}" />
+                Text="{x:Bind ToUpper(ViewModel.Source), Mode=OneWay}" />
             <TextBlock
                 FontWeight="SemiBold"
                 MaxLines="1"
                 Style="{StaticResource BodyLargeTextBlockStyle}"
-                Text="{Binding Title}"
+                Text="{x:Bind ViewModel.Title, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="NoWrap" />
             <TextBlock
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
-                Text="{Binding Artist}"
+                Text="{x:Bind ViewModel.Artist, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="NoWrap" />
         </StackPanel>
@@ -59,7 +59,7 @@
                 Width="32"
                 Height="32"
                 Padding="0"
-                Command="{Binding PreviousCommand}"
+                Click="{x:Bind ViewModel.Previous}"
                 Content="&#xE622;"
                 CornerRadius="16"
                 FontFamily="Segoe Fluent Icons"
@@ -69,8 +69,8 @@
                 Width="38"
                 Height="38"
                 Padding="0"
-                Command="{Binding TogglePlaybackCommand}"
-                Content="{Binding PlayPauseGlyph}"
+                Click="{x:Bind ViewModel.TogglePlayback}"
+                Content="{x:Bind ViewModel.PlayPauseGlyph, Mode=OneWay}"
                 CornerRadius="19"
                 FontFamily="Segoe Fluent Icons"
                 FontSize="18"
@@ -80,7 +80,7 @@
                 Width="32"
                 Height="32"
                 Padding="0"
-                Command="{Binding NextCommand}"
+                Click="{x:Bind ViewModel.Next}"
                 Content="&#xE623;"
                 CornerRadius="16"
                 FontFamily="Segoe Fluent Icons"

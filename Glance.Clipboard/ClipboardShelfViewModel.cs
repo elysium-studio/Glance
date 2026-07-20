@@ -19,6 +19,8 @@ public partial class ClipboardShelfViewModel : ObservableObject
     [ObservableProperty]
     private string historyStatus = "Waiting for clipboard content";
 
+    public string Title => "Clipboard";
+
     public ObservableCollection<ClipboardEntry> ShelfItems { get; } = [];
 
     public void ConfigureRestore(Func<ClipboardEntry, Task<bool>> restore) =>

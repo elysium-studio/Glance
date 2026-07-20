@@ -7,9 +7,13 @@ public sealed partial class PowerExpandedView : UserControl
 {
     public PowerExpandedView(PowerViewModel viewModel)
     {
+        ViewModel = viewModel;
         InitializeComponent();
-        DataContext = viewModel;
     }
 
+    public PowerViewModel ViewModel { get; }
+
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
+
+    private string ToUpper(string value) => value.ToUpperInvariant();
 }

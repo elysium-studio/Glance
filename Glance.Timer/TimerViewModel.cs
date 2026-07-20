@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using System.Diagnostics;
 
 namespace Glance.Timer;
@@ -17,10 +16,11 @@ public partial class TimerViewModel : ObservableObject
     [ObservableProperty]
     private string remainingText = "05:00";
 
+    public string Title => "Timer";
+
     public string ToggleGlyph => IsRunning ? "\uF8AE" : "\uF5B0";
 
-    [RelayCommand]
-    private void Toggle()
+    public void Toggle()
     {
         if (IsRunning)
         {
@@ -34,16 +34,14 @@ public partial class TimerViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]
-    private void Reset()
+    public void Reset()
     {
         IsRunning = false;
         remaining = duration;
         UpdateText();
     }
 
-    [RelayCommand]
-    private void AddMinute()
+    public void AddMinute()
     {
         duration += TimeSpan.FromMinutes(1);
         remaining += TimeSpan.FromMinutes(1);

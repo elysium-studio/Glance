@@ -7,9 +7,11 @@ public sealed partial class SystemMonitorExpandedView : UserControl
 {
     public SystemMonitorExpandedView(SystemMonitorViewModel viewModel)
     {
+        ViewModel = viewModel;
         InitializeComponent();
-        DataContext = viewModel;
     }
+
+    public SystemMonitorViewModel ViewModel { get; }
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 }

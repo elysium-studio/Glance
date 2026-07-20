@@ -237,7 +237,7 @@ public sealed class MediaComponent :
         currentTitle = null;
         viewModel.Title = "Nothing playing";
         viewModel.Artist = "Open a media app to begin";
-        viewModel.Source = "MEDIA";
+        viewModel.Source = "Media";
         viewModel.Artwork = null;
         viewModel.IsPlaying = false;
         viewModel.HasSession = false;
@@ -284,7 +284,6 @@ public sealed class MediaComponent :
         }
 
         return source.Replace("exe", string.Empty, StringComparison.OrdinalIgnoreCase)
-            .TrimEnd('.')
-            .ToUpperInvariant();
+            .TrimEnd('.');
     }
 }

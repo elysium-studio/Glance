@@ -7,14 +7,15 @@ public sealed partial class ClipboardExpandedView : UserControl
 {
     public ClipboardExpandedView(ClipboardShelfViewModel viewModel)
     {
+        ViewModel = viewModel;
         InitializeComponent();
-        DataContext = viewModel;
     }
+
+    public ClipboardShelfViewModel ViewModel { get; }
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
-    private ClipboardShelfViewModel ViewModel =>
-        (ClipboardShelfViewModel)DataContext;
+    private string ToUpper(string value) => value.ToUpperInvariant();
 
     private async void HandleItemClick(object sender, ItemClickEventArgs args)
     {

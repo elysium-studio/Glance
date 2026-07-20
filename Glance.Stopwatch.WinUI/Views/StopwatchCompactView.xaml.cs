@@ -7,9 +7,11 @@ public sealed partial class StopwatchCompactView : UserControl
 {
     public StopwatchCompactView(StopwatchViewModel viewModel)
     {
+        ViewModel = viewModel;
         InitializeComponent();
-        DataContext = viewModel;
     }
+
+    public StopwatchViewModel ViewModel { get; }
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 }

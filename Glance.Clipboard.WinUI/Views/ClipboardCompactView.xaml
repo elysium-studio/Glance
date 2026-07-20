@@ -30,12 +30,12 @@
             Spacing="0">
             <TextBlock
                 Style="{StaticResource BaseTextBlockStyle}"
-                Text="{Binding LatestPreview}"
+                Text="{x:Bind ViewModel.LatestPreview, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis" />
             <TextBlock
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
-                Text="{Binding LatestKind}" />
+                Text="{x:Bind ViewModel.LatestKind, Mode=OneWay}" />
         </StackPanel>
     </Grid>
 </UserControl>

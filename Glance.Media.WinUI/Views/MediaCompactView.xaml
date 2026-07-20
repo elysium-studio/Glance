@@ -24,19 +24,19 @@
                     FontSize="14"
                     Foreground="{ThemeResource GlanceMediaIconBrush}"
                     Glyph="&#xE8D6;" />
-                <Image Source="{Binding Artwork}" Stretch="UniformToFill" />
+                <Image Source="{x:Bind ToImageSource(ViewModel.Artwork), Mode=OneWay}" Stretch="UniformToFill" />
             </Grid>
         </Border>
         <StackPanel Grid.Column="1" VerticalAlignment="Center">
             <TextBlock
                 Style="{StaticResource BaseTextBlockStyle}"
-                Text="{Binding Title}"
+                Text="{x:Bind ViewModel.Title, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="NoWrap" />
             <TextBlock
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
-                Text="{Binding Artist}"
+                Text="{x:Bind ViewModel.Artist, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="NoWrap" />
         </StackPanel>

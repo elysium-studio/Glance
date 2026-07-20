@@ -7,9 +7,11 @@ public sealed partial class PowerCompactView : UserControl
 {
     public PowerCompactView(PowerViewModel viewModel)
     {
+        ViewModel = viewModel;
         InitializeComponent();
-        DataContext = viewModel;
     }
+
+    public PowerViewModel ViewModel { get; }
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 }

@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 
 namespace Glance.Media;
 
@@ -12,7 +11,7 @@ public partial class MediaViewModel : ObservableObject
     private string artist = "Open a media app to begin";
 
     [ObservableProperty]
-    private string source = "MEDIA";
+    private string source = "Media";
 
     [ObservableProperty]
     private object? artwork;
@@ -28,15 +27,12 @@ public partial class MediaViewModel : ObservableObject
 
     public event EventHandler<MediaPlaybackAction>? PlaybackActionRequested;
 
-    [RelayCommand]
-    private void Previous() =>
+    public void Previous() =>
         PlaybackActionRequested?.Invoke(this, MediaPlaybackAction.Previous);
 
-    [RelayCommand]
-    private void TogglePlayback() =>
+    public void TogglePlayback() =>
         PlaybackActionRequested?.Invoke(this, MediaPlaybackAction.TogglePlayback);
 
-    [RelayCommand]
-    private void Next() =>
+    public void Next() =>
         PlaybackActionRequested?.Invoke(this, MediaPlaybackAction.Next);
 }

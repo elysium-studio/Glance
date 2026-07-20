@@ -43,12 +43,12 @@
                 <TextBlock
                     FontSize="16"
                     FontWeight="SemiBold"
-                    Text="{Binding CpuText}" />
+                    Text="{x:Bind ViewModel.CpuText, Mode=OneWay}" />
                 <ProgressBar
                     Height="3"
                     Foreground="{ThemeResource GlanceSystemIconBrush}"
                     Maximum="100"
-                    Value="{Binding CpuUsage}" />
+                    Value="{x:Bind ViewModel.CpuUsage, Mode=OneWay}" />
             </StackPanel>
         </Border>
         <Border
@@ -67,12 +67,12 @@
                 <TextBlock
                     FontSize="16"
                     FontWeight="SemiBold"
-                    Text="{Binding MemoryText}" />
+                    Text="{x:Bind ViewModel.MemoryText, Mode=OneWay}" />
                 <ProgressBar
                     Height="3"
                     Foreground="{ThemeResource GlanceSystemIconBrush}"
                     Maximum="100"
-                    Value="{Binding MemoryUsage}" />
+                    Value="{x:Bind ViewModel.MemoryUsage, Mode=OneWay}" />
             </StackPanel>
         </Border>
         <Border
@@ -97,7 +97,7 @@
                         <TextBlock
                             FontSize="11"
                             FontWeight="SemiBold"
-                            Text="{Binding DownloadText}" />
+                            Text="{x:Bind ViewModel.DownloadText, Mode=OneWay}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Spacing="3">
                         <FontIcon
@@ -107,7 +107,7 @@
                         <TextBlock
                             FontSize="10"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{Binding UploadText}" />
+                            Text="{x:Bind ViewModel.UploadText, Mode=OneWay}" />
                     </StackPanel>
                 </StackPanel>
             </StackPanel>

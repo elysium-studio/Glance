@@ -35,18 +35,18 @@
                 FontSize="11"
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource GlanceClipboardIconBrush}"
-                Text="CLIPBOARD" />
+                Text="{x:Bind ToUpper(ViewModel.Title)}" />
             <TextBlock
                 FontWeight="SemiBold"
                 MaxLines="2"
                 Style="{StaticResource BodyLargeTextBlockStyle}"
-                Text="{Binding LatestPreview}"
+                Text="{x:Bind ViewModel.LatestPreview, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="NoWrap" />
             <TextBlock
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
-                Text="{Binding LatestKind}"
+                Text="{x:Bind ViewModel.LatestKind, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="NoWrap" />
         </StackPanel>

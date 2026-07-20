@@ -7,9 +7,11 @@ public sealed partial class SystemMonitorCompactView : UserControl
 {
     public SystemMonitorCompactView(SystemMonitorViewModel viewModel)
     {
+        ViewModel = viewModel;
         InitializeComponent();
-        DataContext = viewModel;
     }
+
+    public SystemMonitorViewModel ViewModel { get; }
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 }

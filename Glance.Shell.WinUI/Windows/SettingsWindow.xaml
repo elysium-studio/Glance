@@ -56,7 +56,7 @@
                     AllowDrop="True"
                     CanDragItems="True"
                     CanReorderItems="True"
-                    DragItemsCompleted="HandleDragItemsCompleted"
+                    DragItemsCompleted="{x:Bind HandleDragItemsCompleted}"
                     ItemsSource="{x:Bind ViewModel.Modules, Mode=OneWay}"
                     ReorderMode="Enabled"
                     SelectionMode="None">

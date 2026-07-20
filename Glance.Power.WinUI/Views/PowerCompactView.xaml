@@ -30,7 +30,7 @@
                         Background="Transparent"
                         Foreground="{ThemeResource GlancePowerIconBrush}"
                         Maximum="100"
-                        Value="{Binding ChargePercent}" />
+                        Value="{x:Bind ViewModel.ChargePercent, Mode=OneWay}" />
                 </Border>
                 <Border
                     Width="3"
@@ -45,13 +45,13 @@
             VerticalAlignment="Center"
             FontSize="15"
             FontWeight="SemiBold"
-            Text="{Binding ChargeText}" />
+            Text="{x:Bind ViewModel.ChargeText, Mode=OneWay}" />
         <TextBlock
             Grid.Column="2"
             VerticalAlignment="Center"
             FontSize="11"
             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-            Text="{Binding CompactStatusText}"
+            Text="{x:Bind ViewModel.CompactStatusText, Mode=OneWay}"
             TextTrimming="CharacterEllipsis" />
     </Grid>
 </UserControl>

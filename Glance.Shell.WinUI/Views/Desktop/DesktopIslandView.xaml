@@ -4,12 +4,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:Controls="using:Elysium.UI.Controls.WinUI"
     xmlns:WinUI="using:Elysium.UI.WinUI"
-    CompactWidth="220"
+    CompactHeight="52"
+    CompactWidth="228"
     DataContext="{WinUI:ViewModel Key=DesktopIslandView}"
     IsExpanded="{x:Bind ViewModel.IsExpanded, Mode=TwoWay}"
     IsOpen="{x:Bind ViewModel.IsOpen, Mode=TwoWay}"
     IsTabStop="False"
-    PointerWheelChanged="HandlePointerWheelChanged">
+    PointerWheelChanged="{x:Bind HandlePointerWheelChanged}">
     <Controls:DesktopIsland.CompactContent>
         <ContentPresenter
             x:Name="CompactPresenter"
@@ -28,10 +29,10 @@
                 Spacing="6">
                 <PipsPager
                     Height="24"
-                    IsEnabled="{x:Bind ViewModel.HasMultipleComponents}"
+                    IsEnabled="{x:Bind ViewModel.HasMultipleComponents, Mode=OneWay}"
                     MaxVisiblePips="5"
                     NextButtonVisibility="VisibleOnPointerOver"
-                    NumberOfPages="{x:Bind ViewModel.ComponentCount}"
+                    NumberOfPages="{x:Bind ViewModel.ComponentCount, Mode=OneWay}"
                     PreviousButtonVisibility="VisibleOnPointerOver"
                     SelectedPageIndex="{x:Bind ViewModel.SelectedIndex, Mode=TwoWay}" />
                 <Border
@@ -46,7 +47,7 @@
                     VerticalAlignment="Center"
                     Background="Transparent"
                     BorderThickness="0"
-                    Command="{x:Bind ViewModel.OpenSettingsCommand}"
+                    Click="{x:Bind ViewModel.OpenSettings}"
                     Content="&#xE713;"
                     CornerRadius="6"
                     FontFamily="Segoe Fluent Icons"

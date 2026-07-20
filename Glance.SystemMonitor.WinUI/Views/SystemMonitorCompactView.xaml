@@ -29,7 +29,7 @@
                 VerticalAlignment="Center"
                 FontSize="15"
                 FontWeight="SemiBold"
-                Text="{Binding CpuText}" />
+                Text="{x:Bind ViewModel.CpuText, Mode=OneWay}" />
             <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="3">
                 <TextBlock
                     FontSize="11"
@@ -38,7 +38,7 @@
                 <TextBlock
                     FontSize="11"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{Binding MemoryText}" />
+                    Text="{x:Bind ViewModel.MemoryText, Mode=OneWay}" />
             </StackPanel>
         </StackPanel>
     </Grid>

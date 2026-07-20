@@ -7,9 +7,13 @@ public sealed partial class StopwatchExpandedView : UserControl
 {
     public StopwatchExpandedView(StopwatchViewModel viewModel)
     {
+        ViewModel = viewModel;
         InitializeComponent();
-        DataContext = viewModel;
     }
 
+    public StopwatchViewModel ViewModel { get; }
+
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
+
+    private string ToUpper(string value) => value.ToUpperInvariant();
 }

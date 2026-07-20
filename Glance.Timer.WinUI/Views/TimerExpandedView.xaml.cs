@@ -8,9 +8,13 @@ public sealed partial class TimerExpandedView :
 {
     public TimerExpandedView(TimerViewModel viewModel)
     {
+        ViewModel = viewModel;
         InitializeComponent();
-        DataContext = viewModel;
     }
 
+    public TimerViewModel ViewModel { get; }
+
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
+
+    private string ToUpper(string value) => value.ToUpperInvariant();
 }

@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 
 namespace Glance.Stopwatch;
 
@@ -14,10 +13,11 @@ public partial class StopwatchViewModel : ObservableObject
     [ObservableProperty]
     private string elapsed = "00:00.00";
 
+    public string Title => "Stopwatch";
+
     public string ToggleGlyph => IsRunning ? "\uF8AE" : "\uF5B0";
 
-    [RelayCommand]
-    private void Toggle()
+    public void Toggle()
     {
         if (IsRunning)
         {
@@ -33,8 +33,7 @@ public partial class StopwatchViewModel : ObservableObject
         Refresh();
     }
 
-    [RelayCommand]
-    private void Reset()
+    public void Reset()
     {
         stopwatch.Reset();
         IsRunning = false;

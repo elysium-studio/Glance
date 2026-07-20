@@ -4,6 +4,8 @@ namespace Glance.Power;
 
 public partial class PowerViewModel : ObservableObject
 {
+    public string Title => "Power";
+
     [ObservableProperty]
     private double chargePercent = 100;
 

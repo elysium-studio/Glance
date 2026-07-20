@@ -30,7 +30,7 @@
                         Background="Transparent"
                         Foreground="{ThemeResource GlancePowerIconBrush}"
                         Maximum="100"
-                        Value="{Binding ChargePercent}" />
+                        Value="{x:Bind ViewModel.ChargePercent, Mode=OneWay}" />
                 </Border>
                 <Border
                     Width="4"
@@ -48,11 +48,11 @@
                 FontSize="10"
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource GlancePowerIconBrush}"
-                Text="POWER" />
+                Text="{x:Bind ToUpper(ViewModel.Title)}" />
             <TextBlock
                 FontSize="27"
                 FontWeight="SemiBold"
-                Text="{Binding ChargeText}" />
+                Text="{x:Bind ViewModel.ChargeText, Mode=OneWay}" />
         </StackPanel>
         <Border
             Grid.Column="2"
@@ -65,16 +65,16 @@
                 <TextBlock
                     FontSize="12"
                     FontWeight="SemiBold"
-                    Text="{Binding StatusText}" />
+                    Text="{x:Bind ViewModel.StatusText, Mode=OneWay}" />
                 <TextBlock
                     FontSize="10"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{Binding DetailText}"
+                    Text="{x:Bind ViewModel.DetailText, Mode=OneWay}"
                     TextTrimming="CharacterEllipsis" />
                 <TextBlock
                     FontSize="10"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="{Binding PowerSourceText}" />
+                    Text="{x:Bind ViewModel.PowerSourceText, Mode=OneWay}" />
             </StackPanel>
         </Border>
     </Grid>

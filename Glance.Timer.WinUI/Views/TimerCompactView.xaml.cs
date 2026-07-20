@@ -8,9 +8,11 @@ public sealed partial class TimerCompactView :
 {
     public TimerCompactView(TimerViewModel viewModel)
     {
+        ViewModel = viewModel;
         InitializeComponent();
-        DataContext = viewModel;
     }
+
+    public TimerViewModel ViewModel { get; }
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 }
