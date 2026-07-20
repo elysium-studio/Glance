@@ -13,10 +13,7 @@ public sealed partial class ClipboardExpandedView : UserControl
 
     public ClipboardShelfViewModel ViewModel { get; }
 
-    public FrameworkElement ConnectedAnimationElement => ClipboardFlipView;
-
-    private async void HandleClearClick(object sender, RoutedEventArgs args) =>
-        await ViewModel.ClearAsync();
+    public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
     private async void HandleCopyClick(object sender, RoutedEventArgs args)
     {
