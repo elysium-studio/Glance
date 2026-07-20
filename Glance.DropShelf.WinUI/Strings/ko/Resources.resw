@@ -31,7 +31,10 @@
   <data name="DragCaption" xml:space="preserve">
     <value>모아 둔 항목 이동</value>
   </data>
-  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
-    <value>선반 비우기</value>
+  <data name="MoveShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>끌어서 모든 항목 이동</value>
+  </data>
+  <data name="RemoveShelfItemButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>선반에서 제거</value>
   </data>
 </root>

@@ -31,7 +31,10 @@
   <data name="DragCaption" xml:space="preserve">
     <value>Verzamelde items verplaatsen</value>
   </data>
-  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
-    <value>Plank leegmaken</value>
+  <data name="MoveShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Sleep om alle items te verplaatsen</value>
+  </data>
+  <data name="RemoveShelfItemButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Van plank verwijderen</value>
   </data>
 </root>

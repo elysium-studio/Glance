@@ -31,7 +31,10 @@
   <data name="DragCaption" xml:space="preserve">
     <value>[Ṁöṽë šţåğëð ïţëɱš]</value>
   </data>
-  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
-    <value>[Çļëåř šĥëļƒ]</value>
+  <data name="MoveShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>[Ðřåğ ţö ɱöṽë åļļ ïţëɱš]</value>
+  </data>
+  <data name="RemoveShelfItemButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>[Řëɱöṽë ƒřöɱ šĥëļƒ]</value>
   </data>
 </root>

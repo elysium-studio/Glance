@@ -31,7 +31,10 @@
   <data name="DragCaption" xml:space="preserve">
     <value>Mover elementos guardados</value>
   </data>
-  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
-    <value>Vaciar bandeja</value>
+  <data name="MoveShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Arrastra para mover todos los elementos</value>
+  </data>
+  <data name="RemoveShelfItemButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Quitar de la bandeja</value>
   </data>
 </root>

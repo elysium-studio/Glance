@@ -10,27 +10,47 @@
             </ResourceDictionary.MergedDictionaries>
             <DataTemplate x:Key="DropShelfItemTemplate" x:DataType="DropShelf:DropShelfItem">
                 <Border
-                    Width="58"
-                    Height="40"
-                    Padding="4,3"
-                    Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                    Width="96"
+                    Height="36"
+                    Padding="7,0,3,0"
+                    Background="{ThemeResource ControlFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
                     CornerRadius="6"
                     ToolTipService.ToolTip="{x:Bind Path}">
-                    <StackPanel HorizontalAlignment="Center" Spacing="1">
+                    <Grid ColumnSpacing="6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
                         <FontIcon
+                            VerticalAlignment="Center"
                             FontFamily="Segoe Fluent Icons"
-                            FontSize="15"
+                            FontSize="14"
                             Foreground="{ThemeResource GlanceDropShelfIconBrush}"
                             Glyph="{x:Bind Glyph}" />
                         <TextBlock
-                            Width="48"
-                            HorizontalTextAlignment="Center"
-                            FontSize="9"
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            FontSize="11"
                             MaxLines="1"
                             Text="{x:Bind Name}"
                             TextTrimming="CharacterEllipsis"
                             TextWrapping="NoWrap" />
-                    </StackPanel>
+                        <Button
+                            x:Uid="RemoveShelfItemButton"
+                            Grid.Column="2"
+                            Width="22"
+                            Height="22"
+                            Padding="0"
+                            VerticalAlignment="Center"
+                            Click="HandleRemoveItemClick"
+                            Content="&#xE711;"
+                            FontFamily="Segoe Fluent Icons"
+                            FontSize="9"
+                            Style="{StaticResource SubtleButtonStyle}" />
+                    </Grid>
                 </Border>
             </DataTemplate>
         </ResourceDictionary>
@@ -39,7 +59,6 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Grid
             x:Name="StatusIndicator"
@@ -76,62 +95,43 @@
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Text="{x:Bind ViewModel.Summary, Mode=OneWay}"
                 Visibility="{x:Bind WhenEmpty(ViewModel.HasItems), Mode=OneWay}" />
-            <Border
-                x:Name="ShelfDragSurface"
+            <Grid
                 Grid.Row="1"
-                Padding="5,3,8,3"
-                Background="{ThemeResource GlanceDropShelfSurfaceBrush}"
-                BorderBrush="{ThemeResource GlanceDropShelfStrokeBrush}"
-                BorderThickness="1"
-                CanDrag="{x:Bind ViewModel.HasItems, Mode=OneWay}"
-                CornerRadius="8"
-                DragStarting="HandleDragStarting"
-                DropCompleted="HandleDropCompleted"
+                ColumnSpacing="6"
                 Visibility="{x:Bind WhenPopulated(ViewModel.HasItems), Mode=OneWay}">
-                <Grid ColumnSpacing="8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <ScrollViewer
-                        HorizontalScrollBarVisibility="Hidden"
-                        HorizontalScrollMode="Enabled"
-                        VerticalScrollBarVisibility="Disabled"
-                        VerticalScrollMode="Disabled">
-                        <ItemsControl
-                            IsHitTestVisible="False"
-                            ItemTemplate="{StaticResource DropShelfItemTemplate}"
-                            ItemsSource="{x:Bind ViewModel.Items}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" Spacing="5" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
-                    </ScrollViewer>
-                    <FontIcon
-                        Grid.Column="1"
-                        VerticalAlignment="Center"
-                        FontFamily="Segoe Fluent Icons"
-                        FontSize="15"
-                        Foreground="{ThemeResource GlanceDropShelfIconBrush}"
-                        Glyph="&#xE7C2;" />
-                </Grid>
-            </Border>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <ScrollViewer
+                    HorizontalScrollBarVisibility="Hidden"
+                    HorizontalScrollMode="Enabled"
+                    VerticalScrollBarVisibility="Disabled"
+                    VerticalScrollMode="Disabled">
+                    <ItemsControl ItemTemplate="{StaticResource DropShelfItemTemplate}" ItemsSource="{x:Bind ViewModel.Items}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="5" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </ScrollViewer>
+                <Button
+                    x:Uid="MoveShelfButton"
+                    Grid.Column="1"
+                    Width="32"
+                    Height="32"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    CanDrag="True"
+                    Content="&#xE7C2;"
+                    DragStarting="HandleDragStarting"
+                    DropCompleted="HandleDropCompleted"
+                    FontFamily="Segoe Fluent Icons"
+                    FontSize="13"
+                    Foreground="{ThemeResource GlanceDropShelfIconBrush}"
+                    Style="{StaticResource SubtleButtonStyle}" />
+            </Grid>
         </Grid>
-        <Button
-            x:Uid="ClearShelfButton"
-            Grid.Column="2"
-            Width="32"
-            Height="32"
-            Padding="0"
-            VerticalAlignment="Center"
-            Background="Transparent"
-            BorderThickness="0"
-            Click="{x:Bind ViewModel.Clear}"
-            Content="&#xE74D;"
-            FontFamily="Segoe Fluent Icons"
-            FontSize="12"
-            Visibility="{x:Bind WhenPopulated(ViewModel.HasItems), Mode=OneWay}" />
     </Grid>
 </UserControl>

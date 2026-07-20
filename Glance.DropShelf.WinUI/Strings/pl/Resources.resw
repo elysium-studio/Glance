@@ -31,7 +31,10 @@
   <data name="DragCaption" xml:space="preserve">
     <value>Przenieś odłożone elementy</value>
   </data>
-  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
-    <value>Wyczyść półkę</value>
+  <data name="MoveShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Przeciągnij, aby przenieść wszystkie elementy</value>
+  </data>
+  <data name="RemoveShelfItemButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Usuń z półki</value>
   </data>
 </root>

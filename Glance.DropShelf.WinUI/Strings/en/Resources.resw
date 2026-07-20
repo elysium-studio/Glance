@@ -31,7 +31,10 @@
   <data name="DragCaption" xml:space="preserve">
     <value>Move staged items</value>
   </data>
-  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
-    <value>Clear shelf</value>
+  <data name="MoveShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Drag to move all items</value>
+  </data>
+  <data name="RemoveShelfItemButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Remove from shelf</value>
   </data>
 </root>

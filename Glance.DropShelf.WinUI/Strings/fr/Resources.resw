@@ -31,7 +31,10 @@
   <data name="DragCaption" xml:space="preserve">
     <value>Déplacer les éléments déposés</value>
   </data>
-  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
-    <value>Vider le plateau</value>
+  <data name="MoveShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Faites glisser pour déplacer tous les éléments</value>
+  </data>
+  <data name="RemoveShelfItemButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Retirer du plateau</value>
   </data>
 </root>

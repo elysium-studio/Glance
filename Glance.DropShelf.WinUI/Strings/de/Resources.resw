@@ -31,7 +31,10 @@
   <data name="DragCaption" xml:space="preserve">
     <value>Abgelegte Elemente verschieben</value>
   </data>
-  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
-    <value>Ablage leeren</value>
+  <data name="MoveShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Ziehen, um alle Elemente zu verschieben</value>
+  </data>
+  <data name="RemoveShelfItemButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Aus Ablage entfernen</value>
   </data>
 </root>

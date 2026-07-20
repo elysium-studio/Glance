@@ -2,18 +2,12 @@
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Default">
             <SolidColorBrush x:Key="GlanceDropShelfIconBrush" Color="#5DE2D5" />
-            <SolidColorBrush x:Key="GlanceDropShelfSurfaceBrush" Color="#185DE2D5" />
-            <SolidColorBrush x:Key="GlanceDropShelfStrokeBrush" Color="#405DE2D5" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="GlanceDropShelfIconBrush" Color="#006E68" />
-            <SolidColorBrush x:Key="GlanceDropShelfSurfaceBrush" Color="#14006E68" />
-            <SolidColorBrush x:Key="GlanceDropShelfStrokeBrush" Color="#38006E68" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <StaticResource x:Key="GlanceDropShelfIconBrush" ResourceKey="SystemColorWindowTextColorBrush" />
-            <StaticResource x:Key="GlanceDropShelfSurfaceBrush" ResourceKey="SystemColorWindowColorBrush" />
-            <StaticResource x:Key="GlanceDropShelfStrokeBrush" ResourceKey="SystemColorWindowTextColorBrush" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

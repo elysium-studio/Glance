@@ -28,6 +28,14 @@ public sealed partial class DropShelfExpandedView : UserControl
     private Visibility WhenPopulated(bool hasItems) =>
         hasItems ? Visibility.Visible : Visibility.Collapsed;
 
+    private void HandleRemoveItemClick(object sender, RoutedEventArgs args)
+    {
+        if ((sender as FrameworkElement)?.DataContext is DropShelfItem item)
+        {
+            ViewModel.Remove(item);
+        }
+    }
+
     private async void HandleDragStarting(UIElement sender, DragStartingEventArgs args)
     {
         var deferral = args.GetDeferral();

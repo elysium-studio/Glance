@@ -31,7 +31,10 @@
   <data name="DragCaption" xml:space="preserve">
     <value>Sposta gli elementi raccolti</value>
   </data>
-  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
-    <value>Svuota raccolta</value>
+  <data name="MoveShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Trascina per spostare tutti gli elementi</value>
+  </data>
+  <data name="RemoveShelfItemButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Rimuovi dalla raccolta</value>
   </data>
 </root>

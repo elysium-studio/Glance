@@ -31,7 +31,10 @@
   <data name="DragCaption" xml:space="preserve">
     <value>移动暂存的项目</value>
   </data>
-  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
-    <value>清空文件架</value>
+  <data name="MoveShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>拖动以移动所有项目</value>
+  </data>
+  <data name="RemoveShelfItemButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>从文件架中移除</value>
   </data>
 </root>

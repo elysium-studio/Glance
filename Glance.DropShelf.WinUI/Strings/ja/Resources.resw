@@ -31,7 +31,10 @@
   <data name="DragCaption" xml:space="preserve">
     <value>準備した項目を移動</value>
   </data>
-  <data name="ClearShelfButton.ToolTipService.ToolTip" xml:space="preserve">
-    <value>シェルフを空にする</value>
+  <data name="MoveShelfButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>ドラッグしてすべての項目を移動</value>
+  </data>
+  <data name="RemoveShelfItemButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>シェルフから削除</value>
   </data>
 </root>
