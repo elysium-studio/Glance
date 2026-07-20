@@ -12,6 +12,9 @@
   <Project Path="Glance.Clipboard/Glance.Clipboard.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="Glance.Clipboard.Tests/Glance.Clipboard.Tests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="Glance.Shell.WinUI/Glance.Shell.WinUI.csproj">
     <Platform Project="x64" />
   </Project>
@@ -21,10 +24,16 @@
   <Project Path="Glance.Media/Glance.Media.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="Glance.Media.Tests/Glance.Media.Tests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="Glance.Power.WinUI/Glance.Power.WinUI.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
   <Project Path="Glance.Power/Glance.Power.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.Power.Tests/Glance.Power.Tests.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
   <Project Path="Glance.Shell/Glance.Shell.csproj">
@@ -36,10 +45,16 @@
   <Project Path="Glance.Stopwatch/Glance.Stopwatch.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="Glance.Stopwatch.Tests/Glance.Stopwatch.Tests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="Glance.SystemMonitor.WinUI/Glance.SystemMonitor.WinUI.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
   <Project Path="Glance.SystemMonitor/Glance.SystemMonitor.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.SystemMonitor.Tests/Glance.SystemMonitor.Tests.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
   <Project Path="Glance.Tests/Glance.Tests.csproj">
@@ -49,6 +64,9 @@
     <Platform Solution="*|x64" Project="x64" />
   </Project>
   <Project Path="Glance.Timer/Glance.Timer.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.Timer.Tests/Glance.Timer.Tests.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
   <Project Path="Glance.UI.WinUI/Glance.UI.WinUI.csproj">
