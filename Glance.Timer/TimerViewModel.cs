@@ -5,6 +5,8 @@ namespace Glance.Timer;
 
 public partial class TimerViewModel : ObservableObject
 {
+    private static readonly TimeSpan Minute = TimeSpan.FromMinutes(1);
+
     private TimeSpan duration = TimeSpan.FromMinutes(5);
     private TimeSpan remaining = TimeSpan.FromMinutes(5);
     private long lastTimestamp;
@@ -17,6 +19,8 @@ public partial class TimerViewModel : ObservableObject
     private string remainingText = "05:00";
 
     public string Title => "Timer";
+
+    public bool CanDecreaseMinute => duration > Minute;
 
     public string ToggleGlyph => IsRunning ? "\uF8AE" : "\uF5B0";
 
@@ -43,9 +47,32 @@ public partial class TimerViewModel : ObservableObject
 
     public void AddMinute()
     {
-        duration += TimeSpan.FromMinutes(1);
-        remaining += TimeSpan.FromMinutes(1);
+        RefreshIfRunning();
+        duration += Minute;
+        remaining += Minute;
         UpdateText();
+        OnPropertyChanged(nameof(CanDecreaseMinute));
+    }
+
+    public void DecreaseMinute()
+    {
+        if (!CanDecreaseMinute)
+        {
+            return;
+        }
+
+        RefreshIfRunning();
+        duration -= Minute;
+        remaining -= Minute;
+
+        if (remaining <= TimeSpan.Zero)
+        {
+            remaining = TimeSpan.Zero;
+            IsRunning = false;
+        }
+
+        UpdateText();
+        OnPropertyChanged(nameof(CanDecreaseMinute));
     }
 
     public bool Refresh()
@@ -77,5 +104,13 @@ public partial class TimerViewModel : ObservableObject
         RemainingText = display.TotalHours >= 1
             ? $"{(int)display.TotalHours:00}:{display.Minutes:00}:{display.Seconds:00}"
             : $"{display.Minutes:00}:{display.Seconds:00}";
+    }
+
+    private void RefreshIfRunning()
+    {
+        if (IsRunning)
+        {
+            Refresh();
+        }
     }
 }

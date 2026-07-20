@@ -48,11 +48,26 @@
             Orientation="Horizontal"
             Spacing="5">
             <Button
+                Width="32"
                 Height="32"
-                Padding="12,0"
+                Padding="0"
+                AutomationProperties.Name="Decrease by one minute"
+                Click="{x:Bind ViewModel.DecreaseMinute}"
+                Content="&#xE738;"
+                CornerRadius="16"
+                FontFamily="Segoe Fluent Icons"
+                IsEnabled="{x:Bind ViewModel.CanDecreaseMinute, Mode=OneWay}"
+                ToolTipService.ToolTip="Decrease by one minute" />
+            <Button
+                Width="32"
+                Height="32"
+                Padding="0"
+                AutomationProperties.Name="Increase by one minute"
                 Click="{x:Bind ViewModel.AddMinute}"
-                Content="+1 min"
-                CornerRadius="16" />
+                Content="&#xE710;"
+                CornerRadius="16"
+                FontFamily="Segoe Fluent Icons"
+                ToolTipService.ToolTip="Increase by one minute" />
             <Button
                 Width="32"
                 Height="32"

@@ -1,7 +1,9 @@
 <UserControl
     x:Class="Glance.Media.WinUI.MediaExpandedView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Controls="using:Elysium.UI.Controls.WinUI"
+    xmlns:Local="using:Glance.Media.WinUI">
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Media.xaml" />
     </UserControl.Resources>
@@ -36,56 +38,71 @@
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource GlanceMediaIconBrush}"
                 Text="{x:Bind ToUpper(ViewModel.Source), Mode=OneWay}" />
-            <TextBlock
+            <Controls:MarqueeTextBlock
+                Height="23"
+                FontSize="18"
                 FontWeight="SemiBold"
-                MaxLines="1"
-                Style="{StaticResource BodyLargeTextBlockStyle}"
+                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                 Text="{x:Bind ViewModel.Title, Mode=OneWay}"
-                TextTrimming="CharacterEllipsis"
-                TextWrapping="NoWrap" />
-            <TextBlock
+                ToolTipService.ToolTip="{x:Bind ViewModel.Title, Mode=OneWay}" />
+            <Controls:MarqueeTextBlock
+                Height="15"
+                FontSize="12"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ViewModel.Artist, Mode=OneWay}"
-                TextTrimming="CharacterEllipsis"
-                TextWrapping="NoWrap" />
+                ToolTipService.ToolTip="{x:Bind ViewModel.Artist, Mode=OneWay}" />
         </StackPanel>
         <StackPanel
             Grid.Column="2"
             VerticalAlignment="Center"
-            Orientation="Horizontal"
-            Spacing="5">
-            <Button
-                Width="32"
-                Height="32"
-                Padding="0"
-                Click="{x:Bind ViewModel.Previous}"
-                Content="&#xE622;"
-                CornerRadius="16"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="14"
-                ToolTipService.ToolTip="Previous" />
-            <Button
-                Width="38"
-                Height="38"
-                Padding="0"
-                Click="{x:Bind ViewModel.TogglePlayback}"
-                Content="{x:Bind ViewModel.PlayPauseGlyph, Mode=OneWay}"
-                CornerRadius="19"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="18"
-                Style="{StaticResource AccentButtonStyle}"
-                ToolTipService.ToolTip="Play or pause" />
-            <Button
-                Width="32"
-                Height="32"
-                Padding="0"
-                Click="{x:Bind ViewModel.Next}"
-                Content="&#xE623;"
-                CornerRadius="16"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="14"
-                ToolTipService.ToolTip="Next" />
+            Spacing="4">
+            <Local:MediaAudioVisualizer
+                Width="23"
+                Height="16"
+                HorizontalAlignment="Center"
+                ViewModel="{x:Bind ViewModel}" />
+            <StackPanel
+                HorizontalAlignment="Center"
+                Orientation="Horizontal"
+                Spacing="5">
+                <Button
+                    Width="32"
+                    Height="32"
+                    Padding="0"
+                    AutomationProperties.Name="Previous"
+                    Click="{x:Bind ViewModel.Previous}"
+                    Content="&#xE622;"
+                    CornerRadius="16"
+                    FontFamily="Segoe Fluent Icons"
+                    FontSize="14"
+                    IsEnabled="{x:Bind ViewModel.CanSkipPrevious, Mode=OneWay}"
+                    ToolTipService.ToolTip="Previous" />
+                <Button
+                    Width="38"
+                    Height="38"
+                    Padding="0"
+                    AutomationProperties.Name="Play or pause"
+                    Click="{x:Bind ViewModel.TogglePlayback}"
+                    Content="{x:Bind ViewModel.PlayPauseGlyph, Mode=OneWay}"
+                    CornerRadius="19"
+                    FontFamily="Segoe Fluent Icons"
+                    FontSize="18"
+                    IsEnabled="{x:Bind ViewModel.CanTogglePlayback, Mode=OneWay}"
+                    Style="{StaticResource AccentButtonStyle}"
+                    ToolTipService.ToolTip="Play or pause" />
+                <Button
+                    Width="32"
+                    Height="32"
+                    Padding="0"
+                    AutomationProperties.Name="Next"
+                    Click="{x:Bind ViewModel.Next}"
+                    Content="&#xE623;"
+                    CornerRadius="16"
+                    FontFamily="Segoe Fluent Icons"
+                    FontSize="14"
+                    IsEnabled="{x:Bind ViewModel.CanSkipNext, Mode=OneWay}"
+                    ToolTipService.ToolTip="Next" />
+            </StackPanel>
         </StackPanel>
     </Grid>
 </UserControl>

@@ -23,9 +23,23 @@ public partial class MediaViewModel : ObservableObject
     [ObservableProperty]
     private bool hasSession;
 
+    [ObservableProperty]
+    private bool canSkipPrevious;
+
+    [ObservableProperty]
+    private bool canSkipNext;
+
+    [ObservableProperty]
+    private bool canTogglePlayback;
+
     public string PlayPauseGlyph => IsPlaying ? "\uF8AE" : "\uF5B0";
 
+    public event EventHandler<AudioLevelsChangedEventArgs>? AudioLevelsChanged;
+
     public event EventHandler<MediaPlaybackAction>? PlaybackActionRequested;
+
+    public void UpdateAudioLevels(IReadOnlyList<double> levels) =>
+        AudioLevelsChanged?.Invoke(this, new AudioLevelsChangedEventArgs([.. levels]));
 
     public void Previous() =>
         PlaybackActionRequested?.Invoke(this, MediaPlaybackAction.Previous);
@@ -35,4 +49,9 @@ public partial class MediaViewModel : ObservableObject
 
     public void Next() =>
         PlaybackActionRequested?.Invoke(this, MediaPlaybackAction.Next);
+}
+
+public sealed class AudioLevelsChangedEventArgs(IReadOnlyList<double> levels) : EventArgs
+{
+    public IReadOnlyList<double> Levels { get; } = levels;
 }

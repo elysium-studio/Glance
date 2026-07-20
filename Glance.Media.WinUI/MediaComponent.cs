@@ -14,9 +14,12 @@ public sealed class MediaComponent :
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
+    private static readonly double[] SilentAudioLevels = [0, 0, 0, 0, 0];
+
     private readonly MediaViewModel viewModel;
     private readonly IGlanceAttentionService attentionService;
     private readonly DispatcherQueue dispatcherQueue;
+    private readonly AudioLevelMonitor audioLevelMonitor;
     private GlobalSystemMediaTransportControlsSessionManager? sessionManager;
     private GlobalSystemMediaTransportControlsSession? session;
     private string? currentTitle;
@@ -28,6 +31,7 @@ public sealed class MediaComponent :
         this.viewModel = viewModel;
         this.attentionService = attentionService;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        audioLevelMonitor = new AudioLevelMonitor();
 
         MediaCompactView compactView = new(viewModel);
         MediaExpandedView expandedView = new(viewModel);
@@ -38,6 +42,7 @@ public sealed class MediaComponent :
         ExpandedAnimationElement = expandedView.ConnectedAnimationElement;
 
         viewModel.PlaybackActionRequested += HandlePlaybackActionRequested;
+        audioLevelMonitor.LevelsChanged += HandleAudioLevelsChanged;
         Initialize();
     }
 
@@ -56,6 +61,8 @@ public sealed class MediaComponent :
     public void Dispose()
     {
         viewModel.PlaybackActionRequested -= HandlePlaybackActionRequested;
+        audioLevelMonitor.LevelsChanged -= HandleAudioLevelsChanged;
+        audioLevelMonitor.Dispose();
 
         if (sessionManager is not null)
         {
@@ -125,6 +132,11 @@ public sealed class MediaComponent :
         PlaybackInfoChangedEventArgs args) =>
         dispatcherQueue.TryEnqueue(RefreshPlaybackState);
 
+    private void HandleAudioLevelsChanged(
+        object? sender,
+        AudioSpectrumEventArgs args) =>
+        dispatcherQueue.TryEnqueue(() => viewModel.UpdateAudioLevels(args.Levels));
+
     private async void HandlePlaybackActionRequested(
         object? sender,
         MediaPlaybackAction action)
@@ -172,8 +184,8 @@ public sealed class MediaComponent :
             ? "Unknown artist"
             : properties.Artist;
         string source = FormatSourceName(mediaSession.SourceAppUserModelId);
-        bool isPlaying = mediaSession.GetPlaybackInfo()?.PlaybackStatus ==
-            GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
+        GlobalSystemMediaTransportControlsSessionPlaybackInfo? playbackInfo =
+            mediaSession.GetPlaybackInfo();
         IRandomAccessStreamWithContentType? artworkStream = null;
 
         if (properties.Thumbnail is not null)
@@ -195,8 +207,8 @@ public sealed class MediaComponent :
                 viewModel.Artist = artist;
                 viewModel.Source = source;
                 viewModel.HasSession = true;
-                viewModel.IsPlaying = isPlaying;
                 viewModel.Artwork = null;
+                ApplyPlaybackInfo(playbackInfo);
 
                 if (artworkStream is not null)
                 {
@@ -228,8 +240,8 @@ public sealed class MediaComponent :
         GlobalSystemMediaTransportControlsSessionPlaybackInfo? playbackInfo =
             session?.GetPlaybackInfo();
 
-        viewModel.IsPlaying = playbackInfo?.PlaybackStatus ==
-            GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
+        viewModel.HasSession = session is not null;
+        ApplyPlaybackInfo(playbackInfo);
     }
 
     private void ShowEmptyState()
@@ -241,6 +253,43 @@ public sealed class MediaComponent :
         viewModel.Artwork = null;
         viewModel.IsPlaying = false;
         viewModel.HasSession = false;
+        viewModel.CanSkipPrevious = false;
+        viewModel.CanSkipNext = false;
+        viewModel.CanTogglePlayback = false;
+        UpdateAudioCaptureState();
+    }
+
+    private void ApplyPlaybackInfo(
+        GlobalSystemMediaTransportControlsSessionPlaybackInfo? playbackInfo)
+    {
+        GlobalSystemMediaTransportControlsSessionPlaybackControls? controls =
+            playbackInfo?.Controls;
+
+        viewModel.IsPlaying = playbackInfo?.PlaybackStatus ==
+            GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
+        viewModel.CanSkipPrevious = viewModel.HasSession &&
+            controls?.IsPreviousEnabled == true;
+        viewModel.CanSkipNext = viewModel.HasSession &&
+            controls?.IsNextEnabled == true;
+        viewModel.CanTogglePlayback = viewModel.HasSession &&
+            (controls?.IsPlayEnabled == true || controls?.IsPauseEnabled == true);
+        UpdateAudioCaptureState();
+    }
+
+    private void UpdateAudioCaptureState()
+    {
+        if (viewModel.HasSession && viewModel.IsPlaying)
+        {
+            if (!audioLevelMonitor.Start())
+            {
+                viewModel.UpdateAudioLevels(SilentAudioLevels);
+            }
+
+            return;
+        }
+
+        audioLevelMonitor.Stop();
+        viewModel.UpdateAudioLevels(SilentAudioLevels);
     }
 
     private Task RunOnDispatcherAsync(Func<Task> action)
