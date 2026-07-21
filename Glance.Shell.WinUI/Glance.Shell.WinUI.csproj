@@ -40,6 +40,7 @@
     <ProjectReference Include="..\Glance.Application.Abstractions\Glance.Application.Abstractions.csproj" />
     <ProjectReference Include="..\Glance.Clipboard.WinUI\Glance.Clipboard.WinUI.csproj" />
     <ProjectReference Include="..\Glance.DropShelf.WinUI\Glance.DropShelf.WinUI.csproj" />
+    <ProjectReference Include="..\Glance.FocusSession.WinUI\Glance.FocusSession.WinUI.csproj" />
     <ProjectReference Include="..\Glance.Media.WinUI\Glance.Media.WinUI.csproj" />
     <ProjectReference Include="..\Glance.Power.WinUI\Glance.Power.WinUI.csproj" />
     <ProjectReference Include="..\Glance.Shell\Glance.Shell.csproj" />

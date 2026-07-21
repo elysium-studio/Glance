@@ -21,6 +21,15 @@
   <Project Path="Glance.DropShelf.Tests/Glance.DropShelf.Tests.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="Glance.FocusSession.WinUI/Glance.FocusSession.WinUI.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.FocusSession/Glance.FocusSession.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.FocusSession.Tests/Glance.FocusSession.Tests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="Glance.Clipboard.Tests/Glance.Clipboard.Tests.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
