@@ -116,7 +116,7 @@
             <TextBlock
                 x:Uid="EmptyMessage"
                 Grid.Row="1"
-                VerticalAlignment="Top"
+                Margin="0,4,0,0"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
                 Visibility="{x:Bind WhenEmpty(ViewModel.CanClearHistory), Mode=OneWay}" />

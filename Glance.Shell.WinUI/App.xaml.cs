@@ -7,6 +7,7 @@ using Glance.Application.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
+using Microsoft.Windows.Globalization;
 using System;
 using System.IO;
 using System.Text.Json;
@@ -17,7 +18,10 @@ public partial class App
 {
     private IHost? host;
 
-    public App() => InitializeComponent();
+    public App()
+    {
+        InitializeComponent();
+    }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
