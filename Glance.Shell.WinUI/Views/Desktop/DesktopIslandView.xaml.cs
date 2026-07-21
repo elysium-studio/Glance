@@ -220,7 +220,12 @@ public partial class DesktopIslandView :
 
             IReadOnlyList<IStorageItem> storageItems =
                 await dataView.GetStorageItemsAsync();
-            await ProcessStorageItemsAsync(storageItems);
+            GlanceStorageItem[] items = storageItems
+                .Select(CreateStorageItem)
+                .OfType<GlanceStorageItem>()
+                .ToArray();
+
+            await ProcessStorageItemsAsync(items);
         }
         catch (COMException exception)
         {
@@ -234,11 +239,11 @@ public partial class DesktopIslandView :
         }
     }
 
-    private Task ProcessStorageItemsAsync(IReadOnlyList<IStorageItem> storageItems)
+    private Task ProcessStorageItemsAsync(IReadOnlyList<GlanceStorageItem> items)
     {
         if (DispatcherQueue.HasThreadAccess)
         {
-            return AddStorageItemsAsync(storageItems);
+            return AddStorageItemsAsync(items);
         }
 
         TaskCompletionSource<bool> completion = new(
@@ -248,7 +253,7 @@ public partial class DesktopIslandView :
         {
             try
             {
-                await AddStorageItemsAsync(storageItems);
+                await AddStorageItemsAsync(items);
                 completion.TrySetResult(true);
             }
             catch (Exception exception)
@@ -263,14 +268,9 @@ public partial class DesktopIslandView :
         return completion.Task;
     }
 
-    private async Task AddStorageItemsAsync(IReadOnlyList<IStorageItem> storageItems)
+    private async Task AddStorageItemsAsync(IReadOnlyList<GlanceStorageItem> items)
     {
-        GlanceStorageItem[] items = storageItems
-            .Select(CreateStorageItem)
-            .OfType<GlanceStorageItem>()
-            .ToArray();
-
-        if (items.Length > 0)
+        if (items.Count > 0)
         {
             await ViewModel.HandleContentAsync(new GlanceContentContext(
                 GlanceContentKind.FilesAndFolders,
