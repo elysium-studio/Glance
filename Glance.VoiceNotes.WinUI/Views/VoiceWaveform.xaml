@@ -14,11 +14,9 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Center"
             Background="{ThemeResource GlanceVoiceNotesTrackBrush}" />
-        <StackPanel
+        <Grid
             x:Name="WaveformPanel"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Orientation="Horizontal"
-            Spacing="2" />
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center" />
     </Grid>
 </UserControl>

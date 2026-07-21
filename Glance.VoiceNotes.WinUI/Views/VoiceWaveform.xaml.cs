@@ -39,9 +39,11 @@ public sealed partial class VoiceWaveform :
         Brush waveformBrush = (Brush)Resources["GlanceVoiceNotesIconBrush"];
         bars = new FrameworkElement[Math.Max(1, BarCount)];
         WaveformPanel.Children.Clear();
+        WaveformPanel.ColumnDefinitions.Clear();
 
         for (int index = 0; index < bars.Length; index++)
         {
+            WaveformPanel.ColumnDefinitions.Add(new ColumnDefinition());
             Border bar = new()
             {
                 Width = 1,
@@ -49,6 +51,7 @@ public sealed partial class VoiceWaveform :
                 CornerRadius = new CornerRadius(0.5)
             };
             bar.Background = waveformBrush;
+            Grid.SetColumn(bar, index);
             WaveformPanel.Children.Add(bar);
             bars[index] = bar;
 
