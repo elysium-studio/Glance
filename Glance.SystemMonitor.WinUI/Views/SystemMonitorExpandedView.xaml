@@ -89,24 +89,25 @@
                 <Border
                     x:Name="NetworkMetric"
                     Grid.Column="2"
-                    Padding="8,6"
+                    Padding="8,4"
                     VerticalAlignment="Center"
                     Background="{ThemeResource ControlFillColorSecondaryBrush}"
                     CornerRadius="{StaticResource OverlayCornerRadius}">
-                    <StackPanel Spacing="3">
+                    <StackPanel Spacing="1">
                         <TextBlock
                             x:Uid="NetworkLabel"
                             FontWeight="SemiBold"
                             Foreground="{ThemeResource GlanceSystemIconBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}" />
-                        <StackPanel Spacing="2">
+                        <StackPanel Spacing="0">
                             <StackPanel Orientation="Horizontal" Spacing="3">
                                 <FontIcon
                                     FontSize="12"
                                     Foreground="{ThemeResource GlanceSystemIconBrush}"
                                     Glyph="&#xE74B;" />
                                 <TextBlock
-                                    Style="{StaticResource BodyStrongTextBlockStyle}"
+                                    FontWeight="SemiBold"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
                                     Text="{x:Bind ViewModel.DownloadText, Mode=OneWay}" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Spacing="3">
