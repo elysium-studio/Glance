@@ -22,20 +22,13 @@
                 Foreground="{ThemeResource GlanceDropShelfIconBrush}"
                 Glyph="&#xE8B7;" />
         </Grid>
-        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-            <TextBlock
-                MaxLines="1"
-                Style="{StaticResource BodyStrongTextBlockStyle}"
-                Text="{x:Bind ViewModel.Summary, Mode=OneWay}"
-                TextTrimming="CharacterEllipsis"
-                TextWrapping="NoWrap" />
-            <TextBlock
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                MaxLines="1"
-                Style="{StaticResource CaptionTextBlockStyle}"
-                Text="{x:Bind ViewModel.Detail, Mode=OneWay}"
-                TextTrimming="CharacterEllipsis"
-                TextWrapping="NoWrap" />
-        </StackPanel>
+        <TextBlock
+            Grid.Column="1"
+            VerticalAlignment="Center"
+            MaxLines="1"
+            Style="{StaticResource BodyStrongTextBlockStyle}"
+            Text="{x:Bind ViewModel.Summary, Mode=OneWay}"
+            TextTrimming="CharacterEllipsis"
+            TextWrapping="NoWrap" />
     </Grid>
 </UserControl>

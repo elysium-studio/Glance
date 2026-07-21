@@ -71,6 +71,15 @@
   <Project Path="Glance.Power.Tests/Glance.Power.Tests.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="Glance.PrivacyControls.WinUI/Glance.PrivacyControls.WinUI.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.PrivacyControls/Glance.PrivacyControls.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.PrivacyControls.Tests/Glance.PrivacyControls.Tests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="Glance.ScreenCapture.WinUI/Glance.ScreenCapture.WinUI.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>

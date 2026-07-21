@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>개인 정보 제어</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>마이크를 모니터링하고 음소거합니다.</value></data>
+  <data name="NoMicrophone" xml:space="preserve"><value>마이크 없음</value></data>
+  <data name="MicrophoneMuted" xml:space="preserve"><value>음소거됨</value></data>
+  <data name="MicrophoneActive" xml:space="preserve"><value>활성</value></data>
+  <data name="MicrophoneReady" xml:space="preserve"><value>준비됨</value></data>
+  <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>마이크 음소거 전환</value></data>
+  <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>마이크 음소거 전환</value></data>
+</root>

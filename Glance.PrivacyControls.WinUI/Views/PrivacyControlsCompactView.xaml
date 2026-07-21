@@ -1,12 +1,14 @@
 <UserControl
-    x:Class="Glance.ScreenCapture.WinUI.ScreenCaptureCompactView"
+    x:Class="Glance.PrivacyControls.WinUI.PrivacyControlsCompactView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:PrivacyControls="using:Glance.PrivacyControls.WinUI">
     <UserControl.Resources>
-        <ResourceDictionary Source="../Themes/ScreenCapture.xaml" />
+        <ResourceDictionary Source="../Themes/PrivacyControls.xaml" />
     </UserControl.Resources>
     <Grid Padding="8,0" ColumnSpacing="10">
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
@@ -21,15 +23,24 @@
                 VerticalAlignment="Center"
                 FontFamily="Segoe Fluent Icons"
                 FontSize="24"
-                Foreground="{ThemeResource GlanceScreenCaptureIconBrush}"
-                Glyph="&#xE722;" />
+                Foreground="{ThemeResource GlancePrivacyControlsIconBrush}"
+                Glyph="&#xE720;" />
         </Grid>
         <TextBlock
             Grid.Column="1"
             VerticalAlignment="Center"
             Style="{StaticResource BodyStrongTextBlockStyle}"
-            Text="{x:Bind ViewModel.CompactStatusText, Mode=OneWay}"
+            Text="{x:Bind ViewModel.StatusText, Mode=OneWay}"
             TextTrimming="CharacterEllipsis"
             TextWrapping="NoWrap" />
+        <PrivacyControls:MicrophoneLevelMeter
+            Grid.Column="2"
+            Height="18"
+            MinWidth="42"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            BarCount="12"
+            ViewModel="{x:Bind ViewModel}"
+            Visibility="{x:Bind ToVisibility(ViewModel.IsAvailable), Mode=OneWay}" />
     </Grid>
 </UserControl>

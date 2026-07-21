@@ -1,0 +1,91 @@
+<UserControl
+    x:Class="Glance.PrivacyControls.WinUI.PrivacyControlsExpandedView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Controls="using:Elysium.UI.Controls.WinUI"
+    xmlns:PrivacyControls="using:Glance.PrivacyControls.WinUI">
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Themes/PrivacyControls.xaml" />
+    </UserControl.Resources>
+    <Grid Padding="20,12,20,26" ColumnSpacing="18">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid
+            x:Name="StatusIndicator"
+            Width="36"
+            Height="36"
+            VerticalAlignment="Center">
+            <FontIcon
+                Width="30"
+                Height="30"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="30"
+                Foreground="{ThemeResource GlancePrivacyControlsIconBrush}"
+                Glyph="&#xE720;" />
+        </Grid>
+        <Grid
+            Grid.Column="1"
+            Height="58"
+            VerticalAlignment="Center"
+            RowSpacing="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="14" />
+                <RowDefinition Height="22" />
+                <RowDefinition Height="18" />
+            </Grid.RowDefinitions>
+            <TextBlock
+                FontWeight="SemiBold"
+                Foreground="{ThemeResource GlancePrivacyControlsIconBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{x:Bind ToUpper(Title)}" />
+            <Controls:MarqueeTextBlock
+                Grid.Row="1"
+                VerticalAlignment="Center"
+                FontSize="14"
+                FontWeight="SemiBold"
+                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                Text="{x:Bind ViewModel.DeviceName, Mode=OneWay}"
+                ToolTipService.ToolTip="{x:Bind ViewModel.DeviceName, Mode=OneWay}" />
+            <Grid
+                Grid.Row="2"
+                ColumnSpacing="8"
+                Visibility="{x:Bind ToVisibility(ViewModel.IsAvailable), Mode=OneWay}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <PrivacyControls:MicrophoneLevelMeter
+                    Height="14"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center"
+                    BarCount="18"
+                    ViewModel="{x:Bind ViewModel}" />
+                <TextBlock
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.StatusText, Mode=OneWay}" />
+            </Grid>
+        </Grid>
+        <Button
+            x:Uid="ToggleMuteButton"
+            Grid.Column="2"
+            Width="36"
+            Height="36"
+            Padding="0"
+            VerticalAlignment="Center"
+            Click="{x:Bind ViewModel.ToggleMute}"
+            Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}"
+            CornerRadius="18"
+            FontFamily="Segoe Fluent Icons"
+            FontSize="16"
+            IsEnabled="{x:Bind ViewModel.IsAvailable, Mode=OneWay}"
+            Style="{StaticResource AccentButtonStyle}" />
+    </Grid>
+</UserControl>
