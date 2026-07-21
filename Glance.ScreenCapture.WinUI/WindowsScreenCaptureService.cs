@@ -55,7 +55,7 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
         try
         {
             SetWindowsVisible(applicationWindows, false);
-            await Task.Delay(140);
+            _ = NativeMethods.DwmFlush();
 
             DesktopCaptureBitmap desktop = CaptureVirtualDesktop();
             NativeRectangle? selection = mode switch
@@ -208,6 +208,11 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
             if (NativeMethods.GetDIBits(memoryDeviceContext, bitmap, 0, (uint)height, pixels, ref bitmapInfo, 0) == 0)
             {
                 throw new InvalidOperationException("Unable to read the desktop pixels.");
+            }
+
+            for (int index = 3; index < pixels.Length; index += 4)
+            {
+                pixels[index] = byte.MaxValue;
             }
 
             return new DesktopCaptureBitmap(x, y, width, height, pixels);
@@ -475,6 +480,9 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
         [LibraryImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static partial bool GetWindowRect(nint window, out NativeRect rectangle);
+
+        [LibraryImport("dwmapi.dll")]
+        public static partial int DwmFlush();
 
         [LibraryImport("dwmapi.dll")]
         public static partial int DwmGetWindowAttribute(nint window, int attribute, out NativeRect value, uint size);

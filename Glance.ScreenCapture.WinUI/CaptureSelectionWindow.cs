@@ -1,3 +1,4 @@
+using Elysium.Platform.Windows;
 using Glance.Application.Abstractions;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
@@ -8,12 +9,13 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Graphics;
-using Windows.Graphics.Imaging;
-using Windows.Storage.Streams;
+using WinRT.Interop;
 
 namespace Glance.ScreenCapture.WinUI;
 
@@ -28,6 +30,7 @@ internal sealed class CaptureSelectionWindow
     private readonly Window window;
     private bool completed;
     private bool isDragging;
+    private bool isShown;
     private Point selectionStart;
 
     private CaptureSelectionWindow(
@@ -93,26 +96,24 @@ internal sealed class CaptureSelectionWindow
         root.PointerMoved += HandlePointerMoved;
         root.PointerPressed += HandlePointerPressed;
         root.PointerReleased += HandlePointerReleased;
-        root.Loaded += (_, _) => root.Focus(FocusState.Programmatic);
+        root.Loaded += HandleRootLoaded;
 
         window = new Window
         {
             Content = root,
             ExtendsContentIntoTitleBar = true
         };
+        window.SetTitleBar(null);
         window.Closed += HandleClosed;
     }
 
-    public static async Task<NativeRectangle?> SelectAsync(
+    public static Task<NativeRectangle?> SelectAsync(
         DesktopCaptureBitmap bitmap,
         ScreenCaptureMode mode,
         IReadOnlyList<NativeRectangle> candidates,
         ITextLocalizer localizer,
-        DispatcherQueue dispatcherQueue)
-    {
-        using InMemoryRandomAccessStream stream = await CreateImageStreamAsync(bitmap);
-        return await ShowOnDispatcherAsync(bitmap, mode, candidates, localizer, dispatcherQueue, stream);
-    }
+        DispatcherQueue dispatcherQueue) =>
+        ShowOnDispatcherAsync(bitmap, mode, candidates, localizer, dispatcherQueue);
 
     private Task<NativeRectangle?> ShowAsync()
     {
@@ -127,23 +128,26 @@ internal sealed class CaptureSelectionWindow
             presenter.SetBorderAndTitleBar(false, false);
         }
 
+        nint handle = WindowNative.GetWindowHandle(window);
+        WindowExtensions.SetBorderless(handle, true);
+        WindowExtensions.SetCornerRadius(handle, WindowCornerPreference.Sharp);
+        WindowExtensions.SetTopMost(handle, true);
         appWindow.IsShownInSwitchers = false;
-        appWindow.MoveAndResize(new RectInt32(bitmap.OriginX, bitmap.OriginY, bitmap.Width, bitmap.Height));
+        appWindow.MoveAndResize(new RectInt32(-32000, -32000, bitmap.Width, bitmap.Height));
         window.Activate();
         return completion.Task;
     }
 
-    private static async Task<InMemoryRandomAccessStream> CreateImageStreamAsync(DesktopCaptureBitmap bitmap)
+    private static WriteableBitmap CreateImageSource(DesktopCaptureBitmap bitmap)
     {
-        InMemoryRandomAccessStream stream = new();
-        BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, stream);
-        encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Ignore, (uint)bitmap.Width, (uint)bitmap.Height, 96, 96, bitmap.Pixels);
-        await encoder.FlushAsync();
-        stream.Seek(0);
-        return stream;
+        WriteableBitmap imageSource = new(bitmap.Width, bitmap.Height);
+        using Stream stream = imageSource.PixelBuffer.AsStream();
+        stream.Write(bitmap.Pixels);
+        imageSource.Invalidate();
+        return imageSource;
     }
 
-    private static Task<NativeRectangle?> ShowOnDispatcherAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<NativeRectangle> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue, IRandomAccessStream stream)
+    private static Task<NativeRectangle?> ShowOnDispatcherAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<NativeRectangle> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue)
     {
         TaskCompletionSource<NativeRectangle?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -151,8 +155,7 @@ internal sealed class CaptureSelectionWindow
         {
             try
             {
-                BitmapImage imageSource = new();
-                imageSource.SetSource(stream);
+                WriteableBitmap imageSource = CreateImageSource(bitmap);
                 CaptureSelectionWindow selectionWindow = new(bitmap, mode, candidates, localizer, imageSource);
                 _ = CompleteSelectionAsync(selectionWindow.ShowAsync(), completion);
             }
@@ -172,6 +175,24 @@ internal sealed class CaptureSelectionWindow
         }
 
         return completion.Task;
+    }
+
+    private void HandleRootLoaded(object sender, RoutedEventArgs args)
+    {
+        root.UpdateLayout();
+        root.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, ShowPreparedWindow);
+    }
+
+    private void ShowPreparedWindow()
+    {
+        if (completed || isShown)
+        {
+            return;
+        }
+
+        isShown = true;
+        window.AppWindow.MoveAndResize(new RectInt32(bitmap.OriginX, bitmap.OriginY, bitmap.Width, bitmap.Height));
+        root.Focus(FocusState.Programmatic);
     }
 
     private static async Task CompleteSelectionAsync(Task<NativeRectangle?> selection, TaskCompletionSource<NativeRectangle?> completion)
