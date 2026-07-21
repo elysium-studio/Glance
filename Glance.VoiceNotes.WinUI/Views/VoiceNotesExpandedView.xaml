@@ -41,26 +41,13 @@
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource GlanceVoiceNotesIconBrush}"
                 Text="{x:Bind ToUpper(Title)}" />
-            <Grid ColumnSpacing="8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontSize="22"
-                    FontWeight="SemiBold"
-                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                    Text="{x:Bind ViewModel.ExpandedStatusText, Mode=OneWay}"
-                    TextTrimming="CharacterEllipsis" />
-                <VoiceNotesWinUI:VoiceWaveform
-                    Grid.Column="1"
-                    Width="46"
-                    Height="20"
-                    VerticalAlignment="Center"
-                    ViewModel="{x:Bind ViewModel}"
-                    Visibility="{x:Bind ToRecordingVisibility(ViewModel.IsRecording), Mode=OneWay}" />
-            </Grid>
+            <TextBlock
+                VerticalAlignment="Center"
+                FontSize="15"
+                FontWeight="SemiBold"
+                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                Text="{x:Bind ViewModel.ExpandedStatusText, Mode=OneWay}"
+                TextTrimming="CharacterEllipsis" />
         </StackPanel>
         <Button
             x:Uid="RecordButton"
@@ -80,15 +67,22 @@
             Grid.ColumnSpan="2"
             Height="28"
             Margin="0,5,0,0">
+            <VoiceNotesWinUI:VoiceWaveform
+                Height="28"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Center"
+                BarCount="42"
+                ViewModel="{x:Bind ViewModel}"
+                Visibility="{x:Bind ToRecordingVisibility(ViewModel.IsRecording), Mode=OneWay}" />
             <TextBlock
                 x:Uid="NoRecordingsText"
                 VerticalAlignment="Center"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
-                Visibility="{x:Bind ToEmptyVisibility(ViewModel.HasRecordings), Mode=OneWay}" />
+                Visibility="{x:Bind ToEmptyVisibility(ViewModel.HasRecordings, ViewModel.IsRecording), Mode=OneWay}" />
             <ItemsControl
                 ItemsSource="{x:Bind ViewModel.Recordings, Mode=OneWay}"
-                Visibility="{x:Bind ToRecordingsVisibility(ViewModel.HasRecordings), Mode=OneWay}">
+                Visibility="{x:Bind ToRecordingsVisibility(ViewModel.HasRecordings, ViewModel.IsRecording), Mode=OneWay}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal" Spacing="4" />

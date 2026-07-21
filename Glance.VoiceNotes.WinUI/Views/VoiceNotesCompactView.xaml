@@ -38,9 +38,10 @@
             TextWrapping="NoWrap" />
         <VoiceNotes:VoiceWaveform
             Grid.Column="2"
-            Width="46"
-            Height="20"
+            Width="52"
+            Height="18"
             VerticalAlignment="Center"
+            BarCount="18"
             ViewModel="{x:Bind ViewModel}"
             Visibility="{x:Bind ToRecordingVisibility(ViewModel.IsRecording), Mode=OneWay}" />
     </Grid>

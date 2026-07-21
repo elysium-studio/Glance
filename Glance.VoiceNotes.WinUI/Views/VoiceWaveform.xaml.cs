@@ -2,6 +2,7 @@ using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Numerics;
 
@@ -14,6 +15,8 @@ public sealed partial class VoiceWaveform :
     private VoiceNotesViewModel? viewModel;
 
     public VoiceWaveform() => InitializeComponent();
+
+    public int BarCount { get; set; } = 42;
 
     public VoiceNotesViewModel? ViewModel
     {
@@ -33,39 +36,58 @@ public sealed partial class VoiceWaveform :
 
     private void HandleLoaded(object sender, RoutedEventArgs args)
     {
-        bars =
-        [
-            Bar01,
-            Bar02,
-            Bar03,
-            Bar04,
-            Bar05,
-            Bar06,
-            Bar07,
-            Bar08,
-            Bar09,
-            Bar10,
-            Bar11,
-            Bar12
-        ];
+        double barHeight = Math.Max(2, ActualHeight - 2);
+        Brush waveformBrush = (Brush)Resources["GlanceVoiceNotesIconBrush"];
+        bars = new FrameworkElement[Math.Max(1, BarCount)];
+        WaveformPanel.Children.Clear();
 
-        foreach (FrameworkElement bar in bars)
+        for (int index = 0; index < bars.Length; index++)
         {
+            Border bar = new()
+            {
+                Width = 1,
+                Height = barHeight,
+                CornerRadius = new CornerRadius(0.5)
+            };
+            bar.Background = waveformBrush;
+            WaveformPanel.Children.Add(bar);
+            bars[index] = bar;
+
             Visual visual = ElementCompositionPreview.GetElementVisual(bar);
             visual.CenterPoint = new Vector3(
-                (float)bar.ActualWidth / 2,
-                (float)bar.ActualHeight / 2,
+                0.5f,
+                (float)barHeight / 2,
                 0);
-            visual.Scale = new Vector3(1, 0.12f, 1);
+            visual.Scale = new Vector3(1, 0.04f, 1);
         }
 
+        ActualThemeChanged -= HandleActualThemeChanged;
+        ActualThemeChanged += HandleActualThemeChanged;
         Subscribe();
     }
 
     private void HandleUnloaded(object sender, RoutedEventArgs args)
     {
+        ActualThemeChanged -= HandleActualThemeChanged;
         Unsubscribe();
         bars = null;
+    }
+
+    private void HandleActualThemeChanged(
+        FrameworkElement sender,
+        object args)
+    {
+        if (bars is null)
+        {
+            return;
+        }
+
+        Brush waveformBrush = (Brush)Resources["GlanceVoiceNotesIconBrush"];
+
+        foreach (FrameworkElement bar in bars)
+        {
+            ((Border)bar).Background = waveformBrush;
+        }
     }
 
     private void Subscribe()
@@ -94,10 +116,13 @@ public sealed partial class VoiceWaveform :
             return;
         }
 
+        int sourceOffset = Math.Max(0, args.Levels.Count - bars.Length);
+
         for (int index = 0; index < bars.Length; index++)
         {
-            double level = index < args.Levels.Count
-                ? args.Levels[index]
+            int sourceIndex = sourceOffset + index;
+            double level = sourceIndex < args.Levels.Count
+                ? args.Levels[sourceIndex]
                 : 0;
             AnimateBar(bars[index], level);
         }
@@ -112,7 +137,7 @@ public sealed partial class VoiceWaveform :
         animation.Duration = TimeSpan.FromMilliseconds(75);
         animation.InsertKeyFrame(
             1,
-            (float)(0.12 + (Math.Clamp(level, 0, 1) * 0.88)),
+            (float)(0.04 + (Math.Clamp(level, 0, 1) * 0.96)),
             compositor.CreateCubicBezierEasingFunction(
                 new Vector2(0.2f, 0.8f),
                 new Vector2(0.2f, 1)));

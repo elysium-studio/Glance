@@ -7,23 +7,17 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/VoiceNotes.xaml" />
     </UserControl.Resources>
-    <StackPanel
-        HorizontalAlignment="Center"
-        VerticalAlignment="Center"
-        IsHitTestVisible="False"
-        Orientation="Horizontal"
-        Spacing="2">
-        <Border x:Name="Bar01" Width="2" Height="20" Background="{ThemeResource GlanceVoiceNotesIconBrush}" CornerRadius="1" />
-        <Border x:Name="Bar02" Width="2" Height="20" Background="{ThemeResource GlanceVoiceNotesIconBrush}" CornerRadius="1" />
-        <Border x:Name="Bar03" Width="2" Height="20" Background="{ThemeResource GlanceVoiceNotesIconBrush}" CornerRadius="1" />
-        <Border x:Name="Bar04" Width="2" Height="20" Background="{ThemeResource GlanceVoiceNotesIconBrush}" CornerRadius="1" />
-        <Border x:Name="Bar05" Width="2" Height="20" Background="{ThemeResource GlanceVoiceNotesIconBrush}" CornerRadius="1" />
-        <Border x:Name="Bar06" Width="2" Height="20" Background="{ThemeResource GlanceVoiceNotesIconBrush}" CornerRadius="1" />
-        <Border x:Name="Bar07" Width="2" Height="20" Background="{ThemeResource GlanceVoiceNotesIconBrush}" CornerRadius="1" />
-        <Border x:Name="Bar08" Width="2" Height="20" Background="{ThemeResource GlanceVoiceNotesIconBrush}" CornerRadius="1" />
-        <Border x:Name="Bar09" Width="2" Height="20" Background="{ThemeResource GlanceVoiceNotesIconBrush}" CornerRadius="1" />
-        <Border x:Name="Bar10" Width="2" Height="20" Background="{ThemeResource GlanceVoiceNotesIconBrush}" CornerRadius="1" />
-        <Border x:Name="Bar11" Width="2" Height="20" Background="{ThemeResource GlanceVoiceNotesIconBrush}" CornerRadius="1" />
-        <Border x:Name="Bar12" Width="2" Height="20" Background="{ThemeResource GlanceVoiceNotesIconBrush}" CornerRadius="1" />
-    </StackPanel>
+    <Grid IsHitTestVisible="False">
+        <Border
+            Height="1"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            Background="{ThemeResource GlanceVoiceNotesTrackBrush}" />
+        <StackPanel
+            x:Name="WaveformPanel"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Orientation="Horizontal"
+            Spacing="2" />
+    </Grid>
 </UserControl>

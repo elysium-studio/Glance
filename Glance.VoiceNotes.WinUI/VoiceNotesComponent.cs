@@ -18,6 +18,7 @@ public sealed class VoiceNotesComponent :
     private readonly IVoiceRecordingService recordingService;
     private readonly DispatcherQueueTimer timer;
     private readonly VoiceNotesViewModel viewModel;
+    private readonly double[] waveformHistory = new double[42];
     private long recordingStartedTimestamp;
 
     public VoiceNotesComponent(
@@ -117,7 +118,27 @@ public sealed class VoiceNotesComponent :
     private void HandleLevelsChanged(
         object? sender,
         VoiceLevelsChangedEventArgs args) =>
-        dispatcherQueue.TryEnqueue(() => viewModel.UpdateAudioLevels(args.Levels));
+        dispatcherQueue.TryEnqueue(() =>
+        {
+            double level = 0;
+
+            foreach (double sample in args.Levels)
+            {
+                level += sample;
+            }
+
+            level = args.Levels.Count == 0
+                ? 0
+                : level / args.Levels.Count;
+            Array.Copy(
+                waveformHistory,
+                1,
+                waveformHistory,
+                0,
+                waveformHistory.Length - 1);
+            waveformHistory[^1] = Math.Clamp(level, 0, 1);
+            viewModel.UpdateAudioLevels(waveformHistory);
+        });
 
     private void HandleRecordingCompleted(
         object? sender,
@@ -126,6 +147,7 @@ public sealed class VoiceNotesComponent :
         {
             timer.Stop();
             recordingStartedTimestamp = 0;
+            Array.Clear(waveformHistory);
             viewModel.UpdateAudioLevels(SilentLevels);
 
             if (args.Error is not null)
