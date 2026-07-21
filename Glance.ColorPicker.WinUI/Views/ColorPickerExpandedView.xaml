@@ -27,9 +27,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <StackPanel
-                        VerticalAlignment="Center"
-                        Spacing="1">
+                    <StackPanel VerticalAlignment="Center" Spacing="1">
                         <TextBlock
                             MaxLines="1"
                             Style="{StaticResource BodyStrongTextBlockStyle}"
@@ -57,7 +55,7 @@
             </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid Padding="20,12,20,26" ColumnSpacing="12">
+    <Grid Padding="20,12,20,26" ColumnSpacing="18">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />

@@ -40,12 +40,8 @@ internal sealed class WindowsVoiceRecordingService :
 
         try
         {
-            return Directory.EnumerateFiles(recordingsPath, "*.wav")
-                .Select(CreateVoiceNote)
-                .OfType<VoiceNote>()
-                .OrderByDescending(recording => recording.CreatedAt)
-                .Take(maximumCount)
-                .ToArray();
+            return Directory.EnumerateFiles(recordingsPath, "*.wav").Select(CreateVoiceNote).OfType<VoiceNote>().OrderByDescending(recording => recording.CreatedAt)
+                .Take(maximumCount).ToArray();
         }
         catch
         {
@@ -64,9 +60,7 @@ internal sealed class WindowsVoiceRecordingService :
 
             WaveInEvent? newCapture = null;
             WaveFileWriter? newWriter = null;
-            string filePath = Path.Combine(
-                recordingsPath,
-                $"Voice note {DateTime.Now:yyyy-MM-dd HH-mm-ss}.wav");
+            string filePath = Path.Combine(recordingsPath, $"Voice note {DateTime.Now:yyyy-MM-dd HH-mm-ss}.wav");
 
             try
             {
@@ -189,16 +183,11 @@ internal sealed class WindowsVoiceRecordingService :
         {
             activeWriter.Write(args.Buffer, 0, args.BytesRecorded);
             activeWriter.Flush();
-            LevelsChanged?.Invoke(
-                this,
-                new VoiceLevelsChangedEventArgs(CalculateLevels(
-                    args.Buffer,
-                    args.BytesRecorded)));
+            LevelsChanged?.Invoke(this, new VoiceLevelsChangedEventArgs(CalculateLevels(args.Buffer, args.BytesRecorded)));
         }
-        catch (Exception exception)
+        catch (Exception)
         {
             StopRecording();
-            Debug.WriteLine($"VoiceNotes: failed while recording: {exception}");
         }
     }
 
@@ -252,19 +241,14 @@ internal sealed class WindowsVoiceRecordingService :
             File.Exists(completedFilePath) &&
             new FileInfo(completedFilePath).Length > 44)
         {
-            recording = new VoiceNote(
-                completedFilePath,
-                File.GetCreationTime(completedFilePath),
-                duration);
+            recording = new VoiceNote(completedFilePath, File.GetCreationTime(completedFilePath), duration);
         }
         else if (completedFilePath is not null)
         {
             TryDeleteFile(completedFilePath);
         }
 
-        RecordingCompleted?.Invoke(
-            this,
-            new VoiceRecordingCompletedEventArgs(recording, error));
+        RecordingCompleted?.Invoke(this, new VoiceRecordingCompletedEventArgs(recording, error));
     }
 
     private static IReadOnlyList<double> CalculateLevels(
@@ -283,9 +267,7 @@ internal sealed class WindowsVoiceRecordingService :
         for (int levelIndex = 0; levelIndex < LevelCount; levelIndex++)
         {
             int startSample = levelIndex * sampleCount / LevelCount;
-            int endSample = Math.Max(
-                startSample + 1,
-                (levelIndex + 1) * sampleCount / LevelCount);
+            int endSample = Math.Max(startSample + 1, (levelIndex + 1) * sampleCount / LevelCount);
             double peak = 0;
             double squareSum = 0;
             int samplesInLevel = 0;
@@ -307,10 +289,7 @@ internal sealed class WindowsVoiceRecordingService :
             double rmsLevel = ToDisplayLevel(rms);
             double peakLevel = ToDisplayLevel(peak);
 
-            levels[levelIndex] = Math.Clamp(
-                (rmsLevel * 0.72) + (peakLevel * 0.28),
-                0,
-                1);
+            levels[levelIndex] = Math.Clamp((rmsLevel * 0.72) + (peakLevel * 0.28), 0, 1);
         }
 
         return levels;
@@ -329,10 +308,7 @@ internal sealed class WindowsVoiceRecordingService :
         {
             using WaveFileReader reader = new(filePath);
 
-            return new VoiceNote(
-                filePath,
-                File.GetCreationTime(filePath),
-                reader.TotalTime);
+            return new VoiceNote(filePath, File.GetCreationTime(filePath), reader.TotalTime);
         }
         catch
         {

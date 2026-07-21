@@ -66,12 +66,6 @@ public sealed class SystemMonitorComponent :
     private void UpdateMetrics()
     {
         SystemMetrics metrics = metricsReader.Read();
-        viewModel.Update(
-            metrics.CpuUsage,
-            metrics.MemoryUsage,
-            metrics.UsedMemory,
-            metrics.TotalMemory,
-            metrics.DownloadBytesPerSecond,
-            metrics.UploadBytesPerSecond);
+        viewModel.Update(metrics.CpuUsage, metrics.MemoryUsage, metrics.UsedMemory, metrics.TotalMemory, metrics.DownloadBytesPerSecond, metrics.UploadBytesPerSecond);
     }
 }

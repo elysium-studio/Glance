@@ -37,10 +37,7 @@ public sealed partial class MediaAudioVisualizer : UserControl
         foreach (FrameworkElement bar in bars)
         {
             Visual visual = ElementCompositionPreview.GetElementVisual(bar);
-            visual.CenterPoint = new Vector3(
-                (float)bar.ActualWidth / 2,
-                (float)bar.ActualHeight,
-                0);
+            visual.CenterPoint = new Vector3((float)bar.ActualWidth / 2, (float)bar.ActualHeight, 0);
             visual.Scale = new Vector3(1, 0.16f, 1);
         }
 
@@ -90,12 +87,7 @@ public sealed partial class MediaAudioVisualizer : UserControl
         Compositor compositor = visual.Compositor;
         ScalarKeyFrameAnimation animation = compositor.CreateScalarKeyFrameAnimation();
         animation.Duration = TimeSpan.FromMilliseconds(90);
-        animation.InsertKeyFrame(
-            1,
-            (float)(0.16 + (Math.Clamp(level, 0, 1) * 0.84)),
-            compositor.CreateCubicBezierEasingFunction(
-                new Vector2(0.2f, 0.8f),
-                new Vector2(0.2f, 1)));
+        animation.InsertKeyFrame(1, (float)(0.16 + (Math.Clamp(level, 0, 1) * 0.84)), compositor.CreateCubicBezierEasingFunction(new Vector2(0.2f, 0.8f), new Vector2(0.2f, 1)));
         visual.StartAnimation("Scale.Y", animation);
     }
 }

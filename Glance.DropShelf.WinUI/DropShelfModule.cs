@@ -10,8 +10,7 @@ public sealed class DropShelfModule : IGlanceModule
     {
         services.AddSingleton<ModuleResourceTextLocalizer<DropShelfModule>>();
         services.AddSingleton<DropShelfTransferStore>();
-        services.AddSingleton(provider => new DropShelfViewModel(
-            provider.GetRequiredService<ModuleResourceTextLocalizer<DropShelfModule>>()));
+        services.AddSingleton(provider => new DropShelfViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<DropShelfModule>>()));
         services.AddSingleton<IGlanceComponent, DropShelfComponent>();
     }
 }

@@ -27,8 +27,7 @@ public sealed class ModulePreferenceService
             .Where(preference => preference.IsEnabled)
             .Select(preference => allComponents.FirstOrDefault(component =>
                 string.Equals(component.Id, preference.Id, StringComparison.OrdinalIgnoreCase)))
-            .OfType<IGlanceComponent>()
-            .ToArray();
+            .OfType<IGlanceComponent>().ToArray();
 
     public IReadOnlyList<GlanceModulePreference> GetPreferences() =>
         settings.Modules

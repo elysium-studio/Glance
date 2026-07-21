@@ -100,10 +100,7 @@ public partial class VoiceNotesViewModel :
         }
 
         VoiceNoteItemViewModel? existing = Recordings.FirstOrDefault(item =>
-            string.Equals(
-                item.Recording.FilePath,
-                recording.FilePath,
-                StringComparison.OrdinalIgnoreCase));
+            string.Equals(item.Recording.FilePath, recording.FilePath, StringComparison.OrdinalIgnoreCase));
 
         if (existing is not null)
         {
@@ -124,10 +121,7 @@ public partial class VoiceNotesViewModel :
     public void RemoveRecording(VoiceNote recording)
     {
         VoiceNoteItemViewModel? item = Recordings.FirstOrDefault(value =>
-            string.Equals(
-                value.Recording.FilePath,
-                recording.FilePath,
-                StringComparison.OrdinalIgnoreCase));
+            string.Equals(value.Recording.FilePath, recording.FilePath, StringComparison.OrdinalIgnoreCase));
 
         if (item is not null)
         {

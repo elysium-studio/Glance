@@ -13,12 +13,8 @@ public sealed class VoiceNotesModule :
     {
         services.AddSingleton<ModuleResourceTextLocalizer<VoiceNotesModule>>();
         services.AddSingleton<IVoiceRecordingService>(provider =>
-            new WindowsVoiceRecordingService(Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "Glance",
-                "VoiceNotes")));
-        services.AddSingleton(provider => new VoiceNotesViewModel(
-            provider.GetRequiredService<ModuleResourceTextLocalizer<VoiceNotesModule>>()));
+            new WindowsVoiceRecordingService(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "VoiceNotes")));
+        services.AddSingleton(provider => new VoiceNotesViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<VoiceNotesModule>>()));
         services.AddSingleton<IGlanceComponent, VoiceNotesComponent>();
     }
 }

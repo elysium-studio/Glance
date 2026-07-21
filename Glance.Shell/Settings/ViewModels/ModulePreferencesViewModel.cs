@@ -21,8 +21,7 @@ public partial class ModulePreferencesViewModel :
         base(provider, factory, messenger, disposer)
     {
         this.preferences = preferences;
-        Modules = new ObservableCollection<ModuleSettingsItemViewModel>(
-            preferences.GetPreferences().Select(CreateItem));
+        Modules = new ObservableCollection<ModuleSettingsItemViewModel>(preferences.GetPreferences().Select(CreateItem));
     }
 
     public ObservableCollection<ModuleSettingsItemViewModel> Modules { get; }

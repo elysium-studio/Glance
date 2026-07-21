@@ -127,8 +127,7 @@ internal sealed class AudioLevelMonitor : IDisposable
                 {
                     int sampleOffset = frameOffset + (channel * bytesPerSample);
                     sample += bytesPerSample == 4
-                        ? BitConverter.ToSingle(args.Buffer, sampleOffset)
-                        : BitConverter.ToInt16(args.Buffer, sampleOffset) / 32768d;
+                        ? BitConverter.ToSingle(args.Buffer, sampleOffset) : BitConverter.ToInt16(args.Buffer, sampleOffset) / 32768d;
                 }
 
                 sample /= format.Channels;
@@ -161,14 +160,8 @@ internal sealed class AudioLevelMonitor : IDisposable
 
         for (int band = 0; band < BarCount; band++)
         {
-            int startBin = Math.Clamp(
-                (int)Math.Ceiling(BandEdges[band] * FftLength / sampleRate),
-                1,
-                (FftLength / 2) - 1);
-            int endBin = Math.Clamp(
-                (int)Math.Ceiling(BandEdges[band + 1] * FftLength / sampleRate),
-                startBin + 1,
-                FftLength / 2);
+            int startBin = Math.Clamp((int)Math.Ceiling(BandEdges[band] * FftLength / sampleRate), 1, (FftLength / 2) - 1);
+            int endBin = Math.Clamp((int)Math.Ceiling(BandEdges[band + 1] * FftLength / sampleRate), startBin + 1, FftLength / 2);
             double magnitudeSum = 0;
 
             for (int bin = startBin; bin < endBin; bin++)
@@ -188,10 +181,7 @@ internal sealed class AudioLevelMonitor : IDisposable
                 ? 0
                 : Math.Pow(magnitudes[band] / maximumMagnitude, 0.4);
             double target = overallLevel * (0.34 + (relativeMagnitude * 0.66));
-            smoothedLevels[band] = Math.Clamp(
-                Math.Max(target, smoothedLevels[band] * 0.74),
-                0,
-                1);
+            smoothedLevels[band] = Math.Clamp(Math.Max(target, smoothedLevels[band] * 0.74), 0, 1);
         }
 
         long timestamp = Stopwatch.GetTimestamp();

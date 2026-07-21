@@ -54,9 +54,7 @@ public sealed class FocusSessionViewModelTests
     [Fact]
     public void Refresh_AdvancesProgressWhileRunning()
     {
-        FocusSessionViewModel viewModel = new(
-            TimeSpan.FromSeconds(1),
-            TimeSpan.FromSeconds(1));
+        FocusSessionViewModel viewModel = new(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
         viewModel.Toggle();
 
         Thread.Sleep(20);
@@ -69,9 +67,7 @@ public sealed class FocusSessionViewModelTests
     [Fact]
     public void CompletingFocus_AdvancesToPausedBreakAndCountsSession()
     {
-        FocusSessionViewModel viewModel = new(
-            TimeSpan.FromMilliseconds(10),
-            TimeSpan.FromMinutes(5));
+        FocusSessionViewModel viewModel = new(TimeSpan.FromMilliseconds(10), TimeSpan.FromMinutes(5));
         viewModel.Toggle();
 
         Thread.Sleep(25);
@@ -88,9 +84,7 @@ public sealed class FocusSessionViewModelTests
     [Fact]
     public void CompletingBreak_ReturnsToFocusWithoutCountingSession()
     {
-        FocusSessionViewModel viewModel = new(
-            TimeSpan.FromMinutes(25),
-            TimeSpan.FromMilliseconds(10));
+        FocusSessionViewModel viewModel = new(TimeSpan.FromMinutes(25), TimeSpan.FromMilliseconds(10));
         viewModel.Skip();
         viewModel.Toggle();
 
@@ -119,9 +113,7 @@ public sealed class FocusSessionViewModelTests
     [Fact]
     public void Reset_RestoresCurrentPhaseAndStops()
     {
-        FocusSessionViewModel viewModel = new(
-            TimeSpan.FromSeconds(1),
-            TimeSpan.FromSeconds(1));
+        FocusSessionViewModel viewModel = new(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
         viewModel.Toggle();
         Thread.Sleep(20);
         viewModel.Refresh();

@@ -51,13 +51,11 @@ public sealed class LocalizationResourceTests
             string[] languages = GetDirectories(moduleRoot);
             Assert.Equal(ExpectedLanguages, languages);
 
-            IReadOnlyList<ResourceEntry> english = ReadResources(
-                Path.Combine(moduleRoot, "en", "Resources.resw"));
+            IReadOnlyList<ResourceEntry> english = ReadResources(Path.Combine(moduleRoot, "en", "Resources.resw"));
 
             foreach (string language in languages.Where(language => language != "en"))
             {
-                IReadOnlyList<ResourceEntry> localized = ReadResources(
-                    Path.Combine(moduleRoot, language, "Resources.resw"));
+                IReadOnlyList<ResourceEntry> localized = ReadResources(Path.Combine(moduleRoot, language, "Resources.resw"));
 
                 Assert.Equal(
                     english.Select(entry => entry.Name),
@@ -65,16 +63,11 @@ public sealed class LocalizationResourceTests
 
                 for (int index = 0; index < english.Count; index++)
                 {
-                    Assert.Equal(
-                        GetPlaceholders(english[index].Value),
-                        GetPlaceholders(localized[index].Value));
+                    Assert.Equal(GetPlaceholders(english[index].Value), GetPlaceholders(localized[index].Value));
 
                     if (english[index].Value.Contains("Glance", StringComparison.Ordinal))
                     {
-                        Assert.Contains(
-                            "Glance",
-                            localized[index].Value,
-                            StringComparison.Ordinal);
+                        Assert.Contains("Glance", localized[index].Value, StringComparison.Ordinal);
                     }
                 }
             }
@@ -82,26 +75,16 @@ public sealed class LocalizationResourceTests
     }
 
     private static string[] GetDirectories(string path) =>
-        Directory.GetDirectories(path)
-            .Select(Path.GetFileName)
-            .OfType<string>()
-            .Order()
-            .ToArray();
+        Directory.GetDirectories(path).Select(Path.GetFileName).OfType<string>().Order().ToArray();
 
     private static IReadOnlyList<ResourceEntry> ReadResources(string path) =>
-        XDocument.Load(path)
-            .Root!
-            .Elements("data")
-            .Select(element => new ResourceEntry(
-                element.Attribute("name")!.Value,
-                element.Element("value")!.Value))
+        XDocument.Load(path).Root!
+            .Elements("data").Select(element => new ResourceEntry(element.Attribute("name")!.Value, element.Element("value")!.Value))
             .ToArray();
 
     private static string[] GetPlaceholders(string value) =>
-        Regex.Matches(value, "\\{\\d+\\}")
-            .Select(match => match.Value)
-            .Order()
-            .ToArray();
+        Regex.Matches(value, "\\{\\d+\\}").Select(match => match.Value)
+            .Order().ToArray();
 
     private sealed record ResourceEntry(string Name, string Value);
 }

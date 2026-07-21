@@ -89,9 +89,7 @@ public partial class ClipboardShelfViewModel : ObservableObject
             return;
         }
 
-        HistoryStatus = await copyEntry(entry)
-            ? localizer.GetText("CopiedToClipboard")
-            : localizer.GetText("CopyFailed");
+        HistoryStatus = await copyEntry(entry) ? localizer.GetText("CopiedToClipboard") : localizer.GetText("CopyFailed");
     }
 
     public async Task PasteAsync(ClipboardEntry entry)
@@ -101,9 +99,7 @@ public partial class ClipboardShelfViewModel : ObservableObject
             return;
         }
 
-        HistoryStatus = await pasteEntry(entry)
-            ? localizer.GetText("SentToFocusedApp")
-            : localizer.GetText("SendFailed");
+        HistoryStatus = await pasteEntry(entry) ? localizer.GetText("SentToFocusedApp") : localizer.GetText("SendFailed");
     }
 
     public async Task RemoveAsync(ClipboardEntry entry)
@@ -113,9 +109,7 @@ public partial class ClipboardShelfViewModel : ObservableObject
             return;
         }
 
-        HistoryStatus = await removeEntry(entry)
-            ? localizer.GetText("RemovedFromHistory")
-            : localizer.GetText("RemoveFailed");
+        HistoryStatus = await removeEntry(entry) ? localizer.GetText("RemovedFromHistory") : localizer.GetText("RemoveFailed");
     }
 
     public async Task ClearAsync()
@@ -125,9 +119,7 @@ public partial class ClipboardShelfViewModel : ObservableObject
             return;
         }
 
-        HistoryStatus = await clearHistory()
-            ? localizer.GetText("HistoryCleared")
-            : localizer.GetText("ClearFailed");
+        HistoryStatus = await clearHistory() ? localizer.GetText("HistoryCleared") : localizer.GetText("ClearFailed");
     }
 
     public async Task CopySelectedAsync()

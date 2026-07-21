@@ -35,13 +35,7 @@ internal sealed class SystemMetricsReader
 
         (double download, double upload) = ReadNetworkUsage();
 
-        return new SystemMetrics(
-            cpu,
-            memory,
-            used,
-            status.TotalPhysical,
-            download,
-            upload);
+        return new SystemMetrics(cpu, memory, used, status.TotalPhysical, download, upload);
     }
 
     private (double Download, double Upload) ReadNetworkUsage()

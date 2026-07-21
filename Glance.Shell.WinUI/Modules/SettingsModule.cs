@@ -15,38 +15,18 @@ public sealed class SettingsModule :
             .AddViewFor(
                 ServiceLifetime.Transient,
                 provider => new SettingsWindow(),
-                provider => new SettingsViewModel(
-                    provider,
-                    provider.GetRequiredService<IServiceFactory>(),
-                    provider.GetRequiredService<IMessenger>(),
-                    provider.GetRequiredService<IDisposer>(),
-                    provider.GetRequiredService<IEnumerable<ISettingViewModel>>()))
+                provider => new SettingsViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IEnumerable<ISettingViewModel>>()))
             .AddViewFor<GlanceView, ISettingViewModel, GlanceViewModel>(
                 ServiceLifetime.Transient,
                 provider => new GlanceView(),
-                provider => new GlanceViewModel(
-                    provider,
-                    provider.GetRequiredService<IServiceFactory>(),
-                    provider.GetRequiredService<IMessenger>(),
-                    provider.GetRequiredService<IDisposer>(),
-                    provider.GetRequiredService<IEnumerable<IGlanceViewModel>>()))
+                provider => new GlanceViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IEnumerable<IGlanceViewModel>>()))
             .AddViewFor<ModulesView, ISettingViewModel, ModulesViewModel>(
                 ServiceLifetime.Transient,
                 provider => new ModulesView(),
-                provider => new ModulesViewModel(
-                    provider,
-                    provider.GetRequiredService<IServiceFactory>(),
-                    provider.GetRequiredService<IMessenger>(),
-                    provider.GetRequiredService<IDisposer>(),
-                    provider.GetRequiredService<IEnumerable<IModulesViewModel>>()))
+                provider => new ModulesViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IEnumerable<IModulesViewModel>>()))
             .AddViewFor<WindowsView, ISettingViewModel, WindowsViewModel>(
                 ServiceLifetime.Transient,
                 provider => new WindowsView(),
-                provider => new WindowsViewModel(
-                    provider,
-                    provider.GetRequiredService<IServiceFactory>(),
-                    provider.GetRequiredService<IMessenger>(),
-                    provider.GetRequiredService<IDisposer>(),
-                    provider.GetRequiredService<IEnumerable<IWindowsViewModel>>()));
+                provider => new WindowsViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IEnumerable<IWindowsViewModel>>()));
     }
 }

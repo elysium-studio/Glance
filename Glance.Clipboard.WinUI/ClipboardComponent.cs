@@ -57,9 +57,7 @@ public sealed class ClipboardComponent :
         {
             clipboardChangeListener = new ClipboardChangeListener();
             clipboardChangeListener.ClipboardChanged += HandleClipboardChanged;
-            ClipboardDiagnostics.Write(
-                "Listener",
-                $"Registered. Window=0x{clipboardChangeListener.Handle:X}");
+            ClipboardDiagnostics.Write("Listener", $"Registered. Window=0x{clipboardChangeListener.Handle:X}");
         }
         catch (Exception exception)
         {
@@ -104,9 +102,7 @@ public sealed class ClipboardComponent :
     {
         uint sequenceNumber = PInvoke.GetClipboardSequenceNumber();
         bool queued = dispatcherQueue.TryEnqueue(() => _ = RefreshAsync());
-        ClipboardDiagnostics.Write(
-            "ClipboardChanged",
-            $"Sequence={sequenceNumber}; DispatcherQueued={queued}");
+        ClipboardDiagnostics.Write("ClipboardChanged", $"Sequence={sequenceNumber}; DispatcherQueued={queued}");
     }
 
     private void HandleClipboardPoll(DispatcherQueueTimer sender, object args)
@@ -155,9 +151,7 @@ public sealed class ClipboardComponent :
         NativeClipboardCapture capture = await NativeClipboardReader.CaptureAsync();
         if (!capture.WasRead)
         {
-            ClipboardDiagnostics.Write(
-                "CaptureSkipped",
-                $"Could not open clipboard. Sequence={sequenceNumber}");
+            ClipboardDiagnostics.Write("CaptureSkipped", $"Could not open clipboard. Sequence={sequenceNumber}");
             return;
         }
 
@@ -183,9 +177,7 @@ public sealed class ClipboardComponent :
         }
 
         lastSequenceNumber = sequenceNumber;
-        ClipboardDiagnostics.Write(
-            "Capture",
-            $"Added {DescribeSnapshot(snapshot)}. Sequence={sequenceNumber}; Count={localEntries.Count}");
+        ClipboardDiagnostics.Write("Capture", $"Added {DescribeSnapshot(snapshot)}. Sequence={sequenceNumber}; Count={localEntries.Count}");
     }
 
     private void PublishEntries()
@@ -211,16 +203,12 @@ public sealed class ClipboardComponent :
 
             if (clipboardChangeListener is null || !snapshotAvailable)
             {
-                ClipboardDiagnostics.Write(
-                    "CopyRejected",
-                    $"ListenerAvailable={clipboardChangeListener is not null}; SnapshotAvailable={snapshotAvailable}");
+                ClipboardDiagnostics.Write("CopyRejected", $"ListenerAvailable={clipboardChangeListener is not null}; SnapshotAvailable={snapshotAvailable}");
                 return false;
             }
 
             ClipboardDiagnostics.Write("Copy", $"Starting {DescribeSnapshot(snapshot!)}");
-            bool copied = await NativeClipboardWriter.WriteAsync(
-                snapshot!,
-                clipboardChangeListener.WindowHandle);
+            bool copied = await NativeClipboardWriter.WriteAsync(snapshot!, clipboardChangeListener.WindowHandle);
 
             if (copied)
             {
@@ -229,9 +217,7 @@ public sealed class ClipboardComponent :
                 PublishEntries();
             }
 
-            ClipboardDiagnostics.Write(
-                "Copy",
-                $"Completed={copied}; Sequence={PInvoke.GetClipboardSequenceNumber()}");
+            ClipboardDiagnostics.Write("Copy", $"Completed={copied}; Sequence={PInvoke.GetClipboardSequenceNumber()}");
             return copied;
         }
         catch (Exception exception)
@@ -327,12 +313,7 @@ public sealed class ClipboardComponent :
 
         if (snapshot.Bitmap is not null)
         {
-            return CreateEntry(
-                id,
-                localizer.GetText("CopiedImage"),
-                localizer.GetText("KindImage"),
-                "\uEB9F",
-                timestamp);
+            return CreateEntry(id, localizer.GetText("CopiedImage"), localizer.GetText("KindImage"), "\uEB9F", timestamp);
         }
 
         string? link = snapshot.WebLink ?? snapshot.ApplicationLink;
@@ -344,40 +325,20 @@ public sealed class ClipboardComponent :
         if (!string.IsNullOrWhiteSpace(snapshot.Text))
         {
             string preview = Normalize(snapshot.Text);
-            return CreateEntry(
-                id,
-                string.IsNullOrWhiteSpace(preview) ? localizer.GetText("CopiedText") : preview,
-                localizer.GetText("KindText"),
-                "\uE8A5",
-                timestamp);
+            return CreateEntry(id, string.IsNullOrWhiteSpace(preview) ? localizer.GetText("CopiedText") : preview, localizer.GetText("KindText"), "\uE8A5", timestamp);
         }
 
         if (snapshot.Html is not null)
         {
-            return CreateEntry(
-                id,
-                localizer.GetText("RichHtmlContent"),
-                localizer.GetText("KindHtml"),
-                "\uE8D2",
-                timestamp);
+            return CreateEntry(id, localizer.GetText("RichHtmlContent"), localizer.GetText("KindHtml"), "\uE8D2", timestamp);
         }
 
         if (snapshot.Rtf is not null)
         {
-            return CreateEntry(
-                id,
-                localizer.GetText("FormattedText"),
-                localizer.GetText("KindRichText"),
-                "\uE8D2",
-                timestamp);
+            return CreateEntry(id, localizer.GetText("FormattedText"), localizer.GetText("KindRichText"), "\uE8D2", timestamp);
         }
 
-        return CreateEntry(
-            id,
-            localizer.GetText("UnsupportedContent"),
-            localizer.GetText("KindOther"),
-            "\uE77F",
-            timestamp);
+        return CreateEntry(id, localizer.GetText("UnsupportedContent"), localizer.GetText("KindOther"), "\uE77F", timestamp);
     }
 
     private ClipboardEntry CreateEntry(
@@ -390,9 +351,7 @@ public sealed class ClipboardComponent :
 
     private static string GetFileName(string path)
     {
-        string normalizedPath = path.TrimEnd(
-            Path.DirectorySeparatorChar,
-            Path.AltDirectorySeparatorChar);
+        string normalizedPath = path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         string name = Path.GetFileName(normalizedPath);
         return string.IsNullOrWhiteSpace(name) ? path : name;
     }

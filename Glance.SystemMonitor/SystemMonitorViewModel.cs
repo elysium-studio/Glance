@@ -46,10 +46,7 @@ public partial class SystemMonitorViewModel : ObservableObject
         MemoryUsage = memory;
         CpuText = $"{cpu:0}%";
         MemoryText = $"{memory:0}%";
-        MemoryDetail = localizer.GetText(
-            "MemoryUsageFormat",
-            FormatBytes(usedBytes),
-            FormatBytes(totalBytes));
+        MemoryDetail = localizer.GetText("MemoryUsageFormat", FormatBytes(usedBytes), FormatBytes(totalBytes));
         DownloadText = FormatRate(downloadBytesPerSecond);
         UploadText = FormatRate(uploadBytesPerSecond);
     }

@@ -9,8 +9,7 @@ public sealed class MediaModule : IGlanceModule
     public void Register(IServiceCollection services)
     {
         services.AddSingleton<ModuleResourceTextLocalizer<MediaModule>>();
-        services.AddSingleton(provider => new MediaViewModel(
-            provider.GetRequiredService<ModuleResourceTextLocalizer<MediaModule>>()));
+        services.AddSingleton(provider => new MediaViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<MediaModule>>()));
         services.AddSingleton<IGlanceComponent, MediaComponent>();
     }
 }

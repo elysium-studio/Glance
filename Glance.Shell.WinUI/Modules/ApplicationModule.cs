@@ -17,17 +17,11 @@ public sealed class ApplicationModule(
     public void Register(IServiceCollection services)
     {
         services
-            .AddSingleton(new AppEnvironment(applicationData))
-            .AddSingleton<IStartupManager>(new StartupManager(
-                Environment.ProcessPath ?? string.Empty,
-                "GlanceDesktop",
-                "GlanceDesktop"))
-            .AddSingleton<IDispatcher>(new Dispatcher(args =>
+            .AddSingleton(new AppEnvironment(applicationData)).AddSingleton<IStartupManager>(new StartupManager(Environment.ProcessPath ?? string.Empty, "GlanceDesktop", "GlanceDesktop")).AddSingleton<IDispatcher>(new Dispatcher(args =>
             {
                 if (!dispatcherQueue.TryEnqueue(() => args()))
                 {
-                    throw new InvalidOperationException(
-                        "The UI dispatcher queue rejected the operation.");
+                    throw new InvalidOperationException("The UI dispatcher queue rejected the operation.");
                 }
             }));
     }

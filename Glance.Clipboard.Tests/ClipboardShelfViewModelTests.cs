@@ -42,8 +42,7 @@ public sealed class ClipboardShelfViewModelTests
     public void Update_LimitsShelfToSixEntries()
     {
         ClipboardShelfViewModel viewModel = new(localizer);
-        ClipboardEntry[] entries = Enumerable.Range(1, 8)
-            .Select(index => CreateEntry(index.ToString(), $"Item {index}"))
+        ClipboardEntry[] entries = Enumerable.Range(1, 8).Select(index => CreateEntry(index.ToString(), $"Item {index}"))
             .ToArray();
 
         viewModel.Update(entries, "Ready");
@@ -165,10 +164,7 @@ public sealed class ClipboardShelfViewModelTests
     [InlineData(120, "2h")]
     public void ClipboardEntry_TimeText_DescribesAge(int minutesOld, string expected)
     {
-        ClipboardEntry entry = CreateEntry(
-            "1",
-            "Value",
-            timestamp: DateTimeOffset.Now.AddMinutes(-minutesOld));
+        ClipboardEntry entry = CreateEntry("1", "Value", timestamp: DateTimeOffset.Now.AddMinutes(-minutesOld));
 
         Assert.Equal(expected, entry.TimeText);
     }

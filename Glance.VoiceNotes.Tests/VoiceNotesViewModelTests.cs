@@ -34,8 +34,7 @@ public sealed class VoiceNotesViewModelTests
     public void FinishRecording_PutsNewestFirstAndLimitsHistory()
     {
         VoiceNotesViewModel viewModel = new(new FakeLocalizer());
-        VoiceNote[] existing = Enumerable.Range(1, 3)
-            .Select(index => CreateNote($"note-{index}.wav", index))
+        VoiceNote[] existing = Enumerable.Range(1, 3).Select(index => CreateNote($"note-{index}.wav", index))
             .ToArray();
         VoiceNote latest = CreateNote("latest.wav", 10);
 
@@ -91,14 +90,8 @@ public sealed class VoiceNotesViewModelTests
     [Fact]
     public void VoiceNote_FormatsShortAndLongDurations()
     {
-        VoiceNote shortNote = new(
-            "short.wav",
-            DateTimeOffset.Now,
-            new TimeSpan(0, 0, 3, 5));
-        VoiceNote longNote = new(
-            "long.wav",
-            DateTimeOffset.Now,
-            new TimeSpan(0, 2, 3, 5));
+        VoiceNote shortNote = new("short.wav", DateTimeOffset.Now, new TimeSpan(0, 0, 3, 5));
+        VoiceNote longNote = new("long.wav", DateTimeOffset.Now, new TimeSpan(0, 2, 3, 5));
 
         Assert.Equal("03:05", shortNote.DurationText);
         Assert.Equal("02:03:05", longNote.DurationText);

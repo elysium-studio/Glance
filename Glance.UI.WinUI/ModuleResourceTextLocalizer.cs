@@ -15,13 +15,9 @@ public sealed class ModuleResourceTextLocalizer<TMarker> :
     {
         string assemblyName = typeof(TMarker).Assembly.GetName().Name ??
             throw new InvalidOperationException("The module assembly has no name.");
-        string resourcePath = Path.Combine(
-            AppContext.BaseDirectory,
-            $"{assemblyName}.pri");
+        string resourcePath = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.pri");
 
-        resourceLoader = new ResourceLoader(
-            resourcePath,
-            $"{assemblyName}/Resources");
+        resourceLoader = new ResourceLoader(resourcePath, $"{assemblyName}/Resources");
     }
 
     public string GetText(string key, params object[] arguments)

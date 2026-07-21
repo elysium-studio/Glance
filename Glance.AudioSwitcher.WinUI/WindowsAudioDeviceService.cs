@@ -2,7 +2,6 @@ using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Glance.AudioSwitcher.WinUI;
@@ -27,22 +26,16 @@ public sealed class WindowsAudioDeviceService :
 
         try
         {
-            MMDeviceCollection endpoints = deviceEnumerator.EnumerateAudioEndPoints(
-                DataFlow.Render,
-                DeviceState.Active);
+            MMDeviceCollection endpoints = deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
 
             for (int index = 0; index < endpoints.Count; index++)
             {
                 using MMDevice endpoint = endpoints[index];
-                devices.Add(new AudioOutputDevice(
-                    endpoint.ID,
-                    endpoint.FriendlyName,
-                    string.Equals(endpoint.ID, defaultDeviceId, StringComparison.OrdinalIgnoreCase)));
+                devices.Add(new AudioOutputDevice(endpoint.ID, endpoint.FriendlyName, string.Equals(endpoint.ID, defaultDeviceId, StringComparison.OrdinalIgnoreCase)));
             }
         }
-        catch (Exception exception)
+        catch (Exception)
         {
-            Debug.WriteLine($"AudioSwitcher: failed to enumerate outputs: {exception}");
         }
 
         devices.Sort((left, right) =>
@@ -67,9 +60,8 @@ public sealed class WindowsAudioDeviceService :
             SetDefaultEndpoint(policyConfig, deviceId, AudioDeviceRole.Communications);
             return true;
         }
-        catch (Exception exception)
+        catch (Exception)
         {
-            Debug.WriteLine($"AudioSwitcher: failed to switch output: {exception}");
             return false;
         }
         finally
@@ -113,14 +105,11 @@ public sealed class WindowsAudioDeviceService :
     {
         try
         {
-            using MMDevice endpoint = deviceEnumerator.GetDefaultAudioEndpoint(
-                DataFlow.Render,
-                Role.Multimedia);
+            using MMDevice endpoint = deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
             return endpoint.ID;
         }
-        catch (Exception exception)
+        catch (Exception)
         {
-            Debug.WriteLine($"AudioSwitcher: failed to read the default output: {exception}");
             return null;
         }
     }

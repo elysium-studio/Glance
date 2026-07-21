@@ -32,9 +32,7 @@ internal static class NativeClipboardWriter
             {
                 if (attempt > 0)
                 {
-                    ClipboardDiagnostics.Write(
-                        "OpenClipboardForWrite",
-                        $"Succeeded after {attempt + 1} attempts; PreviousError={lastError}");
+                    ClipboardDiagnostics.Write("OpenClipboardForWrite", $"Succeeded after {attempt + 1} attempts; PreviousError={lastError}");
                 }
 
                 try
@@ -51,9 +49,7 @@ internal static class NativeClipboardWriter
             await Task.Delay(25);
         }
 
-        ClipboardDiagnostics.Write(
-            "OpenClipboardForWriteFailed",
-            DescribeClipboardState(lastError));
+        ClipboardDiagnostics.Write("OpenClipboardForWriteFailed", DescribeClipboardState(lastError));
         return false;
     }
 
@@ -84,9 +80,7 @@ internal static class NativeClipboardWriter
             await Task.Delay(25);
         }
 
-        ClipboardDiagnostics.Write(
-            "OpenClipboardForClearFailed",
-            DescribeClipboardState(lastError));
+        ClipboardDiagnostics.Write("OpenClipboardForClearFailed", DescribeClipboardState(lastError));
         return false;
     }
 
@@ -94,9 +88,7 @@ internal static class NativeClipboardWriter
     {
         if (!PInvoke.EmptyClipboard())
         {
-            ClipboardDiagnostics.Write(
-                "EmptyClipboardFailed",
-                $"Error={Marshal.GetLastWin32Error()}");
+            ClipboardDiagnostics.Write("EmptyClipboardFailed", $"Error={Marshal.GetLastWin32Error()}");
             return false;
         }
 
@@ -105,37 +97,27 @@ internal static class NativeClipboardWriter
 
         if (text is not null)
         {
-            wroteContent |= SetClipboardBytes(
-                ClipboardFormatUnicodeText,
-                Encoding.Unicode.GetBytes($"{text}\0"));
+            wroteContent |= SetClipboardBytes(ClipboardFormatUnicodeText, Encoding.Unicode.GetBytes($"{text}\0"));
         }
 
         if (snapshot.Html is not null)
         {
-            wroteContent |= SetClipboardBytes(
-                PInvoke.RegisterClipboardFormat("HTML Format"),
-                EncodeNullTerminated(snapshot.Html, Encoding.UTF8));
+            wroteContent |= SetClipboardBytes(PInvoke.RegisterClipboardFormat("HTML Format"), EncodeNullTerminated(snapshot.Html, Encoding.UTF8));
         }
 
         if (snapshot.Rtf is not null)
         {
-            wroteContent |= SetClipboardBytes(
-                PInvoke.RegisterClipboardFormat("Rich Text Format"),
-                EncodeNullTerminated(snapshot.Rtf, Encoding.UTF8));
+            wroteContent |= SetClipboardBytes(PInvoke.RegisterClipboardFormat("Rich Text Format"), EncodeNullTerminated(snapshot.Rtf, Encoding.UTF8));
         }
 
         if (snapshot.Bitmap is not null)
         {
-            wroteContent |= SetClipboardBytes(
-                PInvoke.RegisterClipboardFormat("PNG"),
-                snapshot.Bitmap);
+            wroteContent |= SetClipboardBytes(PInvoke.RegisterClipboardFormat("PNG"), snapshot.Bitmap);
         }
 
         if (snapshot.FilePaths is { Count: > 0 })
         {
-            wroteContent |= SetClipboardBytes(
-                ClipboardFormatFileDrop,
-                CreateFileDropPayload(snapshot.FilePaths));
+            wroteContent |= SetClipboardBytes(ClipboardFormatFileDrop, CreateFileDropPayload(snapshot.FilePaths));
         }
 
         return wroteContent;
@@ -169,15 +151,11 @@ internal static class NativeClipboardWriter
             return false;
         }
 
-        HGLOBAL memory = PInvoke.GlobalAlloc(
-            GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE | GLOBAL_ALLOC_FLAGS.GMEM_ZEROINIT,
-            (nuint)bytes.Length);
+        HGLOBAL memory = PInvoke.GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE | GLOBAL_ALLOC_FLAGS.GMEM_ZEROINIT, (nuint)bytes.Length);
 
         if (memory.IsNull)
         {
-            ClipboardDiagnostics.Write(
-                "GlobalAllocFailed",
-                $"Format={format}; Bytes={bytes.Length}; Error={Marshal.GetLastWin32Error()}");
+            ClipboardDiagnostics.Write("GlobalAllocFailed", $"Format={format}; Bytes={bytes.Length}; Error={Marshal.GetLastWin32Error()}");
             return false;
         }
 
@@ -188,9 +166,7 @@ internal static class NativeClipboardWriter
             void* destination = PInvoke.GlobalLock(memory);
             if (destination is null)
             {
-                ClipboardDiagnostics.Write(
-                    "GlobalLockFailed",
-                    $"Format={format}; Bytes={bytes.Length}; Error={Marshal.GetLastWin32Error()}");
+                ClipboardDiagnostics.Write("GlobalLockFailed", $"Format={format}; Bytes={bytes.Length}; Error={Marshal.GetLastWin32Error()}");
                 return false;
             }
 
@@ -208,9 +184,7 @@ internal static class NativeClipboardWriter
 
             if (!ownershipTransferred)
             {
-                ClipboardDiagnostics.Write(
-                    "SetClipboardDataFailed",
-                    $"Format={format}; Bytes={bytes.Length}; Error={Marshal.GetLastWin32Error()}");
+                ClipboardDiagnostics.Write("SetClipboardDataFailed", $"Format={format}; Bytes={bytes.Length}; Error={Marshal.GetLastWin32Error()}");
             }
 
             return ownershipTransferred;
@@ -236,9 +210,7 @@ internal static class NativeClipboardWriter
     {
         if (!PInvoke.CloseClipboard())
         {
-            ClipboardDiagnostics.Write(
-                $"CloseClipboardAfter{operation}Failed",
-                $"Error={Marshal.GetLastWin32Error()}");
+            ClipboardDiagnostics.Write($"CloseClipboardAfter{operation}Failed", $"Error={Marshal.GetLastWin32Error()}");
         }
     }
 }

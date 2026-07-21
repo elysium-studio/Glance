@@ -19,10 +19,7 @@ public static class FluentMotion
         Compositor compositor = visual.Compositor;
         CubicBezierEasingFunction easing = CreateEasing(compositor);
 
-        visual.CenterPoint = new Vector3(
-            (float)element.ActualWidth / 2,
-            (float)element.ActualHeight / 2,
-            0);
+        visual.CenterPoint = new Vector3((float)element.ActualWidth / 2, (float)element.ActualHeight / 2, 0);
 
         ScalarKeyFrameAnimation opacity = compositor.CreateScalarKeyFrameAnimation();
         opacity.InsertKeyFrame(0, 0f);
@@ -43,10 +40,7 @@ public static class FluentMotion
         Visual visual = ElementCompositionPreview.GetElementVisual(element);
         Compositor compositor = visual.Compositor;
 
-        visual.CenterPoint = new Vector3(
-            (float)element.ActualWidth / 2,
-            (float)element.ActualHeight / 2,
-            0);
+        visual.CenterPoint = new Vector3((float)element.ActualWidth / 2, (float)element.ActualHeight / 2, 0);
 
         Vector3KeyFrameAnimation animation = compositor.CreateVector3KeyFrameAnimation();
         animation.InsertKeyFrame(0, Vector3.One);
@@ -80,7 +74,5 @@ public static class FluentMotion
     }
 
     private static CubicBezierEasingFunction CreateEasing(Compositor compositor) =>
-        compositor.CreateCubicBezierEasingFunction(
-            new Vector2(0.16f, 1f),
-            new Vector2(0.3f, 1f));
+        compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1f), new Vector2(0.3f, 1f));
 }

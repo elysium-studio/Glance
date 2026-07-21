@@ -2,7 +2,6 @@ using Glance.DropShelf;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -30,16 +29,13 @@ public sealed class DropShelfTransferStore
             try
             {
                 IStorageItem storageItem = item.IsFolder
-                    ? await StorageFolder.GetFolderFromPathAsync(item.Path)
-                    : await StorageFile.GetFileFromPathAsync(item.Path);
+                    ? await StorageFolder.GetFolderFromPathAsync(item.Path) : await StorageFile.GetFileFromPathAsync(item.Path);
 
                 storageItems.TryAdd(item.Path, storageItem);
                 stagedItems.Add(item);
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                Debug.WriteLine(
-                    $"DropShelf: cannot stage '{item.Path}': {exception}");
             }
         }
 
@@ -49,13 +45,9 @@ public sealed class DropShelfTransferStore
     public IReadOnlyList<IStorageItem> GetStorageItems(
         IEnumerable<DropShelfItem> items) =>
         items
-            .Select(item => storageItems.TryGetValue(
-                item.Path,
-                out IStorageItem? storageItem)
-                ? storageItem
+            .Select(item => storageItems.TryGetValue(item.Path, out IStorageItem? storageItem) ? storageItem
                 : null)
-            .OfType<IStorageItem>()
-            .ToArray();
+            .OfType<IStorageItem>().ToArray();
 
     public void Remove(string path) => storageItems.TryRemove(path, out _);
 

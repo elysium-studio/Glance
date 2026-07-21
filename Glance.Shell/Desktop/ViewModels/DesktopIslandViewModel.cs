@@ -65,10 +65,7 @@ public partial class DesktopIslandViewModel :
         get => selectedIndex;
         set
         {
-            int normalizedIndex = Math.Clamp(
-                value,
-                0,
-                Math.Max(0, components.Count - 1));
+            int normalizedIndex = Math.Clamp(value, 0, Math.Max(0, components.Count - 1));
 
             if (!SetProperty(ref selectedIndex, normalizedIndex))
             {
@@ -175,8 +172,7 @@ public partial class DesktopIslandViewModel :
                 .Select((component, index) => (component, index))
                 .Where(item => string.Equals(item.component.Id, selectedId, StringComparison.OrdinalIgnoreCase))
                 .Select(item => item.index)
-                .DefaultIfEmpty(-1)
-                .First();
+                .DefaultIfEmpty(-1).First();
 
         components = activeComponents;
         SelectedIndex = selectedComponentIndex >= 0
@@ -193,13 +189,9 @@ public partial class DesktopIslandViewModel :
     {
         int componentIndex = components
             .Select((component, index) => (component, index))
-            .Where(item => string.Equals(
-                item.component.Id,
-                request.ComponentId,
-                StringComparison.OrdinalIgnoreCase))
+            .Where(item => string.Equals(item.component.Id, request.ComponentId, StringComparison.OrdinalIgnoreCase))
             .Select(item => item.index)
-            .DefaultIfEmpty(-1)
-            .First();
+            .DefaultIfEmpty(-1).First();
 
         if (componentIndex < 0)
         {
@@ -223,8 +215,7 @@ public partial class DesktopIslandViewModel :
                 item.component is IGlanceContextAwareComponent contextAware &&
                 contextAware.CanHandle(kind))
             .Select(item => item.index)
-            .DefaultIfEmpty(-1)
-            .First();
+            .DefaultIfEmpty(-1).First();
 
     private async Task NavigateAsync(string key)
     {

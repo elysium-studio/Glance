@@ -8,7 +8,6 @@ using Microsoft.UI.Xaml.Media.Animation;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -18,7 +17,7 @@ using Windows.Storage;
 
 namespace Glance.Shell.WinUI;
 
-public partial class DesktopIslandView : 
+public partial class DesktopIslandView :
     DesktopIsland
 {
     private readonly DispatcherQueue dispatcherQueue;
@@ -239,19 +238,13 @@ public partial class DesktopIslandView :
             IReadOnlyList<IStorageItem> storageItems =
                 await dataView.GetStorageItemsAsync();
             items = storageItems
-                .Select(CreateStorageItem)
-                .OfType<GlanceStorageItem>()
-                .ToArray();
+                .Select(CreateStorageItem).OfType<GlanceStorageItem>().ToArray();
         }
-        catch (COMException exception)
+        catch (COMException)
         {
-            Debug.WriteLine(
-                $"DropShelf: failed to read dropped storage items " +
-                $"(0x{exception.HResult:X8}): {exception.Message}");
         }
-        catch (Exception exception)
+        catch (Exception)
         {
-            Debug.WriteLine($"DropShelf: failed to process drop: {exception}");
         }
         finally
         {
@@ -264,9 +257,8 @@ public partial class DesktopIslandView :
             {
                 await ProcessStorageItemsAsync(items);
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                Debug.WriteLine($"DropShelf: failed to add dropped items: {exception}");
             }
         }
     }
@@ -279,8 +271,7 @@ public partial class DesktopIslandView :
             return Task.CompletedTask;
         }
 
-        TaskCompletionSource<bool> completion = new(
-            TaskCreationOptions.RunContinuationsAsynchronously);
+        TaskCompletionSource<bool> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         if (!dispatcherQueue.TryEnqueue(() =>
         {
@@ -288,8 +279,6 @@ public partial class DesktopIslandView :
             completion.TrySetResult(true);
         }))
         {
-            Debug.WriteLine(
-                "DropShelf: could not dispatch drop deferral completion.");
             completion.TrySetResult(false);
         }
 
@@ -302,11 +291,8 @@ public partial class DesktopIslandView :
         {
             deferral.Complete();
         }
-        catch (COMException exception)
+        catch (COMException)
         {
-            Debug.WriteLine(
-                $"DropShelf: failed to complete drop deferral " +
-                $"(0x{exception.HResult:X8}): {exception.Message}");
         }
     }
 
@@ -317,8 +303,7 @@ public partial class DesktopIslandView :
             return AddStorageItemsAsync(items);
         }
 
-        TaskCompletionSource<bool> completion = new(
-            TaskCreationOptions.RunContinuationsAsynchronously);
+        TaskCompletionSource<bool> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         if (!DispatcherQueue.TryEnqueue(async () =>
         {
@@ -343,9 +328,7 @@ public partial class DesktopIslandView :
     {
         if (items.Count > 0)
         {
-            await ViewModel.HandleContentAsync(new GlanceContentContext(
-                GlanceContentKind.FilesAndFolders,
-                items));
+            await ViewModel.HandleContentAsync(new GlanceContentContext(GlanceContentKind.FilesAndFolders, items));
         }
     }
 
@@ -360,21 +343,13 @@ public partial class DesktopIslandView :
                 return null;
             }
 
-            string normalizedPath = path.TrimEnd(
-                Path.DirectorySeparatorChar,
-                Path.AltDirectorySeparatorChar);
+            string normalizedPath = path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             string name = Path.GetFileName(normalizedPath);
 
-            return new GlanceStorageItem(
-                path,
-                string.IsNullOrWhiteSpace(name) ? storageItem.Name : name,
-                storageItem is StorageFolder);
+            return new GlanceStorageItem(path, string.IsNullOrWhiteSpace(name) ? storageItem.Name : name, storageItem is StorageFolder);
         }
-        catch (COMException exception)
+        catch (COMException)
         {
-            Debug.WriteLine(
-                $"DropShelf: rejected shell item " +
-                $"(0x{exception.HResult:X8}): {exception.Message}");
             return null;
         }
     }

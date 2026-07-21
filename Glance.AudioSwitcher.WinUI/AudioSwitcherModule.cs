@@ -10,9 +10,7 @@ public sealed class AudioSwitcherModule : IGlanceModule
     {
         services.AddSingleton<ModuleResourceTextLocalizer<AudioSwitcherModule>>();
         services.AddSingleton<IAudioDeviceService, WindowsAudioDeviceService>();
-        services.AddSingleton(provider => new AudioSwitcherViewModel(
-            provider.GetRequiredService<IAudioDeviceService>(),
-            provider.GetRequiredService<ModuleResourceTextLocalizer<AudioSwitcherModule>>()));
+        services.AddSingleton(provider => new AudioSwitcherViewModel(provider.GetRequiredService<IAudioDeviceService>(), provider.GetRequiredService<ModuleResourceTextLocalizer<AudioSwitcherModule>>()));
         services.AddSingleton<IGlanceComponent, AudioSwitcherComponent>();
     }
 }

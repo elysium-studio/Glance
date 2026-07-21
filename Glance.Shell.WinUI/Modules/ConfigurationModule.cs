@@ -22,10 +22,8 @@ public sealed class ConfigurationModule :
                 PropertyNameCaseInsensitive = true,
                 TypeInfoResolverChain = { GlanceJsonContext.Default }
             })
-            .UseJson()
-            .WithChangeHandler((provider, options, name) =>
-                provider.GetRequiredService<IMessenger>()
-                    .Send(new OptionsChangedEventArgs<GlanceSettings>(options)))
+            .UseJson().WithChangeHandler((provider, options, name) =>
+                provider.GetRequiredService<IMessenger>().Send(new OptionsChangedEventArgs<GlanceSettings>(options)))
             .WithAsyncChangeHandler(async (provider, options, _) =>
             {
                 IStartupManager startupManager =

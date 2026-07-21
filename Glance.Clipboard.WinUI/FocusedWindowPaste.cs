@@ -13,8 +13,7 @@ internal static class FocusedWindowPaste
             CreateKey(VIRTUAL_KEY.VK_CONTROL),
             CreateKey(VIRTUAL_KEY.VK_V),
             CreateKey(VIRTUAL_KEY.VK_V, KEYBD_EVENT_FLAGS.KEYEVENTF_KEYUP),
-            CreateKey(VIRTUAL_KEY.VK_CONTROL, KEYBD_EVENT_FLAGS.KEYEVENTF_KEYUP)
-        ];
+            CreateKey(VIRTUAL_KEY.VK_CONTROL, KEYBD_EVENT_FLAGS.KEYEVENTF_KEYUP)        ];
 
         return PInvoke.SendInput(inputs, Marshal.SizeOf<INPUT>()) == inputs.Length;
     }

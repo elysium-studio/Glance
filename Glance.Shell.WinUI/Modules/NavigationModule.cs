@@ -19,8 +19,7 @@ public sealed class NavigationModule :
         services
             .AddSingleton<IViewModelFactory>(provider => new ViewModelFactory((key, viewModelArgs) =>
             {
-                key = key.EndsWith("ViewModel", StringComparison.Ordinal)
-                    ? key[..^"ViewModel".Length]
+                key = key.EndsWith("ViewModel", StringComparison.Ordinal) ? key[..^"ViewModel".Length]
                     : key;
                 Type type = provider.GetRequiredKeyedService<ViewDescriptor>(key).ViewModelType!;
 
@@ -35,8 +34,7 @@ public sealed class NavigationModule :
             }))
             .AddSingleton<IViewFactory>(provider => new ViewFactory((key, viewArgs) =>
             {
-                key = key.EndsWith("ViewModel", StringComparison.Ordinal)
-                    ? key[..^"ViewModel".Length]
+                key = key.EndsWith("ViewModel", StringComparison.Ordinal) ? key[..^"ViewModel".Length]
                     : key;
 
                 ViewDescriptor? descriptor = provider.GetKeyedService<ViewDescriptor>(key);
@@ -56,10 +54,6 @@ public sealed class NavigationModule :
 
                 return provider.GetKeyedService(type, key);
             }))
-            .AddServiceFactory()
-            .AddSingleton<WindowRegistry>()
-            .AddKeyedSingleton<INavigationHandler, WindowHandler>(typeof(Window))
-            .AddKeyedSingleton<INavigationHandler, ContentDialogHandler>(typeof(ContentDialog))
-            .AddKeyedSingleton<INavigationHandler, PopupHandler>(typeof(Popup));
+            .AddServiceFactory().AddSingleton<WindowRegistry>().AddKeyedSingleton<INavigationHandler, WindowHandler>(typeof(Window)).AddKeyedSingleton<INavigationHandler, ContentDialogHandler>(typeof(ContentDialog)).AddKeyedSingleton<INavigationHandler, PopupHandler>(typeof(Popup));
     }
 }

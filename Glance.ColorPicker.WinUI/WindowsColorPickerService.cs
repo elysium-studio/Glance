@@ -144,10 +144,7 @@ public sealed partial class WindowsColorPickerService :
                 return null;
             }
 
-            return new ColorValue(
-                (byte)(value & 0xFF),
-                (byte)((value >> 8) & 0xFF),
-                (byte)((value >> 16) & 0xFF));
+            return new ColorValue((byte)(value & 0xFF), (byte)((value >> 8) & 0xFF), (byte)((value >> 16) & 0xFF));
         }
         finally
         {

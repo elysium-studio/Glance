@@ -13,8 +13,6 @@ public sealed class GlanceAttentionService : IGlanceAttentionService
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(componentId);
 
-        AttentionRequested?.Invoke(
-            this,
-            new GlanceAttentionRequest(componentId, level, expand));
+        AttentionRequested?.Invoke(this, new GlanceAttentionRequest(componentId, level, expand));
     }
 }

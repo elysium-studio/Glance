@@ -17,9 +17,7 @@ public readonly record struct ColorValue(
         {
             (double hue, double saturation, double lightness) = ToHsl();
 
-            return string.Create(
-                CultureInfo.InvariantCulture,
-                $"hsl({Math.Round(hue)}, {Math.Round(saturation * 100)}%, {Math.Round(lightness * 100)}%)");
+            return string.Create(CultureInfo.InvariantCulture, $"hsl({Math.Round(hue)}, {Math.Round(saturation * 100)}%, {Math.Round(lightness * 100)}%)");
         }
     }
 

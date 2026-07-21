@@ -21,28 +21,13 @@ public partial class App
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        string applicationData = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Glance");
+        string applicationData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance");
         DispatcherQueue dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
-        host = Host.CreateDefaultBuilder()
-            .UseWritableContentRoot(applicationData)
-            .ConfigureServices(services =>
+        host = Host.CreateDefaultBuilder().UseWritableContentRoot(applicationData).ConfigureServices(services =>
             {
                 services
-                    .AddApplication()
-                    .AddPresentation()
-                    .AddModules(
-                        new ApplicationModule(applicationData, dispatcherQueue),
-                        new ConfigurationModule(),
-                        new LocalizationModule(),
-                        new NavigationModule(),
-                        new DesktopModule(),
-                        new SettingsModule(),
-                        new GlanceSettingsModule(),
-                        new ModulesSettingsModule(),
-                        new WindowsSettingsModule());
+                    .AddApplication().AddPresentation().AddModules(new ApplicationModule(applicationData, dispatcherQueue), new ConfigurationModule(), new LocalizationModule(), new NavigationModule(), new DesktopModule(), new SettingsModule(), new GlanceSettingsModule(), new ModulesSettingsModule(), new WindowsSettingsModule());
 
                 foreach (IGlanceModule module in GlanceModuleLoader.Load())
                 {

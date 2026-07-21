@@ -185,12 +185,8 @@ public sealed class MediaComponent :
         GlobalSystemMediaTransportControlsSessionMediaProperties properties =
             await mediaSession.TryGetMediaPropertiesAsync();
 
-        string title = string.IsNullOrWhiteSpace(properties.Title)
-            ? localizer.GetText("UnknownTrack")
-            : properties.Title;
-        string artist = string.IsNullOrWhiteSpace(properties.Artist)
-            ? localizer.GetText("UnknownArtist")
-            : properties.Artist;
+        string title = string.IsNullOrWhiteSpace(properties.Title) ? localizer.GetText("UnknownTrack") : properties.Title;
+        string artist = string.IsNullOrWhiteSpace(properties.Artist) ? localizer.GetText("UnknownArtist") : properties.Artist;
         string source = FormatSourceName(mediaSession.SourceAppUserModelId);
         GlobalSystemMediaTransportControlsSessionPlaybackInfo? playbackInfo =
             mediaSession.GetPlaybackInfo();
@@ -228,10 +224,7 @@ public sealed class MediaComponent :
                 if (currentTitle is not null &&
                     !string.Equals(currentTitle, title, StringComparison.Ordinal))
                 {
-                    attentionService.RequestAttention(
-                        Id,
-                        GlanceAttentionLevel.Passive,
-                        expand: false);
+                    attentionService.RequestAttention(Id, GlanceAttentionLevel.Passive, expand: false);
                 }
 
                 currentTitle = title;
@@ -307,8 +300,7 @@ public sealed class MediaComponent :
             return action();
         }
 
-        TaskCompletionSource completion = new(
-            TaskCreationOptions.RunContinuationsAsynchronously);
+        TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         if (!dispatcherQueue.TryEnqueue(async () =>
         {
@@ -323,8 +315,7 @@ public sealed class MediaComponent :
             }
         }))
         {
-            completion.SetException(new InvalidOperationException(
-                "The media dispatcher rejected an update."));
+            completion.SetException(new InvalidOperationException("The media dispatcher rejected an update."));
         }
 
         return completion.Task;
@@ -340,7 +331,6 @@ public sealed class MediaComponent :
             source = source[(finalSeparator + 1)..];
         }
 
-        return source.Replace("exe", string.Empty, StringComparison.OrdinalIgnoreCase)
-            .TrimEnd('.');
+        return source.Replace("exe", string.Empty, StringComparison.OrdinalIgnoreCase).TrimEnd('.');
     }
 }

@@ -24,25 +24,19 @@ internal static class NativeClipboardReader
             {
                 if (attempt > 0)
                 {
-                    ClipboardDiagnostics.Write(
-                        "OpenClipboardForRead",
-                        $"Succeeded after {attempt + 1} attempts; PreviousError={lastError}");
+                    ClipboardDiagnostics.Write("OpenClipboardForRead", $"Succeeded after {attempt + 1} attempts; PreviousError={lastError}");
                 }
 
                 try
                 {
                     ClipboardSnapshot snapshot = CaptureOpenClipboard();
-                    return new NativeClipboardCapture(
-                        true,
-                        snapshot.HasContent ? snapshot : null);
+                    return new NativeClipboardCapture(true, snapshot.HasContent ? snapshot : null);
                 }
                 finally
                 {
                     if (!PInvoke.CloseClipboard())
                     {
-                        ClipboardDiagnostics.Write(
-                            "CloseClipboardAfterReadFailed",
-                            $"Error={Marshal.GetLastWin32Error()}");
+                        ClipboardDiagnostics.Write("CloseClipboardAfterReadFailed", $"Error={Marshal.GetLastWin32Error()}");
                     }
                 }
             }
@@ -51,9 +45,7 @@ internal static class NativeClipboardReader
             await Task.Delay(25);
         }
 
-        ClipboardDiagnostics.Write(
-            "OpenClipboardForReadFailed",
-            DescribeClipboardState(lastError));
+        ClipboardDiagnostics.Write("OpenClipboardForReadFailed", DescribeClipboardState(lastError));
         return new NativeClipboardCapture(false, null);
     }
 
@@ -124,9 +116,7 @@ internal static class NativeClipboardReader
         HANDLE handle = PInvoke.GetClipboardData(format);
         if (handle.IsNull)
         {
-            ClipboardDiagnostics.Write(
-                "GetClipboardDataFailed",
-                $"Format={format}; Error={Marshal.GetLastWin32Error()}");
+            ClipboardDiagnostics.Write("GetClipboardDataFailed", $"Format={format}; Error={Marshal.GetLastWin32Error()}");
             return null;
         }
 
@@ -134,26 +124,20 @@ internal static class NativeClipboardReader
         nuint size = PInvoke.GlobalSize(global);
         if (size == 0)
         {
-            ClipboardDiagnostics.Write(
-                "GlobalSizeFailed",
-                $"Format={format}; Error={Marshal.GetLastWin32Error()}");
+            ClipboardDiagnostics.Write("GlobalSizeFailed", $"Format={format}; Error={Marshal.GetLastWin32Error()}");
             return null;
         }
 
         if (size > MaximumPayloadBytes)
         {
-            ClipboardDiagnostics.Write(
-                "ClipboardPayloadTooLarge",
-                $"Format={format}; Bytes={size}; MaximumBytes={MaximumPayloadBytes}");
+            ClipboardDiagnostics.Write("ClipboardPayloadTooLarge", $"Format={format}; Bytes={size}; MaximumBytes={MaximumPayloadBytes}");
             return null;
         }
 
         void* source = PInvoke.GlobalLock(global);
         if (source is null)
         {
-            ClipboardDiagnostics.Write(
-                "GlobalLockForReadFailed",
-                $"Format={format}; Bytes={size}; Error={Marshal.GetLastWin32Error()}");
+            ClipboardDiagnostics.Write("GlobalLockForReadFailed", $"Format={format}; Bytes={size}; Error={Marshal.GetLastWin32Error()}");
             return null;
         }
 
@@ -185,8 +169,7 @@ internal static class NativeClipboardReader
         }
 
         string paths = usesUnicode
-            ? Encoding.Unicode.GetString(fileDrop, pathsOffset, fileDrop.Length - pathsOffset)
-            : Encoding.Default.GetString(fileDrop, pathsOffset, fileDrop.Length - pathsOffset);
+            ? Encoding.Unicode.GetString(fileDrop, pathsOffset, fileDrop.Length - pathsOffset) : Encoding.Default.GetString(fileDrop, pathsOffset, fileDrop.Length - pathsOffset);
 
         return paths.Split('\0', StringSplitOptions.RemoveEmptyEntries);
     }

@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
@@ -11,10 +10,7 @@ internal static class ClipboardDiagnostics
 {
     private static readonly AsyncLocal<string?> CurrentOperation = new();
     private static readonly object SyncRoot = new();
-    private static readonly string LogPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "Glance",
-        "clipboard-diagnostics.log");
+    private static readonly string LogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "clipboard-diagnostics.log");
     private static int nextOperationId;
     private static int initialized;
 
@@ -59,8 +55,6 @@ internal static class ClipboardDiagnostics
             string line = $"{DateTimeOffset.Now:O} | Thread={Environment.CurrentManagedThreadId} | " +
                 $"Apartment={Thread.CurrentThread.GetApartmentState()} | Operation={operation} | " +
                 $"Stage={stage} | {Normalize(message)}{Environment.NewLine}";
-
-            Debug.Write(line);
 
             lock (SyncRoot)
             {

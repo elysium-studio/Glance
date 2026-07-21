@@ -13,11 +13,6 @@ public sealed class ModulesSettingsModule :
         services.AddViewFor<ModulePreferencesView, IModulesViewModel, ModulePreferencesViewModel>(
             ServiceLifetime.Transient,
             provider => new ModulePreferencesView(),
-            provider => new ModulePreferencesViewModel(
-                provider,
-                provider.GetRequiredService<IServiceFactory>(),
-                provider.GetRequiredService<IMessenger>(),
-                provider.GetRequiredService<IDisposer>(),
-                provider.GetRequiredService<ModulePreferenceService>()));
+            provider => new ModulePreferencesViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<ModulePreferenceService>()));
     }
 }

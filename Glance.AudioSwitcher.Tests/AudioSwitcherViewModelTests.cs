@@ -7,9 +7,7 @@ public sealed class AudioSwitcherViewModelTests
     [Fact]
     public void Constructor_UsesCurrentDefaultOutput()
     {
-        FakeAudioDeviceService service = new(
-            new AudioOutputDevice("speakers", "Speakers", false),
-            new AudioOutputDevice("headphones", "Headphones", true));
+        FakeAudioDeviceService service = new(new AudioOutputDevice("speakers", "Speakers", false), new AudioOutputDevice("headphones", "Headphones", true));
 
         AudioSwitcherViewModel viewModel = new(service, new FakeLocalizer());
 
@@ -21,9 +19,7 @@ public sealed class AudioSwitcherViewModelTests
     [Fact]
     public void Constructor_HandlesMissingOutputs()
     {
-        AudioSwitcherViewModel viewModel = new(
-            new FakeAudioDeviceService(),
-            new FakeLocalizer());
+        AudioSwitcherViewModel viewModel = new(new FakeAudioDeviceService(), new FakeLocalizer());
 
         Assert.Equal("No audio output", viewModel.CurrentDeviceName);
         Assert.Equal(string.Empty, viewModel.DevicePositionText);
@@ -33,9 +29,7 @@ public sealed class AudioSwitcherViewModelTests
     [Fact]
     public void Next_SwitchesToFollowingOutputAndWraps()
     {
-        FakeAudioDeviceService service = new(
-            new AudioOutputDevice("speakers", "Speakers", false),
-            new AudioOutputDevice("headphones", "Headphones", true));
+        FakeAudioDeviceService service = new(new AudioOutputDevice("speakers", "Speakers", false), new AudioOutputDevice("headphones", "Headphones", true));
         AudioSwitcherViewModel viewModel = new(service, new FakeLocalizer());
 
         viewModel.Next();
@@ -48,9 +42,7 @@ public sealed class AudioSwitcherViewModelTests
     [Fact]
     public void Previous_SwitchesToPreviousOutputAndWraps()
     {
-        FakeAudioDeviceService service = new(
-            new AudioOutputDevice("speakers", "Speakers", true),
-            new AudioOutputDevice("headphones", "Headphones", false));
+        FakeAudioDeviceService service = new(new AudioOutputDevice("speakers", "Speakers", true), new AudioOutputDevice("headphones", "Headphones", false));
         AudioSwitcherViewModel viewModel = new(service, new FakeLocalizer());
 
         viewModel.Previous();
@@ -63,8 +55,7 @@ public sealed class AudioSwitcherViewModelTests
     [Fact]
     public void Switch_DoesNothingWithOnlyOneOutput()
     {
-        FakeAudioDeviceService service = new(
-            new AudioOutputDevice("speakers", "Speakers", true));
+        FakeAudioDeviceService service = new(new AudioOutputDevice("speakers", "Speakers", true));
         AudioSwitcherViewModel viewModel = new(service, new FakeLocalizer());
 
         viewModel.Next();
@@ -76,9 +67,7 @@ public sealed class AudioSwitcherViewModelTests
     [Fact]
     public void FailedSwitch_KeepsCurrentOutput()
     {
-        FakeAudioDeviceService service = new(
-            new AudioOutputDevice("speakers", "Speakers", true),
-            new AudioOutputDevice("headphones", "Headphones", false))
+        FakeAudioDeviceService service = new(new AudioOutputDevice("speakers", "Speakers", true), new AudioOutputDevice("headphones", "Headphones", false))
         {
             CanSetDefault = false
         };

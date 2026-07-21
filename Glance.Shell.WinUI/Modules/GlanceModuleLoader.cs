@@ -18,8 +18,7 @@ internal static class GlanceModuleLoader
         {
             Assembly assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
 
-            foreach (Type type in GetLoadableTypes(assembly)
-                .Where(type => !type.IsAbstract && typeof(IGlanceModule).IsAssignableFrom(type)))
+            foreach (Type type in GetLoadableTypes(assembly).Where(type => !type.IsAbstract && typeof(IGlanceModule).IsAssignableFrom(type)))
             {
                 if (Activator.CreateInstance(type) is IGlanceModule module)
                 {

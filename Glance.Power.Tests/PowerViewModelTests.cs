@@ -108,8 +108,7 @@ public sealed class PowerViewModelTests
         Assert.Equal(expected, viewModel.DetailText);
     }
 
-    public static TheoryData<TimeSpan?, string> RemainingTimeCases => new()
-    {
+    public static TheoryData<TimeSpan?, string> RemainingTimeCases => new()    {
         { null, "EstimatingRemainingTime" },
         { TimeSpan.Zero, "EstimatingRemainingTime" },
         { TimeSpan.FromMinutes(35), "MinutesRemaining(35)" },

@@ -39,8 +39,7 @@ public sealed class DropShelfViewModelTests
 
         viewModel.AddItems([
             new("C:\\Work\\notes.txt", "notes.txt", false),
-            new("c:\\work\\NOTES.TXT", "NOTES.TXT", false)
-        ]);
+            new("c:\\work\\NOTES.TXT", "NOTES.TXT", false)        ]);
 
         Assert.Single(viewModel.Items);
         Assert.Equal("OneItemSummary", viewModel.Summary);
@@ -91,8 +90,7 @@ public sealed class DropShelfViewModelTests
         DropShelfViewModel viewModel = CreateViewModel();
         viewModel.AddItems([
             new("C:\\One.txt", "One.txt", false),
-            new("C:\\Two.txt", "Two.txt", false)
-        ]);
+            new("C:\\Two.txt", "Two.txt", false)        ]);
 
         viewModel.Clear();
 
@@ -104,10 +102,7 @@ public sealed class DropShelfViewModelTests
     public void RemoveMissingItems_RemovesUnavailablePaths()
     {
         DropShelfViewModel viewModel = CreateViewModel();
-        viewModel.AddItems([new(
-            Path.Combine(Path.GetTempPath(), $"missing-{Guid.NewGuid():N}.txt"),
-            "Missing.txt",
-            false)]);
+        viewModel.AddItems([new(Path.Combine(Path.GetTempPath(), $"missing-{Guid.NewGuid():N}.txt"), "Missing.txt", false)]);
 
         viewModel.RemoveMissingItems();
 

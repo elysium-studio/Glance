@@ -131,10 +131,7 @@ public partial class FocusSessionViewModel : ObservableObject
     private void UpdateDisplay()
     {
         TimeSpan duration = GetDuration(Phase);
-        double elapsed = Math.Clamp(
-            (duration - remaining).TotalMilliseconds,
-            0,
-            duration.TotalMilliseconds);
+        double elapsed = Math.Clamp((duration - remaining).TotalMilliseconds, 0, duration.TotalMilliseconds);
 
         RemainingText = FormatTime(remaining);
         Progress = elapsed / duration.TotalMilliseconds * 100;

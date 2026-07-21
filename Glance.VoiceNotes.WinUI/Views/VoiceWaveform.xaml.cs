@@ -56,10 +56,7 @@ public sealed partial class VoiceWaveform :
             bars[index] = bar;
 
             Visual visual = ElementCompositionPreview.GetElementVisual(bar);
-            visual.CenterPoint = new Vector3(
-                0.5f,
-                1,
-                0);
+            visual.CenterPoint = new Vector3(0.5f, 1, 0);
             visual.Scale = new Vector3(1, 0.04f, 1);
         }
 
@@ -111,10 +108,7 @@ public sealed partial class VoiceWaveform :
         {
             bar.Height = barHeight;
             ElementCompositionPreview.GetElementVisual(bar).CenterPoint =
-                new Vector3(
-                    0.5f,
-                    (float)barHeight / 2,
-                    0);
+                new Vector3(0.5f, (float)barHeight / 2, 0);
         }
     }
 
@@ -163,12 +157,7 @@ public sealed partial class VoiceWaveform :
         ScalarKeyFrameAnimation animation =
             compositor.CreateScalarKeyFrameAnimation();
         animation.Duration = TimeSpan.FromMilliseconds(75);
-        animation.InsertKeyFrame(
-            1,
-            (float)(0.04 + (Math.Clamp(level, 0, 1) * 0.96)),
-            compositor.CreateCubicBezierEasingFunction(
-                new Vector2(0.2f, 0.8f),
-                new Vector2(0.2f, 1)));
+        animation.InsertKeyFrame(1, (float)(0.04 + (Math.Clamp(level, 0, 1) * 0.96)), compositor.CreateCubicBezierEasingFunction(new Vector2(0.2f, 0.8f), new Vector2(0.2f, 1)));
         visual.StartAnimation("Scale.Y", animation);
     }
 }

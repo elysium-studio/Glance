@@ -81,11 +81,7 @@ public sealed class PowerComponent :
 
         if (currentBand > attentionBand)
         {
-            attentionService.RequestAttention(
-                Id,
-                currentBand >= 2
-                    ? GlanceAttentionLevel.Critical
-                    : GlanceAttentionLevel.Default);
+            attentionService.RequestAttention(Id, currentBand >= 2 ? GlanceAttentionLevel.Critical : GlanceAttentionLevel.Default);
         }
 
         attentionBand = currentBand;

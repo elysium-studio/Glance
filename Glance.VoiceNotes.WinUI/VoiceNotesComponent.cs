@@ -132,16 +132,8 @@ public sealed class VoiceNotesComponent :
             averageLevel = args.Levels.Count == 0
                 ? 0
                 : averageLevel / args.Levels.Count;
-            double level = Math.Clamp(
-                (averageLevel * 0.78) + (peakLevel * 0.34),
-                0,
-                1);
-            Array.Copy(
-                waveformHistory,
-                1,
-                waveformHistory,
-                0,
-                waveformHistory.Length - 1);
+            double level = Math.Clamp((averageLevel * 0.78) + (peakLevel * 0.34), 0, 1);
+            Array.Copy(waveformHistory, 1, waveformHistory, 0, waveformHistory.Length - 1);
             waveformHistory[^1] = Math.Clamp(level, 0, 1);
             viewModel.UpdateAudioLevels(waveformHistory);
         });
@@ -169,8 +161,7 @@ public sealed class VoiceNotesComponent :
     {
         if (recordingStartedTimestamp != 0)
         {
-            viewModel.UpdateElapsed(
-                Stopwatch.GetElapsedTime(recordingStartedTimestamp));
+            viewModel.UpdateElapsed(Stopwatch.GetElapsedTime(recordingStartedTimestamp));
         }
     }
 }

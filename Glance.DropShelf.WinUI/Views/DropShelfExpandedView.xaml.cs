@@ -3,7 +3,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -63,7 +62,6 @@ public sealed partial class DropShelfExpandedView : UserControl
 
             if (storageItems.Count == 0)
             {
-                Debug.WriteLine("DropShelf: outgoing drag contains no accessible items.");
                 args.Cancel = true;
                 ViewModel.RemoveMissingItems();
                 return;
@@ -79,16 +77,14 @@ public sealed partial class DropShelfExpandedView : UserControl
             args.Data.RequestedOperation = DataPackageOperation.Move;
             args.Data.Properties.Title = ViewModel.DragCaption;
         }
-        catch (Exception exception)
+        catch (Exception)
         {
-            Debug.WriteLine($"DropShelf: failed to start outgoing drag: {exception}");
             args.Cancel = true;
         }
     }
 
     private void HandleDropCompleted(UIElement sender, DropCompletedEventArgs args)
     {
-        Debug.WriteLine($"DropShelf: outgoing drag completed with {args.DropResult}.");
         string[] paths = outgoingPaths;
         outgoingPaths = [];
 
@@ -111,26 +107,18 @@ public sealed partial class DropShelfExpandedView : UserControl
             return;
         }
 
-        Debug.WriteLine(
-            $"DropShelf: monitoring {paths.Count} source path(s) for an asynchronous Explorer move.");
-
         try
         {
             for (int attempt = 0; attempt < MoveConfirmationAttempts; attempt++)
             {
                 if (paths.All(IsMissing))
                 {
-                    Debug.WriteLine("DropShelf: confirmed outgoing move from source paths.");
                     QueueRemoveOutgoingItems(paths);
                     return;
                 }
 
-                await Task.Delay(MoveConfirmationInterval, cancellationToken)
-                    .ConfigureAwait(false);
+                await Task.Delay(MoveConfirmationInterval, cancellationToken).ConfigureAwait(false);
             }
-
-            Debug.WriteLine(
-                "DropShelf: outgoing move was not confirmed; preserving remaining shelf items.");
             QueueRemoveMissingOutgoingItems(paths);
         }
         catch (OperationCanceledException)
@@ -147,13 +135,8 @@ public sealed partial class DropShelfExpandedView : UserControl
     private void QueueRemoveMissingOutgoingItems(IReadOnlyCollection<string> paths) =>
         Queue(() => RemoveOutgoingItems(paths.Where(IsMissing).ToArray()));
 
-    private void Queue(Action action)
-    {
-        if (!dispatcherQueue.TryEnqueue(() => action()))
-        {
-            Debug.WriteLine("DropShelf: could not queue outgoing transfer cleanup.");
-        }
-    }
+    private void Queue(Action action) =>
+        _ = dispatcherQueue.TryEnqueue(() => action());
 
     private void RemoveOutgoingItems(IReadOnlyCollection<string> paths)
     {

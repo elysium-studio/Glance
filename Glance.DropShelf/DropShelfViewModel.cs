@@ -82,7 +82,6 @@ public partial class DropShelfViewModel : ObservableObject
             _ => localizer.GetText("ManyItemsSummary", Items.Count)
         };
         Detail = HasItems
-            ? localizer.GetText("ReadyDetail")
-            : localizer.GetText("EmptyDetail");
+            ? localizer.GetText("ReadyDetail") : localizer.GetText("EmptyDetail");
     }
 }

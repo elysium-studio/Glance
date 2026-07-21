@@ -86,10 +86,7 @@ public partial class PowerViewModel : ObservableObject
 
         return hours switch
         {
-            > 0 when minutes > 0 => localizer.GetText(
-                "HoursMinutesRemaining",
-                hours,
-                minutes),
+            > 0 when minutes > 0 => localizer.GetText("HoursMinutesRemaining", hours, minutes),
             > 0 => localizer.GetText("HoursRemaining", hours),
             _ => localizer.GetText("MinutesRemaining", Math.Max(1, minutes))
         };

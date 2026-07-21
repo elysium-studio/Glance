@@ -64,10 +64,7 @@ public sealed class DropShelfComponent :
         }
 
         DropShelfItem[] items = context.StorageItems
-            .Select(item => new DropShelfItem(
-                item.Path,
-                item.Name,
-                item.IsFolder))
+            .Select(item => new DropShelfItem(item.Path, item.Name, item.IsFolder))
             .ToArray();
 
         IReadOnlyList<DropShelfItem> stagedItems =
@@ -83,8 +80,7 @@ public sealed class DropShelfComponent :
             return Task.CompletedTask;
         }
 
-        TaskCompletionSource<bool> completion = new(
-            TaskCreationOptions.RunContinuationsAsynchronously);
+        TaskCompletionSource<bool> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         if (!dispatcherQueue.TryEnqueue(() =>
         {
@@ -99,8 +95,7 @@ public sealed class DropShelfComponent :
             }
         }))
         {
-            completion.TrySetException(new InvalidOperationException(
-                "The Drop Shelf UI dispatcher is unavailable."));
+            completion.TrySetException(new InvalidOperationException("The Drop Shelf UI dispatcher is unavailable."));
         }
 
         return completion.Task;

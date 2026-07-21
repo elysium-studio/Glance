@@ -22,8 +22,7 @@ public sealed partial class ColorPickerExpandedView :
         [
             new ColorFormatItem("HEX", viewModel.Hex, viewModel.CopyHex),
             new ColorFormatItem("RGB", viewModel.Rgb, viewModel.CopyRgb),
-            new ColorFormatItem("HSL", viewModel.Hsl, viewModel.CopyHsl)
-        ];
+            new ColorFormatItem("HSL", viewModel.Hsl, viewModel.CopyHsl)        ];
         viewModel.PropertyChanged += HandleViewModelPropertyChanged;
         InitializeComponent();
     }

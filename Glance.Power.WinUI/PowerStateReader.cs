@@ -13,15 +13,10 @@ internal static class PowerStateReader
             bool hasBattery = status != BatteryStatus.NotPresent;
             bool isOnBattery = PowerManager.PowerSourceKind == PowerSourceKind.DC;
             int percentage = hasBattery
-                ? Math.Clamp(PowerManager.RemainingChargePercent, 0, 100)
-                : 100;
+                ? Math.Clamp(PowerManager.RemainingChargePercent, 0, 100) : 100;
             TimeSpan remaining = PowerManager.RemainingDischargeTime;
 
-            return new PowerSnapshot(
-                Map(status),
-                percentage,
-                isOnBattery,
-                isOnBattery && remaining > TimeSpan.Zero ? remaining : null);
+            return new PowerSnapshot(Map(status), percentage, isOnBattery, isOnBattery && remaining > TimeSpan.Zero ? remaining : null);
         }
         catch
         {

@@ -33,12 +33,8 @@ public sealed class GlanceSettingsTests
             ]
         };
 
-        string json = JsonSerializer.Serialize(
-            settings,
-            GlanceJsonContext.Default.GlanceSettings);
-        GlanceSettings? result = JsonSerializer.Deserialize(
-            json,
-            GlanceJsonContext.Default.GlanceSettings);
+        string json = JsonSerializer.Serialize(settings, GlanceJsonContext.Default.GlanceSettings);
+        GlanceSettings? result = JsonSerializer.Deserialize(json, GlanceJsonContext.Default.GlanceSettings);
 
         Assert.NotNull(result);
         Assert.Equal(GlancePlacement.Bottom, result.Placement);

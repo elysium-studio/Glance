@@ -38,19 +38,7 @@ internal sealed unsafe class ClipboardChangeListener : IDisposable
                 throw new Win32Exception(Marshal.GetLastWin32Error());
             }
 
-            windowHandle = PInvoke.CreateWindowEx(
-                WINDOW_EX_STYLE.WS_EX_NOACTIVATE,
-                className,
-                default,
-                WINDOW_STYLE.WS_OVERLAPPED,
-                0,
-                0,
-                0,
-                0,
-                HWND.HWND_MESSAGE,
-                default,
-                moduleHandle,
-                null);
+            windowHandle = PInvoke.CreateWindowEx(WINDOW_EX_STYLE.WS_EX_NOACTIVATE, className, default, WINDOW_STYLE.WS_OVERLAPPED, 0, 0, 0, 0, HWND.HWND_MESSAGE, default, moduleHandle, null);
         }
 
         if (windowHandle.IsNull)
