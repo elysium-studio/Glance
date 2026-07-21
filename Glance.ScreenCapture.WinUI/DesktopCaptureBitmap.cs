@@ -66,3 +66,5 @@ internal readonly record struct NativeRectangle(int X, int Y, int Width, int Hei
         return new NativeRectangle(left, top, Math.Max(0, right - left), Math.Max(0, bottom - top));
     }
 }
+
+internal readonly record struct CaptureSelectionCandidate(NativeRectangle Bounds, nint WindowHandle = 0);

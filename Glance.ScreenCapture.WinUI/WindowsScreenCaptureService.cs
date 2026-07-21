@@ -19,6 +19,7 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
 {
     private const uint CaptureBlt = 0x40000000;
     private const int DwmExtendedFrameBounds = 9;
+    private const uint PrintWindowEntireWindow = 0;
     private const int SmVirtualScreenHeight = 79;
     private const int SmVirtualScreenWidth = 78;
     private const int SmVirtualScreenX = 76;
@@ -44,10 +45,10 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
             throw new InvalidOperationException("Screen capture must begin on the UI thread.");
         }
 
-        IReadOnlyList<NativeRectangle> candidates = mode switch
+        IReadOnlyList<CaptureSelectionCandidate> candidates = mode switch
         {
-            ScreenCaptureMode.Window => EnumerateWindowRectangles(),
-            ScreenCaptureMode.Display => EnumerateDisplayRectangles(),
+            ScreenCaptureMode.Window => EnumerateWindowCandidates(),
+            ScreenCaptureMode.Display => EnumerateDisplayCandidates(),
             _ => []
         };
         IReadOnlyList<nint> applicationWindows = GetVisibleApplicationWindows();
@@ -58,12 +59,12 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
             _ = NativeMethods.DwmFlush();
 
             DesktopCaptureBitmap desktop = CaptureVirtualDesktop();
-            NativeRectangle? selection = mode switch
+            CaptureSelectionCandidate? selection = mode switch
             {
                 ScreenCaptureMode.Region => await CaptureSelectionWindow.SelectAsync(desktop, mode, [], localizer, dispatcherQueue),
                 ScreenCaptureMode.Window => await CaptureSelectionWindow.SelectAsync(desktop, mode, candidates, localizer, dispatcherQueue),
                 ScreenCaptureMode.Display => await CaptureSelectionWindow.SelectAsync(desktop, mode, candidates, localizer, dispatcherQueue),
-                ScreenCaptureMode.AllDisplays => desktop.Bounds,
+                ScreenCaptureMode.AllDisplays => new CaptureSelectionCandidate(desktop.Bounds),
                 _ => null
             };
 
@@ -72,9 +73,11 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
                 return null;
             }
 
-            DesktopCaptureBitmap result = selection.Value == desktop.Bounds
-                ? desktop
-                : desktop.Crop(selection.Value);
+            DesktopCaptureBitmap result = mode == ScreenCaptureMode.Window && selection.Value.WindowHandle != 0
+                ? CaptureWindow(selection.Value.WindowHandle, selection.Value.Bounds)
+                : selection.Value.Bounds == desktop.Bounds
+                    ? desktop
+                    : desktop.Crop(selection.Value.Bounds);
             return await SaveAsync(result, mode);
         }
         finally
@@ -191,31 +194,7 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
                 throw new InvalidOperationException("Unable to copy the desktop surface.");
             }
 
-            BitmapInfo bitmapInfo = new()
-            {
-                Header = new BitmapInfoHeader
-                {
-                    Size = (uint)Marshal.SizeOf<BitmapInfoHeader>(),
-                    Width = width,
-                    Height = -height,
-                    Planes = 1,
-                    BitCount = 32,
-                    Compression = 0
-                }
-            };
-            byte[] pixels = new byte[width * height * 4];
-
-            if (NativeMethods.GetDIBits(memoryDeviceContext, bitmap, 0, (uint)height, pixels, ref bitmapInfo, 0) == 0)
-            {
-                throw new InvalidOperationException("Unable to read the desktop pixels.");
-            }
-
-            for (int index = 3; index < pixels.Length; index += 4)
-            {
-                pixels[index] = byte.MaxValue;
-            }
-
-            return new DesktopCaptureBitmap(x, y, width, height, pixels);
+            return new DesktopCaptureBitmap(x, y, width, height, ReadBitmapPixels(memoryDeviceContext, bitmap, width, height));
         }
         finally
         {
@@ -326,10 +305,85 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
         }
     }
 
-    private static IReadOnlyList<NativeRectangle> EnumerateWindowRectangles()
+    private static DesktopCaptureBitmap CaptureWindow(nint window, NativeRectangle visibleBounds)
+    {
+        if (!NativeMethods.GetWindowRect(window, out NativeRect windowRectangle))
+        {
+            throw new InvalidOperationException("Unable to read the selected window bounds.");
+        }
+
+        int width = windowRectangle.Right - windowRectangle.Left;
+        int height = windowRectangle.Bottom - windowRectangle.Top;
+
+        if (width <= 0 || height <= 0)
+        {
+            throw new InvalidOperationException("The selected window has no visible surface.");
+        }
+
+        nint screenDeviceContext = NativeMethods.GetDC(nint.Zero);
+
+        if (screenDeviceContext == nint.Zero)
+        {
+            throw new InvalidOperationException("Unable to access the selected window surface.");
+        }
+
+        nint memoryDeviceContext = NativeMethods.CreateCompatibleDC(screenDeviceContext);
+        nint bitmap = NativeMethods.CreateCompatibleBitmap(screenDeviceContext, width, height);
+        nint previousBitmap = NativeMethods.SelectObject(memoryDeviceContext, bitmap);
+
+        try
+        {
+            if (!NativeMethods.PrintWindow(window, memoryDeviceContext, PrintWindowEntireWindow))
+            {
+                throw new InvalidOperationException("The selected window did not provide a capture surface.");
+            }
+
+            byte[] pixels = ReadBitmapPixels(memoryDeviceContext, bitmap, width, height);
+            DesktopCaptureBitmap capturedWindow = new(windowRectangle.Left, windowRectangle.Top, width, height, pixels);
+            return capturedWindow.Crop(visibleBounds);
+        }
+        finally
+        {
+            _ = NativeMethods.SelectObject(memoryDeviceContext, previousBitmap);
+            _ = NativeMethods.DeleteObject(bitmap);
+            _ = NativeMethods.DeleteDC(memoryDeviceContext);
+            _ = NativeMethods.ReleaseDC(nint.Zero, screenDeviceContext);
+        }
+    }
+
+    private static byte[] ReadBitmapPixels(nint deviceContext, nint bitmap, int width, int height)
+    {
+        BitmapInfo bitmapInfo = new()
+        {
+            Header = new BitmapInfoHeader
+            {
+                Size = (uint)Marshal.SizeOf<BitmapInfoHeader>(),
+                Width = width,
+                Height = -height,
+                Planes = 1,
+                BitCount = 32,
+                Compression = 0
+            }
+        };
+        byte[] pixels = new byte[width * height * 4];
+
+        if (NativeMethods.GetDIBits(deviceContext, bitmap, 0, (uint)height, pixels, ref bitmapInfo, 0) == 0)
+        {
+            throw new InvalidOperationException("Unable to read the captured pixels.");
+        }
+
+        for (int index = 3; index < pixels.Length; index += 4)
+        {
+            pixels[index] = byte.MaxValue;
+        }
+
+        return pixels;
+    }
+
+    private static IReadOnlyList<CaptureSelectionCandidate> EnumerateWindowCandidates()
     {
         uint processId = (uint)Environment.ProcessId;
-        List<NativeRectangle> rectangles = [];
+        List<CaptureSelectionCandidate> candidates = [];
         NativeMethods.EnumWindows((window, parameter) =>
         {
             NativeMethods.GetWindowThreadProcessId(window, out uint windowProcessId);
@@ -351,29 +405,29 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
 
             if (width >= 80 && height >= 60)
             {
-                rectangles.Add(new NativeRectangle(rectangle.Left, rectangle.Top, width, height));
+                candidates.Add(new CaptureSelectionCandidate(new NativeRectangle(rectangle.Left, rectangle.Top, width, height), window));
             }
 
             return true;
         }, nint.Zero);
-        return rectangles;
+        return candidates;
     }
 
-    private static IReadOnlyList<NativeRectangle> EnumerateDisplayRectangles()
+    private static IReadOnlyList<CaptureSelectionCandidate> EnumerateDisplayCandidates()
     {
-        List<NativeRectangle> rectangles = [];
+        List<CaptureSelectionCandidate> candidates = [];
         NativeMethods.EnumDisplayMonitors(nint.Zero, nint.Zero, (monitor, _, _, _) =>
         {
             MonitorInfo info = new() { Size = (uint)Marshal.SizeOf<MonitorInfo>() };
 
             if (NativeMethods.GetMonitorInfo(monitor, ref info))
             {
-                rectangles.Add(new NativeRectangle(info.Monitor.Left, info.Monitor.Top, info.Monitor.Right - info.Monitor.Left, info.Monitor.Bottom - info.Monitor.Top));
+                candidates.Add(new CaptureSelectionCandidate(new NativeRectangle(info.Monitor.Left, info.Monitor.Top, info.Monitor.Right - info.Monitor.Left, info.Monitor.Bottom - info.Monitor.Top)));
             }
 
             return true;
         }, nint.Zero);
-        return rectangles;
+        return candidates;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -480,6 +534,10 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
         [LibraryImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static partial bool GetWindowRect(nint window, out NativeRect rectangle);
+
+        [LibraryImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static partial bool PrintWindow(nint window, nint deviceContext, uint flags);
 
         [LibraryImport("dwmapi.dll")]
         public static partial int DwmFlush();

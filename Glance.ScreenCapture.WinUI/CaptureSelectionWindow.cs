@@ -22,8 +22,8 @@ namespace Glance.ScreenCapture.WinUI;
 internal sealed class CaptureSelectionWindow
 {
     private readonly DesktopCaptureBitmap bitmap;
-    private readonly IReadOnlyList<NativeRectangle> candidates;
-    private readonly TaskCompletionSource<NativeRectangle?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly IReadOnlyList<CaptureSelectionCandidate> candidates;
+    private readonly TaskCompletionSource<CaptureSelectionCandidate?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly Border highlight;
     private readonly ScreenCaptureMode mode;
     private readonly Grid root;
@@ -36,7 +36,7 @@ internal sealed class CaptureSelectionWindow
     private CaptureSelectionWindow(
         DesktopCaptureBitmap bitmap,
         ScreenCaptureMode mode,
-        IReadOnlyList<NativeRectangle> candidates,
+        IReadOnlyList<CaptureSelectionCandidate> candidates,
         ITextLocalizer localizer,
         ImageSource imageSource)
     {
@@ -107,15 +107,15 @@ internal sealed class CaptureSelectionWindow
         window.Closed += HandleClosed;
     }
 
-    public static Task<NativeRectangle?> SelectAsync(
+    public static Task<CaptureSelectionCandidate?> SelectAsync(
         DesktopCaptureBitmap bitmap,
         ScreenCaptureMode mode,
-        IReadOnlyList<NativeRectangle> candidates,
+        IReadOnlyList<CaptureSelectionCandidate> candidates,
         ITextLocalizer localizer,
         DispatcherQueue dispatcherQueue) =>
         ShowOnDispatcherAsync(bitmap, mode, candidates, localizer, dispatcherQueue);
 
-    private Task<NativeRectangle?> ShowAsync()
+    private Task<CaptureSelectionCandidate?> ShowAsync()
     {
         AppWindow appWindow = window.AppWindow;
 
@@ -147,9 +147,9 @@ internal sealed class CaptureSelectionWindow
         return imageSource;
     }
 
-    private static Task<NativeRectangle?> ShowOnDispatcherAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<NativeRectangle> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue)
+    private static Task<CaptureSelectionCandidate?> ShowOnDispatcherAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<CaptureSelectionCandidate> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue)
     {
-        TaskCompletionSource<NativeRectangle?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        TaskCompletionSource<CaptureSelectionCandidate?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         void ShowSelectionWindow()
         {
@@ -195,7 +195,7 @@ internal sealed class CaptureSelectionWindow
         root.Focus(FocusState.Programmatic);
     }
 
-    private static async Task CompleteSelectionAsync(Task<NativeRectangle?> selection, TaskCompletionSource<NativeRectangle?> completion)
+    private static async Task CompleteSelectionAsync(Task<CaptureSelectionCandidate?> selection, TaskCompletionSource<CaptureSelectionCandidate?> completion)
     {
         try
         {
@@ -229,7 +229,7 @@ internal sealed class CaptureSelectionWindow
             return;
         }
 
-        NativeRectangle? candidate = FindCandidate(point);
+        CaptureSelectionCandidate? candidate = FindCandidate(point);
 
         if (candidate is not null)
         {
@@ -251,7 +251,7 @@ internal sealed class CaptureSelectionWindow
             return;
         }
 
-        NativeRectangle? candidate = FindCandidate(point);
+        CaptureSelectionCandidate? candidate = FindCandidate(point);
 
         if (candidate is null)
         {
@@ -259,7 +259,7 @@ internal sealed class CaptureSelectionWindow
             return;
         }
 
-        ShowHighlight(ToLocal(candidate.Value));
+        ShowHighlight(ToLocal(candidate.Value.Bounds));
     }
 
     private void HandlePointerReleased(object sender, PointerRoutedEventArgs args)
@@ -280,7 +280,7 @@ internal sealed class CaptureSelectionWindow
             return;
         }
 
-        Complete(ToScreen(local));
+        Complete(new CaptureSelectionCandidate(ToScreen(local)));
     }
 
     private void HandleClosed(object sender, WindowEventArgs args)
@@ -292,11 +292,12 @@ internal sealed class CaptureSelectionWindow
         }
     }
 
-    private NativeRectangle? FindCandidate(Point point)
+    private CaptureSelectionCandidate? FindCandidate(Point point)
     {
         (int x, int y) = ToScreen(point);
-        return candidates.FirstOrDefault(candidate => candidate.Contains(x, y)) is NativeRectangle rectangle && rectangle.Width > 0
-            ? rectangle
+        CaptureSelectionCandidate candidate = candidates.FirstOrDefault(value => value.Bounds.Contains(x, y));
+        return candidate.Bounds.Width > 0
+            ? candidate
             : null;
     }
 
@@ -339,7 +340,7 @@ internal sealed class CaptureSelectionWindow
     private static Rect CreateRectangle(Point start, Point end) =>
         new(Math.Min(start.X, end.X), Math.Min(start.Y, end.Y), Math.Abs(end.X - start.X), Math.Abs(end.Y - start.Y));
 
-    private void Complete(NativeRectangle? rectangle)
+    private void Complete(CaptureSelectionCandidate? candidate)
     {
         if (completed)
         {
@@ -347,7 +348,7 @@ internal sealed class CaptureSelectionWindow
         }
 
         completed = true;
-        completion.TrySetResult(rectangle);
+        completion.TrySetResult(candidate);
         window.Close();
     }
 }
