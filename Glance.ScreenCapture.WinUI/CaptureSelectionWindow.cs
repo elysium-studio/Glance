@@ -31,6 +31,8 @@ internal sealed class CaptureSelectionWindow
     private readonly nint windowHandle;
     private readonly ScreenCaptureMode mode;
     private readonly Grid root;
+    private readonly RectangleGeometry smokeBounds;
+    private readonly RectangleGeometry smokeCutout;
     private readonly Window window;
     private bool completed;
     private bool isDragging;
@@ -50,9 +52,20 @@ internal sealed class CaptureSelectionWindow
         this.mode = mode;
         this.candidates = candidates;
 
+        smokeBounds = new RectangleGeometry();
+        smokeCutout = new RectangleGeometry();
+        GeometryGroup smokeGeometry = new() { FillRule = FillRule.EvenOdd };
+        smokeGeometry.Children.Add(smokeBounds);
+        smokeGeometry.Children.Add(smokeCutout);
+        Microsoft.UI.Xaml.Shapes.Path smokeOverlay = new()
+        {
+            Data = smokeGeometry,
+            Fill = ResolveSmokeBrush(),
+            IsHitTestVisible = false
+        };
         highlight = new Border
         {
-            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(24, 104, 216, 255)),
+            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0)),
             BorderBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 104, 216, 255)),
             BorderThickness = new Thickness(2),
             CornerRadius = new CornerRadius(4),
@@ -90,6 +103,7 @@ internal sealed class CaptureSelectionWindow
             Background = new ImageBrush { ImageSource = imageSource, Stretch = Stretch.Fill },
             IsTabStop = true
         };
+        root.Children.Add(smokeOverlay);
         root.Children.Add(selectionCanvas);
         root.Children.Add(instructionContainer);
         root.KeyDown += HandleKeyDown;
@@ -97,6 +111,7 @@ internal sealed class CaptureSelectionWindow
         root.PointerPressed += HandlePointerPressed;
         root.PointerReleased += HandlePointerReleased;
         root.Loaded += HandleRootLoaded;
+        root.SizeChanged += HandleRootSizeChanged;
 
         window = new Window
         {
@@ -149,6 +164,16 @@ internal sealed class CaptureSelectionWindow
         return imageSource;
     }
 
+    private static Brush ResolveSmokeBrush()
+    {
+        if (Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("SmokeFillColorDefaultBrush", out object value) && value is Brush brush)
+        {
+            return brush;
+        }
+
+        return new SolidColorBrush(Windows.UI.Color.FromArgb(77, 0, 0, 0));
+    }
+
     private static Task<CaptureSelectionCandidate?> ShowOnDispatcherAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<CaptureSelectionCandidate> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue)
     {
         TaskCompletionSource<CaptureSelectionCandidate?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -183,8 +208,12 @@ internal sealed class CaptureSelectionWindow
     {
         root.Loaded -= HandleRootLoaded;
         root.UpdateLayout();
+        UpdateSmokeBounds();
         CompositionTarget.Rendering += HandleCompositionRendering;
     }
+
+    private void HandleRootSizeChanged(object sender, SizeChangedEventArgs args) =>
+        UpdateSmokeBounds();
 
     private void HandleCompositionRendering(object? sender, object args)
     {
@@ -276,7 +305,7 @@ internal sealed class CaptureSelectionWindow
 
         if (candidate is null)
         {
-            highlight.Visibility = Visibility.Collapsed;
+            ClearHighlight();
             return;
         }
 
@@ -297,7 +326,7 @@ internal sealed class CaptureSelectionWindow
 
         if (local.Width < 4 || local.Height < 4)
         {
-            highlight.Visibility = Visibility.Collapsed;
+            ClearHighlight();
             return;
         }
 
@@ -332,12 +361,22 @@ internal sealed class CaptureSelectionWindow
 
     private void ShowHighlight(Rect rectangle)
     {
+        smokeCutout.Rect = rectangle;
         Canvas.SetLeft(highlight, rectangle.X);
         Canvas.SetTop(highlight, rectangle.Y);
         highlight.Width = rectangle.Width;
         highlight.Height = rectangle.Height;
         highlight.Visibility = Visibility.Visible;
     }
+
+    private void ClearHighlight()
+    {
+        smokeCutout.Rect = Rect.Empty;
+        highlight.Visibility = Visibility.Collapsed;
+    }
+
+    private void UpdateSmokeBounds() =>
+        smokeBounds.Rect = new Rect(0, 0, root.ActualWidth, root.ActualHeight);
 
     private Rect ToLocal(NativeRectangle rectangle)
     {
