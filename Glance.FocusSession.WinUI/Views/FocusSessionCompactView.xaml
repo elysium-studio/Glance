@@ -29,7 +29,7 @@
             Margin="8,0,0,0"
             VerticalAlignment="Center">
             <TextBlock
-                HorizontalAlignment="Center"
+                HorizontalAlignment="Left"
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                 Style="{StaticResource BodyLargeTextBlockStyle}"

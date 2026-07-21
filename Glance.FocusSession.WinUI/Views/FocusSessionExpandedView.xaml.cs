@@ -24,10 +24,5 @@ public sealed partial class FocusSessionExpandedView :
 
     public string Title => localizer.GetText("ModuleDisplayName");
 
-    private string ToPhaseName(FocusSessionPhase phase) =>
-        localizer.GetText(phase == FocusSessionPhase.Focus
-            ? "FocusPhase"
-            : "BreakPhase");
-
     private string ToUpper(string value) => value.ToUpperInvariant();
 }

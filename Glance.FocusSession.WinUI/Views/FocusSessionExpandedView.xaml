@@ -35,23 +35,11 @@
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource GlanceFocusSessionIconBrush}"
                 Text="{x:Bind ToUpper(Title)}" />
-            <Grid ColumnSpacing="8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <TextBlock
-                    FontSize="27"
-                    FontWeight="SemiBold"
-                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                    Text="{x:Bind ViewModel.RemainingText, Mode=OneWay}" />
-                <TextBlock
-                    Grid.Column="1"
-                    VerticalAlignment="Bottom"
-                    FontSize="11"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{x:Bind ToPhaseName(ViewModel.Phase), Mode=OneWay}" />
-            </Grid>
+            <TextBlock
+                FontSize="27"
+                FontWeight="SemiBold"
+                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                Text="{x:Bind ViewModel.RemainingText, Mode=OneWay}" />
             <ProgressBar
                 Height="3"
                 Background="{ThemeResource GlanceFocusSessionTrackBrush}"
