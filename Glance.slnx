@@ -80,6 +80,15 @@
   <Project Path="Glance.PrivacyControls.Tests/Glance.PrivacyControls.Tests.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="Glance.RemovableDevices.WinUI/Glance.RemovableDevices.WinUI.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.RemovableDevices/Glance.RemovableDevices.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.RemovableDevices.Tests/Glance.RemovableDevices.Tests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="Glance.ScreenCapture.WinUI/Glance.ScreenCapture.WinUI.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>

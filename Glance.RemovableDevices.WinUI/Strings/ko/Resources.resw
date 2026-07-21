@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>이동식 장치</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>이동식 저장소를 확인하고 열거나 안전하게 꺼냅니다.</value></data>
+  <data name="NoDevices" xml:space="preserve"><value>이동식 장치 없음</value></data>
+  <data name="RemovableDrive" xml:space="preserve"><value>이동식 드라이브</value></data>
+  <data name="StorageDetail" xml:space="preserve"><value>{1} 중 {0} 사용 가능</value></data>
+  <data name="OpenFailed" xml:space="preserve"><value>이 장치를 열 수 없습니다</value></data>
+  <data name="EjectFailed" xml:space="preserve"><value>이 장치를 안전하게 꺼낼 수 없습니다</value></data>
+  <data name="EmptyMessage.Text" xml:space="preserve"><value>이동식 장치 없음</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>파일 탐색기에서 열기</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>파일 탐색기에서 열기</value></data>
+  <data name="EjectButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>안전하게 꺼내기</value></data>
+  <data name="EjectButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>안전하게 꺼내기</value></data>
+</root>

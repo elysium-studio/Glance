@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>リムーバブル デバイス</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>リムーバブル ストレージを表示、開く、安全に取り出します。</value></data>
+  <data name="NoDevices" xml:space="preserve"><value>リムーバブル デバイスはありません</value></data>
+  <data name="RemovableDrive" xml:space="preserve"><value>リムーバブル ドライブ</value></data>
+  <data name="StorageDetail" xml:space="preserve"><value>{1} 中 {0} 空き</value></data>
+  <data name="OpenFailed" xml:space="preserve"><value>このデバイスを開けませんでした</value></data>
+  <data name="EjectFailed" xml:space="preserve"><value>このデバイスを安全に取り出せませんでした</value></data>
+  <data name="EmptyMessage.Text" xml:space="preserve"><value>リムーバブル デバイスはありません</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>エクスプローラーで開く</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>エクスプローラーで開く</value></data>
+  <data name="EjectButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>安全に取り出す</value></data>
+  <data name="EjectButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>安全に取り出す</value></data>
+</root>

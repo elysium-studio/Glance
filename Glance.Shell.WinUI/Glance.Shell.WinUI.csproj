@@ -49,6 +49,7 @@
     <ProjectReference Include="..\Glance.Media.WinUI\Glance.Media.WinUI.csproj" />
     <ProjectReference Include="..\Glance.Power.WinUI\Glance.Power.WinUI.csproj" />
     <ProjectReference Include="..\Glance.PrivacyControls.WinUI\Glance.PrivacyControls.WinUI.csproj" />
+    <ProjectReference Include="..\Glance.RemovableDevices.WinUI\Glance.RemovableDevices.WinUI.csproj" />
     <ProjectReference Include="..\Glance.ScreenCapture.WinUI\Glance.ScreenCapture.WinUI.csproj" />
     <ProjectReference Include="..\Glance.Shell\Glance.Shell.csproj" />
     <ProjectReference Include="..\Glance.Stopwatch.WinUI\Glance.Stopwatch.WinUI.csproj" />

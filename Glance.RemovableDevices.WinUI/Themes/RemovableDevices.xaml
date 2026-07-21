@@ -1,0 +1,16 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Default">
+            <SolidColorBrush x:Key="GlanceRemovableDevicesIconBrush" Color="#FFFFB454" />
+            <SolidColorBrush x:Key="GlanceRemovableDevicesTrackBrush" Color="#32FFB454" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="GlanceRemovableDevicesIconBrush" Color="#FF8A4B00" />
+            <SolidColorBrush x:Key="GlanceRemovableDevicesTrackBrush" Color="#328A4B00" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="HighContrast">
+            <StaticResource x:Key="GlanceRemovableDevicesIconBrush" ResourceKey="SystemColorWindowTextColorBrush" />
+            <StaticResource x:Key="GlanceRemovableDevicesTrackBrush" ResourceKey="SystemColorGrayTextColorBrush" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

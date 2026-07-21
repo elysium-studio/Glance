@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>可移动设备</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>查看、打开和安全弹出可移动存储设备。</value></data>
+  <data name="NoDevices" xml:space="preserve"><value>没有可移动设备</value></data>
+  <data name="RemovableDrive" xml:space="preserve"><value>可移动驱动器</value></data>
+  <data name="StorageDetail" xml:space="preserve"><value>{1} 中有 {0} 可用</value></data>
+  <data name="OpenFailed" xml:space="preserve"><value>无法打开此设备</value></data>
+  <data name="EjectFailed" xml:space="preserve"><value>无法安全弹出此设备</value></data>
+  <data name="EmptyMessage.Text" xml:space="preserve"><value>没有可移动设备</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>在文件资源管理器中打开</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>在文件资源管理器中打开</value></data>
+  <data name="EjectButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>安全弹出</value></data>
+  <data name="EjectButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>安全弹出</value></data>
+</root>

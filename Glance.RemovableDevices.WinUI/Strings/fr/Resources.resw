@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Périphériques amovibles</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Affichez, ouvrez et éjectez en toute sécurité le stockage amovible.</value></data>
+  <data name="NoDevices" xml:space="preserve"><value>Aucun périphérique amovible</value></data>
+  <data name="RemovableDrive" xml:space="preserve"><value>Lecteur amovible</value></data>
+  <data name="StorageDetail" xml:space="preserve"><value>{0} libres sur {1}</value></data>
+  <data name="OpenFailed" xml:space="preserve"><value>Impossible d’ouvrir ce périphérique</value></data>
+  <data name="EjectFailed" xml:space="preserve"><value>Impossible d’éjecter ce périphérique en toute sécurité</value></data>
+  <data name="EmptyMessage.Text" xml:space="preserve"><value>Aucun périphérique amovible</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Ouvrir dans l’Explorateur de fichiers</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Ouvrir dans l’Explorateur de fichiers</value></data>
+  <data name="EjectButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Éjecter en toute sécurité</value></data>
+  <data name="EjectButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Éjecter en toute sécurité</value></data>
+</root>
