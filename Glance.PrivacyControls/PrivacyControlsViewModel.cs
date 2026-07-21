@@ -47,8 +47,6 @@ public partial class PrivacyControlsViewModel :
 
     public string ToggleGlyph => IsMuted ? "\uE74F" : "\uE720";
 
-    public event EventHandler<MicrophoneLevelChangedEventArgs>? LevelChanged;
-
     public void Refresh() =>
         Update(microphoneService.GetState());
 
@@ -72,7 +70,6 @@ public partial class PrivacyControlsViewModel :
         IsAvailable = state.IsAvailable;
         IsMuted = state.IsMuted;
         IsActive = level >= 0.08;
-        LevelChanged?.Invoke(this, new MicrophoneLevelChangedEventArgs(level));
     }
 
     private static double NormalizeLevel(double level) =>

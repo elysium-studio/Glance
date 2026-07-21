@@ -2,7 +2,6 @@
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Default">
             <SolidColorBrush x:Key="GlancePrivacyControlsIconBrush" Color="#FF72D6FF" />
-            <SolidColorBrush x:Key="GlancePrivacyControlsTrackBrush" Color="#3272D6FF" />
             <SolidColorBrush x:Key="AccentButtonBackground" Color="#FF72D6FF" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E672D6FF" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CC72D6FF" />
@@ -10,7 +9,6 @@
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="GlancePrivacyControlsIconBrush" Color="#FF006A85" />
-            <SolidColorBrush x:Key="GlancePrivacyControlsTrackBrush" Color="#32006A85" />
             <SolidColorBrush x:Key="AccentButtonBackground" Color="#FF006A85" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E6006A85" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CC006A85" />
@@ -18,7 +16,6 @@
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <StaticResource x:Key="GlancePrivacyControlsIconBrush" ResourceKey="SystemColorWindowTextColorBrush" />
-            <StaticResource x:Key="GlancePrivacyControlsTrackBrush" ResourceKey="SystemColorGrayTextColorBrush" />
             <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemColorHighlightColorBrush" />
             <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="SystemColorHighlightColorBrush" />
             <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="SystemColorHighlightColorBrush" />

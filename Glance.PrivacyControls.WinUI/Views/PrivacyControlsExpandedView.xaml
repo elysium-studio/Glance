@@ -2,8 +2,7 @@
     x:Class="Glance.PrivacyControls.WinUI.PrivacyControlsExpandedView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:Controls="using:Elysium.UI.Controls.WinUI"
-    xmlns:PrivacyControls="using:Glance.PrivacyControls.WinUI">
+    xmlns:Controls="using:Elysium.UI.Controls.WinUI">
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/PrivacyControls.xaml" />
     </UserControl.Resources>
@@ -51,27 +50,12 @@
                 Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                 Text="{x:Bind ViewModel.DeviceName, Mode=OneWay}"
                 ToolTipService.ToolTip="{x:Bind ViewModel.DeviceName, Mode=OneWay}" />
-            <Grid
+            <TextBlock
                 Grid.Row="2"
-                ColumnSpacing="8"
-                Visibility="{x:Bind ToVisibility(ViewModel.IsAvailable), Mode=OneWay}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <PrivacyControls:MicrophoneLevelMeter
-                    Height="14"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
-                    BarCount="18"
-                    ViewModel="{x:Bind ViewModel}" />
-                <TextBlock
-                    Grid.Column="1"
-                    VerticalAlignment="Center"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Style="{StaticResource CaptionTextBlockStyle}"
-                    Text="{x:Bind ViewModel.StatusText, Mode=OneWay}" />
-            </Grid>
+                VerticalAlignment="Center"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{x:Bind ViewModel.StatusText, Mode=OneWay}" />
         </Grid>
         <Button
             x:Uid="ToggleMuteButton"

@@ -42,30 +42,25 @@ public sealed class PrivacyControlsViewModelTests
     }
 
     [Fact]
-    public void Update_ReportsInputActivityAndNormalizedLevel()
+    public void Update_ReportsInputActivity()
     {
         PrivacyControlsViewModel viewModel = new(new FakeMicrophoneService(MicrophoneState.Unavailable), new FakeLocalizer());
-        double level = 0;
-        viewModel.LevelChanged += (_, args) => level = args.Level;
 
         viewModel.Update(new MicrophoneState("Microphone", true, false, 0.25));
 
         Assert.True(viewModel.IsActive);
         Assert.Equal("Active", viewModel.StatusText);
-        Assert.InRange(level, 0.60, 0.63);
     }
 
     [Fact]
-    public void MutedMicrophone_ReportsNoInputLevel()
+    public void MutedMicrophone_DoesNotReportInputActivity()
     {
         PrivacyControlsViewModel viewModel = new(new FakeMicrophoneService(MicrophoneState.Unavailable), new FakeLocalizer());
-        double level = 1;
-        viewModel.LevelChanged += (_, args) => level = args.Level;
 
         viewModel.Update(new MicrophoneState("Microphone", true, true, 0.8));
 
         Assert.False(viewModel.IsActive);
-        Assert.Equal(0, level);
+        Assert.Equal("Muted", viewModel.StatusText);
     }
 
     private sealed class FakeMicrophoneService(MicrophoneState state) :

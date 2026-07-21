@@ -26,7 +26,4 @@ public sealed partial class PrivacyControlsExpandedView :
 
     private string ToUpper(string value) =>
         value.ToUpperInvariant();
-
-    private Visibility ToVisibility(bool value) =>
-        value ? Visibility.Visible : Visibility.Collapsed;
 }

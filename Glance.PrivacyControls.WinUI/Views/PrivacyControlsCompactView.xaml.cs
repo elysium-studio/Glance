@@ -15,7 +15,4 @@ public sealed partial class PrivacyControlsCompactView :
     public PrivacyControlsViewModel ViewModel { get; }
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
-
-    private Visibility ToVisibility(bool value) =>
-        value ? Visibility.Visible : Visibility.Collapsed;
 }
