@@ -36,7 +36,6 @@ public sealed partial class VoiceWaveform :
 
     private void HandleLoaded(object sender, RoutedEventArgs args)
     {
-        double barHeight = Math.Max(2, ActualHeight - 2);
         Brush waveformBrush = (Brush)Resources["GlanceVoiceNotesIconBrush"];
         bars = new FrameworkElement[Math.Max(1, BarCount)];
         WaveformPanel.Children.Clear();
@@ -46,7 +45,7 @@ public sealed partial class VoiceWaveform :
             Border bar = new()
             {
                 Width = 1,
-                Height = barHeight,
+                Height = 2,
                 CornerRadius = new CornerRadius(0.5)
             };
             bar.Background = waveformBrush;
@@ -56,15 +55,21 @@ public sealed partial class VoiceWaveform :
             Visual visual = ElementCompositionPreview.GetElementVisual(bar);
             visual.CenterPoint = new Vector3(
                 0.5f,
-                (float)barHeight / 2,
+                1,
                 0);
             visual.Scale = new Vector3(1, 0.04f, 1);
         }
 
+        UpdateBarGeometry();
         ActualThemeChanged -= HandleActualThemeChanged;
         ActualThemeChanged += HandleActualThemeChanged;
         Subscribe();
     }
+
+    private void HandleSizeChanged(
+        object sender,
+        SizeChangedEventArgs args) =>
+        UpdateBarGeometry();
 
     private void HandleUnloaded(object sender, RoutedEventArgs args)
     {
@@ -87,6 +92,26 @@ public sealed partial class VoiceWaveform :
         foreach (FrameworkElement bar in bars)
         {
             ((Border)bar).Background = waveformBrush;
+        }
+    }
+
+    private void UpdateBarGeometry()
+    {
+        if (bars is null || ActualHeight <= 0)
+        {
+            return;
+        }
+
+        double barHeight = Math.Max(2, ActualHeight - 2);
+
+        foreach (FrameworkElement bar in bars)
+        {
+            bar.Height = barHeight;
+            ElementCompositionPreview.GetElementVisual(bar).CenterPoint =
+                new Vector3(
+                    0.5f,
+                    (float)barHeight / 2,
+                    0);
         }
     }
 
