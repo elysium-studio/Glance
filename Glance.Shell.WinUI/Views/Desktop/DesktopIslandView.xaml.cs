@@ -209,6 +209,9 @@ public partial class DesktopIslandView :
 
     private async void HandleDrop(object sender, DragEventArgs args)
     {
+        DragOperationDeferral deferral = args.GetDeferral();
+        GlanceStorageItem[] items = [];
+
         try
         {
             DataPackageView dataView = args.DataView;
@@ -220,12 +223,10 @@ public partial class DesktopIslandView :
 
             IReadOnlyList<IStorageItem> storageItems =
                 await dataView.GetStorageItemsAsync();
-            GlanceStorageItem[] items = storageItems
+            items = storageItems
                 .Select(CreateStorageItem)
                 .OfType<GlanceStorageItem>()
                 .ToArray();
-
-            await ProcessStorageItemsAsync(items);
         }
         catch (COMException exception)
         {
@@ -236,6 +237,31 @@ public partial class DesktopIslandView :
         catch (Exception exception)
         {
             Debug.WriteLine($"DropShelf: failed to process drop: {exception}");
+        }
+        finally
+        {
+            try
+            {
+                deferral.Complete();
+            }
+            catch (COMException exception)
+            {
+                Debug.WriteLine(
+                    $"DropShelf: failed to complete drop deferral " +
+                    $"(0x{exception.HResult:X8}): {exception.Message}");
+            }
+        }
+
+        if (items.Length > 0)
+        {
+            try
+            {
+                await ProcessStorageItemsAsync(items);
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine($"DropShelf: failed to add dropped items: {exception}");
+            }
         }
     }
 
