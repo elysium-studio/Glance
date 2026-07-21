@@ -1,23 +1,16 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Windows.ApplicationModel.DataTransfer;
-using Windows.Foundation;
 using Windows.Storage;
 
 namespace Glance.DropShelf.WinUI;
 
 public sealed partial class DropShelfExpandedView : UserControl
 {
-    private const double DragThreshold = 4;
-
     private readonly DropShelfTransferStore transferStore;
-    private Point dragStartPosition;
-    private uint? dragPointerId;
-    private bool isStartingDrag;
 
     public DropShelfExpandedView(
         DropShelfViewModel viewModel,
@@ -64,6 +57,7 @@ public sealed partial class DropShelfExpandedView : UserControl
                 return;
             }
 
+            args.AllowedOperations = DataPackageOperation.Copy | DataPackageOperation.Move;
             args.Data.SetStorageItems(storageItems, false);
             args.Data.RequestedOperation = DataPackageOperation.Move;
             args.Data.Properties.Title = ViewModel.DragCaption;
@@ -75,83 +69,22 @@ public sealed partial class DropShelfExpandedView : UserControl
         }
     }
 
-    private void HandleDragPointerPressed(object sender, PointerRoutedEventArgs args)
+    private void HandleDropCompleted(UIElement sender, DropCompletedEventArgs args)
     {
-        if (sender is not UIElement source || !ViewModel.HasItems || isStartingDrag)
+        Debug.WriteLine($"DropShelf: outgoing drag completed with {args.DropResult}.");
+
+        if (args.DropResult != DataPackageOperation.None)
         {
-            return;
-        }
-
-        dragPointerId = args.Pointer.PointerId;
-        dragStartPosition = args.GetCurrentPoint(source).Position;
-        source.CapturePointer(args.Pointer);
-    }
-
-    private async void HandleDragPointerMoved(object sender, PointerRoutedEventArgs args)
-    {
-        if (sender is not UIElement source ||
-            isStartingDrag ||
-            dragPointerId != args.Pointer.PointerId)
-        {
-            return;
-        }
-
-        var pointerPoint = args.GetCurrentPoint(source);
-        var horizontalDistance = Math.Abs(pointerPoint.Position.X - dragStartPosition.X);
-        var verticalDistance = Math.Abs(pointerPoint.Position.Y - dragStartPosition.Y);
-
-        if (horizontalDistance < DragThreshold && verticalDistance < DragThreshold)
-        {
-            return;
-        }
-
-        isStartingDrag = true;
-        dragPointerId = null;
-        source.ReleasePointerCapture(args.Pointer);
-
-        try
-        {
-            var result = await source.StartDragAsync(pointerPoint);
-
-            if (result != DataPackageOperation.None)
-            {
-                ClearShelfOnUiThread();
-            }
-        }
-        catch (Exception exception)
-        {
-            Debug.WriteLine($"DropShelf: outgoing drag failed: {exception}");
-        }
-        finally
-        {
-            isStartingDrag = false;
+            QueueClearShelf();
         }
     }
 
-    private void HandleDragPointerEnded(object sender, PointerRoutedEventArgs args)
+    private void QueueClearShelf()
     {
-        if (isStartingDrag || dragPointerId != args.Pointer.PointerId)
+        if (!DispatcherQueue.TryEnqueue(ClearShelf))
         {
-            return;
+            Debug.WriteLine("DropShelf: could not queue outgoing transfer cleanup.");
         }
-
-        dragPointerId = null;
-
-        if (sender is UIElement source)
-        {
-            source.ReleasePointerCapture(args.Pointer);
-        }
-    }
-
-    private void ClearShelfOnUiThread()
-    {
-        if (DispatcherQueue.HasThreadAccess)
-        {
-            ClearShelf();
-            return;
-        }
-
-        DispatcherQueue.TryEnqueue(ClearShelf);
     }
 
     private void ClearShelf()

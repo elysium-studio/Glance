@@ -122,13 +122,10 @@
                     Height="32"
                     VerticalAlignment="Center"
                     Background="{ThemeResource SubtleFillColorTransparentBrush}"
+                    CanDrag="True"
                     CornerRadius="6"
                     DragStarting="HandleDragStarting"
-                    PointerCanceled="HandleDragPointerEnded"
-                    PointerCaptureLost="HandleDragPointerEnded"
-                    PointerMoved="HandleDragPointerMoved"
-                    PointerPressed="HandleDragPointerPressed"
-                    PointerReleased="HandleDragPointerEnded">
+                    DropCompleted="HandleDropCompleted">
                     <FontIcon
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
