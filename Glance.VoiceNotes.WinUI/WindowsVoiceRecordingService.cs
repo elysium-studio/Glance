@@ -287,19 +287,40 @@ internal sealed class WindowsVoiceRecordingService :
                 startSample + 1,
                 (levelIndex + 1) * sampleCount / LevelCount);
             double peak = 0;
+            double squareSum = 0;
+            int samplesInLevel = 0;
 
             for (int sampleIndex = startSample;
                  sampleIndex < endSample && sampleIndex < sampleCount;
                  sampleIndex++)
             {
                 short sample = BitConverter.ToInt16(buffer, sampleIndex * 2);
-                peak = Math.Max(peak, Math.Abs(sample / 32768d));
+                double normalizedSample = sample / 32768d;
+                peak = Math.Max(peak, Math.Abs(normalizedSample));
+                squareSum += normalizedSample * normalizedSample;
+                samplesInLevel++;
             }
 
-            levels[levelIndex] = Math.Clamp(Math.Sqrt(peak), 0, 1);
+            double rms = samplesInLevel == 0
+                ? 0
+                : Math.Sqrt(squareSum / samplesInLevel);
+            double rmsLevel = ToDisplayLevel(rms);
+            double peakLevel = ToDisplayLevel(peak);
+
+            levels[levelIndex] = Math.Clamp(
+                (rmsLevel * 0.72) + (peakLevel * 0.28),
+                0,
+                1);
         }
 
         return levels;
+    }
+
+    private static double ToDisplayLevel(double amplitude)
+    {
+        double decibels = 20 * Math.Log10(Math.Max(amplitude, 0.000001));
+
+        return Math.Clamp((decibels + 52) / 40, 0, 1);
     }
 
     private static VoiceNote? CreateVoiceNote(string filePath)

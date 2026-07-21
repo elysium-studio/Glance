@@ -120,16 +120,22 @@ public sealed class VoiceNotesComponent :
         VoiceLevelsChangedEventArgs args) =>
         dispatcherQueue.TryEnqueue(() =>
         {
-            double level = 0;
+            double averageLevel = 0;
+            double peakLevel = 0;
 
             foreach (double sample in args.Levels)
             {
-                level += sample;
+                averageLevel += sample;
+                peakLevel = Math.Max(peakLevel, sample);
             }
 
-            level = args.Levels.Count == 0
+            averageLevel = args.Levels.Count == 0
                 ? 0
-                : level / args.Levels.Count;
+                : averageLevel / args.Levels.Count;
+            double level = Math.Clamp(
+                (averageLevel * 0.78) + (peakLevel * 0.34),
+                0,
+                1);
             Array.Copy(
                 waveformHistory,
                 1,
