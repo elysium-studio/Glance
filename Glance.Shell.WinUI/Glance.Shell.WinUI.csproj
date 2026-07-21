@@ -52,5 +52,6 @@
     <ProjectReference Include="..\Glance.SystemMonitor.WinUI\Glance.SystemMonitor.WinUI.csproj" />
     <ProjectReference Include="..\Glance.Timer.WinUI\Glance.Timer.WinUI.csproj" />
     <ProjectReference Include="..\Glance.UI.WinUI\Glance.UI.WinUI.csproj" />
+    <ProjectReference Include="..\Glance.VoiceNotes.WinUI\Glance.VoiceNotes.WinUI.csproj" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,28 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Default">
+            <SolidColorBrush x:Key="GlanceVoiceNotesIconBrush" Color="#FFFF789D" />
+            <SolidColorBrush x:Key="GlanceVoiceNotesTrackBrush" Color="#32FF789D" />
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FFFF789D" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E6FF789D" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CCFF789D" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#28FFFFFF" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="GlanceVoiceNotesIconBrush" Color="#FFB42355" />
+            <SolidColorBrush x:Key="GlanceVoiceNotesTrackBrush" Color="#32B42355" />
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FFB42355" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E6B42355" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CCB42355" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#28000000" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="HighContrast">
+            <StaticResource x:Key="GlanceVoiceNotesIconBrush" ResourceKey="SystemColorWindowTextColorBrush" />
+            <StaticResource x:Key="GlanceVoiceNotesTrackBrush" ResourceKey="SystemColorGrayTextColorBrush" />
+            <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundDisabled" ResourceKey="SystemColorButtonFaceColorBrush" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

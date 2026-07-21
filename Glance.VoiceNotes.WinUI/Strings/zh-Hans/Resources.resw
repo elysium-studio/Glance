@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>语音笔记</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>快速录制语音笔记并重听最近的录音。</value></data>
+  <data name="ReadyToRecord" xml:space="preserve"><value>准备录音</value></data>
+  <data name="RecordingStatus" xml:space="preserve"><value>正在录音</value></data>
+  <data name="RecordingUnavailable" xml:space="preserve"><value>麦克风不可用</value></data>
+  <data name="RecordButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>开始或停止录音</value></data>
+  <data name="RecordButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>开始或停止录音</value></data>
+  <data name="NoRecordingsText.Text" xml:space="preserve"><value>没有最近录音</value></data>
+  <data name="DeleteRecordingMenuItem.Text" xml:space="preserve"><value>删除录音</value></data>
+</root>

@@ -99,4 +99,13 @@
   <Project Path="Glance.UI.WinUI/Glance.UI.WinUI.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="Glance.VoiceNotes.WinUI/Glance.VoiceNotes.WinUI.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.VoiceNotes/Glance.VoiceNotes.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.VoiceNotes.Tests/Glance.VoiceNotes.Tests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
 </Solution>

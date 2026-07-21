@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Note vocali</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Registra rapide note vocali e riascolta le registrazioni recenti.</value></data>
+  <data name="ReadyToRecord" xml:space="preserve"><value>Pronto per registrare</value></data>
+  <data name="RecordingStatus" xml:space="preserve"><value>Registrazione</value></data>
+  <data name="RecordingUnavailable" xml:space="preserve"><value>Microfono non disponibile</value></data>
+  <data name="RecordButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Avvia o interrompi la registrazione</value></data>
+  <data name="RecordButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Avvia o interrompi la registrazione</value></data>
+  <data name="NoRecordingsText.Text" xml:space="preserve"><value>Nessuna registrazione recente</value></data>
+  <data name="DeleteRecordingMenuItem.Text" xml:space="preserve"><value>Elimina registrazione</value></data>
+</root>

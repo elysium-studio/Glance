@@ -18,6 +18,7 @@ public sealed class LocalizationResourceTests
         "Stopwatch",
         "SystemMonitor",
         "Timer",
+        "VoiceNotes",
     ];
 
     private static readonly string[] ExpectedLanguages =

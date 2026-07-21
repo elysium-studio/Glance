@@ -1,0 +1,123 @@
+<UserControl
+    x:Class="Glance.VoiceNotes.WinUI.VoiceNotesExpandedView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:VoiceNotes="using:Glance.VoiceNotes"
+    xmlns:VoiceNotesWinUI="using:Glance.VoiceNotes.WinUI">
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Themes/VoiceNotes.xaml" />
+    </UserControl.Resources>
+    <Grid Padding="20,10,20,26" ColumnSpacing="12">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid
+            x:Name="StatusIndicator"
+            Width="36"
+            Height="36"
+            VerticalAlignment="Center">
+            <FontIcon
+                Width="30"
+                Height="30"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="30"
+                Foreground="{ThemeResource GlanceVoiceNotesIconBrush}"
+                Glyph="&#xE720;" />
+        </Grid>
+        <StackPanel
+            Grid.Column="1"
+            VerticalAlignment="Center"
+            Spacing="1">
+            <TextBlock
+                FontSize="11"
+                FontWeight="SemiBold"
+                Foreground="{ThemeResource GlanceVoiceNotesIconBrush}"
+                Text="{x:Bind ToUpper(Title)}" />
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontSize="22"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                    Text="{x:Bind ViewModel.ExpandedStatusText, Mode=OneWay}"
+                    TextTrimming="CharacterEllipsis" />
+                <VoiceNotesWinUI:VoiceWaveform
+                    Grid.Column="1"
+                    Width="46"
+                    Height="20"
+                    VerticalAlignment="Center"
+                    ViewModel="{x:Bind ViewModel}"
+                    Visibility="{x:Bind ToRecordingVisibility(ViewModel.IsRecording), Mode=OneWay}" />
+            </Grid>
+        </StackPanel>
+        <Button
+            x:Uid="RecordButton"
+            Grid.Column="2"
+            Width="36"
+            Height="36"
+            Padding="0"
+            VerticalAlignment="Center"
+            Click="{x:Bind ViewModel.ToggleRecording}"
+            Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}"
+            CornerRadius="18"
+            FontFamily="Segoe Fluent Icons"
+            Style="{StaticResource AccentButtonStyle}" />
+        <Grid
+            Grid.Row="1"
+            Grid.Column="1"
+            Grid.ColumnSpan="2"
+            Height="28"
+            Margin="0,5,0,0">
+            <TextBlock
+                x:Uid="NoRecordingsText"
+                VerticalAlignment="Center"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Visibility="{x:Bind ToEmptyVisibility(ViewModel.HasRecordings), Mode=OneWay}" />
+            <ItemsControl
+                ItemsSource="{x:Bind ViewModel.Recordings, Mode=OneWay}"
+                Visibility="{x:Bind ToRecordingsVisibility(ViewModel.HasRecordings), Mode=OneWay}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="4" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="VoiceNotes:VoiceNoteItemViewModel">
+                        <Button
+                            Height="28"
+                            Padding="9,0"
+                            Click="{x:Bind Open}"
+                            CornerRadius="14"
+                            ToolTipService.ToolTip="{x:Bind DisplayName}">
+                            <Button.ContextFlyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem
+                                        x:Uid="DeleteRecordingMenuItem"
+                                        Click="{x:Bind Delete}"
+                                        Icon="Delete" />
+                                </MenuFlyout>
+                            </Button.ContextFlyout>
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <FontIcon FontSize="11" Glyph="&#xF5B0;" />
+                                <TextBlock VerticalAlignment="Center" Text="{x:Bind DurationText}" />
+                            </StackPanel>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+    </Grid>
+</UserControl>

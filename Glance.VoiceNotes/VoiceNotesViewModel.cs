@@ -1,0 +1,154 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using Glance.Application.Abstractions;
+using System.Collections.ObjectModel;
+
+namespace Glance.VoiceNotes;
+
+public partial class VoiceNotesViewModel :
+    ObservableObject
+{
+    private readonly ITextLocalizer localizer;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ToggleGlyph))]
+    [NotifyPropertyChangedFor(nameof(CompactStatusText))]
+    [NotifyPropertyChangedFor(nameof(ExpandedStatusText))]
+    private bool isRecording;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CompactStatusText))]
+    [NotifyPropertyChangedFor(nameof(ExpandedStatusText))]
+    private string elapsedText = "00:00";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ExpandedStatusText))]
+    private string statusText;
+
+    [ObservableProperty]
+    private bool hasRecordings;
+
+    public VoiceNotesViewModel(ITextLocalizer localizer)
+    {
+        this.localizer = localizer;
+        statusText = localizer.GetText("ReadyToRecord");
+    }
+
+    public ObservableCollection<VoiceNoteItemViewModel> Recordings { get; } = [];
+
+    public string ToggleGlyph => IsRecording ? "\uF78A" : "\uE720";
+
+    public string CompactStatusText => IsRecording
+        ? ElapsedText
+        : localizer.GetText("ModuleDisplayName");
+
+    public string ExpandedStatusText => IsRecording
+        ? ElapsedText
+        : StatusText;
+
+    public event EventHandler? RecordingToggleRequested;
+
+    public event EventHandler<VoiceNote>? OpenRequested;
+
+    public event EventHandler<VoiceNote>? DeleteRequested;
+
+    public event EventHandler<VoiceLevelsChangedEventArgs>? AudioLevelsChanged;
+
+    public void ToggleRecording() =>
+        RecordingToggleRequested?.Invoke(this, EventArgs.Empty);
+
+    public void Open(VoiceNote recording) =>
+        OpenRequested?.Invoke(this, recording);
+
+    public void Delete(VoiceNote recording) =>
+        DeleteRequested?.Invoke(this, recording);
+
+    public void SetRecordings(IEnumerable<VoiceNote> recordings)
+    {
+        Recordings.Clear();
+
+        foreach (VoiceNote recording in recordings)
+        {
+            Recordings.Add(CreateItem(recording));
+        }
+
+        HasRecordings = Recordings.Count > 0;
+    }
+
+    public void BeginRecording()
+    {
+        ElapsedText = "00:00";
+        StatusText = localizer.GetText("RecordingStatus");
+        IsRecording = true;
+    }
+
+    public void UpdateElapsed(TimeSpan elapsed) =>
+        ElapsedText = FormatElapsed(elapsed);
+
+    public void FinishRecording(VoiceNote? recording)
+    {
+        IsRecording = false;
+        ElapsedText = "00:00";
+        StatusText = localizer.GetText("ReadyToRecord");
+
+        if (recording is null)
+        {
+            return;
+        }
+
+        VoiceNoteItemViewModel? existing = Recordings.FirstOrDefault(item =>
+            string.Equals(
+                item.Recording.FilePath,
+                recording.FilePath,
+                StringComparison.OrdinalIgnoreCase));
+
+        if (existing is not null)
+        {
+            Recordings.Remove(existing);
+        }
+
+        Recordings.Insert(0, CreateItem(recording));
+
+        while (Recordings.Count > 3)
+        {
+            Recordings.RemoveAt(Recordings.Count - 1);
+        }
+
+        HasRecordings = true;
+    }
+
+    public void RemoveRecording(VoiceNote recording)
+    {
+        VoiceNoteItemViewModel? item = Recordings.FirstOrDefault(value =>
+            string.Equals(
+                value.Recording.FilePath,
+                recording.FilePath,
+                StringComparison.OrdinalIgnoreCase));
+
+        if (item is not null)
+        {
+            Recordings.Remove(item);
+        }
+
+        HasRecordings = Recordings.Count > 0;
+    }
+
+    public void ShowRecordingError()
+    {
+        IsRecording = false;
+        ElapsedText = "00:00";
+        StatusText = localizer.GetText("RecordingUnavailable");
+    }
+
+    public void UpdateAudioLevels(IReadOnlyList<double> levels) =>
+        AudioLevelsChanged?.Invoke(
+            this,
+            new VoiceLevelsChangedEventArgs([.. levels]));
+
+    private static string FormatElapsed(TimeSpan elapsed) =>
+        elapsed.TotalHours >= 1
+            ? $"{(int)elapsed.TotalHours:00}:{elapsed.Minutes:00}:{elapsed.Seconds:00}"
+            : $"{elapsed.Minutes:00}:{elapsed.Seconds:00}";
+
+    private VoiceNoteItemViewModel CreateItem(VoiceNote recording) =>
+        new(recording, Open, Delete);
+}
