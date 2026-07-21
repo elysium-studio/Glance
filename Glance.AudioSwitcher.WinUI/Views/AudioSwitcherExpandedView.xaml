@@ -37,8 +37,7 @@
                 Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ToUpper(Title)}" />
             <Controls:MarqueeTextBlock
-                Height="28"
-                FontSize="20"
+                FontSize="14"
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                 Text="{x:Bind ViewModel.CurrentDeviceName, Mode=OneWay}"

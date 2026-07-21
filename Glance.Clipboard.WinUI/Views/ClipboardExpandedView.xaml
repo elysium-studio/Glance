@@ -115,9 +115,7 @@
             <TextBlock
                 x:Uid="EmptyMessage"
                 Grid.Row="1"
-                Margin="0,2,0,0"
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                Style="{StaticResource BodyTextBlockStyle}"
+                Style="{StaticResource BodyStrongTextBlockStyle}"
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="NoWrap"
                 Visibility="{x:Bind WhenEmpty(ViewModel.CanClearHistory), Mode=OneWay}" />

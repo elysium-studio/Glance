@@ -27,9 +27,8 @@
         </Grid>
         <Controls:MarqueeTextBlock
             Grid.Column="1"
-            Height="24"
             VerticalAlignment="Center"
-            FontSize="18"
+            FontSize="14"
             FontWeight="SemiBold"
             Foreground="{ThemeResource TextFillColorPrimaryBrush}"
             Text="{x:Bind ViewModel.CurrentDeviceName, Mode=OneWay}"

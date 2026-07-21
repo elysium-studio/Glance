@@ -22,10 +22,7 @@
                 Foreground="{ThemeResource GlanceDropShelfIconBrush}"
                 Glyph="&#xE8B7;" />
         </Grid>
-        <StackPanel
-            Grid.Column="1"
-            VerticalAlignment="Center"
-            Spacing="0">
+        <StackPanel Grid.Column="1" VerticalAlignment="Center">
             <TextBlock
                 MaxLines="1"
                 Style="{StaticResource BodyStrongTextBlockStyle}"

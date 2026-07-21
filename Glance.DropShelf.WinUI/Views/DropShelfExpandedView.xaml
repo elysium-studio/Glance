@@ -90,9 +90,7 @@
                 Text="{x:Bind ToUpper(ViewModel.Title)}" />
             <TextBlock
                 Grid.Row="1"
-                Margin="0,2,0,0"
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                Style="{StaticResource BodyTextBlockStyle}"
+                Style="{StaticResource BodyStrongTextBlockStyle}"
                 Text="{x:Bind ViewModel.Summary, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="NoWrap"
