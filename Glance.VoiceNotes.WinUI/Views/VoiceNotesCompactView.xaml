@@ -9,8 +9,8 @@
     <Grid x:Name="LayoutRoot" Padding="8,0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid
             x:Name="StatusIndicator"
@@ -37,10 +37,10 @@
             TextWrapping="NoWrap" />
         <VoiceNotes:VoiceWaveform
             Grid.Column="2"
-            Width="52"
             Height="18"
+            HorizontalAlignment="Stretch"
             VerticalAlignment="Center"
-            BarCount="18"
+            BarCount="24"
             ViewModel="{x:Bind ViewModel}"
             Visibility="{x:Bind ToRecordingVisibility(ViewModel.IsRecording), Mode=OneWay}" />
     </Grid>
