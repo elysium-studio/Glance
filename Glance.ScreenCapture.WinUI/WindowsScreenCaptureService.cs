@@ -479,7 +479,7 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
         [LibraryImport("dwmapi.dll")]
         public static partial int DwmGetWindowAttribute(nint window, int attribute, out NativeRect value, uint size);
 
-        [LibraryImport("user32.dll")]
+        [LibraryImport("user32.dll", EntryPoint = "GetMonitorInfoW")]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static partial bool GetMonitorInfo(nint monitor, ref MonitorInfo info);
 

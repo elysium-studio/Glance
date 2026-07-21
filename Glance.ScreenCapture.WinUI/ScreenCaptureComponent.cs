@@ -1,7 +1,9 @@
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
 using System;
+using System.Threading.Tasks;
 
 namespace Glance.ScreenCapture.WinUI;
 
@@ -13,6 +15,7 @@ public sealed class ScreenCaptureComponent :
     private readonly IGlanceAttentionService attentionService;
     private readonly DispatcherQueue dispatcherQueue;
     private readonly ITextLocalizer localizer;
+    private readonly ILogger<ScreenCaptureComponent> logger;
     private readonly IScreenCaptureService screenCaptureService;
     private readonly ScreenCaptureViewModel viewModel;
 
@@ -20,12 +23,14 @@ public sealed class ScreenCaptureComponent :
         ScreenCaptureViewModel viewModel,
         IScreenCaptureService screenCaptureService,
         IGlanceAttentionService attentionService,
-        ModuleResourceTextLocalizer<ScreenCaptureModule> localizer)
+        ModuleResourceTextLocalizer<ScreenCaptureModule> localizer,
+        ILogger<ScreenCaptureComponent> logger)
     {
         this.viewModel = viewModel;
         this.screenCaptureService = screenCaptureService;
         this.attentionService = attentionService;
         this.localizer = localizer;
+        this.logger = logger;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
         ScreenCaptureCompactView compactView = new(viewModel);
@@ -69,7 +74,15 @@ public sealed class ScreenCaptureComponent :
         viewModel.DeleteRequested -= HandleDeleteRequested;
     }
 
-    private async void HandleCaptureRequested(object? sender, ScreenCaptureMode mode)
+    private void HandleCaptureRequested(object? sender, ScreenCaptureMode mode)
+    {
+        if (!dispatcherQueue.TryEnqueue(async () => await CaptureAsync(mode)))
+        {
+            viewModel.ShowCaptureError();
+        }
+    }
+
+    private async Task CaptureAsync(ScreenCaptureMode mode)
     {
         try
         {
@@ -84,8 +97,9 @@ public sealed class ScreenCaptureComponent :
                 }
             });
         }
-        catch
+        catch (Exception exception)
         {
+            logger.LogError(exception, "Failed to capture the screen using {CaptureMode}", mode);
             RunOnUiThread(viewModel.ShowCaptureError);
         }
     }
