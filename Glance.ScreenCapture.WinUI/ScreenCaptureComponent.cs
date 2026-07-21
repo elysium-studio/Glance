@@ -74,17 +74,31 @@ public sealed class ScreenCaptureComponent :
         try
         {
             ScreenCaptureItem? capture = await screenCaptureService.CaptureAsync(mode);
-            viewModel.CompleteCapture(capture);
-
-            if (capture is not null)
+            RunOnUiThread(() =>
             {
-                attentionService.RequestAttention(Id);
-            }
+                viewModel.CompleteCapture(capture);
+
+                if (capture is not null)
+                {
+                    attentionService.RequestAttention(Id);
+                }
+            });
         }
         catch
         {
-            viewModel.ShowCaptureError();
+            RunOnUiThread(viewModel.ShowCaptureError);
         }
+    }
+
+    private void RunOnUiThread(Action action)
+    {
+        if (dispatcherQueue.HasThreadAccess)
+        {
+            action();
+            return;
+        }
+
+        dispatcherQueue.TryEnqueue(() => action());
     }
 
     private void HandleOpenRequested(object? sender, ScreenCaptureItem capture) =>

@@ -132,7 +132,10 @@
             Style="{StaticResource AccentButtonStyle}"
             ToolTipService.ToolTip="{x:Bind ViewModel.Title}">
             <Button.Flyout>
-                <MenuFlyout Placement="BottomEdgeAlignedRight">
+                <MenuFlyout
+                    Closed="{x:Bind HandleCaptureMenuClosed}"
+                    Opened="{x:Bind HandleCaptureMenuOpened}"
+                    Placement="BottomEdgeAlignedRight">
                     <MenuFlyoutItem
                         Click="{x:Bind ViewModel.CaptureRegion}"
                         Text="{x:Bind ViewModel.CaptureRegionText}">
