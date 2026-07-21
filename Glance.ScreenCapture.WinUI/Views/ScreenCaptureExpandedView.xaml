@@ -135,26 +135,26 @@
                 <MenuFlyout
                     Closed="{x:Bind HandleCaptureMenuClosed}"
                     Opened="{x:Bind HandleCaptureMenuOpened}"
-                    Placement="BottomEdgeAlignedRight">
+                    Placement="Bottom">
                     <MenuFlyoutItem
                         Click="{x:Bind ViewModel.CaptureRegion}"
                         Text="{x:Bind ViewModel.CaptureRegionText}">
                         <MenuFlyoutItem.Icon>
-                            <FontIcon Glyph="&#xE7C6;" />
+                            <FontIcon Glyph="&#xF407;" />
                         </MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
                     <MenuFlyoutItem
                         Click="{x:Bind ViewModel.CaptureWindow}"
                         Text="{x:Bind ViewModel.CaptureWindowText}">
                         <MenuFlyoutItem.Icon>
-                            <FontIcon Glyph="&#xE737;" />
+                            <FontIcon Glyph="&#xF7ED;" />
                         </MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
                     <MenuFlyoutItem
                         Click="{x:Bind ViewModel.CaptureDisplay}"
                         Text="{x:Bind ViewModel.CaptureDisplayText}">
                         <MenuFlyoutItem.Icon>
-                            <FontIcon Glyph="&#xE7F4;" />
+                            <FontIcon Glyph="&#xE9A6;" />
                         </MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
                     <MenuFlyoutItem

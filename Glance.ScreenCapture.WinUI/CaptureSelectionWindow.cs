@@ -25,11 +25,13 @@ internal sealed class CaptureSelectionWindow
     private readonly IReadOnlyList<CaptureSelectionCandidate> candidates;
     private readonly TaskCompletionSource<CaptureSelectionCandidate?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly Border highlight;
+    private readonly nint windowHandle;
     private readonly ScreenCaptureMode mode;
     private readonly Grid root;
     private readonly Window window;
     private bool completed;
     private bool isDragging;
+    private bool isPositioned;
     private bool isShown;
     private Point selectionStart;
 
@@ -105,6 +107,7 @@ internal sealed class CaptureSelectionWindow
         };
         window.SetTitleBar(null);
         window.Closed += HandleClosed;
+        windowHandle = WindowNative.GetWindowHandle(window);
     }
 
     public static Task<CaptureSelectionCandidate?> SelectAsync(
@@ -128,10 +131,10 @@ internal sealed class CaptureSelectionWindow
             presenter.SetBorderAndTitleBar(false, false);
         }
 
-        nint handle = WindowNative.GetWindowHandle(window);
-        WindowExtensions.SetBorderless(handle, true);
-        WindowExtensions.SetCornerRadius(handle, WindowCornerPreference.Sharp);
-        WindowExtensions.SetTopMost(handle, true);
+        WindowExtensions.SetBorderless(windowHandle, true);
+        WindowExtensions.SetCornerRadius(windowHandle, WindowCornerPreference.Sharp);
+        WindowExtensions.SetTopMost(windowHandle, true);
+        WindowExtensions.viSetOpacity(windowHandle, 0);
         appWindow.IsShownInSwitchers = false;
         appWindow.MoveAndResize(new RectInt32(-32000, -32000, bitmap.Width, bitmap.Height));
         window.Activate();
@@ -179,20 +182,30 @@ internal sealed class CaptureSelectionWindow
 
     private void HandleRootLoaded(object sender, RoutedEventArgs args)
     {
+        root.Loaded -= HandleRootLoaded;
         root.UpdateLayout();
-        root.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, ShowPreparedWindow);
+        CompositionTarget.Rendering += HandleCompositionRendering;
     }
 
-    private void ShowPreparedWindow()
+    private void HandleCompositionRendering(object? sender, object args)
     {
         if (completed || isShown)
         {
+            CompositionTarget.Rendering -= HandleCompositionRendering;
             return;
         }
 
-        isShown = true;
-        window.AppWindow.MoveAndResize(new RectInt32(bitmap.OriginX, bitmap.OriginY, bitmap.Width, bitmap.Height));
+        if (!isPositioned)
+        {
+            isPositioned = true;
+            window.AppWindow.MoveAndResize(new RectInt32(bitmap.OriginX, bitmap.OriginY, bitmap.Width, bitmap.Height));
+            return;
+        }
+
+        CompositionTarget.Rendering -= HandleCompositionRendering;
+        WindowExtensions.viSetOpacity(windowHandle, 255);
         root.Focus(FocusState.Programmatic);
+        isShown = true;
     }
 
     private static async Task CompleteSelectionAsync(Task<CaptureSelectionCandidate?> selection, TaskCompletionSource<CaptureSelectionCandidate?> completion)
@@ -285,6 +298,8 @@ internal sealed class CaptureSelectionWindow
 
     private void HandleClosed(object sender, WindowEventArgs args)
     {
+        CompositionTarget.Rendering -= HandleCompositionRendering;
+
         if (!completed)
         {
             completed = true;
@@ -348,6 +363,8 @@ internal sealed class CaptureSelectionWindow
         }
 
         completed = true;
+        CompositionTarget.Rendering -= HandleCompositionRendering;
+        WindowExtensions.viSetOpacity(windowHandle, 0);
         completion.TrySetResult(candidate);
         window.Close();
     }

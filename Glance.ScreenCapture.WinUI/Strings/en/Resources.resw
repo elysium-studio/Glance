@@ -14,15 +14,15 @@
   <data name="CaptureDetail" xml:space="preserve"><value>{0} × {1}</value></data>
   <data name="CaptureRegion" xml:space="preserve"><value>Region</value></data>
   <data name="CaptureWindow" xml:space="preserve"><value>Window</value></data>
-  <data name="CaptureDisplay" xml:space="preserve"><value>Display</value></data>
-  <data name="CaptureAllDisplays" xml:space="preserve"><value>All displays</value></data>
+  <data name="CaptureDisplay" xml:space="preserve"><value>Full screen</value></data>
+  <data name="CaptureAllDisplays" xml:space="preserve"><value>All screens</value></data>
   <data name="SelectRegionInstruction" xml:space="preserve"><value>Drag to capture a region · Esc to cancel</value></data>
   <data name="SelectWindowInstruction" xml:space="preserve"><value>Select a window · Esc to cancel</value></data>
-  <data name="SelectDisplayInstruction" xml:space="preserve"><value>Select a display · Esc to cancel</value></data>
+  <data name="SelectDisplayInstruction" xml:space="preserve"><value>Select a screen · Esc to cancel</value></data>
   <data name="RegionCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Capture region</value></data>
   <data name="WindowCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Capture window</value></data>
-  <data name="DisplayCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Capture display</value></data>
-  <data name="AllDisplaysCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Capture all displays</value></data>
+  <data name="DisplayCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Capture full screen</value></data>
+  <data name="AllDisplaysCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Capture all screens</value></data>
   <data name="CopyCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Copy capture</value></data>
   <data name="OpenCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Open capture</value></data>
   <data name="RevealCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Show in folder</value></data>
