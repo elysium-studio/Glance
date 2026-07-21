@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>2.0</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>[Çøløür pïçkër]</value></data><data name="ModuleDescription" xml:space="preserve"><value>[Pïçk çøløürs ånywhërë øn sçrëën ånd çøpy thëïr vålüës.]</value></data>
+  <data name="PickButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Pïçk å çøløür frøm thë sçrëën]</value></data><data name="PickButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>[Pïçk å çøløür frøm thë sçrëën]</value></data>
+  <data name="CopyHexButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Çøpy HEX vålüë]</value></data><data name="CopyRgbButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Çøpy RGB vålüë]</value></data><data name="CopyHslButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Çøpy HSL vålüë]</value></data>
+</root>

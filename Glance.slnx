@@ -42,6 +42,15 @@
   <Project Path="Glance.Clipboard.Tests/Glance.Clipboard.Tests.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="Glance.ColorPicker.WinUI/Glance.ColorPicker.WinUI.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.ColorPicker/Glance.ColorPicker.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.ColorPicker.Tests/Glance.ColorPicker.Tests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="Glance.Shell.WinUI/Glance.Shell.WinUI.csproj">
     <Platform Project="x64" />
   </Project>

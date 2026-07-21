@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>2.0</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Farbwähler</value></data><data name="ModuleDescription" xml:space="preserve"><value>Farben auf dem Bildschirm auswählen und ihre Werte kopieren.</value></data>
+  <data name="PickButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Farbe vom Bildschirm auswählen</value></data><data name="PickButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Farbe vom Bildschirm auswählen</value></data>
+  <data name="CopyHexButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>HEX-Wert kopieren</value></data><data name="CopyRgbButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>RGB-Wert kopieren</value></data><data name="CopyHslButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>HSL-Wert kopieren</value></data>
+</root>
