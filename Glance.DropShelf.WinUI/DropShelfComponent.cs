@@ -1,5 +1,8 @@
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
+using Microsoft.UI.Dispatching;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -10,6 +13,7 @@ public sealed class DropShelfComponent :
     IGlanceConnectedAnimationComponent,
     IGlanceContextAwareComponent
 {
+    private readonly DispatcherQueue dispatcherQueue;
     private readonly ITextLocalizer localizer;
     private readonly DropShelfTransferStore transferStore;
     private readonly DropShelfViewModel viewModel;
@@ -25,6 +29,7 @@ public sealed class DropShelfComponent :
 
         DropShelfCompactView compactView = new(viewModel);
         DropShelfExpandedView expandedView = new(viewModel, transferStore);
+        dispatcherQueue = compactView.DispatcherQueue;
 
         CompactContent = compactView;
         ExpandedContent = expandedView;
@@ -65,6 +70,39 @@ public sealed class DropShelfComponent :
                 item.IsFolder))
             .ToArray();
 
-        viewModel.AddItems(await transferStore.StageAsync(items));
+        IReadOnlyList<DropShelfItem> stagedItems =
+            await transferStore.StageAsync(items);
+        await AddItemsAsync(stagedItems);
+    }
+
+    private Task AddItemsAsync(IReadOnlyList<DropShelfItem> items)
+    {
+        if (dispatcherQueue.HasThreadAccess)
+        {
+            viewModel.AddItems(items);
+            return Task.CompletedTask;
+        }
+
+        TaskCompletionSource<bool> completion = new(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (!dispatcherQueue.TryEnqueue(() =>
+        {
+            try
+            {
+                viewModel.AddItems(items);
+                completion.TrySetResult(true);
+            }
+            catch (Exception exception)
+            {
+                completion.TrySetException(exception);
+            }
+        }))
+        {
+            completion.TrySetException(new InvalidOperationException(
+                "The Drop Shelf UI dispatcher is unavailable."));
+        }
+
+        return completion.Task;
     }
 }

@@ -1,5 +1,6 @@
 using Glance.DropShelf;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Glance.DropShelf.WinUI;
 
 public sealed class DropShelfTransferStore
 {
-    private readonly Dictionary<string, IStorageItem> storageItems =
+    private readonly ConcurrentDictionary<string, IStorageItem> storageItems =
         new(StringComparer.OrdinalIgnoreCase);
 
     public async Task<IReadOnlyList<DropShelfItem>> StageAsync(
@@ -32,7 +33,7 @@ public sealed class DropShelfTransferStore
                     ? await StorageFolder.GetFolderFromPathAsync(item.Path)
                     : await StorageFile.GetFileFromPathAsync(item.Path);
 
-                storageItems[item.Path] = storageItem;
+                storageItems.TryAdd(item.Path, storageItem);
                 stagedItems.Add(item);
             }
             catch (Exception exception)
@@ -48,11 +49,15 @@ public sealed class DropShelfTransferStore
     public IReadOnlyList<IStorageItem> GetStorageItems(
         IEnumerable<DropShelfItem> items) =>
         items
-            .Select(item => storageItems.GetValueOrDefault(item.Path))
+            .Select(item => storageItems.TryGetValue(
+                item.Path,
+                out IStorageItem? storageItem)
+                ? storageItem
+                : null)
             .OfType<IStorageItem>()
             .ToArray();
 
-    public void Remove(string path) => storageItems.Remove(path);
+    public void Remove(string path) => storageItems.TryRemove(path, out _);
 
     public void Clear() => storageItems.Clear();
 }
