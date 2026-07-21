@@ -70,7 +70,7 @@ public sealed partial class DropShelfExpandedView : UserControl
 
     private void HandleDropCompleted(UIElement sender, DropCompletedEventArgs args)
     {
-        if (args.DropResult == DataPackageOperation.Move)
+        if (args.DropResult != DataPackageOperation.None)
         {
             transferStore.Clear();
             ViewModel.Clear();
