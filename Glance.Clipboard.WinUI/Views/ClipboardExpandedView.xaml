@@ -122,7 +122,7 @@
             <Controls:CompactFlipView
                 x:Name="ClipboardFlipView"
                 Grid.Row="1"
-                Margin="-14,0,0,0"
+                Margin="-22,0,0,0"
                 Background="Transparent"
                 ItemTemplate="{StaticResource ClipboardItemTemplate}"
                 ItemsSource="{x:Bind ViewModel.ShelfItems}"
