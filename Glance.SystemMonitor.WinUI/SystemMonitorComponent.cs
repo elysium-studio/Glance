@@ -23,7 +23,7 @@ public sealed class SystemMonitorComponent :
         this.localizer = localizer;
 
         SystemMonitorCompactView compactView = new(viewModel);
-        SystemMonitorExpandedView expandedView = new(viewModel);
+        SystemMonitorExpandedView expandedView = new(viewModel, localizer);
 
         CompactContent = compactView;
         ExpandedContent = expandedView;

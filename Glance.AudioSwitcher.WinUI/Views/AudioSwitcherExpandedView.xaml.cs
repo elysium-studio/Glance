@@ -25,4 +25,14 @@ public sealed partial class AudioSwitcherExpandedView :
     public string Title => localizer.GetText("ModuleDisplayName");
 
     private string ToUpper(string value) => value.ToUpperInvariant();
+
+    private Visibility WhenDeviceAvailable(string position) =>
+        string.IsNullOrEmpty(position)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+
+    private Visibility WhenDeviceUnavailable(string position) =>
+        string.IsNullOrEmpty(position)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
 }

@@ -33,8 +33,8 @@
                         <TextBlock
                             Grid.Column="1"
                             VerticalAlignment="Center"
-                            FontSize="11"
                             MaxLines="1"
+                            Style="{StaticResource CaptionTextBlockStyle}"
                             Text="{x:Bind Name}"
                             TextTrimming="CharacterEllipsis"
                             TextWrapping="NoWrap" />
@@ -48,14 +48,14 @@
                             Click="HandleRemoveItemClick"
                             Content="&#xE711;"
                             FontFamily="Segoe Fluent Icons"
-                            FontSize="9"
+                            FontSize="12"
                             Style="{StaticResource SubtleButtonStyle}" />
                     </Grid>
                 </Border>
             </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid Padding="20,12,16,26" ColumnSpacing="14">
+    <Grid Padding="20,12,20,26" ColumnSpacing="12">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
@@ -69,7 +69,7 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 FontFamily="Segoe Fluent Icons"
-                FontSize="32"
+                FontSize="30"
                 Foreground="{ThemeResource GlanceDropShelfIconBrush}"
                 Glyph="&#xE8B7;" />
         </Grid>
@@ -83,15 +83,13 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <TextBlock
-                FontSize="11"
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource GlanceDropShelfIconBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ToUpper(ViewModel.Title)}" />
             <TextBlock
                 Grid.Row="1"
-                FontSize="15"
-                FontWeight="SemiBold"
-                Style="{StaticResource CaptionTextBlockStyle}"
+                Style="{StaticResource BodyStrongTextBlockStyle}"
                 Text="{x:Bind ViewModel.Summary, Mode=OneWay}"
                 Visibility="{x:Bind WhenEmpty(ViewModel.HasItems), Mode=OneWay}" />
             <Grid
@@ -130,7 +128,7 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         FontFamily="Segoe Fluent Icons"
-                        FontSize="13"
+                        FontSize="14"
                         Foreground="{ThemeResource GlanceDropShelfIconBrush}"
                         Glyph="&#xE7C2;"
                         IsHitTestVisible="False" />

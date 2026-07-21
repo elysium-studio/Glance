@@ -6,7 +6,7 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/AudioSwitcher.xaml" />
     </UserControl.Resources>
-    <Grid Padding="18,12,18,26" ColumnSpacing="12">
+    <Grid Padding="20,12,20,26" ColumnSpacing="12">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
@@ -14,16 +14,16 @@
         </Grid.ColumnDefinitions>
         <Grid
             x:Name="StatusIndicator"
-            Width="38"
-            Height="38"
+            Width="36"
+            Height="36"
             VerticalAlignment="Center">
             <FontIcon
-                Width="34"
-                Height="34"
+                Width="30"
+                Height="30"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 FontFamily="Segoe Fluent Icons"
-                FontSize="32"
+                FontSize="30"
                 Foreground="{ThemeResource GlanceAudioSwitcherIconBrush}"
                 Glyph="&#xE767;" />
         </Grid>
@@ -32,17 +32,24 @@
             VerticalAlignment="Center"
             Spacing="2">
             <TextBlock
-                FontSize="10"
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource GlanceAudioSwitcherIconBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ToUpper(Title)}" />
             <Controls:MarqueeTextBlock
-                Height="25"
+                Height="28"
                 FontSize="20"
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                 Text="{x:Bind ViewModel.CurrentDeviceName, Mode=OneWay}"
-                ToolTipService.ToolTip="{x:Bind ViewModel.CurrentDeviceName, Mode=OneWay}" />
+                ToolTipService.ToolTip="{x:Bind ViewModel.CurrentDeviceName, Mode=OneWay}"
+                Visibility="{x:Bind WhenDeviceAvailable(ViewModel.DevicePositionText), Mode=OneWay}" />
+            <TextBlock
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Style="{StaticResource BodyTextBlockStyle}"
+                Text="{x:Bind ViewModel.CurrentDeviceName, Mode=OneWay}"
+                TextTrimming="CharacterEllipsis"
+                Visibility="{x:Bind WhenDeviceUnavailable(ViewModel.DevicePositionText), Mode=OneWay}" />
         </StackPanel>
         <StackPanel
             Grid.Column="2"
@@ -58,13 +65,14 @@
                 Content="&#xE76B;"
                 CornerRadius="16"
                 FontFamily="Segoe Fluent Icons"
+                FontSize="14"
                 IsEnabled="{x:Bind ViewModel.CanSwitch, Mode=OneWay}" />
             <TextBlock
                 MinWidth="30"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                FontSize="11"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ViewModel.DevicePositionText, Mode=OneWay}"
                 TextAlignment="Center" />
             <Button
@@ -76,6 +84,7 @@
                 Content="&#xE76C;"
                 CornerRadius="16"
                 FontFamily="Segoe Fluent Icons"
+                FontSize="14"
                 IsEnabled="{x:Bind ViewModel.CanSwitch, Mode=OneWay}" />
         </StackPanel>
     </Grid>

@@ -7,7 +7,7 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Media.xaml" />
     </UserControl.Resources>
-    <Grid Padding="18,12,18,26" ColumnSpacing="14">
+    <Grid Padding="20,12,20,26" ColumnSpacing="12">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
@@ -15,15 +15,15 @@
         </Grid.ColumnDefinitions>
         <Border
             x:Name="ArtworkContainer"
-            Width="68"
-            Height="68"
+            Width="64"
+            Height="64"
             Background="{ThemeResource ControlFillColorSecondaryBrush}"
             CornerRadius="{StaticResource OverlayCornerRadius}">
             <Grid>
                 <FontIcon
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    FontSize="26"
+                    FontSize="24"
                     Foreground="{ThemeResource GlanceMediaIconBrush}"
                     Glyph="&#xE8D6;" />
                 <Image Source="{x:Bind ToImageSource(ViewModel.Artwork), Mode=OneWay}" Stretch="UniformToFill" />
@@ -34,23 +34,37 @@
             VerticalAlignment="Center"
             Spacing="2">
             <TextBlock
-                FontSize="11"
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource GlanceMediaIconBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ToUpper(ViewModel.Source), Mode=OneWay}" />
             <Controls:MarqueeTextBlock
-                Height="23"
+                Height="24"
                 FontSize="18"
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                 Text="{x:Bind ViewModel.Title, Mode=OneWay}"
-                ToolTipService.ToolTip="{x:Bind ViewModel.Title, Mode=OneWay}" />
+                ToolTipService.ToolTip="{x:Bind ViewModel.Title, Mode=OneWay}"
+                Visibility="{x:Bind WhenAvailable(ViewModel.HasSession), Mode=OneWay}" />
             <Controls:MarqueeTextBlock
-                Height="15"
+                Height="16"
                 FontSize="12"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Text="{x:Bind ViewModel.Artist, Mode=OneWay}"
-                ToolTipService.ToolTip="{x:Bind ViewModel.Artist, Mode=OneWay}" />
+                ToolTipService.ToolTip="{x:Bind ViewModel.Artist, Mode=OneWay}"
+                Visibility="{x:Bind WhenAvailable(ViewModel.HasSession), Mode=OneWay}" />
+            <TextBlock
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Style="{StaticResource BodyStrongTextBlockStyle}"
+                Text="{x:Bind ViewModel.Title, Mode=OneWay}"
+                TextTrimming="CharacterEllipsis"
+                Visibility="{x:Bind WhenUnavailable(ViewModel.HasSession), Mode=OneWay}" />
+            <TextBlock
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{x:Bind ViewModel.Artist, Mode=OneWay}"
+                TextTrimming="CharacterEllipsis"
+                Visibility="{x:Bind WhenUnavailable(ViewModel.HasSession), Mode=OneWay}" />
         </StackPanel>
         <StackPanel
             Grid.Column="2"
@@ -78,14 +92,14 @@
                     IsEnabled="{x:Bind ViewModel.CanSkipPrevious, Mode=OneWay}" />
                 <Button
                     x:Uid="ToggleButton"
-                    Width="38"
-                    Height="38"
+                    Width="36"
+                    Height="36"
                     Padding="0"
                     Click="{x:Bind ViewModel.TogglePlayback}"
                     Content="{x:Bind ViewModel.PlayPauseGlyph, Mode=OneWay}"
-                    CornerRadius="19"
+                    CornerRadius="18"
                     FontFamily="Segoe Fluent Icons"
-                    FontSize="18"
+                    FontSize="16"
                     IsEnabled="{x:Bind ViewModel.CanTogglePlayback, Mode=OneWay}"
                     Style="{StaticResource AccentButtonStyle}" />
                 <Button

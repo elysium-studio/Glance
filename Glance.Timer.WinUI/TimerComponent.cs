@@ -26,7 +26,7 @@ public sealed class TimerComponent :
         this.localizer = localizer;
 
         TimerCompactView compactView = new(viewModel);
-        TimerExpandedView expandedView = new(viewModel);
+        TimerExpandedView expandedView = new(viewModel, localizer);
 
         CompactContent = compactView;
         ExpandedContent = expandedView;

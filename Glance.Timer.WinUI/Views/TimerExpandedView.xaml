@@ -5,7 +5,7 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Timer.xaml" />
     </UserControl.Resources>
-    <Grid x:Name="LayoutRoot" Padding="20,12,20,26">
+    <Grid x:Name="LayoutRoot" Padding="20,12,20,26" ColumnSpacing="12">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
@@ -28,18 +28,16 @@
         </Grid>
         <StackPanel
             Grid.Column="1"
-            Margin="12,0,12,0"
             VerticalAlignment="Center"
             Spacing="2">
             <TextBlock
-                x:Uid="ModuleTitle"
-                FontSize="11"
                 FontWeight="SemiBold"
-                Foreground="{ThemeResource GlanceTimerIconBrush}" />
+                Foreground="{ThemeResource GlanceTimerIconBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{x:Bind ToUpper(Title)}" />
             <TextBlock
-                FontSize="27"
-                FontWeight="SemiBold"
                 Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                Style="{StaticResource TitleTextBlockStyle}"
                 Text="{x:Bind ViewModel.RemainingText, Mode=OneWay}" />
         </StackPanel>
         <StackPanel
@@ -56,6 +54,7 @@
                 Content="&#xE738;"
                 CornerRadius="16"
                 FontFamily="Segoe Fluent Icons"
+                FontSize="14"
                 IsEnabled="{x:Bind ViewModel.CanDecreaseMinute, Mode=OneWay}" />
             <Button
                 x:Uid="IncreaseButton"
@@ -65,16 +64,18 @@
                 Click="{x:Bind ViewModel.AddMinute}"
                 Content="&#xE710;"
                 CornerRadius="16"
-                FontFamily="Segoe Fluent Icons" />
+                FontFamily="Segoe Fluent Icons"
+                FontSize="14" />
             <Button
                 x:Uid="ToggleButton"
-                Width="32"
-                Height="32"
+                Width="36"
+                Height="36"
                 Padding="0"
                 Click="{x:Bind ViewModel.Toggle}"
                 Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}"
-                CornerRadius="16"
+                CornerRadius="18"
                 FontFamily="Segoe Fluent Icons"
+                FontSize="16"
                 Style="{StaticResource AccentButtonStyle}" />
             <Button
                 x:Uid="ResetButton"
@@ -84,7 +85,8 @@
                 Click="{x:Bind ViewModel.Reset}"
                 Content="&#xE777;"
                 CornerRadius="16"
-                FontFamily="Segoe Fluent Icons" />
+                FontFamily="Segoe Fluent Icons"
+                FontSize="14" />
         </StackPanel>
     </Grid>
 </UserControl>

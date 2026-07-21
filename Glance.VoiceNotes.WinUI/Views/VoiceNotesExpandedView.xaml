@@ -7,7 +7,7 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/VoiceNotes.xaml" />
     </UserControl.Resources>
-    <Grid Padding="20,10,20,26" ColumnSpacing="12">
+    <Grid Padding="20,12,20,26" ColumnSpacing="12">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
@@ -39,15 +39,14 @@
             VerticalAlignment="Center"
             Spacing="1">
             <TextBlock
-                FontSize="11"
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource GlanceVoiceNotesIconBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ToUpper(Title)}" />
             <TextBlock
                 VerticalAlignment="Center"
-                FontSize="15"
-                FontWeight="SemiBold"
                 Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                Style="{StaticResource BodyStrongTextBlockStyle}"
                 Text="{x:Bind ViewModel.ExpandedStatusText, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis" />
         </StackPanel>
@@ -62,6 +61,7 @@
             Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}"
             CornerRadius="18"
             FontFamily="Segoe Fluent Icons"
+            FontSize="16"
             Style="{StaticResource AccentButtonStyle}" />
         <Grid
             Grid.Row="1"
@@ -80,7 +80,7 @@
                 x:Uid="NoRecordingsText"
                 VerticalAlignment="Center"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                Style="{StaticResource CaptionTextBlockStyle}"
+                Style="{StaticResource BodyTextBlockStyle}"
                 Visibility="{x:Bind ToEmptyVisibility(ViewModel.HasRecordings, ViewModel.IsRecording), Mode=OneWay}" />
             <ItemsControl ItemsSource="{x:Bind ViewModel.Recordings, Mode=OneWay}" Visibility="{x:Bind ToRecordingsVisibility(ViewModel.HasRecordings, ViewModel.IsRecording), Mode=OneWay}">
                 <ItemsControl.ItemsPanel>
@@ -105,8 +105,11 @@
                                 </MenuFlyout>
                             </Button.ContextFlyout>
                             <StackPanel Orientation="Horizontal" Spacing="5">
-                                <FontIcon FontSize="11" Glyph="&#xF5B0;" />
-                                <TextBlock VerticalAlignment="Center" Text="{x:Bind DurationText}" />
+                                <FontIcon FontSize="12" Glyph="&#xF5B0;" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    Text="{x:Bind DurationText}" />
                             </StackPanel>
                         </Button>
                     </DataTemplate>

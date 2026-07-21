@@ -23,7 +23,7 @@ public sealed class StopwatchComponent :
         this.localizer = localizer;
 
         StopwatchCompactView compactView = new(viewModel);
-        StopwatchExpandedView expandedView = new(viewModel);
+        StopwatchExpandedView expandedView = new(viewModel, localizer);
 
         CompactContent = compactView;
         ExpandedContent = expandedView;

@@ -31,14 +31,13 @@
             VerticalAlignment="Center"
             Spacing="2">
             <TextBlock
-                FontSize="11"
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource GlanceFocusSessionIconBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ToUpper(Title)}" />
             <TextBlock
-                FontSize="27"
-                FontWeight="SemiBold"
                 Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                Style="{StaticResource TitleTextBlockStyle}"
                 Text="{x:Bind ViewModel.RemainingText, Mode=OneWay}" />
             <ProgressBar
                 Height="3"
@@ -60,7 +59,8 @@
                 Click="{x:Bind ViewModel.Reset}"
                 Content="&#xE777;"
                 CornerRadius="16"
-                FontFamily="Segoe Fluent Icons" />
+                FontFamily="Segoe Fluent Icons"
+                FontSize="14" />
             <Button
                 x:Uid="SkipButton"
                 Width="32"
@@ -69,7 +69,8 @@
                 Click="{x:Bind ViewModel.Skip}"
                 Content="&#xE8ED;"
                 CornerRadius="16"
-                FontFamily="Segoe Fluent Icons" />
+                FontFamily="Segoe Fluent Icons"
+                FontSize="14" />
             <Button
                 x:Uid="ToggleButton"
                 Width="36"
@@ -79,6 +80,7 @@
                 Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}"
                 CornerRadius="18"
                 FontFamily="Segoe Fluent Icons"
+                FontSize="16"
                 Style="{StaticResource AccentButtonStyle}" />
         </StackPanel>
     </Grid>

@@ -5,7 +5,7 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Power.xaml" />
     </UserControl.Resources>
-    <Grid Padding="18,12,18,26" ColumnSpacing="12">
+    <Grid Padding="20,12,20,26" ColumnSpacing="12">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
@@ -45,13 +45,12 @@
             VerticalAlignment="Center"
             Spacing="1">
             <TextBlock
-                FontSize="10"
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource GlancePowerIconBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ToUpper(ViewModel.Title)}" />
             <TextBlock
-                FontSize="27"
-                FontWeight="SemiBold"
+                Style="{StaticResource TitleTextBlockStyle}"
                 Text="{x:Bind ViewModel.ChargeText, Mode=OneWay}" />
         </StackPanel>
         <Border
@@ -64,12 +63,11 @@
             Visibility="{x:Bind WhenPresent(ViewModel.HasBattery), Mode=OneWay}">
             <StackPanel Spacing="2">
                 <TextBlock
-                    FontSize="12"
-                    FontWeight="SemiBold"
+                    Style="{StaticResource BodyStrongTextBlockStyle}"
                     Text="{x:Bind ViewModel.StatusText, Mode=OneWay}" />
                 <TextBlock
-                    FontSize="10"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
                     Text="{x:Bind ViewModel.DetailText, Mode=OneWay}"
                     TextTrimming="CharacterEllipsis" />
             </StackPanel>

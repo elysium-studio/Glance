@@ -19,4 +19,10 @@ public sealed partial class MediaExpandedView : UserControl
     private ImageSource? ToImageSource(object? value) => value as ImageSource;
 
     private string ToUpper(string value) => value.ToUpperInvariant();
+
+    private Visibility WhenAvailable(bool isAvailable) =>
+        isAvailable ? Visibility.Visible : Visibility.Collapsed;
+
+    private Visibility WhenUnavailable(bool isAvailable) =>
+        isAvailable ? Visibility.Collapsed : Visibility.Visible;
 }
