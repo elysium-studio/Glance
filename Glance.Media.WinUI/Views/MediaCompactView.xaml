@@ -23,7 +23,7 @@
                 <FontIcon
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    FontSize="14"
+                    FontSize="18"
                     Foreground="{ThemeResource GlanceMediaIconBrush}"
                     Glyph="&#xE8D6;" />
                 <Image Source="{x:Bind ToImageSource(ViewModel.Artwork), Mode=OneWay}" Stretch="UniformToFill" />
@@ -31,13 +31,14 @@
         </Border>
         <StackPanel Grid.Column="1" VerticalAlignment="Center">
             <Controls:MarqueeTextBlock
-                Height="18"
+                Height="20"
+                FontSize="14"
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                 Text="{x:Bind ViewModel.Title, Mode=OneWay}"
                 ToolTipService.ToolTip="{x:Bind ViewModel.Title, Mode=OneWay}" />
             <Controls:MarqueeTextBlock
-                Height="15"
+                Height="16"
                 FontSize="12"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Text="{x:Bind ViewModel.Artist, Mode=OneWay}"

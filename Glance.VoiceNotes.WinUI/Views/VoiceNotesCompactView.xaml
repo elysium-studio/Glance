@@ -30,9 +30,8 @@
             Grid.Column="1"
             Margin="8,0,6,0"
             VerticalAlignment="Center"
-            FontWeight="SemiBold"
             Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-            Style="{StaticResource BodyLargeTextBlockStyle}"
+            Style="{StaticResource BodyLargeStrongTextBlockStyle}"
             Text="{x:Bind ViewModel.CompactStatusText, Mode=OneWay}"
             TextTrimming="CharacterEllipsis"
             TextWrapping="NoWrap" />

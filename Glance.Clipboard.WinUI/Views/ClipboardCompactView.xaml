@@ -30,7 +30,7 @@
             Spacing="0">
             <TextBlock
                 MaxLines="1"
-                Style="{StaticResource BaseTextBlockStyle}"
+                Style="{StaticResource BodyStrongTextBlockStyle}"
                 Text="{x:Bind ViewModel.LatestPreview, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="NoWrap" />

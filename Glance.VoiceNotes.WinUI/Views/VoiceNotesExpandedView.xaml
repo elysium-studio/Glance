@@ -19,6 +19,8 @@
         </Grid.RowDefinitions>
         <Grid
             x:Name="StatusIndicator"
+            Grid.Row="0"
+            Grid.RowSpan="2"
             Width="36"
             Height="36"
             VerticalAlignment="Center">
@@ -80,9 +82,7 @@
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
                 Visibility="{x:Bind ToEmptyVisibility(ViewModel.HasRecordings, ViewModel.IsRecording), Mode=OneWay}" />
-            <ItemsControl
-                ItemsSource="{x:Bind ViewModel.Recordings, Mode=OneWay}"
-                Visibility="{x:Bind ToRecordingsVisibility(ViewModel.HasRecordings, ViewModel.IsRecording), Mode=OneWay}">
+            <ItemsControl ItemsSource="{x:Bind ViewModel.Recordings, Mode=OneWay}" Visibility="{x:Bind ToRecordingsVisibility(ViewModel.HasRecordings, ViewModel.IsRecording), Mode=OneWay}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal" Spacing="4" />

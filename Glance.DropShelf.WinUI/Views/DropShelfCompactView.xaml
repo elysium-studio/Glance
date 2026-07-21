@@ -18,7 +18,7 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 FontFamily="Segoe Fluent Icons"
-                FontSize="26"
+                FontSize="24"
                 Foreground="{ThemeResource GlanceDropShelfIconBrush}"
                 Glyph="&#xE8B7;" />
         </Grid>
@@ -28,7 +28,7 @@
             Spacing="0">
             <TextBlock
                 MaxLines="1"
-                Style="{StaticResource BaseTextBlockStyle}"
+                Style="{StaticResource BodyStrongTextBlockStyle}"
                 Text="{x:Bind ViewModel.Summary, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="NoWrap" />

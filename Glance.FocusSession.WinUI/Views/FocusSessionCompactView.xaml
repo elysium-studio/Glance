@@ -30,9 +30,8 @@
             VerticalAlignment="Center">
             <TextBlock
                 HorizontalAlignment="Left"
-                FontWeight="SemiBold"
                 Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                Style="{StaticResource BodyLargeTextBlockStyle}"
+                Style="{StaticResource BodyLargeStrongTextBlockStyle}"
                 Text="{x:Bind ViewModel.RemainingText, Mode=OneWay}" />
             <ProgressBar
                 Height="2"

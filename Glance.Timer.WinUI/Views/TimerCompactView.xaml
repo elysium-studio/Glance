@@ -28,9 +28,8 @@
             Grid.Column="1"
             Margin="8,0,0,0"
             VerticalAlignment="Center"
-            FontWeight="SemiBold"
             Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-            Style="{StaticResource BodyLargeTextBlockStyle}"
+            Style="{StaticResource BodyLargeStrongTextBlockStyle}"
             Text="{x:Bind ViewModel.RemainingText, Mode=OneWay}" />
     </Grid>
 </UserControl>

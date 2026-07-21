@@ -89,8 +89,8 @@
                 Text="{x:Bind ToUpper(ViewModel.Title)}" />
             <TextBlock
                 Grid.Row="1"
-                Margin="0,4,0,0"
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                FontSize="15"
+                FontWeight="SemiBold"
                 Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ViewModel.Summary, Mode=OneWay}"
                 Visibility="{x:Bind WhenEmpty(ViewModel.HasItems), Mode=OneWay}" />

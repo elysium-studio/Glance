@@ -43,14 +43,13 @@
         <TextBlock
             Grid.Column="1"
             VerticalAlignment="Center"
-            FontSize="15"
-            FontWeight="SemiBold"
+            Style="{StaticResource BodyLargeStrongTextBlockStyle}"
             Text="{x:Bind ViewModel.ChargeText, Mode=OneWay}" />
         <TextBlock
             Grid.Column="2"
             VerticalAlignment="Center"
-            FontSize="11"
             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            Style="{StaticResource CaptionTextBlockStyle}"
             Text="{x:Bind ViewModel.CompactStatusText, Mode=OneWay}"
             TextTrimming="CharacterEllipsis" />
     </Grid>
