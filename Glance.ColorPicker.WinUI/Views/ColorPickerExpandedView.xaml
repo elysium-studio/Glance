@@ -2,9 +2,46 @@
     x:Class="Glance.ColorPicker.WinUI.ColorPickerExpandedView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Controls="using:Elysium.UI.Controls.WinUI"
     xmlns:local="using:Glance.ColorPicker.WinUI">
     <UserControl.Resources>
-        <ResourceDictionary Source="../Themes/ColorPicker.xaml" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/ColorPicker.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <DataTemplate x:Key="ColorFormatItemTemplate" x:DataType="local:ColorFormatItem">
+                <Grid ColumnSpacing="6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="28" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="24" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="{x:Bind Label}" />
+                    <TextBlock
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource BodyTextBlockStyle}"
+                        Text="{x:Bind Value, Mode=OneWay}"
+                        TextTrimming="CharacterEllipsis" />
+                    <Button
+                        Grid.Column="2"
+                        Width="24"
+                        Height="24"
+                        Padding="0"
+                        AutomationProperties.Name="{x:Bind Value}"
+                        Click="{x:Bind Copy}"
+                        Content="&#xE8C8;"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="12"
+                        Style="{StaticResource SubtleButtonStyle}"
+                        ToolTipService.ToolTip="{x:Bind Value}" />
+                </Grid>
+            </DataTemplate>
+        </ResourceDictionary>
     </UserControl.Resources>
     <Grid Padding="20,6,20,24" ColumnSpacing="12">
         <Grid.ColumnDefinitions>
@@ -20,21 +57,11 @@
             Background="{x:Bind ToBrush(ViewModel.CurrentColor), Mode=OneWay}"
             BorderBrush="{ThemeResource ControlStrokeColorSecondaryBrush}"
             BorderThickness="1"
-            CornerRadius="9">
-            <FontIcon
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="20"
-                Foreground="{x:Bind ToContrastBrush(ViewModel.CurrentColor), Mode=OneWay}"
-                Glyph="&#xEF3C;" />
-        </Border>
-        <Grid Grid.Column="1" RowSpacing="1">
+            CornerRadius="9" />
+        <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="20" />
-                <RowDefinition Height="20" />
-                <RowDefinition Height="20" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Grid ColumnSpacing="8">
                 <Grid.ColumnDefinitions>
@@ -70,104 +97,22 @@
                     </ItemsRepeater.ItemTemplate>
                 </ItemsRepeater>
             </Grid>
-            <Grid Grid.Row="1" ColumnSpacing="6">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="28" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="24" />
-                </Grid.ColumnDefinitions>
-                <TextBlock
-                    VerticalAlignment="Center"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Style="{StaticResource CaptionTextBlockStyle}"
-                    Text="HEX" />
-                <TextBlock
-                    Grid.Column="1"
-                    VerticalAlignment="Center"
-                    Style="{StaticResource BodyTextBlockStyle}"
-                    Text="{x:Bind ViewModel.Hex, Mode=OneWay}"
-                    TextTrimming="CharacterEllipsis" />
-                <Button
-                    x:Uid="CopyHexButton"
-                    Grid.Column="2"
-                    Width="24"
-                    Height="20"
-                    Padding="0"
-                    Click="{x:Bind ViewModel.CopyHex}"
-                    Content="&#xE8C8;"
-                    FontFamily="Segoe Fluent Icons"
-                    FontSize="12"
-                    Style="{StaticResource SubtleButtonStyle}" />
-            </Grid>
-            <Grid Grid.Row="2" ColumnSpacing="6">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="28" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="24" />
-                </Grid.ColumnDefinitions>
-                <TextBlock
-                    VerticalAlignment="Center"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Style="{StaticResource CaptionTextBlockStyle}"
-                    Text="RGB" />
-                <TextBlock
-                    Grid.Column="1"
-                    VerticalAlignment="Center"
-                    Style="{StaticResource BodyTextBlockStyle}"
-                    Text="{x:Bind ViewModel.Rgb, Mode=OneWay}"
-                    TextTrimming="CharacterEllipsis" />
-                <Button
-                    x:Uid="CopyRgbButton"
-                    Grid.Column="2"
-                    Width="24"
-                    Height="20"
-                    Padding="0"
-                    Click="{x:Bind ViewModel.CopyRgb}"
-                    Content="&#xE8C8;"
-                    FontFamily="Segoe Fluent Icons"
-                    FontSize="12"
-                    Style="{StaticResource SubtleButtonStyle}" />
-            </Grid>
-            <Grid Grid.Row="3" ColumnSpacing="6">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="28" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="24" />
-                </Grid.ColumnDefinitions>
-                <TextBlock
-                    VerticalAlignment="Center"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Style="{StaticResource CaptionTextBlockStyle}"
-                    Text="HSL" />
-                <TextBlock
-                    Grid.Column="1"
-                    VerticalAlignment="Center"
-                    Style="{StaticResource BodyTextBlockStyle}"
-                    Text="{x:Bind ViewModel.Hsl, Mode=OneWay}"
-                    TextTrimming="CharacterEllipsis" />
-                <Button
-                    x:Uid="CopyHslButton"
-                    Grid.Column="2"
-                    Width="24"
-                    Height="20"
-                    Padding="0"
-                    Click="{x:Bind ViewModel.CopyHsl}"
-                    Content="&#xE8C8;"
-                    FontFamily="Segoe Fluent Icons"
-                    FontSize="12"
-                    Style="{StaticResource SubtleButtonStyle}" />
-            </Grid>
+            <Controls:CompactFlipView
+                Grid.Row="1"
+                Background="Transparent"
+                ItemTemplate="{StaticResource ColorFormatItemTemplate}"
+                ItemsSource="{x:Bind Formats}"
+                SelectedIndex="0" />
         </Grid>
         <Button
             x:Uid="PickButton"
             Grid.Column="2"
-            Width="36"
-            Height="36"
+            Width="32"
+            Height="32"
             Padding="0"
             VerticalAlignment="Center"
             Click="{x:Bind ViewModel.Pick}"
-            CornerRadius="18"
-            Style="{StaticResource AccentButtonStyle}">
+            Style="{StaticResource SubtleButtonStyle}">
             <Grid>
                 <FontIcon
                     FontFamily="Segoe Fluent Icons"

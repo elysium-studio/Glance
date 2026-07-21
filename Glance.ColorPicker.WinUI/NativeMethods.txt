@@ -1,0 +1,11 @@
+CreateWindowExW
+DestroyWindow
+OpenClipboard
+CloseClipboard
+EmptyClipboard
+SetClipboardData
+GlobalAlloc
+GlobalFree
+GlobalLock
+GlobalUnlock
+HWND_MESSAGE

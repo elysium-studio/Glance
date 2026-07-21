@@ -108,6 +108,10 @@ public sealed class ColorPickerViewModelTests
     {
         public List<string> Values { get; } = [];
 
-        public void Copy(string text) => Values.Add(text);
+        public Task CopyAsync(string text)
+        {
+            Values.Add(text);
+            return Task.CompletedTask;
+        }
     }
 }

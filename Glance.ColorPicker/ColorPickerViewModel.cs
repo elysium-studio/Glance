@@ -52,11 +52,11 @@ public partial class ColorPickerViewModel :
         colorPickerService.StartPicking();
     }
 
-    public void CopyHex() => textCopyService.Copy(Hex);
+    public void CopyHex() => _ = textCopyService.CopyAsync(Hex);
 
-    public void CopyRgb() => textCopyService.Copy(Rgb);
+    public void CopyRgb() => _ = textCopyService.CopyAsync(Rgb);
 
-    public void CopyHsl() => textCopyService.Copy(Hsl);
+    public void CopyHsl() => _ = textCopyService.CopyAsync(Hsl);
 
     public void SelectRecent(ColorValue color) => CurrentColor = color;
 

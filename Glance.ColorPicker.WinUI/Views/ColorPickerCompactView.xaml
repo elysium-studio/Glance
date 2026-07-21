@@ -17,15 +17,7 @@
             Background="{x:Bind ToBrush(ViewModel.CurrentColor), Mode=OneWay}"
             BorderBrush="{ThemeResource ControlStrokeColorSecondaryBrush}"
             BorderThickness="1"
-            CornerRadius="8">
-            <FontIcon
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="16"
-                Foreground="{x:Bind ToContrastBrush(ViewModel.CurrentColor), Mode=OneWay}"
-                Glyph="&#xEF3C;" />
-        </Border>
+            CornerRadius="8" />
         <TextBlock
             Grid.Column="1"
             VerticalAlignment="Center"
