@@ -5,7 +5,10 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Timer.xaml" />
     </UserControl.Resources>
-    <Grid x:Name="LayoutRoot" Padding="20,12,20,26" ColumnSpacing="12">
+    <Grid
+        x:Name="LayoutRoot"
+        Padding="20,12,20,26"
+        ColumnSpacing="18">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
