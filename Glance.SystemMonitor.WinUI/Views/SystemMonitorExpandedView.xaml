@@ -102,7 +102,9 @@
                         <StackPanel Spacing="0">
                             <StackPanel Orientation="Horizontal" Spacing="3">
                                 <FontIcon
-                                    FontSize="12"
+                                    Margin="0,1,0,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="10"
                                     Foreground="{ThemeResource GlanceSystemIconBrush}"
                                     Glyph="&#xE74B;" />
                                 <TextBlock
@@ -112,7 +114,9 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Spacing="3">
                                 <FontIcon
-                                    FontSize="12"
+                                    Margin="0,1,0,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="10"
                                     Foreground="{ThemeResource GlanceSystemIconBrush}"
                                     Glyph="&#xE74A;" />
                                 <TextBlock
