@@ -74,7 +74,7 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
             }
 
             DesktopCaptureBitmap result = mode == ScreenCaptureMode.Window && selection.Value.WindowHandle != 0
-                ? CaptureWindow(selection.Value.WindowHandle, selection.Value.Bounds)
+                ? await CaptureWindowAsync(selection.Value.WindowHandle, selection.Value.Bounds)
                 : selection.Value.Bounds == desktop.Bounds
                     ? desktop
                     : desktop.Crop(selection.Value.Bounds);
@@ -305,7 +305,17 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
         }
     }
 
-    private static DesktopCaptureBitmap CaptureWindow(nint window, NativeRectangle visibleBounds)
+    private static async Task<DesktopCaptureBitmap> CaptureWindowAsync(nint window, NativeRectangle visibleBounds)
+    {
+        if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
+        {
+            return await WindowsGraphicsCapture.CaptureWindowAsync(window, visibleBounds);
+        }
+
+        return CaptureWindowFallback(window, visibleBounds);
+    }
+
+    private static DesktopCaptureBitmap CaptureWindowFallback(nint window, NativeRectangle visibleBounds)
     {
         if (!NativeMethods.GetWindowRect(window, out NativeRect windowRectangle))
         {

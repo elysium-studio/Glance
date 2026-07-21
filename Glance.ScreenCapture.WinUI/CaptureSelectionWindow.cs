@@ -11,11 +11,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Graphics;
 using WinRT.Interop;
+using WinUIEx;
+using PlatformWindowExtensions = Elysium.Platform.Windows.WindowExtensions;
 
 namespace Glance.ScreenCapture.WinUI;
 
@@ -33,6 +36,7 @@ internal sealed class CaptureSelectionWindow
     private bool isDragging;
     private bool isPositioned;
     private bool isShown;
+    private int renderedFrameCount;
     private Point selectionStart;
 
     private CaptureSelectionWindow(
@@ -46,11 +50,6 @@ internal sealed class CaptureSelectionWindow
         this.mode = mode;
         this.candidates = candidates;
 
-        Image image = new()
-        {
-            Source = imageSource,
-            Stretch = Stretch.Fill
-        };
         highlight = new Border
         {
             Background = new SolidColorBrush(Windows.UI.Color.FromArgb(24, 104, 216, 255)),
@@ -88,10 +87,9 @@ internal sealed class CaptureSelectionWindow
         };
         root = new Grid
         {
-            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0, 0, 0)),
+            Background = new ImageBrush { ImageSource = imageSource, Stretch = Stretch.Fill },
             IsTabStop = true
         };
-        root.Children.Add(image);
         root.Children.Add(selectionCanvas);
         root.Children.Add(instructionContainer);
         root.KeyDown += HandleKeyDown;
@@ -103,7 +101,8 @@ internal sealed class CaptureSelectionWindow
         window = new Window
         {
             Content = root,
-            ExtendsContentIntoTitleBar = true
+            ExtendsContentIntoTitleBar = true,
+            SystemBackdrop = new TransparentTintBackdrop()
         };
         window.SetTitleBar(null);
         window.Closed += HandleClosed;
@@ -131,13 +130,13 @@ internal sealed class CaptureSelectionWindow
             presenter.SetBorderAndTitleBar(false, false);
         }
 
-        WindowExtensions.SetBorderless(windowHandle, true);
-        WindowExtensions.SetCornerRadius(windowHandle, WindowCornerPreference.Sharp);
-        WindowExtensions.SetTopMost(windowHandle, true);
-        WindowExtensions.viSetOpacity(windowHandle, 0);
+        PlatformWindowExtensions.SetBorderless(windowHandle, true);
+        PlatformWindowExtensions.SetCornerRadius(windowHandle, WindowCornerPreference.Sharp);
+        PlatformWindowExtensions.SetTopMost(windowHandle, true);
+        PlatformWindowExtensions.viSetOpacity(windowHandle, 0);
         appWindow.IsShownInSwitchers = false;
         appWindow.MoveAndResize(new RectInt32(-32000, -32000, bitmap.Width, bitmap.Height));
-        window.Activate();
+        appWindow.Show(false);
         return completion.Task;
     }
 
@@ -189,6 +188,8 @@ internal sealed class CaptureSelectionWindow
 
     private void HandleCompositionRendering(object? sender, object args)
     {
+        renderedFrameCount++;
+
         if (completed || isShown)
         {
             CompositionTarget.Rendering -= HandleCompositionRendering;
@@ -202,9 +203,16 @@ internal sealed class CaptureSelectionWindow
             return;
         }
 
+        if (renderedFrameCount < 3)
+        {
+            return;
+        }
+
         CompositionTarget.Rendering -= HandleCompositionRendering;
-        WindowExtensions.viSetOpacity(windowHandle, 255);
+        window.Activate();
+        _ = DwmFlush();
         root.Focus(FocusState.Programmatic);
+        PlatformWindowExtensions.viSetOpacity(windowHandle, 255);
         isShown = true;
     }
 
@@ -355,6 +363,9 @@ internal sealed class CaptureSelectionWindow
     private static Rect CreateRectangle(Point start, Point end) =>
         new(Math.Min(start.X, end.X), Math.Min(start.Y, end.Y), Math.Abs(end.X - start.X), Math.Abs(end.Y - start.Y));
 
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmFlush();
+
     private void Complete(CaptureSelectionCandidate? candidate)
     {
         if (completed)
@@ -364,7 +375,7 @@ internal sealed class CaptureSelectionWindow
 
         completed = true;
         CompositionTarget.Rendering -= HandleCompositionRendering;
-        WindowExtensions.viSetOpacity(windowHandle, 0);
+        PlatformWindowExtensions.viSetOpacity(windowHandle, 0);
         completion.TrySetResult(candidate);
         window.Close();
     }
