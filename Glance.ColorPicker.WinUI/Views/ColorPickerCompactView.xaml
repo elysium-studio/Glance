@@ -5,25 +5,36 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/ColorPicker.xaml" />
     </UserControl.Resources>
-    <Grid Padding="8,0" ColumnSpacing="10">
+    <Grid Padding="8,0" ColumnSpacing="8">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Border
             x:Name="ColorSwatch"
-            Width="30"
-            Height="30"
+            Width="26"
+            Height="26"
             Background="{x:Bind ToBrush(ViewModel.CurrentColor), Mode=OneWay}"
             BorderBrush="{ThemeResource ControlStrokeColorSecondaryBrush}"
             BorderThickness="1"
-            CornerRadius="8" />
-        <TextBlock
+            CornerRadius="7" />
+        <StackPanel
             Grid.Column="1"
             VerticalAlignment="Center"
-            FontSize="18"
-            FontWeight="SemiBold"
-            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-            Text="{x:Bind ViewModel.Hex, Mode=OneWay}" />
+            Spacing="0">
+            <TextBlock
+                MaxLines="1"
+                Style="{StaticResource BodyStrongTextBlockStyle}"
+                Text="{x:Bind ViewModel.Hex, Mode=OneWay}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap" />
+            <TextBlock
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                MaxLines="1"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="HEX"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap" />
+        </StackPanel>
     </Grid>
 </UserControl>

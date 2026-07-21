@@ -1,10 +1,10 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Default">
-            <SolidColorBrush x:Key="GlanceColorPickerIconBrush" Color="#FF63E6D1" />
+            <SolidColorBrush x:Key="GlanceColorPickerIconBrush" Color="#FF9FE870" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
-            <SolidColorBrush x:Key="GlanceColorPickerIconBrush" Color="#FF006C61" />
+            <SolidColorBrush x:Key="GlanceColorPickerIconBrush" Color="#FF3F7100" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <StaticResource x:Key="GlanceColorPickerIconBrush" ResourceKey="SystemColorWindowTextColorBrush" />

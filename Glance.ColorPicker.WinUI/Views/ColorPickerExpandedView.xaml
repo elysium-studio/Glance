@@ -9,45 +9,63 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Themes/ColorPicker.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <Style
+                x:Key="ColorPickerActionButtonStyle"
+                BasedOn="{StaticResource SubtleButtonStyle}"
+                TargetType="Button">
+                <Setter Property="Width" Value="32" />
+                <Setter Property="Height" Value="32" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
+                <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                <Setter Property="FontSize" Value="14" />
+            </Style>
             <DataTemplate x:Key="ColorFormatItemTemplate" x:DataType="local:ColorFormatItem">
-                <Grid ColumnSpacing="6">
+                <Grid Margin="2,0,0,0" ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="28" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="24" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock
+                    <StackPanel
                         VerticalAlignment="Center"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Style="{StaticResource CaptionTextBlockStyle}"
-                        Text="{x:Bind Label}" />
-                    <TextBlock
+                        Spacing="1">
+                        <TextBlock
+                            MaxLines="1"
+                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                            Text="{x:Bind Value, Mode=OneWay}"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="NoWrap" />
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Text="{x:Bind Label}" />
+                    </StackPanel>
+                    <StackPanel
                         Grid.Column="1"
                         VerticalAlignment="Center"
-                        Style="{StaticResource BodyTextBlockStyle}"
-                        Text="{x:Bind Value, Mode=OneWay}"
-                        TextTrimming="CharacterEllipsis" />
-                    <Button
-                        Grid.Column="2"
-                        Width="24"
-                        Height="24"
-                        Padding="0"
-                        AutomationProperties.Name="{x:Bind Value}"
-                        Click="{x:Bind Copy}"
-                        Content="&#xE8C8;"
-                        FontFamily="Segoe Fluent Icons"
-                        FontSize="12"
-                        Style="{StaticResource SubtleButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind Value}" />
+                        Orientation="Horizontal"
+                        Spacing="2">
+                        <Button
+                            AutomationProperties.Name="{x:Bind Value}"
+                            Click="{x:Bind Copy}"
+                            Content="&#xE8C8;"
+                            Style="{StaticResource ColorPickerActionButtonStyle}"
+                            ToolTipService.ToolTip="{x:Bind Value}" />
+                        <Button
+                            x:Uid="PickButton"
+                            Click="{x:Bind Pick}"
+                            Content="&#xEF3C;"
+                            Style="{StaticResource ColorPickerActionButtonStyle}" />
+                    </StackPanel>
                 </Grid>
             </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid Padding="20,12,20,26" ColumnSpacing="12">
+    <Grid Padding="20,12,20,26">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Border
             x:Name="ColorSwatch"
@@ -61,74 +79,25 @@
         <Grid
             Grid.Column="1"
             Height="58"
+            Margin="12,0,0,0"
             VerticalAlignment="Center"
             RowSpacing="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="14" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Grid ColumnSpacing="8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock
-                    FontWeight="SemiBold"
-                    Foreground="{ThemeResource GlanceColorPickerIconBrush}"
-                    Style="{StaticResource CaptionTextBlockStyle}"
-                    Text="{x:Bind ToUpper(Title)}" />
-                <ItemsRepeater
-                    Grid.Column="1"
-                    VerticalAlignment="Center"
-                    ItemsSource="{x:Bind RecentColors}">
-                    <ItemsRepeater.Layout>
-                        <StackLayout Orientation="Horizontal" Spacing="4" />
-                    </ItemsRepeater.Layout>
-                    <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="local:ColorSwatchItem">
-                            <Button
-                                Width="12"
-                                Height="12"
-                                Padding="0"
-                                AutomationProperties.Name="{x:Bind Hex}"
-                                Background="{x:Bind Brush}"
-                                BorderBrush="{ThemeResource ControlStrokeColorSecondaryBrush}"
-                                BorderThickness="1"
-                                Click="{x:Bind Select}"
-                                CornerRadius="6"
-                                ToolTipService.ToolTip="{x:Bind Hex}" />
-                        </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
-            </Grid>
+            <TextBlock
+                FontWeight="SemiBold"
+                Foreground="{ThemeResource GlanceColorPickerIconBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{x:Bind ToUpper(Title)}" />
             <Controls:CompactFlipView
                 Grid.Row="1"
+                Margin="-22,0,0,0"
                 Background="Transparent"
                 ItemTemplate="{StaticResource ColorFormatItemTemplate}"
                 ItemsSource="{x:Bind Formats}"
                 SelectedIndex="0" />
         </Grid>
-        <Button
-            x:Uid="PickButton"
-            Grid.Column="2"
-            Width="32"
-            Height="32"
-            Padding="0"
-            VerticalAlignment="Center"
-            Click="{x:Bind ViewModel.Pick}"
-            Style="{StaticResource SubtleButtonStyle}">
-            <Grid>
-                <FontIcon
-                    FontFamily="Segoe Fluent Icons"
-                    FontSize="16"
-                    Glyph="&#xEF3C;"
-                    Visibility="{x:Bind WhenIdle(ViewModel.IsPicking), Mode=OneWay}" />
-                <ProgressRing
-                    Width="18"
-                    Height="18"
-                    IsActive="{x:Bind ViewModel.IsPicking, Mode=OneWay}"
-                    Visibility="{x:Bind WhenPicking(ViewModel.IsPicking), Mode=OneWay}" />
-            </Grid>
-        </Button>
     </Grid>
 </UserControl>
