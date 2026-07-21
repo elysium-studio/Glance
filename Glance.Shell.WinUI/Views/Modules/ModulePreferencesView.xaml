@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="Glance.Shell.WinUI.ModulePreferencesView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:CommunityToolkit="using:CommunityToolkit.WinUI.Controls"
+    xmlns:Shell="using:Glance.Shell"
+    Loaded="{x:Bind ViewModel.Activate}"
+    Unloaded="{x:Bind ViewModel.Deactivate}">
+    <StackPanel Spacing="12">
+        <TextBlock
+            x:Uid="ModulesDescription"
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            TextWrapping="Wrap" />
+        <ListView
+            AllowDrop="True"
+            CanDragItems="True"
+            CanReorderItems="True"
+            DragItemsCompleted="{x:Bind HandleDragItemsCompleted}"
+            ItemsSource="{x:Bind ViewModel.Modules, Mode=OneWay}"
+            ReorderMode="Enabled"
+            SelectionMode="None">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Margin" Value="0,0,0,4" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="Shell:ModuleSettingsItemViewModel">
+                    <CommunityToolkit:SettingsCard
+                        Description="{x:Bind Description}"
+                        Header="{x:Bind DisplayName}"
+                        IsClickEnabled="False">
+                        <ToggleSwitch
+                            AutomationProperties.Name="{x:Bind DisplayName}"
+                            IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
+                    </CommunityToolkit:SettingsCard>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </StackPanel>
+</UserControl>

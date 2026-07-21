@@ -1,14 +1,14 @@
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Windows.Graphics;
 
 namespace Glance.Shell.WinUI;
 
-public sealed partial class SettingsWindow : Window
+public sealed partial class SettingsWindow :
+    Window
 {
-    private const int WindowWidth = 900;
-    private const int WindowHeight = 620;
+    private const int WindowWidth = 1100;
+    private const int WindowHeight = 680;
 
     public SettingsWindow()
     {
@@ -22,26 +22,13 @@ public sealed partial class SettingsWindow : Window
         presenter.IsMinimizable = false;
         presenter.IsMaximizable = false;
 
-        DisplayArea displayArea = DisplayArea.GetFromWindowId(
-            AppWindow.Id,
-            DisplayAreaFallback.Primary);
+        DisplayArea displayArea = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Primary);
 
-        int centeredX = displayArea.WorkArea.X +
-            (displayArea.WorkArea.Width - WindowWidth) / 2;
-        int centeredY = displayArea.WorkArea.Y +
-            (displayArea.WorkArea.Height - WindowHeight) / 2;
+        int centeredX = displayArea.WorkArea.X + (displayArea.WorkArea.Width / 2) - (WindowWidth / 2);
+        int centeredY = displayArea.WorkArea.Y + (displayArea.WorkArea.Height / 2) - (WindowHeight / 2);
 
-        AppWindow.MoveAndResize(new RectInt32(
-            centeredX,
-            centeredY,
-            WindowWidth,
-            WindowHeight));
+        AppWindow.MoveAndResize(new RectInt32(centeredX, centeredY, WindowWidth, WindowHeight));
     }
 
-    public SettingsViewModel ViewModel => (SettingsViewModel)Root.DataContext;
-
-    private async void HandleDragItemsCompleted(
-        ListViewBase sender,
-        DragItemsCompletedEventArgs args) =>
-        await ViewModel.SaveOrderAsync();
+    public SettingsViewModel ViewModel => (SettingsViewModel)((FrameworkElement)Content).DataContext;
 }

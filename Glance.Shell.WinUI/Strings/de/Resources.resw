@@ -4,19 +4,18 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
-  <data name="SettingsTitleBar.Title" xml:space="preserve">
-    <value>Einstellungen</value>
-  </data>
-  <data name="ModulesNavigationItem.Content" xml:space="preserve">
-    <value>Module</value>
-  </data>
-  <data name="ModulesTitle.Text" xml:space="preserve">
-    <value>Module</value>
-  </data>
-  <data name="ModulesDescription.Text" xml:space="preserve">
-    <value>Wähle aus, welche Module in Glance angezeigt werden, und ziehe sie in die gewünschte Reihenfolge.</value>
-  </data>
-  <data name="SettingsButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Einstellungen</value>
-  </data>
+  <data name="SettingsTitleBar.Title" xml:space="preserve"><value>Einstellungen</value></data>
+  <data name="SettingsButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Einstellungen</value></data>
+  <data name="GlanceSectionTitle.Text" xml:space="preserve"><value>Glance</value></data>
+  <data name="ModulesSectionTitle.Text" xml:space="preserve"><value>Module</value></data>
+  <data name="WindowsSectionTitle.Text" xml:space="preserve"><value>Windows</value></data>
+  <data name="ModulesDescription.Text" xml:space="preserve"><value>Wähle aus, welche Module in Glance angezeigt werden, und ziehe sie in die gewünschte Reihenfolge.</value></data>
+  <data name="GlancePlacementCard.Header" xml:space="preserve"><value>Position von Glance</value></data>
+  <data name="GlancePlacementCard.Description" xml:space="preserve"><value>Lege fest, ob Glance oben oder unten auf dem Bildschirm erscheint</value></data>
+  <data name="GlancePlacementTopOption.Content" xml:space="preserve"><value>Oben</value></data>
+  <data name="GlancePlacementBottomOption.Content" xml:space="preserve"><value>Unten</value></data>
+  <data name="StartWithWindowsCard.Header" xml:space="preserve"><value>Mit Windows starten</value></data>
+  <data name="StartWithWindowsCard.Description" xml:space="preserve"><value>Glance bei der Anmeldung automatisch starten</value></data>
+  <data name="BooleanToggle.OnContent" xml:space="preserve"><value>Ja</value></data>
+  <data name="BooleanToggle.OffContent" xml:space="preserve"><value>Nein</value></data>
 </root>

@@ -1,13 +1,18 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
+using Elysium.Application.Abstractions;
+using Elysium.Presentation;
+using Elysium.Presentation.Abstractions;
 using Glance.Application.Abstractions;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Glance.Shell;
 
 public partial class DesktopIslandViewModel :
-    ObservableObject,
-    IDisposable
+    ObservableViewModel,
+    IRecipient<OptionsChangedEventArgs<GlanceSettings>>
 {
     [ObservableProperty]
     private bool isOpen = true;
@@ -15,26 +20,42 @@ public partial class DesktopIslandViewModel :
     [ObservableProperty]
     private bool isExpanded;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PlacementIndex))]
+    private GlancePlacement placement;
+
     private int selectedIndex;
 
     private IReadOnlyList<IGlanceComponent> components;
     private readonly IGlanceAttentionService attentionService;
+    private readonly IDispatcher dispatcher;
+    private readonly ILogger<DesktopIslandViewModel> logger;
     private readonly ModulePreferenceService modulePreferences;
-    private readonly ISettingsLauncher settingsLauncher;
-    private readonly SynchronizationContext? uiContext;
+    private readonly INavigator navigator;
 
     public DesktopIslandViewModel(
+        IServiceProvider provider,
+        IServiceFactory factory,
+        IMessenger messenger,
+        IDisposer disposer,
+        IDispatcher dispatcher,
         ModulePreferenceService modulePreferences,
         IGlanceAttentionService attentionService,
-        ISettingsLauncher settingsLauncher)
+        INavigator navigator,
+        ILogger<DesktopIslandViewModel> logger,
+        GlanceSettings settings) :
+        base(provider, factory, messenger, disposer)
     {
+        this.dispatcher = dispatcher;
         this.modulePreferences = modulePreferences;
         components = modulePreferences.GetActiveComponents();
         this.attentionService = attentionService;
-        this.settingsLauncher = settingsLauncher;
-        uiContext = SynchronizationContext.Current;
+        this.navigator = navigator;
+        this.logger = logger;
+        Placement = settings.Placement;
         attentionService.AttentionRequested += HandleAttentionRequested;
         modulePreferences.PreferencesChanged += HandlePreferencesChanged;
+        Activate();
     }
 
     public event EventHandler<GlanceAttentionRequest>? AttentionReceived;
@@ -68,6 +89,8 @@ public partial class DesktopIslandViewModel :
 
     public int ComponentCount => components.Count;
 
+    public int PlacementIndex => (int)Placement;
+
     public string PageText => components.Count == 0
         ? "0 / 0"
         : $"{SelectedIndex + 1} / {components.Count}";
@@ -76,7 +99,7 @@ public partial class DesktopIslandViewModel :
 
     public void MovePrevious() => Move(-1);
 
-    public void OpenSettings() => settingsLauncher.Show();
+    public async void NavigateToSettings() => await NavigateAsync("SettingsWindow");
 
     public bool CanHandleContent(GlanceContentKind kind) =>
         FindContextComponentIndex(kind) >= 0;
@@ -123,22 +146,21 @@ public partial class DesktopIslandViewModel :
         SelectedIndex = (SelectedIndex + offset + components.Count) % components.Count;
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         attentionService.AttentionRequested -= HandleAttentionRequested;
         modulePreferences.PreferencesChanged -= HandlePreferencesChanged;
+        base.Dispose();
     }
+
+    public void Receive(OptionsChangedEventArgs<GlanceSettings> message) =>
+        dispatcher.Dispatch(() => Placement = message.Options.Placement);
+
+    protected override void RegisterMessages() =>
+        Messenger.Register<OptionsChangedEventArgs<GlanceSettings>>(this);
 
     private void HandlePreferencesChanged(object? sender, EventArgs args)
-    {
-        if (uiContext is not null && SynchronizationContext.Current != uiContext)
-        {
-            uiContext.Post(_ => ApplyPreferences(), null);
-            return;
-        }
-
-        ApplyPreferences();
-    }
+        => dispatcher.Dispatch(ApplyPreferences);
 
     private void ApplyPreferences()
     {
@@ -203,4 +225,16 @@ public partial class DesktopIslandViewModel :
             .Select(item => item.index)
             .DefaultIfEmpty(-1)
             .First();
+
+    private async Task NavigateAsync(string key)
+    {
+        try
+        {
+            await navigator.NavigateAsync(key);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Failed to navigate to {NavigationKey}", key);
+        }
+    }
 }

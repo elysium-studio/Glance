@@ -8,8 +8,10 @@ public sealed class LocalizationResourceTests
 {
     private static readonly string[] ExpectedModules =
     [
+        "AudioSwitcher",
         "Clipboard",
         "DropShelf",
+        "FocusSession",
         "Media",
         "Power",
         "Shell",

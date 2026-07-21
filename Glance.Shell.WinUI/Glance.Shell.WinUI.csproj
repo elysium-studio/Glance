@@ -24,13 +24,16 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.3.260402-preview2" />
+    <PackageReference Include="Elysium.Application" Version="$(ElysiumVersion)" />
     <PackageReference Include="Elysium.Application.Abstractions" Version="$(ElysiumVersion)" />
-    <PackageReference Include="Elysium.UI.Controls.WinUI" Version="$(ElysiumVersion)" />
     <PackageReference Include="Elysium.Application.DependencyInjection" Version="$(ElysiumVersion)" />
-    <PackageReference Include="Elysium.Presentation" Version="$(ElysiumPublishedVersion)" />
+    <PackageReference Include="Elysium.Platform.Abstractions" Version="$(ElysiumVersion)" />
+    <PackageReference Include="Elysium.Platform.Windows" Version="$(ElysiumVersion)" />
+    <PackageReference Include="Elysium.Presentation" Version="$(ElysiumVersion)" />
     <PackageReference Include="Elysium.Presentation.Abstractions" Version="$(ElysiumVersion)" />
-    <PackageReference Include="Elysium.Presentation.DependencyInjection" Version="$(ElysiumPublishedVersion)" />
-    <PackageReference Include="Elysium.UI.WinUI" Version="$(ElysiumPublishedVersion)" />
+    <PackageReference Include="Elysium.Presentation.DependencyInjection" Version="$(ElysiumVersion)" />
+    <PackageReference Include="Elysium.UI.Controls.WinUI" Version="$(ElysiumVersion)" />
+    <PackageReference Include="Elysium.UI.WinUI" Version="$(ElysiumVersion)" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />

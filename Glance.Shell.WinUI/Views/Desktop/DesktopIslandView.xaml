@@ -14,6 +14,7 @@
     IsExpanded="{x:Bind ViewModel.IsExpanded, Mode=TwoWay}"
     IsOpen="{x:Bind ViewModel.IsOpen, Mode=TwoWay}"
     IsTabStop="False"
+    Placement="{x:Bind ToPlacement(ViewModel.PlacementIndex), Mode=OneWay}"
     PointerWheelChanged="{x:Bind HandlePointerWheelChanged}">
     <Controls:DesktopIsland.CompactContent>
         <ContentPresenter
@@ -52,7 +53,7 @@
                     VerticalAlignment="Center"
                     Background="Transparent"
                     BorderThickness="0"
-                    Click="{x:Bind ViewModel.OpenSettings}"
+                    Click="{x:Bind ViewModel.NavigateToSettings}"
                     Content="&#xE713;"
                     CornerRadius="6"
                     FontFamily="Segoe Fluent Icons"

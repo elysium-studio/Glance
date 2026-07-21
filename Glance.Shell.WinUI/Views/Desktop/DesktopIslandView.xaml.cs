@@ -36,6 +36,18 @@ public partial class DesktopIslandView :
 
     public DesktopIslandViewModel ViewModel => (DesktopIslandViewModel)DataContext;
 
+    public DesktopIslandPlacement ToPlacement(int index)
+    {
+        GlancePlacement placement = (GlancePlacement)index;
+
+        return placement switch
+        {
+            GlancePlacement.Top => DesktopIslandPlacement.Top,
+            GlancePlacement.Bottom => DesktopIslandPlacement.Bottom,
+            _ => DesktopIslandPlacement.Top
+        };
+    }
+
     private void HandleLoaded(object sender, RoutedEventArgs args)
     {
         previousIndex = ViewModel.SelectedIndex;

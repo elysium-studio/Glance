@@ -8,6 +8,9 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Elysium.Application.Abstractions" Version="$(ElysiumVersion)" />
+    <PackageReference Include="Elysium.Presentation" Version="$(ElysiumVersion)" />
+    <PackageReference Include="Elysium.Presentation.Abstractions" Version="$(ElysiumVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Glance.Application.Abstractions\Glance.Application.Abstractions.csproj" />
