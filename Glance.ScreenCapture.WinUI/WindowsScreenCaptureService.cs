@@ -60,9 +60,9 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
             DesktopCaptureBitmap desktop = CaptureVirtualDesktop();
             NativeRectangle? selection = mode switch
             {
-                ScreenCaptureMode.Region => await CaptureSelectionWindow.SelectAsync(desktop, mode, [], localizer),
-                ScreenCaptureMode.Window => await CaptureSelectionWindow.SelectAsync(desktop, mode, candidates, localizer),
-                ScreenCaptureMode.Display => await CaptureSelectionWindow.SelectAsync(desktop, mode, candidates, localizer),
+                ScreenCaptureMode.Region => await CaptureSelectionWindow.SelectAsync(desktop, mode, [], localizer, dispatcherQueue),
+                ScreenCaptureMode.Window => await CaptureSelectionWindow.SelectAsync(desktop, mode, candidates, localizer, dispatcherQueue),
+                ScreenCaptureMode.Display => await CaptureSelectionWindow.SelectAsync(desktop, mode, candidates, localizer, dispatcherQueue),
                 ScreenCaptureMode.AllDisplays => desktop.Bounds,
                 _ => null
             };

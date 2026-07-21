@@ -1,4 +1,5 @@
 using Glance.Application.Abstractions;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -106,11 +107,11 @@ internal sealed class CaptureSelectionWindow
         DesktopCaptureBitmap bitmap,
         ScreenCaptureMode mode,
         IReadOnlyList<NativeRectangle> candidates,
-        ITextLocalizer localizer)
+        ITextLocalizer localizer,
+        DispatcherQueue dispatcherQueue)
     {
-        BitmapImage imageSource = await CreateImageSourceAsync(bitmap);
-        CaptureSelectionWindow selectionWindow = new(bitmap, mode, candidates, localizer, imageSource);
-        return await selectionWindow.ShowAsync();
+        using InMemoryRandomAccessStream stream = await CreateImageStreamAsync(bitmap);
+        return await ShowOnDispatcherAsync(bitmap, mode, candidates, localizer, dispatcherQueue, stream);
     }
 
     private Task<NativeRectangle?> ShowAsync()
@@ -132,16 +133,57 @@ internal sealed class CaptureSelectionWindow
         return completion.Task;
     }
 
-    private static async Task<BitmapImage> CreateImageSourceAsync(DesktopCaptureBitmap bitmap)
+    private static async Task<InMemoryRandomAccessStream> CreateImageStreamAsync(DesktopCaptureBitmap bitmap)
     {
-        using InMemoryRandomAccessStream stream = new();
+        InMemoryRandomAccessStream stream = new();
         BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, stream);
         encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Ignore, (uint)bitmap.Width, (uint)bitmap.Height, 96, 96, bitmap.Pixels);
         await encoder.FlushAsync();
         stream.Seek(0);
-        BitmapImage image = new();
-        await image.SetSourceAsync(stream);
-        return image;
+        return stream;
+    }
+
+    private static Task<NativeRectangle?> ShowOnDispatcherAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<NativeRectangle> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue, IRandomAccessStream stream)
+    {
+        TaskCompletionSource<NativeRectangle?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        void ShowSelectionWindow()
+        {
+            try
+            {
+                BitmapImage imageSource = new();
+                imageSource.SetSource(stream);
+                CaptureSelectionWindow selectionWindow = new(bitmap, mode, candidates, localizer, imageSource);
+                _ = CompleteSelectionAsync(selectionWindow.ShowAsync(), completion);
+            }
+            catch (Exception exception)
+            {
+                completion.TrySetException(exception);
+            }
+        }
+
+        if (dispatcherQueue.HasThreadAccess)
+        {
+            ShowSelectionWindow();
+        }
+        else if (!dispatcherQueue.TryEnqueue(ShowSelectionWindow))
+        {
+            completion.TrySetException(new InvalidOperationException("Unable to open the capture selection window."));
+        }
+
+        return completion.Task;
+    }
+
+    private static async Task CompleteSelectionAsync(Task<NativeRectangle?> selection, TaskCompletionSource<NativeRectangle?> completion)
+    {
+        try
+        {
+            completion.TrySetResult(await selection);
+        }
+        catch (Exception exception)
+        {
+            completion.TrySetException(exception);
+        }
     }
 
     private void HandleKeyDown(object sender, KeyRoutedEventArgs args)
