@@ -46,9 +46,11 @@
                 Visibility="{x:Bind WhenDeviceAvailable(ViewModel.DevicePositionText), Mode=OneWay}" />
             <TextBlock
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                MaxLines="1"
                 Style="{StaticResource BodyTextBlockStyle}"
                 Text="{x:Bind ViewModel.CurrentDeviceName, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap"
                 Visibility="{x:Bind WhenDeviceUnavailable(ViewModel.DevicePositionText), Mode=OneWay}" />
         </StackPanel>
         <StackPanel

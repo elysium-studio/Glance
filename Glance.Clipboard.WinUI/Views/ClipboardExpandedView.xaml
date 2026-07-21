@@ -118,6 +118,8 @@
                 Margin="0,2,0,0"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Style="{StaticResource BodyTextBlockStyle}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap"
                 Visibility="{x:Bind WhenEmpty(ViewModel.CanClearHistory), Mode=OneWay}" />
             <Controls:CompactFlipView
                 x:Name="ClipboardFlipView"

@@ -36,8 +36,11 @@
             <TextBlock
                 FontWeight="SemiBold"
                 Foreground="{ThemeResource GlanceMediaIconBrush}"
+                MaxLines="1"
                 Style="{StaticResource CaptionTextBlockStyle}"
-                Text="{x:Bind ToUpper(ViewModel.Source), Mode=OneWay}" />
+                Text="{x:Bind ToUpper(ViewModel.Source), Mode=OneWay}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap" />
             <Controls:MarqueeTextBlock
                 Height="24"
                 FontSize="18"
@@ -55,15 +58,19 @@
                 Visibility="{x:Bind WhenAvailable(ViewModel.HasSession), Mode=OneWay}" />
             <TextBlock
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                MaxLines="1"
                 Style="{StaticResource BodyStrongTextBlockStyle}"
                 Text="{x:Bind ViewModel.Title, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap"
                 Visibility="{x:Bind WhenUnavailable(ViewModel.HasSession), Mode=OneWay}" />
             <TextBlock
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                MaxLines="1"
                 Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ViewModel.Artist, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap"
                 Visibility="{x:Bind WhenUnavailable(ViewModel.HasSession), Mode=OneWay}" />
         </StackPanel>
         <StackPanel

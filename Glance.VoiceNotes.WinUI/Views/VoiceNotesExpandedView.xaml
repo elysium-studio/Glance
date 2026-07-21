@@ -104,6 +104,7 @@
                 Style="{StaticResource BodyTextBlockStyle}"
                 Text="{x:Bind ViewModel.ExpandedStatusText, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap"
                 Visibility="{x:Bind ToEmptyVisibility(ViewModel.HasRecordings, ViewModel.IsRecording), Mode=OneWay}" />
             <Controls:CompactFlipView
                 Grid.Row="1"
