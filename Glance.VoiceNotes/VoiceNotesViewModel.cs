@@ -27,6 +27,9 @@ public partial class VoiceNotesViewModel :
     [ObservableProperty]
     private bool hasRecordings;
 
+    [ObservableProperty]
+    private VoiceNoteItemViewModel? selectedRecording;
+
     public VoiceNotesViewModel(ITextLocalizer localizer)
     {
         this.localizer = localizer;
@@ -72,6 +75,7 @@ public partial class VoiceNotesViewModel :
         }
 
         HasRecordings = Recordings.Count > 0;
+        SelectedRecording = Recordings.FirstOrDefault();
     }
 
     public void BeginRecording()
@@ -114,6 +118,7 @@ public partial class VoiceNotesViewModel :
         }
 
         HasRecordings = true;
+        SelectedRecording = Recordings[0];
     }
 
     public void RemoveRecording(VoiceNote recording)
@@ -126,10 +131,21 @@ public partial class VoiceNotesViewModel :
 
         if (item is not null)
         {
+            bool wasSelected = ReferenceEquals(SelectedRecording, item);
             Recordings.Remove(item);
+
+            if (wasSelected)
+            {
+                SelectedRecording = Recordings.FirstOrDefault();
+            }
         }
 
         HasRecordings = Recordings.Count > 0;
+
+        if (!HasRecordings)
+        {
+            SelectedRecording = null;
+        }
     }
 
     public void ShowRecordingError()

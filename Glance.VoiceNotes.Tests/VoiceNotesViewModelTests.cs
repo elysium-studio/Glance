@@ -47,6 +47,7 @@ public sealed class VoiceNotesViewModelTests
         Assert.True(viewModel.HasRecordings);
         Assert.Equal(3, viewModel.Recordings.Count);
         Assert.Same(latest, viewModel.Recordings[0].Recording);
+        Assert.Same(viewModel.Recordings[0], viewModel.SelectedRecording);
         Assert.DoesNotContain(
             viewModel.Recordings,
             item => ReferenceEquals(existing[^1], item.Recording));
@@ -63,6 +64,7 @@ public sealed class VoiceNotesViewModelTests
 
         Assert.Empty(viewModel.Recordings);
         Assert.False(viewModel.HasRecordings);
+        Assert.Null(viewModel.SelectedRecording);
     }
 
     [Fact]
@@ -100,6 +102,18 @@ public sealed class VoiceNotesViewModelTests
 
         Assert.Equal("03:05", shortNote.DurationText);
         Assert.Equal("02:03:05", longNote.DurationText);
+    }
+
+    [Fact]
+    public void SetRecordings_SelectsNewestRecordingAndExposesFullFileName()
+    {
+        VoiceNotesViewModel viewModel = new(new FakeLocalizer());
+        VoiceNote recording = CreateNote("voice-note.wav", 1);
+
+        viewModel.SetRecordings([recording]);
+
+        Assert.Same(viewModel.Recordings[0], viewModel.SelectedRecording);
+        Assert.Equal("voice-note.wav", viewModel.Recordings[0].FileName);
     }
 
     private static VoiceNote CreateNote(string name, int minute) =>

@@ -9,6 +9,8 @@ public sealed class VoiceNoteItemViewModel(
 
     public string DisplayName => Recording.DisplayName;
 
+    public string FileName => Path.GetFileName(Recording.FilePath);
+
     public string DurationText => Recording.DurationText;
 
     public string CreatedText => Recording.CreatedText;
