@@ -1,6 +1,7 @@
 using Elysium.UI.Controls.WinUI;
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Animation;
@@ -20,12 +21,14 @@ namespace Glance.Shell.WinUI;
 public partial class DesktopIslandView : 
     DesktopIsland
 {
+    private readonly DispatcherQueue dispatcherQueue;
     private int previousIndex;
     private bool skipNextConnectedExpansion;
 
     public DesktopIslandView()
     {
         InitializeComponent();
+        dispatcherQueue = DispatcherQueue;
 
         Loaded += HandleLoaded;
         Unloaded += HandleUnloaded;
@@ -240,16 +243,7 @@ public partial class DesktopIslandView :
         }
         finally
         {
-            try
-            {
-                deferral.Complete();
-            }
-            catch (COMException exception)
-            {
-                Debug.WriteLine(
-                    $"DropShelf: failed to complete drop deferral " +
-                    $"(0x{exception.HResult:X8}): {exception.Message}");
-            }
+            await CompleteDropDeferralAsync(deferral);
         }
 
         if (items.Length > 0)
@@ -262,6 +256,45 @@ public partial class DesktopIslandView :
             {
                 Debug.WriteLine($"DropShelf: failed to add dropped items: {exception}");
             }
+        }
+    }
+
+    private Task CompleteDropDeferralAsync(DragOperationDeferral deferral)
+    {
+        if (dispatcherQueue.HasThreadAccess)
+        {
+            CompleteDropDeferral(deferral);
+            return Task.CompletedTask;
+        }
+
+        TaskCompletionSource<bool> completion = new(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (!dispatcherQueue.TryEnqueue(() =>
+        {
+            CompleteDropDeferral(deferral);
+            completion.TrySetResult(true);
+        }))
+        {
+            Debug.WriteLine(
+                "DropShelf: could not dispatch drop deferral completion.");
+            completion.TrySetResult(false);
+        }
+
+        return completion.Task;
+    }
+
+    private static void CompleteDropDeferral(DragOperationDeferral deferral)
+    {
+        try
+        {
+            deferral.Complete();
+        }
+        catch (COMException exception)
+        {
+            Debug.WriteLine(
+                $"DropShelf: failed to complete drop deferral " +
+                $"(0x{exception.HResult:X8}): {exception.Message}");
         }
     }
 
