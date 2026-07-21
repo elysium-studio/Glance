@@ -6,6 +6,15 @@
   <Project Path="Glance.Application.Abstractions/Glance.Application.Abstractions.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="Glance.AudioSwitcher.WinUI/Glance.AudioSwitcher.WinUI.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.AudioSwitcher/Glance.AudioSwitcher.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.AudioSwitcher.Tests/Glance.AudioSwitcher.Tests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="Glance.Clipboard.WinUI/Glance.Clipboard.WinUI.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>

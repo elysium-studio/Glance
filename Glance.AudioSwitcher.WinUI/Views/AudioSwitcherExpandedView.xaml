@@ -1,0 +1,82 @@
+<UserControl
+    x:Class="Glance.AudioSwitcher.WinUI.AudioSwitcherExpandedView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Controls="using:Elysium.UI.Controls.WinUI">
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Themes/AudioSwitcher.xaml" />
+    </UserControl.Resources>
+    <Grid Padding="18,12,18,26" ColumnSpacing="12">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid
+            x:Name="StatusIndicator"
+            Width="38"
+            Height="38"
+            VerticalAlignment="Center">
+            <FontIcon
+                Width="34"
+                Height="34"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="32"
+                Foreground="{ThemeResource GlanceAudioSwitcherIconBrush}"
+                Glyph="&#xE767;" />
+        </Grid>
+        <StackPanel
+            Grid.Column="1"
+            VerticalAlignment="Center"
+            Spacing="2">
+            <TextBlock
+                FontSize="10"
+                FontWeight="SemiBold"
+                Foreground="{ThemeResource GlanceAudioSwitcherIconBrush}"
+                Text="{x:Bind ToUpper(Title)}" />
+            <Controls:MarqueeTextBlock
+                Height="25"
+                FontSize="20"
+                FontWeight="SemiBold"
+                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                Text="{x:Bind ViewModel.CurrentDeviceName, Mode=OneWay}"
+                ToolTipService.ToolTip="{x:Bind ViewModel.CurrentDeviceName, Mode=OneWay}" />
+        </StackPanel>
+        <StackPanel
+            Grid.Column="2"
+            VerticalAlignment="Center"
+            Orientation="Horizontal"
+            Spacing="4">
+            <Button
+                x:Uid="PreviousButton"
+                Width="32"
+                Height="32"
+                Padding="0"
+                Click="{x:Bind ViewModel.Previous}"
+                Content="&#xE76B;"
+                CornerRadius="16"
+                FontFamily="Segoe Fluent Icons"
+                IsEnabled="{x:Bind ViewModel.CanSwitch, Mode=OneWay}" />
+            <TextBlock
+                MinWidth="30"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontSize="11"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="{x:Bind ViewModel.DevicePositionText, Mode=OneWay}"
+                TextAlignment="Center" />
+            <Button
+                x:Uid="NextButton"
+                Width="32"
+                Height="32"
+                Padding="0"
+                Click="{x:Bind ViewModel.Next}"
+                Content="&#xE76C;"
+                CornerRadius="16"
+                FontFamily="Segoe Fluent Icons"
+                IsEnabled="{x:Bind ViewModel.CanSwitch, Mode=OneWay}" />
+        </StackPanel>
+    </Grid>
+</UserControl>

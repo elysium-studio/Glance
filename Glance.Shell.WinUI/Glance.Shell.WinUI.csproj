@@ -38,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Glance.Application.Abstractions\Glance.Application.Abstractions.csproj" />
+    <ProjectReference Include="..\Glance.AudioSwitcher.WinUI\Glance.AudioSwitcher.WinUI.csproj" />
     <ProjectReference Include="..\Glance.Clipboard.WinUI\Glance.Clipboard.WinUI.csproj" />
     <ProjectReference Include="..\Glance.DropShelf.WinUI\Glance.DropShelf.WinUI.csproj" />
     <ProjectReference Include="..\Glance.FocusSession.WinUI\Glance.FocusSession.WinUI.csproj" />
