@@ -8,19 +8,16 @@ public sealed class ColorFormatItem :
     INotifyPropertyChanged
 {
     private readonly Action copy;
-    private readonly Action pick;
     private string value;
 
     public ColorFormatItem(
         string label,
         string value,
-        Action copy,
-        Action pick)
+        Action copy)
     {
         Label = label;
         this.value = value;
         this.copy = copy;
-        this.pick = pick;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -43,8 +40,6 @@ public sealed class ColorFormatItem :
     }
 
     public void Copy() => copy();
-
-    public void Pick() => pick();
 
     public void Update(string newValue) => Value = newValue;
 

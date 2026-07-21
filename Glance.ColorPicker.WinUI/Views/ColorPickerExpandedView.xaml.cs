@@ -20,9 +20,9 @@ public sealed partial class ColorPickerExpandedView :
         this.localizer = localizer;
         Formats =
         [
-            new ColorFormatItem("HEX", viewModel.Hex, viewModel.CopyHex, viewModel.Pick),
-            new ColorFormatItem("RGB", viewModel.Rgb, viewModel.CopyRgb, viewModel.Pick),
-            new ColorFormatItem("HSL", viewModel.Hsl, viewModel.CopyHsl, viewModel.Pick)
+            new ColorFormatItem("HEX", viewModel.Hex, viewModel.CopyHex),
+            new ColorFormatItem("RGB", viewModel.Rgb, viewModel.CopyRgb),
+            new ColorFormatItem("HSL", viewModel.Hsl, viewModel.CopyHsl)
         ];
         viewModel.PropertyChanged += HandleViewModelPropertyChanged;
         InitializeComponent();
@@ -40,6 +40,12 @@ public sealed partial class ColorPickerExpandedView :
 
     private SolidColorBrush ToBrush(ColorValue color) =>
         new(Windows.UI.Color.FromArgb(255, color.Red, color.Green, color.Blue));
+
+    private Visibility WhenIdle(bool isPicking) =>
+        isPicking ? Visibility.Collapsed : Visibility.Visible;
+
+    private Visibility WhenPicking(bool isPicking) =>
+        isPicking ? Visibility.Visible : Visibility.Collapsed;
 
     private void HandleViewModelPropertyChanged(
         object? sender,

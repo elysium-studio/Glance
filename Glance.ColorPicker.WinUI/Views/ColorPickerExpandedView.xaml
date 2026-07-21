@@ -52,20 +52,16 @@
                             Content="&#xE8C8;"
                             Style="{StaticResource ColorPickerActionButtonStyle}"
                             ToolTipService.ToolTip="{x:Bind Value}" />
-                        <Button
-                            x:Uid="PickButton"
-                            Click="{x:Bind Pick}"
-                            Content="&#xEF3C;"
-                            Style="{StaticResource ColorPickerActionButtonStyle}" />
                     </StackPanel>
                 </Grid>
             </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid Padding="20,12,20,26">
+    <Grid Padding="20,12,20,26" ColumnSpacing="12">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Border
             x:Name="ColorSwatch"
@@ -79,7 +75,6 @@
         <Grid
             Grid.Column="1"
             Height="58"
-            Margin="12,0,0,0"
             VerticalAlignment="Center"
             RowSpacing="1">
             <Grid.RowDefinitions>
@@ -99,5 +94,28 @@
                 ItemsSource="{x:Bind Formats}"
                 SelectedIndex="0" />
         </Grid>
+        <Button
+            x:Uid="PickButton"
+            Grid.Column="2"
+            Width="36"
+            Height="36"
+            Padding="0"
+            VerticalAlignment="Center"
+            Click="{x:Bind ViewModel.Pick}"
+            CornerRadius="18"
+            Style="{StaticResource AccentButtonStyle}">
+            <Grid>
+                <FontIcon
+                    FontFamily="Segoe Fluent Icons"
+                    FontSize="16"
+                    Glyph="&#xEF3C;"
+                    Visibility="{x:Bind WhenIdle(ViewModel.IsPicking), Mode=OneWay}" />
+                <ProgressRing
+                    Width="18"
+                    Height="18"
+                    IsActive="{x:Bind ViewModel.IsPicking, Mode=OneWay}"
+                    Visibility="{x:Bind WhenPicking(ViewModel.IsPicking), Mode=OneWay}" />
+            </Grid>
+        </Button>
     </Grid>
 </UserControl>
