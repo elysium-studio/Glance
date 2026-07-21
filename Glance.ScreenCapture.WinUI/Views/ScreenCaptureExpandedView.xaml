@@ -1,0 +1,172 @@
+<UserControl
+    x:Class="Glance.ScreenCapture.WinUI.ScreenCaptureExpandedView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Controls="using:Elysium.UI.Controls.WinUI"
+    xmlns:ScreenCapture="using:Glance.ScreenCapture">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/ScreenCapture.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <Style
+                x:Key="ScreenCaptureActionButtonStyle"
+                BasedOn="{StaticResource SubtleButtonStyle}"
+                TargetType="Button">
+                <Setter Property="Width" Value="32" />
+                <Setter Property="Height" Value="32" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
+                <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+            <DataTemplate x:Key="CaptureItemTemplate" x:DataType="ScreenCapture:ScreenCaptureItemViewModel">
+                <Grid Margin="2,0,0,0" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center" Spacing="1">
+                        <TextBlock
+                            MaxLines="1"
+                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                            Text="{x:Bind FileName}"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="NoWrap" />
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Text="{x:Bind Detail}" />
+                    </StackPanel>
+                    <StackPanel
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="2">
+                        <Button
+                            x:Uid="CopyCaptureButton"
+                            Click="{x:Bind Copy}"
+                            Content="&#xE8C8;"
+                            Style="{StaticResource ScreenCaptureActionButtonStyle}" />
+                        <Button
+                            x:Uid="OpenCaptureButton"
+                            Click="{x:Bind Open}"
+                            Content="&#xE8A7;"
+                            Style="{StaticResource ScreenCaptureActionButtonStyle}" />
+                        <Button
+                            x:Uid="RevealCaptureButton"
+                            Click="{x:Bind Reveal}"
+                            Content="&#xE838;"
+                            Style="{StaticResource ScreenCaptureActionButtonStyle}" />
+                        <Button
+                            x:Uid="DeleteCaptureButton"
+                            Click="{x:Bind Delete}"
+                            Content="&#xE74D;"
+                            Style="{StaticResource ScreenCaptureActionButtonStyle}" />
+                    </StackPanel>
+                </Grid>
+            </DataTemplate>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid Padding="20,12,20,26" ColumnSpacing="18">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid
+            x:Name="StatusIndicator"
+            Width="36"
+            Height="36"
+            VerticalAlignment="Center">
+            <FontIcon
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="30"
+                Foreground="{ThemeResource GlanceScreenCaptureIconBrush}"
+                Glyph="&#xE722;" />
+        </Grid>
+        <Grid
+            Grid.Column="1"
+            Height="58"
+            VerticalAlignment="Center"
+            RowSpacing="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="14" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBlock
+                FontWeight="SemiBold"
+                Foreground="{ThemeResource GlanceScreenCaptureIconBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{x:Bind ToUpper(ViewModel.Title)}" />
+            <TextBlock
+                Grid.Row="1"
+                Margin="0,2,0,0"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Style="{StaticResource BodyTextBlockStyle}"
+                Text="{x:Bind ViewModel.StatusText, Mode=OneWay}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap"
+                Visibility="{x:Bind WhenEmpty(ViewModel.HasCaptures), Mode=OneWay}" />
+            <Controls:CompactFlipView
+                Grid.Row="1"
+                Margin="-22,0,0,0"
+                Background="Transparent"
+                ItemTemplate="{StaticResource CaptureItemTemplate}"
+                ItemsSource="{x:Bind ViewModel.Captures}"
+                SelectedItem="{x:Bind ViewModel.SelectedCapture, Mode=TwoWay}"
+                Visibility="{x:Bind WhenPopulated(ViewModel.HasCaptures), Mode=OneWay}" />
+        </Grid>
+        <Button
+            Grid.Column="2"
+            Width="36"
+            Height="36"
+            Padding="0"
+            VerticalAlignment="Center"
+            AutomationProperties.Name="{x:Bind ViewModel.Title}"
+            CornerRadius="18"
+            IsEnabled="{x:Bind WhenIdle(ViewModel.IsCapturing), Mode=OneWay}"
+            Style="{StaticResource AccentButtonStyle}"
+            ToolTipService.ToolTip="{x:Bind ViewModel.Title}">
+            <Button.Flyout>
+                <MenuFlyout Placement="BottomEdgeAlignedRight">
+                    <MenuFlyoutItem
+                        Click="{x:Bind ViewModel.CaptureRegion}"
+                        Text="{x:Bind ViewModel.CaptureRegionText}">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE7C6;" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem
+                        Click="{x:Bind ViewModel.CaptureWindow}"
+                        Text="{x:Bind ViewModel.CaptureWindowText}">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE737;" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem
+                        Click="{x:Bind ViewModel.CaptureDisplay}"
+                        Text="{x:Bind ViewModel.CaptureDisplayText}">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE7F4;" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem
+                        Click="{x:Bind ViewModel.CaptureAllDisplays}"
+                        Text="{x:Bind ViewModel.CaptureAllDisplaysText}">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE7F8;" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                </MenuFlyout>
+            </Button.Flyout>
+            <FontIcon
+                FontFamily="Segoe Fluent Icons"
+                FontSize="16"
+                Glyph="&#xE722;" />
+        </Button>
+    </Grid>
+</UserControl>

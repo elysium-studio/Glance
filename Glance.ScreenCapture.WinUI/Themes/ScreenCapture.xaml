@@ -1,0 +1,37 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Default">
+            <SolidColorBrush x:Key="GlanceScreenCaptureIconBrush" Color="#FF68D8FF" />
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FF68D8FF" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E668D8FF" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CC68D8FF" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#28FFFFFF" />
+            <SolidColorBrush x:Key="AccentButtonForeground" Color="#FF06202A" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FF06202A" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#CC06202A" />
+            <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#66FFFFFF" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="GlanceScreenCaptureIconBrush" Color="#FF006B88" />
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FF006B88" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E6006B88" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CC006B88" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#28000000" />
+            <SolidColorBrush x:Key="AccentButtonForeground" Color="#FFFFFFFF" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FFFFFFFF" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#CCFFFFFF" />
+            <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#66000000" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="HighContrast">
+            <StaticResource x:Key="GlanceScreenCaptureIconBrush" ResourceKey="SystemColorWindowTextColorBrush" />
+            <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundDisabled" ResourceKey="SystemColorButtonFaceColorBrush" />
+            <StaticResource x:Key="AccentButtonForeground" ResourceKey="SystemColorHighlightTextColorBrush" />
+            <StaticResource x:Key="AccentButtonForegroundPointerOver" ResourceKey="SystemColorHighlightTextColorBrush" />
+            <StaticResource x:Key="AccentButtonForegroundPressed" ResourceKey="SystemColorHighlightTextColorBrush" />
+            <StaticResource x:Key="AccentButtonForegroundDisabled" ResourceKey="SystemColorGrayTextColorBrush" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>
