@@ -1,6 +1,5 @@
 <Solution>
   <Configurations>
-    <Platform Name="Any CPU" />
     <Platform Name="x64" />
   </Configurations>
   <Project Path="Glance.Application.Abstractions/Glance.Application.Abstractions.csproj">
