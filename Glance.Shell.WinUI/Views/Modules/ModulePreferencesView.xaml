@@ -13,13 +13,15 @@
             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
             TextWrapping="Wrap" />
         <ListView
-            x:Name="ModulesList"
             AllowDrop="True"
             CanDragItems="True"
             CanReorderItems="True"
             DragItemsCompleted="{x:Bind HandleDragItemsCompleted}"
             ItemsSource="{x:Bind ViewModel.Modules, Mode=OneWay}"
+            MaxHeight="480"
             ReorderMode="Enabled"
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
+            ScrollViewer.VerticalScrollMode="Enabled"
             SelectionMode="None">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
