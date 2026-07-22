@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Appareils Bluetooth</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Affiche les appareils Bluetooth connectés et les niveaux de batterie disponibles.</value></data>
+  <data name="NoDevices" xml:space="preserve"><value>Aucun appareil Bluetooth connecté</value></data>
+  <data name="BluetoothDevice" xml:space="preserve"><value>Appareil Bluetooth</value></data>
+  <data name="Connected" xml:space="preserve"><value>Connecté</value></data>
+  <data name="ConnectedWithBattery" xml:space="preserve"><value>Connecté · Batterie à {0} %</value></data>
+  <data name="EmptyMessage.Text" xml:space="preserve"><value>Aucun appareil Bluetooth connecté</value></data>
+  <data name="OpenSettingsButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Ouvrir les paramètres Bluetooth</value></data>
+  <data name="OpenSettingsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Ouvrir les paramètres Bluetooth</value></data>
+</root>

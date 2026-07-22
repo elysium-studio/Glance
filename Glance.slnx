@@ -50,6 +50,15 @@
   <Project Path="Glance.ColorPicker.Tests/Glance.ColorPicker.Tests.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="Glance.DevicePresence.WinUI/Glance.DevicePresence.WinUI.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.DevicePresence/Glance.DevicePresence.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.DevicePresence.Tests/Glance.DevicePresence.Tests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="Glance.Shell.WinUI/Glance.Shell.WinUI.csproj">
     <Platform Project="x64" />
   </Project>

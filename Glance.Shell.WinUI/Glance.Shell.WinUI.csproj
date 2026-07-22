@@ -44,6 +44,7 @@
     <ProjectReference Include="..\Glance.AudioSwitcher.WinUI\Glance.AudioSwitcher.WinUI.csproj" />
     <ProjectReference Include="..\Glance.Clipboard.WinUI\Glance.Clipboard.WinUI.csproj" />
     <ProjectReference Include="..\Glance.ColorPicker.WinUI\Glance.ColorPicker.WinUI.csproj" />
+    <ProjectReference Include="..\Glance.DevicePresence.WinUI\Glance.DevicePresence.WinUI.csproj" />
     <ProjectReference Include="..\Glance.DropShelf.WinUI\Glance.DropShelf.WinUI.csproj" />
     <ProjectReference Include="..\Glance.FocusSession.WinUI\Glance.FocusSession.WinUI.csproj" />
     <ProjectReference Include="..\Glance.Media.WinUI\Glance.Media.WinUI.csproj" />

@@ -10,6 +10,7 @@ public sealed class LocalizationResourceTests
     [
         "AudioSwitcher",
         "Clipboard",
+        "DevicePresence",
         "DropShelf",
         "FocusSession",
         "Media",

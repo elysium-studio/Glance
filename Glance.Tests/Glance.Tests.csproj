@@ -18,6 +18,7 @@
   <ItemGroup>
     <None Include="..\Glance.AudioSwitcher.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\AudioSwitcher\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\Glance.Clipboard.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\Clipboard\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\Glance.DevicePresence.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\DevicePresence\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\Glance.DropShelf.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\DropShelf\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\Glance.FocusSession.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\FocusSession\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\Glance.Media.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\Media\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />

@@ -1,0 +1,114 @@
+<UserControl
+    x:Class="Glance.DevicePresence.WinUI.DevicePresenceExpandedView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Controls="using:Elysium.UI.Controls.WinUI"
+    xmlns:DevicePresence="using:Glance.DevicePresence">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/DevicePresence.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <Style
+                x:Key="DevicePresenceActionButtonStyle"
+                BasedOn="{StaticResource SubtleButtonStyle}"
+                TargetType="Button">
+                <Setter Property="Width" Value="32" />
+                <Setter Property="Height" Value="32" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
+                <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+            <DataTemplate x:Key="DevicePresenceItemTemplate" x:DataType="DevicePresence:DevicePresenceItemViewModel">
+                <Grid Margin="2,0,0,0" VerticalAlignment="Center" RowSpacing="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        MaxLines="1"
+                        Style="{StaticResource BodyStrongTextBlockStyle}"
+                        Text="{x:Bind DisplayName, Mode=OneWay}"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="NoWrap"
+                        ToolTipService.ToolTip="{x:Bind DisplayName, Mode=OneWay}" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="{x:Bind Detail, Mode=OneWay}"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="NoWrap" />
+                </Grid>
+            </DataTemplate>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid Padding="20,12,20,26">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid
+            x:Name="StatusIndicator"
+            Width="36"
+            Height="36"
+            VerticalAlignment="Center">
+            <FontIcon
+                Width="30"
+                Height="30"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="30"
+                Foreground="{ThemeResource GlanceDevicePresenceIconBrush}"
+                Glyph="{x:Bind ViewModel.SelectedDeviceGlyph, Mode=OneWay}" />
+        </Grid>
+        <Grid
+            Grid.Column="1"
+            Height="58"
+            Margin="18,0,0,0"
+            VerticalAlignment="Center"
+            ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid RowSpacing="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="14" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource GlanceDevicePresenceIconBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ToUpper(Title)}" />
+                <TextBlock
+                    x:Uid="EmptyMessage"
+                    Grid.Row="1"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource BodyStrongTextBlockStyle}"
+                    TextTrimming="CharacterEllipsis"
+                    TextWrapping="NoWrap"
+                    Visibility="{x:Bind WhenEmpty(ViewModel.HasDevices), Mode=OneWay}" />
+                <Controls:CompactFlipView
+                    Grid.Row="1"
+                    Margin="-22,0,0,0"
+                    Background="Transparent"
+                    ItemTemplate="{StaticResource DevicePresenceItemTemplate}"
+                    ItemsSource="{x:Bind ViewModel.Devices}"
+                    SelectedItem="{x:Bind ViewModel.SelectedDevice, Mode=TwoWay}"
+                    Visibility="{x:Bind WhenPopulated(ViewModel.HasDevices), Mode=OneWay}" />
+            </Grid>
+            <Button
+                x:Uid="OpenSettingsButton"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                Click="{x:Bind OpenSettings}"
+                Content="&#xE713;"
+                Style="{StaticResource DevicePresenceActionButtonStyle}" />
+        </Grid>
+    </Grid>
+</UserControl>
