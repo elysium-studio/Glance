@@ -364,8 +364,8 @@ internal sealed class CaptureSelectionWindow
         Visual captureVisual = ElementCompositionPreview.GetElementVisual(captureSurface);
         Compositor compositor = captureVisual.Compositor;
         TimeSpan duration = TimeSpan.FromMilliseconds(AnimationDurationMs);
-        CubicBezierEasingFunction flightEasing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.32f, 0.72f), new Vector2(0, 1));
-        CubicBezierEasingFunction fadeEasing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.4f, 0), new Vector2(1, 1));
+        SineEasingFunction flightEasing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.Out);
+        SineEasingFunction fadeEasing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.InOut);
 
         Vector3 sourceOffset = captureVisual.Offset;
         Vector3 sourceCenter = new((float)sourceBounds.Width / 2, (float)sourceBounds.Height / 2, 0);
@@ -389,7 +389,7 @@ internal sealed class CaptureSelectionWindow
         ScalarKeyFrameAnimation opacityAnimation = compositor.CreateScalarKeyFrameAnimation();
         opacityAnimation.Duration = duration;
         opacityAnimation.InsertKeyFrame(0, 1);
-        opacityAnimation.InsertKeyFrame(0.82f, 1);
+        opacityAnimation.InsertKeyFrame(0.68f, 1);
         opacityAnimation.InsertKeyFrame(1, 0, fadeEasing);
 
         CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
