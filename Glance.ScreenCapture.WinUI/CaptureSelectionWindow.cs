@@ -27,7 +27,7 @@ namespace Glance.ScreenCapture.WinUI;
 
 internal sealed class CaptureSelectionWindow
 {
-    private const int AnimationDurationMs = 720;
+    private const int AnimationDurationMs = 560;
 
     private readonly DesktopCaptureBitmap bitmap;
     private readonly IReadOnlyList<CaptureSelectionCandidate> candidates;
@@ -364,8 +364,7 @@ internal sealed class CaptureSelectionWindow
         Visual captureVisual = ElementCompositionPreview.GetElementVisual(captureSurface);
         Compositor compositor = captureVisual.Compositor;
         TimeSpan duration = TimeSpan.FromMilliseconds(AnimationDurationMs);
-        CubicBezierEasingFunction accelerate = compositor.CreateCubicBezierEasingFunction(new Vector2(0.72f, 0), new Vector2(0.88f, 0.42f));
-        CubicBezierEasingFunction settle = compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
+        CubicBezierEasingFunction flightEasing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.2f, 0), new Vector2(0, 1));
 
         Vector3 sourceOffset = captureVisual.Offset;
         Vector3 sourceCenter = new((float)sourceBounds.Width / 2, (float)sourceBounds.Height / 2, 0);
@@ -379,23 +378,17 @@ internal sealed class CaptureSelectionWindow
         Vector3KeyFrameAnimation offsetAnimation = compositor.CreateVector3KeyFrameAnimation();
         offsetAnimation.Duration = duration;
         offsetAnimation.InsertKeyFrame(0, sourceOffset);
-        offsetAnimation.InsertKeyFrame(0.16f, Vector3.Lerp(sourceOffset, targetOffset, 0.03f), settle);
-        offsetAnimation.InsertKeyFrame(0.76f, Vector3.Lerp(sourceOffset, targetOffset, 0.82f), accelerate);
-        offsetAnimation.InsertKeyFrame(1, targetOffset, accelerate);
+        offsetAnimation.InsertKeyFrame(1, targetOffset, flightEasing);
 
         Vector3KeyFrameAnimation scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
         scaleAnimation.Duration = duration;
         scaleAnimation.InsertKeyFrame(0, Vector3.One);
-        scaleAnimation.InsertKeyFrame(0.12f, new Vector3(1.015f, 1.015f, 1), settle);
-        scaleAnimation.InsertKeyFrame(0.72f, Vector3.Lerp(Vector3.One, finalScale, 0.64f), accelerate);
-        scaleAnimation.InsertKeyFrame(1, finalScale, accelerate);
+        scaleAnimation.InsertKeyFrame(1, finalScale, flightEasing);
 
         ScalarKeyFrameAnimation opacityAnimation = compositor.CreateScalarKeyFrameAnimation();
         opacityAnimation.Duration = duration;
         opacityAnimation.InsertKeyFrame(0, 1);
-        opacityAnimation.InsertKeyFrame(0.72f, 0.98f);
-        opacityAnimation.InsertKeyFrame(0.92f, 0.62f, accelerate);
-        opacityAnimation.InsertKeyFrame(1, 0);
+        opacityAnimation.InsertKeyFrame(1, 0, flightEasing);
 
         CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
         captureVisual.Offset = targetOffset;
