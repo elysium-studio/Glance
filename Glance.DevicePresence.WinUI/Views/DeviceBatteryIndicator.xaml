@@ -10,12 +10,12 @@
             x:Name="PercentageText"
             VerticalAlignment="Center"
             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-            Style="{StaticResource CaptionTextBlockStyle}" />
+            Style="{StaticResource BodyTextBlockStyle}" />
         <FontIcon
             x:Name="BatteryGlyph"
             VerticalAlignment="Center"
             FontFamily="Segoe Fluent Icons"
-            FontSize="16"
+            FontSize="20"
             Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
     </StackPanel>
 </UserControl>
