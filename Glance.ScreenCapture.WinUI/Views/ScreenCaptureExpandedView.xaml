@@ -127,7 +127,7 @@
                         TextWrapping="NoWrap"
                         Visibility="{x:Bind WhenEmpty(ViewModel.HasCaptures), Mode=OneWay}" />
                     <Controls:CompactFlipView
-                        Margin="-22,0,0,0"
+                        Margin="-22,0,-12,0"
                         Background="Transparent"
                         ItemTemplate="{StaticResource CaptureItemTemplate}"
                         ItemsSource="{x:Bind ViewModel.Captures}"
