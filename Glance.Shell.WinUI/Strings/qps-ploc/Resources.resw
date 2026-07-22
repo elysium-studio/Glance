@@ -18,4 +18,6 @@
   <data name="StartWithWindowsCard.Description" xml:space="preserve"><value>[Åütømåtïçålly låünçh Glance whén yøü sïgn ïn]</value></data>
   <data name="BooleanToggle.OnContent" xml:space="preserve"><value>[Yés]</value></data>
   <data name="BooleanToggle.OffContent" xml:space="preserve"><value>[Nø]</value></data>
+  <data name="AutoHideCard.Header" xml:space="preserve"><value>[Åütø-hïdé]</value></data>
+  <data name="AutoHideCard.Description" xml:space="preserve"><value>[Hïdé Glance whén ït ïs ïdlé ånd révéål ït whén thé pøïntér åpprøåçhés ïts sçréén-édgé ïndïçåtør]</value></data>
 </root>

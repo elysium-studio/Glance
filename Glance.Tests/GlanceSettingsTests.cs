@@ -11,6 +11,7 @@ public sealed class GlanceSettingsTests
     {
         GlanceSettings settings = new();
 
+        Assert.False(settings.AutoHide);
         Assert.Empty(settings.Modules);
         Assert.Equal(GlancePlacement.Top, settings.Placement);
         Assert.True(settings.StartWithWindows);
@@ -21,6 +22,7 @@ public sealed class GlanceSettingsTests
     {
         GlanceSettings settings = new()
         {
+            AutoHide = true,
             Placement = GlancePlacement.Bottom,
             StartWithWindows = false,
             Modules =
@@ -37,6 +39,7 @@ public sealed class GlanceSettingsTests
         GlanceSettings? result = JsonSerializer.Deserialize(json, GlanceJsonContext.Default.GlanceSettings);
 
         Assert.NotNull(result);
+        Assert.True(result.AutoHide);
         Assert.Equal(GlancePlacement.Bottom, result.Placement);
         Assert.False(result.StartWithWindows);
         Assert.Single(result.Modules);

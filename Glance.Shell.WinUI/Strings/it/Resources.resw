@@ -18,4 +18,6 @@
   <data name="StartWithWindowsCard.Description" xml:space="preserve"><value>Avvia automaticamente Glance all’accesso</value></data>
   <data name="BooleanToggle.OnContent" xml:space="preserve"><value>Sì</value></data>
   <data name="BooleanToggle.OffContent" xml:space="preserve"><value>No</value></data>
+  <data name="AutoHideCard.Header" xml:space="preserve"><value>Nascondi automaticamente</value></data>
+  <data name="AutoHideCard.Description" xml:space="preserve"><value>Nasconde Glance quando è inattivo e lo mostra quando il puntatore si avvicina all’indicatore sul bordo dello schermo</value></data>
 </root>

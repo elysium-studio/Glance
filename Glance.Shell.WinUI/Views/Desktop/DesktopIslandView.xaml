@@ -11,6 +11,7 @@
     DragEnter="{x:Bind HandleDragEnter}"
     DragOver="{x:Bind HandleDragOver}"
     Drop="{x:Bind HandleDrop}"
+    IsAutoHideEnabled="{x:Bind ViewModel.AutoHide, Mode=OneWay}"
     IsExpanded="{x:Bind ViewModel.IsExpanded, Mode=TwoWay}"
     IsOpen="{x:Bind ViewModel.IsOpen, Mode=TwoWay}"
     IsTabStop="False"

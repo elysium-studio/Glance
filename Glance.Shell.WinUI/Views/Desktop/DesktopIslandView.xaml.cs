@@ -63,6 +63,7 @@ public partial class DesktopIslandView :
     private void HandleAttentionReceived(object? sender, GlanceAttentionRequest request) =>
         DispatcherQueue.TryEnqueue(() =>
         {
+            Reveal();
             FrameworkElement presenter = ViewModel.IsExpanded
                 ? ExpandedPresenter
                 : CompactPresenter;

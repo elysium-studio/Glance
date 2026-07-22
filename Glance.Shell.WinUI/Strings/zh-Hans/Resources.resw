@@ -18,4 +18,6 @@
   <data name="StartWithWindowsCard.Description" xml:space="preserve"><value>登录时自动启动 Glance</value></data>
   <data name="BooleanToggle.OnContent" xml:space="preserve"><value>是</value></data>
   <data name="BooleanToggle.OffContent" xml:space="preserve"><value>否</value></data>
+  <data name="AutoHideCard.Header" xml:space="preserve"><value>自动隐藏</value></data>
+  <data name="AutoHideCard.Description" xml:space="preserve"><value>空闲时隐藏 Glance，并在指针靠近屏幕边缘指示器时重新显示</value></data>
 </root>

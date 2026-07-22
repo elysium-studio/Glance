@@ -18,4 +18,6 @@
   <data name="StartWithWindowsCard.Description" xml:space="preserve"><value>Automatically launch Glance when you sign in</value></data>
   <data name="BooleanToggle.OnContent" xml:space="preserve"><value>Yes</value></data>
   <data name="BooleanToggle.OffContent" xml:space="preserve"><value>No</value></data>
+  <data name="AutoHideCard.Header" xml:space="preserve"><value>Auto-hide</value></data>
+  <data name="AutoHideCard.Description" xml:space="preserve"><value>Hide Glance when it is idle and reveal it when the pointer approaches its screen-edge indicator</value></data>
 </root>

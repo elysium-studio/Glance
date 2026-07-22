@@ -15,6 +15,9 @@ public partial class DesktopIslandViewModel :
     IRecipient<OptionsChangedEventArgs<GlanceSettings>>
 {
     [ObservableProperty]
+    private bool autoHide;
+
+    [ObservableProperty]
     private bool isOpen = true;
 
     [ObservableProperty]
@@ -52,6 +55,7 @@ public partial class DesktopIslandViewModel :
         this.attentionService = attentionService;
         this.navigator = navigator;
         this.logger = logger;
+        AutoHide = settings.AutoHide;
         Placement = settings.Placement;
         attentionService.AttentionRequested += HandleAttentionRequested;
         modulePreferences.PreferencesChanged += HandlePreferencesChanged;
@@ -151,7 +155,11 @@ public partial class DesktopIslandViewModel :
     }
 
     public void Receive(OptionsChangedEventArgs<GlanceSettings> message) =>
-        dispatcher.Dispatch(() => Placement = message.Options.Placement);
+        dispatcher.Dispatch(() =>
+        {
+            AutoHide = message.Options.AutoHide;
+            Placement = message.Options.Placement;
+        });
 
     protected override void RegisterMessages() =>
         Messenger.Register<OptionsChangedEventArgs<GlanceSettings>>(this);
