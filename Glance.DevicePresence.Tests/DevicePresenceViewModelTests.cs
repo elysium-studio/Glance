@@ -14,6 +14,7 @@ public sealed class DevicePresenceViewModelTests
         Assert.Null(viewModel.SelectedDevice);
         Assert.Equal("No Bluetooth devices connected", viewModel.CompactStatusText);
         Assert.Equal("\uE702", viewModel.SelectedDeviceGlyph);
+        Assert.Equal(-1, viewModel.SelectedDeviceBatteryLevel);
     }
 
     [Fact]
@@ -26,7 +27,8 @@ public sealed class DevicePresenceViewModelTests
         Assert.True(viewModel.HasDevices);
         Assert.Equal(2, viewModel.Devices.Count);
         Assert.Equal("Headphones", viewModel.SelectedDevice?.DisplayName);
-        Assert.Equal("Headphones  ·  72%", viewModel.CompactStatusText);
+        Assert.Equal("Headphones", viewModel.CompactStatusText);
+        Assert.Equal(72, viewModel.SelectedDeviceBatteryLevel);
         Assert.Equal("\uE7F6", viewModel.SelectedDeviceGlyph);
     }
 
@@ -39,7 +41,8 @@ public sealed class DevicePresenceViewModelTests
         viewModel.Update([CreateDevice("mouse", "Mouse", BluetoothDeviceKind.Mouse), CreateDevice("phone", "Phone", BluetoothDeviceKind.Phone, 45)], "phone");
 
         Assert.Equal("phone", viewModel.SelectedDevice?.Device.Id);
-        Assert.Equal("Phone  ·  45%", viewModel.CompactStatusText);
+        Assert.Equal("Phone", viewModel.CompactStatusText);
+        Assert.Equal(45, viewModel.SelectedDeviceBatteryLevel);
         Assert.Equal("\uE8EA", viewModel.SelectedDeviceGlyph);
     }
 
@@ -54,8 +57,10 @@ public sealed class DevicePresenceViewModelTests
         viewModel.Update([CreateDevice("audio", "Headphones", BluetoothDeviceKind.Audio, 75), CreateDevice("mouse", "Mouse", BluetoothDeviceKind.Mouse, 60)]);
 
         Assert.Same(selected, viewModel.SelectedDevice);
-        Assert.Equal("Connected · 60% battery", selected.Detail);
-        Assert.Equal("Mouse  ·  60%", viewModel.CompactStatusText);
+        Assert.Equal("Connected", selected.Detail);
+        Assert.Equal(60, selected.BatteryLevel);
+        Assert.Equal("Mouse", viewModel.CompactStatusText);
+        Assert.Equal(60, viewModel.SelectedDeviceBatteryLevel);
     }
 
     [Fact]

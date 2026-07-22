@@ -17,6 +17,9 @@ public partial class DevicePresenceItemViewModel :
     [ObservableProperty]
     private string glyph;
 
+    [ObservableProperty]
+    private int batteryLevel;
+
     public DevicePresenceItemViewModel(
         ConnectedBluetoothDevice device,
         string displayName,
@@ -25,8 +28,9 @@ public partial class DevicePresenceItemViewModel :
         Device = device;
         this.displayName = displayName;
         this.detail = detail;
-        compactText = GetCompactText(displayName, device.BatteryLevel);
+        compactText = displayName;
         glyph = GetGlyph(device.Kind);
+        batteryLevel = device.BatteryLevel ?? -1;
     }
 
     public ConnectedBluetoothDevice Device { get; private set; }
@@ -39,14 +43,10 @@ public partial class DevicePresenceItemViewModel :
         Device = device;
         DisplayName = displayName;
         Detail = detail;
-        CompactText = GetCompactText(displayName, device.BatteryLevel);
+        CompactText = displayName;
         Glyph = GetGlyph(device.Kind);
+        BatteryLevel = device.BatteryLevel ?? -1;
     }
-
-    private static string GetCompactText(string displayName, byte? batteryLevel) =>
-        batteryLevel is null
-            ? displayName
-            : $"{displayName}  ·  {batteryLevel}%";
 
     private static string GetGlyph(BluetoothDeviceKind kind) => kind switch
     {

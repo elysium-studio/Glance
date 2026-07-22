@@ -1,7 +1,8 @@
 <UserControl
     x:Class="Glance.DevicePresence.WinUI.DevicePresenceCompactView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Glance.DevicePresence.WinUI">
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/DevicePresence.xaml" />
     </UserControl.Resources>
@@ -9,6 +10,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Grid
             x:Name="StatusIndicator"
@@ -32,5 +34,8 @@
             Text="{x:Bind ViewModel.CompactStatusText, Mode=OneWay}"
             TextTrimming="CharacterEllipsis"
             TextWrapping="NoWrap" />
+        <local:DeviceBatteryIndicator
+            Grid.Column="2"
+            BatteryLevel="{x:Bind ViewModel.SelectedDeviceBatteryLevel, Mode=OneWay}" />
     </Grid>
 </UserControl>

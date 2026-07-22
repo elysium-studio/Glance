@@ -2,8 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
+using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.Enumeration;
+using Windows.Storage.Streams;
 
 namespace Glance.DevicePresence.WinUI;
 
@@ -22,10 +26,12 @@ public sealed class WindowsDevicePresenceService :
     private const string LeAppearanceSubcategoryProperty = "System.Devices.Aep.Bluetooth.Le.Appearance.Subcategory";
     private static readonly string[] RequestedProperties = [BatteryLifeProperty, CategoryProperty, ClassMajorProperty, ClassMinorProperty, ContainerIdProperty, DeviceAddressProperty, DisplayNameProperty, LeAppearanceCategoryProperty, LeAppearanceSubcategoryProperty];
     private readonly HashSet<DeviceWatcher> completedWatchers = [];
+    private readonly HashSet<string> activeBatteryReads = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, ObservedDevice> devices = new(StringComparer.OrdinalIgnoreCase);
     private readonly object gate = new();
     private readonly List<DeviceWatcher> watchers = [];
     private readonly Dictionary<DeviceWatcher, BluetoothTransport> watcherTransports = [];
+    private readonly Timer batteryRefreshTimer;
     private int expectedWatcherCount;
     private bool isDisposed;
     private bool isReady;
@@ -45,6 +51,8 @@ public sealed class WindowsDevicePresenceService :
         {
             isReady = completedWatchers.Count == expectedWatcherCount;
         }
+
+        batteryRefreshTimer = new Timer(_ => RefreshBatteryLevels(), null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
     }
 
     public event EventHandler? DevicesChanged;
@@ -76,6 +84,7 @@ public sealed class WindowsDevicePresenceService :
         }
 
         isDisposed = true;
+        batteryRefreshTimer.Dispose();
 
         foreach (DeviceWatcher watcher in watchers)
         {
@@ -148,6 +157,11 @@ public sealed class WindowsDevicePresenceService :
         {
             DevicesChanged?.Invoke(this, EventArgs.Empty);
         }
+
+        if (transport == BluetoothTransport.LowEnergy)
+        {
+            RefreshBatteryLevel(GetStorageKey(transport, information.Id), information.Id);
+        }
     }
 
     private void HandleUpdated(DeviceWatcher sender, DeviceInformationUpdate update)
@@ -170,6 +184,11 @@ public sealed class WindowsDevicePresenceService :
         if (notify)
         {
             DevicesChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (transport == BluetoothTransport.LowEnergy)
+        {
+            RefreshBatteryLevel(GetStorageKey(transport, update.Id), update.Id);
         }
     }
 
@@ -230,9 +249,125 @@ public sealed class WindowsDevicePresenceService :
     private static string GetStorageKey(BluetoothTransport transport, string id) =>
         $"{transport}:{id}";
 
+    private void RefreshBatteryLevels()
+    {
+        KeyValuePair<string, string>[] endpoints;
+
+        lock (gate)
+        {
+            endpoints = devices.Where(pair => pair.Value.Transport == BluetoothTransport.LowEnergy).Select(pair => new KeyValuePair<string, string>(pair.Key, pair.Value.Id)).ToArray();
+        }
+
+        foreach ((string key, string id) in endpoints)
+        {
+            RefreshBatteryLevel(key, id);
+        }
+    }
+
+    private void RefreshBatteryLevel(string key, string id)
+    {
+        lock (gate)
+        {
+            if (isDisposed || !activeBatteryReads.Add(key))
+            {
+                return;
+            }
+        }
+
+        _ = RefreshBatteryLevelAsync(key, id);
+    }
+
+    private async Task RefreshBatteryLevelAsync(string key, string id)
+    {
+        byte? batteryLevel = null;
+
+        try
+        {
+            batteryLevel = await ReadBatteryLevelAsync(id);
+        }
+        catch (Exception)
+        {
+        }
+
+        bool notify = false;
+
+        lock (gate)
+        {
+            activeBatteryReads.Remove(key);
+
+            if (batteryLevel is byte value && devices.TryGetValue(key, out ObservedDevice? device) && device.BatteryLevel != value)
+            {
+                device.SetBatteryLevel(value);
+                notify = isReady;
+            }
+        }
+
+        if (notify)
+        {
+            DevicesChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private static async Task<byte?> ReadBatteryLevelAsync(string id)
+    {
+        using BluetoothLEDevice? device = await BluetoothLEDevice.FromIdAsync(id);
+
+        if (device is null)
+        {
+            return null;
+        }
+
+        foreach (BluetoothCacheMode cacheMode in new[] { BluetoothCacheMode.Uncached, BluetoothCacheMode.Cached })
+        {
+            GattDeviceServicesResult servicesResult = await device.GetGattServicesForUuidAsync(GattServiceUuids.Battery, cacheMode);
+
+            if (servicesResult.Status != GattCommunicationStatus.Success)
+            {
+                continue;
+            }
+
+            GattDeviceService[] services = servicesResult.Services.ToArray();
+
+            try
+            {
+                foreach (GattDeviceService service in services)
+                {
+                    GattCharacteristicsResult characteristicsResult = await service.GetCharacteristicsForUuidAsync(GattCharacteristicUuids.BatteryLevel, cacheMode);
+
+                    if (characteristicsResult.Status != GattCommunicationStatus.Success)
+                    {
+                        continue;
+                    }
+
+                    foreach (GattCharacteristic characteristic in characteristicsResult.Characteristics)
+                    {
+                        GattReadResult readResult = await characteristic.ReadValueAsync(cacheMode);
+
+                        if (readResult.Status == GattCommunicationStatus.Success && readResult.Value.Length > 0)
+                        {
+                            using DataReader reader = DataReader.FromBuffer(readResult.Value);
+                            byte value = reader.ReadByte();
+                            return value <= 100 ? value : null;
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                foreach (GattDeviceService service in services)
+                {
+                    service.Dispose();
+                }
+            }
+        }
+
+        return null;
+    }
+
     private sealed class ObservedDevice
     {
         private readonly Dictionary<string, object> properties;
+        private byte? supplementalBatteryLevel;
 
         public ObservedDevice(
             BluetoothTransport transport,
@@ -256,7 +391,10 @@ public sealed class WindowsDevicePresenceService :
 
         public BluetoothDeviceKind Kind => GetKind(properties, Name);
 
-        public byte? BatteryLevel => GetBatteryLevel(properties);
+        public byte? BatteryLevel => GetBatteryLevel(properties) ?? supplementalBatteryLevel;
+
+        public void SetBatteryLevel(byte value) =>
+            supplementalBatteryLevel = value;
 
         public void Update(IReadOnlyDictionary<string, object> updates)
         {

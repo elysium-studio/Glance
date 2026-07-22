@@ -19,6 +19,9 @@ public partial class DevicePresenceViewModel :
     private string selectedDeviceGlyph = "\uE702";
 
     [ObservableProperty]
+    private int selectedDeviceBatteryLevel = -1;
+
+    [ObservableProperty]
     private DevicePresenceItemViewModel? selectedDevice;
 
     public DevicePresenceViewModel(ITextLocalizer localizer)
@@ -40,7 +43,7 @@ public partial class DevicePresenceViewModel :
         foreach (ConnectedBluetoothDevice device in devices.OrderBy(device => device.Name, StringComparer.CurrentCultureIgnoreCase))
         {
             string displayName = string.IsNullOrWhiteSpace(device.Name) ? localizer.GetText("BluetoothDevice") : device.Name;
-            string detail = device.BatteryLevel is byte batteryLevel ? localizer.GetText("ConnectedWithBattery", batteryLevel) : localizer.GetText("Connected");
+            string detail = localizer.GetText("Connected");
 
             if (existing.TryGetValue(device.Id, out DevicePresenceItemViewModel? item))
             {
@@ -100,5 +103,6 @@ public partial class DevicePresenceViewModel :
     {
         CompactStatusText = SelectedDevice?.CompactText ?? localizer.GetText("NoDevices");
         SelectedDeviceGlyph = SelectedDevice?.Glyph ?? "\uE702";
+        SelectedDeviceBatteryLevel = SelectedDevice?.BatteryLevel ?? -1;
     }
 }
