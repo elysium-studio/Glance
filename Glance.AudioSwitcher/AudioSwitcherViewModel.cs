@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Glance.Application.Abstractions;
+using System.Collections.ObjectModel;
 
 namespace Glance.AudioSwitcher;
 
@@ -7,17 +8,17 @@ public partial class AudioSwitcherViewModel : ObservableObject
 {
     private readonly IAudioDeviceService audioDeviceService;
     private readonly ITextLocalizer localizer;
-    private IReadOnlyList<AudioOutputDevice> devices = [];
-    private int selectedIndex = -1;
+    private bool isRefreshing;
+    private string? selectedDeviceId;
 
     [ObservableProperty]
     private string currentDeviceName;
 
     [ObservableProperty]
-    private string devicePositionText = string.Empty;
+    private bool hasDevices;
 
     [ObservableProperty]
-    private bool canSwitch;
+    private AudioOutputDevice? selectedDevice;
 
     public AudioSwitcherViewModel(
         IAudioDeviceService audioDeviceService,
@@ -30,53 +31,43 @@ public partial class AudioSwitcherViewModel : ObservableObject
         Refresh();
     }
 
+    public ObservableCollection<AudioOutputDevice> Devices { get; } = [];
+
     public void Refresh()
     {
-        devices = audioDeviceService.GetOutputDevices();
-        selectedIndex = FindSelectedIndex(devices);
+        IReadOnlyList<AudioOutputDevice> devices = audioDeviceService.GetOutputDevices();
+        AudioOutputDevice? currentDevice = devices.FirstOrDefault(device => device.IsDefault) ?? devices.FirstOrDefault();
 
-        if (selectedIndex < 0)
+        isRefreshing = true;
+        Devices.Clear();
+
+        foreach (AudioOutputDevice device in devices)
         {
-            CurrentDeviceName = localizer.GetText("NoOutputDevice");
-            DevicePositionText = string.Empty;
-            CanSwitch = false;
-            return;
+            Devices.Add(device);
         }
 
-        CurrentDeviceName = devices[selectedIndex].Name;
-        DevicePositionText = $"{selectedIndex + 1} / {devices.Count}";
-        CanSwitch = devices.Count > 1;
+        HasDevices = Devices.Count > 0;
+        SelectedDevice = null;
+        SelectedDevice = currentDevice;
+        selectedDeviceId = currentDevice?.Id;
+        CurrentDeviceName = currentDevice?.Name ?? localizer.GetText("NoOutputDevice");
+        isRefreshing = false;
     }
 
-    public void Previous() => Switch(-1);
-
-    public void Next() => Switch(1);
-
-    private static int FindSelectedIndex(IReadOnlyList<AudioOutputDevice> values)
+    partial void OnSelectedDeviceChanged(AudioOutputDevice? value)
     {
-        for (int index = 0; index < values.Count; index++)
-        {
-            if (values[index].IsDefault)
-            {
-                return index;
-            }
-        }
-
-        return values.Count > 0 ? 0 : -1;
-    }
-
-    private void Switch(int offset)
-    {
-        if (!CanSwitch || selectedIndex < 0)
+        if (isRefreshing || value is null || string.Equals(value.Id, selectedDeviceId, StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
 
-        int targetIndex = (selectedIndex + offset + devices.Count) % devices.Count;
-
-        if (audioDeviceService.TrySetDefaultOutput(devices[targetIndex].Id))
+        if (audioDeviceService.TrySetDefaultOutput(value.Id))
         {
-            Refresh();
+            selectedDeviceId = value.Id;
+            CurrentDeviceName = value.Name;
+            return;
         }
+
+        Refresh();
     }
 }

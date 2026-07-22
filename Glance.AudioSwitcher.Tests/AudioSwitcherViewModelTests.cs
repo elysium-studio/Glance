@@ -12,8 +12,9 @@ public sealed class AudioSwitcherViewModelTests
         AudioSwitcherViewModel viewModel = new(service, new FakeLocalizer());
 
         Assert.Equal("Headphones", viewModel.CurrentDeviceName);
-        Assert.Equal("2 / 2", viewModel.DevicePositionText);
-        Assert.True(viewModel.CanSwitch);
+        Assert.Equal("headphones", viewModel.SelectedDevice?.Id);
+        Assert.Equal(2, viewModel.Devices.Count);
+        Assert.True(viewModel.HasDevices);
     }
 
     [Fact]
@@ -22,46 +23,32 @@ public sealed class AudioSwitcherViewModelTests
         AudioSwitcherViewModel viewModel = new(new FakeAudioDeviceService(), new FakeLocalizer());
 
         Assert.Equal("No audio output", viewModel.CurrentDeviceName);
-        Assert.Equal(string.Empty, viewModel.DevicePositionText);
-        Assert.False(viewModel.CanSwitch);
+        Assert.Null(viewModel.SelectedDevice);
+        Assert.Empty(viewModel.Devices);
+        Assert.False(viewModel.HasDevices);
     }
 
     [Fact]
-    public void Next_SwitchesToFollowingOutputAndWraps()
+    public void SelectingDevice_SwitchesDefaultOutput()
     {
         FakeAudioDeviceService service = new(new AudioOutputDevice("speakers", "Speakers", false), new AudioOutputDevice("headphones", "Headphones", true));
         AudioSwitcherViewModel viewModel = new(service, new FakeLocalizer());
 
-        viewModel.Next();
+        viewModel.SelectedDevice = viewModel.Devices[0];
 
         Assert.Equal("speakers", service.LastSelectedId);
         Assert.Equal("Speakers", viewModel.CurrentDeviceName);
-        Assert.Equal("1 / 2", viewModel.DevicePositionText);
     }
 
     [Fact]
-    public void Previous_SwitchesToPreviousOutputAndWraps()
+    public void SelectingCurrentDevice_DoesNotSetDefaultAgain()
     {
         FakeAudioDeviceService service = new(new AudioOutputDevice("speakers", "Speakers", true), new AudioOutputDevice("headphones", "Headphones", false));
         AudioSwitcherViewModel viewModel = new(service, new FakeLocalizer());
 
-        viewModel.Previous();
-
-        Assert.Equal("headphones", service.LastSelectedId);
-        Assert.Equal("Headphones", viewModel.CurrentDeviceName);
-        Assert.Equal("2 / 2", viewModel.DevicePositionText);
-    }
-
-    [Fact]
-    public void Switch_DoesNothingWithOnlyOneOutput()
-    {
-        FakeAudioDeviceService service = new(new AudioOutputDevice("speakers", "Speakers", true));
-        AudioSwitcherViewModel viewModel = new(service, new FakeLocalizer());
-
-        viewModel.Next();
+        viewModel.SelectedDevice = viewModel.Devices[0];
 
         Assert.Null(service.LastSelectedId);
-        Assert.False(viewModel.CanSwitch);
     }
 
     [Fact]
@@ -73,11 +60,11 @@ public sealed class AudioSwitcherViewModelTests
         };
         AudioSwitcherViewModel viewModel = new(service, new FakeLocalizer());
 
-        viewModel.Next();
+        viewModel.SelectedDevice = viewModel.Devices[1];
 
         Assert.Equal("headphones", service.LastSelectedId);
         Assert.Equal("Speakers", viewModel.CurrentDeviceName);
-        Assert.Equal("1 / 2", viewModel.DevicePositionText);
+        Assert.Equal("speakers", viewModel.SelectedDevice?.Id);
     }
 
     private sealed class FakeAudioDeviceService(params AudioOutputDevice[] devices) :

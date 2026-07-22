@@ -26,11 +26,9 @@ public sealed partial class AudioSwitcherExpandedView :
 
     private string ToUpper(string value) => value.ToUpperInvariant();
 
-    private Visibility WhenDeviceAvailable(string position) =>
-        string.IsNullOrEmpty(position) ? Visibility.Collapsed
-            : Visibility.Visible;
+    private Visibility WhenEmpty(bool hasDevices) =>
+        hasDevices ? Visibility.Collapsed : Visibility.Visible;
 
-    private Visibility WhenDeviceUnavailable(string position) =>
-        string.IsNullOrEmpty(position) ? Visibility.Visible
-            : Visibility.Collapsed;
+    private Visibility WhenPopulated(bool hasDevices) =>
+        hasDevices ? Visibility.Visible : Visibility.Collapsed;
 }
