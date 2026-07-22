@@ -1,9 +1,11 @@
 using Elysium.Platform.Windows;
 using Glance.Application.Abstractions;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
@@ -11,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
@@ -24,29 +27,30 @@ namespace Glance.ScreenCapture.WinUI;
 
 internal sealed class CaptureSelectionWindow
 {
+    private const int AnimationDurationMs = 720;
+
     private readonly DesktopCaptureBitmap bitmap;
     private readonly IReadOnlyList<CaptureSelectionCandidate> candidates;
-    private readonly TaskCompletionSource<CaptureSelectionCandidate?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly TaskCompletionSource<CaptureSelectionResult?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly Canvas flightCanvas;
     private readonly Border highlight;
-    private readonly nint windowHandle;
     private readonly ScreenCaptureMode mode;
     private readonly Grid root;
+    private readonly Grid selectionChrome;
     private readonly RectangleGeometry smokeBounds;
     private readonly RectangleGeometry smokeCutout;
     private readonly Window window;
-    private bool completed;
+    private readonly nint windowHandle;
+    private bool closed;
+    private bool flightInProgress;
     private bool isDragging;
     private bool isPositioned;
     private bool isShown;
     private int renderedFrameCount;
+    private bool selectionCompleted;
     private Point selectionStart;
 
-    private CaptureSelectionWindow(
-        DesktopCaptureBitmap bitmap,
-        ScreenCaptureMode mode,
-        IReadOnlyList<CaptureSelectionCandidate> candidates,
-        ITextLocalizer localizer,
-        ImageSource imageSource)
+    private CaptureSelectionWindow(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<CaptureSelectionCandidate> candidates, ITextLocalizer localizer, ImageSource imageSource)
     {
         this.bitmap = bitmap;
         this.mode = mode;
@@ -98,20 +102,29 @@ internal sealed class CaptureSelectionWindow
             CornerRadius = new CornerRadius(8),
             Child = instruction
         };
+        selectionChrome = new Grid { IsHitTestVisible = false };
+        selectionChrome.Children.Add(smokeOverlay);
+        selectionChrome.Children.Add(selectionCanvas);
+        selectionChrome.Children.Add(instructionContainer);
+        flightCanvas = new Canvas { IsHitTestVisible = false };
         root = new Grid
         {
             Background = new ImageBrush { ImageSource = imageSource, Stretch = Stretch.Fill },
             IsTabStop = true
         };
-        root.Children.Add(smokeOverlay);
-        root.Children.Add(selectionCanvas);
-        root.Children.Add(instructionContainer);
+        root.Children.Add(selectionChrome);
+        root.Children.Add(flightCanvas);
         root.KeyDown += HandleKeyDown;
         root.PointerMoved += HandlePointerMoved;
         root.PointerPressed += HandlePointerPressed;
         root.PointerReleased += HandlePointerReleased;
         root.Loaded += HandleRootLoaded;
         root.SizeChanged += HandleRootSizeChanged;
+
+        if (mode == ScreenCaptureMode.AllDisplays)
+        {
+            selectionChrome.Visibility = Visibility.Collapsed;
+        }
 
         window = new Window
         {
@@ -124,15 +137,51 @@ internal sealed class CaptureSelectionWindow
         windowHandle = WindowNative.GetWindowHandle(window);
     }
 
-    public static Task<CaptureSelectionCandidate?> SelectAsync(
-        DesktopCaptureBitmap bitmap,
-        ScreenCaptureMode mode,
-        IReadOnlyList<CaptureSelectionCandidate> candidates,
-        ITextLocalizer localizer,
-        DispatcherQueue dispatcherQueue) =>
+    public static Task<CaptureSelectionResult?> SelectAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<CaptureSelectionCandidate> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue) =>
         ShowOnDispatcherAsync(bitmap, mode, candidates, localizer, dispatcherQueue);
 
-    private Task<CaptureSelectionCandidate?> ShowAsync()
+    public Task PlayFlightAsync(DesktopCaptureBitmap capture, NativeRectangle landingBounds, Action onArrived)
+    {
+        TaskCompletionSource<bool> flightCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        void Play()
+        {
+            try
+            {
+                PlayFlight(capture, landingBounds, onArrived, flightCompletion);
+            }
+            catch (Exception exception)
+            {
+                CloseCore();
+                flightCompletion.TrySetException(exception);
+            }
+        }
+
+        if (window.DispatcherQueue.HasThreadAccess)
+        {
+            Play();
+        }
+        else if (!window.DispatcherQueue.TryEnqueue(Play))
+        {
+            flightCompletion.TrySetException(new InvalidOperationException("Unable to start the capture flight animation."));
+        }
+
+        return flightCompletion.Task;
+    }
+
+    public void Close()
+    {
+        if (window.DispatcherQueue.HasThreadAccess)
+        {
+            CloseCore();
+        }
+        else
+        {
+            window.DispatcherQueue.TryEnqueue(CloseCore);
+        }
+    }
+
+    private Task<CaptureSelectionResult?> ShowAsync()
     {
         AppWindow appWindow = window.AppWindow;
 
@@ -155,6 +204,129 @@ internal sealed class CaptureSelectionWindow
         return completion.Task;
     }
 
+    private void PlayFlight(DesktopCaptureBitmap capture, NativeRectangle landingBounds, Action onArrived, TaskCompletionSource<bool> flightCompletion)
+    {
+        if (closed)
+        {
+            throw new InvalidOperationException("The capture overlay is no longer available.");
+        }
+
+        if (flightInProgress)
+        {
+            throw new InvalidOperationException("The capture overlay is already animating.");
+        }
+
+        flightInProgress = true;
+        WriteableBitmap source = CreateImageSource(capture);
+        Rect sourceBounds = ToLocal(capture.Bounds);
+        Rect targetBounds = ToLocal(landingBounds);
+        Image image = new() { Source = source, Stretch = Stretch.Fill };
+        Border captureSurface = new()
+        {
+            Width = Math.Max(1, sourceBounds.Width),
+            Height = Math.Max(1, sourceBounds.Height),
+            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 16, 20, 28)),
+            BorderBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(230, 104, 216, 255)),
+            BorderThickness = new Thickness(2),
+            CornerRadius = new CornerRadius(8),
+            Child = image
+        };
+        Canvas.SetLeft(captureSurface, sourceBounds.X);
+        Canvas.SetTop(captureSurface, sourceBounds.Y);
+        flightCanvas.Children.Add(captureSurface);
+        root.UpdateLayout();
+        root.Background = null;
+        selectionChrome.Visibility = Visibility.Collapsed;
+
+        DispatcherQueueTimer? completionTimer = null;
+        EventHandler<object>? renderingHandler = null;
+        bool finished = false;
+
+        void Finish(Exception? exception = null)
+        {
+            if (finished)
+            {
+                return;
+            }
+
+            finished = true;
+
+            if (renderingHandler is not null)
+            {
+                CompositionTarget.Rendering -= renderingHandler;
+            }
+
+            completionTimer?.Stop();
+            CloseCore();
+
+            if (exception is null)
+            {
+                flightCompletion.TrySetResult(true);
+            }
+            else
+            {
+                flightCompletion.TrySetException(exception);
+            }
+        }
+
+        void BeginHandoff()
+        {
+            try
+            {
+                onArrived();
+                int handoffFrames = 0;
+                renderingHandler = (_, _) =>
+                {
+                    handoffFrames++;
+
+                    if (handoffFrames < 2)
+                    {
+                        return;
+                    }
+
+                    CompositionTarget.Rendering -= renderingHandler;
+                    renderingHandler = null;
+                    Finish();
+                };
+                CompositionTarget.Rendering += renderingHandler;
+            }
+            catch (Exception exception)
+            {
+                Finish(exception);
+            }
+        }
+
+        int preparationFrames = 0;
+        renderingHandler = (_, _) =>
+        {
+            preparationFrames++;
+
+            if (preparationFrames < 2)
+            {
+                return;
+            }
+
+            CompositionTarget.Rendering -= renderingHandler;
+            renderingHandler = null;
+
+            try
+            {
+                _ = DwmFlush();
+                StartFlightAnimation(captureSurface, sourceBounds, targetBounds);
+                completionTimer = window.DispatcherQueue.CreateTimer();
+                completionTimer.Interval = TimeSpan.FromMilliseconds(AnimationDurationMs + 40);
+                completionTimer.IsRepeating = false;
+                completionTimer.Tick += (_, _) => BeginHandoff();
+                completionTimer.Start();
+            }
+            catch (Exception exception)
+            {
+                Finish(exception);
+            }
+        };
+        CompositionTarget.Rendering += renderingHandler;
+    }
+
     private static WriteableBitmap CreateImageSource(DesktopCaptureBitmap bitmap)
     {
         WriteableBitmap imageSource = new(bitmap.Width, bitmap.Height);
@@ -174,9 +346,9 @@ internal sealed class CaptureSelectionWindow
         return new SolidColorBrush(Windows.UI.Color.FromArgb(77, 0, 0, 0));
     }
 
-    private static Task<CaptureSelectionCandidate?> ShowOnDispatcherAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<CaptureSelectionCandidate> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue)
+    private static Task<CaptureSelectionResult?> ShowOnDispatcherAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<CaptureSelectionCandidate> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue)
     {
-        TaskCompletionSource<CaptureSelectionCandidate?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        TaskCompletionSource<CaptureSelectionResult?> result = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         void ShowSelectionWindow()
         {
@@ -184,11 +356,11 @@ internal sealed class CaptureSelectionWindow
             {
                 WriteableBitmap imageSource = CreateImageSource(bitmap);
                 CaptureSelectionWindow selectionWindow = new(bitmap, mode, candidates, localizer, imageSource);
-                _ = CompleteSelectionAsync(selectionWindow.ShowAsync(), completion);
+                _ = CompleteSelectionAsync(selectionWindow.ShowAsync(), result);
             }
             catch (Exception exception)
             {
-                completion.TrySetException(exception);
+                result.TrySetException(exception);
             }
         }
 
@@ -198,10 +370,65 @@ internal sealed class CaptureSelectionWindow
         }
         else if (!dispatcherQueue.TryEnqueue(ShowSelectionWindow))
         {
-            completion.TrySetException(new InvalidOperationException("Unable to open the capture selection window."));
+            result.TrySetException(new InvalidOperationException("Unable to open the capture selection window."));
         }
 
-        return completion.Task;
+        return result.Task;
+    }
+
+    private static async Task CompleteSelectionAsync(Task<CaptureSelectionResult?> selection, TaskCompletionSource<CaptureSelectionResult?> result)
+    {
+        try
+        {
+            result.TrySetResult(await selection);
+        }
+        catch (Exception exception)
+        {
+            result.TrySetException(exception);
+        }
+    }
+
+    private static void StartFlightAnimation(Border captureSurface, Rect sourceBounds, Rect targetBounds)
+    {
+        Visual captureVisual = ElementCompositionPreview.GetElementVisual(captureSurface);
+        Compositor compositor = captureVisual.Compositor;
+        TimeSpan duration = TimeSpan.FromMilliseconds(AnimationDurationMs);
+        CubicBezierEasingFunction accelerate = compositor.CreateCubicBezierEasingFunction(new Vector2(0.72f, 0), new Vector2(0.88f, 0.42f));
+        CubicBezierEasingFunction settle = compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
+
+        Vector3 sourceOffset = captureVisual.Offset;
+        Vector3 sourceCenter = new((float)sourceBounds.Width / 2, (float)sourceBounds.Height / 2, 0);
+        Vector3 targetCenter = new((float)(targetBounds.X + (targetBounds.Width / 2)), (float)(targetBounds.Y + (targetBounds.Height / 2)), 0);
+        Vector3 targetOffset = targetCenter - sourceCenter;
+        float targetScale = Math.Min(1, Math.Min(64f / Math.Max(1, (float)sourceBounds.Width), 40f / Math.Max(1, (float)sourceBounds.Height)));
+        Vector3 finalScale = new(targetScale, targetScale, 1);
+
+        captureVisual.CenterPoint = sourceCenter;
+
+        Vector3KeyFrameAnimation offsetAnimation = compositor.CreateVector3KeyFrameAnimation();
+        offsetAnimation.Duration = duration;
+        offsetAnimation.InsertKeyFrame(0, sourceOffset);
+        offsetAnimation.InsertKeyFrame(0.16f, Vector3.Lerp(sourceOffset, targetOffset, 0.03f), settle);
+        offsetAnimation.InsertKeyFrame(0.76f, Vector3.Lerp(sourceOffset, targetOffset, 0.82f), accelerate);
+        offsetAnimation.InsertKeyFrame(1, targetOffset, accelerate);
+
+        Vector3KeyFrameAnimation scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
+        scaleAnimation.Duration = duration;
+        scaleAnimation.InsertKeyFrame(0, Vector3.One);
+        scaleAnimation.InsertKeyFrame(0.12f, new Vector3(1.015f, 1.015f, 1), settle);
+        scaleAnimation.InsertKeyFrame(0.72f, Vector3.Lerp(Vector3.One, finalScale, 0.64f), accelerate);
+        scaleAnimation.InsertKeyFrame(1, finalScale, accelerate);
+
+        ScalarKeyFrameAnimation opacityAnimation = compositor.CreateScalarKeyFrameAnimation();
+        opacityAnimation.Duration = duration;
+        opacityAnimation.InsertKeyFrame(0, 1);
+        opacityAnimation.InsertKeyFrame(0.72f, 0.98f);
+        opacityAnimation.InsertKeyFrame(0.92f, 0.62f, accelerate);
+        opacityAnimation.InsertKeyFrame(1, 0);
+
+        captureVisual.StartAnimation(nameof(Visual.Offset), offsetAnimation);
+        captureVisual.StartAnimation(nameof(Visual.Scale), scaleAnimation);
+        captureVisual.StartAnimation(nameof(Visual.Opacity), opacityAnimation);
     }
 
     private void HandleRootLoaded(object sender, RoutedEventArgs args)
@@ -219,7 +446,7 @@ internal sealed class CaptureSelectionWindow
     {
         renderedFrameCount++;
 
-        if (completed || isShown)
+        if (closed || isShown)
         {
             CompositionTarget.Rendering -= HandleCompositionRendering;
             return;
@@ -243,17 +470,10 @@ internal sealed class CaptureSelectionWindow
         root.Focus(FocusState.Programmatic);
         PlatformWindowExtensions.viSetOpacity(windowHandle, 255);
         isShown = true;
-    }
 
-    private static async Task CompleteSelectionAsync(Task<CaptureSelectionCandidate?> selection, TaskCompletionSource<CaptureSelectionCandidate?> completion)
-    {
-        try
+        if (mode == ScreenCaptureMode.AllDisplays)
         {
-            completion.TrySetResult(await selection);
-        }
-        catch (Exception exception)
-        {
-            completion.TrySetException(exception);
+            CompleteSelection(new CaptureSelectionCandidate(bitmap.Bounds));
         }
     }
 
@@ -262,7 +482,7 @@ internal sealed class CaptureSelectionWindow
         if (args.Key == Windows.System.VirtualKey.Escape)
         {
             args.Handled = true;
-            Complete(null);
+            CancelSelection();
         }
     }
 
@@ -283,7 +503,7 @@ internal sealed class CaptureSelectionWindow
 
         if (candidate is not null)
         {
-            Complete(candidate);
+            CompleteSelection(candidate.Value);
         }
     }
 
@@ -330,34 +550,77 @@ internal sealed class CaptureSelectionWindow
             return;
         }
 
-        Complete(new CaptureSelectionCandidate(ToScreen(local)));
+        CompleteSelection(new CaptureSelectionCandidate(ToScreen(local)));
     }
 
     private void HandleClosed(object sender, WindowEventArgs args)
     {
+        closed = true;
         CompositionTarget.Rendering -= HandleCompositionRendering;
+        DetachSelectionHandlers();
 
-        if (!completed)
+        if (!selectionCompleted)
         {
-            completed = true;
+            selectionCompleted = true;
             completion.TrySetResult(null);
         }
+    }
+
+    private void CompleteSelection(CaptureSelectionCandidate candidate)
+    {
+        if (selectionCompleted)
+        {
+            return;
+        }
+
+        selectionCompleted = true;
+        DetachSelectionHandlers();
+        completion.TrySetResult(new CaptureSelectionResult(candidate, this));
+    }
+
+    private void CancelSelection()
+    {
+        if (selectionCompleted)
+        {
+            return;
+        }
+
+        selectionCompleted = true;
+        completion.TrySetResult(null);
+        CloseCore();
+    }
+
+    private void CloseCore()
+    {
+        if (closed)
+        {
+            return;
+        }
+
+        closed = true;
+        CompositionTarget.Rendering -= HandleCompositionRendering;
+        DetachSelectionHandlers();
+        PlatformWindowExtensions.viSetOpacity(windowHandle, 0);
+        window.Close();
+    }
+
+    private void DetachSelectionHandlers()
+    {
+        root.KeyDown -= HandleKeyDown;
+        root.PointerMoved -= HandlePointerMoved;
+        root.PointerPressed -= HandlePointerPressed;
+        root.PointerReleased -= HandlePointerReleased;
     }
 
     private CaptureSelectionCandidate? FindCandidate(Point point)
     {
         (int x, int y) = ToScreen(point);
         CaptureSelectionCandidate candidate = candidates.FirstOrDefault(value => value.Bounds.Contains(x, y));
-        return candidate.Bounds.Width > 0
-            ? candidate
-            : null;
+        return candidate.Bounds.Width > 0 ? candidate : null;
     }
 
-    private void UpdateRegionHighlight(Point end)
-    {
-        Rect rectangle = CreateRectangle(selectionStart, end);
-        ShowHighlight(rectangle);
-    }
+    private void UpdateRegionHighlight(Point end) =>
+        ShowHighlight(CreateRectangle(selectionStart, end));
 
     private void ShowHighlight(Rect rectangle)
     {
@@ -404,18 +667,6 @@ internal sealed class CaptureSelectionWindow
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmFlush();
-
-    private void Complete(CaptureSelectionCandidate? candidate)
-    {
-        if (completed)
-        {
-            return;
-        }
-
-        completed = true;
-        CompositionTarget.Rendering -= HandleCompositionRendering;
-        PlatformWindowExtensions.viSetOpacity(windowHandle, 0);
-        completion.TrySetResult(candidate);
-        window.Close();
-    }
 }
+
+internal sealed record CaptureSelectionResult(CaptureSelectionCandidate Candidate, CaptureSelectionWindow Overlay);

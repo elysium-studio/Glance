@@ -27,8 +27,8 @@ public sealed partial class WindowsScreenCaptureService :
     private const int SmVirtualScreenX = 76;
     private const int SmVirtualScreenY = 77;
     private const uint SourceCopy = 0x00CC0020;
-    private const int SwHide = 0;
-    private const int SwShowNoActivate = 8;
+    private const int OffscreenWindowCoordinate = -32000;
+    private const uint SetWindowPositionFlags = 0x0001 | 0x0004 | 0x0010 | 0x0200;
     private readonly DispatcherQueue dispatcherQueue;
     private readonly ITextLocalizer localizer;
     private readonly string captureFolderPath;
@@ -61,6 +61,7 @@ public sealed partial class WindowsScreenCaptureService :
             throw new InvalidOperationException("Screen capture must begin on the UI thread.");
         }
 
+        pendingAnimationFrame?.Overlay.Close();
         pendingAnimationFrame = null;
         IReadOnlyList<CaptureSelectionCandidate> candidates = mode switch
         {
@@ -68,45 +69,51 @@ public sealed partial class WindowsScreenCaptureService :
             ScreenCaptureMode.Display => EnumerateDisplayCandidates(),
             _ => []
         };
-        IReadOnlyList<nint> applicationWindows = GetVisibleApplicationWindows();
+        IReadOnlyList<ApplicationWindowState> applicationWindows = GetVisibleApplicationWindows();
+
+        CaptureSelectionWindow? overlay = null;
 
         try
         {
-            SetWindowsVisible(applicationWindows, false);
+            MoveWindowsOffscreen(applicationWindows);
             _ = NativeMethods.DwmFlush();
 
             DesktopCaptureBitmap desktop = CaptureVirtualDesktop();
-            CaptureSelectionCandidate? selection = mode switch
-            {
-                ScreenCaptureMode.Region => await CaptureSelectionWindow.SelectAsync(desktop, mode, [], localizer, dispatcherQueue),
-                ScreenCaptureMode.Window => await CaptureSelectionWindow.SelectAsync(desktop, mode, candidates, localizer, dispatcherQueue),
-                ScreenCaptureMode.Display => await CaptureSelectionWindow.SelectAsync(desktop, mode, candidates, localizer, dispatcherQueue),
-                ScreenCaptureMode.AllDisplays => new CaptureSelectionCandidate(desktop.Bounds),
-                _ => null
-            };
+            CaptureSelectionResult? selectionResult = await CaptureSelectionWindow.SelectAsync(desktop, mode, candidates, localizer, dispatcherQueue);
 
-            if (selection is null)
+            if (selectionResult is null)
             {
                 return null;
             }
 
-            DesktopCaptureBitmap result = mode == ScreenCaptureMode.Window && selection.Value.WindowHandle != 0
-                ? await CaptureWindowAsync(selection.Value.WindowHandle, selection.Value.Bounds)
-                : selection.Value.Bounds == desktop.Bounds
+            overlay = selectionResult.Overlay;
+            CaptureSelectionCandidate selection = selectionResult.Candidate;
+            DesktopCaptureBitmap result = mode == ScreenCaptureMode.Window && selection.WindowHandle != 0
+                ? await CaptureWindowAsync(selection.WindowHandle, selection.Bounds)
+                : selection.Bounds == desktop.Bounds
                     ? desktop
-                    : desktop.Crop(selection.Value.Bounds);
+                    : desktop.Crop(selection.Bounds);
             ScreenCaptureItem capture = await SaveAsync(result, mode);
-            pendingAnimationFrame = new CaptureAnimationFrame(result, desktop.Bounds);
+            pendingAnimationFrame = new CaptureAnimationFrame(result, overlay);
+            overlay = null;
             return capture;
+        }
+        catch
+        {
+            overlay?.Close();
+            throw;
         }
         finally
         {
-            SetWindowsVisible(applicationWindows, true);
+            RestoreWindows(applicationWindows);
+            _ = NativeMethods.DwmFlush();
         }
     }
 
     public void Dispose()
     {
+        pendingAnimationFrame?.Overlay.Close();
+        pendingAnimationFrame = null;
         captureWatcher.EnableRaisingEvents = false;
         captureWatcher.Deleted -= HandleCaptureFolderChanged;
         captureWatcher.Renamed -= HandleCaptureFolderChanged;
@@ -317,17 +324,17 @@ public sealed partial class WindowsScreenCaptureService :
         }
     }
 
-    private static IReadOnlyList<nint> GetVisibleApplicationWindows()
+    private static IReadOnlyList<ApplicationWindowState> GetVisibleApplicationWindows()
     {
         uint processId = (uint)Environment.ProcessId;
-        List<nint> windows = [];
+        List<ApplicationWindowState> windows = [];
         NativeMethods.EnumWindows((window, parameter) =>
         {
             NativeMethods.GetWindowThreadProcessId(window, out uint windowProcessId);
 
-            if (windowProcessId == processId && NativeMethods.IsWindowVisible(window))
+            if (windowProcessId == processId && NativeMethods.IsWindowVisible(window) && NativeMethods.GetWindowRect(window, out NativeRect bounds))
             {
-                windows.Add(window);
+                windows.Add(new ApplicationWindowState(window, bounds.Left, bounds.Top));
             }
 
             return true;
@@ -335,11 +342,19 @@ public sealed partial class WindowsScreenCaptureService :
         return windows;
     }
 
-    private static void SetWindowsVisible(IEnumerable<nint> windows, bool visible)
+    private static void MoveWindowsOffscreen(IEnumerable<ApplicationWindowState> windows)
     {
-        foreach (nint window in windows)
+        foreach (ApplicationWindowState window in windows)
         {
-            _ = NativeMethods.ShowWindow(window, visible ? SwShowNoActivate : SwHide);
+            _ = NativeMethods.SetWindowPos(window.Handle, nint.Zero, OffscreenWindowCoordinate, OffscreenWindowCoordinate, 0, 0, SetWindowPositionFlags);
+        }
+    }
+
+    private static void RestoreWindows(IEnumerable<ApplicationWindowState> windows)
+    {
+        foreach (ApplicationWindowState window in windows)
+        {
+            _ = NativeMethods.SetWindowPos(window.Handle, nint.Zero, window.X, window.Y, 0, 0, SetWindowPositionFlags);
         }
     }
 
@@ -510,6 +525,8 @@ public sealed partial class WindowsScreenCaptureService :
         public int Bottom;
     }
 
+    private readonly record struct ApplicationWindowState(nint Handle, int X, int Y);
+
     [StructLayout(LayoutKind.Sequential)]
     private struct MonitorInfo
     {
@@ -599,6 +616,6 @@ public sealed partial class WindowsScreenCaptureService :
 
         [LibraryImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static partial bool ShowWindow(nint window, int command);
+        public static partial bool SetWindowPos(nint window, nint insertAfter, int x, int y, int width, int height, uint flags);
     }
 }

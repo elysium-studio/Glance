@@ -1,11 +1,9 @@
 using Elysium.UI.Controls.WinUI;
-using Microsoft.UI.Composition;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Media;
 using System;
-using System.Numerics;
 using System.Runtime.InteropServices;
 using Windows.Foundation;
 
@@ -13,6 +11,9 @@ namespace Glance.ScreenCapture.WinUI;
 
 public sealed partial class ScreenCaptureExpandedView : UserControl
 {
+    private const int CaptureCompletionDelayMs = 700;
+
+    private DispatcherQueueTimer? captureCompletionTimer;
     private bool isCaptureInProgress;
 
     public ScreenCaptureExpandedView(ScreenCaptureViewModel viewModel)
@@ -27,6 +28,7 @@ public sealed partial class ScreenCaptureExpandedView : UserControl
 
     internal void SetCaptureInProgress(bool value)
     {
+        captureCompletionTimer?.Stop();
         isCaptureInProgress = value;
         DesktopIsland? island = FindIsland();
 
@@ -42,6 +44,22 @@ public sealed partial class ScreenCaptureExpandedView : UserControl
             island.Reveal();
             island.IsExpanded = true;
         }
+    }
+
+    internal void CompleteCapturePresentation()
+    {
+        captureCompletionTimer ??= CreateCaptureCompletionTimer();
+        captureCompletionTimer.Stop();
+        captureCompletionTimer.Start();
+    }
+
+    private DispatcherQueueTimer CreateCaptureCompletionTimer()
+    {
+        DispatcherQueueTimer timer = DispatcherQueue.CreateTimer();
+        timer.Interval = TimeSpan.FromMilliseconds(CaptureCompletionDelayMs);
+        timer.IsRepeating = false;
+        timer.Tick += (_, _) => SetCaptureInProgress(false);
+        return timer;
     }
 
     internal bool TryGetCaptureLandingBounds(out NativeRectangle bounds)
@@ -62,55 +80,6 @@ public sealed partial class ScreenCaptureExpandedView : UserControl
             Math.Max(1, (int)Math.Round(localBounds.Width * scale)),
             Math.Max(1, (int)Math.Round(localBounds.Height * scale)));
         return true;
-    }
-
-    internal void ResetCaptureArrival()
-    {
-        Visual contentVisual = ElementCompositionPreview.GetElementVisual(CaptureArrivalContent);
-        Visual glowVisual = ElementCompositionPreview.GetElementVisual(CaptureArrivalGlow);
-        contentVisual.StopAnimation(nameof(Visual.Opacity));
-        contentVisual.StopAnimation(nameof(Visual.Scale));
-        glowVisual.StopAnimation(nameof(Visual.Opacity));
-        glowVisual.StopAnimation(nameof(Visual.Scale));
-        contentVisual.Opacity = 1;
-        contentVisual.Scale = Vector3.One;
-        glowVisual.Opacity = 0;
-        glowVisual.Scale = Vector3.One;
-    }
-
-    internal void PlayCaptureArrival()
-    {
-        Visual contentVisual = ElementCompositionPreview.GetElementVisual(CaptureArrivalContent);
-        Visual glowVisual = ElementCompositionPreview.GetElementVisual(CaptureArrivalGlow);
-        Compositor compositor = contentVisual.Compositor;
-        CubicBezierEasingFunction easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
-
-        ResetCaptureArrival();
-        contentVisual.CenterPoint = new Vector3((float)CaptureArrivalContent.ActualWidth / 2, (float)CaptureArrivalContent.ActualHeight / 2, 0);
-
-        Vector3KeyFrameAnimation scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
-        scaleAnimation.Duration = TimeSpan.FromMilliseconds(240);
-        scaleAnimation.InsertKeyFrame(0, new Vector3(0.94f, 0.94f, 1));
-        scaleAnimation.InsertKeyFrame(1, Vector3.One, easing);
-        ScalarKeyFrameAnimation opacityAnimation = compositor.CreateScalarKeyFrameAnimation();
-        opacityAnimation.Duration = TimeSpan.FromMilliseconds(180);
-        opacityAnimation.InsertKeyFrame(0, 0);
-        opacityAnimation.InsertKeyFrame(1, 1, easing);
-
-        glowVisual.CenterPoint = new Vector3((float)CaptureArrivalGlow.ActualWidth / 2, (float)CaptureArrivalGlow.ActualHeight / 2, 0);
-        Vector3KeyFrameAnimation glowScaleAnimation = compositor.CreateVector3KeyFrameAnimation();
-        glowScaleAnimation.Duration = TimeSpan.FromMilliseconds(320);
-        glowScaleAnimation.InsertKeyFrame(0, new Vector3(0.82f, 0.82f, 1));
-        glowScaleAnimation.InsertKeyFrame(1, new Vector3(1.06f, 1.06f, 1), easing);
-        ScalarKeyFrameAnimation glowOpacityAnimation = compositor.CreateScalarKeyFrameAnimation();
-        glowOpacityAnimation.Duration = TimeSpan.FromMilliseconds(320);
-        glowOpacityAnimation.InsertKeyFrame(0, 0.38f);
-        glowOpacityAnimation.InsertKeyFrame(1, 0, easing);
-
-        contentVisual.StartAnimation(nameof(Visual.Scale), scaleAnimation);
-        contentVisual.StartAnimation(nameof(Visual.Opacity), opacityAnimation);
-        glowVisual.StartAnimation(nameof(Visual.Scale), glowScaleAnimation);
-        glowVisual.StartAnimation(nameof(Visual.Opacity), glowOpacityAnimation);
     }
 
     private void HandleCaptureMenuOpened(object sender, object args) =>

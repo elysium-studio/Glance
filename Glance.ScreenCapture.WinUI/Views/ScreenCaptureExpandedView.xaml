@@ -106,14 +106,7 @@
                 x:Name="CaptureLandingTarget"
                 Grid.Row="1"
                 VerticalAlignment="Stretch">
-                <Border
-                    x:Name="CaptureArrivalGlow"
-                    Margin="-4,0"
-                    Background="{ThemeResource GlanceScreenCaptureIconBrush}"
-                    CornerRadius="8"
-                    IsHitTestVisible="False"
-                    Opacity="0" />
-                <Grid x:Name="CaptureArrivalContent">
+                <Grid>
                     <TextBlock
                         Style="{StaticResource BodyStrongTextBlockStyle}"
                         Text="{x:Bind ViewModel.StatusText, Mode=OneWay}"

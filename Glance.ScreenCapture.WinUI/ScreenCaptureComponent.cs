@@ -12,7 +12,6 @@ public sealed class ScreenCaptureComponent :
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
-    private readonly IGlanceAttentionService attentionService;
     private readonly DispatcherQueue dispatcherQueue;
     private readonly ITextLocalizer localizer;
     private readonly ILogger<ScreenCaptureComponent> logger;
@@ -25,14 +24,12 @@ public sealed class ScreenCaptureComponent :
     public ScreenCaptureComponent(
         ScreenCaptureViewModel viewModel,
         IScreenCaptureService screenCaptureService,
-        IGlanceAttentionService attentionService,
         GlanceModuleOptions<ScreenCaptureSettings> options,
         ModuleResourceTextLocalizer<ScreenCaptureModule> localizer,
         ILogger<ScreenCaptureComponent> logger)
     {
         this.viewModel = viewModel;
         this.screenCaptureService = screenCaptureService;
-        this.attentionService = attentionService;
         this.options = options;
         this.localizer = localizer;
         this.logger = logger;
@@ -118,15 +115,29 @@ public sealed class ScreenCaptureComponent :
 
             CaptureAnimationFrame? frame = (screenCaptureService as WindowsScreenCaptureService)?.TakeAnimationFrame();
             NativeRectangle? landingBounds = await GetLandingBoundsAsync();
+            bool capturePresented = false;
+
+            void PresentCapture()
+            {
+                if (capturePresented)
+                {
+                    return;
+                }
+
+                capturePresented = true;
+                viewModel.CompleteCapture(capture);
+                ApplyPendingCaptureRefresh();
+            }
 
             if (frame is not null && landingBounds is NativeRectangle target)
             {
                 try
                 {
-                    await CaptureFlightWindow.PlayAsync(frame, target, dispatcherQueue);
+                    await frame.Overlay.PlayFlightAsync(frame.Bitmap, target, PresentCapture);
                 }
                 catch (Exception exception)
                 {
+                    frame.Overlay.Close();
                     logger.LogWarning(exception, "The capture flight animation could not be displayed ({ErrorCode:X8}): {ErrorMessage}", exception.HResult, exception.Message);
                 }
             }
@@ -136,26 +147,14 @@ public sealed class ScreenCaptureComponent :
             }
             else
             {
+                frame.Overlay.Close();
                 logger.LogWarning("The capture flight animation was skipped because the island landing target was unavailable");
             }
 
             RunOnUiThread(() =>
             {
-                viewModel.CompleteCapture(capture);
-
-                try
-                {
-                    expandedView.PlayCaptureArrival();
-                }
-                catch (Exception exception)
-                {
-                    logger.LogWarning(exception, "The capture arrival animation could not be displayed");
-                    expandedView.ResetCaptureArrival();
-                }
-
-                expandedView.SetCaptureInProgress(false);
-                ApplyPendingCaptureRefresh();
-                attentionService.RequestAttention(Id, GlanceAttentionLevel.Passive, expand: false);
+                PresentCapture();
+                expandedView.CompleteCapturePresentation();
             });
         }
         catch (Exception exception)
