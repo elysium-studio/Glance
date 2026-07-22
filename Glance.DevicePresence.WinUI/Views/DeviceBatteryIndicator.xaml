@@ -5,7 +5,7 @@
     <StackPanel
         VerticalAlignment="Center"
         Orientation="Horizontal"
-        Spacing="6">
+        Spacing="4">
         <TextBlock
             x:Name="PercentageText"
             VerticalAlignment="Center"
@@ -15,7 +15,8 @@
             x:Name="BatteryGlyph"
             VerticalAlignment="Center"
             FontFamily="Segoe Fluent Icons"
-            FontSize="20"
+            FontSize="25"
+            FontWeight="SemiBold"
             Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
     </StackPanel>
 </UserControl>
