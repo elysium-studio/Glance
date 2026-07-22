@@ -27,7 +27,7 @@ namespace Glance.ScreenCapture.WinUI;
 
 internal sealed class CaptureSelectionWindow
 {
-    private const int AnimationDurationMs = 520;
+    private const int AnimationDurationMs = 440;
 
     private readonly DesktopCaptureBitmap bitmap;
     private readonly IReadOnlyList<CaptureSelectionCandidate> candidates;
