@@ -4,6 +4,7 @@ obj/
 build/
 build-check*/
 artifacts/
+TestResults/
 *.user
 *.nupkg
 publish.local.json

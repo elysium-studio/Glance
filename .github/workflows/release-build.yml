@@ -1,0 +1,115 @@
+name: Release build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: WinUI managed publish (x64)
+    runs-on: windows-latest
+
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: true
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Configure private Elysium feed
+        shell: pwsh
+        env:
+          ELYSIUM_PACKAGES_TOKEN: ${{ secrets.ELYSIUM_PACKAGES_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          $token = if ([string]::IsNullOrWhiteSpace($env:ELYSIUM_PACKAGES_TOKEN)) {
+            $env:GITHUB_TOKEN
+          }
+          else {
+            $env:ELYSIUM_PACKAGES_TOKEN
+          }
+
+          dotnet nuget update source "Elysium Studio" `
+            --username $env:GITHUB_REPOSITORY_OWNER `
+            --password $token `
+            --store-password-in-clear-text `
+            --configfile NuGet.config
+
+      - name: Publish application
+        shell: pwsh
+        run: |
+          dotnet publish Glance.Shell.WinUI/Glance.Shell.WinUI.csproj `
+            --configuration Release `
+            --runtime win-x64 `
+            --output artifacts/release `
+            --self-contained true `
+            --property:Platform=x64 `
+            --property:PublishAot=false `
+            --property:PublishTrimmed=false `
+            --property:DebugType=None `
+            --property:DebugSymbols=false `
+            --property:StripSymbols=true `
+            --warnaserror
+
+      - name: Verify release output
+        shell: pwsh
+        run: |
+          $requiredFiles = @(
+            "artifacts/release/Glance.exe",
+            "artifacts/release/Glance.dll",
+            "artifacts/release/Glance.pri",
+            "artifacts/release/App.xbf",
+            "artifacts/release/Microsoft.WindowsAppRuntime.Insights.Resource.dll"
+          )
+
+          foreach ($requiredFile in $requiredFiles) {
+            if (-not (Test-Path -LiteralPath $requiredFile -PathType Leaf)) {
+              throw "Managed publish did not produce $requiredFile"
+            }
+          }
+
+          $requiredModules = @(
+            "Glance.AudioSwitcher.WinUI.dll",
+            "Glance.Clipboard.WinUI.dll",
+            "Glance.ColorPicker.WinUI.dll",
+            "Glance.DevicePresence.WinUI.dll",
+            "Glance.DropShelf.WinUI.dll",
+            "Glance.FocusSession.WinUI.dll",
+            "Glance.Media.WinUI.dll",
+            "Glance.Power.WinUI.dll",
+            "Glance.PrivacyControls.WinUI.dll",
+            "Glance.RemovableDevices.WinUI.dll",
+            "Glance.ScreenCapture.WinUI.dll",
+            "Glance.Stopwatch.WinUI.dll",
+            "Glance.SystemMonitor.WinUI.dll",
+            "Glance.Timer.WinUI.dll",
+            "Glance.UI.WinUI.dll",
+            "Glance.VoiceNotes.WinUI.dll"
+          )
+
+          foreach ($requiredModule in $requiredModules) {
+            $modulePath = Join-Path "artifacts/release" $requiredModule
+
+            if (-not (Test-Path -LiteralPath $modulePath -PathType Leaf)) {
+              throw "Managed publish did not include $requiredModule"
+            }
+          }
