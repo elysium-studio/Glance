@@ -3,6 +3,7 @@ using Microsoft.Windows.ApplicationModel.Resources;
 using System;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 
 namespace Glance.UI.WinUI;
 
@@ -13,9 +14,10 @@ public sealed class ModuleResourceTextLocalizer<TMarker> :
 
     public ModuleResourceTextLocalizer()
     {
-        string assemblyName = typeof(TMarker).Assembly.GetName().Name ??
-            throw new InvalidOperationException("The module assembly has no name.");
-        string resourcePath = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.pri");
+        Assembly assembly = typeof(TMarker).Assembly;
+        string assemblyName = assembly.GetName().Name ?? throw new InvalidOperationException("The module assembly has no name.");
+        string assemblyDirectory = Path.GetDirectoryName(assembly.Location) ?? AppContext.BaseDirectory;
+        string resourcePath = Path.Combine(assemblyDirectory, $"{assemblyName}.pri");
 
         resourceLoader = new ResourceLoader(resourcePath, $"{assemblyName}/Resources");
     }
