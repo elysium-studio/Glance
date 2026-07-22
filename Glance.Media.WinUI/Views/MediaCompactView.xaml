@@ -50,6 +50,7 @@
             Height="18"
             Margin="4,0,4,0"
             VerticalAlignment="Center"
+            Visibility="{x:Bind WhenAvailable(ViewModel.ShowAudioVisualization), Mode=OneWay}"
             ViewModel="{x:Bind ViewModel}" />
     </Grid>
 </UserControl>

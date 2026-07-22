@@ -1,10 +1,18 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
+using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
 
 namespace Glance.Media;
 
-public partial class MediaViewModel : ObservableObject
+public partial class MediaViewModel :
+    ObservableObject,
+    IRecipient<OptionsChangedEventArgs<MediaSettings>>,
+    IDisposable
 {
+    private readonly IDispatcher? dispatcher;
+    private readonly IMessenger? messenger;
+
     [ObservableProperty]
     private string title;
 
@@ -33,11 +41,20 @@ public partial class MediaViewModel : ObservableObject
     [ObservableProperty]
     private bool canTogglePlayback;
 
-    public MediaViewModel(ITextLocalizer localizer)
+    [ObservableProperty]
+    private bool showAudioVisualization;
+
+    public MediaViewModel(ITextLocalizer localizer, MediaSettings? settings = null, IMessenger? messenger = null, IDispatcher? dispatcher = null)
     {
+        MediaSettings initialSettings = settings ?? new MediaSettings();
+
+        this.dispatcher = dispatcher;
+        this.messenger = messenger;
         title = localizer.GetText("NothingPlaying");
         artist = localizer.GetText("OpenMediaApp");
         source = localizer.GetText("ModuleTitle");
+        showAudioVisualization = initialSettings.ShowAudioVisualization;
+        messenger?.Register<OptionsChangedEventArgs<MediaSettings>>(this);
     }
 
     public string PlayPauseGlyph => IsPlaying ? "\uF8AE" : "\uF5B0";
@@ -45,6 +62,26 @@ public partial class MediaViewModel : ObservableObject
     public event EventHandler<AudioLevelsChangedEventArgs>? AudioLevelsChanged;
 
     public event EventHandler<MediaPlaybackAction>? PlaybackActionRequested;
+
+    public void Receive(OptionsChangedEventArgs<MediaSettings> message)
+    {
+        void Apply() => ShowAudioVisualization = message.Options.ShowAudioVisualization;
+
+        if (dispatcher is null)
+        {
+            Apply();
+        }
+        else
+        {
+            dispatcher.Dispatch(Apply);
+        }
+    }
+
+    public void Dispose()
+    {
+        messenger?.UnregisterAll(this);
+        GC.SuppressFinalize(this);
+    }
 
     public void UpdateAudioLevels(IReadOnlyList<double> levels) =>
         AudioLevelsChanged?.Invoke(this, new AudioLevelsChangedEventArgs([.. levels]));

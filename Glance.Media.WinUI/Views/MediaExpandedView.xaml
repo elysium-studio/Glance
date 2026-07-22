@@ -81,6 +81,7 @@
                 Width="23"
                 Height="16"
                 HorizontalAlignment="Center"
+                Visibility="{x:Bind WhenAvailable(ViewModel.ShowAudioVisualization), Mode=OneWay}"
                 ViewModel="{x:Bind ViewModel}" />
             <StackPanel
                 HorizontalAlignment="Center"

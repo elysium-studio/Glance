@@ -3,6 +3,7 @@ using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using Windows.Media;
 using Windows.Media.Control;
@@ -22,7 +23,6 @@ public sealed class MediaComponent :
     private readonly IGlanceAttentionService attentionService;
     private readonly DispatcherQueue dispatcherQueue;
     private readonly AudioLevelMonitor audioLevelMonitor;
-    private readonly GlanceModuleOptions<MediaSettings> options;
     private GlobalSystemMediaTransportControlsSessionManager? sessionManager;
     private GlobalSystemMediaTransportControlsSession? session;
     private string? currentTitle;
@@ -30,12 +30,10 @@ public sealed class MediaComponent :
     public MediaComponent(
         MediaViewModel viewModel,
         IGlanceAttentionService attentionService,
-        GlanceModuleOptions<MediaSettings> options,
         ModuleResourceTextLocalizer<MediaModule> localizer)
     {
         this.viewModel = viewModel;
         this.attentionService = attentionService;
-        this.options = options;
         this.localizer = localizer;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         audioLevelMonitor = new AudioLevelMonitor();
@@ -49,8 +47,8 @@ public sealed class MediaComponent :
         ExpandedAnimationElement = expandedView.ConnectedAnimationElement;
 
         viewModel.PlaybackActionRequested += HandlePlaybackActionRequested;
+        viewModel.PropertyChanged += HandleViewModelPropertyChanged;
         audioLevelMonitor.LevelsChanged += HandleAudioLevelsChanged;
-        options.Changed += HandleOptionsChanged;
         Initialize();
     }
 
@@ -73,8 +71,8 @@ public sealed class MediaComponent :
     public void Dispose()
     {
         viewModel.PlaybackActionRequested -= HandlePlaybackActionRequested;
+        viewModel.PropertyChanged -= HandleViewModelPropertyChanged;
         audioLevelMonitor.LevelsChanged -= HandleAudioLevelsChanged;
-        options.Changed -= HandleOptionsChanged;
         audioLevelMonitor.Dispose();
 
         if (sessionManager is not null)
@@ -150,8 +148,13 @@ public sealed class MediaComponent :
         AudioSpectrumEventArgs args) =>
         dispatcherQueue.TryEnqueue(() => viewModel.UpdateAudioLevels(args.Levels));
 
-    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<MediaSettings> args) =>
-        dispatcherQueue.TryEnqueue(UpdateAudioCaptureState);
+    private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName == nameof(MediaViewModel.ShowAudioVisualization))
+        {
+            UpdateAudioCaptureState();
+        }
+    }
 
     private async void HandlePlaybackActionRequested(
         object? sender,
@@ -287,7 +290,7 @@ public sealed class MediaComponent :
 
     private void UpdateAudioCaptureState()
     {
-        if (options.Current.ShowAudioVisualization && viewModel.HasSession && viewModel.IsPlaying)
+        if (viewModel.ShowAudioVisualization && viewModel.HasSession && viewModel.IsPlaying)
         {
             if (!audioLevelMonitor.Start())
             {

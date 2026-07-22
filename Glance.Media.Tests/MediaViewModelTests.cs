@@ -1,4 +1,6 @@
 using Glance.Application.Abstractions;
+using CommunityToolkit.Mvvm.Messaging;
+using Elysium.Application.Abstractions;
 
 namespace Glance.Media.Tests;
 
@@ -85,6 +87,17 @@ public sealed class MediaViewModelTests
         Assert.True(viewModel.CanSkipPrevious);
         Assert.True(viewModel.CanSkipNext);
         Assert.True(viewModel.CanTogglePlayback);
+    }
+
+    [Fact]
+    public void OptionsChanged_UpdatesAudioVisualizationVisibility()
+    {
+        WeakReferenceMessenger messenger = new();
+        using MediaViewModel viewModel = new(new TestTextLocalizer(), new MediaSettings { ShowAudioVisualization = true }, messenger);
+
+        messenger.Send(new OptionsChangedEventArgs<MediaSettings>(new MediaSettings { ShowAudioVisualization = false }));
+
+        Assert.False(viewModel.ShowAudioVisualization);
     }
 
     private sealed class TestTextLocalizer : ITextLocalizer

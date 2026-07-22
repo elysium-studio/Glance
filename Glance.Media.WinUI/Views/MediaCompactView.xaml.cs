@@ -17,4 +17,7 @@ public sealed partial class MediaCompactView : UserControl
     public FrameworkElement ConnectedAnimationElement => ArtworkContainer;
 
     private ImageSource? ToImageSource(object? value) => value as ImageSource;
+
+    private Visibility WhenAvailable(bool isAvailable) =>
+        isAvailable ? Visibility.Visible : Visibility.Collapsed;
 }

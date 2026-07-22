@@ -40,7 +40,7 @@
                             Description="{x:Bind Description}"
                             Header="{x:Bind DisplayName}"
                             IsClickEnabled="False"
-                            Visibility="{x:Bind local:ModulePreferencesView.WhenSettingsUnavailable(HasSettings)}">
+                            Visibility="{x:Bind local:ModulePreferencesView.WhenSettingsUnavailable(CanExpand), Mode=OneWay}">
                             <ToggleSwitch AutomationProperties.Name="{x:Bind DisplayName}" IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
                         </CommunityToolkit:SettingsCard>
                         <CommunityToolkit:SettingsExpander
@@ -48,7 +48,7 @@
                             Header="{x:Bind DisplayName}"
                             IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
                             ItemsSource="{x:Bind Settings, Mode=OneWay}"
-                            Visibility="{x:Bind local:ModulePreferencesView.WhenSettingsAvailable(HasSettings)}">
+                            Visibility="{x:Bind local:ModulePreferencesView.WhenSettingsAvailable(CanExpand), Mode=OneWay}">
                             <CommunityToolkit:SettingsExpander.Content>
                                 <ToggleSwitch AutomationProperties.Name="{x:Bind DisplayName}" IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
                             </CommunityToolkit:SettingsExpander.Content>
