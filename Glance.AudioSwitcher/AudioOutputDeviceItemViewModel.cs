@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Glance.AudioSwitcher;
 
-public partial class AudioOutputDeviceItemViewModel :
+public sealed partial class AudioOutputDeviceItemViewModel :
     ObservableObject
 {
     private readonly IAudioDeviceService audioDeviceService;

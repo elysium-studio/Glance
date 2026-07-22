@@ -3,7 +3,7 @@ using Glance.Application.Abstractions;
 
 namespace Glance.SystemMonitor;
 
-public partial class SystemMonitorViewModel : ObservableObject
+public sealed partial class SystemMonitorViewModel : ObservableObject
 {
     private readonly ITextLocalizer localizer;
 

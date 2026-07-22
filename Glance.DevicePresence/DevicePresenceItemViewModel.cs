@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Glance.DevicePresence;
 
-public partial class DevicePresenceItemViewModel :
+public sealed partial class DevicePresenceItemViewModel :
     ObservableObject
 {
     [ObservableProperty]

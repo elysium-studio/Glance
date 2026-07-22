@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 
 namespace Glance.Shell;
 
-public partial class ModulePreferencesViewModel :
+public sealed partial class ModulePreferencesViewModel :
     ObservableViewModel,
     IModulesViewModel
 {

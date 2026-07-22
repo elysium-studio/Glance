@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Glance.Stopwatch;
 
-public partial class StopwatchViewModel : ObservableObject
+public sealed partial class StopwatchViewModel : ObservableObject
 {
     private readonly System.Diagnostics.Stopwatch stopwatch = new();
 

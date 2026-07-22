@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace Glance.Shell;
 
-public partial class ModuleSettingsItemViewModel :
+public sealed partial class ModuleSettingsItemViewModel :
     ObservableObject,
     IDisposable
 {

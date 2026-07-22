@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Glance.Shell;
 
-public partial class DesktopIslandViewModel :
+public sealed partial class DesktopIslandViewModel :
     ObservableViewModel,
     IRecipient<OptionsChangedEventArgs<GlanceSettings>>
 {

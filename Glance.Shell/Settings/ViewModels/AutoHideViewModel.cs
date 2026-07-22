@@ -4,7 +4,7 @@ using Elysium.Presentation;
 
 namespace Glance.Shell;
 
-public partial class AutoHideViewModel(IServiceProvider provider,
+public sealed partial class AutoHideViewModel(IServiceProvider provider,
     IServiceFactory factory,
     IMessenger messenger,
     IDisposer disposer,

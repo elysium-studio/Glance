@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace Glance.DropShelf;
 
-public partial class DropShelfViewModel : ObservableObject
+public sealed partial class DropShelfViewModel : ObservableObject
 {
     private readonly ITextLocalizer localizer;
     private int itemLimit;

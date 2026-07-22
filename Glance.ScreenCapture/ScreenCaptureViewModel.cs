@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace Glance.ScreenCapture;
 
-public partial class ScreenCaptureViewModel : ObservableObject
+public sealed partial class ScreenCaptureViewModel : ObservableObject
 {
     private readonly ITextLocalizer localizer;
     private int recentCaptureLimit;

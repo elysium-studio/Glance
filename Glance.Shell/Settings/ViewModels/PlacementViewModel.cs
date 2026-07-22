@@ -4,7 +4,7 @@ using Elysium.Presentation;
 
 namespace Glance.Shell;
 
-public partial class PlacementViewModel(IServiceProvider provider,
+public sealed partial class PlacementViewModel(IServiceProvider provider,
     IServiceFactory factory,
     IMessenger messenger,
     IDisposer disposer,

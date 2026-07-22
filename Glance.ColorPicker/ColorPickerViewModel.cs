@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace Glance.ColorPicker;
 
-public partial class ColorPickerViewModel :
+public sealed partial class ColorPickerViewModel :
     ObservableObject,
     IDisposable
 {

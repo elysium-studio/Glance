@@ -13,7 +13,7 @@ using System.IO;
 
 namespace Glance.Shell.WinUI;
 
-public partial class App
+public sealed partial class App
 {
     private IHost? host;
 

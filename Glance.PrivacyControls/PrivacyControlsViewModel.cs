@@ -3,7 +3,7 @@ using Glance.Application.Abstractions;
 
 namespace Glance.PrivacyControls;
 
-public partial class PrivacyControlsViewModel :
+public sealed partial class PrivacyControlsViewModel :
     ObservableObject
 {
     private readonly IMicrophoneService microphoneService;

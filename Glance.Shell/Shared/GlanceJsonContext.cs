@@ -5,4 +5,4 @@ namespace Glance.Shell;
 [JsonSerializable(typeof(GlanceSettings))]
 [JsonSerializable(typeof(GlanceModulePreference))]
 [JsonSerializable(typeof(List<GlanceModulePreference>))]
-public partial class GlanceJsonContext : JsonSerializerContext;
+public sealed partial class GlanceJsonContext : JsonSerializerContext;

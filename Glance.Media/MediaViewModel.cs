@@ -5,7 +5,7 @@ using Glance.Application.Abstractions;
 
 namespace Glance.Media;
 
-public partial class MediaViewModel :
+public sealed partial class MediaViewModel :
     ObservableObject,
     IRecipient<OptionsChangedEventArgs<MediaSettings>>,
     IDisposable

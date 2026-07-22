@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace Glance.AudioSwitcher;
 
-public partial class AudioSwitcherViewModel : ObservableObject
+public sealed partial class AudioSwitcherViewModel : ObservableObject
 {
     private readonly IAudioDeviceService audioDeviceService;
     private readonly ITextLocalizer localizer;
