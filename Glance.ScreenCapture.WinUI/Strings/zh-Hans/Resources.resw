@@ -6,4 +6,10 @@
   <data name="SelectRegionInstruction" xml:space="preserve"><value>拖动以截取区域 · 按 Esc 取消</value></data><data name="SelectWindowInstruction" xml:space="preserve"><value>选择窗口 · 按 Esc 取消</value></data><data name="SelectDisplayInstruction" xml:space="preserve"><value>选择显示器 · 按 Esc 取消</value></data>
   <data name="RegionCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>截取区域</value></data><data name="WindowCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>截取窗口</value></data><data name="DisplayCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>截取显示器</value></data><data name="AllDisplaysCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>截取所有显示器</value></data>
   <data name="CopyCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>复制截图</value></data><data name="OpenCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>打开截图</value></data><data name="RevealCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>在文件夹中显示</value></data><data name="DeleteCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>删除截图</value></data>
+  <data name="RecentCaptureLimitSettingCard.Header" xml:space="preserve">
+    <value>Recent captures</value>
+  </data>
+  <data name="RecentCaptureLimitSettingCard.Description" xml:space="preserve">
+    <value>Maximum number of recent captures shown in the island.</value>
+  </data>
 </root>

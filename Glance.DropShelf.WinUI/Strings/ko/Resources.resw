@@ -37,4 +37,10 @@
   <data name="RemoveShelfItemButton.ToolTipService.ToolTip" xml:space="preserve">
     <value>선반에서 제거</value>
   </data>
+  <data name="ItemLimitSettingCard.Header" xml:space="preserve">
+    <value>Shelf capacity</value>
+  </data>
+  <data name="ItemLimitSettingCard.Description" xml:space="preserve">
+    <value>Maximum number of files and folders held on the shelf.</value>
+  </data>
 </root>

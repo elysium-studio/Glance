@@ -7,6 +7,7 @@ namespace Glance.DropShelf;
 public partial class DropShelfViewModel : ObservableObject
 {
     private readonly ITextLocalizer localizer;
+    private int itemLimit;
 
     [ObservableProperty]
     private string summary;
@@ -17,9 +18,10 @@ public partial class DropShelfViewModel : ObservableObject
     [ObservableProperty]
     private bool hasItems;
 
-    public DropShelfViewModel(ITextLocalizer localizer)
+    public DropShelfViewModel(ITextLocalizer localizer, DropShelfSettings? settings = null)
     {
         this.localizer = localizer;
+        itemLimit = GetItemLimit(settings ?? new DropShelfSettings());
         summary = localizer.GetText("EmptySummary");
         detail = localizer.GetText("EmptyDetail");
     }
@@ -43,6 +45,8 @@ public partial class DropShelfViewModel : ObservableObject
                 Items.Add(item);
             }
         }
+
+        TrimItems();
 
         UpdateState();
     }
@@ -71,6 +75,24 @@ public partial class DropShelfViewModel : ObservableObject
 
         UpdateState();
     }
+
+    public void ApplySettings(DropShelfSettings settings)
+    {
+        itemLimit = GetItemLimit(settings);
+        TrimItems();
+        UpdateState();
+    }
+
+    private void TrimItems()
+    {
+        while (Items.Count > itemLimit)
+        {
+            Items.RemoveAt(0);
+        }
+    }
+
+    private static int GetItemLimit(DropShelfSettings settings) =>
+        (int)Math.Clamp(settings.ItemLimit, 1, 50);
 
     private void UpdateState()
     {

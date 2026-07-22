@@ -22,6 +22,7 @@ public sealed class MediaComponent :
     private readonly IGlanceAttentionService attentionService;
     private readonly DispatcherQueue dispatcherQueue;
     private readonly AudioLevelMonitor audioLevelMonitor;
+    private readonly GlanceModuleOptions<MediaSettings> options;
     private GlobalSystemMediaTransportControlsSessionManager? sessionManager;
     private GlobalSystemMediaTransportControlsSession? session;
     private string? currentTitle;
@@ -29,10 +30,12 @@ public sealed class MediaComponent :
     public MediaComponent(
         MediaViewModel viewModel,
         IGlanceAttentionService attentionService,
+        GlanceModuleOptions<MediaSettings> options,
         ModuleResourceTextLocalizer<MediaModule> localizer)
     {
         this.viewModel = viewModel;
         this.attentionService = attentionService;
+        this.options = options;
         this.localizer = localizer;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         audioLevelMonitor = new AudioLevelMonitor();
@@ -47,6 +50,7 @@ public sealed class MediaComponent :
 
         viewModel.PlaybackActionRequested += HandlePlaybackActionRequested;
         audioLevelMonitor.LevelsChanged += HandleAudioLevelsChanged;
+        options.Changed += HandleOptionsChanged;
         Initialize();
     }
 
@@ -70,6 +74,7 @@ public sealed class MediaComponent :
     {
         viewModel.PlaybackActionRequested -= HandlePlaybackActionRequested;
         audioLevelMonitor.LevelsChanged -= HandleAudioLevelsChanged;
+        options.Changed -= HandleOptionsChanged;
         audioLevelMonitor.Dispose();
 
         if (sessionManager is not null)
@@ -144,6 +149,9 @@ public sealed class MediaComponent :
         object? sender,
         AudioSpectrumEventArgs args) =>
         dispatcherQueue.TryEnqueue(() => viewModel.UpdateAudioLevels(args.Levels));
+
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<MediaSettings> args) =>
+        dispatcherQueue.TryEnqueue(UpdateAudioCaptureState);
 
     private async void HandlePlaybackActionRequested(
         object? sender,
@@ -279,7 +287,7 @@ public sealed class MediaComponent :
 
     private void UpdateAudioCaptureState()
     {
-        if (viewModel.HasSession && viewModel.IsPlaying)
+        if (options.Current.ShowAudioVisualization && viewModel.HasSession && viewModel.IsPlaying)
         {
             if (!audioLevelMonitor.Start())
             {

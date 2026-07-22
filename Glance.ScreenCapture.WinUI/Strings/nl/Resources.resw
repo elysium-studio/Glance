@@ -6,4 +6,10 @@
   <data name="SelectRegionInstruction" xml:space="preserve"><value>Sleep om een gebied vast te leggen · Esc om te annuleren</value></data><data name="SelectWindowInstruction" xml:space="preserve"><value>Selecteer een venster · Esc om te annuleren</value></data><data name="SelectDisplayInstruction" xml:space="preserve"><value>Selecteer een scherm · Esc om te annuleren</value></data>
   <data name="RegionCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Gebied vastleggen</value></data><data name="WindowCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Venster vastleggen</value></data><data name="DisplayCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Scherm vastleggen</value></data><data name="AllDisplaysCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Alle schermen vastleggen</value></data>
   <data name="CopyCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Opname kopiëren</value></data><data name="OpenCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Opname openen</value></data><data name="RevealCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>In map weergeven</value></data><data name="DeleteCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Opname verwijderen</value></data>
+  <data name="RecentCaptureLimitSettingCard.Header" xml:space="preserve">
+    <value>Recent captures</value>
+  </data>
+  <data name="RecentCaptureLimitSettingCard.Description" xml:space="preserve">
+    <value>Maximum number of recent captures shown in the island.</value>
+  </data>
 </root>

@@ -16,6 +16,18 @@ public sealed class FocusSessionViewModelTests
     }
 
     [Fact]
+    public void ApplySettings_UpdatesIdlePhaseDurations()
+    {
+        FocusSessionViewModel viewModel = new();
+
+        viewModel.ApplySettings(new FocusSessionSettings { FocusDurationMinutes = 40, BreakDurationMinutes = 10 });
+        Assert.Equal("40:00", viewModel.RemainingText);
+
+        viewModel.Skip();
+        Assert.Equal("10:00", viewModel.RemainingText);
+    }
+
+    [Fact]
     public void Constructor_RejectsNonPositiveDurations()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>

@@ -53,6 +53,19 @@ public sealed class ScreenCaptureViewModelTests
     }
 
     [Fact]
+    public void RecentCaptureLimit_ComesFromModuleSettings()
+    {
+        ScreenCaptureViewModel viewModel = new(new FakeLocalizer(), new ScreenCaptureSettings { RecentCaptureLimit = 2 });
+
+        for (int index = 0; index < 4; index++)
+        {
+            viewModel.CompleteCapture(CreateCapture($"capture-{index}.png", 100, 100));
+        }
+
+        Assert.Equal(2, viewModel.Captures.Count);
+    }
+
+    [Fact]
     public void Remove_LastCapture_RestoresEmptyState()
     {
         ScreenCaptureViewModel viewModel = CreateViewModel();

@@ -43,4 +43,10 @@
   <data name="NextButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Siguiente</value>
   </data>
+  <data name="AudioVisualizationSettingCard.Header" xml:space="preserve">
+    <value>Audio visualisation</value>
+  </data>
+  <data name="AudioVisualizationSettingCard.Description" xml:space="preserve">
+    <value>Show animated audio bars while media is playing.</value>
+  </data>
 </root>

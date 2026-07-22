@@ -27,4 +27,10 @@
   <data name="OpenCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Open capture</value></data>
   <data name="RevealCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Show in folder</value></data>
   <data name="DeleteCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Delete capture</value></data>
+  <data name="RecentCaptureLimitSettingCard.Header" xml:space="preserve">
+    <value>Recent captures</value>
+  </data>
+  <data name="RecentCaptureLimitSettingCard.Description" xml:space="preserve">
+    <value>Maximum number of recent captures shown in the island.</value>
+  </data>
 </root>

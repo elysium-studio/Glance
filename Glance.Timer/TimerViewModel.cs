@@ -5,20 +5,28 @@ namespace Glance.Timer;
 
 public partial class TimerViewModel : ObservableObject
 {
-    private static readonly TimeSpan Minute = TimeSpan.FromMinutes(1);
-
-    private TimeSpan duration = TimeSpan.FromMinutes(5);
-    private TimeSpan remaining = TimeSpan.FromMinutes(5);
+    private TimeSpan adjustment;
+    private TimeSpan duration;
+    private TimeSpan remaining;
     private long lastTimestamp;
+
+    public TimerViewModel(TimerSettings? settings = null)
+    {
+        TimerSettings initialSettings = settings ?? new TimerSettings();
+        adjustment = GetAdjustment(initialSettings);
+        duration = GetDefaultDuration(initialSettings);
+        remaining = duration;
+        remainingText = FormatTime(remaining);
+    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ToggleGlyph))]
     private bool isRunning;
 
     [ObservableProperty]
-    private string remainingText = "05:00";
+    private string remainingText;
 
-    public bool CanDecreaseMinute => duration > Minute;
+    public bool CanDecreaseMinute => duration > adjustment;
 
     public string ToggleGlyph => IsRunning ? "\uF8AE" : "\uF5B0";
 
@@ -46,8 +54,8 @@ public partial class TimerViewModel : ObservableObject
     public void AddMinute()
     {
         RefreshIfRunning();
-        duration += Minute;
-        remaining += Minute;
+        duration += adjustment;
+        remaining += adjustment;
         UpdateText();
         OnPropertyChanged(nameof(CanDecreaseMinute));
     }
@@ -60,8 +68,8 @@ public partial class TimerViewModel : ObservableObject
         }
 
         RefreshIfRunning();
-        duration -= Minute;
-        remaining -= Minute;
+        duration -= adjustment;
+        remaining -= adjustment;
 
         if (remaining <= TimeSpan.Zero)
         {
@@ -96,12 +104,23 @@ public partial class TimerViewModel : ObservableObject
         return completed;
     }
 
+    public void ApplySettings(TimerSettings settings)
+    {
+        adjustment = GetAdjustment(settings);
+
+        if (!IsRunning)
+        {
+            duration = GetDefaultDuration(settings);
+            remaining = duration;
+            UpdateText();
+        }
+
+        OnPropertyChanged(nameof(CanDecreaseMinute));
+    }
+
     private void UpdateText()
     {
-        TimeSpan display = remaining < TimeSpan.Zero ? TimeSpan.Zero : remaining;
-        RemainingText = display.TotalHours >= 1
-            ? $"{(int)display.TotalHours:00}:{display.Minutes:00}:{display.Seconds:00}"
-            : $"{display.Minutes:00}:{display.Seconds:00}";
+        RemainingText = FormatTime(remaining);
     }
 
     private void RefreshIfRunning()
@@ -110,5 +129,19 @@ public partial class TimerViewModel : ObservableObject
         {
             Refresh();
         }
+    }
+
+    private static TimeSpan GetAdjustment(TimerSettings settings) =>
+        TimeSpan.FromMinutes(Math.Clamp(settings.AdjustmentMinutes, 0.5, 60));
+
+    private static TimeSpan GetDefaultDuration(TimerSettings settings) =>
+        TimeSpan.FromMinutes(Math.Clamp(settings.DefaultDurationMinutes, 1, 1440));
+
+    private static string FormatTime(TimeSpan value)
+    {
+        TimeSpan display = value < TimeSpan.Zero ? TimeSpan.Zero : value;
+        return display.TotalHours >= 1
+            ? $"{(int)display.TotalHours:00}:{display.Minutes:00}:{display.Seconds:00}"
+            : $"{display.Minutes:00}:{display.Seconds:00}";
     }
 }

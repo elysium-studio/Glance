@@ -15,15 +15,18 @@ public sealed class PowerComponent :
     private readonly ITextLocalizer localizer;
     private readonly PowerViewModel viewModel;
     private readonly IGlanceAttentionService attentionService;
+    private readonly GlanceModuleOptions<PowerSettings> options;
     private int attentionBand;
 
     public PowerComponent(
         PowerViewModel viewModel,
         IGlanceAttentionService attentionService,
+        GlanceModuleOptions<PowerSettings> options,
         ModuleResourceTextLocalizer<PowerModule> localizer)
     {
         this.viewModel = viewModel;
         this.attentionService = attentionService;
+        this.options = options;
         this.localizer = localizer;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
@@ -39,6 +42,7 @@ public sealed class PowerComponent :
         PowerManager.PowerSourceKindChanged += HandlePowerChanged;
         PowerManager.RemainingChargePercentChanged += HandlePowerChanged;
         PowerManager.RemainingDischargeTimeChanged += HandlePowerChanged;
+        options.Changed += HandleOptionsChanged;
 
         PowerSnapshot initialSnapshot = PowerStateReader.Read();
         attentionBand = GetAttentionBand(initialSnapshot);
@@ -67,10 +71,14 @@ public sealed class PowerComponent :
         PowerManager.PowerSourceKindChanged -= HandlePowerChanged;
         PowerManager.RemainingChargePercentChanged -= HandlePowerChanged;
         PowerManager.RemainingDischargeTimeChanged -= HandlePowerChanged;
+        options.Changed -= HandleOptionsChanged;
     }
 
     private void HandlePowerChanged(object? sender, object args) =>
         dispatcherQueue.TryEnqueue(Refresh);
+
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<PowerSettings> args) =>
+        dispatcherQueue.TryEnqueue(() => attentionBand = GetAttentionBand(PowerStateReader.Read()));
 
     private void Refresh()
     {
@@ -87,18 +95,16 @@ public sealed class PowerComponent :
         attentionBand = currentBand;
     }
 
-    private static int GetAttentionBand(PowerSnapshot snapshot)
+    private int GetAttentionBand(PowerSnapshot snapshot)
     {
         if (snapshot.BatteryState != BatteryState.Discharging)
         {
             return 0;
         }
 
-        return snapshot.ChargePercent switch
-        {
-            <= 10 => 2,
-            <= 20 => 1,
-            _ => 0
-        };
+        int criticalThreshold = (int)Math.Clamp(options.Current.CriticalBatteryThreshold, 5, 20);
+        int lowThreshold = Math.Max(criticalThreshold, (int)Math.Clamp(options.Current.LowBatteryThreshold, 10, 50));
+
+        return snapshot.ChargePercent <= criticalThreshold ? 2 : snapshot.ChargePercent <= lowThreshold ? 1 : 0;
     }
 }

@@ -64,4 +64,16 @@
   <data name="MinutesRemaining" xml:space="preserve">
     <value>{0} min rimanenti</value>
   </data>
+  <data name="LowBatteryThresholdSettingCard.Header" xml:space="preserve">
+    <value>Low battery alert</value>
+  </data>
+  <data name="LowBatteryThresholdSettingCard.Description" xml:space="preserve">
+    <value>Call for attention when the battery reaches this percentage.</value>
+  </data>
+  <data name="CriticalBatteryThresholdSettingCard.Header" xml:space="preserve">
+    <value>Critical battery alert</value>
+  </data>
+  <data name="CriticalBatteryThresholdSettingCard.Description" xml:space="preserve">
+    <value>Call for urgent attention when the battery reaches this percentage.</value>
+  </data>
 </root>

@@ -12,12 +12,12 @@ public sealed class DevicePresenceComponent :
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
-    private const byte LowBatteryThreshold = 20;
     private readonly IGlanceAttentionService attentionService;
     private readonly IDevicePresenceService devicePresenceService;
     private readonly DispatcherQueue dispatcherQueue;
     private readonly ModuleResourceTextLocalizer<DevicePresenceModule> localizer;
     private readonly DevicePresenceViewModel viewModel;
+    private readonly GlanceModuleOptions<DevicePresenceSettings> options;
     private HashSet<string> currentDeviceIds = new(StringComparer.OrdinalIgnoreCase);
     private HashSet<string> lowBatteryDeviceIds = new(StringComparer.OrdinalIgnoreCase);
     private bool hasSnapshot;
@@ -26,11 +26,13 @@ public sealed class DevicePresenceComponent :
         DevicePresenceViewModel viewModel,
         IDevicePresenceService devicePresenceService,
         IGlanceAttentionService attentionService,
+        GlanceModuleOptions<DevicePresenceSettings> options,
         ModuleResourceTextLocalizer<DevicePresenceModule> localizer)
     {
         this.viewModel = viewModel;
         this.devicePresenceService = devicePresenceService;
         this.attentionService = attentionService;
+        this.options = options;
         this.localizer = localizer;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
@@ -43,6 +45,7 @@ public sealed class DevicePresenceComponent :
         ExpandedAnimationElement = expandedView.ConnectedAnimationElement;
 
         devicePresenceService.DevicesChanged += HandleDevicesChanged;
+        options.Changed += HandleOptionsChanged;
 
         if (devicePresenceService.IsReady)
         {
@@ -66,8 +69,26 @@ public sealed class DevicePresenceComponent :
 
     public object ExpandedAnimationElement { get; }
 
-    public void Dispose() =>
+    public void Dispose()
+    {
         devicePresenceService.DevicesChanged -= HandleDevicesChanged;
+        options.Changed -= HandleOptionsChanged;
+    }
+
+    private byte LowBatteryThreshold => (byte)Math.Clamp(options.Current.LowBatteryThreshold, 5, 50);
+
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<DevicePresenceSettings> args) =>
+        dispatcherQueue.TryEnqueue(() =>
+        {
+            if (devicePresenceService.IsReady)
+            {
+                IReadOnlyList<ConnectedBluetoothDevice> devices = devicePresenceService.GetConnectedDevices();
+                viewModel.Update(devices, null);
+                currentDeviceIds = devices.Select(device => device.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                lowBatteryDeviceIds = devices.Where(device => device.BatteryLevel <= LowBatteryThreshold).Select(device => device.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                hasSnapshot = true;
+            }
+        });
 
     private void HandleDevicesChanged(object? sender, EventArgs args)
     {

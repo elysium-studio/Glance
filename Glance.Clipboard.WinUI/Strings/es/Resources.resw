@@ -118,4 +118,10 @@
   <data name="RemoveButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>Eliminar</value>
   </data>
+  <data name="ClipboardHistoryLimitSettingCard.Header" xml:space="preserve">
+    <value>History size</value>
+  </data>
+  <data name="ClipboardHistoryLimitSettingCard.Description" xml:space="preserve">
+    <value>Maximum number of recent clipboard items to keep.</value>
+  </data>
 </root>

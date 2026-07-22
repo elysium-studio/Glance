@@ -6,4 +6,10 @@
   <data name="SelectRegionInstruction" xml:space="preserve"><value>Arraste para capturar uma região · Esc para cancelar</value></data><data name="SelectWindowInstruction" xml:space="preserve"><value>Selecione uma janela · Esc para cancelar</value></data><data name="SelectDisplayInstruction" xml:space="preserve"><value>Selecione uma tela · Esc para cancelar</value></data>
   <data name="RegionCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Capturar região</value></data><data name="WindowCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Capturar janela</value></data><data name="DisplayCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Capturar tela</value></data><data name="AllDisplaysCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Capturar todas as telas</value></data>
   <data name="CopyCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Copiar captura</value></data><data name="OpenCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Abrir captura</value></data><data name="RevealCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Mostrar na pasta</value></data><data name="DeleteCaptureButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Excluir captura</value></data>
+  <data name="RecentCaptureLimitSettingCard.Header" xml:space="preserve">
+    <value>Recent captures</value>
+  </data>
+  <data name="RecentCaptureLimitSettingCard.Description" xml:space="preserve">
+    <value>Maximum number of recent captures shown in the island.</value>
+  </data>
 </root>

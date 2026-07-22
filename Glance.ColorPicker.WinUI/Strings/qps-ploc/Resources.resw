@@ -4,4 +4,10 @@
   <data name="ModuleDisplayName" xml:space="preserve"><value>[Çøløür pïçkër]</value></data><data name="ModuleDescription" xml:space="preserve"><value>[Pïçk çøløürs ånywhërë øn sçrëën ånd çøpy thëïr vålüës.]</value></data>
   <data name="PickButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Pïçk å çøløür frøm thë sçrëën]</value></data><data name="PickButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>[Pïçk å çøløür frøm thë sçrëën]</value></data>
   <data name="CopyHexButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Çøpy HEX vålüë]</value></data><data name="CopyRgbButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Çøpy RGB vålüë]</value></data><data name="CopyHslButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Çøpy HSL vålüë]</value></data>
+  <data name="RecentColorLimitSettingCard.Header" xml:space="preserve">
+    <value>Recent colours</value>
+  </data>
+  <data name="RecentColorLimitSettingCard.Description" xml:space="preserve">
+    <value>Maximum number of recently picked colours to keep.</value>
+  </data>
 </root>

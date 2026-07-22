@@ -53,6 +53,16 @@ public sealed class VoiceNotesViewModelTests
     }
 
     [Fact]
+    public void RecentRecordingLimit_ComesFromModuleSettings()
+    {
+        VoiceNotesViewModel viewModel = new(new FakeLocalizer(), new VoiceNotesSettings { RecentRecordingLimit = 2 });
+
+        viewModel.SetRecordings(Enumerable.Range(1, 4).Select(index => CreateNote($"note-{index}.wav", index)));
+
+        Assert.Equal(2, viewModel.Recordings.Count);
+    }
+
+    [Fact]
     public void RemoveRecording_UpdatesEmptyState()
     {
         VoiceNotesViewModel viewModel = new(new FakeLocalizer());

@@ -11,19 +11,24 @@ public sealed class FocusSessionComponent :
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
+    private readonly DispatcherQueue dispatcherQueue;
     private readonly IGlanceAttentionService attentionService;
     private readonly ITextLocalizer localizer;
     private readonly DispatcherQueueTimer timer;
     private readonly FocusSessionViewModel viewModel;
+    private readonly GlanceModuleOptions<FocusSessionSettings> options;
 
     public FocusSessionComponent(
         FocusSessionViewModel viewModel,
         IGlanceAttentionService attentionService,
+        GlanceModuleOptions<FocusSessionSettings> options,
         ModuleResourceTextLocalizer<FocusSessionModule> localizer)
     {
         this.viewModel = viewModel;
         this.attentionService = attentionService;
+        this.options = options;
         this.localizer = localizer;
+        dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
         FocusSessionCompactView compactView = new(viewModel);
         FocusSessionExpandedView expandedView = new(viewModel, localizer);
@@ -33,12 +38,13 @@ public sealed class FocusSessionComponent :
         CompactAnimationElement = compactView.ConnectedAnimationElement;
         ExpandedAnimationElement = expandedView.ConnectedAnimationElement;
 
-        timer = DispatcherQueue.GetForCurrentThread().CreateTimer();
+        timer = dispatcherQueue.CreateTimer();
         timer.Interval = TimeSpan.FromMilliseconds(250);
         timer.IsRepeating = true;
         timer.Tick += HandleTick;
 
         viewModel.PropertyChanged += HandlePropertyChanged;
+        options.Changed += HandleOptionsChanged;
     }
 
     public string Id => "FocusSession";
@@ -62,7 +68,11 @@ public sealed class FocusSessionComponent :
         timer.Stop();
         timer.Tick -= HandleTick;
         viewModel.PropertyChanged -= HandlePropertyChanged;
+        options.Changed -= HandleOptionsChanged;
     }
+
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<FocusSessionSettings> args) =>
+        dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
 
     private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs args)
     {

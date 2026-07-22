@@ -37,4 +37,16 @@
   <data name="ResetButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Zurücksetzen</value>
   </data>
+  <data name="TimerDefaultDurationSettingCard.Header" xml:space="preserve">
+    <value>Default duration</value>
+  </data>
+  <data name="TimerDefaultDurationSettingCard.Description" xml:space="preserve">
+    <value>Minutes used when the timer opens or its preferences change.</value>
+  </data>
+  <data name="TimerAdjustmentSettingCard.Header" xml:space="preserve">
+    <value>Adjustment step</value>
+  </data>
+  <data name="TimerAdjustmentSettingCard.Description" xml:space="preserve">
+    <value>Minutes added or removed by the timer controls.</value>
+  </data>
 </root>

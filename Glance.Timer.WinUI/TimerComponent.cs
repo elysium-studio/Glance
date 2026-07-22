@@ -11,19 +11,24 @@ public sealed class TimerComponent :
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
+    private readonly DispatcherQueue dispatcherQueue;
     private readonly DispatcherQueueTimer timer;
     private readonly ITextLocalizer localizer;
     private readonly TimerViewModel viewModel;
     private readonly IGlanceAttentionService attentionService;
+    private readonly GlanceModuleOptions<TimerSettings> options;
 
     public TimerComponent(
         TimerViewModel viewModel,
         IGlanceAttentionService attentionService,
+        GlanceModuleOptions<TimerSettings> options,
         ModuleResourceTextLocalizer<TimerModule> localizer)
     {
         this.viewModel = viewModel;
         this.attentionService = attentionService;
+        this.options = options;
         this.localizer = localizer;
+        dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
         TimerCompactView compactView = new(viewModel);
         TimerExpandedView expandedView = new(viewModel, localizer);
@@ -33,12 +38,13 @@ public sealed class TimerComponent :
         CompactAnimationElement = compactView.ConnectedAnimationElement;
         ExpandedAnimationElement = expandedView.ConnectedAnimationElement;
 
-        timer = DispatcherQueue.GetForCurrentThread().CreateTimer();
+        timer = dispatcherQueue.CreateTimer();
         timer.Interval = TimeSpan.FromMilliseconds(100);
         timer.IsRepeating = true;
         timer.Tick += HandleTick;
 
         viewModel.PropertyChanged += HandlePropertyChanged;
+        options.Changed += HandleOptionsChanged;
     }
 
     public string Id => "Timer";
@@ -62,7 +68,11 @@ public sealed class TimerComponent :
         timer.Stop();
         timer.Tick -= HandleTick;
         viewModel.PropertyChanged -= HandlePropertyChanged;
+        options.Changed -= HandleOptionsChanged;
     }
+
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<TimerSettings> args) =>
+        dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
 
     private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs args)
     {

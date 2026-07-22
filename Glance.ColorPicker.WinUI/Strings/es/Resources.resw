@@ -4,4 +4,10 @@
   <data name="ModuleDisplayName" xml:space="preserve"><value>Selector de color</value></data><data name="ModuleDescription" xml:space="preserve"><value>Selecciona colores de cualquier parte de la pantalla y copia sus valores.</value></data>
   <data name="PickButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Seleccionar un color de la pantalla</value></data><data name="PickButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Seleccionar un color de la pantalla</value></data>
   <data name="CopyHexButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Copiar valor HEX</value></data><data name="CopyRgbButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Copiar valor RGB</value></data><data name="CopyHslButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Copiar valor HSL</value></data>
+  <data name="RecentColorLimitSettingCard.Header" xml:space="preserve">
+    <value>Recent colours</value>
+  </data>
+  <data name="RecentColorLimitSettingCard.Description" xml:space="preserve">
+    <value>Maximum number of recently picked colours to keep.</value>
+  </data>
 </root>

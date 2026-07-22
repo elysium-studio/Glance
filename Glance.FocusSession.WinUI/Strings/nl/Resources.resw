@@ -3,4 +3,16 @@
   <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>2.0</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="ModuleDisplayName" xml:space="preserve"><value>Focussessie</value></data><data name="ModuleDescription" xml:space="preserve"><value>Blijf geconcentreerd met getimede werk- en herstelsessies.</value></data><data name="FocusPhase" xml:space="preserve"><value>Focus</value></data><data name="BreakPhase" xml:space="preserve"><value>Pauze</value></data>
   <data name="ToggleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Starten of pauzeren</value></data><data name="ToggleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Starten of pauzeren</value></data><data name="SkipButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Fase overslaan</value></data><data name="SkipButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Fase overslaan</value></data><data name="ResetButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Fase opnieuw instellen</value></data><data name="ResetButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Fase opnieuw instellen</value></data>
+  <data name="FocusDurationSettingCard.Header" xml:space="preserve">
+    <value>Focus duration</value>
+  </data>
+  <data name="FocusDurationSettingCard.Description" xml:space="preserve">
+    <value>Minutes in each focus period.</value>
+  </data>
+  <data name="BreakDurationSettingCard.Header" xml:space="preserve">
+    <value>Break duration</value>
+  </data>
+  <data name="BreakDurationSettingCard.Description" xml:space="preserve">
+    <value>Minutes in each break period.</value>
+  </data>
 </root>

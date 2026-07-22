@@ -7,9 +7,9 @@ public partial class ColorPickerViewModel :
     ObservableObject,
     IDisposable
 {
-    private const int MaximumRecentColors = 6;
     private readonly IColorPickerService colorPickerService;
     private readonly ITextCopyService textCopyService;
+    private int recentColorLimit;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Hex))]
@@ -22,10 +22,12 @@ public partial class ColorPickerViewModel :
 
     public ColorPickerViewModel(
         IColorPickerService colorPickerService,
-        ITextCopyService textCopyService)
+        ITextCopyService textCopyService,
+        ColorPickerSettings? settings = null)
     {
         this.colorPickerService = colorPickerService;
         this.textCopyService = textCopyService;
+        recentColorLimit = GetRecentColorLimit(settings ?? new ColorPickerSettings());
 
         colorPickerService.PreviewChanged += HandlePreviewChanged;
         colorPickerService.ColorPicked += HandleColorPicked;
@@ -85,7 +87,7 @@ public partial class ColorPickerViewModel :
 
         RecentColors.Insert(0, args.Color);
 
-        while (RecentColors.Count > MaximumRecentColors)
+        while (RecentColors.Count > recentColorLimit)
         {
             RecentColors.RemoveAt(RecentColors.Count - 1);
         }
@@ -93,4 +95,17 @@ public partial class ColorPickerViewModel :
 
     private void HandlePickingCancelled(object? sender, EventArgs args) =>
         IsPicking = false;
+
+    public void ApplySettings(ColorPickerSettings settings)
+    {
+        recentColorLimit = GetRecentColorLimit(settings);
+
+        while (RecentColors.Count > recentColorLimit)
+        {
+            RecentColors.RemoveAt(RecentColors.Count - 1);
+        }
+    }
+
+    private static int GetRecentColorLimit(ColorPickerSettings settings) =>
+        (int)Math.Clamp(settings.RecentColorLimit, 1, 12);
 }

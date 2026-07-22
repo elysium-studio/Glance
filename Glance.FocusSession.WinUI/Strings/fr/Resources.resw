@@ -3,4 +3,16 @@
   <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>2.0</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="ModuleDisplayName" xml:space="preserve"><value>Session de concentration</value></data><data name="ModuleDescription" xml:space="preserve"><value>Restez concentré grâce à des sessions de travail et de récupération chronométrées.</value></data><data name="FocusPhase" xml:space="preserve"><value>Concentration</value></data><data name="BreakPhase" xml:space="preserve"><value>Pause</value></data>
   <data name="ToggleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Démarrer ou suspendre</value></data><data name="ToggleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Démarrer ou suspendre</value></data><data name="SkipButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Passer la phase</value></data><data name="SkipButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Passer la phase</value></data><data name="ResetButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Réinitialiser la phase</value></data><data name="ResetButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Réinitialiser la phase</value></data>
+  <data name="FocusDurationSettingCard.Header" xml:space="preserve">
+    <value>Focus duration</value>
+  </data>
+  <data name="FocusDurationSettingCard.Description" xml:space="preserve">
+    <value>Minutes in each focus period.</value>
+  </data>
+  <data name="BreakDurationSettingCard.Header" xml:space="preserve">
+    <value>Break duration</value>
+  </data>
+  <data name="BreakDurationSettingCard.Description" xml:space="preserve">
+    <value>Minutes in each break period.</value>
+  </data>
 </root>

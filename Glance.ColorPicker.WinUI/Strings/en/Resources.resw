@@ -14,4 +14,10 @@
   <data name="CopyRgbButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Copy RGB value</value></data>
   <data name="CopyHslButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Copy HSL value</value></data>
   <data name="CopyHslButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Copy HSL value</value></data>
+  <data name="RecentColorLimitSettingCard.Header" xml:space="preserve">
+    <value>Recent colours</value>
+  </data>
+  <data name="RecentColorLimitSettingCard.Description" xml:space="preserve">
+    <value>Maximum number of recently picked colours to keep.</value>
+  </data>
 </root>

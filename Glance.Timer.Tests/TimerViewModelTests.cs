@@ -14,6 +14,27 @@ public sealed class TimerViewModelTests
     }
 
     [Fact]
+    public void Constructor_UsesModuleSettings()
+    {
+        TimerViewModel viewModel = new(new TimerSettings { DefaultDurationMinutes = 12, AdjustmentMinutes = 2 });
+
+        viewModel.AddMinute();
+
+        Assert.Equal("14:00", viewModel.RemainingText);
+    }
+
+    [Fact]
+    public void ApplySettings_UpdatesAnIdleTimer()
+    {
+        TimerViewModel viewModel = new();
+
+        viewModel.ApplySettings(new TimerSettings { DefaultDurationMinutes = 20, AdjustmentMinutes = 5 });
+        viewModel.DecreaseMinute();
+
+        Assert.Equal("15:00", viewModel.RemainingText);
+    }
+
+    [Fact]
     public void AddMinute_IncreasesDurationAndRemainingTime()
     {
         TimerViewModel viewModel = new();

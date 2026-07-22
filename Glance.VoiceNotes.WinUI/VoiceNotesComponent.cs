@@ -18,16 +18,19 @@ public sealed class VoiceNotesComponent :
     private readonly IVoiceRecordingService recordingService;
     private readonly DispatcherQueueTimer timer;
     private readonly VoiceNotesViewModel viewModel;
+    private readonly GlanceModuleOptions<VoiceNotesSettings> options;
     private readonly double[] waveformHistory = new double[42];
     private long recordingStartedTimestamp;
 
     public VoiceNotesComponent(
         VoiceNotesViewModel viewModel,
         IVoiceRecordingService recordingService,
+        GlanceModuleOptions<VoiceNotesSettings> options,
         ModuleResourceTextLocalizer<VoiceNotesModule> localizer)
     {
         this.viewModel = viewModel;
         this.recordingService = recordingService;
+        this.options = options;
         this.localizer = localizer;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
@@ -49,7 +52,8 @@ public sealed class VoiceNotesComponent :
         viewModel.DeleteRequested += HandleDeleteRequested;
         recordingService.LevelsChanged += HandleLevelsChanged;
         recordingService.RecordingCompleted += HandleRecordingCompleted;
-        viewModel.SetRecordings(recordingService.GetRecentRecordings(3));
+        options.Changed += HandleOptionsChanged;
+        viewModel.SetRecordings(recordingService.GetRecentRecordings(RecentRecordingLimit));
     }
 
     public string Id => "VoiceNotes";
@@ -77,12 +81,18 @@ public sealed class VoiceNotesComponent :
         viewModel.DeleteRequested -= HandleDeleteRequested;
         recordingService.LevelsChanged -= HandleLevelsChanged;
         recordingService.RecordingCompleted -= HandleRecordingCompleted;
+        options.Changed -= HandleOptionsChanged;
 
         if (recordingService.IsRecording)
         {
             recordingService.StopRecording();
         }
     }
+
+    private int RecentRecordingLimit => (int)Math.Clamp(options.Current.RecentRecordingLimit, 1, 10);
+
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<VoiceNotesSettings> args) =>
+        dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
 
     private void HandleRecordingToggleRequested(object? sender, EventArgs args)
     {

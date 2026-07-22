@@ -18,17 +18,20 @@ public sealed class ScreenCaptureComponent :
     private readonly ILogger<ScreenCaptureComponent> logger;
     private readonly IScreenCaptureService screenCaptureService;
     private readonly ScreenCaptureViewModel viewModel;
+    private readonly GlanceModuleOptions<ScreenCaptureSettings> options;
 
     public ScreenCaptureComponent(
         ScreenCaptureViewModel viewModel,
         IScreenCaptureService screenCaptureService,
         IGlanceAttentionService attentionService,
+        GlanceModuleOptions<ScreenCaptureSettings> options,
         ModuleResourceTextLocalizer<ScreenCaptureModule> localizer,
         ILogger<ScreenCaptureComponent> logger)
     {
         this.viewModel = viewModel;
         this.screenCaptureService = screenCaptureService;
         this.attentionService = attentionService;
+        this.options = options;
         this.localizer = localizer;
         this.logger = logger;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
@@ -46,7 +49,8 @@ public sealed class ScreenCaptureComponent :
         viewModel.RevealRequested += HandleRevealRequested;
         viewModel.CopyRequested += HandleCopyRequested;
         viewModel.DeleteRequested += HandleDeleteRequested;
-        viewModel.SetCaptures(screenCaptureService.GetRecentCaptures(6));
+        options.Changed += HandleOptionsChanged;
+        viewModel.SetCaptures(screenCaptureService.GetRecentCaptures(RecentCaptureLimit));
     }
 
     public string Id => "ScreenCapture";
@@ -72,7 +76,13 @@ public sealed class ScreenCaptureComponent :
         viewModel.RevealRequested -= HandleRevealRequested;
         viewModel.CopyRequested -= HandleCopyRequested;
         viewModel.DeleteRequested -= HandleDeleteRequested;
+        options.Changed -= HandleOptionsChanged;
     }
+
+    private int RecentCaptureLimit => (int)Math.Clamp(options.Current.RecentCaptureLimit, 1, 12);
+
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<ScreenCaptureSettings> args) =>
+        dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
 
     private void HandleCaptureRequested(object? sender, ScreenCaptureMode mode)
     {

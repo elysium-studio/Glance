@@ -1,5 +1,6 @@
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
+using Microsoft.UI.Dispatching;
 using System;
 
 namespace Glance.ColorPicker.WinUI;
@@ -12,16 +13,23 @@ public sealed class ColorPickerComponent :
     private readonly IColorPickerService colorPickerService;
     private readonly IGlanceAttentionService attentionService;
     private readonly ITextLocalizer localizer;
+    private readonly ColorPickerViewModel viewModel;
+    private readonly GlanceModuleOptions<ColorPickerSettings> options;
+    private readonly DispatcherQueue dispatcherQueue;
 
     public ColorPickerComponent(
         ColorPickerViewModel viewModel,
         IColorPickerService colorPickerService,
         IGlanceAttentionService attentionService,
+        GlanceModuleOptions<ColorPickerSettings> options,
         ModuleResourceTextLocalizer<ColorPickerModule> localizer)
     {
         this.colorPickerService = colorPickerService;
         this.attentionService = attentionService;
+        this.viewModel = viewModel;
+        this.options = options;
         this.localizer = localizer;
+        dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
         ColorPickerCompactView compactView = new(viewModel);
         ColorPickerExpandedView expandedView = new(viewModel, localizer);
@@ -32,6 +40,7 @@ public sealed class ColorPickerComponent :
         ExpandedAnimationElement = expandedView.ConnectedAnimationElement;
 
         colorPickerService.ColorPicked += HandleColorPicked;
+        options.Changed += HandleOptionsChanged;
     }
 
     public string Id => "ColorPicker";
@@ -50,8 +59,14 @@ public sealed class ColorPickerComponent :
 
     public object ExpandedAnimationElement { get; }
 
-    public void Dispose() =>
+    public void Dispose()
+    {
         colorPickerService.ColorPicked -= HandleColorPicked;
+        options.Changed -= HandleOptionsChanged;
+    }
+
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<ColorPickerSettings> args) =>
+        dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
 
     private void HandleColorPicked(object? sender, ColorPickerEventArgs args) =>
         attentionService.RequestAttention(Id);

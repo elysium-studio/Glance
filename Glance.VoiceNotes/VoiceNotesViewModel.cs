@@ -8,6 +8,7 @@ public partial class VoiceNotesViewModel :
     ObservableObject
 {
     private readonly ITextLocalizer localizer;
+    private int recentRecordingLimit;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ToggleGlyph))]
@@ -30,9 +31,10 @@ public partial class VoiceNotesViewModel :
     [ObservableProperty]
     private VoiceNoteItemViewModel? selectedRecording;
 
-    public VoiceNotesViewModel(ITextLocalizer localizer)
+    public VoiceNotesViewModel(ITextLocalizer localizer, VoiceNotesSettings? settings = null)
     {
         this.localizer = localizer;
+        recentRecordingLimit = GetRecentRecordingLimit(settings ?? new VoiceNotesSettings());
         statusText = localizer.GetText("ReadyToRecord");
     }
 
@@ -74,6 +76,8 @@ public partial class VoiceNotesViewModel :
             Recordings.Add(CreateItem(recording));
         }
 
+        TrimRecordings();
+
         HasRecordings = Recordings.Count > 0;
         SelectedRecording = Recordings.FirstOrDefault();
     }
@@ -109,10 +113,7 @@ public partial class VoiceNotesViewModel :
 
         Recordings.Insert(0, CreateItem(recording));
 
-        while (Recordings.Count > 3)
-        {
-            Recordings.RemoveAt(Recordings.Count - 1);
-        }
+        TrimRecordings();
 
         HasRecordings = true;
         SelectedRecording = Recordings[0];
@@ -153,6 +154,25 @@ public partial class VoiceNotesViewModel :
         AudioLevelsChanged?.Invoke(
             this,
             new VoiceLevelsChangedEventArgs([.. levels]));
+
+    public void ApplySettings(VoiceNotesSettings settings)
+    {
+        recentRecordingLimit = GetRecentRecordingLimit(settings);
+        TrimRecordings();
+        HasRecordings = Recordings.Count > 0;
+        SelectedRecording ??= Recordings.FirstOrDefault();
+    }
+
+    private void TrimRecordings()
+    {
+        while (Recordings.Count > recentRecordingLimit)
+        {
+            Recordings.RemoveAt(Recordings.Count - 1);
+        }
+    }
+
+    private static int GetRecentRecordingLimit(VoiceNotesSettings settings) =>
+        (int)Math.Clamp(settings.RecentRecordingLimit, 1, 10);
 
     private static string FormatElapsed(TimeSpan elapsed) =>
         elapsed.TotalHours >= 1

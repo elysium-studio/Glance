@@ -11,16 +11,21 @@ public sealed class SystemMonitorComponent :
     IDisposable
 {
     private readonly DispatcherQueueTimer timer;
+    private readonly DispatcherQueue dispatcherQueue;
     private readonly ITextLocalizer localizer;
     private readonly SystemMetricsReader metricsReader = new();
     private readonly SystemMonitorViewModel viewModel;
+    private readonly GlanceModuleOptions<SystemMonitorSettings> options;
 
     public SystemMonitorComponent(
         SystemMonitorViewModel viewModel,
+        GlanceModuleOptions<SystemMonitorSettings> options,
         ModuleResourceTextLocalizer<SystemMonitorModule> localizer)
     {
         this.viewModel = viewModel;
+        this.options = options;
         this.localizer = localizer;
+        dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
         SystemMonitorCompactView compactView = new(viewModel);
         SystemMonitorExpandedView expandedView = new(viewModel, localizer);
@@ -30,11 +35,12 @@ public sealed class SystemMonitorComponent :
         CompactAnimationElement = compactView.ConnectedAnimationElement;
         ExpandedAnimationElement = expandedView.ConnectedAnimationElement;
 
-        timer = DispatcherQueue.GetForCurrentThread().CreateTimer();
-        timer.Interval = TimeSpan.FromSeconds(1);
+        timer = dispatcherQueue.CreateTimer();
+        timer.Interval = GetRefreshInterval(options.Current);
         timer.IsRepeating = true;
         timer.Tick += HandleTick;
         timer.Start();
+        options.Changed += HandleOptionsChanged;
 
         UpdateMetrics();
     }
@@ -59,9 +65,16 @@ public sealed class SystemMonitorComponent :
     {
         timer.Stop();
         timer.Tick -= HandleTick;
+        options.Changed -= HandleOptionsChanged;
     }
 
     private void HandleTick(DispatcherQueueTimer sender, object args) => UpdateMetrics();
+
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<SystemMonitorSettings> args) =>
+        dispatcherQueue.TryEnqueue(() => timer.Interval = GetRefreshInterval(args.Options));
+
+    private static TimeSpan GetRefreshInterval(SystemMonitorSettings settings) =>
+        TimeSpan.FromSeconds(Math.Clamp(settings.RefreshIntervalSeconds, 0.5, 10));
 
     private void UpdateMetrics()
     {

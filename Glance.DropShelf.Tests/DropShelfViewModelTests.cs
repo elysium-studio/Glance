@@ -70,6 +70,19 @@ public sealed class DropShelfViewModelTests
     }
 
     [Fact]
+    public void AddItems_RespectsConfiguredShelfCapacity()
+    {
+        DropShelfViewModel viewModel = new(new TestTextLocalizer(), new DropShelfSettings { ItemLimit = 2 });
+
+        viewModel.AddItems([
+            new("C:\\One.txt", "One.txt", false),
+            new("C:\\Two.txt", "Two.txt", false),
+            new("C:\\Three.txt", "Three.txt", false)]);
+
+        Assert.Equal(["C:\\Two.txt", "C:\\Three.txt"], viewModel.Items.Select(item => item.Path));
+    }
+
+    [Fact]
     public void Remove_UpdatesSummaryAndEmptyState()
     {
         DropShelfViewModel viewModel = CreateViewModel();

@@ -11,20 +11,24 @@ namespace Glance.DropShelf.WinUI;
 public sealed class DropShelfComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
-    IGlanceContextAwareComponent
+    IGlanceContextAwareComponent,
+    IDisposable
 {
     private readonly DispatcherQueue dispatcherQueue;
     private readonly ITextLocalizer localizer;
     private readonly DropShelfTransferStore transferStore;
     private readonly DropShelfViewModel viewModel;
+    private readonly GlanceModuleOptions<DropShelfSettings> options;
 
     public DropShelfComponent(
         DropShelfViewModel viewModel,
         DropShelfTransferStore transferStore,
+        GlanceModuleOptions<DropShelfSettings> options,
         ModuleResourceTextLocalizer<DropShelfModule> localizer)
     {
         this.viewModel = viewModel;
         this.transferStore = transferStore;
+        this.options = options;
         this.localizer = localizer;
 
         DropShelfCompactView compactView = new(viewModel);
@@ -35,6 +39,7 @@ public sealed class DropShelfComponent :
         ExpandedContent = expandedView;
         CompactAnimationElement = compactView.ConnectedAnimationElement;
         ExpandedAnimationElement = expandedView.ConnectedAnimationElement;
+        options.Changed += HandleOptionsChanged;
     }
 
     public string Id => "DropShelf";
@@ -52,6 +57,8 @@ public sealed class DropShelfComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public void Dispose() => options.Changed -= HandleOptionsChanged;
 
     public bool CanHandle(GlanceContentKind kind) =>
         kind == GlanceContentKind.FilesAndFolders;
@@ -71,6 +78,9 @@ public sealed class DropShelfComponent :
             await transferStore.StageAsync(items);
         await AddItemsAsync(stagedItems);
     }
+
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<DropShelfSettings> args) =>
+        dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
 
     private Task AddItemsAsync(IReadOnlyList<DropShelfItem> items)
     {

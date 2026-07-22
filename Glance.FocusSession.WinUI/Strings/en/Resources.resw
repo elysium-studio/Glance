@@ -14,4 +14,16 @@
   <data name="SkipButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Skip phase</value></data>
   <data name="ResetButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Reset phase</value></data>
   <data name="ResetButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Reset phase</value></data>
+  <data name="FocusDurationSettingCard.Header" xml:space="preserve">
+    <value>Focus duration</value>
+  </data>
+  <data name="FocusDurationSettingCard.Description" xml:space="preserve">
+    <value>Minutes in each focus period.</value>
+  </data>
+  <data name="BreakDurationSettingCard.Header" xml:space="preserve">
+    <value>Break duration</value>
+  </data>
+  <data name="BreakDurationSettingCard.Description" xml:space="preserve">
+    <value>Minutes in each break period.</value>
+  </data>
 </root>

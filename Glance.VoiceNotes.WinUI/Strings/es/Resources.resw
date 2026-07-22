@@ -13,4 +13,10 @@
   <data name="RecordButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Iniciar o detener la grabación</value></data>
   <data name="NoRecordingsText.Text" xml:space="preserve"><value>No hay grabaciones recientes</value></data>
   <data name="DeleteRecordingMenuItem.Text" xml:space="preserve"><value>Eliminar grabación</value></data>
+  <data name="RecentRecordingLimitSettingCard.Header" xml:space="preserve">
+    <value>Recent recordings</value>
+  </data>
+  <data name="RecentRecordingLimitSettingCard.Description" xml:space="preserve">
+    <value>Maximum number of recent recordings shown in the island.</value>
+  </data>
 </root>

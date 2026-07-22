@@ -5,8 +5,8 @@ namespace Glance.FocusSession;
 
 public partial class FocusSessionViewModel : ObservableObject
 {
-    private readonly TimeSpan breakDuration;
-    private readonly TimeSpan focusDuration;
+    private TimeSpan breakDuration;
+    private TimeSpan focusDuration;
     private long lastTimestamp;
     private TimeSpan remaining;
 
@@ -107,6 +107,18 @@ public partial class FocusSessionViewModel : ObservableObject
         remaining = GetDuration(Phase);
         UpdateDisplay();
         return completedPhase;
+    }
+
+    public void ApplySettings(FocusSessionSettings settings)
+    {
+        focusDuration = TimeSpan.FromMinutes(Math.Clamp(settings.FocusDurationMinutes, 1, 180));
+        breakDuration = TimeSpan.FromMinutes(Math.Clamp(settings.BreakDurationMinutes, 1, 60));
+
+        if (!IsRunning)
+        {
+            remaining = GetDuration(Phase);
+            UpdateDisplay();
+        }
     }
 
     private static FocusSessionPhase GetNextPhase(FocusSessionPhase phase) =>

@@ -17,11 +17,15 @@ public partial class ModulePreferencesViewModel :
         IServiceFactory factory,
         IMessenger messenger,
         IDisposer disposer,
-        ModulePreferenceService preferences) :
+        ModulePreferenceService preferences,
+        IEnumerable<IGlanceModuleSettingViewModel> settings) :
         base(provider, factory, messenger, disposer)
     {
         this.preferences = preferences;
-        Modules = new ObservableCollection<ModuleSettingsItemViewModel>(preferences.GetPreferences().Select(CreateItem));
+        ILookup<string, IGlanceModuleSettingViewModel> settingsByModule = settings
+            .OrderBy(setting => setting.Order)
+            .ToLookup(setting => setting.ModuleId, StringComparer.OrdinalIgnoreCase);
+        Modules = new ObservableCollection<ModuleSettingsItemViewModel>(preferences.GetPreferences().Select(preference => CreateItem(preference, settingsByModule[preference.Id])));
     }
 
     public ObservableCollection<ModuleSettingsItemViewModel> Modules { get; }
@@ -29,7 +33,18 @@ public partial class ModulePreferencesViewModel :
     public Task SaveOrderAsync() =>
         preferences.SetOrderAsync(Modules.Select(item => item.Id));
 
-    private ModuleSettingsItemViewModel CreateItem(GlanceModulePreference preference)
+    public override void Dispose()
+    {
+        foreach (ModuleSettingsItemViewModel module in Modules)
+        {
+            module.Dispose();
+        }
+
+        Modules.Clear();
+        base.Dispose();
+    }
+
+    private ModuleSettingsItemViewModel CreateItem(GlanceModulePreference preference, IEnumerable<IGlanceModuleSettingViewModel> settings)
     {
         IGlanceComponent? component = preferences.GetComponent(preference.Id);
         string displayName = component?.DisplayName ?? preference.Id;
@@ -40,6 +55,7 @@ public partial class ModulePreferencesViewModel :
             displayName,
             description,
             preference.IsEnabled,
+            settings,
             (_, enabled) => preferences.SetEnabledAsync(preference.Id, enabled));
     }
 }

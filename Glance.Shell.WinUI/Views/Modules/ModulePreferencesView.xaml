@@ -3,8 +3,11 @@
     x:Class="Glance.Shell.WinUI.ModulePreferencesView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Application="using:Glance.Application.Abstractions"
     xmlns:CommunityToolkit="using:CommunityToolkit.WinUI.Controls"
+    xmlns:local="using:Glance.Shell.WinUI"
     xmlns:Shell="using:Glance.Shell"
+    xmlns:WinUI="using:Elysium.UI.WinUI"
     Loaded="{x:Bind ViewModel.Activate}"
     Unloaded="{x:Bind ViewModel.Deactivate}">
     <StackPanel Spacing="12">
@@ -32,14 +35,30 @@
             </ListView.ItemContainerStyle>
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="Shell:ModuleSettingsItemViewModel">
-                    <CommunityToolkit:SettingsCard
-                        Description="{x:Bind Description}"
-                        Header="{x:Bind DisplayName}"
-                        IsClickEnabled="False">
-                        <ToggleSwitch
-                            AutomationProperties.Name="{x:Bind DisplayName}"
-                            IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
-                    </CommunityToolkit:SettingsCard>
+                    <Grid>
+                        <CommunityToolkit:SettingsCard
+                            Description="{x:Bind Description}"
+                            Header="{x:Bind DisplayName}"
+                            IsClickEnabled="False"
+                            Visibility="{x:Bind local:ModulePreferencesView.WhenSettingsUnavailable(HasSettings)}">
+                            <ToggleSwitch AutomationProperties.Name="{x:Bind DisplayName}" IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
+                        </CommunityToolkit:SettingsCard>
+                        <CommunityToolkit:SettingsExpander
+                            Description="{x:Bind Description}"
+                            Header="{x:Bind DisplayName}"
+                            IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
+                            ItemsSource="{x:Bind Settings, Mode=OneWay}"
+                            Visibility="{x:Bind local:ModulePreferencesView.WhenSettingsAvailable(HasSettings)}">
+                            <CommunityToolkit:SettingsExpander.Content>
+                                <ToggleSwitch AutomationProperties.Name="{x:Bind DisplayName}" IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
+                            </CommunityToolkit:SettingsExpander.Content>
+                            <CommunityToolkit:SettingsExpander.ItemTemplate>
+                                <DataTemplate x:DataType="Application:IGlanceModuleSettingViewModel">
+                                    <ContentControl HorizontalContentAlignment="Stretch" Content="{x:Bind}" ContentTemplateSelector="{WinUI:ViewTemplateSelector}" />
+                                </DataTemplate>
+                            </CommunityToolkit:SettingsExpander.ItemTemplate>
+                        </CommunityToolkit:SettingsExpander>
+                    </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

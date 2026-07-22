@@ -28,4 +28,10 @@
   <data name="NetworkLabel.Text" xml:space="preserve">
     <value>RÉSEAU</value>
   </data>
+  <data name="RefreshIntervalSettingCard.Header" xml:space="preserve">
+    <value>Refresh interval</value>
+  </data>
+  <data name="RefreshIntervalSettingCard.Description" xml:space="preserve">
+    <value>How often system usage information is refreshed.</value>
+  </data>
 </root>

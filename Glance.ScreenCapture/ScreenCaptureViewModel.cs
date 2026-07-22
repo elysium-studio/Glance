@@ -7,6 +7,7 @@ namespace Glance.ScreenCapture;
 public partial class ScreenCaptureViewModel : ObservableObject
 {
     private readonly ITextLocalizer localizer;
+    private int recentCaptureLimit;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CompactStatusText))]
@@ -22,9 +23,10 @@ public partial class ScreenCaptureViewModel : ObservableObject
     [ObservableProperty]
     private ScreenCaptureItemViewModel? selectedCapture;
 
-    public ScreenCaptureViewModel(ITextLocalizer localizer)
+    public ScreenCaptureViewModel(ITextLocalizer localizer, ScreenCaptureSettings? settings = null)
     {
         this.localizer = localizer;
+        recentCaptureLimit = GetRecentCaptureLimit(settings ?? new ScreenCaptureSettings());
         statusText = localizer.GetText("ReadyToCapture");
     }
 
@@ -71,6 +73,8 @@ public partial class ScreenCaptureViewModel : ObservableObject
             Captures.Add(CreateItem(capture));
         }
 
+        TrimCaptures();
+
         UpdateSelection();
     }
 
@@ -93,10 +97,7 @@ public partial class ScreenCaptureViewModel : ObservableObject
 
         Captures.Insert(0, CreateItem(capture));
 
-        while (Captures.Count > 6)
-        {
-            Captures.RemoveAt(Captures.Count - 1);
-        }
+        TrimCaptures();
 
         HasCaptures = true;
         SelectedCapture = Captures[0];
@@ -120,6 +121,24 @@ public partial class ScreenCaptureViewModel : ObservableObject
 
         UpdateSelection();
     }
+
+    public void ApplySettings(ScreenCaptureSettings settings)
+    {
+        recentCaptureLimit = GetRecentCaptureLimit(settings);
+        TrimCaptures();
+        UpdateSelection();
+    }
+
+    private void TrimCaptures()
+    {
+        while (Captures.Count > recentCaptureLimit)
+        {
+            Captures.RemoveAt(Captures.Count - 1);
+        }
+    }
+
+    private static int GetRecentCaptureLimit(ScreenCaptureSettings settings) =>
+        (int)Math.Clamp(settings.RecentCaptureLimit, 1, 12);
 
     private void RequestCapture(ScreenCaptureMode mode)
     {

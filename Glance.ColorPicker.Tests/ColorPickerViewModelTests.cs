@@ -50,6 +50,19 @@ public sealed class ColorPickerViewModelTests
     }
 
     [Fact]
+    public void RecentColorLimit_ComesFromModuleSettings()
+    {
+        FakeColorPickerService picker = new();
+        ColorPickerViewModel viewModel = new(picker, new FakeTextCopyService(), new ColorPickerSettings { RecentColorLimit = 2 });
+
+        picker.Complete(new ColorValue(1, 1, 1));
+        picker.Complete(new ColorValue(2, 2, 2));
+        picker.Complete(new ColorValue(3, 3, 3));
+
+        Assert.Equal(2, viewModel.RecentColors.Count);
+    }
+
+    [Fact]
     public void CopyFunctions_CopyExpectedFormats()
     {
         FakeTextCopyService clipboard = new();

@@ -15,8 +15,6 @@ public sealed class ClipboardComponent :
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
-    private const int MaximumShelfItems = 6;
-
     private readonly ClipboardChangeListener? clipboardChangeListener;
     private readonly DispatcherQueueTimer clipboardPollTimer;
     private readonly DispatcherQueue dispatcherQueue;
@@ -26,17 +24,20 @@ public sealed class ClipboardComponent :
     private readonly SemaphoreSlim refreshGate = new(1, 1);
     private readonly ITextLocalizer localizer;
     private readonly ClipboardShelfViewModel viewModel;
+    private readonly GlanceModuleOptions<ClipboardSettings> options;
     private bool isDisposed;
     private uint lastSequenceNumber;
 
     public ClipboardComponent(
         ClipboardShelfViewModel viewModel,
+        GlanceModuleOptions<ClipboardSettings> options,
         ModuleResourceTextLocalizer<ClipboardModule> localizer)
     {
         ClipboardDiagnostics.Initialize();
         ClipboardDiagnostics.Write("Component", $"Creating. Diagnostics={ClipboardDiagnostics.FilePath}");
 
         this.viewModel = viewModel;
+        this.options = options;
         this.localizer = localizer;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         clipboardPollTimer = dispatcherQueue.CreateTimer();
@@ -66,6 +67,7 @@ public sealed class ClipboardComponent :
         }
 
         clipboardPollTimer.Start();
+        options.Changed += HandleOptionsChanged;
         _ = RefreshAsync();
     }
 
@@ -96,6 +98,8 @@ public sealed class ClipboardComponent :
             clipboardChangeListener.ClipboardChanged -= HandleClipboardChanged;
             clipboardChangeListener.Dispose();
         }
+
+        options.Changed -= HandleOptionsChanged;
     }
 
     private void HandleClipboardChanged(object? sender, object args)
@@ -169,7 +173,7 @@ public sealed class ClipboardComponent :
         localEntries.Insert(0, entry);
         localSnapshots[id] = snapshot;
 
-        while (localEntries.Count > MaximumShelfItems)
+        while (localEntries.Count > HistoryLimit)
         {
             ClipboardEntry removed = localEntries[^1];
             localEntries.RemoveAt(localEntries.Count - 1);
@@ -179,6 +183,21 @@ public sealed class ClipboardComponent :
         lastSequenceNumber = sequenceNumber;
         ClipboardDiagnostics.Write("Capture", $"Added {DescribeSnapshot(snapshot)}. Sequence={sequenceNumber}; Count={localEntries.Count}");
     }
+
+    private int HistoryLimit => (int)Math.Clamp(options.Current.HistoryLimit, 1, 20);
+
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<ClipboardSettings> args) =>
+        dispatcherQueue.TryEnqueue(() =>
+        {
+            while (localEntries.Count > HistoryLimit)
+            {
+                ClipboardEntry removed = localEntries[^1];
+                localEntries.RemoveAt(localEntries.Count - 1);
+                localSnapshots.Remove(removed.Id);
+            }
+
+            PublishEntries();
+        });
 
     private void PublishEntries()
     {

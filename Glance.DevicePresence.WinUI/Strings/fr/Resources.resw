@@ -13,4 +13,10 @@
   <data name="EmptyMessage.Text" xml:space="preserve"><value>Aucun appareil Bluetooth connecté</value></data>
   <data name="OpenSettingsButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Ouvrir les paramètres Bluetooth</value></data>
   <data name="OpenSettingsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Ouvrir les paramètres Bluetooth</value></data>
+  <data name="LowBatteryThresholdSettingCard.Header" xml:space="preserve">
+    <value>Low battery alert</value>
+  </data>
+  <data name="LowBatteryThresholdSettingCard.Description" xml:space="preserve">
+    <value>Call for attention when a connected device falls below this percentage.</value>
+  </data>
 </root>
