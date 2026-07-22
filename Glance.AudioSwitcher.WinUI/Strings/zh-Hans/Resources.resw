@@ -11,4 +11,6 @@
   <data name="PreviousButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>上一个输出</value></data>
   <data name="NextButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>下一个输出</value></data>
   <data name="NextButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>下一个输出</value></data>
+  <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>将输出静音或取消静音</value></data>
+  <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>将输出静音或取消静音</value></data>
 </root>

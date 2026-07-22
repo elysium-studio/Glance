@@ -2,6 +2,7 @@ using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Glance.AudioSwitcher.WinUI;
@@ -12,6 +13,8 @@ public sealed class WindowsAudioDeviceService :
     IDisposable
 {
     private readonly MMDeviceEnumerator deviceEnumerator = new();
+    private readonly Dictionary<string, TrackedOutputDevice> trackedOutputDevices = new(StringComparer.OrdinalIgnoreCase);
+    private readonly object gate = new();
     private bool isDisposed;
 
     public WindowsAudioDeviceService() =>
@@ -22,6 +25,7 @@ public sealed class WindowsAudioDeviceService :
     public IReadOnlyList<AudioOutputDevice> GetOutputDevices()
     {
         List<AudioOutputDevice> devices = [];
+        HashSet<string> activeDeviceIds = new(StringComparer.OrdinalIgnoreCase);
         string? defaultDeviceId = GetDefaultDeviceId();
 
         try
@@ -30,9 +34,21 @@ public sealed class WindowsAudioDeviceService :
 
             for (int index = 0; index < endpoints.Count; index++)
             {
-                using MMDevice endpoint = endpoints[index];
-                devices.Add(new AudioOutputDevice(endpoint.ID, endpoint.FriendlyName, string.Equals(endpoint.ID, defaultDeviceId, StringComparison.OrdinalIgnoreCase)));
+                MMDevice endpoint = endpoints[index];
+                activeDeviceIds.Add(endpoint.ID);
+
+                try
+                {
+                    TrackedOutputDevice trackedDevice = GetOrTrack(endpoint);
+                    devices.Add(new AudioOutputDevice(trackedDevice.Id, trackedDevice.Name, string.Equals(trackedDevice.Id, defaultDeviceId, StringComparison.OrdinalIgnoreCase), trackedDevice.VolumePercent, trackedDevice.IsMuted));
+                }
+                catch (Exception)
+                {
+                    endpoint.Dispose();
+                }
             }
+
+            RemoveInactiveDevices(activeDeviceIds);
         }
         catch (Exception)
         {
@@ -73,6 +89,34 @@ public sealed class WindowsAudioDeviceService :
         }
     }
 
+    public bool TrySetOutputMuted(string deviceId, bool isMuted)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(deviceId);
+
+        try
+        {
+            TrackedOutputDevice? trackedDevice;
+
+            lock (gate)
+            {
+                trackedOutputDevices.TryGetValue(deviceId, out trackedDevice);
+            }
+
+            if (trackedDevice is not null)
+            {
+                return trackedDevice.TrySetMuted(isMuted);
+            }
+
+            using MMDevice endpoint = deviceEnumerator.GetDevice(deviceId);
+            endpoint.AudioEndpointVolume.Mute = isMuted;
+            return endpoint.AudioEndpointVolume.Mute == isMuted;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
     public void Dispose()
     {
         if (isDisposed)
@@ -82,6 +126,17 @@ public sealed class WindowsAudioDeviceService :
 
         isDisposed = true;
         deviceEnumerator.UnregisterEndpointNotificationCallback(this);
+
+        lock (gate)
+        {
+            foreach (TrackedOutputDevice device in trackedOutputDevices.Values)
+            {
+                device.Dispose();
+            }
+
+            trackedOutputDevices.Clear();
+        }
+
         deviceEnumerator.Dispose();
     }
 
@@ -117,11 +172,80 @@ public sealed class WindowsAudioDeviceService :
     private void RaiseDevicesChanged() =>
         DevicesChanged?.Invoke(this, EventArgs.Empty);
 
+    private TrackedOutputDevice GetOrTrack(MMDevice endpoint)
+    {
+        lock (gate)
+        {
+            if (trackedOutputDevices.TryGetValue(endpoint.ID, out TrackedOutputDevice? existing))
+            {
+                endpoint.Dispose();
+                return existing;
+            }
+
+            TrackedOutputDevice trackedDevice = new(endpoint, RaiseDevicesChanged);
+            trackedOutputDevices.Add(endpoint.ID, trackedDevice);
+            return trackedDevice;
+        }
+    }
+
+    private void RemoveInactiveDevices(IReadOnlySet<string> activeDeviceIds)
+    {
+        lock (gate)
+        {
+            string[] inactiveDeviceIds = trackedOutputDevices.Keys.Where(id => !activeDeviceIds.Contains(id)).ToArray();
+
+            foreach (string deviceId in inactiveDeviceIds)
+            {
+                trackedOutputDevices.Remove(deviceId, out TrackedOutputDevice? device);
+                device?.Dispose();
+            }
+        }
+    }
+
     private static void SetDefaultEndpoint(
         IPolicyConfig policyConfig,
         string deviceId,
         AudioDeviceRole role) =>
         Marshal.ThrowExceptionForHR(policyConfig.SetDefaultEndpoint(deviceId, role));
+
+    private sealed class TrackedOutputDevice :
+        IDisposable
+    {
+        private readonly AudioEndpointVolume endpointVolume;
+        private readonly AudioEndpointVolumeNotificationDelegate volumeChanged;
+        private readonly MMDevice device;
+
+        public TrackedOutputDevice(
+            MMDevice device,
+            Action changed)
+        {
+            this.device = device;
+            endpointVolume = device.AudioEndpointVolume;
+            volumeChanged = _ => changed();
+            endpointVolume.OnVolumeNotification += volumeChanged;
+        }
+
+        public string Id => device.ID;
+
+        public string Name => device.FriendlyName;
+
+        public int VolumePercent => Math.Clamp((int)Math.Round(endpointVolume.MasterVolumeLevelScalar * 100, MidpointRounding.AwayFromZero), 0, 100);
+
+        public bool IsMuted => endpointVolume.Mute;
+
+        public bool TrySetMuted(bool isMuted)
+        {
+            endpointVolume.Mute = isMuted;
+            return endpointVolume.Mute == isMuted;
+        }
+
+        public void Dispose()
+        {
+            endpointVolume.OnVolumeNotification -= volumeChanged;
+            endpointVolume.Dispose();
+            device.Dispose();
+        }
+    }
 }
 
 internal enum AudioDeviceRole

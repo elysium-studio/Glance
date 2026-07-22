@@ -11,4 +11,6 @@
   <data name="PreviousButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Sortie précédente</value></data>
   <data name="NextButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Sortie suivante</value></data>
   <data name="NextButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Sortie suivante</value></data>
+  <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Couper ou rétablir le son de la sortie</value></data>
+  <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Couper ou rétablir le son de la sortie</value></data>
 </root>

@@ -11,4 +11,6 @@
   <data name="PreviousButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Salida anterior</value></data>
   <data name="NextButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Salida siguiente</value></data>
   <data name="NextButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Salida siguiente</value></data>
+  <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Silenciar o reactivar la salida</value></data>
+  <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Silenciar o reactivar la salida</value></data>
 </root>

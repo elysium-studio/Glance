@@ -11,4 +11,6 @@
   <data name="PreviousButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>[Prévïøüs øütpüt]</value></data>
   <data name="NextButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Néxt øütpüt]</value></data>
   <data name="NextButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>[Néxt øütpüt]</value></data>
+  <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Müté ör ünmüté öütpüt]</value></data>
+  <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>[Müté ör ünmüté öütpüt]</value></data>
 </root>

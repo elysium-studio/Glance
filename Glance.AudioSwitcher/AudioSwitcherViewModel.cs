@@ -18,7 +18,7 @@ public partial class AudioSwitcherViewModel : ObservableObject
     private bool hasDevices;
 
     [ObservableProperty]
-    private AudioOutputDevice? selectedDevice;
+    private AudioOutputDeviceItemViewModel? selectedDevice;
 
     public AudioSwitcherViewModel(
         IAudioDeviceService audioDeviceService,
@@ -31,30 +31,40 @@ public partial class AudioSwitcherViewModel : ObservableObject
         Refresh();
     }
 
-    public ObservableCollection<AudioOutputDevice> Devices { get; } = [];
+    public ObservableCollection<AudioOutputDeviceItemViewModel> Devices { get; } = [];
 
     public void Refresh()
     {
         IReadOnlyList<AudioOutputDevice> devices = audioDeviceService.GetOutputDevices();
-        AudioOutputDevice? currentDevice = devices.FirstOrDefault(device => device.IsDefault) ?? devices.FirstOrDefault();
-
-        isRefreshing = true;
-        Devices.Clear();
+        Dictionary<string, AudioOutputDeviceItemViewModel> existing = Devices.ToDictionary(device => device.Id, StringComparer.OrdinalIgnoreCase);
+        List<AudioOutputDeviceItemViewModel> ordered = [];
 
         foreach (AudioOutputDevice device in devices)
         {
-            Devices.Add(device);
+            if (existing.TryGetValue(device.Id, out AudioOutputDeviceItemViewModel? item))
+            {
+                item.Update(device);
+                ordered.Add(item);
+            }
+            else
+            {
+                ordered.Add(new AudioOutputDeviceItemViewModel(device, audioDeviceService));
+            }
         }
 
+        Synchronize(ordered);
+        AudioOutputDeviceItemViewModel? currentDevice = Devices.FirstOrDefault(device => device.IsDefault) ?? Devices.FirstOrDefault();
+
+        isRefreshing = true;
         HasDevices = Devices.Count > 0;
         SelectedDevice = null;
         SelectedDevice = currentDevice;
-        selectedDeviceId = currentDevice?.Id;
+        selectedDeviceId = currentDevice?.Device.Id;
         CurrentDeviceName = currentDevice?.Name ?? localizer.GetText("NoOutputDevice");
         isRefreshing = false;
     }
 
-    partial void OnSelectedDeviceChanged(AudioOutputDevice? value)
+    partial void OnSelectedDeviceChanged(AudioOutputDeviceItemViewModel? value)
     {
         if (isRefreshing || value is null || string.Equals(value.Id, selectedDeviceId, StringComparison.OrdinalIgnoreCase))
         {
@@ -65,9 +75,44 @@ public partial class AudioSwitcherViewModel : ObservableObject
         {
             selectedDeviceId = value.Id;
             CurrentDeviceName = value.Name;
+
+            foreach (AudioOutputDeviceItemViewModel device in Devices)
+            {
+                device.IsDefault = ReferenceEquals(device, value);
+            }
+
             return;
         }
 
         Refresh();
+    }
+
+    private void Synchronize(IReadOnlyList<AudioOutputDeviceItemViewModel> ordered)
+    {
+        for (int index = 0; index < ordered.Count; index++)
+        {
+            AudioOutputDeviceItemViewModel item = ordered[index];
+
+            if (index < Devices.Count && ReferenceEquals(Devices[index], item))
+            {
+                continue;
+            }
+
+            int currentIndex = Devices.IndexOf(item);
+
+            if (currentIndex >= 0)
+            {
+                Devices.Move(currentIndex, index);
+            }
+            else
+            {
+                Devices.Insert(index, item);
+            }
+        }
+
+        while (Devices.Count > ordered.Count)
+        {
+            Devices.RemoveAt(Devices.Count - 1);
+        }
     }
 }

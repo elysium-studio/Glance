@@ -7,12 +7,13 @@ public sealed class AudioSwitcherViewModelTests
     [Fact]
     public void Constructor_UsesCurrentDefaultOutput()
     {
-        FakeAudioDeviceService service = new(new AudioOutputDevice("speakers", "Speakers", false), new AudioOutputDevice("headphones", "Headphones", true));
+        FakeAudioDeviceService service = new(new AudioOutputDevice("speakers", "Speakers", false), new AudioOutputDevice("headphones", "Headphones", true, 68));
 
         AudioSwitcherViewModel viewModel = new(service, new FakeLocalizer());
 
         Assert.Equal("Headphones", viewModel.CurrentDeviceName);
         Assert.Equal("headphones", viewModel.SelectedDevice?.Id);
+        Assert.Equal("68%", viewModel.SelectedDevice?.VolumeText);
         Assert.Equal(2, viewModel.Devices.Count);
         Assert.True(viewModel.HasDevices);
     }
@@ -67,6 +68,20 @@ public sealed class AudioSwitcherViewModelTests
         Assert.Equal("speakers", viewModel.SelectedDevice?.Id);
     }
 
+    [Fact]
+    public void ToggleMute_UpdatesSelectedOutput()
+    {
+        FakeAudioDeviceService service = new(new AudioOutputDevice("speakers", "Speakers", true, 42));
+        AudioSwitcherViewModel viewModel = new(service, new FakeLocalizer());
+
+        viewModel.SelectedDevice!.ToggleMute();
+
+        Assert.Equal("speakers", service.LastMutedId);
+        Assert.True(service.LastMutedValue);
+        Assert.True(viewModel.SelectedDevice.IsMuted);
+        Assert.Equal("\uE74F", viewModel.SelectedDevice.ToggleGlyph);
+    }
+
     private sealed class FakeAudioDeviceService(params AudioOutputDevice[] devices) :
         IAudioDeviceService
     {
@@ -77,6 +92,10 @@ public sealed class AudioSwitcherViewModelTests
         public bool CanSetDefault { get; init; } = true;
 
         public string? LastSelectedId { get; private set; }
+
+        public string? LastMutedId { get; private set; }
+
+        public bool? LastMutedValue { get; private set; }
 
         public IReadOnlyList<AudioOutputDevice> GetOutputDevices() => devices;
 
@@ -93,6 +112,18 @@ public sealed class AudioSwitcherViewModelTests
             {
                 IsDefault = device.Id == deviceId
             })];
+            DevicesChanged?.Invoke(this, EventArgs.Empty);
+            return true;
+        }
+
+        public bool TrySetOutputMuted(string deviceId, bool isMuted)
+        {
+            LastMutedId = deviceId;
+            LastMutedValue = isMuted;
+            devices = [.. devices.Select(device => device.Id == deviceId ? device with
+            {
+                IsMuted = isMuted
+            } : device)];
             DevicesChanged?.Invoke(this, EventArgs.Empty);
             return true;
         }

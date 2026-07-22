@@ -7,4 +7,6 @@ public interface IAudioDeviceService
     IReadOnlyList<AudioOutputDevice> GetOutputDevices();
 
     bool TrySetDefaultOutput(string deviceId);
+
+    bool TrySetOutputMuted(string deviceId, bool isMuted);
 }
