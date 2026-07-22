@@ -3,6 +3,6 @@
     <Authors>Elysium Studio</Authors>
     <Company>Elysium Studio</Company>
     <Deterministic>true</Deterministic>
-    <ElysiumVersion>0.1.0-preview.36</ElysiumVersion>
+    <ElysiumVersion>0.1.0-preview.37</ElysiumVersion>
   </PropertyGroup>
 </Project>
