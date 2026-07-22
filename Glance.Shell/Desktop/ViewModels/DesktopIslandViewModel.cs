@@ -100,6 +100,8 @@ public partial class DesktopIslandViewModel :
 
     public void MovePrevious() => Move(-1);
 
+    public void CompleteStartup() => attentionService.CompleteStartup();
+
     public async void NavigateToSettings() => await NavigateAsync("SettingsWindow");
 
     public bool CanHandleContent(GlanceContentKind kind) =>

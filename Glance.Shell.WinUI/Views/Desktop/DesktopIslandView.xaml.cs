@@ -21,9 +21,11 @@ public partial class DesktopIslandView :
     DesktopIsland
 {
     private const int ContextualDragExitDelayMs = 160;
+    private const int StartupAttentionDelayMs = 2500;
 
     private readonly DispatcherQueue dispatcherQueue;
     private DispatcherQueueTimer? contextualDragExitTimer;
+    private DispatcherQueueTimer? startupAttentionTimer;
     private bool isContextualDragActive;
     private int contextualDragSession;
     private int previousIndex;
@@ -57,6 +59,7 @@ public partial class DesktopIslandView :
         previousIndex = ViewModel.SelectedIndex;
         ViewModel.PropertyChanged += HandleViewModelPropertyChanged;
         ViewModel.AttentionReceived += HandleAttentionReceived;
+        StartStartupAttentionTimer();
     }
 
     private void HandleUnloaded(object sender, RoutedEventArgs args)
@@ -64,6 +67,31 @@ public partial class DesktopIslandView :
         ViewModel.PropertyChanged -= HandleViewModelPropertyChanged;
         ViewModel.AttentionReceived -= HandleAttentionReceived;
         StopContextualDragExitTimer();
+        StopStartupAttentionTimer();
+    }
+
+    private void StartStartupAttentionTimer()
+    {
+        startupAttentionTimer ??= CreateStartupAttentionTimer();
+        startupAttentionTimer.Stop();
+        startupAttentionTimer.Start();
+    }
+
+    private DispatcherQueueTimer CreateStartupAttentionTimer()
+    {
+        DispatcherQueueTimer timer = DispatcherQueue.CreateTimer();
+        timer.Interval = TimeSpan.FromMilliseconds(StartupAttentionDelayMs);
+        timer.IsRepeating = false;
+        timer.Tick += HandleStartupAttentionTimerTick;
+        return timer;
+    }
+
+    private void StopStartupAttentionTimer() => startupAttentionTimer?.Stop();
+
+    private void HandleStartupAttentionTimerTick(DispatcherQueueTimer sender, object args)
+    {
+        sender.Stop();
+        ViewModel.CompleteStartup();
     }
 
     private void HandleAttentionReceived(object? sender, GlanceAttentionRequest request) =>

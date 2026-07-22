@@ -3,7 +3,6 @@ using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Glance.DevicePresence.WinUI;
 
@@ -13,14 +12,12 @@ public sealed class DevicePresenceComponent :
     IDisposable
 {
     private readonly IGlanceAttentionService attentionService;
+    private readonly DevicePresenceAttentionTracker attentionTracker = new();
     private readonly IDevicePresenceService devicePresenceService;
     private readonly DispatcherQueue dispatcherQueue;
     private readonly ModuleResourceTextLocalizer<DevicePresenceModule> localizer;
     private readonly DevicePresenceViewModel viewModel;
     private readonly GlanceModuleOptions<DevicePresenceSettings> options;
-    private HashSet<string> currentDeviceIds = new(StringComparer.OrdinalIgnoreCase);
-    private HashSet<string> lowBatteryDeviceIds = new(StringComparer.OrdinalIgnoreCase);
-    private bool hasSnapshot;
 
     public DevicePresenceComponent(
         DevicePresenceViewModel viewModel,
@@ -84,9 +81,7 @@ public sealed class DevicePresenceComponent :
             {
                 IReadOnlyList<ConnectedBluetoothDevice> devices = devicePresenceService.GetConnectedDevices();
                 viewModel.Update(devices, null);
-                currentDeviceIds = devices.Select(device => device.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
-                lowBatteryDeviceIds = devices.Where(device => device.BatteryLevel <= LowBatteryThreshold).Select(device => device.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
-                hasSnapshot = true;
+                attentionTracker.EstablishBaseline(devices);
             }
         });
 
@@ -103,19 +98,13 @@ public sealed class DevicePresenceComponent :
 
     private void ApplyDevices(IReadOnlyList<ConnectedBluetoothDevice> devices)
     {
-        ConnectedBluetoothDevice? addedDevice = hasSnapshot ? devices.FirstOrDefault(device => !currentDeviceIds.Contains(device.Id)) : null;
-        ConnectedBluetoothDevice? newlyLowDevice = hasSnapshot ? devices.FirstOrDefault(device => device.BatteryLevel <= LowBatteryThreshold && !lowBatteryDeviceIds.Contains(device.Id)) : null;
-        ConnectedBluetoothDevice? attentionDevice = addedDevice ?? newlyLowDevice;
+        ConnectedBluetoothDevice? attentionDevice = attentionTracker.Update(devices, LowBatteryThreshold);
 
         viewModel.Update(devices, attentionDevice?.Id);
-        currentDeviceIds = devices.Select(device => device.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        lowBatteryDeviceIds = devices.Where(device => device.BatteryLevel <= LowBatteryThreshold).Select(device => device.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         if (attentionDevice is not null)
         {
             attentionService.RequestAttention(Id);
         }
-
-        hasSnapshot = true;
     }
 }
