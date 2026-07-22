@@ -87,29 +87,37 @@ jobs:
             }
           }
 
-          $requiredModules = @(
-            "Glance.AudioSwitcher.WinUI.dll",
-            "Glance.Clipboard.WinUI.dll",
-            "Glance.ColorPicker.WinUI.dll",
-            "Glance.DevicePresence.WinUI.dll",
-            "Glance.DropShelf.WinUI.dll",
-            "Glance.FocusSession.WinUI.dll",
-            "Glance.Media.WinUI.dll",
-            "Glance.Power.WinUI.dll",
-            "Glance.PrivacyControls.WinUI.dll",
-            "Glance.RemovableDevices.WinUI.dll",
-            "Glance.ScreenCapture.WinUI.dll",
-            "Glance.Stopwatch.WinUI.dll",
-            "Glance.SystemMonitor.WinUI.dll",
-            "Glance.Timer.WinUI.dll",
-            "Glance.UI.WinUI.dll",
-            "Glance.VoiceNotes.WinUI.dll"
-          )
+          $requiredModules = @{
+            AudioSwitcher = @("Glance.AudioSwitcher.dll", "Glance.AudioSwitcher.WinUI.dll", "Glance.AudioSwitcher.WinUI.pri")
+            Clipboard = @("Glance.Clipboard.dll", "Glance.Clipboard.WinUI.dll", "Glance.Clipboard.WinUI.pri")
+            ColorPicker = @("Glance.ColorPicker.dll", "Glance.ColorPicker.WinUI.dll", "Glance.ColorPicker.WinUI.pri")
+            DevicePresence = @("Glance.DevicePresence.dll", "Glance.DevicePresence.WinUI.dll", "Glance.DevicePresence.WinUI.pri")
+            DropShelf = @("Glance.DropShelf.dll", "Glance.DropShelf.WinUI.dll", "Glance.DropShelf.WinUI.pri")
+            FocusSession = @("Glance.FocusSession.dll", "Glance.FocusSession.WinUI.dll", "Glance.FocusSession.WinUI.pri")
+            Media = @("Glance.Media.dll", "Glance.Media.WinUI.dll", "Glance.Media.WinUI.pri")
+            Power = @("Glance.Power.dll", "Glance.Power.WinUI.dll", "Glance.Power.WinUI.pri")
+            PrivacyControls = @("Glance.PrivacyControls.dll", "Glance.PrivacyControls.WinUI.dll", "Glance.PrivacyControls.WinUI.pri")
+            RemovableDevices = @("Glance.RemovableDevices.dll", "Glance.RemovableDevices.WinUI.dll", "Glance.RemovableDevices.WinUI.pri")
+            ScreenCapture = @("Glance.ScreenCapture.dll", "Glance.ScreenCapture.WinUI.dll", "Glance.ScreenCapture.WinUI.pri")
+            Stopwatch = @("Glance.Stopwatch.dll", "Glance.Stopwatch.WinUI.dll", "Glance.Stopwatch.WinUI.pri")
+            SystemMonitor = @("Glance.SystemMonitor.dll", "Glance.SystemMonitor.WinUI.dll", "Glance.SystemMonitor.WinUI.pri")
+            Timer = @("Glance.Timer.dll", "Glance.Timer.WinUI.dll", "Glance.Timer.WinUI.pri")
+            UI = @("Glance.UI.WinUI.dll", "Glance.UI.WinUI.pri")
+            VoiceNotes = @("Glance.VoiceNotes.dll", "Glance.VoiceNotes.WinUI.dll", "Glance.VoiceNotes.WinUI.pri")
+          }
 
-          foreach ($requiredModule in $requiredModules) {
-            $modulePath = Join-Path "artifacts/release" $requiredModule
+          foreach ($module in $requiredModules.GetEnumerator()) {
+            foreach ($requiredFile in $module.Value) {
+              $modulePath = Join-Path "artifacts/release/Modules/$($module.Key)" $requiredFile
 
-            if (-not (Test-Path -LiteralPath $modulePath -PathType Leaf)) {
-              throw "Managed publish did not include $requiredModule"
+              if (-not (Test-Path -LiteralPath $modulePath -PathType Leaf)) {
+                throw "Managed publish did not include Modules/$($module.Key)/$requiredFile"
+              }
             }
+          }
+
+          $flattenedModules = @(Get-ChildItem "artifacts/release" -File | Where-Object { $_.Name -match '^Glance\..+\.WinUI\.(dll|pri)$' })
+
+          if ($flattenedModules.Count -gt 0) {
+            throw "Module files were left in the application root: $($flattenedModules.Name -join ', ')"
           }

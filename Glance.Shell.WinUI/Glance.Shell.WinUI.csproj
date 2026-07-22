@@ -68,6 +68,28 @@
     <ProjectReference Include="..\Glance.UI.WinUI\Glance.UI.WinUI.csproj" />
     <ProjectReference Include="..\Glance.VoiceNotes.WinUI\Glance.VoiceNotes.WinUI.csproj" />
   </ItemGroup>
+  <Target Name="ArrangeGlanceModulesInBuildOutput" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true'">
+    <ItemGroup>
+      <GlanceModuleBuildFile Include="$(OutDir)Glance.AudioSwitcher.*"><ModuleName>AudioSwitcher</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(OutDir)Glance.Clipboard.*"><ModuleName>Clipboard</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(OutDir)Glance.ColorPicker.*"><ModuleName>ColorPicker</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(OutDir)Glance.DevicePresence.*"><ModuleName>DevicePresence</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(OutDir)Glance.DropShelf.*"><ModuleName>DropShelf</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(OutDir)Glance.FocusSession.*"><ModuleName>FocusSession</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(OutDir)Glance.Media.*"><ModuleName>Media</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(OutDir)Glance.Power.*"><ModuleName>Power</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(OutDir)Glance.PrivacyControls.*"><ModuleName>PrivacyControls</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(OutDir)Glance.RemovableDevices.*"><ModuleName>RemovableDevices</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(OutDir)Glance.ScreenCapture.*"><ModuleName>ScreenCapture</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(OutDir)Glance.Stopwatch.*"><ModuleName>Stopwatch</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(OutDir)Glance.SystemMonitor.*"><ModuleName>SystemMonitor</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(OutDir)Glance.Timer.*"><ModuleName>Timer</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(OutDir)Glance.UI.WinUI.*"><ModuleName>UI</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(OutDir)Glance.VoiceNotes.*"><ModuleName>VoiceNotes</ModuleName></GlanceModuleBuildFile>
+    </ItemGroup>
+    <Copy SourceFiles="@(GlanceModuleBuildFile)" DestinationFiles="@(GlanceModuleBuildFile->'$(OutDir)Modules\%(ModuleName)\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Delete Files="@(GlanceModuleBuildFile)" />
+  </Target>
   <Target Name="CopyPriAndXbfToPublish" AfterTargets="Publish">
     <ItemGroup>
       <PriFiles Include="$(OutDir)*.pri" />
@@ -75,6 +97,29 @@
     </ItemGroup>
     <Copy SourceFiles="@(PriFiles)" DestinationFolder="$(PublishDir)" />
     <Copy SourceFiles="@(XbfFiles)" DestinationFolder="$(PublishDir)" />
+  </Target>
+  <Target Name="ArrangeGlanceModulesInPublishOutput" AfterTargets="Publish" DependsOnTargets="CopyPriAndXbfToPublish">
+    <ItemGroup>
+      <GlanceModulePublishFile Include="$(OutDir)Modules\AudioSwitcher\Glance.AudioSwitcher.*;$(PublishDir)Glance.AudioSwitcher.*"><ModuleName>AudioSwitcher</ModuleName></GlanceModulePublishFile>
+      <GlanceModulePublishFile Include="$(OutDir)Modules\Clipboard\Glance.Clipboard.*;$(PublishDir)Glance.Clipboard.*"><ModuleName>Clipboard</ModuleName></GlanceModulePublishFile>
+      <GlanceModulePublishFile Include="$(OutDir)Modules\ColorPicker\Glance.ColorPicker.*;$(PublishDir)Glance.ColorPicker.*"><ModuleName>ColorPicker</ModuleName></GlanceModulePublishFile>
+      <GlanceModulePublishFile Include="$(OutDir)Modules\DevicePresence\Glance.DevicePresence.*;$(PublishDir)Glance.DevicePresence.*"><ModuleName>DevicePresence</ModuleName></GlanceModulePublishFile>
+      <GlanceModulePublishFile Include="$(OutDir)Modules\DropShelf\Glance.DropShelf.*;$(PublishDir)Glance.DropShelf.*"><ModuleName>DropShelf</ModuleName></GlanceModulePublishFile>
+      <GlanceModulePublishFile Include="$(OutDir)Modules\FocusSession\Glance.FocusSession.*;$(PublishDir)Glance.FocusSession.*"><ModuleName>FocusSession</ModuleName></GlanceModulePublishFile>
+      <GlanceModulePublishFile Include="$(OutDir)Modules\Media\Glance.Media.*;$(PublishDir)Glance.Media.*"><ModuleName>Media</ModuleName></GlanceModulePublishFile>
+      <GlanceModulePublishFile Include="$(OutDir)Modules\Power\Glance.Power.*;$(PublishDir)Glance.Power.*"><ModuleName>Power</ModuleName></GlanceModulePublishFile>
+      <GlanceModulePublishFile Include="$(OutDir)Modules\PrivacyControls\Glance.PrivacyControls.*;$(PublishDir)Glance.PrivacyControls.*"><ModuleName>PrivacyControls</ModuleName></GlanceModulePublishFile>
+      <GlanceModulePublishFile Include="$(OutDir)Modules\RemovableDevices\Glance.RemovableDevices.*;$(PublishDir)Glance.RemovableDevices.*"><ModuleName>RemovableDevices</ModuleName></GlanceModulePublishFile>
+      <GlanceModulePublishFile Include="$(OutDir)Modules\ScreenCapture\Glance.ScreenCapture.*;$(PublishDir)Glance.ScreenCapture.*"><ModuleName>ScreenCapture</ModuleName></GlanceModulePublishFile>
+      <GlanceModulePublishFile Include="$(OutDir)Modules\Stopwatch\Glance.Stopwatch.*;$(PublishDir)Glance.Stopwatch.*"><ModuleName>Stopwatch</ModuleName></GlanceModulePublishFile>
+      <GlanceModulePublishFile Include="$(OutDir)Modules\SystemMonitor\Glance.SystemMonitor.*;$(PublishDir)Glance.SystemMonitor.*"><ModuleName>SystemMonitor</ModuleName></GlanceModulePublishFile>
+      <GlanceModulePublishFile Include="$(OutDir)Modules\Timer\Glance.Timer.*;$(PublishDir)Glance.Timer.*"><ModuleName>Timer</ModuleName></GlanceModulePublishFile>
+      <GlanceModulePublishFile Include="$(OutDir)Modules\UI\Glance.UI.WinUI.*;$(PublishDir)Glance.UI.WinUI.*"><ModuleName>UI</ModuleName></GlanceModulePublishFile>
+      <GlanceModulePublishFile Include="$(OutDir)Modules\VoiceNotes\Glance.VoiceNotes.*;$(PublishDir)Glance.VoiceNotes.*"><ModuleName>VoiceNotes</ModuleName></GlanceModulePublishFile>
+      <GlanceModulePublishRootFile Include="$(PublishDir)Glance.AudioSwitcher.*;$(PublishDir)Glance.Clipboard.*;$(PublishDir)Glance.ColorPicker.*;$(PublishDir)Glance.DevicePresence.*;$(PublishDir)Glance.DropShelf.*;$(PublishDir)Glance.FocusSession.*;$(PublishDir)Glance.Media.*;$(PublishDir)Glance.Power.*;$(PublishDir)Glance.PrivacyControls.*;$(PublishDir)Glance.RemovableDevices.*;$(PublishDir)Glance.ScreenCapture.*;$(PublishDir)Glance.Stopwatch.*;$(PublishDir)Glance.SystemMonitor.*;$(PublishDir)Glance.Timer.*;$(PublishDir)Glance.UI.WinUI.*;$(PublishDir)Glance.VoiceNotes.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(GlanceModulePublishFile)" DestinationFiles="@(GlanceModulePublishFile->'$(PublishDir)Modules\%(ModuleName)\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Delete Files="@(GlanceModulePublishRootFile)" />
   </Target>
   <UsingTask TaskName="ExtractWindowsAppRuntimeInsightsResource" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
     <ParameterGroup>

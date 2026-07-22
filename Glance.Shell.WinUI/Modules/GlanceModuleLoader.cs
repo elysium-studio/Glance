@@ -10,13 +10,28 @@ namespace Glance.Shell.WinUI;
 
 internal static class GlanceModuleLoader
 {
+    private const string ModulesDirectoryName = "Modules";
+    private static IReadOnlyDictionary<string, string> moduleAssemblyPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    private static bool resolverRegistered;
+
     public static IReadOnlyList<IGlanceModule> Load()
     {
         List<IGlanceModule> modules = [];
+        string modulesDirectory = Path.Combine(AppContext.BaseDirectory, ModulesDirectoryName);
 
-        foreach (string path in Directory.EnumerateFiles(AppContext.BaseDirectory, "Glance.*.WinUI.dll"))
+        if (!Directory.Exists(modulesDirectory))
         {
-            Assembly assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
+            return modules;
+        }
+
+        string[] assemblyPaths = Directory.EnumerateFiles(modulesDirectory, "*.dll", SearchOption.AllDirectories).Order(StringComparer.OrdinalIgnoreCase).ToArray();
+        moduleAssemblyPaths = assemblyPaths.ToDictionary(path => AssemblyName.GetAssemblyName(path).Name!, StringComparer.OrdinalIgnoreCase);
+        RegisterResolver();
+
+        foreach (string path in assemblyPaths.Where(path => Path.GetFileName(path).StartsWith("Glance.", StringComparison.OrdinalIgnoreCase) && Path.GetFileName(path).EndsWith(".WinUI.dll", StringComparison.OrdinalIgnoreCase)))
+        {
+            AssemblyName assemblyName = AssemblyName.GetAssemblyName(path);
+            Assembly assembly = AssemblyLoadContext.Default.Assemblies.FirstOrDefault(candidate => AssemblyName.ReferenceMatchesDefinition(candidate.GetName(), assemblyName)) ?? AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
 
             foreach (Type type in GetLoadableTypes(assembly).Where(type => !type.IsAbstract && typeof(IGlanceModule).IsAssignableFrom(type)))
             {
@@ -28,6 +43,27 @@ internal static class GlanceModuleLoader
         }
 
         return modules;
+    }
+
+    private static void RegisterResolver()
+    {
+        if (resolverRegistered)
+        {
+            return;
+        }
+
+        AssemblyLoadContext.Default.Resolving += ResolveModuleAssembly;
+        resolverRegistered = true;
+    }
+
+    private static Assembly? ResolveModuleAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
+    {
+        if (assemblyName.Name is null || !moduleAssemblyPaths.TryGetValue(assemblyName.Name, out string? path))
+        {
+            return null;
+        }
+
+        return context.LoadFromAssemblyPath(path);
     }
 
     private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)

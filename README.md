@@ -29,7 +29,7 @@ Each feature is an independent pair of projects:
 - `Glance.<Module>` contains the platform-neutral state and view-model logic.
 - `Glance.<Module>.WinUI` contains the Windows integration, views, theme resources, and localized strings.
 
-Modules implement `IGlanceModule` and are discovered from `Glance.*.WinUI.dll` assemblies at startup. This keeps the shell small and allows a module to own its dependencies and presentation. Unit tests are kept in matching `Glance.<Module>.Tests` projects.
+Modules implement `IGlanceModule` and are discovered recursively from the `Modules` application directory at startup. Each module is published to `Modules/<Module>` with its domain assembly, WinUI assembly, symbols, and PRI resources kept together. Shared application and framework dependencies remain beside `Glance.exe`, while the module loader resolves module-owned assemblies from their module directories. This keeps the shell small and allows a module to own its dependencies and presentation. Unit tests are kept in matching `Glance.<Module>.Tests` projects.
 
 Glance consumes Elysium through NuGet package references, using the shared version declared in `Directory.Build.props`.
 
@@ -56,7 +56,7 @@ The application entry point is `Glance.Shell.WinUI`.
 
 Glance uses the same release model as Infinity: Velopack produces the directly distributed installer and update feed, while a separately generated MSIX upload is used for Microsoft Store releases. Store-packaged builds detect their package identity and do not initialise Velopack at runtime.
 
-Release builds remain self-contained managed .NET applications rather than using Native AOT. Glance discovers its `Glance.*.WinUI.dll` modules at runtime, so those assemblies must remain available for module loading.
+Release builds remain self-contained managed .NET applications rather than using Native AOT. Glance discovers its `Modules/<Module>/Glance.*.WinUI.dll` modules at runtime, so those directories must remain available for module loading.
 
 Copy `publish.local.example.json` to the ignored `publish.local.json`, fill in the credentials and Store identity values, then run:
 
