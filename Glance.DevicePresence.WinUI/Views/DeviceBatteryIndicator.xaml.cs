@@ -1,4 +1,3 @@
-using System;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -7,7 +6,10 @@ namespace Glance.DevicePresence.WinUI;
 public sealed partial class DeviceBatteryIndicator :
     UserControl
 {
-    public static readonly DependencyProperty BatteryLevelProperty = DependencyProperty.Register(nameof(BatteryLevel), typeof(int), typeof(DeviceBatteryIndicator), new PropertyMetadata(-1, HandleBatteryLevelChanged));
+    public static readonly DependencyProperty BatteryLevelProperty =
+        DependencyProperty.Register(nameof(BatteryLevel),
+            typeof(int), typeof(DeviceBatteryIndicator),
+            new PropertyMetadata(-1, HandleBatteryLevelChanged));
 
     public DeviceBatteryIndicator()
     {
@@ -35,6 +37,21 @@ public sealed partial class DeviceBatteryIndicator :
         }
 
         PercentageText.Text = $"{BatteryLevel}%";
-        BatteryFill.Width = BatteryLevel == 0 ? 0 : Math.Max(1, 11 * BatteryLevel / 100d);
+        BatteryGlyph.Glyph = GetBatteryGlyph(BatteryLevel);
     }
+
+    private static string GetBatteryGlyph(int batteryLevel) => batteryLevel switch
+    {
+        >= 100 => "\uE83F",
+        >= 90 => "\uE859",
+        >= 80 => "\uE858",
+        >= 70 => "\uE857",
+        >= 60 => "\uE856",
+        >= 50 => "\uE855",
+        >= 40 => "\uE854",
+        >= 30 => "\uE853",
+        >= 20 => "\uE852",
+        >= 10 => "\uE851",
+        _ => "\uE850"
+    };
 }

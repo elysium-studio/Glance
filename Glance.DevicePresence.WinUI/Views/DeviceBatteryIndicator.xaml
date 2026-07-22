@@ -11,31 +11,11 @@
             VerticalAlignment="Center"
             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
             Style="{StaticResource CaptionTextBlockStyle}" />
-        <Grid
-            Width="18"
-            Height="10"
-            VerticalAlignment="Center">
-            <Border
-                Width="15"
-                Height="10"
-                HorizontalAlignment="Left"
-                BorderBrush="{ThemeResource TextFillColorSecondaryBrush}"
-                BorderThickness="1"
-                CornerRadius="2">
-                <Border
-                    x:Name="BatteryFill"
-                    Height="6"
-                    Margin="1"
-                    HorizontalAlignment="Left"
-                    Background="{ThemeResource TextFillColorSecondaryBrush}"
-                    CornerRadius="1" />
-            </Border>
-            <Border
-                Width="2"
-                Height="4"
-                HorizontalAlignment="Right"
-                Background="{ThemeResource TextFillColorSecondaryBrush}"
-                CornerRadius="0,1,1,0" />
-        </Grid>
+        <FontIcon
+            x:Name="BatteryGlyph"
+            VerticalAlignment="Center"
+            FontFamily="Segoe Fluent Icons"
+            FontSize="16"
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
     </StackPanel>
 </UserControl>

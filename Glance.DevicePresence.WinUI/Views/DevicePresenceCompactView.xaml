@@ -36,6 +36,7 @@
             TextWrapping="NoWrap" />
         <local:DeviceBatteryIndicator
             Grid.Column="2"
+            Margin="0 0 6 0"
             BatteryLevel="{x:Bind ViewModel.SelectedDeviceBatteryLevel, Mode=OneWay}" />
     </Grid>
 </UserControl>
