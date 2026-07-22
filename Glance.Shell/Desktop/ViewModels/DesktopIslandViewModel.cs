@@ -120,6 +120,8 @@ public partial class DesktopIslandViewModel :
         return true;
     }
 
+    public void EndContentPreview() => IsExpanded = false;
+
     public async Task<bool> HandleContentAsync(GlanceContentContext context)
     {
         int componentIndex = FindContextComponentIndex(context.Kind);

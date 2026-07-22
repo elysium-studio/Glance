@@ -9,6 +9,7 @@
     AllowDrop="True"
     DataContext="{WinUI:ViewModel Key=DesktopIslandView}"
     DragEnter="{x:Bind HandleDragEnter}"
+    DragLeave="{x:Bind HandleDragLeave}"
     DragOver="{x:Bind HandleDragOver}"
     Drop="{x:Bind HandleDrop}"
     IsAutoHideEnabled="{x:Bind ViewModel.AutoHide, Mode=OneWay}"

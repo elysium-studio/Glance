@@ -20,7 +20,12 @@ namespace Glance.Shell.WinUI;
 public partial class DesktopIslandView :
     DesktopIsland
 {
+    private const int ContextualDragExitDelayMs = 160;
+
     private readonly DispatcherQueue dispatcherQueue;
+    private DispatcherQueueTimer? contextualDragExitTimer;
+    private bool isContextualDragActive;
+    private int contextualDragSession;
     private int previousIndex;
     private bool skipNextConnectedExpansion;
 
@@ -58,6 +63,7 @@ public partial class DesktopIslandView :
     {
         ViewModel.PropertyChanged -= HandleViewModelPropertyChanged;
         ViewModel.AttentionReceived -= HandleAttentionReceived;
+        StopContextualDragExitTimer();
     }
 
     private void HandleAttentionReceived(object? sender, GlanceAttentionRequest request) =>
@@ -190,12 +196,21 @@ public partial class DesktopIslandView :
         if (!CanAcceptContent(args.DataView))
         {
             args.AcceptedOperation = DataPackageOperation.None;
+            ScheduleContextualDragExit();
             return;
         }
 
+        StopContextualDragExitTimer();
+        isContextualDragActive = true;
+        int session = ++contextualDragSession;
         args.AcceptedOperation = DataPackageOperation.Copy;
         DispatcherQueue.TryEnqueue(() =>
-            ViewModel.TryActivateContent(GlanceContentKind.FilesAndFolders));
+        {
+            if (isContextualDragActive && session == contextualDragSession)
+            {
+                ViewModel.TryActivateContent(GlanceContentKind.FilesAndFolders);
+            }
+        });
     }
 
     private void HandleDragOver(object sender, DragEventArgs args)
@@ -203,11 +218,16 @@ public partial class DesktopIslandView :
         if (!CanAcceptContent(args.DataView))
         {
             args.AcceptedOperation = DataPackageOperation.None;
+            ScheduleContextualDragExit();
             return;
         }
 
+        StopContextualDragExitTimer();
         args.AcceptedOperation = DataPackageOperation.Copy;
     }
+
+    private void HandleDragLeave(object sender, DragEventArgs args) =>
+        ScheduleContextualDragExit();
 
     private bool CanAcceptContent(DataPackageView dataView)
     {
@@ -224,22 +244,20 @@ public partial class DesktopIslandView :
 
     private async void HandleDrop(object sender, DragEventArgs args)
     {
+        StopContextualDragExitTimer();
         DragOperationDeferral deferral = args.GetDeferral();
         GlanceStorageItem[] items = [];
+        bool contentHandled = false;
 
         try
         {
             DataPackageView dataView = args.DataView;
 
-            if (!dataView.Contains(StandardDataFormats.StorageItems))
+            if (dataView.Contains(StandardDataFormats.StorageItems))
             {
-                return;
+                IReadOnlyList<IStorageItem> storageItems = await dataView.GetStorageItemsAsync();
+                items = storageItems.Select(CreateStorageItem).OfType<GlanceStorageItem>().ToArray();
             }
-
-            IReadOnlyList<IStorageItem> storageItems =
-                await dataView.GetStorageItemsAsync();
-            items = storageItems
-                .Select(CreateStorageItem).OfType<GlanceStorageItem>().ToArray();
         }
         catch (COMException)
         {
@@ -257,11 +275,59 @@ public partial class DesktopIslandView :
             try
             {
                 await ProcessStorageItemsAsync(items);
+                contentHandled = true;
             }
             catch (Exception)
             {
             }
         }
+
+        CompleteContextualDrag(contentHandled);
+    }
+
+    private void ScheduleContextualDragExit()
+    {
+        if (!isContextualDragActive)
+        {
+            return;
+        }
+
+        contextualDragExitTimer ??= CreateContextualDragExitTimer();
+        contextualDragExitTimer.Stop();
+        contextualDragExitTimer.Start();
+    }
+
+    private DispatcherQueueTimer CreateContextualDragExitTimer()
+    {
+        DispatcherQueueTimer timer = DispatcherQueue.CreateTimer();
+        timer.Interval = TimeSpan.FromMilliseconds(ContextualDragExitDelayMs);
+        timer.IsRepeating = false;
+        timer.Tick += HandleContextualDragExitTimerTick;
+        return timer;
+    }
+
+    private void StopContextualDragExitTimer() => contextualDragExitTimer?.Stop();
+
+    private void HandleContextualDragExitTimerTick(DispatcherQueueTimer sender, object args)
+    {
+        sender.Stop();
+        CompleteContextualDrag(false);
+    }
+
+    private void CompleteContextualDrag(bool contentHandled)
+    {
+        StopContextualDragExitTimer();
+        isContextualDragActive = false;
+        contextualDragSession++;
+
+        if (contentHandled)
+        {
+            Reveal();
+            return;
+        }
+
+        ViewModel.EndContentPreview();
+        Dismiss();
     }
 
     private Task CompleteDropDeferralAsync(DragOperationDeferral deferral)
