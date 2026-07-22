@@ -27,7 +27,10 @@ namespace Glance.ScreenCapture.WinUI;
 
 internal sealed class CaptureSelectionWindow
 {
-    private const int AnimationDurationMs = 250;
+    private const int CaptureBeatDurationMs = 83;
+    private const int CaptureHoldDurationMs = 50;
+    private const int FlightDurationMs = 250;
+    private const int AnimationDurationMs = CaptureBeatDurationMs + CaptureHoldDurationMs + FlightDurationMs;
 
     private readonly DesktopCaptureBitmap bitmap;
     private readonly IReadOnlyList<CaptureSelectionCandidate> candidates;
@@ -364,14 +367,19 @@ internal sealed class CaptureSelectionWindow
         Visual captureVisual = ElementCompositionPreview.GetElementVisual(captureSurface);
         Compositor compositor = captureVisual.Compositor;
         TimeSpan duration = TimeSpan.FromMilliseconds(AnimationDurationMs);
+        SineEasingFunction captureEasing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.InOut);
         SineEasingFunction flightEasing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.Out);
         SineEasingFunction fadeEasing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.InOut);
+        float captureBeatProgress = CaptureBeatDurationMs / (float)AnimationDurationMs;
+        float flightStartProgress = (CaptureBeatDurationMs + CaptureHoldDurationMs) / (float)AnimationDurationMs;
+        float fadeStartProgress = (AnimationDurationMs - CaptureBeatDurationMs) / (float)AnimationDurationMs;
 
         Vector3 sourceOffset = captureVisual.Offset;
         Vector3 sourceCenter = new((float)sourceBounds.Width / 2, (float)sourceBounds.Height / 2, 0);
         Vector3 targetCenter = new((float)(targetBounds.X + (targetBounds.Width / 2)), (float)(targetBounds.Y + (targetBounds.Height / 2)), 0);
         Vector3 targetOffset = targetCenter - sourceCenter;
         float targetScale = Math.Min(1, Math.Min(64f / Math.Max(1, (float)sourceBounds.Width), 40f / Math.Max(1, (float)sourceBounds.Height)));
+        Vector3 capturedScale = new(0.965f, 0.965f, 1);
         Vector3 finalScale = new(targetScale, targetScale, 1);
 
         captureVisual.CenterPoint = sourceCenter;
@@ -379,17 +387,20 @@ internal sealed class CaptureSelectionWindow
         Vector3KeyFrameAnimation offsetAnimation = compositor.CreateVector3KeyFrameAnimation();
         offsetAnimation.Duration = duration;
         offsetAnimation.InsertKeyFrame(0, sourceOffset);
+        offsetAnimation.InsertKeyFrame(flightStartProgress, sourceOffset);
         offsetAnimation.InsertKeyFrame(1, targetOffset, flightEasing);
 
         Vector3KeyFrameAnimation scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
         scaleAnimation.Duration = duration;
         scaleAnimation.InsertKeyFrame(0, Vector3.One);
+        scaleAnimation.InsertKeyFrame(captureBeatProgress, capturedScale, captureEasing);
+        scaleAnimation.InsertKeyFrame(flightStartProgress, capturedScale);
         scaleAnimation.InsertKeyFrame(1, finalScale, flightEasing);
 
         ScalarKeyFrameAnimation opacityAnimation = compositor.CreateScalarKeyFrameAnimation();
         opacityAnimation.Duration = duration;
         opacityAnimation.InsertKeyFrame(0, 1);
-        opacityAnimation.InsertKeyFrame(0.68f, 1);
+        opacityAnimation.InsertKeyFrame(fadeStartProgress, 1);
         opacityAnimation.InsertKeyFrame(1, 0, fadeEasing);
 
         CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
