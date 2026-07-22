@@ -3,5 +3,9 @@ obj/
 .vs/
 build/
 build-check*/
+artifacts/
 *.user
 *.nupkg
+publish.local.json
+Publish/*
+!Publish/releases.json

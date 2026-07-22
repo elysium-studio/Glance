@@ -51,3 +51,17 @@ dotnet build Glance.slnx -p:Platform=x64
 ```
 
 The application entry point is `Glance.Shell.WinUI`.
+
+## Releasing
+
+Glance uses the same release model as Infinity: Velopack produces the directly distributed installer and update feed, while a separately generated MSIX upload is used for Microsoft Store releases. Store-packaged builds detect their package identity and do not initialise Velopack at runtime.
+
+Release builds remain self-contained managed .NET applications rather than using Native AOT. Glance discovers its `Glance.*.WinUI.dll` modules at runtime, so those assemblies must remain available for module loading.
+
+Copy `publish.local.example.json` to the ignored `publish.local.json`, fill in the credentials and Store identity values, then run:
+
+```powershell
+.\publish.ps1
+```
+
+Useful alternatives include `-SkipMicrosoftStore`, `-MicrosoftStorePackageOnly`, `-MicrosoftStoreDraft`, and `-GitReleaseOnly`. The script supports Azure Trusted Signing, SFTP update-feed upload, GitHub releases, and Partner Center submission. See [`Store/README.md`](Store/README.md) for the Microsoft Store prerequisites and servicing model.
