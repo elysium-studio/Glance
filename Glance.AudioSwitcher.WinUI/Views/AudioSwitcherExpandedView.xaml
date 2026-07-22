@@ -10,15 +10,13 @@
                 <ResourceDictionary Source="../Themes/AudioSwitcher.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <DataTemplate x:Key="AudioOutputItemTemplate" x:DataType="AudioSwitcher:AudioOutputDevice">
-                <Grid Margin="2,0,0,0" VerticalAlignment="Center">
-                    <Controls:MarqueeTextBlock
-                        Height="20"
-                        FontSize="14"
-                        FontWeight="SemiBold"
-                        Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                        Text="{x:Bind Name}"
-                        ToolTipService.ToolTip="{x:Bind Name}" />
-                </Grid>
+                <Controls:MarqueeTextBlock
+                    Margin="2,0,0,0"
+                    FontSize="14"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                    Text="{x:Bind Name}"
+                    ToolTipService.ToolTip="{x:Bind Name}" />
             </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -48,8 +46,8 @@
             VerticalAlignment="Center"
             RowSpacing="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="14" />
-                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <TextBlock
                 FontWeight="SemiBold"
