@@ -4,8 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Management;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace Glance.RemovableDevices.WinUI;
 
@@ -46,8 +48,7 @@ public sealed class WindowsRemovableDeviceService :
                     ? drive.VolumeLabel
                     : driveMetadata?.Model ?? string.Empty;
                 string id = driveMetadata?.DeviceInstanceId ?? rootPath;
-                bool canEject = !string.IsNullOrWhiteSpace(driveMetadata?.DeviceInstanceId);
-                devices.Add(new RemovableDevice(id, rootPath, displayName, drive.TotalSize, drive.AvailableFreeSpace, canEject));
+                devices.Add(new RemovableDevice(id, rootPath, displayName, drive.TotalSize, drive.AvailableFreeSpace, true));
             }
             catch (Exception)
             {
@@ -75,18 +76,22 @@ public sealed class WindowsRemovableDeviceService :
 
     public bool TryEject(RemovableDevice device)
     {
-        if (!device.CanEject || string.IsNullOrWhiteSpace(device.Id))
+        if (!device.CanEject)
         {
             return false;
         }
 
-        if (CM_Locate_DevNodeW(out uint deviceInstance, device.Id, 0) != ConfigurationManagerSuccess)
+        if (!string.IsNullOrWhiteSpace(device.Id) && CM_Locate_DevNodeW(out uint deviceInstance, device.Id, 0) == ConfigurationManagerSuccess)
         {
-            return false;
+            StringBuilder vetoName = new(260);
+
+            if (CM_Request_Device_EjectW(deviceInstance, out _, vetoName, (uint)vetoName.Capacity, 0) == ConfigurationManagerSuccess)
+            {
+                return true;
+            }
         }
 
-        StringBuilder vetoName = new(260);
-        return CM_Request_Device_EjectW(deviceInstance, out _, vetoName, (uint)vetoName.Capacity, 0) == ConfigurationManagerSuccess;
+        return TryShellEject(device.RootPath);
     }
 
     private static Dictionary<string, DriveMetadata> GetDriveMetadata()
@@ -149,6 +154,63 @@ public sealed class WindowsRemovableDeviceService :
         catch (Exception)
         {
             return $"{drive.Name}:{drive.DriveType}:False:0";
+        }
+    }
+
+    private static bool TryShellEject(string rootPath)
+    {
+        bool ejected = false;
+        Thread thread = new(() => ejected = TryShellEjectCore(rootPath));
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+        return ejected;
+    }
+
+    private static bool TryShellEjectCore(string rootPath)
+    {
+        object? shell = null;
+        object? drives = null;
+        object? item = null;
+
+        try
+        {
+            Type? shellType = Type.GetTypeFromProgID("Shell.Application");
+
+            if (shellType is null)
+            {
+                return false;
+            }
+
+            shell = Activator.CreateInstance(shellType);
+            drives = shellType.InvokeMember("NameSpace", BindingFlags.InvokeMethod, null, shell, [17]);
+            item = drives?.GetType().InvokeMember("ParseName", BindingFlags.InvokeMethod, null, drives, [rootPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)]);
+
+            if (item is null)
+            {
+                return false;
+            }
+
+            item.GetType().InvokeMember("InvokeVerb", BindingFlags.InvokeMethod, null, item, ["Eject"]);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+        finally
+        {
+            ReleaseComObject(item);
+            ReleaseComObject(drives);
+            ReleaseComObject(shell);
+        }
+    }
+
+    private static void ReleaseComObject(object? value)
+    {
+        if (value is not null && Marshal.IsComObject(value))
+        {
+            Marshal.FinalReleaseComObject(value);
         }
     }
 

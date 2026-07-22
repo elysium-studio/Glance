@@ -31,6 +31,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <TextBlock
                             MaxLines="1"
@@ -39,44 +40,39 @@
                             TextTrimming="CharacterEllipsis"
                             TextWrapping="NoWrap"
                             ToolTipService.ToolTip="{x:Bind DisplayName, Mode=OneWay}" />
-                        <Grid Grid.Row="1" ColumnSpacing="8">
+                        <Grid Grid.Row="1" ColumnSpacing="5">
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="56" />
                             </Grid.ColumnDefinitions>
-                            <Grid ColumnSpacing="5">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Style="{StaticResource CaptionTextBlockStyle}"
-                                    Text="{x:Bind DriveLetter, Mode=OneWay}" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                                    Style="{StaticResource CaptionTextBlockStyle}"
-                                    Text="&#x2022;" />
-                                <TextBlock
-                                    Grid.Column="2"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Style="{StaticResource CaptionTextBlockStyle}"
-                                    Text="{x:Bind Detail, Mode=OneWay}"
-                                    TextTrimming="CharacterEllipsis"
-                                    TextWrapping="NoWrap" />
-                            </Grid>
-                            <ProgressBar
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Text="{x:Bind DriveLetter, Mode=OneWay}" />
+                            <TextBlock
                                 Grid.Column="1"
-                                Height="4"
-                                VerticalAlignment="Center"
-                                Background="{ThemeResource GlanceRemovableDevicesTrackBrush}"
-                                Foreground="{ThemeResource GlanceRemovableDevicesIconBrush}"
-                                IsIndeterminate="False"
-                                Maximum="100"
-                                Value="{x:Bind UsagePercent, Mode=OneWay}" />
+                                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Text="&#x2022;" />
+                            <TextBlock
+                                Grid.Column="2"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Text="{x:Bind Detail, Mode=OneWay}"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="NoWrap" />
                         </Grid>
+                        <ProgressBar
+                            Grid.Row="2"
+                            Height="3"
+                            Margin="0,2,0,0"
+                            VerticalAlignment="Center"
+                            Background="{ThemeResource GlanceRemovableDevicesTrackBrush}"
+                            Foreground="{ThemeResource GlanceRemovableDevicesIconBrush}"
+                            IsIndeterminate="False"
+                            Maximum="100"
+                            Value="{x:Bind UsagePercent, Mode=OneWay}" />
                     </Grid>
                     <StackPanel
                         Grid.Column="1"
