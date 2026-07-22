@@ -102,21 +102,33 @@
                 Foreground="{ThemeResource GlanceScreenCaptureIconBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ToUpper(ViewModel.Title)}" />
-            <TextBlock
+            <Grid
+                x:Name="CaptureLandingTarget"
                 Grid.Row="1"
-                Style="{StaticResource BodyStrongTextBlockStyle}"
-                Text="{x:Bind ViewModel.StatusText, Mode=OneWay}"
-                TextTrimming="CharacterEllipsis"
-                TextWrapping="NoWrap"
-                Visibility="{x:Bind WhenEmpty(ViewModel.HasCaptures), Mode=OneWay}" />
-            <Controls:CompactFlipView
-                Grid.Row="1"
-                Margin="-22,0,0,0"
-                Background="Transparent"
-                ItemTemplate="{StaticResource CaptureItemTemplate}"
-                ItemsSource="{x:Bind ViewModel.Captures}"
-                SelectedItem="{x:Bind ViewModel.SelectedCapture, Mode=TwoWay}"
-                Visibility="{x:Bind WhenPopulated(ViewModel.HasCaptures), Mode=OneWay}" />
+                VerticalAlignment="Stretch">
+                <Border
+                    x:Name="CaptureArrivalGlow"
+                    Margin="-4,0"
+                    Background="{ThemeResource GlanceScreenCaptureIconBrush}"
+                    CornerRadius="8"
+                    IsHitTestVisible="False"
+                    Opacity="0" />
+                <Grid x:Name="CaptureArrivalContent">
+                    <TextBlock
+                        Style="{StaticResource BodyStrongTextBlockStyle}"
+                        Text="{x:Bind ViewModel.StatusText, Mode=OneWay}"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="NoWrap"
+                        Visibility="{x:Bind WhenEmpty(ViewModel.HasCaptures), Mode=OneWay}" />
+                    <Controls:CompactFlipView
+                        Margin="-22,0,0,0"
+                        Background="Transparent"
+                        ItemTemplate="{StaticResource CaptureItemTemplate}"
+                        ItemsSource="{x:Bind ViewModel.Captures}"
+                        SelectedItem="{x:Bind ViewModel.SelectedCapture, Mode=TwoWay}"
+                        Visibility="{x:Bind WhenPopulated(ViewModel.HasCaptures), Mode=OneWay}" />
+                </Grid>
+            </Grid>
         </Grid>
         <Button
             Grid.Column="2"

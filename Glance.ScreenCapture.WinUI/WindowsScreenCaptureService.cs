@@ -15,7 +15,9 @@ using Windows.Storage.Streams;
 
 namespace Glance.ScreenCapture.WinUI;
 
-public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
+public sealed partial class WindowsScreenCaptureService :
+    IScreenCaptureService,
+    IDisposable
 {
     private const uint CaptureBlt = 0x40000000;
     private const int DwmExtendedFrameBounds = 9;
@@ -30,13 +32,27 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
     private readonly DispatcherQueue dispatcherQueue;
     private readonly ITextLocalizer localizer;
     private readonly string captureFolderPath;
+    private readonly FileSystemWatcher captureWatcher;
+    private readonly System.Threading.Timer captureWatcherDebounceTimer;
+    private CaptureAnimationFrame? pendingAnimationFrame;
 
     public WindowsScreenCaptureService(ModuleResourceTextLocalizer<ScreenCaptureModule> localizer)
     {
         this.localizer = localizer;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         captureFolderPath = ResolveCaptureFolderPath();
+        Directory.CreateDirectory(captureFolderPath);
+        captureWatcherDebounceTimer = new System.Threading.Timer(_ => CapturesChanged?.Invoke(this, EventArgs.Empty), null, System.Threading.Timeout.InfiniteTimeSpan, System.Threading.Timeout.InfiniteTimeSpan);
+        captureWatcher = new FileSystemWatcher(captureFolderPath, "Glance *.png")
+        {
+            NotifyFilter = NotifyFilters.FileName,
+            EnableRaisingEvents = true
+        };
+        captureWatcher.Deleted += HandleCaptureFolderChanged;
+        captureWatcher.Renamed += HandleCaptureFolderChanged;
     }
+
+    public event EventHandler? CapturesChanged;
 
     public async Task<ScreenCaptureItem?> CaptureAsync(ScreenCaptureMode mode)
     {
@@ -45,6 +61,7 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
             throw new InvalidOperationException("Screen capture must begin on the UI thread.");
         }
 
+        pendingAnimationFrame = null;
         IReadOnlyList<CaptureSelectionCandidate> candidates = mode switch
         {
             ScreenCaptureMode.Window => EnumerateWindowCandidates(),
@@ -78,13 +95,34 @@ public sealed partial class WindowsScreenCaptureService : IScreenCaptureService
                 : selection.Value.Bounds == desktop.Bounds
                     ? desktop
                     : desktop.Crop(selection.Value.Bounds);
-            return await SaveAsync(result, mode);
+            ScreenCaptureItem capture = await SaveAsync(result, mode);
+            pendingAnimationFrame = new CaptureAnimationFrame(result, desktop.Bounds);
+            return capture;
         }
         finally
         {
             SetWindowsVisible(applicationWindows, true);
         }
     }
+
+    public void Dispose()
+    {
+        captureWatcher.EnableRaisingEvents = false;
+        captureWatcher.Deleted -= HandleCaptureFolderChanged;
+        captureWatcher.Renamed -= HandleCaptureFolderChanged;
+        captureWatcher.Dispose();
+        captureWatcherDebounceTimer.Dispose();
+    }
+
+    internal CaptureAnimationFrame? TakeAnimationFrame()
+    {
+        CaptureAnimationFrame? frame = pendingAnimationFrame;
+        pendingAnimationFrame = null;
+        return frame;
+    }
+
+    private void HandleCaptureFolderChanged(object sender, FileSystemEventArgs args) =>
+        captureWatcherDebounceTimer.Change(TimeSpan.FromMilliseconds(180), System.Threading.Timeout.InfiniteTimeSpan);
 
     public IReadOnlyList<ScreenCaptureItem> GetRecentCaptures(int maximumCount)
     {

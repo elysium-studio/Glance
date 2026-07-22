@@ -53,6 +53,20 @@ public sealed class ScreenCaptureViewModelTests
     }
 
     [Fact]
+    public void SetCaptures_RemovesItemsMissingFromLatestFolderSnapshot()
+    {
+        ScreenCaptureViewModel viewModel = CreateViewModel();
+        ScreenCaptureItem retained = CreateCapture("retained.png", 800, 600);
+        ScreenCaptureItem deleted = CreateCapture("deleted.png", 1024, 768);
+        viewModel.SetCaptures([retained, deleted]);
+
+        viewModel.SetCaptures([retained]);
+
+        Assert.Single(viewModel.Captures);
+        Assert.Equal(retained, viewModel.SelectedCapture?.Capture);
+    }
+
+    [Fact]
     public void RecentCaptureLimit_ComesFromModuleSettings()
     {
         ScreenCaptureViewModel viewModel = new(new FakeLocalizer(), new ScreenCaptureSettings { RecentCaptureLimit = 2 });

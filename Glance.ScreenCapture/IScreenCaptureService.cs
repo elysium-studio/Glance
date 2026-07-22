@@ -2,6 +2,8 @@ namespace Glance.ScreenCapture;
 
 public interface IScreenCaptureService
 {
+    event EventHandler? CapturesChanged;
+
     Task<ScreenCaptureItem?> CaptureAsync(ScreenCaptureMode mode);
 
     IReadOnlyList<ScreenCaptureItem> GetRecentCaptures(int maximumCount);
