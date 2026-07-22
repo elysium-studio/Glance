@@ -19,6 +19,8 @@ public sealed partial class ModulePreferencesView :
     public ModulePreferencesView()
     {
         InitializeComponent();
+        ModulesList.AddHandler(UIElement.DragOverEvent, new DragEventHandler(HandleDragOver), true);
+        ModulesList.AddHandler(UIElement.DragLeaveEvent, new DragEventHandler(HandleDragLeave), true);
         autoScrollTimer.Tick += HandleAutoScrollTick;
         Unloaded += HandleUnloaded;
     }
@@ -52,7 +54,15 @@ public sealed partial class ModulePreferencesView :
         }
     }
 
-    private void HandleDragLeave(object sender, DragEventArgs args) => StopAutoScroll();
+    private void HandleDragLeave(object sender, DragEventArgs args)
+    {
+        Point position = args.GetPosition(ModulesList);
+
+        if (position.X < 0 || position.X > ModulesList.ActualWidth || position.Y < 0 || position.Y > ModulesList.ActualHeight)
+        {
+            StopAutoScroll();
+        }
+    }
 
     private async void HandleDragItemsCompleted(
         ListViewBase sender,

@@ -13,11 +13,10 @@
             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
             TextWrapping="Wrap" />
         <ListView
+            x:Name="ModulesList"
             AllowDrop="True"
             CanDragItems="True"
             CanReorderItems="True"
-            DragLeave="{x:Bind HandleDragLeave}"
-            DragOver="{x:Bind HandleDragOver}"
             DragItemsCompleted="{x:Bind HandleDragItemsCompleted}"
             ItemsSource="{x:Bind ViewModel.Modules, Mode=OneWay}"
             ReorderMode="Enabled"
