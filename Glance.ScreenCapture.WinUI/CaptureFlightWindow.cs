@@ -103,9 +103,9 @@ internal sealed class CaptureFlightWindow
                 await flightWindow.PlayAsync();
                 completion.TrySetResult(true);
             }
-            catch (Exception)
+            catch (Exception exception)
             {
-                completion.TrySetResult(false);
+                completion.TrySetException(exception);
             }
         }
 
@@ -115,33 +115,112 @@ internal sealed class CaptureFlightWindow
         }
         else if (!dispatcherQueue.TryEnqueue(Play))
         {
-            completion.TrySetResult(false);
+            completion.TrySetException(new InvalidOperationException("Unable to start the capture flight animation."));
         }
 
         return completion.Task;
     }
 
-    private async Task PlayAsync()
+    private Task PlayAsync()
     {
+        TaskCompletionSource<bool> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        DispatcherQueueTimer? closeTimer = null;
+        EventHandler<object>? renderingHandler = null;
+        bool completed = false;
+
+        void Complete(Exception? exception = null)
+        {
+            if (completed)
+            {
+                return;
+            }
+
+            completed = true;
+
+            if (renderingHandler is not null)
+            {
+                CompositionTarget.Rendering -= renderingHandler;
+            }
+
+            closeTimer?.Stop();
+
+            try
+            {
+                PlatformWindowExtensions.viSetOpacity(windowHandle, 0);
+                window.Close();
+            }
+            catch (Exception closeException)
+            {
+                exception ??= closeException;
+            }
+
+            if (exception is null)
+            {
+                completion.TrySetResult(true);
+            }
+            else
+            {
+                completion.TrySetException(exception);
+            }
+        }
+
+        void HandleLoaded(object sender, RoutedEventArgs args)
+        {
+            root.Loaded -= HandleLoaded;
+
+            try
+            {
+                root.UpdateLayout();
+                int renderedFrames = 0;
+                renderingHandler = (_, _) =>
+                {
+                    renderedFrames++;
+
+                    if (renderedFrames < 2)
+                    {
+                        return;
+                    }
+
+                    CompositionTarget.Rendering -= renderingHandler;
+                    renderingHandler = null;
+
+                    try
+                    {
+                        _ = DwmFlush();
+                        PlatformWindowExtensions.viSetOpacity(windowHandle, 255);
+                        StartFlightAnimation();
+                        closeTimer = window.DispatcherQueue.CreateTimer();
+                        closeTimer.Interval = TimeSpan.FromMilliseconds(AnimationDurationMs + 40);
+                        closeTimer.IsRepeating = false;
+                        closeTimer.Tick += (_, _) => Complete();
+                        closeTimer.Start();
+                    }
+                    catch (Exception exception)
+                    {
+                        Complete(exception);
+                    }
+                };
+                CompositionTarget.Rendering += renderingHandler;
+            }
+            catch (Exception exception)
+            {
+                Complete(exception);
+            }
+        }
+
         try
         {
             ConfigureWindow();
-            TaskCompletionSource<bool> loaded = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            root.Loaded += (_, _) => loaded.TrySetResult(true);
+            root.Loaded += HandleLoaded;
             window.AppWindow.Show(false);
-            await loaded.Task;
-            root.UpdateLayout();
-            await WaitForRenderingFramesAsync(2);
-            _ = DwmFlush();
-            PlatformWindowExtensions.viSetOpacity(windowHandle, 255);
-            StartFlightAnimation();
-            await Task.Delay(AnimationDurationMs + 40);
         }
-        finally
+        catch (Exception exception)
         {
-            PlatformWindowExtensions.viSetOpacity(windowHandle, 0);
-            window.Close();
+            root.Loaded -= HandleLoaded;
+            Complete(exception);
         }
+
+        return completion.Task;
     }
 
     private void ConfigureWindow()
@@ -234,28 +313,6 @@ internal sealed class CaptureFlightWindow
         stream.Write(bitmap.Pixels);
         imageSource.Invalidate();
         return imageSource;
-    }
-
-    private static Task WaitForRenderingFramesAsync(int frameCount)
-    {
-        TaskCompletionSource<bool> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
-        int renderedFrames = 0;
-
-        void HandleRendering(object? sender, object args)
-        {
-            renderedFrames++;
-
-            if (renderedFrames < frameCount)
-            {
-                return;
-            }
-
-            CompositionTarget.Rendering -= HandleRendering;
-            completion.TrySetResult(true);
-        }
-
-        CompositionTarget.Rendering += HandleRendering;
-        return completion.Task;
     }
 
     [DllImport("user32.dll", EntryPoint = "GetWindowLongW")]

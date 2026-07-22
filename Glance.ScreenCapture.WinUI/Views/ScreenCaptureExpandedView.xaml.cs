@@ -64,12 +64,18 @@ public sealed partial class ScreenCaptureExpandedView : UserControl
         return true;
     }
 
-    internal void PrepareCaptureArrival()
+    internal void ResetCaptureArrival()
     {
-        Visual visual = ElementCompositionPreview.GetElementVisual(CaptureArrivalContent);
-        visual.CenterPoint = new Vector3((float)CaptureArrivalContent.ActualWidth / 2, (float)CaptureArrivalContent.ActualHeight / 2, 0);
-        visual.Opacity = 0;
-        visual.Scale = new Vector3(0.94f, 0.94f, 1);
+        Visual contentVisual = ElementCompositionPreview.GetElementVisual(CaptureArrivalContent);
+        Visual glowVisual = ElementCompositionPreview.GetElementVisual(CaptureArrivalGlow);
+        contentVisual.StopAnimation(nameof(Visual.Opacity));
+        contentVisual.StopAnimation(nameof(Visual.Scale));
+        glowVisual.StopAnimation(nameof(Visual.Opacity));
+        glowVisual.StopAnimation(nameof(Visual.Scale));
+        contentVisual.Opacity = 1;
+        contentVisual.Scale = Vector3.One;
+        glowVisual.Opacity = 0;
+        glowVisual.Scale = Vector3.One;
     }
 
     internal void PlayCaptureArrival()
@@ -78,6 +84,9 @@ public sealed partial class ScreenCaptureExpandedView : UserControl
         Visual glowVisual = ElementCompositionPreview.GetElementVisual(CaptureArrivalGlow);
         Compositor compositor = contentVisual.Compositor;
         CubicBezierEasingFunction easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
+
+        ResetCaptureArrival();
+        contentVisual.CenterPoint = new Vector3((float)CaptureArrivalContent.ActualWidth / 2, (float)CaptureArrivalContent.ActualHeight / 2, 0);
 
         Vector3KeyFrameAnimation scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
         scaleAnimation.Duration = TimeSpan.FromMilliseconds(240);

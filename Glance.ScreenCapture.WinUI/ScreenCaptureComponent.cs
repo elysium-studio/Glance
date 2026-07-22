@@ -121,14 +121,38 @@ public sealed class ScreenCaptureComponent :
 
             if (frame is not null && landingBounds is NativeRectangle target)
             {
-                await CaptureFlightWindow.PlayAsync(frame, target, dispatcherQueue);
+                try
+                {
+                    await CaptureFlightWindow.PlayAsync(frame, target, dispatcherQueue);
+                }
+                catch (Exception exception)
+                {
+                    logger.LogWarning(exception, "The capture flight animation could not be displayed ({ErrorCode:X8}): {ErrorMessage}", exception.HResult, exception.Message);
+                }
+            }
+            else if (frame is null)
+            {
+                logger.LogWarning("The capture flight animation was skipped because no animation frame was available");
+            }
+            else
+            {
+                logger.LogWarning("The capture flight animation was skipped because the island landing target was unavailable");
             }
 
             RunOnUiThread(() =>
             {
-                expandedView.PrepareCaptureArrival();
                 viewModel.CompleteCapture(capture);
-                expandedView.PlayCaptureArrival();
+
+                try
+                {
+                    expandedView.PlayCaptureArrival();
+                }
+                catch (Exception exception)
+                {
+                    logger.LogWarning(exception, "The capture arrival animation could not be displayed");
+                    expandedView.ResetCaptureArrival();
+                }
+
                 expandedView.SetCaptureInProgress(false);
                 ApplyPendingCaptureRefresh();
                 attentionService.RequestAttention(Id, GlanceAttentionLevel.Passive, expand: false);
