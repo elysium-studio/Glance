@@ -235,10 +235,11 @@ internal sealed class CaptureSelectionWindow
         Canvas.SetTop(captureSurface, sourceBounds.Y);
         flightCanvas.Children.Add(captureSurface);
         root.UpdateLayout();
+        onArrived();
         root.Background = null;
         selectionChrome.Visibility = Visibility.Collapsed;
 
-        DispatcherQueueTimer? completionTimer = null;
+        CompositionScopedBatch? animationBatch = null;
         EventHandler<object>? renderingHandler = null;
         bool finished = false;
 
@@ -256,7 +257,8 @@ internal sealed class CaptureSelectionWindow
                 CompositionTarget.Rendering -= renderingHandler;
             }
 
-            completionTimer?.Stop();
+            animationBatch?.Dispose();
+            animationBatch = null;
             CloseCore();
 
             if (exception is null)
@@ -266,33 +268,6 @@ internal sealed class CaptureSelectionWindow
             else
             {
                 flightCompletion.TrySetException(exception);
-            }
-        }
-
-        void BeginHandoff()
-        {
-            try
-            {
-                onArrived();
-                int handoffFrames = 0;
-                renderingHandler = (_, _) =>
-                {
-                    handoffFrames++;
-
-                    if (handoffFrames < 2)
-                    {
-                        return;
-                    }
-
-                    CompositionTarget.Rendering -= renderingHandler;
-                    renderingHandler = null;
-                    Finish();
-                };
-                CompositionTarget.Rendering += renderingHandler;
-            }
-            catch (Exception exception)
-            {
-                Finish(exception);
             }
         }
 
@@ -312,12 +287,8 @@ internal sealed class CaptureSelectionWindow
             try
             {
                 _ = DwmFlush();
-                StartFlightAnimation(captureSurface, sourceBounds, targetBounds);
-                completionTimer = window.DispatcherQueue.CreateTimer();
-                completionTimer.Interval = TimeSpan.FromMilliseconds(AnimationDurationMs + 40);
-                completionTimer.IsRepeating = false;
-                completionTimer.Tick += (_, _) => BeginHandoff();
-                completionTimer.Start();
+                animationBatch = StartFlightAnimation(captureSurface, sourceBounds, targetBounds);
+                animationBatch.Completed += (_, _) => Finish();
             }
             catch (Exception exception)
             {
@@ -388,7 +359,7 @@ internal sealed class CaptureSelectionWindow
         }
     }
 
-    private static void StartFlightAnimation(Border captureSurface, Rect sourceBounds, Rect targetBounds)
+    private static CompositionScopedBatch StartFlightAnimation(Border captureSurface, Rect sourceBounds, Rect targetBounds)
     {
         Visual captureVisual = ElementCompositionPreview.GetElementVisual(captureSurface);
         Compositor compositor = captureVisual.Compositor;
@@ -426,9 +397,15 @@ internal sealed class CaptureSelectionWindow
         opacityAnimation.InsertKeyFrame(0.92f, 0.62f, accelerate);
         opacityAnimation.InsertKeyFrame(1, 0);
 
+        CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+        captureVisual.Offset = targetOffset;
+        captureVisual.Scale = finalScale;
+        captureVisual.Opacity = 0;
         captureVisual.StartAnimation(nameof(Visual.Offset), offsetAnimation);
         captureVisual.StartAnimation(nameof(Visual.Scale), scaleAnimation);
         captureVisual.StartAnimation(nameof(Visual.Opacity), opacityAnimation);
+        batch.End();
+        return batch;
     }
 
     private void HandleRootLoaded(object sender, RoutedEventArgs args)
