@@ -14,21 +14,27 @@ internal static class GlanceModuleLoader
     private static IReadOnlyDictionary<string, string> moduleAssemblyPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
     private static bool resolverRegistered;
 
-    public static IReadOnlyList<IGlanceModule> Load()
+    public static void Initialize()
     {
-        List<IGlanceModule> modules = [];
         string modulesDirectory = Path.Combine(AppContext.BaseDirectory, ModulesDirectoryName);
 
         if (!Directory.Exists(modulesDirectory))
         {
-            return modules;
+            return;
         }
 
         string[] assemblyPaths = Directory.EnumerateFiles(modulesDirectory, "*.dll", SearchOption.AllDirectories).Order(StringComparer.OrdinalIgnoreCase).ToArray();
         moduleAssemblyPaths = assemblyPaths.ToDictionary(path => AssemblyName.GetAssemblyName(path).Name!, StringComparer.OrdinalIgnoreCase);
         RegisterResolver();
+    }
 
-        foreach (string path in assemblyPaths.Where(path => Path.GetFileName(path).StartsWith("Glance.", StringComparison.OrdinalIgnoreCase) && Path.GetFileName(path).EndsWith(".WinUI.dll", StringComparison.OrdinalIgnoreCase)))
+    public static IReadOnlyList<IGlanceModule> Load()
+    {
+        Initialize();
+
+        List<IGlanceModule> modules = [];
+
+        foreach (string path in moduleAssemblyPaths.Values.Where(path => Path.GetFileName(path).StartsWith("Glance.", StringComparison.OrdinalIgnoreCase) && Path.GetFileName(path).EndsWith(".WinUI.dll", StringComparison.OrdinalIgnoreCase)))
         {
             AssemblyName assemblyName = AssemblyName.GetAssemblyName(path);
             Assembly assembly = AssemblyLoadContext.Default.Assemblies.FirstOrDefault(candidate => AssemblyName.ReferenceMatchesDefinition(candidate.GetName(), assemblyName)) ?? AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
