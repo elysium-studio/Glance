@@ -4,6 +4,7 @@
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>Glance.Timer.WinUI</RootNamespace>
     <UseWinUI>true</UseWinUI>
+    <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
     <Nullable>enable</Nullable>
     <Platforms>AnyCPU;x64</Platforms>
     <DefaultLanguage>en</DefaultLanguage>

@@ -29,9 +29,37 @@ Each feature is an independent pair of projects:
 - `Glance.<Module>` contains the platform-neutral state and view-model logic.
 - `Glance.<Module>.WinUI` contains the Windows integration, views, theme resources, and localized strings.
 
-Modules implement `IGlanceModule` and are discovered recursively from the `Modules` application directory at startup. Each module is published to `Modules/<Module>` with its domain assembly, WinUI assembly, symbols, and PRI resources kept together. Shared application and framework dependencies, including `Glance.UI.WinUI`, remain beside `Glance.exe`, while the module loader resolves module-owned assemblies from their module directories. This keeps the shell small and allows a module to own its dependencies and presentation. Unit tests are kept in matching `Glance.<Module>.Tests` projects.
+Modules implement `IGlanceModule` and are discovered recursively from the `Modules` application directory at startup. Each module is published to `Modules/<Module>` with its domain assembly, WinUI assembly, private dependencies, symbols, and PRI resources kept together. Shared application and framework dependencies, including `Glance.UI.WinUI`, remain beside `Glance.exe`, while the module loader resolves module-owned assemblies from their module directories.
+
+The shell has no compile-time reference to the presentation assemblies of its built-in modules. At startup it loads each module's PRI, registers its generated WinUI XAML metadata provider, discovers `IGlanceModule` implementations, and then lets the module register its own services. The built-in modules therefore use the same runtime path as an independently supplied module. Unit tests are kept in matching `Glance.<Module>.Tests` projects.
 
 Glance consumes Elysium through NuGet package references, using the shared version declared in `Directory.Build.props`.
+
+## Third-party modules
+
+A third-party module is installed by placing its bundle in a new directory below `%LOCALAPPDATA%\Glance\Modules` before Glance starts:
+
+```text
+%LOCALAPPDATA%/Glance/Modules/
+  Example/
+    Example.Glance.WinUI.dll
+    Example.Glance.WinUI.pri
+    Example.Glance.dll
+    Example.Dependency.dll
+```
+
+Glance scans both this user-writable location and the built-in `Modules` directory beside `Glance.exe`. Both locations use the same loader. The entry assembly and PRI must have the same base filename. Glance does not require the assembly name to begin with `Glance` or to be known when the application is compiled.
+
+The module's WinUI project must:
+
+- Reference the matching `Glance.Application.Abstractions` contract and expose a public, parameterless `IGlanceModule` implementation.
+- Set `UseWinUI` to `true`.
+- Set `DisableEmbeddedXbf` to `false` so compiled XAML is embedded in the module PRI.
+- Set `CopyLocalLockFileAssemblies` to `true`, or otherwise include every private runtime dependency in the module directory.
+- Target x64 and a framework compatible with Glance's .NET 10 and Windows App SDK 2.2 runtime.
+- Keep shared Glance, Elysium, WinUI, and Microsoft Extensions contract assemblies out of the module bundle so the host-provided versions are used.
+
+Modules are loaded at startup and run with the same trust as Glance itself. Only install modules from sources you trust.
 
 ## Settings
 
