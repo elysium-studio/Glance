@@ -77,6 +77,8 @@ jobs:
             "artifacts/release/Glance.exe",
             "artifacts/release/Glance.dll",
             "artifacts/release/Glance.pri",
+            "artifacts/release/Glance.UI.WinUI.dll",
+            "artifacts/release/Glance.UI.WinUI.pri",
             "artifacts/release/App.xbf",
             "artifacts/release/Microsoft.WindowsAppRuntime.Insights.Resource.dll"
           )
@@ -102,7 +104,6 @@ jobs:
             Stopwatch = @("Glance.Stopwatch.dll", "Glance.Stopwatch.WinUI.dll", "Glance.Stopwatch.WinUI.pri")
             SystemMonitor = @("Glance.SystemMonitor.dll", "Glance.SystemMonitor.WinUI.dll", "Glance.SystemMonitor.WinUI.pri")
             Timer = @("Glance.Timer.dll", "Glance.Timer.WinUI.dll", "Glance.Timer.WinUI.pri")
-            UI = @("Glance.UI.WinUI.dll", "Glance.UI.WinUI.pri")
             VoiceNotes = @("Glance.VoiceNotes.dll", "Glance.VoiceNotes.WinUI.dll", "Glance.VoiceNotes.WinUI.pri")
           }
 

@@ -29,7 +29,7 @@ Each feature is an independent pair of projects:
 - `Glance.<Module>` contains the platform-neutral state and view-model logic.
 - `Glance.<Module>.WinUI` contains the Windows integration, views, theme resources, and localized strings.
 
-Modules implement `IGlanceModule` and are discovered recursively from the `Modules` application directory at startup. Each module is published to `Modules/<Module>` with its domain assembly, WinUI assembly, symbols, and PRI resources kept together. Shared application and framework dependencies remain beside `Glance.exe`, while the module loader resolves module-owned assemblies from their module directories. This keeps the shell small and allows a module to own its dependencies and presentation. Unit tests are kept in matching `Glance.<Module>.Tests` projects.
+Modules implement `IGlanceModule` and are discovered recursively from the `Modules` application directory at startup. Each module is published to `Modules/<Module>` with its domain assembly, WinUI assembly, symbols, and PRI resources kept together. Shared application and framework dependencies, including `Glance.UI.WinUI`, remain beside `Glance.exe`, while the module loader resolves module-owned assemblies from their module directories. This keeps the shell small and allows a module to own its dependencies and presentation. Unit tests are kept in matching `Glance.<Module>.Tests` projects.
 
 Glance consumes Elysium through NuGet package references, using the shared version declared in `Directory.Build.props`.
 
