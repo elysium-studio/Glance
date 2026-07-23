@@ -58,6 +58,7 @@ public sealed partial class DesktopIslandViewModel :
         AutoHide = settings.AutoHide;
         Placement = settings.Placement;
         attentionService.AttentionRequested += HandleAttentionRequested;
+        modulePreferences.ComponentsAdded += HandleComponentsAdded;
         modulePreferences.PreferencesChanged += HandlePreferencesChanged;
         Activate();
     }
@@ -154,6 +155,7 @@ public sealed partial class DesktopIslandViewModel :
     public override void Dispose()
     {
         attentionService.AttentionRequested -= HandleAttentionRequested;
+        modulePreferences.ComponentsAdded -= HandleComponentsAdded;
         modulePreferences.PreferencesChanged -= HandlePreferencesChanged;
         base.Dispose();
     }
@@ -170,6 +172,27 @@ public sealed partial class DesktopIslandViewModel :
 
     private void HandlePreferencesChanged(object? sender, EventArgs args)
         => dispatcher.Dispatch(ApplyPreferences);
+
+    private void HandleComponentsAdded(object? sender, GlanceComponentsAddedEventArgs args) =>
+        dispatcher.Dispatch(() =>
+        {
+            ApplyPreferences();
+
+            string? componentId = args.Components
+                .Select(component => component.Id)
+                .FirstOrDefault(id => components.Any(component => string.Equals(component.Id, id, StringComparison.OrdinalIgnoreCase)));
+
+            if (componentId is null)
+            {
+                return;
+            }
+
+            SelectedIndex = components
+                .Select((component, index) => (component, index))
+                .First(item => string.Equals(item.component.Id, componentId, StringComparison.OrdinalIgnoreCase))
+                .index;
+            IsOpen = true;
+        });
 
     private void ApplyPreferences()
     {

@@ -65,7 +65,7 @@ Unpacked module directories remain supported for development:
     Example.Dependency.dll
 ```
 
-Glance scans both this user-writable location and the built-in `Modules` directory beside `Glance.exe`. Both locations use the same loader. New `.glance` files placed in the user directory are detected, validated after the copy completes, and activated while Glance is running. Replacing or removing a loaded package takes effect after restarting Glance because WinUI module assemblies and PRI resources cannot be safely unloaded in place.
+Glance scans and watches both this user-writable location and the built-in `Modules` directory beside `Glance.exe`. New `.glance` files placed in either directory are detected, validated after the copy completes, activated while Glance is running, and selected on the island. Replacing or removing a loaded package takes effect after restarting Glance because WinUI module assemblies and PRI resources cannot be safely unloaded in place.
 
 The original package remains intact while its runtime contents are kept under `%LOCALAPPDATA%\Glance\ModuleCache`. The entry assembly and PRI must have the same base filename. Glance does not require the assembly name to begin with `Glance` or to be known when the application is compiled.
 

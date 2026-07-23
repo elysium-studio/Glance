@@ -17,7 +17,7 @@ internal sealed class GlanceModuleManager :
 {
     private static readonly TimeSpan copySettleDelay = TimeSpan.FromMilliseconds(500);
     private readonly DispatcherQueue dispatcherQueue;
-    private readonly FileSystemWatcher watcher;
+    private readonly IReadOnlyList<FileSystemWatcher> watchers;
     private readonly GlanceRuntimeServiceProvider runtimeServices;
     private readonly HashSet<string> knownPackages = new(StringComparer.OrdinalIgnoreCase);
     private readonly ILogger<GlanceModuleManager> logger;
@@ -40,15 +40,11 @@ internal sealed class GlanceModuleManager :
         preferences = applicationServices.GetRequiredService<ModulePreferenceService>();
 
         Directory.CreateDirectory(GlanceModuleLoader.UserModulesDirectory);
-        watcher = new FileSystemWatcher(GlanceModuleLoader.UserModulesDirectory, "*.glance")
-        {
-            IncludeSubdirectories = true,
-            NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size
-        };
-        watcher.Created += HandlePackageChanged;
-        watcher.Changed += HandlePackageChanged;
-        watcher.Renamed += HandlePackageRenamed;
-        watcher.Error += HandleWatcherError;
+        watchers = GlanceModuleLoader.ModuleDirectories
+            .Where(Directory.Exists)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select(CreateWatcher)
+            .ToArray();
     }
 
     public async Task LoadStartupModulesAsync()
@@ -57,31 +53,32 @@ internal sealed class GlanceModuleManager :
         {
             await InstallAsync(result);
         }
-
-        foreach (string sourcePath in GlanceModuleLoader.GetLoadedSourcePaths())
-        {
-            knownPackages.Add(sourcePath);
-        }
     }
 
     public void StartWatching()
     {
-        watcher.EnableRaisingEvents = true;
-
-        foreach (string packagePath in Directory.EnumerateFiles(GlanceModuleLoader.UserModulesDirectory, "*.glance", SearchOption.AllDirectories))
+        foreach (FileSystemWatcher watcher in watchers)
         {
-            SchedulePackage(packagePath);
+            watcher.EnableRaisingEvents = true;
+
+            foreach (string packagePath in Directory.EnumerateFiles(watcher.Path, "*.glance", SearchOption.AllDirectories))
+            {
+                SchedulePackage(packagePath);
+            }
         }
     }
 
     public async ValueTask DisposeAsync()
     {
-        watcher.EnableRaisingEvents = false;
-        watcher.Created -= HandlePackageChanged;
-        watcher.Changed -= HandlePackageChanged;
-        watcher.Renamed -= HandlePackageRenamed;
-        watcher.Error -= HandleWatcherError;
-        watcher.Dispose();
+        foreach (FileSystemWatcher watcher in watchers)
+        {
+            watcher.EnableRaisingEvents = false;
+            watcher.Created -= HandlePackageChanged;
+            watcher.Changed -= HandlePackageChanged;
+            watcher.Renamed -= HandlePackageRenamed;
+            watcher.Error -= HandleWatcherError;
+            watcher.Dispose();
+        }
 
         CancellationTokenSource[] pending;
 
@@ -154,12 +151,31 @@ internal sealed class GlanceModuleManager :
 
     private void HandleWatcherError(object sender, ErrorEventArgs args)
     {
-        logger.LogWarning(args.GetException(), "The Glance module folder watcher missed one or more changes; rescanning the folder");
+        if (sender is not FileSystemWatcher watcher)
+        {
+            return;
+        }
 
-        foreach (string packagePath in Directory.EnumerateFiles(GlanceModuleLoader.UserModulesDirectory, "*.glance", SearchOption.AllDirectories))
+        logger.LogWarning(args.GetException(), "The Glance module folder watcher missed one or more changes in {ModuleDirectory}; rescanning the folder", watcher.Path);
+
+        foreach (string packagePath in Directory.EnumerateFiles(watcher.Path, "*.glance", SearchOption.AllDirectories))
         {
             SchedulePackage(packagePath);
         }
+    }
+
+    private FileSystemWatcher CreateWatcher(string directory)
+    {
+        FileSystemWatcher watcher = new(directory, "*.glance")
+        {
+            IncludeSubdirectories = true,
+            NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size
+        };
+        watcher.Created += HandlePackageChanged;
+        watcher.Changed += HandlePackageChanged;
+        watcher.Renamed += HandlePackageRenamed;
+        watcher.Error += HandleWatcherError;
+        return watcher;
     }
 
     private void SchedulePackage(string packagePath)
@@ -205,7 +221,10 @@ internal sealed class GlanceModuleManager :
                 if (result is not null)
                 {
                     await InstallAsync(result);
+                    return;
                 }
+
+                logger.LogWarning("The discovered Glance module package {ModulePackage} did not contain a loadable module", packagePath);
             });
         }
         catch (OperationCanceledException)

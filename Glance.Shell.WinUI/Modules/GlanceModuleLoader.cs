@@ -18,7 +18,6 @@ internal static class GlanceModuleLoader
 {
     private const string ModulesDirectoryName = "Modules";
     private static readonly object synchronization = new();
-    private static readonly HashSet<string> loadedSourcePaths = new(StringComparer.OrdinalIgnoreCase);
     private static readonly ModulePackageCache modulePackageCache = new(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "ModuleCache"));
     private static readonly List<object> xamlMetadataProviderTokens = [];
     private static IReadOnlyDictionary<string, string> moduleAssemblyPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -26,6 +25,12 @@ internal static class GlanceModuleLoader
 
     public static string UserModulesDirectory =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", ModulesDirectoryName);
+
+    public static string[] ModuleDirectories =>
+    [
+        Path.Combine(AppContext.BaseDirectory, ModulesDirectoryName),
+        UserModulesDirectory
+    ];
 
     public static void Initialize()
     {
@@ -46,35 +51,13 @@ internal static class GlanceModuleLoader
     public static GlanceModuleLoadResult? LoadPackage(string packagePath)
     {
         string fullPackagePath = Path.GetFullPath(packagePath);
-
-        lock (synchronization)
-        {
-            if (loadedSourcePaths.Contains(fullPackagePath))
-            {
-                return null;
-            }
-        }
-
-        string? contentDirectory = PreparePackage(fullPackagePath);
-
-        if (contentDirectory is null)
-        {
-            return null;
-        }
+        string contentDirectory = modulePackageCache.Prepare(fullPackagePath);
 
         RegisterAssemblyPaths(new[] { contentDirectory });
         RegisterResolver();
 
         GlanceModuleLoadResult result = Load(new ModuleSource(fullPackagePath, contentDirectory));
         return result.Modules.Count > 0 ? result : null;
-    }
-
-    public static IReadOnlySet<string> GetLoadedSourcePaths()
-    {
-        lock (synchronization)
-        {
-            return loadedSourcePaths.ToHashSet(StringComparer.OrdinalIgnoreCase);
-        }
     }
 
     private static IReadOnlyList<ModuleSource> DiscoverSources()
@@ -111,10 +94,7 @@ internal static class GlanceModuleLoader
     }
 
     private static IEnumerable<string> GetModuleDirectories()
-    {
-        yield return Path.Combine(AppContext.BaseDirectory, ModulesDirectoryName);
-        yield return UserModulesDirectory;
-    }
+        => ModuleDirectories;
 
     private static string? PreparePackage(string packagePath)
     {
@@ -135,14 +115,6 @@ internal static class GlanceModuleLoader
         foreach (string path in Directory.EnumerateFiles(source.ContentDirectory, "*.dll", SearchOption.AllDirectories).Where(path => File.Exists(Path.ChangeExtension(path, ".pri"))).Order(StringComparer.OrdinalIgnoreCase))
         {
             modules.AddRange(LoadAssembly(path));
-        }
-
-        if (modules.Count > 0)
-        {
-            lock (synchronization)
-            {
-                loadedSourcePaths.Add(source.SourcePath);
-            }
         }
 
         return new GlanceModuleLoadResult(source.SourcePath, modules);
@@ -197,7 +169,7 @@ internal static class GlanceModuleLoader
 
                     if (assemblyName is not null)
                     {
-                        assemblyPaths.TryAdd(assemblyName, path);
+                        assemblyPaths[assemblyName] = path;
                     }
                 }
                 catch (BadImageFormatException)
