@@ -3,9 +3,9 @@ using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
 using Elysium.Presentation;
 using Elysium.UI.WinUI;
-using Glance.Application.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using System;
@@ -16,6 +16,7 @@ namespace Glance.Shell.WinUI;
 public partial class App
 {
     private IHost? host;
+    private GlanceModuleManager? moduleManager;
 
     public App() => InitializeComponent();
 
@@ -28,19 +29,19 @@ public partial class App
             {
                 services
                     .AddApplication().AddPresentation().AddModules(new ApplicationModule(applicationData, dispatcherQueue), new ConfigurationModule(), new LocalizationModule(), new NavigationModule(), new DesktopModule(), new SettingsModule(), new GlanceSettingsModule(), new ModulesSettingsModule(), new WindowsSettingsModule());
-
-                foreach (IGlanceModule module in GlanceModuleLoader.Load())
-                {
-                    module.Register(services);
-                }
             })
             .Build();
 
-        ViewExtension.DefaultProvider = host.Services;
-        ViewModelExtension.DefaultProvider = host.Services;
+        host.Start();
+
+        GlanceRuntimeServiceProvider runtimeServices = new(host.Services);
+        ViewExtension.DefaultProvider = runtimeServices;
+        ViewModelExtension.DefaultProvider = runtimeServices;
+
+        moduleManager = new GlanceModuleManager(host.Services, runtimeServices, dispatcherQueue, host.Services.GetRequiredService<ILogger<GlanceModuleManager>>());
+        moduleManager.LoadStartupModulesAsync().GetAwaiter().GetResult();
 
         _ = host.Services.GetRequiredKeyedService<DesktopIslandView>("DesktopIslandView");
-
-        host.Start();
+        moduleManager.StartWatching();
     }
 }

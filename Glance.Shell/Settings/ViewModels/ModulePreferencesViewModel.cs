@@ -23,9 +23,11 @@ public partial class ModulePreferencesViewModel :
     {
         this.preferences = preferences;
         ILookup<string, IGlanceModuleSettingViewModel> settingsByModule = settings
+            .Concat(preferences.CreateRuntimeSettings())
             .OrderBy(setting => setting.Order)
             .ToLookup(setting => setting.ModuleId, StringComparer.OrdinalIgnoreCase);
         Modules = new ObservableCollection<ModuleSettingsItemViewModel>(preferences.GetPreferences().Select(preference => CreateItem(preference, settingsByModule[preference.Id])));
+        preferences.ComponentsAdded += HandleComponentsAdded;
     }
 
     public ObservableCollection<ModuleSettingsItemViewModel> Modules { get; }
@@ -35,6 +37,8 @@ public partial class ModulePreferencesViewModel :
 
     public override void Dispose()
     {
+        preferences.ComponentsAdded -= HandleComponentsAdded;
+
         foreach (ModuleSettingsItemViewModel module in Modules)
         {
             module.Dispose();
@@ -57,5 +61,20 @@ public partial class ModulePreferencesViewModel :
             preference.IsEnabled,
             settings,
             (_, enabled) => preferences.SetEnabledAsync(preference.Id, enabled));
+    }
+
+    private void HandleComponentsAdded(object? sender, GlanceComponentsAddedEventArgs args)
+    {
+        ILookup<string, IGlanceModuleSettingViewModel> settingsByModule = args.CreateSettings()
+            .OrderBy(setting => setting.Order)
+            .ToLookup(setting => setting.ModuleId, StringComparer.OrdinalIgnoreCase);
+        IReadOnlyList<GlanceModulePreference> orderedPreferences = preferences.GetPreferences();
+
+        foreach (IGlanceComponent component in args.Components)
+        {
+            GlanceModulePreference preference = orderedPreferences.First(item => string.Equals(item.Id, component.Id, StringComparison.OrdinalIgnoreCase));
+            int index = orderedPreferences.Select(item => item.Id).TakeWhile(id => !string.Equals(id, component.Id, StringComparison.OrdinalIgnoreCase)).Count();
+            Modules.Insert(Math.Min(index, Modules.Count), CreateItem(preference, settingsByModule[component.Id]));
+        }
     }
 }

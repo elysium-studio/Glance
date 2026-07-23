@@ -10,60 +10,76 @@ using System.Runtime.Loader;
 
 namespace Glance.Shell.WinUI;
 
+internal sealed record GlanceModuleLoadResult(
+    string SourcePath,
+    IReadOnlyList<IGlanceModule> Modules);
+
 internal static class GlanceModuleLoader
 {
     private const string ModulesDirectoryName = "Modules";
-    private static IReadOnlyDictionary<string, string> moduleAssemblyPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    private static readonly object synchronization = new();
+    private static readonly HashSet<string> loadedSourcePaths = new(StringComparer.OrdinalIgnoreCase);
     private static readonly ModulePackageCache modulePackageCache = new(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "ModuleCache"));
     private static readonly List<object> xamlMetadataProviderTokens = [];
+    private static IReadOnlyDictionary<string, string> moduleAssemblyPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
     private static bool resolverRegistered;
+
+    public static string UserModulesDirectory =>
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", ModulesDirectoryName);
 
     public static void Initialize()
     {
-        Dictionary<string, string> assemblyPaths = new(StringComparer.OrdinalIgnoreCase);
-
-        foreach (string moduleContentDirectory in GetModuleContentDirectories().Distinct(StringComparer.OrdinalIgnoreCase))
-        {
-            foreach (string path in Directory.EnumerateFiles(moduleContentDirectory, "*.dll", SearchOption.AllDirectories).Order(StringComparer.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    string? assemblyName = AssemblyName.GetAssemblyName(path).Name;
-
-                    if (assemblyName is not null)
-                    {
-                        assemblyPaths.TryAdd(assemblyName, path);
-                    }
-                }
-                catch (BadImageFormatException)
-                {
-                }
-                catch (FileLoadException)
-                {
-                }
-            }
-        }
-
-        moduleAssemblyPaths = assemblyPaths;
+        IReadOnlyList<ModuleSource> sources = DiscoverSources();
+        RegisterAssemblyPaths(sources.Select(source => source.ContentDirectory));
         RegisterResolver();
     }
 
-    public static IReadOnlyList<IGlanceModule> Load()
+    public static IReadOnlyList<GlanceModuleLoadResult> Load()
     {
-        Initialize();
+        IReadOnlyList<ModuleSource> sources = DiscoverSources();
+        RegisterAssemblyPaths(sources.Select(source => source.ContentDirectory));
+        RegisterResolver();
 
-        List<IGlanceModule> modules = [];
-
-        foreach (string path in moduleAssemblyPaths.Values.Where(path => File.Exists(Path.ChangeExtension(path, ".pri"))))
-        {
-            modules.AddRange(Load(path));
-        }
-
-        return modules;
+        return sources.Select(Load).Where(result => result.Modules.Count > 0).ToArray();
     }
 
-    private static IEnumerable<string> GetModuleContentDirectories()
+    public static GlanceModuleLoadResult? LoadPackage(string packagePath)
     {
+        string fullPackagePath = Path.GetFullPath(packagePath);
+
+        lock (synchronization)
+        {
+            if (loadedSourcePaths.Contains(fullPackagePath))
+            {
+                return null;
+            }
+        }
+
+        string? contentDirectory = PreparePackage(fullPackagePath);
+
+        if (contentDirectory is null)
+        {
+            return null;
+        }
+
+        RegisterAssemblyPaths(new[] { contentDirectory });
+        RegisterResolver();
+
+        GlanceModuleLoadResult result = Load(new ModuleSource(fullPackagePath, contentDirectory));
+        return result.Modules.Count > 0 ? result : null;
+    }
+
+    public static IReadOnlySet<string> GetLoadedSourcePaths()
+    {
+        lock (synchronization)
+        {
+            return loadedSourcePaths.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        }
+    }
+
+    private static IReadOnlyList<ModuleSource> DiscoverSources()
+    {
+        List<ModuleSource> sources = [];
         foreach (string modulesDirectory in GetModuleDirectories().Where(Directory.Exists).Distinct(StringComparer.OrdinalIgnoreCase))
         {
             foreach (string packagePath in Directory.EnumerateFiles(modulesDirectory, "*.glance", SearchOption.AllDirectories).Order(StringComparer.OrdinalIgnoreCase))
@@ -72,18 +88,32 @@ internal static class GlanceModuleLoader
 
                 if (contentDirectory is not null)
                 {
-                    yield return contentDirectory;
+                    sources.Add(new ModuleSource(Path.GetFullPath(packagePath), contentDirectory));
                 }
             }
 
-            yield return modulesDirectory;
+            foreach (string priPath in Directory.EnumerateFiles(modulesDirectory, "*.pri", SearchOption.AllDirectories).Order(StringComparer.OrdinalIgnoreCase))
+            {
+                string assemblyPath = Path.ChangeExtension(priPath, ".dll");
+
+                if (File.Exists(assemblyPath))
+                {
+                    string contentDirectory = Path.GetDirectoryName(assemblyPath)!;
+                    sources.Add(new ModuleSource(Path.GetFullPath(assemblyPath), contentDirectory));
+                }
+            }
         }
+
+        return sources
+            .GroupBy(source => source.SourcePath, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
+            .ToArray();
     }
 
     private static IEnumerable<string> GetModuleDirectories()
     {
         yield return Path.Combine(AppContext.BaseDirectory, ModulesDirectoryName);
-        yield return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", ModulesDirectoryName);
+        yield return UserModulesDirectory;
     }
 
     private static string? PreparePackage(string packagePath)
@@ -98,7 +128,27 @@ internal static class GlanceModuleLoader
         }
     }
 
-    private static IReadOnlyList<IGlanceModule> Load(string path)
+    private static GlanceModuleLoadResult Load(ModuleSource source)
+    {
+        List<IGlanceModule> modules = [];
+
+        foreach (string path in Directory.EnumerateFiles(source.ContentDirectory, "*.dll", SearchOption.AllDirectories).Where(path => File.Exists(Path.ChangeExtension(path, ".pri"))).Order(StringComparer.OrdinalIgnoreCase))
+        {
+            modules.AddRange(LoadAssembly(path));
+        }
+
+        if (modules.Count > 0)
+        {
+            lock (synchronization)
+            {
+                loadedSourcePaths.Add(source.SourcePath);
+            }
+        }
+
+        return new GlanceModuleLoadResult(source.SourcePath, modules);
+    }
+
+    private static IReadOnlyList<IGlanceModule> LoadAssembly(string path)
     {
         List<IGlanceModule> modules = [];
 
@@ -128,6 +178,43 @@ internal static class GlanceModuleLoader
         return modules;
     }
 
+    private static void RegisterAssemblyPaths(IEnumerable<string> contentDirectories)
+    {
+        Dictionary<string, string> assemblyPaths;
+
+        lock (synchronization)
+        {
+            assemblyPaths = new Dictionary<string, string>(moduleAssemblyPaths, StringComparer.OrdinalIgnoreCase);
+        }
+
+        foreach (string contentDirectory in contentDirectories.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            foreach (string path in Directory.EnumerateFiles(contentDirectory, "*.dll", SearchOption.AllDirectories).Order(StringComparer.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    string? assemblyName = AssemblyName.GetAssemblyName(path).Name;
+
+                    if (assemblyName is not null)
+                    {
+                        assemblyPaths.TryAdd(assemblyName, path);
+                    }
+                }
+                catch (BadImageFormatException)
+                {
+                }
+                catch (FileLoadException)
+                {
+                }
+            }
+        }
+
+        lock (synchronization)
+        {
+            moduleAssemblyPaths = assemblyPaths;
+        }
+    }
+
     private static void RegisterXamlMetadataProviders(Assembly assembly)
     {
         foreach (Type type in GetLoadableTypes(assembly).Where(type => !type.IsAbstract && typeof(IXamlMetadataProvider).IsAssignableFrom(type)))
@@ -141,18 +228,23 @@ internal static class GlanceModuleLoader
 
     private static void RegisterResolver()
     {
-        if (resolverRegistered)
+        lock (synchronization)
         {
-            return;
-        }
+            if (resolverRegistered)
+            {
+                return;
+            }
 
-        AssemblyLoadContext.Default.Resolving += ResolveModuleAssembly;
-        resolverRegistered = true;
+            AssemblyLoadContext.Default.Resolving += ResolveModuleAssembly;
+            resolverRegistered = true;
+        }
     }
 
     private static Assembly? ResolveModuleAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
     {
-        if (assemblyName.Name is null || !moduleAssemblyPaths.TryGetValue(assemblyName.Name, out string? path))
+        IReadOnlyDictionary<string, string> assemblyPaths = moduleAssemblyPaths;
+
+        if (assemblyName.Name is null || !assemblyPaths.TryGetValue(assemblyName.Name, out string? path))
         {
             return null;
         }
@@ -171,4 +263,8 @@ internal static class GlanceModuleLoader
             return exception.Types.OfType<Type>();
         }
     }
+
+    private sealed record ModuleSource(
+        string SourcePath,
+        string ContentDirectory);
 }

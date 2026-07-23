@@ -5,7 +5,8 @@ namespace Glance.Shell;
 
 public sealed class ModulePreferenceService
 {
-    private readonly IReadOnlyList<IGlanceComponent> allComponents;
+    private readonly List<IGlanceComponent> allComponents;
+    private readonly List<Func<IReadOnlyList<IGlanceModuleSettingViewModel>>> runtimeSettingsFactories = [];
     private readonly GlanceSettings settings;
     private readonly IWritableOptions<GlanceSettings> writer;
 
@@ -14,11 +15,13 @@ public sealed class ModulePreferenceService
         GlanceSettings settings,
         IWritableOptions<GlanceSettings> writer)
     {
-        allComponents = components.OrderBy(component => component.Order).ToArray();
+        allComponents = components.OrderBy(component => component.Order).ToList();
         this.settings = settings;
         this.writer = writer;
         Normalize();
     }
+
+    public event EventHandler<GlanceComponentsAddedEventArgs>? ComponentsAdded;
 
     public event EventHandler? PreferencesChanged;
 
@@ -31,6 +34,7 @@ public sealed class ModulePreferenceService
 
     public IReadOnlyList<GlanceModulePreference> GetPreferences() =>
         settings.Modules
+            .Where(preference => GetComponent(preference.Id) is not null)
             .Select(preference => new GlanceModulePreference
             {
                 Id = preference.Id,
@@ -41,6 +45,50 @@ public sealed class ModulePreferenceService
     public IGlanceComponent? GetComponent(string id) =>
         allComponents.FirstOrDefault(component =>
             string.Equals(component.Id, id, StringComparison.OrdinalIgnoreCase));
+
+    public IReadOnlyList<IGlanceModuleSettingViewModel> CreateRuntimeSettings() =>
+        runtimeSettingsFactories.SelectMany(factory => factory()).OrderBy(setting => setting.Order).ToArray();
+
+    public async Task RegisterComponentsAsync(
+        IReadOnlyList<IGlanceComponent> components,
+        Func<IReadOnlyList<IGlanceModuleSettingViewModel>> createSettings)
+    {
+        ArgumentNullException.ThrowIfNull(components);
+        ArgumentNullException.ThrowIfNull(createSettings);
+
+        string[] ids = components.Select(component => component.Id).ToArray();
+
+        if (ids.Any(string.IsNullOrWhiteSpace) ||
+            ids.Distinct(StringComparer.OrdinalIgnoreCase).Count() != ids.Length ||
+            ids.Any(id => GetComponent(id) is not null))
+        {
+            throw new InvalidOperationException("A loaded module must provide unique, non-empty component identifiers.");
+        }
+
+        allComponents.AddRange(components);
+        runtimeSettingsFactories.Add(createSettings);
+
+        bool settingsChanged = false;
+
+        foreach (IGlanceComponent component in components)
+        {
+            if (settings.Modules.Any(preference => string.Equals(preference.Id, component.Id, StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+
+            settings.Modules.Add(new GlanceModulePreference { Id = component.Id });
+            settingsChanged = true;
+        }
+
+        PreferencesChanged?.Invoke(this, EventArgs.Empty);
+        ComponentsAdded?.Invoke(this, new GlanceComponentsAddedEventArgs(components, createSettings));
+
+        if (settingsChanged)
+        {
+            await writer.WriteAsync(value => value.Modules = settings.Modules.Select(Clone).ToList());
+        }
+    }
 
     public async Task<bool> SetEnabledAsync(string id, bool isEnabled)
     {
@@ -65,6 +113,7 @@ public sealed class ModulePreferenceService
     public async Task SetOrderAsync(IEnumerable<string> orderedIds)
     {
         Dictionary<string, GlanceModulePreference> preferences = settings.Modules
+            .Where(item => GetComponent(item.Id) is not null)
             .ToDictionary(item => item.Id, StringComparer.OrdinalIgnoreCase);
         List<GlanceModulePreference> ordered = [];
 
@@ -77,6 +126,7 @@ public sealed class ModulePreferenceService
         }
 
         ordered.AddRange(preferences.Values);
+        ordered.AddRange(settings.Modules.Where(item => GetComponent(item.Id) is null));
         settings.Modules = ordered;
         await SaveAsync();
     }
@@ -89,8 +139,6 @@ public sealed class ModulePreferenceService
             .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
 
         settings.Modules = settings.Modules
-            .Where(preference => allComponents.Any(component =>
-                string.Equals(component.Id, preference.Id, StringComparison.OrdinalIgnoreCase)))
             .GroupBy(preference => preference.Id, StringComparer.OrdinalIgnoreCase)
             .Select(group => group.First())
             .ToList();
@@ -106,9 +154,16 @@ public sealed class ModulePreferenceService
 
     private async Task SaveAsync()
     {
-        List<GlanceModulePreference> snapshot = GetPreferences().ToList();
+        List<GlanceModulePreference> snapshot = settings.Modules.Select(Clone).ToList();
 
         PreferencesChanged?.Invoke(this, EventArgs.Empty);
         await writer.WriteAsync(value => value.Modules = snapshot);
     }
+
+    private static GlanceModulePreference Clone(GlanceModulePreference preference) =>
+        new()
+        {
+            Id = preference.Id,
+            IsEnabled = preference.IsEnabled
+        };
 }

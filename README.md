@@ -31,13 +31,13 @@ Each feature is an independent pair of projects:
 
 Modules implement `IGlanceModule` and are discovered recursively from the `Modules` application directory at startup. Each built-in module is published as one `Modules/<Module>.glance` package containing its domain assembly, WinUI assembly, private dependencies, symbols, and PRI resources. Shared application and framework dependencies, including `Glance.UI.WinUI`, remain beside `Glance.exe`.
 
-The shell has no compile-time reference to the presentation assemblies of its built-in modules. At startup it expands new or updated packages into Glance's private module cache, loads each module's PRI, registers its generated WinUI XAML metadata provider, discovers `IGlanceModule` implementations, and then lets the module register its own services. Unchanged packages reuse the existing cache without being extracted or hashed again. The built-in modules therefore use the same runtime path as an independently supplied module. Unit tests are kept in matching `Glance.<Module>.Tests` projects.
+The shell has no compile-time reference to the presentation assemblies of its built-in modules. It expands new packages into Glance's private module cache, loads each module's PRI, registers its generated WinUI XAML metadata provider, discovers `IGlanceModule` implementations, and then lets the module register its own services. Each package receives an isolated service provider and lifecycle; application services are available only as shared parent services. Unchanged packages reuse the existing cache without being extracted or hashed again. The built-in modules therefore use the same runtime path as an independently supplied module. Unit tests are kept in matching `Glance.<Module>.Tests` projects.
 
 Glance consumes Elysium through NuGet package references, using the shared version declared in `Directory.Build.props`.
 
 ## Third-party modules
 
-A third-party module is installed by placing its `.glance` package below `%LOCALAPPDATA%\Glance\Modules` before Glance starts:
+A third-party module is installed by placing its `.glance` package below `%LOCALAPPDATA%\Glance\Modules`:
 
 ```text
 %LOCALAPPDATA%/Glance/Modules/
@@ -65,7 +65,9 @@ Unpacked module directories remain supported for development:
     Example.Dependency.dll
 ```
 
-Glance scans both this user-writable location and the built-in `Modules` directory beside `Glance.exe`. Both locations use the same loader. The original package remains intact while its runtime contents are kept under `%LOCALAPPDATA%\Glance\ModuleCache`. The entry assembly and PRI must have the same base filename. Glance does not require the assembly name to begin with `Glance` or to be known when the application is compiled.
+Glance scans both this user-writable location and the built-in `Modules` directory beside `Glance.exe`. Both locations use the same loader. New `.glance` files placed in the user directory are detected, validated after the copy completes, and activated while Glance is running. Replacing or removing a loaded package takes effect after restarting Glance because WinUI module assemblies and PRI resources cannot be safely unloaded in place.
+
+The original package remains intact while its runtime contents are kept under `%LOCALAPPDATA%\Glance\ModuleCache`. The entry assembly and PRI must have the same base filename. Glance does not require the assembly name to begin with `Glance` or to be known when the application is compiled.
 
 The module's WinUI project must:
 
@@ -76,7 +78,7 @@ The module's WinUI project must:
 - Target x64 and a framework compatible with Glance's .NET 10 and Windows App SDK 2.2 runtime.
 - Keep shared Glance, Elysium, WinUI, and Microsoft Extensions contract assemblies out of the module bundle so the host-provided versions are used.
 
-Modules are loaded at startup and run with the same trust as Glance itself. Only install modules from sources you trust.
+Modules run with the same trust as Glance itself. Service isolation controls module lifetimes and registration collisions; it is not a security sandbox. Only install modules from sources you trust.
 
 ## Settings
 
@@ -101,7 +103,7 @@ The application entry point is `Glance.Shell.WinUI`.
 
 Glance uses the same release model as Infinity: Velopack produces the directly distributed installer and update feed, while a separately generated MSIX upload is used for Microsoft Store releases. Store-packaged builds detect their package identity and do not initialise Velopack at runtime.
 
-Release builds remain self-contained managed .NET applications rather than using Native AOT. Glance discovers its `Modules/<Module>/Glance.*.WinUI.dll` modules at runtime, so those directories must remain available for module loading.
+Release builds remain self-contained managed .NET applications rather than using Native AOT. Glance discovers its `Modules/*.glance` packages at runtime, so those packages must remain available for module loading.
 
 Copy `publish.local.example.json` to the ignored `publish.local.json`, fill in the credentials and Store identity values, then run:
 
