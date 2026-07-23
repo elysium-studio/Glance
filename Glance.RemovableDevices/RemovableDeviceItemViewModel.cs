@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Glance.RemovableDevices;
 
-public partial class RemovableDeviceItemViewModel :
+public sealed partial class RemovableDeviceItemViewModel :
     ObservableObject
 {
     private readonly Action<RemovableDevice> eject;

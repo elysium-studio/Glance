@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace Glance.RemovableDevices;
 
-public partial class RemovableDevicesViewModel :
+public sealed partial class RemovableDevicesViewModel :
     ObservableObject
 {
     private readonly ITextLocalizer localizer;

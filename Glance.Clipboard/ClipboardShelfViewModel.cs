@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace Glance.Clipboard;
 
-public partial class ClipboardShelfViewModel : ObservableObject
+public sealed partial class ClipboardShelfViewModel : ObservableObject
 {
     private readonly ITextLocalizer localizer;
     private Func<ClipboardEntry, Task<bool>>? copyEntry;

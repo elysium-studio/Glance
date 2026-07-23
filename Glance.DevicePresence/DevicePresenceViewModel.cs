@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace Glance.DevicePresence;
 
-public partial class DevicePresenceViewModel :
+public sealed partial class DevicePresenceViewModel :
     ObservableObject
 {
     private readonly ITextLocalizer localizer;

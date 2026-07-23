@@ -4,7 +4,7 @@ using Elysium.Presentation;
 
 namespace Glance.Shell;
 
-public partial class StartWithWindowsViewModel(IServiceProvider provider,
+public sealed partial class StartWithWindowsViewModel(IServiceProvider provider,
     IServiceFactory factory,
     IMessenger messenger,
     IDisposer disposer,

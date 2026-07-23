@@ -17,7 +17,7 @@ using Windows.Storage;
 
 namespace Glance.Shell.WinUI;
 
-public partial class DesktopIslandView :
+public sealed partial class DesktopIslandView :
     DesktopIsland
 {
     private const int ContextualDragExitDelayMs = 160;

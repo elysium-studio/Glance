@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace Glance.VoiceNotes;
 
-public partial class VoiceNotesViewModel :
+public sealed partial class VoiceNotesViewModel :
     ObservableObject
 {
     private readonly ITextLocalizer localizer;

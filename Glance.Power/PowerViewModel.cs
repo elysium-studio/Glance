@@ -3,7 +3,7 @@ using Glance.Application.Abstractions;
 
 namespace Glance.Power;
 
-public partial class PowerViewModel : ObservableObject
+public sealed partial class PowerViewModel : ObservableObject
 {
     private readonly ITextLocalizer localizer;
 
