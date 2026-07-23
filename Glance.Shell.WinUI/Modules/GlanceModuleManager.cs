@@ -122,8 +122,9 @@ internal sealed class GlanceModuleManager :
                 throw new InvalidOperationException("The package registered a component identifier that is already loaded.");
             }
 
-            runtimeServices.AddModuleProvider(runtime.Services);
-            await preferences.RegisterComponentsAsync(components, () => runtime.Services.GetServices<IGlanceModuleSettingViewModel>().ToArray());
+            IServiceProvider moduleServices = runtime.Services;
+            runtimeServices.AddModuleProvider(moduleServices);
+            await preferences.RegisterComponentsAsync(components, () => moduleServices.GetServices<IGlanceModuleSettingViewModel>().ToArray());
             runtimes.Add(runtime);
             runtime = null;
 
