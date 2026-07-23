@@ -14,6 +14,7 @@ internal static class GlanceModuleLoader
 {
     private const string ModulesDirectoryName = "Modules";
     private static IReadOnlyDictionary<string, string> moduleAssemblyPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    private static readonly ModulePackageCache modulePackageCache = new(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "ModuleCache"));
     private static readonly List<object> xamlMetadataProviderTokens = [];
     private static bool resolverRegistered;
 
@@ -21,9 +22,9 @@ internal static class GlanceModuleLoader
     {
         Dictionary<string, string> assemblyPaths = new(StringComparer.OrdinalIgnoreCase);
 
-        foreach (string modulesDirectory in GetModuleDirectories().Where(Directory.Exists).Distinct(StringComparer.OrdinalIgnoreCase))
+        foreach (string moduleContentDirectory in GetModuleContentDirectories().Distinct(StringComparer.OrdinalIgnoreCase))
         {
-            foreach (string path in Directory.EnumerateFiles(modulesDirectory, "*.dll", SearchOption.AllDirectories).Order(StringComparer.OrdinalIgnoreCase))
+            foreach (string path in Directory.EnumerateFiles(moduleContentDirectory, "*.dll", SearchOption.AllDirectories).Order(StringComparer.OrdinalIgnoreCase))
             {
                 try
                 {
@@ -61,10 +62,40 @@ internal static class GlanceModuleLoader
         return modules;
     }
 
+    private static IEnumerable<string> GetModuleContentDirectories()
+    {
+        foreach (string modulesDirectory in GetModuleDirectories().Where(Directory.Exists).Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            foreach (string packagePath in Directory.EnumerateFiles(modulesDirectory, "*.glance", SearchOption.AllDirectories).Order(StringComparer.OrdinalIgnoreCase))
+            {
+                string? contentDirectory = PreparePackage(packagePath);
+
+                if (contentDirectory is not null)
+                {
+                    yield return contentDirectory;
+                }
+            }
+
+            yield return modulesDirectory;
+        }
+    }
+
     private static IEnumerable<string> GetModuleDirectories()
     {
         yield return Path.Combine(AppContext.BaseDirectory, ModulesDirectoryName);
         yield return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", ModulesDirectoryName);
+    }
+
+    private static string? PreparePackage(string packagePath)
+    {
+        try
+        {
+            return modulePackageCache.Prepare(packagePath);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static IReadOnlyList<IGlanceModule> Load(string path)

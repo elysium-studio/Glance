@@ -29,15 +29,32 @@ Each feature is an independent pair of projects:
 - `Glance.<Module>` contains the platform-neutral state and view-model logic.
 - `Glance.<Module>.WinUI` contains the Windows integration, views, theme resources, and localized strings.
 
-Modules implement `IGlanceModule` and are discovered recursively from the `Modules` application directory at startup. Each module is published to `Modules/<Module>` with its domain assembly, WinUI assembly, private dependencies, symbols, and PRI resources kept together. Shared application and framework dependencies, including `Glance.UI.WinUI`, remain beside `Glance.exe`, while the module loader resolves module-owned assemblies from their module directories.
+Modules implement `IGlanceModule` and are discovered recursively from the `Modules` application directory at startup. Each built-in module is published as one `Modules/<Module>.glance` package containing its domain assembly, WinUI assembly, private dependencies, symbols, and PRI resources. Shared application and framework dependencies, including `Glance.UI.WinUI`, remain beside `Glance.exe`.
 
-The shell has no compile-time reference to the presentation assemblies of its built-in modules. At startup it loads each module's PRI, registers its generated WinUI XAML metadata provider, discovers `IGlanceModule` implementations, and then lets the module register its own services. The built-in modules therefore use the same runtime path as an independently supplied module. Unit tests are kept in matching `Glance.<Module>.Tests` projects.
+The shell has no compile-time reference to the presentation assemblies of its built-in modules. At startup it expands new or updated packages into Glance's private module cache, loads each module's PRI, registers its generated WinUI XAML metadata provider, discovers `IGlanceModule` implementations, and then lets the module register its own services. Unchanged packages reuse the existing cache without being extracted or hashed again. The built-in modules therefore use the same runtime path as an independently supplied module. Unit tests are kept in matching `Glance.<Module>.Tests` projects.
 
 Glance consumes Elysium through NuGet package references, using the shared version declared in `Directory.Build.props`.
 
 ## Third-party modules
 
-A third-party module is installed by placing its bundle in a new directory below `%LOCALAPPDATA%\Glance\Modules` before Glance starts:
+A third-party module is installed by placing its `.glance` package below `%LOCALAPPDATA%\Glance\Modules` before Glance starts:
+
+```text
+%LOCALAPPDATA%/Glance/Modules/
+  Example.glance
+```
+
+A `.glance` file is a ZIP container with the module files at its root:
+
+```text
+Example.glance
+  Example.Glance.WinUI.dll
+  Example.Glance.WinUI.pri
+  Example.Glance.dll
+  Example.Dependency.dll
+```
+
+Unpacked module directories remain supported for development:
 
 ```text
 %LOCALAPPDATA%/Glance/Modules/
@@ -48,7 +65,7 @@ A third-party module is installed by placing its bundle in a new directory below
     Example.Dependency.dll
 ```
 
-Glance scans both this user-writable location and the built-in `Modules` directory beside `Glance.exe`. Both locations use the same loader. The entry assembly and PRI must have the same base filename. Glance does not require the assembly name to begin with `Glance` or to be known when the application is compiled.
+Glance scans both this user-writable location and the built-in `Modules` directory beside `Glance.exe`. Both locations use the same loader. The original package remains intact while its runtime contents are kept under `%LOCALAPPDATA%\Glance\ModuleCache`. The entry assembly and PRI must have the same base filename. Glance does not require the assembly name to begin with `Glance` or to be known when the application is compiled.
 
 The module's WinUI project must:
 
