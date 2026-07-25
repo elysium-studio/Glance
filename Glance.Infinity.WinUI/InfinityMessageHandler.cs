@@ -15,6 +15,7 @@ public sealed class InfinityMessageHandler(InfinityViewModel viewModel, IDispatc
 
     public const string PagesCapability = "infinity.pages.v1";
     public const string PageNavigationTopic = "page-navigation";
+    public const string PageNavigationVisibilityTopic = "page-navigation-visibility";
 
     public string ApplicationId => "ElysiumStudio.Infinity";
 
@@ -24,6 +25,18 @@ public sealed class InfinityMessageHandler(InfinityViewModel viewModel, IDispatc
 
     public ValueTask HandleAsync(GlanceApplicationMessage message, IGlanceApplicationConnection connection, CancellationToken cancellationToken)
     {
+        if (string.Equals(message.Topic, PageNavigationVisibilityTopic, StringComparison.OrdinalIgnoreCase))
+        {
+            InfinityPageNavigationVisibility? visibility = message.Payload.Deserialize<InfinityPageNavigationVisibility>(serializerOptions);
+
+            if (visibility is not null)
+            {
+                dispatcher.Dispatch(() => viewModel.IsAvailable = visibility.IsVisible);
+            }
+
+            return ValueTask.CompletedTask;
+        }
+
         if (!string.Equals(message.Topic, PageNavigationTopic, StringComparison.OrdinalIgnoreCase))
         {
             return ValueTask.CompletedTask;
@@ -38,12 +51,12 @@ public sealed class InfinityMessageHandler(InfinityViewModel viewModel, IDispatc
 
         dispatcher.Dispatch(() =>
         {
-            bool shouldRequestAttention = viewModel.IsConnected && viewModel.PageNumber != state.PageNumber;
+            bool shouldRequestAttention = viewModel.IsAvailable && (!viewModel.IsConnected || viewModel.PageNumber != state.PageNumber);
             viewModel.Update(state);
 
             if (shouldRequestAttention)
             {
-                attentionService.RequestAttention(ComponentId);
+                dispatcher.Dispatch(() => attentionService.RequestAttention(ComponentId, expand: false));
             }
         });
 

@@ -62,6 +62,29 @@ public sealed class ModulePreferenceServiceTests
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.RegisterComponentsAsync([new TestComponent("timer")], () => []));
     }
 
+    [Fact]
+    public void UnavailableComponentIsExcludedUntilItBecomesAvailable()
+    {
+        GlanceSettings settings = new();
+        TestAvailabilityComponent component = new("Infinity");
+        ModulePreferenceService service = new([component], settings, new TestWritableOptions(settings));
+        int activeComponentsChanged = 0;
+        service.ActiveComponentsChanged += (_, _) => activeComponentsChanged++;
+
+        Assert.Empty(service.GetActiveComponents());
+        Assert.True(service.IsEnabled(component.Id));
+
+        component.SetAvailable(true);
+
+        Assert.Equal(component, Assert.Single(service.GetActiveComponents()));
+        Assert.Equal(1, activeComponentsChanged);
+
+        component.SetAvailable(false);
+
+        Assert.Empty(service.GetActiveComponents());
+        Assert.Equal(2, activeComponentsChanged);
+    }
+
     private sealed class TestComponent(string id) :
         IGlanceComponent
     {
@@ -78,6 +101,38 @@ public sealed class ModulePreferenceServiceTests
         public object ExpandedContent { get; } = new();
     }
 
+    private sealed class TestAvailabilityComponent(string id) :
+        IGlanceComponent,
+        IGlanceAvailabilityComponent
+    {
+        public string Id { get; } = id;
+
+        public string DisplayName => Id;
+
+        public string Description => string.Empty;
+
+        public int Order => 0;
+
+        public object CompactContent { get; } = new();
+
+        public object ExpandedContent { get; } = new();
+
+        public bool IsAvailable { get; private set; }
+
+        public event EventHandler? AvailabilityChanged;
+
+        public void SetAvailable(bool value)
+        {
+            if (IsAvailable == value)
+            {
+                return;
+            }
+
+            IsAvailable = value;
+            AvailabilityChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     private sealed class TestWritableOptions(GlanceSettings settings) :
         IWritableOptions<GlanceSettings>
     {
@@ -86,18 +141,14 @@ public sealed class ModulePreferenceServiceTests
         public Task<GlanceSettings?> ReadAsync(CancellationToken cancellationToken = default) =>
             Task.FromResult<GlanceSettings?>(settings);
 
-        public Task WriteAsync(
-            Action<GlanceSettings> update,
-            CancellationToken cancellationToken = default)
+        public Task WriteAsync(Action<GlanceSettings> update, CancellationToken cancellationToken = default)
         {
             update(settings);
             WriteCount++;
             return Task.CompletedTask;
         }
 
-        public Task WriteAsync(
-            GlanceSettings value,
-            CancellationToken cancellationToken = default)
+        public Task WriteAsync(GlanceSettings value, CancellationToken cancellationToken = default)
         {
             WriteCount++;
             return Task.CompletedTask;

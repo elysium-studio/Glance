@@ -81,12 +81,10 @@ internal sealed class GlanceBridgeRouter :
 
     public IReadOnlyCollection<string> GetCapabilities(string applicationId)
     {
-        HashSet<string> activeComponents = preferences.GetActiveComponents().Select(component => component.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
-
         lock (synchronization)
         {
             return handlers
-                .Where(handler => string.Equals(handler.ApplicationId, applicationId, StringComparison.OrdinalIgnoreCase) && activeComponents.Contains(handler.ComponentId))
+                .Where(handler => string.Equals(handler.ApplicationId, applicationId, StringComparison.OrdinalIgnoreCase) && preferences.IsEnabled(handler.ComponentId))
                 .SelectMany(handler => handler.Capabilities)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .Order(StringComparer.OrdinalIgnoreCase)
@@ -101,7 +99,6 @@ internal sealed class GlanceBridgeRouter :
             return;
         }
 
-        HashSet<string> activeComponents = preferences.GetActiveComponents().Select(component => component.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
         IGlanceApplicationMessageHandler[] targets;
 
         lock (synchronization)
@@ -109,7 +106,7 @@ internal sealed class GlanceBridgeRouter :
             targets = handlers
                 .Where(handler =>
                     string.Equals(handler.ApplicationId, connection.ApplicationId, StringComparison.OrdinalIgnoreCase) &&
-                    activeComponents.Contains(handler.ComponentId) &&
+                    preferences.IsEnabled(handler.ComponentId) &&
                     handler.Capabilities.Contains(message.Capability, StringComparer.OrdinalIgnoreCase))
                 .ToArray();
         }

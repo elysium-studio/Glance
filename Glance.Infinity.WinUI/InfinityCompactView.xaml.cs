@@ -20,7 +20,7 @@ public sealed partial class InfinityCompactView :
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
-    private string ToDisplayText(bool isConnected, string pageTitle) => isConnected
-        ? pageTitle
-        : localizer.GetText("WaitingForInfinity");
+    private string ToDisplayText(bool isConnected, int pageNumber) => isConnected
+        ? localizer.GetText("PageNumber", pageNumber)
+        : string.Empty;
 }

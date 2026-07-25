@@ -9,6 +9,9 @@ public sealed partial class InfinityViewModel :
     private bool isConnected;
 
     [ObservableProperty]
+    private bool isAvailable;
+
+    [ObservableProperty]
     private int pageNumber;
 
     [ObservableProperty]
@@ -23,6 +26,7 @@ public sealed partial class InfinityViewModel :
 
     public void Disconnect()
     {
+        IsAvailable = false;
         IsConnected = false;
     }
 }
