@@ -344,6 +344,12 @@ public sealed partial class DesktopIslandView :
 
     private void CompleteContextualDrag(bool contentHandled)
     {
+        if (!dispatcherQueue.HasThreadAccess)
+        {
+            dispatcherQueue.TryEnqueue(() => CompleteContextualDrag(contentHandled));
+            return;
+        }
+
         StopContextualDragExitTimer();
         isContextualDragActive = false;
         contextualDragSession++;
