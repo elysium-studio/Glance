@@ -45,6 +45,23 @@ public sealed class InfinityViewModelTests
         Assert.Equal("Second", viewModel.PageTitle);
     }
 
+    [Fact]
+    public void InteractionKeepsTransientModuleAvailableAfterSurfaceCloses()
+    {
+        InfinityViewModel viewModel = new(new PageTitleUpdater());
+        viewModel.SetSurfaceVisibility(true);
+        viewModel.BeginInteraction();
+        viewModel.SetSurfaceVisibility(false);
+
+        viewModel.DismissIfIdle();
+
+        Assert.True(viewModel.IsAvailable);
+
+        viewModel.EndInteraction();
+
+        Assert.False(viewModel.IsAvailable);
+    }
+
     private sealed class PageTitleUpdater :
         IInfinityPageTitleUpdater
     {

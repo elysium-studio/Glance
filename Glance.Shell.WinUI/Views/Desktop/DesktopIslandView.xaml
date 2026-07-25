@@ -17,6 +17,8 @@
     IsOpen="{x:Bind ViewModel.IsOpen, Mode=TwoWay}"
     IsTabStop="False"
     Placement="{x:Bind ToPlacement(ViewModel.PlacementIndex), Mode=OneWay}"
+    PointerEntered="{x:Bind HandleIslandPointerEntered}"
+    PointerExited="{x:Bind HandleIslandPointerExited}"
     PointerWheelChanged="{x:Bind HandlePointerWheelChanged}">
     <Controls:DesktopIsland.CompactContent>
         <ContentPresenter

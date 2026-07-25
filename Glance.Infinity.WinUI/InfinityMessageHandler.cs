@@ -11,8 +11,10 @@ namespace Glance.Infinity.WinUI;
 public sealed class InfinityMessageHandler(InfinityViewModel viewModel, InfinityBridgeClient bridgeClient, IDispatcher dispatcher, IGlanceAttentionService attentionService) :
     IGlanceApplicationMessageHandler
 {
+    private const int InteractionHandoffDurationMs = 1200;
     private static readonly JsonSerializerOptions serializerOptions = new(JsonSerializerDefaults.Web);
     private bool attentionPending;
+    private int visibilityGeneration;
 
     public const string PagesCapability = "infinity.pages.v1";
     public const string PageNavigationTopic = "page-navigation";
@@ -41,11 +43,21 @@ public sealed class InfinityMessageHandler(InfinityViewModel viewModel, Infinity
 
             if (visibility is not null)
             {
-                dispatcher.Dispatch(() =>
+                int generation = Interlocked.Increment(ref visibilityGeneration);
+
+                if (visibility.IsVisible)
                 {
-                    attentionPending = visibility.IsVisible;
-                    viewModel.IsAvailable = visibility.IsVisible;
-                });
+                    dispatcher.Dispatch(() =>
+                    {
+                        attentionPending = true;
+                        viewModel.SetSurfaceVisibility(true);
+                    });
+                }
+                else
+                {
+                    dispatcher.Dispatch(() => viewModel.SetSurfaceVisibility(false));
+                    _ = DismissAfterInteractionHandoffAsync(generation);
+                }
             }
 
             return ValueTask.CompletedTask;
@@ -80,6 +92,7 @@ public sealed class InfinityMessageHandler(InfinityViewModel viewModel, Infinity
 
     public ValueTask DisconnectedAsync(IGlanceApplicationConnection connection, CancellationToken cancellationToken)
     {
+        Interlocked.Increment(ref visibilityGeneration);
         bridgeClient.Disconnect(connection);
         dispatcher.Dispatch(() =>
         {
@@ -88,5 +101,15 @@ public sealed class InfinityMessageHandler(InfinityViewModel viewModel, Infinity
         });
 
         return ValueTask.CompletedTask;
+    }
+
+    private async Task DismissAfterInteractionHandoffAsync(int generation)
+    {
+        await Task.Delay(InteractionHandoffDurationMs);
+
+        if (generation == Volatile.Read(ref visibilityGeneration))
+        {
+            dispatcher.Dispatch(viewModel.DismissIfIdle);
+        }
     }
 }

@@ -9,6 +9,7 @@ public sealed class InfinityComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IGlanceAvailabilityComponent,
+    IGlanceInteractionAwareComponent,
     IDisposable
 {
     private readonly ITextLocalizer localizer;
@@ -47,6 +48,10 @@ public sealed class InfinityComponent :
     public bool IsAvailable => viewModel.IsAvailable;
 
     public event EventHandler? AvailabilityChanged;
+
+    public void BeginInteraction() => viewModel.BeginInteraction();
+
+    public void EndInteraction() => viewModel.EndInteraction();
 
     public void Dispose()
     {

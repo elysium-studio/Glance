@@ -6,6 +6,8 @@ public sealed partial class InfinityViewModel :
     ObservableObject
 {
     private readonly IInfinityPageTitleUpdater pageTitleUpdater;
+    private bool isInteracting;
+    private bool isSurfaceVisible;
 
     [ObservableProperty]
     private bool isConnected;
@@ -55,6 +57,36 @@ public sealed partial class InfinityViewModel :
         IsEditing = true;
     }
 
+    public void BeginInteraction()
+    {
+        isInteracting = true;
+        IsAvailable = true;
+    }
+
+    public void EndInteraction()
+    {
+        isInteracting = false;
+        DismissIfIdle();
+    }
+
+    public void SetSurfaceVisibility(bool isVisible)
+    {
+        isSurfaceVisible = isVisible;
+
+        if (isVisible)
+        {
+            IsAvailable = true;
+        }
+    }
+
+    public void DismissIfIdle()
+    {
+        if (!isSurfaceVisible && !isInteracting && !IsEditing)
+        {
+            IsAvailable = false;
+        }
+    }
+
     public async Task CommitEditAsync()
     {
         if (IsSavingTitle)
@@ -81,8 +113,18 @@ public sealed partial class InfinityViewModel :
 
     public void Disconnect()
     {
+        isInteracting = false;
+        isSurfaceVisible = false;
         IsAvailable = false;
         IsConnected = false;
         IsEditing = false;
+    }
+
+    partial void OnIsEditingChanged(bool value)
+    {
+        if (!value)
+        {
+            DismissIfIdle();
+        }
     }
 }

@@ -28,6 +28,8 @@ public sealed partial class DesktopIslandView :
     private DispatcherQueueTimer? startupAttentionTimer;
     private bool isContextualDragActive;
     private int contextualDragSession;
+    private IGlanceInteractionAwareComponent? interactionComponent;
+    private bool isPointerOverIsland;
     private int previousIndex;
     private bool skipNextConnectedExpansion;
 
@@ -66,6 +68,7 @@ public sealed partial class DesktopIslandView :
     {
         ViewModel.PropertyChanged -= HandleViewModelPropertyChanged;
         ViewModel.AttentionReceived -= HandleAttentionReceived;
+        EndComponentInteraction();
         StopContextualDragExitTimer();
         StopStartupAttentionTimer();
     }
@@ -107,6 +110,12 @@ public sealed partial class DesktopIslandView :
 
     private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
+        if (args.PropertyName == nameof(DesktopIslandViewModel.SelectedComponent))
+        {
+            UpdateComponentInteraction();
+            return;
+        }
+
         if (args.PropertyName == nameof(DesktopIslandViewModel.IsExpanded))
         {
             if (skipNextConnectedExpansion)
@@ -145,6 +154,43 @@ public sealed partial class DesktopIslandView :
             FluentMotion.PlayHorizontalPageTransition(CompactPresenter, direction);
             FluentMotion.PlayHorizontalPageTransition(ExpandedPresenter, direction);
         });
+    }
+
+    private void HandleIslandPointerEntered(object sender, PointerRoutedEventArgs args)
+    {
+        isPointerOverIsland = true;
+        UpdateComponentInteraction();
+    }
+
+    private void HandleIslandPointerExited(object sender, PointerRoutedEventArgs args)
+    {
+        isPointerOverIsland = false;
+        EndComponentInteraction();
+    }
+
+    private void UpdateComponentInteraction()
+    {
+        IGlanceInteractionAwareComponent? selectedComponent = ViewModel.SelectedComponent as IGlanceInteractionAwareComponent;
+
+        if (ReferenceEquals(interactionComponent, selectedComponent))
+        {
+            return;
+        }
+
+        EndComponentInteraction();
+
+        if (isPointerOverIsland && selectedComponent is not null)
+        {
+            interactionComponent = selectedComponent;
+            interactionComponent.BeginInteraction();
+        }
+    }
+
+    private void EndComponentInteraction()
+    {
+        IGlanceInteractionAwareComponent? previousComponent = interactionComponent;
+        interactionComponent = null;
+        previousComponent?.EndInteraction();
     }
 
     private void PlayConnectedExpansionAnimation()
