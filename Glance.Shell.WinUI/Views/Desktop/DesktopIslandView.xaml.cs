@@ -160,6 +160,8 @@ public sealed partial class DesktopIslandView :
     {
         isPointerOverIsland = true;
         UpdateComponentInteraction();
+        Reveal();
+        ViewModel.IsExpanded = true;
     }
 
     private void HandleIslandPointerExited(object sender, PointerRoutedEventArgs args)

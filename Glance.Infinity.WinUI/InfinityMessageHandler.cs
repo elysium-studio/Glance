@@ -11,7 +11,7 @@ namespace Glance.Infinity.WinUI;
 public sealed class InfinityMessageHandler(InfinityViewModel viewModel, InfinityBridgeClient bridgeClient, IDispatcher dispatcher, IGlanceAttentionService attentionService) :
     IGlanceApplicationMessageHandler
 {
-    private const int InteractionHandoffDurationMs = 1200;
+    private const int InteractionHandoffDurationMs = 3000;
     private static readonly JsonSerializerOptions serializerOptions = new(JsonSerializerDefaults.Web);
     private bool attentionPending;
     private int visibilityGeneration;
