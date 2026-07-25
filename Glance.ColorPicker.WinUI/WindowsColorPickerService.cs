@@ -14,6 +14,7 @@ public sealed partial class WindowsColorPickerService :
     private const int LeftMouseButton = 0x01;
     private readonly DispatcherQueue dispatcherQueue;
     private CancellationTokenSource? cancellationTokenSource;
+    private CursorColorPreviewWindow? cursorPreviewWindow;
     private bool isPicking;
 
     public WindowsColorPickerService() =>
@@ -35,6 +36,7 @@ public sealed partial class WindowsColorPickerService :
         }
 
         isPicking = true;
+        cursorPreviewWindow ??= new CursorColorPreviewWindow();
         cancellationTokenSource = new CancellationTokenSource();
         _ = TrackPointerAsync(cancellationTokenSource.Token);
     }
@@ -54,6 +56,7 @@ public sealed partial class WindowsColorPickerService :
     {
         cancellationTokenSource?.Cancel();
         cancellationTokenSource?.Dispose();
+        cursorPreviewWindow?.Dispose();
     }
 
     private async Task TrackPointerAsync(CancellationToken cancellationToken)
@@ -73,17 +76,20 @@ public sealed partial class WindowsColorPickerService :
                     return;
                 }
 
-                ColorValue? color = ReadColorUnderPointer();
+                ColorSample? sample = ReadColorUnderPointer();
 
-                if (color is ColorValue preview)
+                if (sample is ColorSample preview)
                 {
                     dispatcherQueue.TryEnqueue(() =>
-                        PreviewChanged?.Invoke(this, new ColorPickerEventArgs(preview)));
+                    {
+                        cursorPreviewWindow?.Show(preview.Color, preview.X, preview.Y);
+                        PreviewChanged?.Invoke(this, new ColorPickerEventArgs(preview.Color));
+                    });
                 }
 
                 if (IsKeyPressed(LeftMouseButton))
                 {
-                    CompletePicking(color);
+                    CompletePicking(sample?.Color);
                     return;
                 }
 
@@ -107,6 +113,8 @@ public sealed partial class WindowsColorPickerService :
 
         dispatcherQueue.TryEnqueue(() =>
         {
+            cursorPreviewWindow?.Hide();
+
             if (color is ColorValue pickedColor)
             {
                 ColorPicked?.Invoke(this, new ColorPickerEventArgs(pickedColor));
@@ -121,7 +129,7 @@ public sealed partial class WindowsColorPickerService :
     private static bool IsKeyPressed(int key) =>
         (NativeMethods.GetAsyncKeyState(key) & 0x8000) != 0;
 
-    private static ColorValue? ReadColorUnderPointer()
+    private static ColorSample? ReadColorUnderPointer()
     {
         if (!NativeMethods.GetCursorPos(out NativePoint point))
         {
@@ -144,13 +152,16 @@ public sealed partial class WindowsColorPickerService :
                 return null;
             }
 
-            return new ColorValue((byte)(value & 0xFF), (byte)((value >> 8) & 0xFF), (byte)((value >> 16) & 0xFF));
+            ColorValue color = new((byte)(value & 0xFF), (byte)((value >> 8) & 0xFF), (byte)((value >> 16) & 0xFF));
+            return new ColorSample(color, point.X, point.Y);
         }
         finally
         {
             _ = NativeMethods.ReleaseDC(nint.Zero, deviceContext);
         }
     }
+
+    private readonly record struct ColorSample(ColorValue Color, int X, int Y);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct NativePoint

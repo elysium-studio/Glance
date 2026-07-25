@@ -1,7 +1,6 @@
 using Glance.UI.WinUI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
 
@@ -12,9 +11,7 @@ public sealed partial class ColorPickerExpandedView :
 {
     private readonly ModuleResourceTextLocalizer<ColorPickerModule> localizer;
 
-    public ColorPickerExpandedView(
-        ColorPickerViewModel viewModel,
-        ModuleResourceTextLocalizer<ColorPickerModule> localizer)
+    public ColorPickerExpandedView(ColorPickerViewModel viewModel, ModuleResourceTextLocalizer<ColorPickerModule> localizer)
     {
         ViewModel = viewModel;
         this.localizer = localizer;
@@ -22,7 +19,8 @@ public sealed partial class ColorPickerExpandedView :
         [
             new ColorFormatItem("HEX", viewModel.Hex, viewModel.CopyHex),
             new ColorFormatItem("RGB", viewModel.Rgb, viewModel.CopyRgb),
-            new ColorFormatItem("HSL", viewModel.Hsl, viewModel.CopyHsl)        ];
+            new ColorFormatItem("HSL", viewModel.Hsl, viewModel.CopyHsl)
+        ];
         viewModel.PropertyChanged += HandleViewModelPropertyChanged;
         InitializeComponent();
     }
@@ -31,24 +29,13 @@ public sealed partial class ColorPickerExpandedView :
 
     public ObservableCollection<ColorFormatItem> Formats { get; }
 
-    public FrameworkElement ConnectedAnimationElement => ColorSwatch;
+    public FrameworkElement ConnectedAnimationElement => PaletteIcon;
 
     public string Title => localizer.GetText("ModuleDisplayName");
 
     private string ToUpper(string value) => value.ToUpperInvariant();
 
-    private SolidColorBrush ToBrush(ColorValue color) =>
-        new(Windows.UI.Color.FromArgb(255, color.Red, color.Green, color.Blue));
-
-    private Visibility WhenIdle(bool isPicking) =>
-        isPicking ? Visibility.Collapsed : Visibility.Visible;
-
-    private Visibility WhenPicking(bool isPicking) =>
-        isPicking ? Visibility.Visible : Visibility.Collapsed;
-
-    private void HandleViewModelPropertyChanged(
-        object? sender,
-        PropertyChangedEventArgs args)
+    private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
         if (args.PropertyName != nameof(ColorPickerViewModel.CurrentColor))
         {

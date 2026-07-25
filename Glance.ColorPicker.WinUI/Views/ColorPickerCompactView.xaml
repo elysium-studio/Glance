@@ -10,14 +10,13 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Border
-            x:Name="ColorSwatch"
-            Width="26"
-            Height="26"
-            Background="{x:Bind ToBrush(ViewModel.CurrentColor), Mode=OneWay}"
-            BorderBrush="{ThemeResource ControlStrokeColorSecondaryBrush}"
-            BorderThickness="1"
-            CornerRadius="7" />
+        <FontIcon
+            x:Name="PaletteIcon"
+            Width="30"
+            FontFamily="Segoe Fluent Icons"
+            FontSize="26"
+            Foreground="{ThemeResource GlanceColorPickerIconBrush}"
+            Glyph="&#xE790;" />
         <StackPanel
             Grid.Column="1"
             VerticalAlignment="Center"

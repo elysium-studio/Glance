@@ -61,15 +61,14 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        <Border
-            x:Name="ColorSwatch"
+        <FontIcon
+            x:Name="PaletteIcon"
             Width="36"
-            Height="36"
             VerticalAlignment="Center"
-            Background="{x:Bind ToBrush(ViewModel.CurrentColor), Mode=OneWay}"
-            BorderBrush="{ThemeResource ControlStrokeColorSecondaryBrush}"
-            BorderThickness="1"
-            CornerRadius="9" />
+            FontFamily="Segoe Fluent Icons"
+            FontSize="32"
+            Foreground="{ThemeResource GlanceColorPickerIconBrush}"
+            Glyph="&#xE790;" />
         <Grid
             Grid.Column="1"
             Height="58"
@@ -102,18 +101,10 @@
             Click="{x:Bind ViewModel.Pick}"
             CornerRadius="18"
             Style="{StaticResource AccentButtonStyle}">
-            <Grid>
-                <FontIcon
-                    FontFamily="Segoe Fluent Icons"
-                    FontSize="16"
-                    Glyph="&#xEF3C;"
-                    Visibility="{x:Bind WhenIdle(ViewModel.IsPicking), Mode=OneWay}" />
-                <ProgressRing
-                    Width="18"
-                    Height="18"
-                    IsActive="{x:Bind ViewModel.IsPicking, Mode=OneWay}"
-                    Visibility="{x:Bind WhenPicking(ViewModel.IsPicking), Mode=OneWay}" />
-            </Grid>
+            <FontIcon
+                FontFamily="Segoe Fluent Icons"
+                FontSize="16"
+                Glyph="&#xEF3C;" />
         </Button>
     </Grid>
 </UserControl>
