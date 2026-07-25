@@ -12,6 +12,7 @@ public sealed class InfinityMessageHandler(InfinityViewModel viewModel, IDispatc
     IGlanceApplicationMessageHandler
 {
     private static readonly JsonSerializerOptions serializerOptions = new(JsonSerializerDefaults.Web);
+    private bool attentionPending;
 
     public const string PagesCapability = "infinity.pages.v1";
     public const string PageNavigationTopic = "page-navigation";
@@ -31,7 +32,11 @@ public sealed class InfinityMessageHandler(InfinityViewModel viewModel, IDispatc
 
             if (visibility is not null)
             {
-                dispatcher.Dispatch(() => viewModel.IsAvailable = visibility.IsVisible);
+                dispatcher.Dispatch(() =>
+                {
+                    attentionPending = visibility.IsVisible;
+                    viewModel.IsAvailable = visibility.IsVisible;
+                });
             }
 
             return ValueTask.CompletedTask;
@@ -51,7 +56,8 @@ public sealed class InfinityMessageHandler(InfinityViewModel viewModel, IDispatc
 
         dispatcher.Dispatch(() =>
         {
-            bool shouldRequestAttention = viewModel.IsAvailable && (!viewModel.IsConnected || viewModel.PageNumber != state.PageNumber);
+            bool shouldRequestAttention = viewModel.IsAvailable && (attentionPending || !viewModel.IsConnected || viewModel.PageNumber != state.PageNumber);
+            attentionPending = false;
             viewModel.Update(state);
 
             if (shouldRequestAttention)
@@ -65,7 +71,12 @@ public sealed class InfinityMessageHandler(InfinityViewModel viewModel, IDispatc
 
     public ValueTask DisconnectedAsync(IGlanceApplicationConnection connection, CancellationToken cancellationToken)
     {
-        dispatcher.Dispatch(viewModel.Disconnect);
+        dispatcher.Dispatch(() =>
+        {
+            attentionPending = false;
+            viewModel.Disconnect();
+        });
+
         return ValueTask.CompletedTask;
     }
 }
