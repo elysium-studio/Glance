@@ -21,6 +21,7 @@ internal sealed class GlanceModuleManager :
     private readonly GlanceRuntimeServiceProvider runtimeServices;
     private readonly HashSet<string> knownPackages = new(StringComparer.OrdinalIgnoreCase);
     private readonly ILogger<GlanceModuleManager> logger;
+    private readonly GlanceBridgeRouter bridgeRouter;
     private readonly List<GlanceModuleRuntime> runtimes = [];
     private readonly ModulePreferenceService preferences;
     private readonly IServiceProvider applicationServices;
@@ -38,6 +39,7 @@ internal sealed class GlanceModuleManager :
         this.dispatcherQueue = dispatcherQueue;
         this.logger = logger;
         preferences = applicationServices.GetRequiredService<ModulePreferenceService>();
+        bridgeRouter = applicationServices.GetRequiredService<GlanceBridgeRouter>();
 
         Directory.CreateDirectory(GlanceModuleLoader.UserModulesDirectory);
         watchers = GlanceModuleLoader.ModuleDirectories
@@ -122,6 +124,7 @@ internal sealed class GlanceModuleManager :
             IServiceProvider moduleServices = runtime.Services;
             runtimeServices.AddModuleProvider(moduleServices);
             await preferences.RegisterComponentsAsync(components, () => moduleServices.GetServices<IGlanceModuleSettingViewModel>().ToArray());
+            bridgeRouter.AddHandlers(moduleServices.GetServices<IGlanceApplicationMessageHandler>());
             runtimes.Add(runtime);
             runtime = null;
 

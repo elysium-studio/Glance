@@ -1,0 +1,37 @@
+<UserControl
+    x:Class="Glance.Infinity.WinUI.InfinityCompactView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <ResourceDictionary Source="Themes/Infinity.xaml" />
+    </UserControl.Resources>
+    <Grid Padding="8,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid
+            x:Name="StatusIndicator"
+            Width="26"
+            Height="26">
+            <FontIcon
+                Width="24"
+                Height="24"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="24"
+                Foreground="{ThemeResource GlanceInfinityIconBrush}"
+                Glyph="&#xE8A5;" />
+        </Grid>
+        <TextBlock
+            Grid.Column="1"
+            Margin="8,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+            Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+            Text="{x:Bind ToDisplayText(ViewModel.IsConnected, ViewModel.PageTitle), Mode=OneWay}"
+            TextTrimming="CharacterEllipsis" />
+    </Grid>
+</UserControl>
