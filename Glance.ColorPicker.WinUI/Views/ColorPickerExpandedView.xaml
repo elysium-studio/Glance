@@ -61,14 +61,13 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        <FontIcon
-            x:Name="PaletteIcon"
+        <Border
+            x:Name="ColorSwatch"
             Width="36"
+            Height="36"
             VerticalAlignment="Center"
-            FontFamily="Segoe Fluent Icons"
-            FontSize="32"
-            Foreground="{ThemeResource GlanceColorPickerIconBrush}"
-            Glyph="&#xE790;" />
+            Background="{x:Bind ToBrush(ViewModel.CurrentColor), Mode=OneWay}"
+            CornerRadius="8" />
         <Grid
             Grid.Column="1"
             Height="58"

@@ -14,12 +14,20 @@ namespace Glance.ColorPicker.WinUI;
 internal sealed partial class CursorColorPreviewWindow :
     IDisposable
 {
-    private const int CursorOffset = 18;
+    private const int CaptionStyle = 0x00C00000;
+    private const int CursorOffset = 16;
+    private const uint DwmBorderColorAttribute = 34;
+    private const uint DwmColorNone = 0xFFFFFFFE;
+    private const uint DwmCornerPreferenceAttribute = 33;
+    private const uint DwmDoNotRound = 1;
     private const int ExtendedWindowStyleIndex = -20;
-    private const int PreviewSize = 30;
-    private const int TransparentWindowStyle = 0x00000020;
-    private const int ToolWindowStyle = 0x00000080;
     private const int NoActivateWindowStyle = 0x08000000;
+    private const int PreviewSize = 26;
+    private const int ResizableFrameStyle = 0x00040000;
+    private const int SystemMenuStyle = 0x00080000;
+    private const int ToolWindowStyle = 0x00000080;
+    private const int TransparentWindowStyle = 0x00000020;
+    private const int WindowStyleIndex = -16;
 
     private readonly Border colorPreview;
     private readonly Window window = new();
@@ -29,27 +37,11 @@ internal sealed partial class CursorColorPreviewWindow :
     {
         colorPreview = new Border
         {
-            CornerRadius = new CornerRadius(5)
-        };
-
-        Border innerBorder = new()
-        {
-            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(230, 255, 255, 255)),
-            Child = colorPreview,
             CornerRadius = new CornerRadius(6),
-            Padding = new Thickness(1)
+            IsHitTestVisible = false
         };
 
-        Border outerBorder = new()
-        {
-            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(180, 0, 0, 0)),
-            Child = innerBorder,
-            CornerRadius = new CornerRadius(7),
-            IsHitTestVisible = false,
-            Padding = new Thickness(1)
-        };
-
-        window.Content = outerBorder;
+        window.Content = colorPreview;
         window.ExtendsContentIntoTitleBar = true;
         window.SetTitleBar(null);
         window.SystemBackdrop = new TransparentTintBackdrop();
@@ -63,8 +55,14 @@ internal sealed partial class CursorColorPreviewWindow :
         presenter.IsResizable = false;
 
         nint handle = WindowNative.GetWindowHandle(window);
+        int style = GetWindowLong(handle, WindowStyleIndex);
+        _ = SetWindowLong(handle, WindowStyleIndex, style & ~CaptionStyle & ~ResizableFrameStyle & ~SystemMenuStyle);
         int extendedStyle = GetWindowLong(handle, ExtendedWindowStyleIndex);
         _ = SetWindowLong(handle, ExtendedWindowStyleIndex, extendedStyle | TransparentWindowStyle | ToolWindowStyle | NoActivateWindowStyle);
+        uint cornerPreference = DwmDoNotRound;
+        uint borderColor = DwmColorNone;
+        _ = DwmSetWindowAttribute(handle, DwmCornerPreferenceAttribute, in cornerPreference, sizeof(uint));
+        _ = DwmSetWindowAttribute(handle, DwmBorderColorAttribute, in borderColor, sizeof(uint));
         window.AppWindow.Resize(new SizeInt32(PreviewSize, PreviewSize));
     }
 
@@ -118,4 +116,7 @@ internal sealed partial class CursorColorPreviewWindow :
 
     [LibraryImport("user32.dll", EntryPoint = "SetWindowLongW")]
     private static partial int SetWindowLong(nint window, int index, int value);
+
+    [LibraryImport("dwmapi.dll")]
+    private static partial int DwmSetWindowAttribute(nint window, uint attribute, in uint value, uint size);
 }

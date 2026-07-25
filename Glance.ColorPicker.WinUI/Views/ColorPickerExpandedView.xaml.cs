@@ -1,6 +1,7 @@
 using Glance.UI.WinUI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
 
@@ -29,11 +30,14 @@ public sealed partial class ColorPickerExpandedView :
 
     public ObservableCollection<ColorFormatItem> Formats { get; }
 
-    public FrameworkElement ConnectedAnimationElement => PaletteIcon;
+    public FrameworkElement ConnectedAnimationElement => ColorSwatch;
 
     public string Title => localizer.GetText("ModuleDisplayName");
 
     private string ToUpper(string value) => value.ToUpperInvariant();
+
+    private SolidColorBrush ToBrush(ColorValue color) =>
+        new(Windows.UI.Color.FromArgb(255, color.Red, color.Green, color.Blue));
 
     private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {

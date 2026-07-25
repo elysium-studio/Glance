@@ -1,8 +1,6 @@
 using Microsoft.UI.Dispatching;
 using System;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Glance.ColorPicker.WinUI;
 
@@ -12,13 +10,18 @@ public sealed partial class WindowsColorPickerService :
 {
     private const int EscapeKey = 0x1B;
     private const int LeftMouseButton = 0x01;
-    private readonly DispatcherQueue dispatcherQueue;
-    private CancellationTokenSource? cancellationTokenSource;
+    private readonly DispatcherQueueTimer trackingTimer;
     private CursorColorPreviewWindow? cursorPreviewWindow;
     private bool isPicking;
+    private bool isWaitingForMouseRelease;
 
-    public WindowsColorPickerService() =>
-        dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+    public WindowsColorPickerService()
+    {
+        trackingTimer = DispatcherQueue.GetForCurrentThread().CreateTimer();
+        trackingTimer.Interval = TimeSpan.FromMilliseconds(16);
+        trackingTimer.IsRepeating = true;
+        trackingTimer.Tick += HandleTrackingTick;
+    }
 
     public event EventHandler<ColorPickerEventArgs>? PreviewChanged;
 
@@ -36,9 +39,9 @@ public sealed partial class WindowsColorPickerService :
         }
 
         isPicking = true;
+        isWaitingForMouseRelease = IsKeyPressed(LeftMouseButton);
         cursorPreviewWindow ??= new CursorColorPreviewWindow();
-        cancellationTokenSource = new CancellationTokenSource();
-        _ = TrackPointerAsync(cancellationTokenSource.Token);
+        trackingTimer.Start();
     }
 
     public void CancelPicking()
@@ -48,56 +51,45 @@ public sealed partial class WindowsColorPickerService :
             return;
         }
 
-        cancellationTokenSource?.Cancel();
         CompletePicking(null);
     }
 
     public void Dispose()
     {
-        cancellationTokenSource?.Cancel();
-        cancellationTokenSource?.Dispose();
+        trackingTimer.Stop();
+        trackingTimer.Tick -= HandleTrackingTick;
         cursorPreviewWindow?.Dispose();
     }
 
-    private async Task TrackPointerAsync(CancellationToken cancellationToken)
+    private void HandleTrackingTick(DispatcherQueueTimer sender, object args)
     {
-        try
+        if (isWaitingForMouseRelease)
         {
-            while (IsKeyPressed(LeftMouseButton) && !cancellationToken.IsCancellationRequested)
+            if (IsKeyPressed(LeftMouseButton))
             {
-                await Task.Delay(20, cancellationToken).ConfigureAwait(false);
+                return;
             }
 
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                if (IsKeyPressed(EscapeKey))
-                {
-                    CompletePicking(null);
-                    return;
-                }
-
-                ColorSample? sample = ReadColorUnderPointer();
-
-                if (sample is ColorSample preview)
-                {
-                    dispatcherQueue.TryEnqueue(() =>
-                    {
-                        cursorPreviewWindow?.Show(preview.Color, preview.X, preview.Y);
-                        PreviewChanged?.Invoke(this, new ColorPickerEventArgs(preview.Color));
-                    });
-                }
-
-                if (IsKeyPressed(LeftMouseButton))
-                {
-                    CompletePicking(sample?.Color);
-                    return;
-                }
-
-                await Task.Delay(33, cancellationToken).ConfigureAwait(false);
-            }
+            isWaitingForMouseRelease = false;
         }
-        catch (OperationCanceledException)
+
+        if (IsKeyPressed(EscapeKey))
         {
+            CompletePicking(null);
+            return;
+        }
+
+        ColorSample? sample = ReadColorUnderPointer();
+
+        if (sample is ColorSample preview)
+        {
+            cursorPreviewWindow?.Show(preview.Color, preview.X, preview.Y);
+            PreviewChanged?.Invoke(this, new ColorPickerEventArgs(preview.Color));
+        }
+
+        if (IsKeyPressed(LeftMouseButton))
+        {
+            CompletePicking(sample?.Color);
         }
     }
 
@@ -109,21 +101,17 @@ public sealed partial class WindowsColorPickerService :
         }
 
         isPicking = false;
-        cancellationTokenSource?.Cancel();
+        trackingTimer.Stop();
+        cursorPreviewWindow?.Hide();
 
-        dispatcherQueue.TryEnqueue(() =>
+        if (color is ColorValue pickedColor)
         {
-            cursorPreviewWindow?.Hide();
-
-            if (color is ColorValue pickedColor)
-            {
-                ColorPicked?.Invoke(this, new ColorPickerEventArgs(pickedColor));
-            }
-            else
-            {
-                PickingCancelled?.Invoke(this, EventArgs.Empty);
-            }
-        });
+            ColorPicked?.Invoke(this, new ColorPickerEventArgs(pickedColor));
+        }
+        else
+        {
+            PickingCancelled?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     private static bool IsKeyPressed(int key) =>
