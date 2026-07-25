@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>2.0</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Infinity</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>在导航时显示当前 Infinity 桌面页面。</value></data>
+  <data name="WaitingForInfinity" xml:space="preserve"><value>正在等待 Infinity</value></data>
+  <data name="PageNumber" xml:space="preserve"><value>第 {0} 页</value></data>
+</root>

@@ -10,16 +10,16 @@ public sealed class ModulePreferenceService
     private readonly GlanceSettings settings;
     private readonly IWritableOptions<GlanceSettings> writer;
 
-    public ModulePreferenceService(
-        IEnumerable<IGlanceComponent> components,
-        GlanceSettings settings,
-        IWritableOptions<GlanceSettings> writer)
+    public ModulePreferenceService(IEnumerable<IGlanceComponent> components, GlanceSettings settings, IWritableOptions<GlanceSettings> writer)
     {
         allComponents = components.OrderBy(component => component.Order).ToList();
         this.settings = settings;
         this.writer = writer;
         Normalize();
+        TrackAvailability(allComponents);
     }
+
+    public event EventHandler? ActiveComponentsChanged;
 
     public event EventHandler<GlanceComponentsAddedEventArgs>? ComponentsAdded;
 
@@ -30,7 +30,9 @@ public sealed class ModulePreferenceService
             .Where(preference => preference.IsEnabled)
             .Select(preference => allComponents.FirstOrDefault(component =>
                 string.Equals(component.Id, preference.Id, StringComparison.OrdinalIgnoreCase)))
-            .OfType<IGlanceComponent>().ToArray();
+            .OfType<IGlanceComponent>()
+            .Where(IsAvailable)
+            .ToArray();
 
     public IReadOnlyList<GlanceModulePreference> GetPreferences() =>
         settings.Modules
@@ -46,12 +48,13 @@ public sealed class ModulePreferenceService
         allComponents.FirstOrDefault(component =>
             string.Equals(component.Id, id, StringComparison.OrdinalIgnoreCase));
 
+    public bool IsEnabled(string id) =>
+        settings.Modules.Any(preference => preference.IsEnabled && string.Equals(preference.Id, id, StringComparison.OrdinalIgnoreCase));
+
     public IReadOnlyList<IGlanceModuleSettingViewModel> CreateRuntimeSettings() =>
         runtimeSettingsFactories.SelectMany(factory => factory()).OrderBy(setting => setting.Order).ToArray();
 
-    public async Task RegisterComponentsAsync(
-        IReadOnlyList<IGlanceComponent> components,
-        Func<IReadOnlyList<IGlanceModuleSettingViewModel>> createSettings)
+    public async Task RegisterComponentsAsync(IReadOnlyList<IGlanceComponent> components, Func<IReadOnlyList<IGlanceModuleSettingViewModel>> createSettings)
     {
         ArgumentNullException.ThrowIfNull(components);
         ArgumentNullException.ThrowIfNull(createSettings);
@@ -67,6 +70,7 @@ public sealed class ModulePreferenceService
 
         allComponents.AddRange(components);
         runtimeSettingsFactories.Add(createSettings);
+        TrackAvailability(components);
 
         bool settingsChanged = false;
 
@@ -159,6 +163,20 @@ public sealed class ModulePreferenceService
         PreferencesChanged?.Invoke(this, EventArgs.Empty);
         await writer.WriteAsync(value => value.Modules = snapshot);
     }
+
+    private static bool IsAvailable(IGlanceComponent component) =>
+        component is not IGlanceAvailabilityComponent availability || availability.IsAvailable;
+
+    private void TrackAvailability(IEnumerable<IGlanceComponent> components)
+    {
+        foreach (IGlanceAvailabilityComponent component in components.OfType<IGlanceAvailabilityComponent>())
+        {
+            component.AvailabilityChanged += HandleComponentAvailabilityChanged;
+        }
+    }
+
+    private void HandleComponentAvailabilityChanged(object? sender, EventArgs args) =>
+        ActiveComponentsChanged?.Invoke(this, EventArgs.Empty);
 
     private static GlanceModulePreference Clone(GlanceModulePreference preference) =>
         new()

@@ -58,6 +58,7 @@ public sealed partial class DesktopIslandViewModel :
         AutoHide = settings.AutoHide;
         Placement = settings.Placement;
         attentionService.AttentionRequested += HandleAttentionRequested;
+        modulePreferences.ActiveComponentsChanged += HandleActiveComponentsChanged;
         modulePreferences.ComponentsAdded += HandleComponentsAdded;
         modulePreferences.PreferencesChanged += HandlePreferencesChanged;
         Activate();
@@ -155,6 +156,7 @@ public sealed partial class DesktopIslandViewModel :
     public override void Dispose()
     {
         attentionService.AttentionRequested -= HandleAttentionRequested;
+        modulePreferences.ActiveComponentsChanged -= HandleActiveComponentsChanged;
         modulePreferences.ComponentsAdded -= HandleComponentsAdded;
         modulePreferences.PreferencesChanged -= HandlePreferencesChanged;
         base.Dispose();
@@ -172,6 +174,9 @@ public sealed partial class DesktopIslandViewModel :
 
     private void HandlePreferencesChanged(object? sender, EventArgs args)
         => dispatcher.Dispatch(ApplyPreferences);
+
+    private void HandleActiveComponentsChanged(object? sender, EventArgs args) =>
+        dispatcher.Dispatch(ApplyPreferences);
 
     private void HandleComponentsAdded(object? sender, GlanceComponentsAddedEventArgs args) =>
         dispatcher.Dispatch(() =>
@@ -233,11 +238,18 @@ public sealed partial class DesktopIslandViewModel :
             return;
         }
 
+        bool isAlreadyPresented = SelectedIndex == componentIndex && IsOpen && (!request.Expand || IsExpanded);
+
+        if (isAlreadyPresented)
+        {
+            return;
+        }
+
         if (request.Level != GlanceAttentionLevel.Passive)
         {
             SelectedIndex = componentIndex;
             IsOpen = true;
-            IsExpanded = request.Expand;
+            IsExpanded = IsExpanded || request.Expand;
         }
 
         AttentionReceived?.Invoke(this, request);

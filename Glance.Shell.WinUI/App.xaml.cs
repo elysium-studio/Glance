@@ -28,7 +28,7 @@ public sealed partial class App
         host = Host.CreateDefaultBuilder().UseWritableContentRoot(applicationData).ConfigureServices(services =>
             {
                 services
-                    .AddApplication().AddPresentation().AddModules(new ApplicationModule(applicationData, dispatcherQueue), new ConfigurationModule(), new LocalizationModule(), new NavigationModule(), new DesktopModule(), new SettingsModule(), new GlanceSettingsModule(), new ModulesSettingsModule(), new WindowsSettingsModule());
+                    .AddApplication().AddPresentation().AddModules(new ApplicationModule(applicationData, dispatcherQueue), new ConfigurationModule(), new LocalizationModule(), new NavigationModule(), new DesktopModule(), new BridgeModule(), new SettingsModule(), new GlanceSettingsModule(), new ModulesSettingsModule(), new WindowsSettingsModule());
             })
             .Build();
 
