@@ -233,6 +233,13 @@ public sealed partial class DesktopIslandViewModel :
             return;
         }
 
+        bool isAlreadyPresented = SelectedIndex == componentIndex && IsOpen && (!request.Expand || IsExpanded);
+
+        if (isAlreadyPresented)
+        {
+            return;
+        }
+
         if (request.Level != GlanceAttentionLevel.Passive)
         {
             SelectedIndex = componentIndex;

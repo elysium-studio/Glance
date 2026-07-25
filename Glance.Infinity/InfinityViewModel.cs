@@ -9,9 +9,6 @@ public sealed partial class InfinityViewModel :
     private bool isConnected;
 
     [ObservableProperty]
-    private bool isActive;
-
-    [ObservableProperty]
     private int pageNumber;
 
     [ObservableProperty]
@@ -21,13 +18,11 @@ public sealed partial class InfinityViewModel :
     {
         PageTitle = state.PageTitle;
         PageNumber = state.PageNumber;
-        IsActive = state.IsActive;
         IsConnected = true;
     }
 
     public void Disconnect()
     {
-        IsActive = false;
         IsConnected = false;
     }
 }

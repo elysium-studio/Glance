@@ -38,9 +38,10 @@ public sealed class InfinityMessageHandler(InfinityViewModel viewModel, IDispatc
 
         dispatcher.Dispatch(() =>
         {
+            bool shouldRequestAttention = viewModel.IsConnected && viewModel.PageNumber != state.PageNumber;
             viewModel.Update(state);
 
-            if (state.IsActive)
+            if (shouldRequestAttention)
             {
                 attentionService.RequestAttention(ComponentId);
             }
