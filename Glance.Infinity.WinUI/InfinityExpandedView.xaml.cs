@@ -9,9 +9,7 @@ public sealed partial class InfinityExpandedView :
 {
     private readonly ModuleResourceTextLocalizer<InfinityModule> localizer;
 
-    public InfinityExpandedView(
-        InfinityViewModel viewModel,
-        ModuleResourceTextLocalizer<InfinityModule> localizer)
+    public InfinityExpandedView(InfinityViewModel viewModel, ModuleResourceTextLocalizer<InfinityModule> localizer)
     {
         ViewModel = viewModel;
         this.localizer = localizer;

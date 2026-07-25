@@ -28,11 +28,7 @@ internal sealed class GlanceModuleManager :
     private readonly Dictionary<string, CancellationTokenSource> pendingPackages = new(StringComparer.OrdinalIgnoreCase);
     private readonly object synchronization = new();
 
-    public GlanceModuleManager(
-        IServiceProvider applicationServices,
-        GlanceRuntimeServiceProvider runtimeServices,
-        DispatcherQueue dispatcherQueue,
-        ILogger<GlanceModuleManager> logger)
+    public GlanceModuleManager(IServiceProvider applicationServices, GlanceRuntimeServiceProvider runtimeServices, DispatcherQueue dispatcherQueue, ILogger<GlanceModuleManager> logger)
     {
         this.applicationServices = applicationServices;
         this.runtimeServices = runtimeServices;
@@ -204,9 +200,7 @@ internal sealed class GlanceModuleManager :
         }
     }
 
-    private async Task PrepareAndInstallAsync(
-        string packagePath,
-        CancellationTokenSource cancellation)
+    private async Task PrepareAndInstallAsync(string packagePath, CancellationTokenSource cancellation)
     {
         try
         {
@@ -250,9 +244,7 @@ internal sealed class GlanceModuleManager :
         }
     }
 
-    private static async Task<bool> WaitForStablePackageAsync(
-        string packagePath,
-        CancellationToken cancellationToken)
+    private static async Task<bool> WaitForStablePackageAsync(string packagePath, CancellationToken cancellationToken)
     {
         for (int attempt = 0; attempt < 8; attempt++)
         {

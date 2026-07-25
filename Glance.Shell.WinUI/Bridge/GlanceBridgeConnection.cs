@@ -10,9 +10,7 @@ using System.Threading.Tasks;
 
 namespace Glance.Shell.WinUI;
 
-internal sealed class GlanceBridgeConnection(
-    string applicationId,
-    StreamWriter writer) :
+internal sealed class GlanceBridgeConnection(string applicationId, StreamWriter writer) :
     IGlanceApplicationConnection,
     IAsyncDisposable
 {
@@ -21,11 +19,7 @@ internal sealed class GlanceBridgeConnection(
 
     public string ApplicationId { get; } = applicationId;
 
-    public async ValueTask SendAsync(
-        string capability,
-        string topic,
-        JsonElement payload,
-        CancellationToken cancellationToken = default)
+    public async ValueTask SendAsync(string capability, string topic, JsonElement payload, CancellationToken cancellationToken = default)
     {
         GlanceBridgeWireMessage message = new()
         {
@@ -39,9 +33,7 @@ internal sealed class GlanceBridgeConnection(
         await WriteAsync(message, cancellationToken);
     }
 
-    public async ValueTask SendCapabilitiesAsync(
-        IReadOnlyCollection<string> capabilities,
-        CancellationToken cancellationToken = default)
+    public async ValueTask SendCapabilitiesAsync(IReadOnlyCollection<string> capabilities, CancellationToken cancellationToken = default)
     {
         GlanceBridgeWireMessage message = new()
         {
@@ -59,9 +51,7 @@ internal sealed class GlanceBridgeConnection(
         await writer.DisposeAsync();
     }
 
-    private async ValueTask WriteAsync(
-        GlanceBridgeWireMessage message,
-        CancellationToken cancellationToken)
+    private async ValueTask WriteAsync(GlanceBridgeWireMessage message, CancellationToken cancellationToken)
     {
         string json = JsonSerializer.Serialize(message, serializerOptions);
         await writeLock.WaitAsync(cancellationToken);

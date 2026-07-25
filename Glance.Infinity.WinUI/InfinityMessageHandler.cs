@@ -8,12 +8,11 @@ using System.Threading.Tasks;
 
 namespace Glance.Infinity.WinUI;
 
-public sealed class InfinityMessageHandler(
-    InfinityViewModel viewModel,
-    IDispatcher dispatcher,
-    IGlanceAttentionService attentionService) :
+public sealed class InfinityMessageHandler(InfinityViewModel viewModel, IDispatcher dispatcher, IGlanceAttentionService attentionService) :
     IGlanceApplicationMessageHandler
 {
+    private static readonly JsonSerializerOptions serializerOptions = new(JsonSerializerDefaults.Web);
+
     public const string PagesCapability = "infinity.pages.v1";
     public const string PageNavigationTopic = "page-navigation";
 
@@ -23,17 +22,14 @@ public sealed class InfinityMessageHandler(
 
     public IReadOnlyCollection<string> Capabilities { get; } = [PagesCapability];
 
-    public ValueTask HandleAsync(
-        GlanceApplicationMessage message,
-        IGlanceApplicationConnection connection,
-        CancellationToken cancellationToken)
+    public ValueTask HandleAsync(GlanceApplicationMessage message, IGlanceApplicationConnection connection, CancellationToken cancellationToken)
     {
         if (!string.Equals(message.Topic, PageNavigationTopic, StringComparison.OrdinalIgnoreCase))
         {
             return ValueTask.CompletedTask;
         }
 
-        InfinityPageNavigationState? state = message.Payload.Deserialize<InfinityPageNavigationState>();
+        InfinityPageNavigationState? state = message.Payload.Deserialize<InfinityPageNavigationState>(serializerOptions);
 
         if (state is null)
         {
@@ -53,9 +49,7 @@ public sealed class InfinityMessageHandler(
         return ValueTask.CompletedTask;
     }
 
-    public ValueTask DisconnectedAsync(
-        IGlanceApplicationConnection connection,
-        CancellationToken cancellationToken)
+    public ValueTask DisconnectedAsync(IGlanceApplicationConnection connection, CancellationToken cancellationToken)
     {
         dispatcher.Dispatch(viewModel.Disconnect);
         return ValueTask.CompletedTask;

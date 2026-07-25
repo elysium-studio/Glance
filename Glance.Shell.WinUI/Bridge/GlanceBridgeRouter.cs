@@ -18,9 +18,7 @@ internal sealed class GlanceBridgeRouter :
     private readonly ModulePreferenceService preferences;
     private readonly object synchronization = new();
 
-    public GlanceBridgeRouter(
-        ModulePreferenceService preferences,
-        ILogger<GlanceBridgeRouter> logger)
+    public GlanceBridgeRouter(ModulePreferenceService preferences, ILogger<GlanceBridgeRouter> logger)
     {
         this.preferences = preferences;
         this.logger = logger;
@@ -49,9 +47,7 @@ internal sealed class GlanceBridgeRouter :
         BroadcastCapabilities();
     }
 
-    public async ValueTask AddConnectionAsync(
-        GlanceBridgeConnection connection,
-        CancellationToken cancellationToken)
+    public async ValueTask AddConnectionAsync(GlanceBridgeConnection connection, CancellationToken cancellationToken)
     {
         IGlanceApplicationMessageHandler[] targets;
 
@@ -67,9 +63,7 @@ internal sealed class GlanceBridgeRouter :
         }
     }
 
-    public async ValueTask RemoveConnectionAsync(
-        GlanceBridgeConnection connection,
-        CancellationToken cancellationToken)
+    public async ValueTask RemoveConnectionAsync(GlanceBridgeConnection connection, CancellationToken cancellationToken)
     {
         IGlanceApplicationMessageHandler[] targets;
 
@@ -100,10 +94,7 @@ internal sealed class GlanceBridgeRouter :
         }
     }
 
-    public async ValueTask RouteAsync(
-        GlanceBridgeConnection connection,
-        GlanceBridgeWireMessage message,
-        CancellationToken cancellationToken)
+    public async ValueTask RouteAsync(GlanceBridgeConnection connection, GlanceBridgeWireMessage message, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(message.Capability) || string.IsNullOrWhiteSpace(message.Topic) || message.Payload.ValueKind == JsonValueKind.Undefined)
         {
@@ -165,9 +156,7 @@ internal sealed class GlanceBridgeRouter :
         }
     }
 
-    private async ValueTask InvokeAsync(
-        Func<ValueTask> action,
-        IGlanceApplicationMessageHandler handler)
+    private async ValueTask InvokeAsync(Func<ValueTask> action, IGlanceApplicationMessageHandler handler)
     {
         try
         {

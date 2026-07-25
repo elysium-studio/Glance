@@ -10,9 +10,7 @@ using System.Threading.Tasks;
 
 namespace Glance.Shell.WinUI;
 
-internal sealed class GlanceBridgeServer(
-    GlanceBridgeRouter router,
-    ILogger<GlanceBridgeServer> logger) :
+internal sealed class GlanceBridgeServer(GlanceBridgeRouter router, ILogger<GlanceBridgeServer> logger) :
     BackgroundService
 {
     private static readonly JsonSerializerOptions serializerOptions = new(JsonSerializerDefaults.Web);
@@ -21,12 +19,7 @@ internal sealed class GlanceBridgeServer(
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            NamedPipeServerStream pipe = new(
-                GlanceBridgeProtocol.PipeName,
-                PipeDirection.InOut,
-                NamedPipeServerStream.MaxAllowedServerInstances,
-                PipeTransmissionMode.Byte,
-                PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+            NamedPipeServerStream pipe = new(GlanceBridgeProtocol.PipeName, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
 
             try
             {
@@ -45,9 +38,7 @@ internal sealed class GlanceBridgeServer(
         }
     }
 
-    private async Task HandleConnectionAsync(
-        NamedPipeServerStream pipe,
-        CancellationToken cancellationToken)
+    private async Task HandleConnectionAsync(NamedPipeServerStream pipe, CancellationToken cancellationToken)
     {
         GlanceBridgeConnection? connection = null;
 

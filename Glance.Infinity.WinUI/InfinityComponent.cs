@@ -9,9 +9,7 @@ public sealed class InfinityComponent :
 {
     private readonly ITextLocalizer localizer;
 
-    public InfinityComponent(
-        InfinityViewModel viewModel,
-        ModuleResourceTextLocalizer<InfinityModule> localizer)
+    public InfinityComponent(InfinityViewModel viewModel, ModuleResourceTextLocalizer<InfinityModule> localizer)
     {
         this.localizer = localizer;
         InfinityCompactView compactView = new(viewModel, localizer);
