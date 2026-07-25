@@ -5,7 +5,7 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/DropShelf.xaml" />
     </UserControl.Resources>
-    <Grid Padding="8,0" ColumnSpacing="10">
+    <Grid Padding="12,4" ColumnSpacing="8">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />

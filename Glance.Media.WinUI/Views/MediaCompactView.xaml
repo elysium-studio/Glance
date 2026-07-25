@@ -7,7 +7,7 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Media.xaml" />
     </UserControl.Resources>
-    <Grid Padding="8,0" ColumnSpacing="10">
+    <Grid Padding="12,4" ColumnSpacing="8">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
@@ -15,8 +15,8 @@
         </Grid.ColumnDefinitions>
         <Border
             x:Name="ArtworkContainer"
-            Width="30"
-            Height="30"
+            Width="28"
+            Height="28"
             Background="{ThemeResource ControlFillColorSecondaryBrush}"
             CornerRadius="7">
             <Grid>

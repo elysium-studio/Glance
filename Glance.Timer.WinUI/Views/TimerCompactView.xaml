@@ -5,15 +5,15 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Timer.xaml" />
     </UserControl.Resources>
-    <Grid x:Name="LayoutRoot" Padding="8,0">
+    <Grid x:Name="LayoutRoot" Padding="12,4" ColumnSpacing="8">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid
             x:Name="StatusIndicator"
-            Width="26"
-            Height="26">
+            Width="28"
+            Height="28">
             <FontIcon
                 Width="24"
                 Height="24"
@@ -26,10 +26,9 @@
         </Grid>
         <TextBlock
             Grid.Column="1"
-            Margin="8,0,0,0"
             VerticalAlignment="Center"
             Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-            Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+            Style="{StaticResource BodyStrongTextBlockStyle}"
             Text="{x:Bind ViewModel.RemainingText, Mode=OneWay}" />
     </Grid>
 </UserControl>

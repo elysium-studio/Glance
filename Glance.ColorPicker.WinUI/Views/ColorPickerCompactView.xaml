@@ -5,15 +5,15 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/ColorPicker.xaml" />
     </UserControl.Resources>
-    <Grid Padding="8,0" ColumnSpacing="8">
+    <Grid Padding="12,4" ColumnSpacing="8">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Border
             x:Name="ColorSwatch"
-            Width="30"
-            Height="30"
+            Width="28"
+            Height="28"
             Background="{x:Bind ToBrush(ViewModel.CurrentColor), Mode=OneWay}"
             CornerRadius="8" />
         <StackPanel

@@ -5,15 +5,15 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Clipboard.xaml" />
     </UserControl.Resources>
-    <Grid Padding="8,0" ColumnSpacing="8">
+    <Grid Padding="12,4" ColumnSpacing="8">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid
             x:Name="StatusIndicator"
-            Width="26"
-            Height="26">
+            Width="28"
+            Height="28">
             <FontIcon
                 Width="24"
                 Height="24"

@@ -6,7 +6,7 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Power.xaml" />
     </UserControl.Resources>
-    <Grid Padding="8,0" ColumnSpacing="8">
+    <Grid Padding="12,4" ColumnSpacing="8">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
@@ -14,8 +14,8 @@
         </Grid.ColumnDefinitions>
         <Grid
             x:Name="StatusIndicator"
-            Width="30"
-            Height="26">
+            Width="28"
+            Height="28">
             <Grid Width="28" Height="14">
                 <Border
                     Width="24"
@@ -43,7 +43,7 @@
         <TextBlock
             Grid.Column="1"
             VerticalAlignment="Center"
-            Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+            Style="{StaticResource BodyStrongTextBlockStyle}"
             Text="{x:Bind ViewModel.ChargeText, Mode=OneWay}" />
         <TextBlock
             Grid.Column="2"
