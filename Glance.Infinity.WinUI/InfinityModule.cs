@@ -10,6 +10,8 @@ public sealed class InfinityModule :
     public void Register(IServiceCollection services)
     {
         services.AddSingleton<ModuleResourceTextLocalizer<InfinityModule>>();
+        services.AddSingleton<InfinityBridgeClient>();
+        services.AddSingleton<IInfinityPageTitleUpdater>(provider => provider.GetRequiredService<InfinityBridgeClient>());
         services.AddSingleton<InfinityViewModel>();
         services.AddSingleton<IGlanceComponent, InfinityComponent>();
         services.AddSingleton<IGlanceApplicationMessageHandler, InfinityMessageHandler>();

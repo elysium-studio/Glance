@@ -22,6 +22,10 @@ public sealed partial class InfinityExpandedView :
 
     public string Title => localizer.GetText("ModuleDisplayName");
 
+    public string EditTitleLabel => localizer.GetText("EditPageTitle");
+
+    public string SaveTitleLabel => localizer.GetText("SavePageTitle");
+
     private string ToDisplayText(bool isConnected, string pageTitle) => isConnected
         ? pageTitle
         : localizer.GetText("WaitingForInfinity");
@@ -31,4 +35,12 @@ public sealed partial class InfinityExpandedView :
     private string ToUpper(string value) => value.ToUpperInvariant();
 
     private Visibility ToVisibility(bool value) => value ? Visibility.Visible : Visibility.Collapsed;
+
+    private Visibility WhenEditing(bool isEditing) => isEditing ? Visibility.Visible : Visibility.Collapsed;
+
+    private Visibility WhenNotEditing(bool isEditing) => isEditing ? Visibility.Collapsed : Visibility.Visible;
+
+    private Visibility WhenCanEdit(bool isConnected, bool isEditing) => isConnected && !isEditing ? Visibility.Visible : Visibility.Collapsed;
+
+    private bool IsSaveEnabled(bool isConnected, bool isSavingTitle) => isConnected && !isSavingTitle;
 }

@@ -41,6 +41,9 @@
   <Project Path="Glance.Infinity/Glance.Infinity.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="Glance.Infinity.Tests/Glance.Infinity.Tests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="Glance.FocusSession.Tests/Glance.FocusSession.Tests.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>

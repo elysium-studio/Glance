@@ -9,6 +9,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Grid
             x:Name="StatusIndicator"
@@ -34,16 +35,56 @@
                 Foreground="{ThemeResource GlanceInfinityIconBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ToUpper(Title)}" />
-            <TextBlock
-                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                Style="{StaticResource TitleTextBlockStyle}"
-                Text="{x:Bind ToDisplayText(ViewModel.IsConnected, ViewModel.PageTitle), Mode=OneWay}"
-                TextTrimming="CharacterEllipsis" />
+            <Grid>
+                <TextBlock
+                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                    Style="{StaticResource TitleTextBlockStyle}"
+                    Text="{x:Bind ToDisplayText(ViewModel.IsConnected, ViewModel.PageTitle), Mode=OneWay}"
+                    TextTrimming="CharacterEllipsis"
+                    Visibility="{x:Bind WhenNotEditing(ViewModel.IsEditing), Mode=OneWay}" />
+                <TextBox
+                    MaxLength="80"
+                    Text="{x:Bind ViewModel.EditingTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Visibility="{x:Bind WhenEditing(ViewModel.IsEditing), Mode=OneWay}" />
+            </Grid>
             <TextBlock
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ToPageText(ViewModel.PageNumber), Mode=OneWay}"
                 Visibility="{x:Bind ToVisibility(ViewModel.IsConnected), Mode=OneWay}" />
         </StackPanel>
+        <Grid
+            Grid.Column="2"
+            Width="36"
+            Height="36"
+            VerticalAlignment="Center">
+            <Button
+                Width="36"
+                Height="36"
+                AutomationProperties.Name="{x:Bind EditTitleLabel}"
+                Click="{x:Bind ViewModel.BeginEditing}"
+                Style="{StaticResource SubtleButtonStyle}"
+                ToolTipService.ToolTip="{x:Bind EditTitleLabel}"
+                Visibility="{x:Bind WhenCanEdit(ViewModel.IsConnected, ViewModel.IsEditing), Mode=OneWay}">
+                <FontIcon
+                    FontFamily="Segoe Fluent Icons"
+                    FontSize="16"
+                    Glyph="&#xE70F;" />
+            </Button>
+            <Button
+                Width="36"
+                Height="36"
+                AutomationProperties.Name="{x:Bind SaveTitleLabel}"
+                Click="{x:Bind ViewModel.CommitEditAsync}"
+                IsEnabled="{x:Bind IsSaveEnabled(ViewModel.IsConnected, ViewModel.IsSavingTitle), Mode=OneWay}"
+                Style="{StaticResource AccentButtonStyle}"
+                ToolTipService.ToolTip="{x:Bind SaveTitleLabel}"
+                Visibility="{x:Bind WhenEditing(ViewModel.IsEditing), Mode=OneWay}">
+                <FontIcon
+                    FontFamily="Segoe Fluent Icons"
+                    FontSize="16"
+                    Glyph="&#xE74E;" />
+            </Button>
+        </Grid>
     </Grid>
 </UserControl>

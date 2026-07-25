@@ -5,4 +5,6 @@
   <data name="ModuleDescription" xml:space="preserve"><value>ナビゲーション中に現在の Infinity デスクトップページを表示します。</value></data>
   <data name="WaitingForInfinity" xml:space="preserve"><value>Infinity を待機中</value></data>
   <data name="PageNumber" xml:space="preserve"><value>ページ {0}</value></data>
+  <data name="EditPageTitle" xml:space="preserve"><value>ページ タイトルを編集</value></data>
+  <data name="SavePageTitle" xml:space="preserve"><value>ページ タイトルを保存</value></data>
 </root>

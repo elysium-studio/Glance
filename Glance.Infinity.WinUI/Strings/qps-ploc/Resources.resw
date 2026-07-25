@@ -5,4 +5,6 @@
   <data name="ModuleDescription" xml:space="preserve"><value>[Šĥöŵš ţĥë çüřřëñţ Ïñƒïñïţý dëšķţöþ þåğë ŵĥïļë ñåvïğåţïñğ.]</value></data>
   <data name="WaitingForInfinity" xml:space="preserve"><value>[Ŵåïţïñğ ƒöř Ïñƒïñïţý]</value></data>
   <data name="PageNumber" xml:space="preserve"><value>[Þåğë {0}]</value></data>
+  <data name="EditPageTitle" xml:space="preserve"><value>[Edit page title]</value></data>
+  <data name="SavePageTitle" xml:space="preserve"><value>[Save page title]</value></data>
 </root>

@@ -5,4 +5,6 @@
   <data name="ModuleDescription" xml:space="preserve"><value>Mostra a página atual da área de trabalho do Infinity durante a navegação.</value></data>
   <data name="WaitingForInfinity" xml:space="preserve"><value>Aguardando o Infinity</value></data>
   <data name="PageNumber" xml:space="preserve"><value>Página {0}</value></data>
+  <data name="EditPageTitle" xml:space="preserve"><value>Editar título da página</value></data>
+  <data name="SavePageTitle" xml:space="preserve"><value>Salvar título da página</value></data>
 </root>
