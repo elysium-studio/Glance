@@ -196,7 +196,17 @@ public sealed partial class DesktopIslandView :
     {
         sender.Stop();
 
-        if (!isPointerOverIsland)
+        if (isPointerOverIsland)
+        {
+            return;
+        }
+
+        if (IsPointerWithinInteractiveRegion)
+        {
+            isPointerOverIsland = true;
+            UpdateComponentInteraction();
+        }
+        else
         {
             EndComponentInteraction();
         }
