@@ -35,14 +35,17 @@
                 Foreground="{ThemeResource GlanceInfinityIconBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ToUpper(Title)}" />
-            <Grid>
+            <Grid Height="36">
                 <TextBlock
+                    VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                     Style="{StaticResource TitleTextBlockStyle}"
                     Text="{x:Bind ToDisplayText(ViewModel.IsConnected, ViewModel.PageTitle), Mode=OneWay}"
                     TextTrimming="CharacterEllipsis"
                     Visibility="{x:Bind WhenNotEditing(ViewModel.IsEditing), Mode=OneWay}" />
                 <TextBox
+                    Height="32"
+                    VerticalAlignment="Center"
                     MaxLength="80"
                     Text="{x:Bind ViewModel.EditingTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Visibility="{x:Bind WhenEditing(ViewModel.IsEditing), Mode=OneWay}" />
