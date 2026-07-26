@@ -66,12 +66,6 @@ public sealed partial class InfinityViewModel :
     public void EndInteraction()
     {
         isInteracting = false;
-
-        if (IsEditing)
-        {
-            CancelEditing();
-        }
-
         DismissIfIdle();
     }
 

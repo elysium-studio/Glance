@@ -10,6 +10,7 @@ public sealed class InfinityComponent :
     IGlanceConnectedAnimationComponent,
     IGlanceAvailabilityComponent,
     IGlanceInteractionAwareComponent,
+    IGlanceExpansionLockComponent,
     IDisposable
 {
     private readonly ITextLocalizer localizer;
@@ -47,11 +48,17 @@ public sealed class InfinityComponent :
 
     public bool IsAvailable => viewModel.IsAvailable;
 
+    public bool IsExpansionLocked => viewModel.IsEditing;
+
     public event EventHandler? AvailabilityChanged;
+
+    public event EventHandler? ExpansionLockChanged;
 
     public void BeginInteraction() => viewModel.BeginInteraction();
 
     public void EndInteraction() => viewModel.EndInteraction();
+
+    public void DismissExpansionLock() => viewModel.CancelEditing();
 
     public void Dispose()
     {
@@ -63,6 +70,11 @@ public sealed class InfinityComponent :
         if (args.PropertyName == nameof(InfinityViewModel.IsAvailable))
         {
             AvailabilityChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (args.PropertyName == nameof(InfinityViewModel.IsEditing))
+        {
+            ExpansionLockChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }

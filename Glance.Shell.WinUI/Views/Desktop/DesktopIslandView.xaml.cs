@@ -35,6 +35,7 @@ public sealed partial class DesktopIslandView :
     private Button? pressedButton;
     private bool isContextualDragActive;
     private int contextualDragSession;
+    private IGlanceExpansionLockComponent? expansionLockComponent;
     private IGlanceInteractionAwareComponent? interactionComponent;
     private bool isPointerOverIsland;
     private int previousIndex;
@@ -72,6 +73,8 @@ public sealed partial class DesktopIslandView :
         previousIndex = ViewModel.SelectedIndex;
         ViewModel.PropertyChanged += HandleViewModelPropertyChanged;
         ViewModel.AttentionReceived += HandleAttentionReceived;
+        Deactivated += HandleIslandDeactivated;
+        UpdateExpansionLockComponent();
         StartStartupAttentionTimer();
     }
 
@@ -79,7 +82,9 @@ public sealed partial class DesktopIslandView :
     {
         ViewModel.PropertyChanged -= HandleViewModelPropertyChanged;
         ViewModel.AttentionReceived -= HandleAttentionReceived;
+        Deactivated -= HandleIslandDeactivated;
         ReleasePressedButton();
+        ClearExpansionLockComponent();
         EndComponentInteraction();
         StopAttentionExpansionTimer();
         StopContextualDragExitTimer();
@@ -172,6 +177,7 @@ public sealed partial class DesktopIslandView :
     {
         if (args.PropertyName == nameof(DesktopIslandViewModel.SelectedComponent))
         {
+            UpdateExpansionLockComponent();
             UpdateComponentInteraction();
             return;
         }
@@ -346,6 +352,52 @@ public sealed partial class DesktopIslandView :
         IGlanceInteractionAwareComponent? previousComponent = interactionComponent;
         interactionComponent = null;
         previousComponent?.EndInteraction();
+    }
+
+    private void UpdateExpansionLockComponent()
+    {
+        IGlanceExpansionLockComponent? selectedComponent = ViewModel.SelectedComponent as IGlanceExpansionLockComponent;
+
+        if (ReferenceEquals(expansionLockComponent, selectedComponent))
+        {
+            ApplyExpansionLock();
+            return;
+        }
+
+        ClearExpansionLockComponent();
+        expansionLockComponent = selectedComponent;
+
+        if (expansionLockComponent is not null)
+        {
+            expansionLockComponent.ExpansionLockChanged += HandleExpansionLockChanged;
+        }
+
+        ApplyExpansionLock();
+    }
+
+    private void ClearExpansionLockComponent()
+    {
+        if (expansionLockComponent is not null)
+        {
+            expansionLockComponent.ExpansionLockChanged -= HandleExpansionLockChanged;
+            expansionLockComponent = null;
+        }
+
+        IsExpansionLocked = false;
+    }
+
+    private void HandleExpansionLockChanged(object? sender, EventArgs args) =>
+        DispatcherQueue.TryEnqueue(ApplyExpansionLock);
+
+    private void ApplyExpansionLock() =>
+        IsExpansionLocked = expansionLockComponent?.IsExpansionLocked == true;
+
+    private void HandleIslandDeactivated(object? sender, EventArgs args)
+    {
+        if (expansionLockComponent?.IsExpansionLocked == true)
+        {
+            expansionLockComponent.DismissExpansionLock();
+        }
     }
 
     private void PlayConnectedExpansionAnimation()
