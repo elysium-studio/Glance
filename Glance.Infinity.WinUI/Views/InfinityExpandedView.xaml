@@ -63,28 +63,24 @@
                 Height="36"
                 AutomationProperties.Name="{x:Bind EditTitleLabel}"
                 Click="{x:Bind ViewModel.BeginEditing}"
+                Content="&#xE70F;"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="14"
                 Style="{StaticResource SubtleButtonStyle}"
                 ToolTipService.ToolTip="{x:Bind EditTitleLabel}"
-                Visibility="{x:Bind WhenCanEdit(ViewModel.IsConnected, ViewModel.IsEditing), Mode=OneWay}">
-                <FontIcon
-                    FontFamily="Segoe Fluent Icons"
-                    FontSize="16"
-                    Glyph="&#xE70F;" />
-            </Button>
+                Visibility="{x:Bind WhenCanEdit(ViewModel.IsConnected, ViewModel.IsEditing), Mode=OneWay}" />
             <Button
                 Width="36"
                 Height="36"
                 AutomationProperties.Name="{x:Bind SaveTitleLabel}"
                 Click="{x:Bind ViewModel.CommitEditAsync}"
+                Content="&#xE74E;"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="14"
                 IsEnabled="{x:Bind IsSaveEnabled(ViewModel.IsConnected, ViewModel.IsSavingTitle), Mode=OneWay}"
                 Style="{StaticResource AccentButtonStyle}"
                 ToolTipService.ToolTip="{x:Bind SaveTitleLabel}"
-                Visibility="{x:Bind WhenEditing(ViewModel.IsEditing), Mode=OneWay}">
-                <FontIcon
-                    FontFamily="Segoe Fluent Icons"
-                    FontSize="16"
-                    Glyph="&#xE74E;" />
-            </Button>
+                Visibility="{x:Bind WhenEditing(ViewModel.IsEditing), Mode=OneWay}" />
         </Grid>
     </Grid>
 </UserControl>
