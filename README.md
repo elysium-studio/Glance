@@ -16,6 +16,7 @@ The island remains at the top or bottom of the desktop in a compact state, expan
 - **Focus Session** — run a focused work session with a clear remaining-time display.
 - **Audio Switcher** — move quickly between available playback devices.
 - **Voice Notes** — record short audio notes and revisit recent recordings.
+- **Speech to Text** — transcribe a microphone, system playback, or both together in real time using the on-device Windows AI speech model.
 - **Colour Picker** — sample a screen colour and copy its HEX, RGB, or HSL value.
 - **Screen Capture** — capture a region, a window, one display, or all displays directly to the Captures folder.
 - **Privacy Controls** — monitor the default microphone state and mute or unmute it globally.
@@ -75,7 +76,7 @@ The module's WinUI project must:
 - Set `UseWinUI` to `true`.
 - Set `DisableEmbeddedXbf` to `false` so compiled XAML is embedded in the module PRI.
 - Set `CopyLocalLockFileAssemblies` to `true`, or otherwise include every private runtime dependency in the module directory.
-- Target x64 and a framework compatible with Glance's .NET 10 and Windows App SDK 2.2 runtime.
+- Target x64 and a framework compatible with Glance's .NET 11 preview and Windows App SDK 2.2 runtime.
 - Keep shared Glance, Elysium, WinUI, and Microsoft Extensions contract assemblies out of the module bundle so the host-provided versions are used.
 
 Modules run with the same trust as Glance itself. Service isolation controls module lifetimes and registration collisions; it is not a security sandbox. Only install modules from sources you trust.
@@ -91,7 +92,7 @@ Settings follow the same Elysium application and navigation structure used by [I
 
 ## Building
 
-Glance targets Windows with .NET 10 and WinUI 3. Open `Glance.slnx` in Visual Studio or build the x64 solution from the command line:
+Glance targets Windows with .NET 11 preview and WinUI 3. Open `Glance.slnx` in Visual Studio or build the x64 solution from the command line:
 
 ```powershell
 dotnet build Glance.slnx -p:Platform=x64

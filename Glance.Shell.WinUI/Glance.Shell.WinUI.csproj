@@ -16,7 +16,7 @@
     <Nullable>enable</Nullable>
     <EnablePreviewFeatures>true</EnablePreviewFeatures>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <WindowsAppSDKSelfContained Condition="'$(Configuration)' == 'Release'">true</WindowsAppSDKSelfContained>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <StartupObject>Glance.Shell.WinUI.Start</StartupObject>
     <DefaultLanguage>en</DefaultLanguage>
@@ -47,6 +47,7 @@
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
     <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.3.1" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.AI" Version="2.2.6-experimental" />
     <PackageReference Include="Microsoft.WindowsAppSDK.Runtime" Version="2.2.0" GeneratePathProperty="true" PrivateAssets="all" />
     <PackageReference Include="Velopack" Version="1.2.0" />
     <PackageReference Include="WinUIEx" Version="2.9.1" />
@@ -64,6 +65,7 @@
     <GlanceModuleProject Include="..\Glance.PrivacyControls.WinUI\Glance.PrivacyControls.WinUI.csproj" />
     <GlanceModuleProject Include="..\Glance.RemovableDevices.WinUI\Glance.RemovableDevices.WinUI.csproj" />
     <GlanceModuleProject Include="..\Glance.ScreenCapture.WinUI\Glance.ScreenCapture.WinUI.csproj" />
+    <GlanceModuleProject Include="..\Glance.SpeechToText.WinUI\Glance.SpeechToText.WinUI.csproj" />
     <GlanceModuleProject Include="..\Glance.Stopwatch.WinUI\Glance.Stopwatch.WinUI.csproj" />
     <GlanceModuleProject Include="..\Glance.SystemMonitor.WinUI\Glance.SystemMonitor.WinUI.csproj" />
     <GlanceModuleProject Include="..\Glance.Timer.WinUI\Glance.Timer.WinUI.csproj" />
@@ -108,7 +110,7 @@
   </UsingTask>
   <Target Name="ArrangeGlanceModulesInBuildOutput" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true'">
     <ItemGroup>
-      <GlanceModuleStagingDirectory Include="$(OutDir)Modules\AudioSwitcher;$(OutDir)Modules\Clipboard;$(OutDir)Modules\ColorPicker;$(OutDir)Modules\DevicePresence;$(OutDir)Modules\DropShelf;$(OutDir)Modules\FocusSession;$(OutDir)Modules\Infinity;$(OutDir)Modules\Media;$(OutDir)Modules\Power;$(OutDir)Modules\PrivacyControls;$(OutDir)Modules\RemovableDevices;$(OutDir)Modules\ScreenCapture;$(OutDir)Modules\Stopwatch;$(OutDir)Modules\SystemMonitor;$(OutDir)Modules\Timer;$(OutDir)Modules\VoiceNotes" />
+      <GlanceModuleStagingDirectory Include="$(OutDir)Modules\AudioSwitcher;$(OutDir)Modules\Clipboard;$(OutDir)Modules\ColorPicker;$(OutDir)Modules\DevicePresence;$(OutDir)Modules\DropShelf;$(OutDir)Modules\FocusSession;$(OutDir)Modules\Infinity;$(OutDir)Modules\Media;$(OutDir)Modules\Power;$(OutDir)Modules\PrivacyControls;$(OutDir)Modules\RemovableDevices;$(OutDir)Modules\ScreenCapture;$(OutDir)Modules\SpeechToText;$(OutDir)Modules\Stopwatch;$(OutDir)Modules\SystemMonitor;$(OutDir)Modules\Timer;$(OutDir)Modules\VoiceNotes" />
       <ExistingGlanceModulePackage Include="$(OutDir)Modules\*.glance" />
       <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.AudioSwitcher.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.AudioSwitcher.*"><ModuleName>AudioSwitcher</ModuleName></GlanceModuleBuildFile>
       <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.AudioSwitcher.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\NAudio*.dll"><ModuleName>AudioSwitcher</ModuleName></GlanceModuleBuildFile>
@@ -126,13 +128,16 @@
       <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.RemovableDevices.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.RemovableDevices.*"><ModuleName>RemovableDevices</ModuleName></GlanceModuleBuildFile>
       <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.RemovableDevices.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\System.Management.dll"><ModuleName>RemovableDevices</ModuleName></GlanceModuleBuildFile>
       <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.ScreenCapture.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.ScreenCapture.*"><ModuleName>ScreenCapture</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\Glance.SpeechToText.*"><ModuleName>SpeechToText</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\NAudio*.dll"><ModuleName>SpeechToText</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\Microsoft.Windows.AI.Projection.dll;$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\Microsoft.Windows.AI.Foundation.Projection.dll;$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\Microsoft.Windows.AI.Speech.dll;$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\Microsoft.Windows.AI.Speech.Projection.dll"><ModuleName>SpeechToText</ModuleName></GlanceModuleBuildFile>
       <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Stopwatch.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Stopwatch.*"><ModuleName>Stopwatch</ModuleName></GlanceModuleBuildFile>
       <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.SystemMonitor.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.SystemMonitor.*"><ModuleName>SystemMonitor</ModuleName></GlanceModuleBuildFile>
       <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Timer.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Timer.*"><ModuleName>Timer</ModuleName></GlanceModuleBuildFile>
       <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.VoiceNotes.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.VoiceNotes.*"><ModuleName>VoiceNotes</ModuleName></GlanceModuleBuildFile>
       <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.VoiceNotes.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\NAudio*.dll"><ModuleName>VoiceNotes</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildRootFile Include="$(OutDir)Glance.AudioSwitcher.*;$(OutDir)Glance.Clipboard.*;$(OutDir)Glance.ColorPicker.*;$(OutDir)Glance.DevicePresence.*;$(OutDir)Glance.DropShelf.*;$(OutDir)Glance.FocusSession.*;$(OutDir)Glance.Infinity.*;$(OutDir)Glance.Media.*;$(OutDir)Glance.Power.*;$(OutDir)Glance.PrivacyControls.*;$(OutDir)Glance.RemovableDevices.*;$(OutDir)Glance.ScreenCapture.*;$(OutDir)Glance.Stopwatch.*;$(OutDir)Glance.SystemMonitor.*;$(OutDir)Glance.Timer.*;$(OutDir)Glance.VoiceNotes.*" />
-      <GlanceModuleRootXbfDirectory Include="$(OutDir)Glance.AudioSwitcher.WinUI;$(OutDir)Glance.Clipboard.WinUI;$(OutDir)Glance.ColorPicker.WinUI;$(OutDir)Glance.DevicePresence.WinUI;$(OutDir)Glance.DropShelf.WinUI;$(OutDir)Glance.FocusSession.WinUI;$(OutDir)Glance.Infinity.WinUI;$(OutDir)Glance.Media.WinUI;$(OutDir)Glance.Power.WinUI;$(OutDir)Glance.PrivacyControls.WinUI;$(OutDir)Glance.RemovableDevices.WinUI;$(OutDir)Glance.ScreenCapture.WinUI;$(OutDir)Glance.Stopwatch.WinUI;$(OutDir)Glance.SystemMonitor.WinUI;$(OutDir)Glance.Timer.WinUI;$(OutDir)Glance.VoiceNotes.WinUI" />
+      <GlanceModuleBuildRootFile Include="$(OutDir)Glance.AudioSwitcher.*;$(OutDir)Glance.Clipboard.*;$(OutDir)Glance.ColorPicker.*;$(OutDir)Glance.DevicePresence.*;$(OutDir)Glance.DropShelf.*;$(OutDir)Glance.FocusSession.*;$(OutDir)Glance.Infinity.*;$(OutDir)Glance.Media.*;$(OutDir)Glance.Power.*;$(OutDir)Glance.PrivacyControls.*;$(OutDir)Glance.RemovableDevices.*;$(OutDir)Glance.ScreenCapture.*;$(OutDir)Glance.SpeechToText.*;$(OutDir)Glance.Stopwatch.*;$(OutDir)Glance.SystemMonitor.*;$(OutDir)Glance.Timer.*;$(OutDir)Glance.VoiceNotes.*" />
+      <GlanceModuleRootXbfDirectory Include="$(OutDir)Glance.AudioSwitcher.WinUI;$(OutDir)Glance.Clipboard.WinUI;$(OutDir)Glance.ColorPicker.WinUI;$(OutDir)Glance.DevicePresence.WinUI;$(OutDir)Glance.DropShelf.WinUI;$(OutDir)Glance.FocusSession.WinUI;$(OutDir)Glance.Infinity.WinUI;$(OutDir)Glance.Media.WinUI;$(OutDir)Glance.Power.WinUI;$(OutDir)Glance.PrivacyControls.WinUI;$(OutDir)Glance.RemovableDevices.WinUI;$(OutDir)Glance.ScreenCapture.WinUI;$(OutDir)Glance.SpeechToText.WinUI;$(OutDir)Glance.Stopwatch.WinUI;$(OutDir)Glance.SystemMonitor.WinUI;$(OutDir)Glance.Timer.WinUI;$(OutDir)Glance.VoiceNotes.WinUI" />
     </ItemGroup>
     <RemoveDir Directories="@(GlanceModuleStagingDirectory);$(OutDir)Modules\UI" />
     <Delete Files="@(ExistingGlanceModulePackage)" />
@@ -149,6 +154,7 @@
     <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\PrivacyControls" ArchivePath="$(OutDir)Modules\PrivacyControls.glance" />
     <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\RemovableDevices" ArchivePath="$(OutDir)Modules\RemovableDevices.glance" />
     <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ScreenCapture" ArchivePath="$(OutDir)Modules\ScreenCapture.glance" />
+    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\SpeechToText" ArchivePath="$(OutDir)Modules\SpeechToText.glance" />
     <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Stopwatch" ArchivePath="$(OutDir)Modules\Stopwatch.glance" />
     <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\SystemMonitor" ArchivePath="$(OutDir)Modules\SystemMonitor.glance" />
     <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Timer" ArchivePath="$(OutDir)Modules\Timer.glance" />
@@ -168,7 +174,7 @@
   <Target Name="ArrangeGlanceModulesInPublishOutput" AfterTargets="Publish" DependsOnTargets="CopyPriAndXbfToPublish">
     <ItemGroup>
       <GlanceModulePublishFile Include="$(OutDir)Modules\*.glance" />
-      <GlanceModulePublishRootFile Include="$(PublishDir)Glance.AudioSwitcher.*;$(PublishDir)Glance.Clipboard.*;$(PublishDir)Glance.ColorPicker.*;$(PublishDir)Glance.DevicePresence.*;$(PublishDir)Glance.DropShelf.*;$(PublishDir)Glance.FocusSession.*;$(PublishDir)Glance.Infinity.*;$(PublishDir)Glance.Media.*;$(PublishDir)Glance.Power.*;$(PublishDir)Glance.PrivacyControls.*;$(PublishDir)Glance.RemovableDevices.*;$(PublishDir)Glance.ScreenCapture.*;$(PublishDir)Glance.Stopwatch.*;$(PublishDir)Glance.SystemMonitor.*;$(PublishDir)Glance.Timer.*;$(PublishDir)Glance.VoiceNotes.*" />
+      <GlanceModulePublishRootFile Include="$(PublishDir)Glance.AudioSwitcher.*;$(PublishDir)Glance.Clipboard.*;$(PublishDir)Glance.ColorPicker.*;$(PublishDir)Glance.DevicePresence.*;$(PublishDir)Glance.DropShelf.*;$(PublishDir)Glance.FocusSession.*;$(PublishDir)Glance.Infinity.*;$(PublishDir)Glance.Media.*;$(PublishDir)Glance.Power.*;$(PublishDir)Glance.PrivacyControls.*;$(PublishDir)Glance.RemovableDevices.*;$(PublishDir)Glance.ScreenCapture.*;$(PublishDir)Glance.SpeechToText.*;$(PublishDir)Glance.Stopwatch.*;$(PublishDir)Glance.SystemMonitor.*;$(PublishDir)Glance.Timer.*;$(PublishDir)Glance.VoiceNotes.*" />
     </ItemGroup>
     <RemoveDir Directories="$(PublishDir)Modules" />
     <Copy SourceFiles="@(GlanceModulePublishFile)" DestinationFolder="$(PublishDir)Modules" SkipUnchangedFiles="true" />

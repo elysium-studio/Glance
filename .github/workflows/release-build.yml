@@ -102,6 +102,7 @@ jobs:
             "PrivacyControls",
             "RemovableDevices",
             "ScreenCapture",
+            "SpeechToText",
             "Stopwatch",
             "SystemMonitor",
             "Timer",

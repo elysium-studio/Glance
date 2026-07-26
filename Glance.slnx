@@ -116,6 +116,15 @@
   <Project Path="Glance.ScreenCapture.Tests/Glance.ScreenCapture.Tests.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="Glance.SpeechToText.WinUI/Glance.SpeechToText.WinUI.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.SpeechToText/Glance.SpeechToText.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="Glance.SpeechToText.Tests/Glance.SpeechToText.Tests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="Glance.Shell/Glance.Shell.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
