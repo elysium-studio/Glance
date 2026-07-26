@@ -62,6 +62,23 @@ public sealed class InfinityViewModelTests
         Assert.False(viewModel.IsAvailable);
     }
 
+    [Fact]
+    public void EndInteractionCancelsPendingTitleEdit()
+    {
+        InfinityViewModel viewModel = new(new PageTitleUpdater());
+        viewModel.Update(new InfinityPageNavigationState(0, 1, "Original"));
+        viewModel.BeginInteraction();
+        viewModel.BeginEditing();
+        viewModel.EditingTitle = "Unsaved title";
+
+        viewModel.EndInteraction();
+
+        Assert.False(viewModel.IsEditing);
+        Assert.Equal("Original", viewModel.EditingTitle);
+        Assert.Equal("Original", viewModel.PageTitle);
+        Assert.False(viewModel.IsAvailable);
+    }
+
     private sealed class PageTitleUpdater :
         IInfinityPageTitleUpdater
     {

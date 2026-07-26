@@ -66,6 +66,12 @@ public sealed partial class InfinityViewModel :
     public void EndInteraction()
     {
         isInteracting = false;
+
+        if (IsEditing)
+        {
+            CancelEditing();
+        }
+
         DismissIfIdle();
     }
 
@@ -109,7 +115,11 @@ public sealed partial class InfinityViewModel :
         }
     }
 
-    public void CancelEditing() => IsEditing = false;
+    public void CancelEditing()
+    {
+        EditingTitle = PageTitle;
+        IsEditing = false;
+    }
 
     public void Disconnect()
     {
