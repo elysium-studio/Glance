@@ -8,8 +8,16 @@ namespace Glance.UI.WinUI;
 
 public static class FluentMotion
 {
+    private static readonly TimeSpan ButtonPressDuration = TimeSpan.FromMilliseconds(90);
+    private static readonly TimeSpan ButtonReleaseDuration = TimeSpan.FromMilliseconds(160);
     private static readonly TimeSpan EntranceDuration = TimeSpan.FromMilliseconds(240);
     private static readonly TimeSpan PulseDuration = TimeSpan.FromMilliseconds(320);
+
+    public static void PlayButtonPress(FrameworkElement element) =>
+        PlayScale(element, 0.94f, ButtonPressDuration);
+
+    public static void PlayButtonRelease(FrameworkElement element) =>
+        PlayScale(element, 1f, ButtonReleaseDuration);
 
     public static void PlayEntrance(FrameworkElement element, float verticalOffset = 8f)
     {
@@ -71,6 +79,20 @@ public static class FluentMotion
 
         visual.StartAnimation("Translation.X", translation);
         visual.StartAnimation(nameof(Visual.Opacity), opacity);
+    }
+
+    private static void PlayScale(FrameworkElement element, float scale, TimeSpan duration)
+    {
+        Visual visual = ElementCompositionPreview.GetElementVisual(element);
+        Compositor compositor = visual.Compositor;
+
+        visual.CenterPoint = new Vector3((float)element.ActualWidth / 2, (float)element.ActualHeight / 2, 0);
+
+        Vector3KeyFrameAnimation animation = compositor.CreateVector3KeyFrameAnimation();
+        animation.InsertKeyFrame(1, new Vector3(scale, scale, 1), CreateEasing(compositor));
+        animation.Duration = duration;
+
+        visual.StartAnimation(nameof(Visual.Scale), animation);
     }
 
     private static CubicBezierEasingFunction CreateEasing(Compositor compositor) =>

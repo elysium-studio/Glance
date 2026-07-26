@@ -3,7 +3,9 @@ using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using System;
 using System.Collections.Generic;
@@ -30,6 +32,7 @@ public sealed partial class DesktopIslandView :
     private DispatcherQueueTimer? contextualDragExitTimer;
     private DispatcherQueueTimer? interactionExitTimer;
     private DispatcherQueueTimer? startupAttentionTimer;
+    private Button? pressedButton;
     private bool isContextualDragActive;
     private int contextualDragSession;
     private IGlanceInteractionAwareComponent? interactionComponent;
@@ -44,6 +47,10 @@ public sealed partial class DesktopIslandView :
 
         Loaded += HandleLoaded;
         Unloaded += HandleUnloaded;
+        AddHandler(PointerPressedEvent, new PointerEventHandler(HandleButtonPointerPressed), true);
+        AddHandler(PointerReleasedEvent, new PointerEventHandler(HandleButtonPointerReleased), true);
+        AddHandler(PointerCanceledEvent, new PointerEventHandler(HandleButtonPointerCanceled), true);
+        AddHandler(PointerCaptureLostEvent, new PointerEventHandler(HandleButtonPointerCaptureLost), true);
     }
 
     public DesktopIslandViewModel ViewModel => (DesktopIslandViewModel)DataContext;
@@ -72,6 +79,7 @@ public sealed partial class DesktopIslandView :
     {
         ViewModel.PropertyChanged -= HandleViewModelPropertyChanged;
         ViewModel.AttentionReceived -= HandleAttentionReceived;
+        ReleasePressedButton();
         EndComponentInteraction();
         StopAttentionExpansionTimer();
         StopContextualDragExitTimer();
@@ -222,6 +230,59 @@ public sealed partial class DesktopIslandView :
     {
         isPointerOverIsland = false;
         ScheduleInteractionExit();
+    }
+
+    private void HandleButtonPointerPressed(object sender, PointerRoutedEventArgs args)
+    {
+        Button? button = FindButton(args.OriginalSource as DependencyObject);
+
+        if (button is null || !button.IsEnabled)
+        {
+            return;
+        }
+
+        if (!ReferenceEquals(pressedButton, button))
+        {
+            ReleasePressedButton();
+            pressedButton = button;
+        }
+
+        FluentMotion.PlayButtonPress(button);
+    }
+
+    private void HandleButtonPointerReleased(object sender, PointerRoutedEventArgs args) =>
+        ReleasePressedButton();
+
+    private void HandleButtonPointerCanceled(object sender, PointerRoutedEventArgs args) =>
+        ReleasePressedButton();
+
+    private void HandleButtonPointerCaptureLost(object sender, PointerRoutedEventArgs args) =>
+        ReleasePressedButton();
+
+    private void ReleasePressedButton()
+    {
+        Button? button = pressedButton;
+        pressedButton = null;
+
+        if (button is not null)
+        {
+            FluentMotion.PlayButtonRelease(button);
+        }
+    }
+
+    private Button? FindButton(DependencyObject? element)
+    {
+        while (element is not null && !ReferenceEquals(element, this))
+        {
+            if (element is Button button)
+            {
+                return button;
+            }
+
+            element = VisualTreeHelper.GetParent(element);
+        }
+
+        return null;
     }
 
     private void ScheduleInteractionExit()
