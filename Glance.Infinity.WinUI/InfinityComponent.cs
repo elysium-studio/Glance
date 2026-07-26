@@ -20,7 +20,7 @@ public sealed class InfinityComponent :
         this.viewModel = viewModel;
         this.localizer = localizer;
         viewModel.PropertyChanged += HandleViewModelPropertyChanged;
-        InfinityCompactView compactView = new(viewModel, localizer);
+        InfinityCompactView compactView = new(viewModel);
         InfinityExpandedView expandedView = new(viewModel, localizer);
 
         CompactContent = compactView;

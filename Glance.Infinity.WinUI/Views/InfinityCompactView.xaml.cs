@@ -7,12 +7,9 @@ namespace Glance.Infinity.WinUI;
 public sealed partial class InfinityCompactView :
     UserControl
 {
-    private readonly ModuleResourceTextLocalizer<InfinityModule> localizer;
-
-    public InfinityCompactView(InfinityViewModel viewModel, ModuleResourceTextLocalizer<InfinityModule> localizer)
+    public InfinityCompactView(InfinityViewModel viewModel)
     {
         ViewModel = viewModel;
-        this.localizer = localizer;
         InitializeComponent();
     }
 
@@ -20,7 +17,7 @@ public sealed partial class InfinityCompactView :
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
-    private string ToDisplayText(bool isConnected, int pageNumber) => isConnected
-        ? localizer.GetText("PageNumber", pageNumber)
+    private string ToDisplayText(bool isConnected, string pageTitle) => isConnected
+        ? pageTitle
         : string.Empty;
 }

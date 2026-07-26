@@ -30,7 +30,7 @@
             VerticalAlignment="Center"
             Foreground="{ThemeResource TextFillColorPrimaryBrush}"
             Style="{StaticResource BodyStrongTextBlockStyle}"
-            Text="{x:Bind ToDisplayText(ViewModel.IsConnected, ViewModel.PageNumber), Mode=OneWay}"
+            Text="{x:Bind ToDisplayText(ViewModel.IsConnected, ViewModel.PageTitle), Mode=OneWay}"
             TextTrimming="CharacterEllipsis" />
     </Grid>
 </UserControl>
