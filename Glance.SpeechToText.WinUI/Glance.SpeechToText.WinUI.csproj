@@ -43,4 +43,9 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
+  <Target Name="RestoreSpeechToTextPriIndexName" AfterTargets="_OverrideGetPriIndexName">
+    <PropertyGroup>
+      <PriIndexName>$(TargetName)</PriIndexName>
+    </PropertyGroup>
+  </Target>
 </Project>
