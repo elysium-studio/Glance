@@ -21,10 +21,12 @@ public sealed partial class DesktopIslandView :
     DesktopIsland
 {
     private const int ContextualDragExitDelayMs = 160;
+    private const int InteractionExitDelayMs = 240;
     private const int StartupAttentionDelayMs = 2500;
 
     private readonly DispatcherQueue dispatcherQueue;
     private DispatcherQueueTimer? contextualDragExitTimer;
+    private DispatcherQueueTimer? interactionExitTimer;
     private DispatcherQueueTimer? startupAttentionTimer;
     private bool isContextualDragActive;
     private int contextualDragSession;
@@ -70,6 +72,7 @@ public sealed partial class DesktopIslandView :
         ViewModel.AttentionReceived -= HandleAttentionReceived;
         EndComponentInteraction();
         StopContextualDragExitTimer();
+        StopInteractionExitTimer();
         StopStartupAttentionTimer();
     }
 
@@ -158,6 +161,7 @@ public sealed partial class DesktopIslandView :
 
     private void HandleIslandPointerEntered(object sender, PointerRoutedEventArgs args)
     {
+        StopInteractionExitTimer();
         isPointerOverIsland = true;
         UpdateComponentInteraction();
         Reveal();
@@ -167,7 +171,35 @@ public sealed partial class DesktopIslandView :
     private void HandleIslandPointerExited(object sender, PointerRoutedEventArgs args)
     {
         isPointerOverIsland = false;
-        EndComponentInteraction();
+        ScheduleInteractionExit();
+    }
+
+    private void ScheduleInteractionExit()
+    {
+        interactionExitTimer ??= CreateInteractionExitTimer();
+        interactionExitTimer.Stop();
+        interactionExitTimer.Start();
+    }
+
+    private DispatcherQueueTimer CreateInteractionExitTimer()
+    {
+        DispatcherQueueTimer timer = DispatcherQueue.CreateTimer();
+        timer.Interval = TimeSpan.FromMilliseconds(InteractionExitDelayMs);
+        timer.IsRepeating = false;
+        timer.Tick += HandleInteractionExitTimerTick;
+        return timer;
+    }
+
+    private void StopInteractionExitTimer() => interactionExitTimer?.Stop();
+
+    private void HandleInteractionExitTimerTick(DispatcherQueueTimer sender, object args)
+    {
+        sender.Stop();
+
+        if (!isPointerOverIsland)
+        {
+            EndComponentInteraction();
+        }
     }
 
     private void UpdateComponentInteraction()
