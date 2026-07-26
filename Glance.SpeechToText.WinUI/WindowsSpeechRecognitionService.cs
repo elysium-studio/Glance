@@ -1,6 +1,7 @@
 using Microsoft.Windows.AI;
 using Microsoft.Windows.AI.Speech;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.X86;
 using Windows.ApplicationModel;
 
 namespace Glance.SpeechToText.WinUI;
@@ -36,6 +37,12 @@ public sealed partial class WindowsSpeechRecognitionService :
             return false;
         }
 
+        if (!IsRuntimeCompatible())
+        {
+            SetAvailability(SpeechRecognitionAvailability.Unsupported);
+            return false;
+        }
+
         try
         {
             await SpeechRecognitionModel.EnsureReadyAsync();
@@ -54,6 +61,12 @@ public sealed partial class WindowsSpeechRecognitionService :
         if (IsListening)
         {
             return true;
+        }
+
+        if (!IsRuntimeCompatible())
+        {
+            SetAvailability(SpeechRecognitionAvailability.Unsupported);
+            return false;
         }
 
         if (Availability != SpeechRecognitionAvailability.Ready)
@@ -118,6 +131,11 @@ public sealed partial class WindowsSpeechRecognitionService :
             return SpeechRecognitionAvailability.PackageIdentityRequired;
         }
 
+        if (!IsRuntimeCompatible())
+        {
+            return SpeechRecognitionAvailability.Unsupported;
+        }
+
         try
         {
             return SpeechRecognitionModel.GetReadyState() switch
@@ -131,6 +149,23 @@ public sealed partial class WindowsSpeechRecognitionService :
         catch (Exception)
         {
             return SpeechRecognitionAvailability.Unavailable;
+        }
+    }
+
+    private static bool IsRuntimeCompatible()
+    {
+        if (RuntimeInformation.ProcessArchitecture != Architecture.X64 || AvxVnni.IsSupported)
+        {
+            return true;
+        }
+
+        try
+        {
+            return AICapabilities.HasAICapability(AICapabilityCategory.CopilotPlusPC);
+        }
+        catch (Exception)
+        {
+            return false;
         }
     }
 

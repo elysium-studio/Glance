@@ -25,17 +25,13 @@ public sealed partial class SpeechToTextExpandedView :
 
     private async void DownloadModel()
     {
-        ContentDialog dialog = new()
-        {
-            XamlRoot = XamlRoot,
-            Title = localizer.GetText("ModelConsentTitle"),
-            Content = localizer.GetText("ModelConsentMessage"),
-            PrimaryButtonText = localizer.GetText("ModelConsentDownload"),
-            CloseButtonText = localizer.GetText("Cancel"),
-            DefaultButton = ContentDialogButton.Primary
-        };
+        bool confirmed = await SpeechModelConsentWindow.ShowAsync(localizer.GetText("ModelConsentTitle"),
+            localizer.GetText("ModelConsentMessage"),
+            localizer.GetText("ModelConsentDownload"),
+            localizer.GetText("Cancel"),
+            XamlRoot.ContentIslandEnvironment.AppWindowId);
 
-        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        if (confirmed)
         {
             ViewModel.EnsureModel();
         }
@@ -56,6 +52,9 @@ public sealed partial class SpeechToTextExpandedView :
         availability == SpeechRecognitionAvailability.Ready
             ? Visibility.Visible
             : Visibility.Collapsed;
+
+    private bool CanDownloadModel(bool isBusy) =>
+        !isBusy;
 
     private bool CanChangeAudioSource(bool isListening,
         bool isBusy) =>

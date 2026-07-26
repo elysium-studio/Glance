@@ -115,6 +115,7 @@
             <Button
                 x:Uid="DownloadModelButton"
                 Click="{x:Bind DownloadModel}"
+                IsEnabled="{x:Bind CanDownloadModel(ViewModel.IsBusy), Mode=OneWay}"
                 Visibility="{x:Bind ToModelRequiredVisibility(ViewModel.Availability), Mode=OneWay}">
                 <Button.Style>
                     <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
