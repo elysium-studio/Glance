@@ -20,4 +20,6 @@
   <data name="BooleanToggle.OffContent" xml:space="preserve"><value>いいえ</value></data>
   <data name="AutoHideCard.Header" xml:space="preserve"><value>自動的に隠す</value></data>
   <data name="AutoHideCard.Description" xml:space="preserve"><value>操作していないときは Glance を隠し、ポインターが画面端のインジケーターに近づくと表示します</value></data>
+  <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>注意喚起を許可</value></data>
+  <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>注意が必要なときに、このモジュールを自動的に表示します</value></data>
 </root>

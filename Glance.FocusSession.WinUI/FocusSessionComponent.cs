@@ -9,6 +9,7 @@ namespace Glance.FocusSession.WinUI;
 public sealed partial class FocusSessionComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
+    IGlanceAttentionComponent,
     IDisposable
 {
     private readonly DispatcherQueue dispatcherQueue;
@@ -61,6 +62,8 @@ public sealed partial class FocusSessionComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public bool IsAttentionEnabledByDefault => true;
 
     public void Dispose()
     {

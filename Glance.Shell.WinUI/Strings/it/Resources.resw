@@ -20,4 +20,6 @@
   <data name="BooleanToggle.OffContent" xml:space="preserve"><value>No</value></data>
   <data name="AutoHideCard.Header" xml:space="preserve"><value>Nascondi automaticamente</value></data>
   <data name="AutoHideCard.Description" xml:space="preserve"><value>Nasconde Glance quando è inattivo e lo mostra quando il puntatore si avvicina all’indicatore sul bordo dello schermo</value></data>
+  <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>Consenti avvisi</value></data>
+  <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>Consenti al modulo di mostrarsi quando qualcosa richiede la tua attenzione</value></data>
 </root>

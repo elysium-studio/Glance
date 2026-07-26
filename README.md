@@ -73,6 +73,7 @@ The original package remains intact while its runtime contents are kept under `%
 The module's WinUI project must:
 
 - Reference the matching `Glance.Application.Abstractions` contract and expose a public, parameterless `IGlanceModule` implementation.
+- Implement `IGlanceAttentionComponent` on any component that requests attention. Glance then exposes a per-module permission and blocks requests when the user turns it off.
 - Set `UseWinUI` to `true`.
 - Set `DisableEmbeddedXbf` to `false` so compiled XAML is embedded in the module PRI.
 - Set `CopyLocalLockFileAssemblies` to `true`, or otherwise include every private runtime dependency in the module directory.
@@ -87,6 +88,7 @@ Settings follow the same Elysium application and navigation structure used by [I
 
 - Drag-and-drop module ordering
 - Per-module enable and disable switches
+- Per-module attention permissions for modules that can bring themselves into view
 - Top or bottom desktop-island placement
 - Start Glance with Windows
 

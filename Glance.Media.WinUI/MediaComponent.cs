@@ -14,6 +14,7 @@ namespace Glance.Media.WinUI;
 public sealed partial class MediaComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
+    IGlanceAttentionComponent,
     IDisposable
 {
     private static readonly double[] SilentAudioLevels = [0, 0, 0, 0, 0];
@@ -66,6 +67,8 @@ public sealed partial class MediaComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public bool IsAttentionEnabledByDefault => false;
 
     public void Dispose()
     {

@@ -20,4 +20,6 @@
   <data name="BooleanToggle.OffContent" xml:space="preserve"><value>No</value></data>
   <data name="AutoHideCard.Header" xml:space="preserve"><value>Auto-hide</value></data>
   <data name="AutoHideCard.Description" xml:space="preserve"><value>Hide Glance when it is idle and reveal it when the pointer approaches its screen-edge indicator</value></data>
+  <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>Allow attention</value></data>
+  <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>Let this module bring itself into view when something needs your attention</value></data>
 </root>

@@ -226,6 +226,11 @@ public sealed partial class DesktopIslandViewModel :
 
     private void HandleAttentionRequested(object? sender, GlanceAttentionRequest request)
     {
+        if (!modulePreferences.IsAttentionEnabled(request.ComponentId))
+        {
+            return;
+        }
+
         int componentIndex = components
             .Select((component, index) => (component, index))
             .Where(item => string.Equals(item.component.Id, request.ComponentId, StringComparison.OrdinalIgnoreCase))

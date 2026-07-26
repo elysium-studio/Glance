@@ -8,6 +8,7 @@ namespace Glance.Infinity.WinUI;
 public sealed partial class InfinityComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
+    IGlanceAttentionComponent,
     IGlanceAvailabilityComponent,
     IGlanceInteractionAwareComponent,
     IGlanceExpansionLockComponent,
@@ -45,6 +46,8 @@ public sealed partial class InfinityComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public bool IsAttentionEnabledByDefault => true;
 
     public bool IsAvailable => viewModel.IsAvailable;
 

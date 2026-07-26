@@ -8,6 +8,7 @@ namespace Glance.ColorPicker.WinUI;
 public sealed partial class ColorPickerComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
+    IGlanceAttentionComponent,
     IDisposable
 {
     private readonly IColorPickerService colorPickerService;
@@ -57,6 +58,8 @@ public sealed partial class ColorPickerComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public bool IsAttentionEnabledByDefault => true;
 
     public void Dispose()
     {

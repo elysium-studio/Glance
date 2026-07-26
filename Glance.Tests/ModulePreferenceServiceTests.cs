@@ -85,6 +85,44 @@ public sealed class ModulePreferenceServiceTests
         Assert.Equal(2, activeComponentsChanged);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void AttentionUsesTheComponentsDefaultUntilTheUserChooses(bool isEnabledByDefault)
+    {
+        GlanceSettings settings = new();
+        TestAttentionComponent component = new("Timer", isEnabledByDefault);
+        ModulePreferenceService service = new([component], settings, new TestWritableOptions(settings));
+
+        Assert.Equal(isEnabledByDefault, service.IsAttentionEnabled(component.Id));
+    }
+
+    [Fact]
+    public async Task AttentionPreferenceOverridesTheComponentDefaultAndIsPersisted()
+    {
+        GlanceSettings settings = new();
+        TestWritableOptions writer = new(settings);
+        TestAttentionComponent component = new("Media", true);
+        ModulePreferenceService service = new([component], settings, writer);
+
+        await service.SetAttentionEnabledAsync(component.Id, false);
+
+        Assert.False(service.IsAttentionEnabled(component.Id));
+        Assert.False(Assert.Single(service.GetPreferences()).IsAttentionEnabled);
+        Assert.False(Assert.Single(settings.Modules).IsAttentionEnabled);
+        Assert.Equal(1, writer.WriteCount);
+    }
+
+    [Fact]
+    public void ComponentsWithoutAttentionCapabilityCannotRequestAttention()
+    {
+        GlanceSettings settings = new();
+        TestComponent component = new("Stopwatch");
+        ModulePreferenceService service = new([component], settings, new TestWritableOptions(settings));
+
+        Assert.False(service.IsAttentionEnabled(component.Id));
+    }
+
     private sealed class TestComponent(string id) :
         IGlanceComponent
     {
@@ -131,6 +169,25 @@ public sealed class ModulePreferenceServiceTests
             IsAvailable = value;
             AvailabilityChanged?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    private sealed class TestAttentionComponent(string id, bool isAttentionEnabledByDefault) :
+        IGlanceComponent,
+        IGlanceAttentionComponent
+    {
+        public string Id { get; } = id;
+
+        public string DisplayName => Id;
+
+        public string Description => string.Empty;
+
+        public int Order => 0;
+
+        public object CompactContent { get; } = new();
+
+        public object ExpandedContent { get; } = new();
+
+        public bool IsAttentionEnabledByDefault { get; } = isAttentionEnabledByDefault;
     }
 
     private sealed class TestWritableOptions(GlanceSettings settings) :

@@ -52,12 +52,20 @@ public sealed partial class ModulePreferencesViewModel :
         IGlanceComponent? component = preferences.GetComponent(preference.Id);
         string displayName = component?.DisplayName ?? preference.Id;
         string description = component?.Description ?? string.Empty;
+        List<IGlanceModuleSettingViewModel> availableSettings = [.. settings];
+
+        if (component is IGlanceAttentionComponent)
+        {
+            availableSettings.Add(new ModuleAttentionSettingViewModel(preference.Id,
+                preferences.IsAttentionEnabled(preference.Id),
+                enabled => preferences.SetAttentionEnabledAsync(preference.Id, enabled)));
+        }
 
         return new ModuleSettingsItemViewModel(preference.Id,
             displayName,
             description,
             preference.IsEnabled,
-            settings,
+            availableSettings.OrderBy(setting => setting.Order),
             (_, enabled) => preferences.SetEnabledAsync(preference.Id, enabled));
     }
 

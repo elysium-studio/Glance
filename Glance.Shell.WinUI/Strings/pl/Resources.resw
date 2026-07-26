@@ -20,4 +20,6 @@
   <data name="BooleanToggle.OffContent" xml:space="preserve"><value>Nie</value></data>
   <data name="AutoHideCard.Header" xml:space="preserve"><value>Automatyczne ukrywanie</value></data>
   <data name="AutoHideCard.Description" xml:space="preserve"><value>Ukrywa Glance, gdy nie jest używany, i pokazuje go, gdy wskaźnik zbliży się do znacznika przy krawędzi ekranu</value></data>
+  <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>Zezwalaj na alerty</value></data>
+  <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>Pozwól temu modułowi pojawić się, gdy coś wymaga Twojej uwagi</value></data>
 </root>

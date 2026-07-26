@@ -30,6 +30,7 @@ public sealed class GlanceSettingsTests
                 new GlanceModulePreference
                 {
                     Id = "Timer",
+                    IsAttentionEnabled = false,
                     IsEnabled = false
                 }
             ]
@@ -44,6 +45,7 @@ public sealed class GlanceSettingsTests
         Assert.False(result.StartWithWindows);
         Assert.Single(result.Modules);
         Assert.Equal("Timer", result.Modules[0].Id);
+        Assert.False(result.Modules[0].IsAttentionEnabled);
         Assert.False(result.Modules[0].IsEnabled);
     }
 }

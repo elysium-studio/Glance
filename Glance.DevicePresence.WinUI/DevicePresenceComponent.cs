@@ -9,6 +9,7 @@ namespace Glance.DevicePresence.WinUI;
 public sealed partial class DevicePresenceComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
+    IGlanceAttentionComponent,
     IDisposable
 {
     private readonly IGlanceAttentionService attentionService;
@@ -64,6 +65,8 @@ public sealed partial class DevicePresenceComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public bool IsAttentionEnabledByDefault => false;
 
     public void Dispose()
     {

@@ -9,6 +9,7 @@ namespace Glance.Power.WinUI;
 public sealed partial class PowerComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
+    IGlanceAttentionComponent,
     IDisposable
 {
     private readonly DispatcherQueue dispatcherQueue;
@@ -63,6 +64,8 @@ public sealed partial class PowerComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public bool IsAttentionEnabledByDefault => true;
 
     public void Dispose()
     {

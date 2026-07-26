@@ -39,6 +39,7 @@ public sealed class ModulePreferenceService
             .Select(preference => new GlanceModulePreference
             {
                 Id = preference.Id,
+                IsAttentionEnabled = preference.IsAttentionEnabled,
                 IsEnabled = preference.IsEnabled
             })];
 
@@ -48,6 +49,21 @@ public sealed class ModulePreferenceService
 
     public bool IsEnabled(string id) =>
         settings.Modules.Any(preference => preference.IsEnabled && string.Equals(preference.Id, id, StringComparison.OrdinalIgnoreCase));
+
+    public bool IsAttentionEnabled(string id)
+    {
+        IGlanceComponent? component = GetComponent(id);
+
+        if (component is not IGlanceAttentionComponent attentionComponent)
+        {
+            return false;
+        }
+
+        GlanceModulePreference? preference = settings.Modules.FirstOrDefault(item =>
+            string.Equals(item.Id, id, StringComparison.OrdinalIgnoreCase));
+
+        return preference?.IsAttentionEnabled ?? attentionComponent.IsAttentionEnabledByDefault;
+    }
 
     public IReadOnlyList<IGlanceModuleSettingViewModel> CreateRuntimeSettings() =>
         [.. runtimeSettingsFactories.SelectMany(factory => factory()).OrderBy(setting => setting.Order)];
@@ -110,6 +126,20 @@ public sealed class ModulePreferenceService
         preference.IsEnabled = isEnabled;
         await SaveAsync();
         return true;
+    }
+
+    public async Task SetAttentionEnabledAsync(string id, bool isEnabled)
+    {
+        GlanceModulePreference? preference = settings.Modules.FirstOrDefault(item =>
+            string.Equals(item.Id, id, StringComparison.OrdinalIgnoreCase));
+
+        if (preference is null || preference.IsAttentionEnabled == isEnabled)
+        {
+            return;
+        }
+
+        preference.IsAttentionEnabled = isEnabled;
+        await SaveAsync();
     }
 
     public async Task SetOrderAsync(IEnumerable<string> orderedIds)
@@ -179,6 +209,7 @@ public sealed class ModulePreferenceService
         new()
         {
             Id = preference.Id,
+            IsAttentionEnabled = preference.IsAttentionEnabled,
             IsEnabled = preference.IsEnabled
         };
 }

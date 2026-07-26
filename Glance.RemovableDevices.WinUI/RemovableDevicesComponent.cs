@@ -12,6 +12,7 @@ namespace Glance.RemovableDevices.WinUI;
 public sealed partial class RemovableDevicesComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
+    IGlanceAttentionComponent,
     IDisposable
 {
     private readonly IGlanceAttentionService attentionService;
@@ -69,6 +70,8 @@ public sealed partial class RemovableDevicesComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public bool IsAttentionEnabledByDefault => false;
 
     public void Dispose()
     {
