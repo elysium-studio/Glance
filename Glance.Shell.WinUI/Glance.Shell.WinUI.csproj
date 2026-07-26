@@ -62,6 +62,7 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
     <PackageReference Include="Microsoft.WindowsAppSDK.AI" Version="2.2.6-experimental" />
     <PackageReference Include="Microsoft.WindowsAppSDK.Runtime" Version="2.2.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="System.Management" Version="10.0.10" GeneratePathProperty="true" PrivateAssets="all" />
     <PackageReference Include="Velopack" Version="1.2.0" />
     <PackageReference Include="WinUIEx" Version="2.9.1" />
   </ItemGroup>
@@ -139,7 +140,7 @@
       <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.PrivacyControls.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.PrivacyControls.*"><ModuleName>PrivacyControls</ModuleName></GlanceModuleBuildFile>
       <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.PrivacyControls.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\NAudio*.dll"><ModuleName>PrivacyControls</ModuleName></GlanceModuleBuildFile>
       <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.RemovableDevices.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.RemovableDevices.*"><ModuleName>RemovableDevices</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.RemovableDevices.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\System.Management.dll"><ModuleName>RemovableDevices</ModuleName></GlanceModuleBuildFile>
+      <GlanceModuleBuildFile Include="$(PkgSystem_Management)\runtimes\win\lib\net10.0\System.Management.dll"><ModuleName>RemovableDevices</ModuleName></GlanceModuleBuildFile>
       <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.ScreenCapture.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.ScreenCapture.*"><ModuleName>ScreenCapture</ModuleName></GlanceModuleBuildFile>
       <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\Glance.SpeechToText.*"><ModuleName>SpeechToText</ModuleName></GlanceModuleBuildFile>
       <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\NAudio*.dll"><ModuleName>SpeechToText</ModuleName></GlanceModuleBuildFile>
