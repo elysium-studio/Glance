@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Glance (Package)": {
+      "commandName": "MsixPackage",
+      "nativeDebugging": false
+    },
+    "Glance (Unpackaged)": {
+      "commandName": "Project",
+      "debugEngines": "managed"
+    }
+  }
+}

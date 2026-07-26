@@ -8,6 +8,7 @@
     <AssemblyTitle>Glance</AssemblyTitle>
     <ApplicationIcon>Assets\Glance.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Configurations>Debug;DebugPackaged;Release</Configurations>
     <Platforms>x64</Platforms>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <UseWinUI>true</UseWinUI>
@@ -22,6 +23,18 @@
     <DefaultLanguage>en</DefaultLanguage>
     <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3842</MSBuildWarningsAsMessages>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'DebugPackaged'">
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <WindowsPackageType></WindowsPackageType>
+    <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
+    <AppxBundle>Never</AppxBundle>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>portable</DebugType>
+    <DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
+    <EnableDefaultPriItems>false</EnableDefaultPriItems>
+    <GenerateAppInstallerFile>false</GenerateAppInstallerFile>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
   <ItemGroup>
     <Content Include="Assets\**\*">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
@@ -32,7 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.3.260402-preview2" />
-    <PackageReference Include="DynamicXaml.WinUI" Version="1.0.2" />
+    <PackageReference Include="DynamicXaml.WinUI" Version="1.0.2" GeneratePathProperty="true" />
     <PackageReference Include="Elysium.Application" Version="$(ElysiumVersion)" />
     <PackageReference Include="Elysium.Application.Abstractions" Version="$(ElysiumVersion)" />
     <PackageReference Include="Elysium.Application.DependencyInjection" Version="$(ElysiumVersion)" />
@@ -163,6 +176,29 @@
     <Delete Files="@(GlanceModuleBuildRootFile)" />
     <RemoveDir Directories="@(GlanceModuleRootXbfDirectory)" />
   </Target>
+  <Target Name="IncludeGlanceModulesInPackage" BeforeTargets="_ComputeAppxPackagePayload" DependsOnTargets="ArrangeGlanceModulesInBuildOutput" Condition="'$(EnableMsixTooling)' == 'true'">
+    <ItemGroup>
+      <GlanceModulePackage Include="$(OutDir)Modules\AudioSwitcher.glance" TargetPath="Modules\AudioSwitcher.glance" />
+      <GlanceModulePackage Include="$(OutDir)Modules\Clipboard.glance" TargetPath="Modules\Clipboard.glance" />
+      <GlanceModulePackage Include="$(OutDir)Modules\ColorPicker.glance" TargetPath="Modules\ColorPicker.glance" />
+      <GlanceModulePackage Include="$(OutDir)Modules\DevicePresence.glance" TargetPath="Modules\DevicePresence.glance" />
+      <GlanceModulePackage Include="$(OutDir)Modules\DropShelf.glance" TargetPath="Modules\DropShelf.glance" />
+      <GlanceModulePackage Include="$(OutDir)Modules\FocusSession.glance" TargetPath="Modules\FocusSession.glance" />
+      <GlanceModulePackage Include="$(OutDir)Modules\Infinity.glance" TargetPath="Modules\Infinity.glance" />
+      <GlanceModulePackage Include="$(OutDir)Modules\Media.glance" TargetPath="Modules\Media.glance" />
+      <GlanceModulePackage Include="$(OutDir)Modules\Power.glance" TargetPath="Modules\Power.glance" />
+      <GlanceModulePackage Include="$(OutDir)Modules\PrivacyControls.glance" TargetPath="Modules\PrivacyControls.glance" />
+      <GlanceModulePackage Include="$(OutDir)Modules\RemovableDevices.glance" TargetPath="Modules\RemovableDevices.glance" />
+      <GlanceModulePackage Include="$(OutDir)Modules\ScreenCapture.glance" TargetPath="Modules\ScreenCapture.glance" />
+      <GlanceModulePackage Include="$(OutDir)Modules\SpeechToText.glance" TargetPath="Modules\SpeechToText.glance" />
+      <GlanceModulePackage Include="$(OutDir)Modules\Stopwatch.glance" TargetPath="Modules\Stopwatch.glance" />
+      <GlanceModulePackage Include="$(OutDir)Modules\SystemMonitor.glance" TargetPath="Modules\SystemMonitor.glance" />
+      <GlanceModulePackage Include="$(OutDir)Modules\Timer.glance" TargetPath="Modules\Timer.glance" />
+      <GlanceModulePackage Include="$(OutDir)Modules\VoiceNotes.glance" TargetPath="Modules\VoiceNotes.glance" />
+      <GlanceModulePackage Update="@(GlanceModulePackage)" OutputGroup="ContentFilesProjectOutputGroup" />
+      <PackagingOutputs Include="@(GlanceModulePackage)" />
+    </ItemGroup>
+  </Target>
   <Target Name="CopyPriAndXbfToPublish" AfterTargets="Publish">
     <ItemGroup>
       <PriFiles Include="$(OutDir)*.pri" />
@@ -212,5 +248,11 @@
     </PropertyGroup>
     <Error Condition="!Exists('$(WindowsAppRuntimeFrameworkMsix)')" Text="Windows App Runtime framework package was not found at $(WindowsAppRuntimeFrameworkMsix)." />
     <ExtractWindowsAppRuntimeInsightsResource ArchivePath="$(WindowsAppRuntimeFrameworkMsix)" OutputPath="$(PublishDir)Microsoft.WindowsAppRuntime.Insights.Resource.dll" />
+  </Target>
+  <Target Name="CorrectDynamicXamlMetadataPath" BeforeTargets="_UpdateWindowsMetadataReference" Condition="'$(EnableMsixTooling)' == 'true'">
+    <ItemGroup>
+      <WindowsMetadataReference Remove="$(DynamicXamlWinMDPath)" />
+      <WindowsMetadataReference Include="$(PkgDynamicXaml_WinUI)\lib\native\DynamicXaml.WinUI.winmd" Implementation="DynamicXaml.WinUI.dll" />
+    </ItemGroup>
   </Target>
 </Project>
