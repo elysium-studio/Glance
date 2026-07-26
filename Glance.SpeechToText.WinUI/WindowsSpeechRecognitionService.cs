@@ -8,6 +8,9 @@ namespace Glance.SpeechToText.WinUI;
 public sealed partial class WindowsSpeechRecognitionService :
     ISpeechRecognitionService
 {
+    private static readonly TimeSpan AvailabilityTimeout = TimeSpan.FromSeconds(5);
+    private readonly Lock availabilityLock = new();
+    private Task<SpeechRecognitionAvailability>? availabilityTask;
     private SpeechRecognitionModel? speechModel;
     private StreamingRecognition? streamingRecognition;
     private LiveSpeechAudioCapture? audioCapture;
@@ -22,11 +25,8 @@ public sealed partial class WindowsSpeechRecognitionService :
 
     public event EventHandler? ListeningStopped;
 
-    public Task CheckAvailabilityAsync()
-    {
-        SetAvailability(GetAvailability());
-        return Task.CompletedTask;
-    }
+    public async Task CheckAvailabilityAsync() =>
+        SetAvailability(await GetAvailabilityAsync());
 
     public async Task<bool> EnsureModelAsync()
     {
@@ -39,12 +39,12 @@ public sealed partial class WindowsSpeechRecognitionService :
         try
         {
             await SpeechRecognitionModel.EnsureReadyAsync();
-            SetAvailability(GetAvailability());
+            SetAvailability(await GetAvailabilityAsync());
             return Availability == SpeechRecognitionAvailability.Ready;
         }
         catch (Exception)
         {
-            SetAvailability(GetAvailability());
+            SetAvailability(await GetAvailabilityAsync());
             return false;
         }
     }
@@ -92,7 +92,7 @@ public sealed partial class WindowsSpeechRecognitionService :
         catch (Exception)
         {
             await ReleaseRecognitionAsync();
-            SetAvailability(GetAvailability());
+            SetAvailability(await GetAvailabilityAsync());
             return false;
         }
     }
@@ -131,6 +131,38 @@ public sealed partial class WindowsSpeechRecognitionService :
         catch (Exception)
         {
             return SpeechRecognitionAvailability.Unavailable;
+        }
+    }
+
+    private async Task<SpeechRecognitionAvailability> GetAvailabilityAsync()
+    {
+        Task<SpeechRecognitionAvailability> task;
+
+        lock (availabilityLock)
+        {
+            task = availabilityTask ??= Task.Run(GetAvailability);
+        }
+
+        try
+        {
+            return await task.WaitAsync(AvailabilityTimeout);
+        }
+        catch (TimeoutException)
+        {
+            return SpeechRecognitionAvailability.Unavailable;
+        }
+        finally
+        {
+            if (task.IsCompleted)
+            {
+                lock (availabilityLock)
+                {
+                    if (ReferenceEquals(availabilityTask, task))
+                    {
+                        availabilityTask = null;
+                    }
+                }
+            }
         }
     }
 
