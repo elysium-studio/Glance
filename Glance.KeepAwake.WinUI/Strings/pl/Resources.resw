@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Nie usypiaj</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Zapobiega uśpieniu systemu Windows do czasu zatrzymania.</value></data>
+  <data name="InactiveStatus" xml:space="preserve"><value>Gotowe</value></data>
+  <data name="ActiveStatus" xml:space="preserve"><value>Zapobieganie uśpieniu</value></data>
+  <data name="InactiveDetail" xml:space="preserve"><value>System Windows może normalnie przejść w stan uśpienia</value></data>
+  <data name="ActiveDetail" xml:space="preserve"><value>Automatyczne uśpienie jest zablokowane</value></data>
+  <data name="StartLabel" xml:space="preserve"><value>Nie usypiaj</value></data>
+  <data name="StopLabel" xml:space="preserve"><value>Zatrzymaj zapobieganie uśpieniu</value></data>
+</root>

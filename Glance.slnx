@@ -45,6 +45,15 @@
   <Project Path="Glance.Infinity.Tests/Glance.Infinity.Tests.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.KeepAwake.WinUI/Glance.KeepAwake.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.KeepAwake/Glance.KeepAwake.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.KeepAwake.Tests/Glance.KeepAwake.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.FocusSession.Tests/Glance.FocusSession.Tests.csproj">
     <Platform Project="x64" />
   </Project>

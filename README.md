@@ -22,6 +22,7 @@ The island remains at the top or bottom of the desktop in a compact state, expan
 - **Privacy Controls** — monitor the default microphone state and mute or unmute it globally.
 - **Removable Devices** — view connected removable storage, inspect capacity, open it in Explorer, and request safe ejection. Multiple devices are presented as pages within the module.
 - **Bluetooth Devices** — see connected Bluetooth accessories and their available battery levels. Newly connected or newly low-battery devices can automatically request attention.
+- **Keep Awake** — prevent automatic system sleep until you explicitly stop the module.
 
 ## Architecture
 
