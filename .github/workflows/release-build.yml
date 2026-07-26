@@ -116,7 +116,11 @@ jobs:
             }
           }
 
-          $flattenedModules = @(Get-ChildItem "artifacts/release" -File | Where-Object { $_.Name -match '^Glance\..+\.WinUI\.(dll|pri)$' })
+          $flattenedModules = @(
+            foreach ($module in $requiredModules) {
+              Get-ChildItem "artifacts/release" -File | Where-Object { $_.Name -match "^Glance\.$module\.WinUI\.(dll|pri)$" }
+            }
+          )
 
           if ($flattenedModules.Count -gt 0) {
             throw "Module files were left in the application root: $($flattenedModules.Name -join ', ')"
