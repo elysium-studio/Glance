@@ -177,24 +177,27 @@
     <RemoveDir Directories="@(GlanceModuleRootXbfDirectory)" />
   </Target>
   <Target Name="IncludeGlanceModulesInPackage" BeforeTargets="_ComputeAppxPackagePayload" DependsOnTargets="ArrangeGlanceModulesInBuildOutput" Condition="'$(EnableMsixTooling)' == 'true'">
+    <PropertyGroup>
+      <GlanceModulePackageDirectory>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(OutDir)', 'Modules'))</GlanceModulePackageDirectory>
+    </PropertyGroup>
     <ItemGroup>
-      <GlanceModulePackage Include="$(OutDir)Modules\AudioSwitcher.glance" TargetPath="Modules\AudioSwitcher.glance" />
-      <GlanceModulePackage Include="$(OutDir)Modules\Clipboard.glance" TargetPath="Modules\Clipboard.glance" />
-      <GlanceModulePackage Include="$(OutDir)Modules\ColorPicker.glance" TargetPath="Modules\ColorPicker.glance" />
-      <GlanceModulePackage Include="$(OutDir)Modules\DevicePresence.glance" TargetPath="Modules\DevicePresence.glance" />
-      <GlanceModulePackage Include="$(OutDir)Modules\DropShelf.glance" TargetPath="Modules\DropShelf.glance" />
-      <GlanceModulePackage Include="$(OutDir)Modules\FocusSession.glance" TargetPath="Modules\FocusSession.glance" />
-      <GlanceModulePackage Include="$(OutDir)Modules\Infinity.glance" TargetPath="Modules\Infinity.glance" />
-      <GlanceModulePackage Include="$(OutDir)Modules\Media.glance" TargetPath="Modules\Media.glance" />
-      <GlanceModulePackage Include="$(OutDir)Modules\Power.glance" TargetPath="Modules\Power.glance" />
-      <GlanceModulePackage Include="$(OutDir)Modules\PrivacyControls.glance" TargetPath="Modules\PrivacyControls.glance" />
-      <GlanceModulePackage Include="$(OutDir)Modules\RemovableDevices.glance" TargetPath="Modules\RemovableDevices.glance" />
-      <GlanceModulePackage Include="$(OutDir)Modules\ScreenCapture.glance" TargetPath="Modules\ScreenCapture.glance" />
-      <GlanceModulePackage Include="$(OutDir)Modules\SpeechToText.glance" TargetPath="Modules\SpeechToText.glance" />
-      <GlanceModulePackage Include="$(OutDir)Modules\Stopwatch.glance" TargetPath="Modules\Stopwatch.glance" />
-      <GlanceModulePackage Include="$(OutDir)Modules\SystemMonitor.glance" TargetPath="Modules\SystemMonitor.glance" />
-      <GlanceModulePackage Include="$(OutDir)Modules\Timer.glance" TargetPath="Modules\Timer.glance" />
-      <GlanceModulePackage Include="$(OutDir)Modules\VoiceNotes.glance" TargetPath="Modules\VoiceNotes.glance" />
+      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)AudioSwitcher.glance" TargetPath="Modules\AudioSwitcher.glance" />
+      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Clipboard.glance" TargetPath="Modules\Clipboard.glance" />
+      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)ColorPicker.glance" TargetPath="Modules\ColorPicker.glance" />
+      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)DevicePresence.glance" TargetPath="Modules\DevicePresence.glance" />
+      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)DropShelf.glance" TargetPath="Modules\DropShelf.glance" />
+      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)FocusSession.glance" TargetPath="Modules\FocusSession.glance" />
+      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Infinity.glance" TargetPath="Modules\Infinity.glance" />
+      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Media.glance" TargetPath="Modules\Media.glance" />
+      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Power.glance" TargetPath="Modules\Power.glance" />
+      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)PrivacyControls.glance" TargetPath="Modules\PrivacyControls.glance" />
+      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)RemovableDevices.glance" TargetPath="Modules\RemovableDevices.glance" />
+      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)ScreenCapture.glance" TargetPath="Modules\ScreenCapture.glance" />
+      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)SpeechToText.glance" TargetPath="Modules\SpeechToText.glance" />
+      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Stopwatch.glance" TargetPath="Modules\Stopwatch.glance" />
+      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)SystemMonitor.glance" TargetPath="Modules\SystemMonitor.glance" />
+      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Timer.glance" TargetPath="Modules\Timer.glance" />
+      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)VoiceNotes.glance" TargetPath="Modules\VoiceNotes.glance" />
       <GlanceModulePackage Update="@(GlanceModulePackage)" OutputGroup="ContentFilesProjectOutputGroup" />
       <PackagingOutputs Include="@(GlanceModulePackage)" />
     </ItemGroup>

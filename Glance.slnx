@@ -4,171 +4,172 @@
     <Platform Name="x64" />
   </Configurations>
   <Project Path="Glance.Application.Abstractions/Glance.Application.Abstractions.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.AudioSwitcher.WinUI/Glance.AudioSwitcher.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.AudioSwitcher/Glance.AudioSwitcher.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.AudioSwitcher.Tests/Glance.AudioSwitcher.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Clipboard.WinUI/Glance.Clipboard.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Clipboard/Glance.Clipboard.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.DropShelf.WinUI/Glance.DropShelf.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.DropShelf/Glance.DropShelf.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.DropShelf.Tests/Glance.DropShelf.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.FocusSession.WinUI/Glance.FocusSession.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.FocusSession/Glance.FocusSession.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Infinity.WinUI/Glance.Infinity.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Infinity/Glance.Infinity.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Infinity.Tests/Glance.Infinity.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.FocusSession.Tests/Glance.FocusSession.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Clipboard.Tests/Glance.Clipboard.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.ColorPicker.WinUI/Glance.ColorPicker.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.ColorPicker/Glance.ColorPicker.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.ColorPicker.Tests/Glance.ColorPicker.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.DevicePresence.WinUI/Glance.DevicePresence.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.DevicePresence/Glance.DevicePresence.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.DevicePresence.Tests/Glance.DevicePresence.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Shell.WinUI/Glance.Shell.WinUI.csproj">
     <Platform Project="x64" />
+    <Deploy />
   </Project>
   <Project Path="Glance.Media.WinUI/Glance.Media.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Media/Glance.Media.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Media.Tests/Glance.Media.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Power.WinUI/Glance.Power.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Power/Glance.Power.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Power.Tests/Glance.Power.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.PrivacyControls.WinUI/Glance.PrivacyControls.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.PrivacyControls/Glance.PrivacyControls.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.PrivacyControls.Tests/Glance.PrivacyControls.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.RemovableDevices.WinUI/Glance.RemovableDevices.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.RemovableDevices/Glance.RemovableDevices.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.RemovableDevices.Tests/Glance.RemovableDevices.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.ScreenCapture.WinUI/Glance.ScreenCapture.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.ScreenCapture/Glance.ScreenCapture.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.ScreenCapture.Tests/Glance.ScreenCapture.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.SpeechToText.WinUI/Glance.SpeechToText.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.SpeechToText/Glance.SpeechToText.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.SpeechToText.Tests/Glance.SpeechToText.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Shell/Glance.Shell.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Stopwatch.WinUI/Glance.Stopwatch.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Stopwatch/Glance.Stopwatch.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Stopwatch.Tests/Glance.Stopwatch.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.SystemMonitor.WinUI/Glance.SystemMonitor.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.SystemMonitor/Glance.SystemMonitor.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.SystemMonitor.Tests/Glance.SystemMonitor.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Tests/Glance.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Timer.WinUI/Glance.Timer.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Timer/Glance.Timer.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Timer.Tests/Glance.Timer.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.UI.WinUI/Glance.UI.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.VoiceNotes.WinUI/Glance.VoiceNotes.WinUI.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.VoiceNotes/Glance.VoiceNotes.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Glance.VoiceNotes.Tests/Glance.VoiceNotes.Tests.csproj">
-    <Platform Solution="*|x64" Project="x64" />
+    <Platform Project="x64" />
   </Project>
 </Solution>
