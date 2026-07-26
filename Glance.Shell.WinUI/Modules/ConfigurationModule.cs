@@ -26,8 +26,7 @@ public sealed class ConfigurationModule :
                 provider.GetRequiredService<IMessenger>().Send(new OptionsChangedEventArgs<GlanceSettings>(options)))
             .WithAsyncChangeHandler(async (provider, options, _) =>
             {
-                IStartupManager startupManager =
-                    provider.GetRequiredService<IStartupManager>();
+                IStartupManager startupManager = provider.GetRequiredService<IStartupManager>();
 
                 if (options.StartWithWindows)
                 {
