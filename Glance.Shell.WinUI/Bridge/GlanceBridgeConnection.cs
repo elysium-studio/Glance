@@ -6,18 +6,33 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace Glance.Shell.WinUI;
 
-internal sealed class GlanceBridgeConnection(string applicationId, StreamWriter writer) :
+internal sealed class GlanceBridgeConnection :
     IGlanceApplicationConnection,
     IAsyncDisposable
 {
     private static readonly JsonSerializerOptions serializerOptions = new(JsonSerializerDefaults.Web);
-    private readonly SemaphoreSlim writeLock = new(1, 1);
+    private readonly CancellationTokenSource disposalCancellation = new();
+    private readonly Channel<GlanceBridgeWireMessage> messages = Channel.CreateUnbounded<GlanceBridgeWireMessage>(new UnboundedChannelOptions
+    {
+        SingleReader = true
+    });
+    private readonly StreamWriter writer;
+    private readonly Task writerTask;
+    private int disposed;
 
-    public string ApplicationId { get; } = applicationId;
+    public GlanceBridgeConnection(string applicationId, StreamWriter writer)
+    {
+        ApplicationId = applicationId;
+        this.writer = writer;
+        writerTask = WriteMessagesAsync();
+    }
+
+    public string ApplicationId { get; }
 
     public async ValueTask SendAsync(string capability, string topic, JsonElement payload, CancellationToken cancellationToken = default)
     {
@@ -30,7 +45,7 @@ internal sealed class GlanceBridgeConnection(string applicationId, StreamWriter 
             Payload = payload
         };
 
-        await WriteAsync(message, cancellationToken);
+        await QueueAsync(message, cancellationToken);
     }
 
     public async ValueTask SendCapabilitiesAsync(IReadOnlyCollection<string> capabilities, CancellationToken cancellationToken = default)
@@ -42,28 +57,49 @@ internal sealed class GlanceBridgeConnection(string applicationId, StreamWriter 
             Capabilities = capabilities.ToArray()
         };
 
-        await WriteAsync(message, cancellationToken);
+        await QueueAsync(message, cancellationToken);
     }
 
     public async ValueTask DisposeAsync()
     {
-        writeLock.Dispose();
+        if (Interlocked.Exchange(ref disposed, 1) != 0)
+        {
+            return;
+        }
+
+        messages.Writer.TryComplete();
+        disposalCancellation.Cancel();
         await writer.DisposeAsync();
+        await writerTask;
+        disposalCancellation.Dispose();
     }
 
-    private async ValueTask WriteAsync(GlanceBridgeWireMessage message, CancellationToken cancellationToken)
+    private ValueTask QueueAsync(GlanceBridgeWireMessage message, CancellationToken cancellationToken)
     {
-        string json = JsonSerializer.Serialize(message, serializerOptions);
-        await writeLock.WaitAsync(cancellationToken);
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != 0, this);
+        return messages.Writer.WriteAsync(message, cancellationToken);
+    }
 
+    private async Task WriteMessagesAsync()
+    {
         try
         {
-            await writer.WriteLineAsync(json.AsMemory(), cancellationToken);
-            await writer.FlushAsync(cancellationToken);
+            await foreach (GlanceBridgeWireMessage message in messages.Reader.ReadAllAsync(disposalCancellation.Token))
+            {
+                string json = JsonSerializer.Serialize(message, serializerOptions);
+                await writer.WriteLineAsync(json.AsMemory(), disposalCancellation.Token);
+                await writer.FlushAsync(disposalCancellation.Token);
+            }
         }
-        finally
+        catch (OperationCanceledException) when (disposalCancellation.IsCancellationRequested)
         {
-            writeLock.Release();
+        }
+        catch (IOException exception)
+        {
+            messages.Writer.TryComplete(exception);
+        }
+        catch (ObjectDisposedException) when (Volatile.Read(ref disposed) != 0)
+        {
         }
     }
 }
