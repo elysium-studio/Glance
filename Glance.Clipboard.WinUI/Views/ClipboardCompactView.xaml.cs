@@ -3,7 +3,8 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.Clipboard.WinUI;
 
-public sealed partial class ClipboardCompactView : UserControl
+public sealed partial class ClipboardCompactView :
+    UserControl
 {
     public ClipboardCompactView(ClipboardShelfViewModel viewModel)
     {

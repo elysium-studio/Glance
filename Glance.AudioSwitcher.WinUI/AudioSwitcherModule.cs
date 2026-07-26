@@ -4,7 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Glance.AudioSwitcher.WinUI;
 
-public sealed class AudioSwitcherModule : IGlanceModule
+public sealed class AudioSwitcherModule :
+    IGlanceModule
 {
     public void Register(IServiceCollection services)
     {

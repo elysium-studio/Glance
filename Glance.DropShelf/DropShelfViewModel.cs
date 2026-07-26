@@ -4,27 +4,20 @@ using System.Collections.ObjectModel;
 
 namespace Glance.DropShelf;
 
-public sealed partial class DropShelfViewModel : ObservableObject
+public sealed partial class DropShelfViewModel(ITextLocalizer localizer, DropShelfSettings? settings = null) :
+    ObservableObject
 {
-    private readonly ITextLocalizer localizer;
-    private int itemLimit;
+    private readonly ITextLocalizer localizer = localizer;
+    private int itemLimit = GetItemLimit(settings ?? new DropShelfSettings());
 
     [ObservableProperty]
-    private string summary;
+    private string summary = localizer.GetText("EmptySummary");
 
     [ObservableProperty]
-    private string detail;
+    private string detail = localizer.GetText("EmptyDetail");
 
     [ObservableProperty]
     private bool hasItems;
-
-    public DropShelfViewModel(ITextLocalizer localizer, DropShelfSettings? settings = null)
-    {
-        this.localizer = localizer;
-        itemLimit = GetItemLimit(settings ?? new DropShelfSettings());
-        summary = localizer.GetText("EmptySummary");
-        detail = localizer.GetText("EmptyDetail");
-    }
 
     public string Title => localizer.GetText("ModuleTitle");
 

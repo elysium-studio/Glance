@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Glance.DevicePresence.WinUI;
 
-public sealed class DevicePresenceComponent :
+public sealed partial class DevicePresenceComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IDisposable
@@ -19,8 +19,7 @@ public sealed class DevicePresenceComponent :
     private readonly DevicePresenceViewModel viewModel;
     private readonly GlanceModuleOptions<DevicePresenceSettings> options;
 
-    public DevicePresenceComponent(
-        DevicePresenceViewModel viewModel,
+    public DevicePresenceComponent(DevicePresenceViewModel viewModel,
         IDevicePresenceService devicePresenceService,
         IGlanceAttentionService attentionService,
         GlanceModuleOptions<DevicePresenceSettings> options,

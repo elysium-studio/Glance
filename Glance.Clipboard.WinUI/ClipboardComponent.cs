@@ -10,7 +10,7 @@ using Windows.Win32;
 
 namespace Glance.Clipboard.WinUI;
 
-public sealed class ClipboardComponent :
+public sealed partial class ClipboardComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IDisposable
@@ -19,8 +19,7 @@ public sealed class ClipboardComponent :
     private readonly DispatcherQueueTimer clipboardPollTimer;
     private readonly DispatcherQueue dispatcherQueue;
     private readonly List<ClipboardEntry> localEntries = [];
-    private readonly Dictionary<string, ClipboardSnapshot> localSnapshots =
-        new(StringComparer.Ordinal);
+    private readonly Dictionary<string, ClipboardSnapshot> localSnapshots = [with(StringComparer.Ordinal)];
     private readonly SemaphoreSlim refreshGate = new(1, 1);
     private readonly ITextLocalizer localizer;
     private readonly ClipboardShelfViewModel viewModel;
@@ -28,8 +27,7 @@ public sealed class ClipboardComponent :
     private bool isDisposed;
     private uint lastSequenceNumber;
 
-    public ClipboardComponent(
-        ClipboardShelfViewModel viewModel,
+    public ClipboardComponent(ClipboardShelfViewModel viewModel,
         GlanceModuleOptions<ClipboardSettings> options,
         ModuleResourceTextLocalizer<ClipboardModule> localizer)
     {
@@ -63,7 +61,6 @@ public sealed class ClipboardComponent :
         catch (Exception exception)
         {
             ClipboardDiagnostics.WriteException("ListenerRegistrationFailed", exception);
-            // Sequence polling remains available if native notification registration fails.
         }
 
         clipboardPollTimer.Start();
@@ -315,8 +312,7 @@ public sealed class ClipboardComponent :
         }
     }
 
-    private ClipboardEntry CreateEntryFromSnapshot(
-        string id,
+    private ClipboardEntry CreateEntryFromSnapshot(string id,
         DateTimeOffset timestamp,
         ClipboardSnapshot snapshot)
     {
@@ -360,8 +356,7 @@ public sealed class ClipboardComponent :
         return CreateEntry(id, localizer.GetText("UnsupportedContent"), localizer.GetText("KindOther"), "\uE77F", timestamp);
     }
 
-    private ClipboardEntry CreateEntry(
-        string id,
+    private ClipboardEntry CreateEntry(string id,
         string preview,
         string kind,
         string glyph,
@@ -376,10 +371,8 @@ public sealed class ClipboardComponent :
     }
 
     private static string Normalize(string value) =>
-        string.Join(
-            " ",
-            value.Split(
-                ['\r', '\n', '\t', ' '],
+        string.Join(" ",
+            value.Split(['\r', '\n', '\t', ' '],
                 StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
 
     private static string Truncate(string value) =>

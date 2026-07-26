@@ -3,7 +3,8 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.DropShelf.WinUI;
 
-public sealed partial class DropShelfCompactView : UserControl
+public sealed partial class DropShelfCompactView :
+    UserControl
 {
     public DropShelfCompactView(DropShelfViewModel viewModel)
     {

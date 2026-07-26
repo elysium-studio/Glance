@@ -129,7 +129,8 @@ public sealed class AudioSwitcherViewModelTests
         }
     }
 
-    private sealed class FakeLocalizer : ITextLocalizer
+    private sealed class FakeLocalizer :
+        ITextLocalizer
     {
         public string GetText(string key, params object[] arguments) => key switch
         {

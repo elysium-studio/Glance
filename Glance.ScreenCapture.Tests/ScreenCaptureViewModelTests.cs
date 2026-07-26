@@ -128,7 +128,8 @@ public sealed class ScreenCaptureViewModelTests
         }
     }
 
-    private sealed class FakeLocalizer : ITextLocalizer
+    private sealed class FakeLocalizer :
+        ITextLocalizer
     {
         private static readonly IReadOnlyDictionary<string, string> Values = new Dictionary<string, string>
         {

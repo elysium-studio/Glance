@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace Glance.FocusSession.WinUI;
 
-public sealed class FocusSessionComponent :
+public sealed partial class FocusSessionComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IDisposable
@@ -18,8 +18,7 @@ public sealed class FocusSessionComponent :
     private readonly FocusSessionViewModel viewModel;
     private readonly GlanceModuleOptions<FocusSessionSettings> options;
 
-    public FocusSessionComponent(
-        FocusSessionViewModel viewModel,
+    public FocusSessionComponent(FocusSessionViewModel viewModel,
         IGlanceAttentionService attentionService,
         GlanceModuleOptions<FocusSessionSettings> options,
         ModuleResourceTextLocalizer<FocusSessionModule> localizer)

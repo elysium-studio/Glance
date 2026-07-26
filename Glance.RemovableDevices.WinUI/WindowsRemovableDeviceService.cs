@@ -16,7 +16,7 @@ public sealed class WindowsRemovableDeviceService :
 {
     private const uint ConfigurationManagerSuccess = 0;
 
-    private Dictionary<string, DriveMetadata> cachedMetadata = new(StringComparer.OrdinalIgnoreCase);
+    private Dictionary<string, DriveMetadata> cachedMetadata = [with(StringComparer.OrdinalIgnoreCase)];
     private string driveSignature = string.Empty;
 
     public IReadOnlyList<RemovableDevice> GetDevices()
@@ -96,7 +96,7 @@ public sealed class WindowsRemovableDeviceService :
 
     private static Dictionary<string, DriveMetadata> GetDriveMetadata()
     {
-        Dictionary<string, DriveMetadata> metadata = new(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, DriveMetadata> metadata = [with(StringComparer.OrdinalIgnoreCase)];
 
         try
         {
@@ -223,8 +223,7 @@ public sealed class WindowsRemovableDeviceService :
     [DllImport("CfgMgr32.dll", CharSet = CharSet.Unicode)]
     private static extern uint CM_Request_Device_EjectW(uint deviceInstance, out int vetoType, StringBuilder vetoName, uint vetoNameLength, uint flags);
 
-    private sealed record DriveMetadata(
-        string DeviceInstanceId,
+    private sealed record DriveMetadata(string DeviceInstanceId,
         string Model,
         bool IsUsb);
 }

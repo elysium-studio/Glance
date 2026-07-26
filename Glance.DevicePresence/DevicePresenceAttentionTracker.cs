@@ -2,8 +2,8 @@ namespace Glance.DevicePresence;
 
 public sealed class DevicePresenceAttentionTracker
 {
-    private readonly Dictionary<string, byte> batteryLevels = new(StringComparer.OrdinalIgnoreCase);
-    private HashSet<string> deviceIds = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, byte> batteryLevels = [with(StringComparer.OrdinalIgnoreCase)];
+    private HashSet<string> deviceIds = [with(StringComparer.OrdinalIgnoreCase)];
     private bool hasSnapshot;
 
     public ConnectedBluetoothDevice? Update(IReadOnlyList<ConnectedBluetoothDevice> devices, byte lowBatteryThreshold)

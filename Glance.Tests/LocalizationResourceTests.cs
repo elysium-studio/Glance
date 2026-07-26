@@ -58,8 +58,7 @@ public sealed class LocalizationResourceTests
             {
                 IReadOnlyList<ResourceEntry> localized = ReadResources(Path.Combine(moduleRoot, language, "Resources.resw"));
 
-                Assert.Equal(
-                    english.Select(entry => entry.Name),
+                Assert.Equal(english.Select(entry => entry.Name),
                     localized.Select(entry => entry.Name));
 
                 for (int index = 0; index < english.Count; index++)
@@ -76,16 +75,14 @@ public sealed class LocalizationResourceTests
     }
 
     private static string[] GetDirectories(string path) =>
-        Directory.GetDirectories(path).Select(Path.GetFileName).OfType<string>().Order().ToArray();
+        [.. Directory.GetDirectories(path).Select(Path.GetFileName).OfType<string>().Order()];
 
     private static IReadOnlyList<ResourceEntry> ReadResources(string path) =>
-        XDocument.Load(path).Root!
-            .Elements("data").Select(element => new ResourceEntry(element.Attribute("name")!.Value, element.Element("value")!.Value))
-            .ToArray();
+        [.. XDocument.Load(path).Root!
+            .Elements("data").Select(element => new ResourceEntry(element.Attribute("name")!.Value, element.Element("value")!.Value))];
 
     private static string[] GetPlaceholders(string value) =>
-        Regex.Matches(value, "\\{\\d+\\}").Select(match => match.Value)
-            .Order().ToArray();
+        [.. Regex.Matches(value, "\\{\\d+\\}").Select(match => match.Value).Order()];
 
     private sealed record ResourceEntry(string Name, string Value);
 }

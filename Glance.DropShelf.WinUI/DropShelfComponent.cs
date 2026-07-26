@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Glance.DropShelf.WinUI;
 
-public sealed class DropShelfComponent :
+public sealed partial class DropShelfComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IGlanceContextAwareComponent,
@@ -20,8 +20,7 @@ public sealed class DropShelfComponent :
     private readonly DropShelfViewModel viewModel;
     private readonly GlanceModuleOptions<DropShelfSettings> options;
 
-    public DropShelfComponent(
-        DropShelfViewModel viewModel,
+    public DropShelfComponent(DropShelfViewModel viewModel,
         DropShelfTransferStore transferStore,
         GlanceModuleOptions<DropShelfSettings> options,
         ModuleResourceTextLocalizer<DropShelfModule> localizer)
@@ -70,9 +69,7 @@ public sealed class DropShelfComponent :
             return;
         }
 
-        DropShelfItem[] items = context.StorageItems
-            .Select(item => new DropShelfItem(item.Path, item.Name, item.IsFolder))
-            .ToArray();
+        DropShelfItem[] items = [.. context.StorageItems.Select(item => new DropShelfItem(item.Path, item.Name, item.IsFolder))];
 
         IReadOnlyList<DropShelfItem> stagedItems =
             await transferStore.StageAsync(items);

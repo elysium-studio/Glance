@@ -27,8 +27,7 @@ public sealed partial class RemovableDeviceItemViewModel :
     [NotifyPropertyChangedFor(nameof(CanEject))]
     private bool isBusy;
 
-    public RemovableDeviceItemViewModel(
-        RemovableDevice device,
+    public RemovableDeviceItemViewModel(RemovableDevice device,
         string displayName,
         string detail,
         Action<RemovableDevice> open,
@@ -54,8 +53,7 @@ public sealed partial class RemovableDeviceItemViewModel :
     public void Eject() =>
         eject(Device);
 
-    public void Update(
-        RemovableDevice device,
+    public void Update(RemovableDevice device,
         string displayName,
         string detail)
     {
@@ -71,8 +69,7 @@ public sealed partial class RemovableDeviceItemViewModel :
     private static string GetDriveLetter(string rootPath) =>
         rootPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
-    private static string GetCompactText(
-        string displayName,
+    private static string GetCompactText(string displayName,
         string driveLetter) =>
         $"{displayName}  ·  {driveLetter}";
 

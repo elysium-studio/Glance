@@ -36,8 +36,7 @@ public sealed partial class DesktopIslandViewModel :
     private readonly ModulePreferenceService modulePreferences;
     private readonly INavigator navigator;
 
-    public DesktopIslandViewModel(
-        IServiceProvider provider,
+    public DesktopIslandViewModel(IServiceProvider provider,
         IServiceFactory factory,
         IMessenger messenger,
         IDisposer disposer,

@@ -79,7 +79,7 @@ internal sealed class GlanceRuntimeServiceProvider :
     {
         lock (synchronization)
         {
-            return moduleProviders.ToArray();
+            return (IServiceProvider[])[.. moduleProviders];
         }
     }
 }

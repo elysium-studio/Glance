@@ -4,7 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Glance.Stopwatch.WinUI;
 
-public sealed class StopwatchModule : IGlanceModule
+public sealed class StopwatchModule :
+    IGlanceModule
 {
     public void Register(IServiceCollection services)
     {

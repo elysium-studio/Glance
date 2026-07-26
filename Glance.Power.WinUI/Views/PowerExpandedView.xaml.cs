@@ -3,7 +3,8 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.Power.WinUI;
 
-public sealed partial class PowerExpandedView : UserControl
+public sealed partial class PowerExpandedView :
+    UserControl
 {
     public PowerExpandedView(PowerViewModel viewModel)
     {

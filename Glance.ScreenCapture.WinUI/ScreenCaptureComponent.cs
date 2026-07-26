@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Glance.ScreenCapture.WinUI;
 
-public sealed class ScreenCaptureComponent :
+public sealed partial class ScreenCaptureComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IDisposable
@@ -21,8 +21,7 @@ public sealed class ScreenCaptureComponent :
     private readonly GlanceModuleOptions<ScreenCaptureSettings> options;
     private bool captureRefreshPending;
 
-    public ScreenCaptureComponent(
-        ScreenCaptureViewModel viewModel,
+    public ScreenCaptureComponent(ScreenCaptureViewModel viewModel,
         IScreenCaptureService screenCaptureService,
         GlanceModuleOptions<ScreenCaptureSettings> options,
         ModuleResourceTextLocalizer<ScreenCaptureModule> localizer,

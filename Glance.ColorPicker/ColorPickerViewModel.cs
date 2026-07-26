@@ -20,8 +20,7 @@ public sealed partial class ColorPickerViewModel :
     [ObservableProperty]
     private bool isPicking;
 
-    public ColorPickerViewModel(
-        IColorPickerService colorPickerService,
+    public ColorPickerViewModel(IColorPickerService colorPickerService,
         ITextCopyService textCopyService,
         ColorPickerSettings? settings = null)
     {

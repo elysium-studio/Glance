@@ -2,38 +2,27 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Glance.AudioSwitcher;
 
-public sealed partial class AudioOutputDeviceItemViewModel :
+public sealed partial class AudioOutputDeviceItemViewModel(AudioOutputDevice device,
+    IAudioDeviceService audioDeviceService) :
     ObservableObject
 {
-    private readonly IAudioDeviceService audioDeviceService;
+    private readonly IAudioDeviceService audioDeviceService = audioDeviceService;
 
     [ObservableProperty]
-    private string name;
+    private string name = device.Name;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(VolumeText))]
-    private int volumePercent;
+    private int volumePercent = device.VolumePercent;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ToggleGlyph))]
-    private bool isMuted;
+    private bool isMuted = device.IsMuted;
 
     [ObservableProperty]
-    private bool isDefault;
+    private bool isDefault = device.IsDefault;
 
-    public AudioOutputDeviceItemViewModel(
-        AudioOutputDevice device,
-        IAudioDeviceService audioDeviceService)
-    {
-        Device = device;
-        this.audioDeviceService = audioDeviceService;
-        name = device.Name;
-        volumePercent = device.VolumePercent;
-        isMuted = device.IsMuted;
-        isDefault = device.IsDefault;
-    }
-
-    public AudioOutputDevice Device { get; private set; }
+    public AudioOutputDevice Device { get; private set; } = device;
 
     public string Id => Device.Id;
 

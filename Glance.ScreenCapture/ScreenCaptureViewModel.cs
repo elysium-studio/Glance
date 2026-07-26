@@ -4,10 +4,11 @@ using System.Collections.ObjectModel;
 
 namespace Glance.ScreenCapture;
 
-public sealed partial class ScreenCaptureViewModel : ObservableObject
+public sealed partial class ScreenCaptureViewModel(ITextLocalizer localizer, ScreenCaptureSettings? settings = null) :
+    ObservableObject
 {
-    private readonly ITextLocalizer localizer;
-    private int recentCaptureLimit;
+    private readonly ITextLocalizer localizer = localizer;
+    private int recentCaptureLimit = GetRecentCaptureLimit(settings ?? new ScreenCaptureSettings());
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CompactStatusText))]
@@ -15,20 +16,13 @@ public sealed partial class ScreenCaptureViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CompactStatusText))]
-    private string statusText;
+    private string statusText = localizer.GetText("ReadyToCapture");
 
     [ObservableProperty]
     private bool hasCaptures;
 
     [ObservableProperty]
     private ScreenCaptureItemViewModel? selectedCapture;
-
-    public ScreenCaptureViewModel(ITextLocalizer localizer, ScreenCaptureSettings? settings = null)
-    {
-        this.localizer = localizer;
-        recentCaptureLimit = GetRecentCaptureLimit(settings ?? new ScreenCaptureSettings());
-        statusText = localizer.GetText("ReadyToCapture");
-    }
 
     public string Title => localizer.GetText("ModuleTitle");
 
@@ -162,8 +156,7 @@ public sealed partial class ScreenCaptureViewModel : ObservableObject
     }
 
     private ScreenCaptureItemViewModel CreateItem(ScreenCaptureItem capture) =>
-        new(
-            capture,
+        new(capture,
             localizer.GetText("CaptureDetail", capture.Width, capture.Height),
             value => OpenRequested?.Invoke(this, value),
             value => RevealRequested?.Invoke(this, value),

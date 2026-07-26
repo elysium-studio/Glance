@@ -4,12 +4,12 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.SystemMonitor.WinUI;
 
-public sealed partial class SystemMonitorExpandedView : UserControl
+public sealed partial class SystemMonitorExpandedView :
+    UserControl
 {
     private readonly ModuleResourceTextLocalizer<SystemMonitorModule> localizer;
 
-    public SystemMonitorExpandedView(
-        SystemMonitorViewModel viewModel,
+    public SystemMonitorExpandedView(SystemMonitorViewModel viewModel,
         ModuleResourceTextLocalizer<SystemMonitorModule> localizer)
     {
         ViewModel = viewModel;

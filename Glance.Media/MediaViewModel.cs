@@ -96,7 +96,8 @@ public sealed partial class MediaViewModel :
         PlaybackActionRequested?.Invoke(this, MediaPlaybackAction.Next);
 }
 
-public sealed class AudioLevelsChangedEventArgs(IReadOnlyList<double> levels) : EventArgs
+public sealed class AudioLevelsChangedEventArgs(IReadOnlyList<double> levels) :
+    EventArgs
 {
     public IReadOnlyList<double> Levels { get; } = levels;
 }

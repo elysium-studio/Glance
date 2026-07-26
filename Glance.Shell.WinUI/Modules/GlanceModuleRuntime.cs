@@ -18,8 +18,7 @@ internal sealed class GlanceModuleRuntime :
 {
     private readonly IReadOnlyList<IHostedService> hostedServices;
 
-    private GlanceModuleRuntime(
-        ServiceProvider services,
+    private GlanceModuleRuntime(ServiceProvider services,
         IReadOnlyList<IHostedService> hostedServices)
     {
         Services = services;
@@ -28,8 +27,7 @@ internal sealed class GlanceModuleRuntime :
 
     public ServiceProvider Services { get; }
 
-    public static async Task<GlanceModuleRuntime> CreateAsync(
-        IServiceProvider applicationServices,
+    public static async Task<GlanceModuleRuntime> CreateAsync(IServiceProvider applicationServices,
         IReadOnlyList<IGlanceModule> modules,
         CancellationToken cancellationToken = default)
     {
@@ -49,7 +47,7 @@ internal sealed class GlanceModuleRuntime :
         }
 
         ServiceProvider services = isolatedRegistrations.BuildServiceProvider();
-        IReadOnlyList<IHostedService> hostedServices = services.GetServices<IHostedService>().ToArray();
+        IHostedService[] hostedServices = [.. services.GetServices<IHostedService>()];
         List<IHostedService> startedServices = [];
 
         try
@@ -128,8 +126,7 @@ internal sealed class GlanceModuleRuntime :
     private static string NormalizeViewKey(string key) =>
         key.EndsWith("ViewModel", StringComparison.Ordinal) ? key[..^"ViewModel".Length] : key;
 
-    private static ServiceDescriptor RewriteDescriptor(
-        ServiceDescriptor descriptor,
+    private static ServiceDescriptor RewriteDescriptor(ServiceDescriptor descriptor,
         IServiceProvider applicationServices)
     {
         if (descriptor.IsKeyedService)
@@ -162,8 +159,7 @@ internal sealed class GlanceModuleRuntime :
         return new ServiceDescriptor(descriptor.ServiceType, provider => ActivatorUtilities.CreateInstance(new ParentFallbackServiceProvider(provider, applicationServices), type), descriptor.Lifetime);
     }
 
-    private sealed class ParentFallbackServiceProvider(
-        IServiceProvider moduleServices,
+    private sealed class ParentFallbackServiceProvider(IServiceProvider moduleServices,
         IServiceProvider applicationServices) :
         IServiceProvider,
         IKeyedServiceProvider,

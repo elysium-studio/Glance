@@ -4,7 +4,8 @@ using Microsoft.UI.Xaml.Media;
 
 namespace Glance.Media.WinUI;
 
-public sealed partial class MediaCompactView : UserControl
+public sealed partial class MediaCompactView :
+    UserControl
 {
     public MediaCompactView(MediaViewModel viewModel)
     {

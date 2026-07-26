@@ -3,9 +3,10 @@ using Glance.Application.Abstractions;
 
 namespace Glance.SystemMonitor;
 
-public sealed partial class SystemMonitorViewModel : ObservableObject
+public sealed partial class SystemMonitorViewModel(ITextLocalizer localizer) :
+    ObservableObject
 {
-    private readonly ITextLocalizer localizer;
+    private readonly ITextLocalizer localizer = localizer;
 
     [ObservableProperty]
     private double cpuUsage;
@@ -20,7 +21,7 @@ public sealed partial class SystemMonitorViewModel : ObservableObject
     private string memoryText = "0%";
 
     [ObservableProperty]
-    private string memoryDetail;
+    private string memoryDetail = localizer.GetText("CalculatingMemory");
 
     [ObservableProperty]
     private string downloadText = "0 KB/s";
@@ -28,14 +29,7 @@ public sealed partial class SystemMonitorViewModel : ObservableObject
     [ObservableProperty]
     private string uploadText = "0 KB/s";
 
-    public SystemMonitorViewModel(ITextLocalizer localizer)
-    {
-        this.localizer = localizer;
-        memoryDetail = localizer.GetText("CalculatingMemory");
-    }
-
-    public void Update(
-        double cpu,
+    public void Update(double cpu,
         double memory,
         ulong usedBytes,
         ulong totalBytes,

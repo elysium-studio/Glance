@@ -40,8 +40,7 @@ internal sealed class WindowsVoiceRecordingService :
 
         try
         {
-            return Directory.EnumerateFiles(recordingsPath, "*.wav").Select(CreateVoiceNote).OfType<VoiceNote>().OrderByDescending(recording => recording.CreatedAt)
-                .Take(maximumCount).ToArray();
+            return [.. Directory.EnumerateFiles(recordingsPath, "*.wav").Select(CreateVoiceNote).OfType<VoiceNote>().OrderByDescending(recording => recording.CreatedAt).Take(maximumCount)];
         }
         catch
         {
@@ -251,8 +250,7 @@ internal sealed class WindowsVoiceRecordingService :
         RecordingCompleted?.Invoke(this, new VoiceRecordingCompletedEventArgs(recording, error));
     }
 
-    private static IReadOnlyList<double> CalculateLevels(
-        byte[] buffer,
+    private static IReadOnlyList<double> CalculateLevels(byte[] buffer,
         int bytesRecorded)
     {
         int sampleCount = bytesRecorded / 2;

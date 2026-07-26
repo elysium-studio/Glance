@@ -87,8 +87,7 @@ public sealed class RemovableDevicesViewModelTests
         Assert.Equal("256 B free of 1 KB", viewModel.SelectedDevice.Detail);
     }
 
-    private static RemovableDevice CreateDevice(
-        string id,
+    private static RemovableDevice CreateDevice(string id,
         string rootPath,
         string name,
         long totalBytes = 1024,

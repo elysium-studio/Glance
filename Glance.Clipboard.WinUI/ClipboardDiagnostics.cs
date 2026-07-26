@@ -64,7 +64,6 @@ internal static class ClipboardDiagnostics
         }
         catch
         {
-            // Diagnostics must never interfere with clipboard handling.
         }
         finally
         {
@@ -98,8 +97,7 @@ internal static class ClipboardDiagnostics
     private static string Normalize(string value) =>
         value.Replace('\r', ' ').Replace('\n', ' ');
 
-    private sealed class DiagnosticScope(
-        string operation,
+    private sealed class DiagnosticScope(string operation,
         string? previousOperation) : IDisposable
     {
         private bool disposed;

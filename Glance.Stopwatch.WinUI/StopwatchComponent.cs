@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace Glance.Stopwatch.WinUI;
 
-public sealed class StopwatchComponent :
+public sealed partial class StopwatchComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IDisposable
@@ -15,8 +15,7 @@ public sealed class StopwatchComponent :
     private readonly ITextLocalizer localizer;
     private readonly StopwatchViewModel viewModel;
 
-    public StopwatchComponent(
-        StopwatchViewModel viewModel,
+    public StopwatchComponent(StopwatchViewModel viewModel,
         ModuleResourceTextLocalizer<StopwatchModule> localizer)
     {
         this.viewModel = viewModel;

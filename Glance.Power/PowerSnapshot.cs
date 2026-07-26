@@ -8,8 +8,7 @@ public enum BatteryState
     Charging
 }
 
-public sealed record PowerSnapshot(
-    BatteryState BatteryState,
+public sealed record PowerSnapshot(BatteryState BatteryState,
     int ChargePercent,
     bool IsOnBattery,
     TimeSpan? RemainingTime);

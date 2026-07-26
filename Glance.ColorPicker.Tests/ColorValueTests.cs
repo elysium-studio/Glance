@@ -16,8 +16,7 @@ public sealed class ColorValueTests
     [InlineData(0, 0, 0, true)]
     [InlineData(255, 255, 255, false)]
     [InlineData(0, 120, 212, true)]
-    public void ChoosesReadableForeground(
-        byte red,
+    public void ChoosesReadableForeground(byte red,
         byte green,
         byte blue,
         bool expected)

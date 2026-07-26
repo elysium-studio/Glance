@@ -18,8 +18,7 @@ internal static class FocusedWindowPaste
         return PInvoke.SendInput(inputs, Marshal.SizeOf<INPUT>()) == inputs.Length;
     }
 
-    private static INPUT CreateKey(
-        VIRTUAL_KEY key,
+    private static INPUT CreateKey(VIRTUAL_KEY key,
         KEYBD_EVENT_FLAGS flags = 0)
     {
         INPUT input = new() { type = INPUT_TYPE.INPUT_KEYBOARD };

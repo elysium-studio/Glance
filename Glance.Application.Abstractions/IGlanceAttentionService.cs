@@ -6,8 +6,7 @@ public interface IGlanceAttentionService
 
     void CompleteStartup();
 
-    void RequestAttention(
-        string componentId,
+    void RequestAttention(string componentId,
         GlanceAttentionLevel level = GlanceAttentionLevel.Default,
         bool expand = true);
 }

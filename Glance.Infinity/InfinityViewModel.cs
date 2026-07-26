@@ -2,10 +2,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Glance.Infinity;
 
-public sealed partial class InfinityViewModel :
+public sealed partial class InfinityViewModel(IInfinityPageTitleUpdater pageTitleUpdater) :
     ObservableObject
 {
-    private readonly IInfinityPageTitleUpdater pageTitleUpdater;
+    private readonly IInfinityPageTitleUpdater pageTitleUpdater = pageTitleUpdater;
     private bool isInteracting;
     private bool isSurfaceVisible;
 
@@ -32,11 +32,6 @@ public sealed partial class InfinityViewModel :
 
     [ObservableProperty]
     private bool isSavingTitle;
-
-    public InfinityViewModel(IInfinityPageTitleUpdater pageTitleUpdater)
-    {
-        this.pageTitleUpdater = pageTitleUpdater;
-    }
 
     public void Update(InfinityPageNavigationState state)
     {

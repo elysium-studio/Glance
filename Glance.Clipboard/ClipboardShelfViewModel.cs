@@ -4,25 +4,26 @@ using System.Collections.ObjectModel;
 
 namespace Glance.Clipboard;
 
-public sealed partial class ClipboardShelfViewModel : ObservableObject
+public sealed partial class ClipboardShelfViewModel(ITextLocalizer localizer) :
+    ObservableObject
 {
-    private readonly ITextLocalizer localizer;
+    private readonly ITextLocalizer localizer = localizer;
     private Func<ClipboardEntry, Task<bool>>? copyEntry;
     private Func<ClipboardEntry, Task<bool>>? pasteEntry;
     private Func<ClipboardEntry, Task<bool>>? removeEntry;
     private Func<Task<bool>>? clearHistory;
 
     [ObservableProperty]
-    private string latestPreview;
+    private string latestPreview = localizer.GetText("ClipboardEmpty");
 
     [ObservableProperty]
-    private string latestKind;
+    private string latestKind = localizer.GetText("CopySomethingToBegin");
 
     [ObservableProperty]
     private string latestGlyph = "\uE77F";
 
     [ObservableProperty]
-    private string historyStatus;
+    private string historyStatus = localizer.GetText("WaitingForClipboard");
 
     [ObservableProperty]
     private bool canClearHistory;
@@ -33,20 +34,11 @@ public sealed partial class ClipboardShelfViewModel : ObservableObject
     [ObservableProperty]
     private ClipboardEntry? selectedEntry;
 
-    public ClipboardShelfViewModel(ITextLocalizer localizer)
-    {
-        this.localizer = localizer;
-        latestPreview = localizer.GetText("ClipboardEmpty");
-        latestKind = localizer.GetText("CopySomethingToBegin");
-        historyStatus = localizer.GetText("WaitingForClipboard");
-    }
-
     public string Title => localizer.GetText("ModuleTitle");
 
     public ObservableCollection<ClipboardEntry> ShelfItems { get; } = [];
 
-    public void ConfigureActions(
-        Func<ClipboardEntry, Task<bool>> copy,
+    public void ConfigureActions(Func<ClipboardEntry, Task<bool>> copy,
         Func<ClipboardEntry, Task<bool>> paste,
         Func<ClipboardEntry, Task<bool>> remove,
         Func<Task<bool>> clear)
@@ -57,8 +49,7 @@ public sealed partial class ClipboardShelfViewModel : ObservableObject
         clearHistory = clear;
     }
 
-    public void Update(
-        IReadOnlyList<ClipboardEntry> entries,
+    public void Update(IReadOnlyList<ClipboardEntry> entries,
         string status)
     {
         ClipboardEntry? latest = entries.FirstOrDefault();

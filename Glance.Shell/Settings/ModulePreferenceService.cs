@@ -12,7 +12,7 @@ public sealed class ModulePreferenceService
 
     public ModulePreferenceService(IEnumerable<IGlanceComponent> components, GlanceSettings settings, IWritableOptions<GlanceSettings> writer)
     {
-        allComponents = components.OrderBy(component => component.Order).ToList();
+        allComponents = [.. components.OrderBy(component => component.Order)];
         this.settings = settings;
         this.writer = writer;
         Normalize();
@@ -26,23 +26,21 @@ public sealed class ModulePreferenceService
     public event EventHandler? PreferencesChanged;
 
     public IReadOnlyList<IGlanceComponent> GetActiveComponents() =>
-        settings.Modules
+        [.. settings.Modules
             .Where(preference => preference.IsEnabled)
             .Select(preference => allComponents.FirstOrDefault(component =>
                 string.Equals(component.Id, preference.Id, StringComparison.OrdinalIgnoreCase)))
             .OfType<IGlanceComponent>()
-            .Where(IsAvailable)
-            .ToArray();
+            .Where(IsAvailable)];
 
     public IReadOnlyList<GlanceModulePreference> GetPreferences() =>
-        settings.Modules
+        [.. settings.Modules
             .Where(preference => GetComponent(preference.Id) is not null)
             .Select(preference => new GlanceModulePreference
             {
                 Id = preference.Id,
                 IsEnabled = preference.IsEnabled
-            })
-            .ToArray();
+            })];
 
     public IGlanceComponent? GetComponent(string id) =>
         allComponents.FirstOrDefault(component =>
@@ -52,14 +50,14 @@ public sealed class ModulePreferenceService
         settings.Modules.Any(preference => preference.IsEnabled && string.Equals(preference.Id, id, StringComparison.OrdinalIgnoreCase));
 
     public IReadOnlyList<IGlanceModuleSettingViewModel> CreateRuntimeSettings() =>
-        runtimeSettingsFactories.SelectMany(factory => factory()).OrderBy(setting => setting.Order).ToArray();
+        [.. runtimeSettingsFactories.SelectMany(factory => factory()).OrderBy(setting => setting.Order)];
 
     public async Task RegisterComponentsAsync(IReadOnlyList<IGlanceComponent> components, Func<IReadOnlyList<IGlanceModuleSettingViewModel>> createSettings)
     {
         ArgumentNullException.ThrowIfNull(components);
         ArgumentNullException.ThrowIfNull(createSettings);
 
-        string[] ids = components.Select(component => component.Id).ToArray();
+        string[] ids = [.. components.Select(component => component.Id)];
 
         if (ids.Any(string.IsNullOrWhiteSpace) ||
             ids.Distinct(StringComparer.OrdinalIgnoreCase).Count() != ids.Length ||
@@ -90,7 +88,7 @@ public sealed class ModulePreferenceService
 
         if (settingsChanged)
         {
-            await writer.WriteAsync(value => value.Modules = settings.Modules.Select(Clone).ToList());
+            await writer.WriteAsync(value => value.Modules = [.. settings.Modules.Select(Clone)]);
         }
     }
 
@@ -142,10 +140,9 @@ public sealed class ModulePreferenceService
             .GroupBy(preference => preference.Id, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
 
-        settings.Modules = settings.Modules
+        settings.Modules = [.. settings.Modules
             .GroupBy(preference => preference.Id, StringComparer.OrdinalIgnoreCase)
-            .Select(group => group.First())
-            .ToList();
+            .Select(group => group.First())];
 
         foreach (IGlanceComponent component in allComponents)
         {
@@ -158,7 +155,7 @@ public sealed class ModulePreferenceService
 
     private async Task SaveAsync()
     {
-        List<GlanceModulePreference> snapshot = settings.Modules.Select(Clone).ToList();
+        List<GlanceModulePreference> snapshot = [.. settings.Modules.Select(Clone)];
 
         PreferencesChanged?.Invoke(this, EventArgs.Empty);
         await writer.WriteAsync(value => value.Modules = snapshot);

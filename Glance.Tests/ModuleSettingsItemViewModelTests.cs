@@ -43,7 +43,8 @@ public sealed class ModuleSettingsItemViewModelTests
         Assert.True(setting.IsDisposed);
     }
 
-    private sealed class TestSetting(string moduleId, int order) : IGlanceModuleSettingViewModel
+    private sealed class TestSetting(string moduleId, int order) :
+        IGlanceModuleSettingViewModel
     {
         public string ModuleId { get; } = moduleId;
 

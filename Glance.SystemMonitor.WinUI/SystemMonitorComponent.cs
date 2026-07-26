@@ -5,7 +5,7 @@ using System;
 
 namespace Glance.SystemMonitor.WinUI;
 
-public sealed class SystemMonitorComponent :
+public sealed partial class SystemMonitorComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IDisposable
@@ -17,8 +17,7 @@ public sealed class SystemMonitorComponent :
     private readonly SystemMonitorViewModel viewModel;
     private readonly GlanceModuleOptions<SystemMonitorSettings> options;
 
-    public SystemMonitorComponent(
-        SystemMonitorViewModel viewModel,
+    public SystemMonitorComponent(SystemMonitorViewModel viewModel,
         GlanceModuleOptions<SystemMonitorSettings> options,
         ModuleResourceTextLocalizer<SystemMonitorModule> localizer)
     {

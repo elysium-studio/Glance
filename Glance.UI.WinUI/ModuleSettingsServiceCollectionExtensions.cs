@@ -11,8 +11,7 @@ namespace Glance.UI.WinUI;
 
 public static class ModuleSettingsServiceCollectionExtensions
 {
-    public static IServiceCollection AddModuleOptions<TOptions>(
-        this IServiceCollection services,
+    public static IServiceCollection AddModuleOptions<TOptions>(this IServiceCollection services,
         string sectionPath,
         string filePath,
         JsonSerializerContext context)

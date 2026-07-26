@@ -12,7 +12,8 @@ using Windows.Storage;
 
 namespace Glance.DropShelf.WinUI;
 
-public sealed partial class DropShelfExpandedView : UserControl
+public sealed partial class DropShelfExpandedView :
+    UserControl
 {
     private const int MoveConfirmationAttempts = 240;
     private static readonly TimeSpan MoveConfirmationInterval = TimeSpan.FromMilliseconds(250);
@@ -22,8 +23,7 @@ public sealed partial class DropShelfExpandedView : UserControl
     private CancellationTokenSource? moveConfirmation;
     private string[] outgoingPaths = [];
 
-    public DropShelfExpandedView(
-        DropShelfViewModel viewModel,
+    public DropShelfExpandedView(DropShelfViewModel viewModel,
         DropShelfTransferStore transferStore)
     {
         ViewModel = viewModel;
@@ -68,10 +68,9 @@ public sealed partial class DropShelfExpandedView : UserControl
             }
 
             CancelMoveConfirmation();
-            outgoingPaths = storageItems
+            outgoingPaths = [.. storageItems
                 .Select(item => item.Path)
-                .Where(path => !string.IsNullOrWhiteSpace(path))
-                .ToArray();
+                .Where(path => !string.IsNullOrWhiteSpace(path))];
             args.AllowedOperations = DataPackageOperation.Move;
             args.Data.SetStorageItems(storageItems, false);
             args.Data.RequestedOperation = DataPackageOperation.Move;
@@ -98,8 +97,7 @@ public sealed partial class DropShelfExpandedView : UserControl
         _ = ConfirmMoveAsync(paths, moveConfirmation.Token);
     }
 
-    private async Task ConfirmMoveAsync(
-        IReadOnlyCollection<string> paths,
+    private async Task ConfirmMoveAsync(IReadOnlyCollection<string> paths,
         CancellationToken cancellationToken)
     {
         if (paths.Count == 0)
@@ -133,7 +131,7 @@ public sealed partial class DropShelfExpandedView : UserControl
         Queue(() => RemoveOutgoingItems(paths));
 
     private void QueueRemoveMissingOutgoingItems(IReadOnlyCollection<string> paths) =>
-        Queue(() => RemoveOutgoingItems(paths.Where(IsMissing).ToArray()));
+        Queue(() => RemoveOutgoingItems([.. paths.Where(IsMissing)]));
 
     private void Queue(Action action) =>
         _ = dispatcherQueue.TryEnqueue(() => action());

@@ -76,8 +76,7 @@ public sealed class DevicePresenceViewModelTests
         Assert.Equal("audio", viewModel.SelectedDevice?.Device.Id);
     }
 
-    private static ConnectedBluetoothDevice CreateDevice(
-        string id,
+    private static ConnectedBluetoothDevice CreateDevice(string id,
         string name,
         BluetoothDeviceKind kind,
         byte? batteryLevel = null) =>

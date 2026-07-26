@@ -11,8 +11,7 @@ public sealed partial class ModuleSettingsItemViewModel :
     private readonly IReadOnlyList<IGlanceModuleSettingViewModel> availableSettings;
     private bool suppressPersistence;
 
-    public ModuleSettingsItemViewModel(
-        string id,
+    public ModuleSettingsItemViewModel(string id,
         string displayName,
         string description,
         bool isEnabled,
@@ -22,7 +21,7 @@ public sealed partial class ModuleSettingsItemViewModel :
         Id = id;
         DisplayName = displayName;
         Description = description;
-        availableSettings = settings.ToArray();
+        availableSettings = [.. settings];
         this.isEnabled = isEnabled;
         SetEnabled = setEnabled;
         RefreshSettings();

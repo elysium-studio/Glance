@@ -10,8 +10,7 @@ using System.Runtime.Loader;
 
 namespace Glance.Shell.WinUI;
 
-internal sealed record GlanceModuleLoadResult(
-    string SourcePath,
+internal sealed record GlanceModuleLoadResult(string SourcePath,
     IReadOnlyList<IGlanceModule> Modules);
 
 internal static class GlanceModuleLoader
@@ -20,7 +19,7 @@ internal static class GlanceModuleLoader
     private static readonly object synchronization = new();
     private static readonly ModulePackageCache modulePackageCache = new(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "ModuleCache"));
     private static readonly List<object> xamlMetadataProviderTokens = [];
-    private static IReadOnlyDictionary<string, string> moduleAssemblyPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    private static Dictionary<string, string> moduleAssemblyPaths = [with(StringComparer.OrdinalIgnoreCase)];
     private static bool resolverRegistered;
 
     public static string UserModulesDirectory =>
@@ -45,7 +44,7 @@ internal static class GlanceModuleLoader
         RegisterAssemblyPaths(sources.Select(source => source.ContentDirectory));
         RegisterResolver();
 
-        return sources.Select(Load).Where(result => result.Modules.Count > 0).ToArray();
+        return (GlanceModuleLoadResult[])[.. sources.Select(Load).Where(result => result.Modules.Count > 0)];
     }
 
     public static GlanceModuleLoadResult? LoadPackage(string packagePath)
@@ -53,7 +52,7 @@ internal static class GlanceModuleLoader
         string fullPackagePath = Path.GetFullPath(packagePath);
         string contentDirectory = modulePackageCache.Prepare(fullPackagePath);
 
-        RegisterAssemblyPaths(new[] { contentDirectory });
+        RegisterAssemblyPaths((string[])[contentDirectory]);
         RegisterResolver();
 
         GlanceModuleLoadResult result = Load(new ModuleSource(fullPackagePath, contentDirectory));
@@ -87,10 +86,9 @@ internal static class GlanceModuleLoader
             }
         }
 
-        return sources
+        return (ModuleSource[])[.. sources
             .GroupBy(source => source.SourcePath, StringComparer.OrdinalIgnoreCase)
-            .Select(group => group.First())
-            .ToArray();
+            .Select(group => group.First())];
     }
 
     private static IEnumerable<string> GetModuleDirectories()
@@ -236,7 +234,6 @@ internal static class GlanceModuleLoader
         }
     }
 
-    private sealed record ModuleSource(
-        string SourcePath,
+    private sealed record ModuleSource(string SourcePath,
         string ContentDirectory);
 }

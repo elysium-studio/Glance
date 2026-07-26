@@ -2,8 +2,7 @@ using Glance.Application.Abstractions;
 
 namespace Glance.Shell;
 
-public sealed class GlanceComponentsAddedEventArgs(
-    IReadOnlyList<IGlanceComponent> components,
+public sealed class GlanceComponentsAddedEventArgs(IReadOnlyList<IGlanceComponent> components,
     Func<IReadOnlyList<IGlanceModuleSettingViewModel>> createSettings) :
     EventArgs
 {

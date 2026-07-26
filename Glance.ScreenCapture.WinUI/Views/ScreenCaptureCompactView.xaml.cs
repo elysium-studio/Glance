@@ -3,7 +3,8 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.ScreenCapture.WinUI;
 
-public sealed partial class ScreenCaptureCompactView : UserControl
+public sealed partial class ScreenCaptureCompactView :
+    UserControl
 {
     public ScreenCaptureCompactView(ScreenCaptureViewModel viewModel)
     {

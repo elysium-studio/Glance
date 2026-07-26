@@ -140,12 +140,11 @@ public sealed partial class WindowsScreenCaptureService :
                 return [];
             }
 
-            return Directory.EnumerateFiles(captureFolderPath, "Glance *.png")
+            return [.. Directory.EnumerateFiles(captureFolderPath, "Glance *.png")
                 .Select(path => new FileInfo(path))
                 .OrderByDescending(file => file.CreationTimeUtc)
                 .Take(maximumCount)
-                .Select(CreateRecentItem)
-                .ToArray();
+                .Select(CreateRecentItem)];
         }
         catch
         {

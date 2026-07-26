@@ -9,8 +9,7 @@ public sealed partial class StopwatchExpandedView :
 {
     private readonly ModuleResourceTextLocalizer<StopwatchModule> localizer;
 
-    public StopwatchExpandedView(
-        StopwatchViewModel viewModel,
+    public StopwatchExpandedView(StopwatchViewModel viewModel,
         ModuleResourceTextLocalizer<StopwatchModule> localizer)
     {
         ViewModel = viewModel;

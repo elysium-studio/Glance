@@ -7,7 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Glance.ScreenCapture.WinUI;
 
-public sealed class ScreenCaptureModule : IGlanceModule
+public sealed class ScreenCaptureModule :
+    IGlanceModule
 {
     public void Register(IServiceCollection services)
     {

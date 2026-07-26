@@ -6,7 +6,8 @@ using System.Diagnostics;
 
 namespace Glance.Media.WinUI;
 
-internal sealed class AudioLevelMonitor : IDisposable
+internal sealed class AudioLevelMonitor :
+    IDisposable
 {
     private const int BarCount = 5;
     private const int FftExponent = 10;
@@ -198,7 +199,8 @@ internal sealed class AudioLevelMonitor : IDisposable
     }
 }
 
-internal sealed class AudioSpectrumEventArgs(IReadOnlyList<double> levels) : EventArgs
+internal sealed class AudioSpectrumEventArgs(IReadOnlyList<double> levels) :
+    EventArgs
 {
     public IReadOnlyList<double> Levels { get; } = levels;
 }

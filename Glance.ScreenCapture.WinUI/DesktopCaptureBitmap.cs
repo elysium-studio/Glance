@@ -2,26 +2,17 @@ using System;
 
 namespace Glance.ScreenCapture.WinUI;
 
-internal sealed class DesktopCaptureBitmap
+internal sealed class DesktopCaptureBitmap(int originX, int originY, int width, int height, byte[] pixels)
 {
-    public DesktopCaptureBitmap(int originX, int originY, int width, int height, byte[] pixels)
-    {
-        OriginX = originX;
-        OriginY = originY;
-        Width = width;
-        Height = height;
-        Pixels = pixels;
-    }
+    public int OriginX { get; } = originX;
 
-    public int OriginX { get; }
+    public int OriginY { get; } = originY;
 
-    public int OriginY { get; }
+    public int Width { get; } = width;
 
-    public int Width { get; }
+    public int Height { get; } = height;
 
-    public int Height { get; }
-
-    public byte[] Pixels { get; }
+    public byte[] Pixels { get; } = pixels;
 
     public NativeRectangle Bounds => new(OriginX, OriginY, Width, Height);
 

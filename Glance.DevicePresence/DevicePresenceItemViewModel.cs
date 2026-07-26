@@ -2,41 +2,29 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Glance.DevicePresence;
 
-public sealed partial class DevicePresenceItemViewModel :
+public sealed partial class DevicePresenceItemViewModel(ConnectedBluetoothDevice device,
+    string displayName,
+    string detail) :
     ObservableObject
 {
     [ObservableProperty]
-    private string displayName;
+    private string displayName = displayName;
 
     [ObservableProperty]
-    private string detail;
+    private string detail = detail;
 
     [ObservableProperty]
-    private string compactText;
+    private string compactText = displayName;
 
     [ObservableProperty]
-    private string glyph;
+    private string glyph = GetGlyph(device.Kind);
 
     [ObservableProperty]
-    private int batteryLevel;
+    private int batteryLevel = device.BatteryLevel ?? -1;
 
-    public DevicePresenceItemViewModel(
-        ConnectedBluetoothDevice device,
-        string displayName,
-        string detail)
-    {
-        Device = device;
-        this.displayName = displayName;
-        this.detail = detail;
-        compactText = displayName;
-        glyph = GetGlyph(device.Kind);
-        batteryLevel = device.BatteryLevel ?? -1;
-    }
+    public ConnectedBluetoothDevice Device { get; private set; } = device;
 
-    public ConnectedBluetoothDevice Device { get; private set; }
-
-    public void Update(
-        ConnectedBluetoothDevice device,
+    public void Update(ConnectedBluetoothDevice device,
         string displayName,
         string detail)
     {

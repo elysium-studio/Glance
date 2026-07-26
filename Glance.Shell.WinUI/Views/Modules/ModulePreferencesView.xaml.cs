@@ -17,8 +17,7 @@ public sealed partial class ModulePreferencesView :
     public static Visibility WhenSettingsUnavailable(bool hasSettings) =>
         hasSettings ? Visibility.Collapsed : Visibility.Visible;
 
-    private async void HandleDragItemsCompleted(
-        ListViewBase sender,
+    private async void HandleDragItemsCompleted(ListViewBase sender,
         DragItemsCompletedEventArgs args) =>
         await ViewModel.SaveOrderAsync();
 }

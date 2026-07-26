@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Glance.RemovableDevices.WinUI;
 
-public sealed class RemovableDevicesComponent :
+public sealed partial class RemovableDevicesComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IDisposable
@@ -20,12 +20,11 @@ public sealed class RemovableDevicesComponent :
     private readonly IRemovableDeviceService removableDeviceService;
     private readonly DispatcherQueueTimer timer;
     private readonly RemovableDevicesViewModel viewModel;
-    private HashSet<string> currentDeviceIds = new(StringComparer.OrdinalIgnoreCase);
+    private HashSet<string> currentDeviceIds = [with(StringComparer.OrdinalIgnoreCase)];
     private bool hasSnapshot;
     private int isRefreshing;
 
-    public RemovableDevicesComponent(
-        RemovableDevicesViewModel viewModel,
+    public RemovableDevicesComponent(RemovableDevicesViewModel viewModel,
         IRemovableDeviceService removableDeviceService,
         IGlanceAttentionService attentionService,
         ModuleResourceTextLocalizer<RemovableDevicesModule> localizer)

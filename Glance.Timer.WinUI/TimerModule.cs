@@ -7,7 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Glance.Timer.WinUI;
 
-public sealed class TimerModule : IGlanceModule
+public sealed class TimerModule :
+    IGlanceModule
 {
     public void Register(IServiceCollection services)
     {

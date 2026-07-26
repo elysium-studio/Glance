@@ -3,7 +3,8 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.SystemMonitor.WinUI;
 
-public sealed partial class SystemMonitorCompactView : UserControl
+public sealed partial class SystemMonitorCompactView :
+    UserControl
 {
     public SystemMonitorCompactView(SystemMonitorViewModel viewModel)
     {

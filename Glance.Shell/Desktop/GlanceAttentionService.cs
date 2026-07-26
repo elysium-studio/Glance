@@ -2,7 +2,8 @@ using Glance.Application.Abstractions;
 
 namespace Glance.Shell;
 
-public sealed class GlanceAttentionService : IGlanceAttentionService
+public sealed class GlanceAttentionService :
+    IGlanceAttentionService
 {
     private bool isStartupComplete;
 
@@ -11,8 +12,7 @@ public sealed class GlanceAttentionService : IGlanceAttentionService
     public void CompleteStartup() =>
         isStartupComplete = true;
 
-    public void RequestAttention(
-        string componentId,
+    public void RequestAttention(string componentId,
         GlanceAttentionLevel level = GlanceAttentionLevel.Default,
         bool expand = true)
     {

@@ -42,8 +42,7 @@ public sealed class ClipboardShelfViewModelTests
     public void Update_LimitsShelfToSixEntries()
     {
         ClipboardShelfViewModel viewModel = new(localizer);
-        ClipboardEntry[] entries = Enumerable.Range(1, 8).Select(index => CreateEntry(index.ToString(), $"Item {index}"))
-            .ToArray();
+        ClipboardEntry[] entries = [.. Enumerable.Range(1, 8).Select(index => CreateEntry(index.ToString(), $"Item {index}"))];
 
         viewModel.Update(entries, "Ready");
 
@@ -120,8 +119,7 @@ public sealed class ClipboardShelfViewModelTests
     {
         List<(string Action, ClipboardEntry Entry)> calls = [];
         ClipboardShelfViewModel viewModel = new(localizer);
-        viewModel.ConfigureActions(
-            entry => Record("Copy", entry),
+        viewModel.ConfigureActions(entry => Record("Copy", entry),
             entry => Record("Paste", entry),
             entry => Record("Remove", entry),
             () => Task.FromResult(true));
@@ -169,30 +167,28 @@ public sealed class ClipboardShelfViewModelTests
         Assert.Equal(expected, entry.TimeText);
     }
 
-    private ClipboardShelfViewModel CreateConfiguredViewModel(
-        bool copyResult = true,
+    private ClipboardShelfViewModel CreateConfiguredViewModel(bool copyResult = true,
         bool pasteResult = true,
         bool removeResult = true,
         bool clearResult = true)
     {
         ClipboardShelfViewModel viewModel = new(localizer);
-        viewModel.ConfigureActions(
-            _ => Task.FromResult(copyResult),
+        viewModel.ConfigureActions(_ => Task.FromResult(copyResult),
             _ => Task.FromResult(pasteResult),
             _ => Task.FromResult(removeResult),
             () => Task.FromResult(clearResult));
         return viewModel;
     }
 
-    private ClipboardEntry CreateEntry(
-        string id,
+    private ClipboardEntry CreateEntry(string id,
         string preview,
         string kind = "Text",
         string glyph = "G",
         DateTimeOffset? timestamp = null) =>
         new(id, preview, kind, glyph, timestamp ?? DateTimeOffset.Now, localizer);
 
-    private sealed class TestTextLocalizer : ITextLocalizer
+    private sealed class TestTextLocalizer :
+        ITextLocalizer
     {
         public string GetText(string key, params object[] arguments) => key;
     }

@@ -5,7 +5,7 @@ using System;
 
 namespace Glance.PrivacyControls.WinUI;
 
-public sealed class PrivacyControlsComponent :
+public sealed partial class PrivacyControlsComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IDisposable
@@ -14,8 +14,7 @@ public sealed class PrivacyControlsComponent :
     private readonly DispatcherQueueTimer timer;
     private readonly PrivacyControlsViewModel viewModel;
 
-    public PrivacyControlsComponent(
-        PrivacyControlsViewModel viewModel,
+    public PrivacyControlsComponent(PrivacyControlsViewModel viewModel,
         ModuleResourceTextLocalizer<PrivacyControlsModule> localizer)
     {
         this.viewModel = viewModel;

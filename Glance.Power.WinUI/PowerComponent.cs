@@ -6,7 +6,7 @@ using System;
 
 namespace Glance.Power.WinUI;
 
-public sealed class PowerComponent :
+public sealed partial class PowerComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IDisposable
@@ -18,8 +18,7 @@ public sealed class PowerComponent :
     private readonly GlanceModuleOptions<PowerSettings> options;
     private int attentionBand;
 
-    public PowerComponent(
-        PowerViewModel viewModel,
+    public PowerComponent(PowerViewModel viewModel,
         IGlanceAttentionService attentionService,
         GlanceModuleOptions<PowerSettings> options,
         ModuleResourceTextLocalizer<PowerModule> localizer)

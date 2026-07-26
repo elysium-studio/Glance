@@ -66,8 +66,7 @@ public sealed partial class VoiceWaveform :
         Subscribe();
     }
 
-    private void HandleSizeChanged(
-        object sender,
+    private void HandleSizeChanged(object sender,
         SizeChangedEventArgs args) =>
         UpdateBarGeometry();
 
@@ -78,8 +77,7 @@ public sealed partial class VoiceWaveform :
         bars = null;
     }
 
-    private void HandleActualThemeChanged(
-        FrameworkElement sender,
+    private void HandleActualThemeChanged(FrameworkElement sender,
         object args)
     {
         if (bars is null)
@@ -129,8 +127,7 @@ public sealed partial class VoiceWaveform :
         }
     }
 
-    private void HandleAudioLevelsChanged(
-        object? sender,
+    private void HandleAudioLevelsChanged(object? sender,
         VoiceLevelsChangedEventArgs args)
     {
         if (bars is null)

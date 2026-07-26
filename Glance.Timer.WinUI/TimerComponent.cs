@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace Glance.Timer.WinUI;
 
-public sealed class TimerComponent :
+public sealed partial class TimerComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IDisposable
@@ -18,8 +18,7 @@ public sealed class TimerComponent :
     private readonly IGlanceAttentionService attentionService;
     private readonly GlanceModuleOptions<TimerSettings> options;
 
-    public TimerComponent(
-        TimerViewModel viewModel,
+    public TimerComponent(TimerViewModel viewModel,
         IGlanceAttentionService attentionService,
         GlanceModuleOptions<TimerSettings> options,
         ModuleResourceTextLocalizer<TimerModule> localizer)

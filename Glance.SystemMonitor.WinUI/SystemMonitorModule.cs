@@ -7,7 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Glance.SystemMonitor.WinUI;
 
-public sealed class SystemMonitorModule : IGlanceModule
+public sealed class SystemMonitorModule :
+    IGlanceModule
 {
     public void Register(IServiceCollection services)
     {

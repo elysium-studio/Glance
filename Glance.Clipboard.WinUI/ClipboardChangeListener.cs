@@ -7,7 +7,8 @@ using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Glance.Clipboard.WinUI;
 
-internal sealed unsafe class ClipboardChangeListener : IDisposable
+internal sealed unsafe class ClipboardChangeListener :
+    IDisposable
 {
     private const uint ClipboardUpdateMessage = 0x031D;
 
@@ -87,8 +88,7 @@ internal sealed unsafe class ClipboardChangeListener : IDisposable
         }
     }
 
-    private LRESULT HandleWindowMessage(
-        HWND window,
+    private LRESULT HandleWindowMessage(HWND window,
         uint message,
         WPARAM wParam,
         LPARAM lParam)

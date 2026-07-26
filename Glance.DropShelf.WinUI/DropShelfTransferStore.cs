@@ -10,11 +10,9 @@ namespace Glance.DropShelf.WinUI;
 
 public sealed class DropShelfTransferStore
 {
-    private readonly ConcurrentDictionary<string, IStorageItem> storageItems =
-        new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, IStorageItem> storageItems = [with(StringComparer.OrdinalIgnoreCase)];
 
-    public async Task<IReadOnlyList<DropShelfItem>> StageAsync(
-        IEnumerable<DropShelfItem> items)
+    public async Task<IReadOnlyList<DropShelfItem>> StageAsync(IEnumerable<DropShelfItem> items)
     {
         List<DropShelfItem> stagedItems = [];
 
@@ -42,12 +40,11 @@ public sealed class DropShelfTransferStore
         return stagedItems;
     }
 
-    public IReadOnlyList<IStorageItem> GetStorageItems(
-        IEnumerable<DropShelfItem> items) =>
-        items
+    public IReadOnlyList<IStorageItem> GetStorageItems(IEnumerable<DropShelfItem> items) =>
+        [.. items
             .Select(item => storageItems.TryGetValue(item.Path, out IStorageItem? storageItem) ? storageItem
                 : null)
-            .OfType<IStorageItem>().ToArray();
+            .OfType<IStorageItem>()];
 
     public void Remove(string path) => storageItems.TryRemove(path, out _);
 

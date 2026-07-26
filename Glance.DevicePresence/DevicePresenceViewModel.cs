@@ -4,16 +4,16 @@ using System.Collections.ObjectModel;
 
 namespace Glance.DevicePresence;
 
-public sealed partial class DevicePresenceViewModel :
+public sealed partial class DevicePresenceViewModel(ITextLocalizer localizer) :
     ObservableObject
 {
-    private readonly ITextLocalizer localizer;
+    private readonly ITextLocalizer localizer = localizer;
 
     [ObservableProperty]
     private bool hasDevices;
 
     [ObservableProperty]
-    private string compactStatusText;
+    private string compactStatusText = localizer.GetText("NoDevices");
 
     [ObservableProperty]
     private string selectedDeviceGlyph = "\uE702";
@@ -24,16 +24,9 @@ public sealed partial class DevicePresenceViewModel :
     [ObservableProperty]
     private DevicePresenceItemViewModel? selectedDevice;
 
-    public DevicePresenceViewModel(ITextLocalizer localizer)
-    {
-        this.localizer = localizer;
-        compactStatusText = localizer.GetText("NoDevices");
-    }
-
     public ObservableCollection<DevicePresenceItemViewModel> Devices { get; } = [];
 
-    public void Update(
-        IReadOnlyList<ConnectedBluetoothDevice> devices,
+    public void Update(IReadOnlyList<ConnectedBluetoothDevice> devices,
         string? preferredDeviceId = null)
     {
         string? selectedId = SelectedDevice?.Device.Id;

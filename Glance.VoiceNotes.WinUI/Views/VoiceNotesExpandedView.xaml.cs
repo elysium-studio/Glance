@@ -9,8 +9,7 @@ public sealed partial class VoiceNotesExpandedView :
 {
     private readonly ModuleResourceTextLocalizer<VoiceNotesModule> localizer;
 
-    public VoiceNotesExpandedView(
-        VoiceNotesViewModel viewModel,
+    public VoiceNotesExpandedView(VoiceNotesViewModel viewModel,
         ModuleResourceTextLocalizer<VoiceNotesModule> localizer)
     {
         ViewModel = viewModel;
@@ -26,15 +25,13 @@ public sealed partial class VoiceNotesExpandedView :
 
     private string ToUpper(string value) => value.ToUpperInvariant();
 
-    private Visibility ToRecordingsVisibility(
-        bool hasRecordings,
+    private Visibility ToRecordingsVisibility(bool hasRecordings,
         bool isRecording) =>
         hasRecordings && !isRecording
             ? Visibility.Visible
             : Visibility.Collapsed;
 
-    private Visibility ToEmptyVisibility(
-        bool hasRecordings,
+    private Visibility ToEmptyVisibility(bool hasRecordings,
         bool isRecording) =>
         !hasRecordings && !isRecording
             ? Visibility.Visible

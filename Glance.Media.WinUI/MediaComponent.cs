@@ -11,7 +11,7 @@ using Windows.Storage.Streams;
 
 namespace Glance.Media.WinUI;
 
-public sealed class MediaComponent :
+public sealed partial class MediaComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IDisposable
@@ -27,8 +27,7 @@ public sealed class MediaComponent :
     private GlobalSystemMediaTransportControlsSession? session;
     private string? currentTitle;
 
-    public MediaComponent(
-        MediaViewModel viewModel,
+    public MediaComponent(MediaViewModel viewModel,
         IGlanceAttentionService attentionService,
         ModuleResourceTextLocalizer<MediaModule> localizer)
     {
@@ -102,8 +101,7 @@ public sealed class MediaComponent :
         }
     }
 
-    private void HandleCurrentSessionChanged(
-        GlobalSystemMediaTransportControlsSessionManager sender,
+    private void HandleCurrentSessionChanged(GlobalSystemMediaTransportControlsSessionManager sender,
         CurrentSessionChangedEventArgs args) =>
         dispatcherQueue.TryEnqueue(async () =>
         {
@@ -133,18 +131,15 @@ public sealed class MediaComponent :
         }
     }
 
-    private void HandleMediaPropertiesChanged(
-        GlobalSystemMediaTransportControlsSession sender,
+    private void HandleMediaPropertiesChanged(GlobalSystemMediaTransportControlsSession sender,
         MediaPropertiesChangedEventArgs args) =>
         dispatcherQueue.TryEnqueue(async () => await Refresh());
 
-    private void HandlePlaybackInfoChanged(
-        GlobalSystemMediaTransportControlsSession sender,
+    private void HandlePlaybackInfoChanged(GlobalSystemMediaTransportControlsSession sender,
         PlaybackInfoChangedEventArgs args) =>
         dispatcherQueue.TryEnqueue(RefreshPlaybackState);
 
-    private void HandleAudioLevelsChanged(
-        object? sender,
+    private void HandleAudioLevelsChanged(object? sender,
         AudioSpectrumEventArgs args) =>
         dispatcherQueue.TryEnqueue(() => viewModel.UpdateAudioLevels(args.Levels));
 
@@ -156,8 +151,7 @@ public sealed class MediaComponent :
         }
     }
 
-    private async void HandlePlaybackActionRequested(
-        object? sender,
+    private async void HandlePlaybackActionRequested(object? sender,
         MediaPlaybackAction action)
     {
         if (session is null)
@@ -271,8 +265,7 @@ public sealed class MediaComponent :
         UpdateAudioCaptureState();
     }
 
-    private void ApplyPlaybackInfo(
-        GlobalSystemMediaTransportControlsSessionPlaybackInfo? playbackInfo)
+    private void ApplyPlaybackInfo(GlobalSystemMediaTransportControlsSessionPlaybackInfo? playbackInfo)
     {
         GlobalSystemMediaTransportControlsSessionPlaybackControls? controls =
             playbackInfo?.Controls;

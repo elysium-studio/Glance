@@ -9,8 +9,7 @@ public sealed partial class AudioSwitcherExpandedView :
 {
     private readonly ModuleResourceTextLocalizer<AudioSwitcherModule> localizer;
 
-    public AudioSwitcherExpandedView(
-        AudioSwitcherViewModel viewModel,
+    public AudioSwitcherExpandedView(AudioSwitcherViewModel viewModel,
         ModuleResourceTextLocalizer<AudioSwitcherModule> localizer)
     {
         ViewModel = viewModel;

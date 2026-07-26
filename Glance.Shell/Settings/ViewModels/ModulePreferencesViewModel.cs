@@ -12,8 +12,7 @@ public sealed partial class ModulePreferencesViewModel :
 {
     private readonly ModulePreferenceService preferences;
 
-    public ModulePreferencesViewModel(
-        IServiceProvider provider,
+    public ModulePreferencesViewModel(IServiceProvider provider,
         IServiceFactory factory,
         IMessenger messenger,
         IDisposer disposer,
@@ -54,8 +53,7 @@ public sealed partial class ModulePreferencesViewModel :
         string displayName = component?.DisplayName ?? preference.Id;
         string description = component?.Description ?? string.Empty;
 
-        return new ModuleSettingsItemViewModel(
-            preference.Id,
+        return new ModuleSettingsItemViewModel(preference.Id,
             displayName,
             description,
             preference.IsEnabled,

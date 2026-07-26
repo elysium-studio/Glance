@@ -26,8 +26,7 @@ public sealed partial class PrivacyControlsViewModel :
     [NotifyPropertyChangedFor(nameof(StatusText))]
     private bool isActive;
 
-    public PrivacyControlsViewModel(
-        IMicrophoneService microphoneService,
+    public PrivacyControlsViewModel(IMicrophoneService microphoneService,
         ITextLocalizer localizer)
     {
         this.microphoneService = microphoneService;

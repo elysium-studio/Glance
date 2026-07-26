@@ -5,7 +5,7 @@ using System;
 
 namespace Glance.ColorPicker.WinUI;
 
-public sealed class ColorPickerComponent :
+public sealed partial class ColorPickerComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IDisposable
@@ -17,8 +17,7 @@ public sealed class ColorPickerComponent :
     private readonly GlanceModuleOptions<ColorPickerSettings> options;
     private readonly DispatcherQueue dispatcherQueue;
 
-    public ColorPickerComponent(
-        ColorPickerViewModel viewModel,
+    public ColorPickerComponent(ColorPickerViewModel viewModel,
         IColorPickerService colorPickerService,
         IGlanceAttentionService attentionService,
         GlanceModuleOptions<ColorPickerSettings> options,

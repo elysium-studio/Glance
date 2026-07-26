@@ -34,8 +34,7 @@ public sealed class VoiceNotesViewModelTests
     public void FinishRecording_PutsNewestFirstAndLimitsHistory()
     {
         VoiceNotesViewModel viewModel = new(new FakeLocalizer());
-        VoiceNote[] existing = Enumerable.Range(1, 3).Select(index => CreateNote($"note-{index}.wav", index))
-            .ToArray();
+        VoiceNote[] existing = [.. Enumerable.Range(1, 3).Select(index => CreateNote($"note-{index}.wav", index))];
         VoiceNote latest = CreateNote("latest.wav", 10);
 
         viewModel.SetRecordings(existing);
@@ -47,8 +46,7 @@ public sealed class VoiceNotesViewModelTests
         Assert.Equal(3, viewModel.Recordings.Count);
         Assert.Same(latest, viewModel.Recordings[0].Recording);
         Assert.Same(viewModel.Recordings[0], viewModel.SelectedRecording);
-        Assert.DoesNotContain(
-            viewModel.Recordings,
+        Assert.DoesNotContain(viewModel.Recordings,
             item => ReferenceEquals(existing[^1], item.Recording));
     }
 

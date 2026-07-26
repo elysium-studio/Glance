@@ -84,8 +84,7 @@ public sealed class WindowsMicrophoneService :
     public void OnDeviceStateChanged(string deviceId, DeviceState newState) =>
         InvalidateDevice();
 
-    public void OnDefaultDeviceChanged(
-        DataFlow flow,
+    public void OnDefaultDeviceChanged(DataFlow flow,
         Role role,
         string defaultDeviceId)
     {

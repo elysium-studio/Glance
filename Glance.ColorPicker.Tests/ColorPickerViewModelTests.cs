@@ -73,8 +73,7 @@ public sealed class ColorPickerViewModelTests
         viewModel.CopyRgb();
         viewModel.CopyHsl();
 
-        Assert.Equal(
-            ["#020E1E", "rgb(2, 14, 30)", "hsl(214, 88%, 6%)"],
+        Assert.Equal(["#020E1E", "rgb(2, 14, 30)", "hsl(214, 88%, 6%)"],
             clipboard.Values);
     }
 

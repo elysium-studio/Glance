@@ -9,8 +9,7 @@ public sealed partial class RemovableDevicesExpandedView :
 {
     private readonly ModuleResourceTextLocalizer<RemovableDevicesModule> localizer;
 
-    public RemovableDevicesExpandedView(
-        RemovableDevicesViewModel viewModel,
+    public RemovableDevicesExpandedView(RemovableDevicesViewModel viewModel,
         ModuleResourceTextLocalizer<RemovableDevicesModule> localizer)
     {
         ViewModel = viewModel;

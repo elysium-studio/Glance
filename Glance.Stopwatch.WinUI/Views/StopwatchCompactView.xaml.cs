@@ -3,7 +3,8 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.Stopwatch.WinUI;
 
-public sealed partial class StopwatchCompactView : UserControl
+public sealed partial class StopwatchCompactView :
+    UserControl
 {
     public StopwatchCompactView(StopwatchViewModel viewModel)
     {

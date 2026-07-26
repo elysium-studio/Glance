@@ -15,8 +15,7 @@ internal static class NativeClipboardWriter
     private const uint ClipboardFormatFileDrop = 15;
     private const int MaximumAttempts = 8;
 
-    public static async Task<bool> WriteAsync(
-        ClipboardSnapshot snapshot,
+    public static async Task<bool> WriteAsync(ClipboardSnapshot snapshot,
         HWND ownerWindow)
     {
         if (ownerWindow.IsNull)

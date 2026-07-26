@@ -26,8 +26,8 @@ public sealed class WindowsDevicePresenceService :
     private const string LeAppearanceSubcategoryProperty = "System.Devices.Aep.Bluetooth.Le.Appearance.Subcategory";
     private static readonly string[] RequestedProperties = [BatteryLifeProperty, CategoryProperty, ClassMajorProperty, ClassMinorProperty, ContainerIdProperty, DeviceAddressProperty, DisplayNameProperty, LeAppearanceCategoryProperty, LeAppearanceSubcategoryProperty];
     private readonly HashSet<DeviceWatcher> completedWatchers = [];
-    private readonly HashSet<string> activeBatteryReads = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, ObservedDevice> devices = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> activeBatteryReads = [with(StringComparer.OrdinalIgnoreCase)];
+    private readonly Dictionary<string, ObservedDevice> devices = [with(StringComparer.OrdinalIgnoreCase)];
     private readonly object gate = new();
     private readonly List<DeviceWatcher> watchers = [];
     private readonly Dictionary<DeviceWatcher, BluetoothTransport> watcherTransports = [];
@@ -72,7 +72,7 @@ public sealed class WindowsDevicePresenceService :
     {
         lock (gate)
         {
-            return devices.Values.GroupBy(device => device.Identity, StringComparer.OrdinalIgnoreCase).Select(Merge).OrderBy(device => device.Name, StringComparer.CurrentCultureIgnoreCase).ToArray();
+            return [.. devices.Values.GroupBy(device => device.Identity, StringComparer.OrdinalIgnoreCase).Select(Merge).OrderBy(device => device.Name, StringComparer.CurrentCultureIgnoreCase)];
         }
     }
 
@@ -239,7 +239,7 @@ public sealed class WindowsDevicePresenceService :
 
     private static ConnectedBluetoothDevice Merge(IGrouping<string, ObservedDevice> group)
     {
-        ObservedDevice[] endpoints = group.ToArray();
+        ObservedDevice[] endpoints = [.. group];
         string name = endpoints.Select(endpoint => endpoint.Name).FirstOrDefault(value => !string.IsNullOrWhiteSpace(value)) ?? string.Empty;
         BluetoothDeviceKind kind = endpoints.Select(endpoint => endpoint.Kind).FirstOrDefault(value => value != BluetoothDeviceKind.Bluetooth);
         byte? batteryLevel = endpoints.Select(endpoint => endpoint.BatteryLevel).FirstOrDefault(value => value.HasValue);
@@ -255,7 +255,7 @@ public sealed class WindowsDevicePresenceService :
 
         lock (gate)
         {
-            endpoints = devices.Where(pair => pair.Value.Transport == BluetoothTransport.LowEnergy).Select(pair => new KeyValuePair<string, string>(pair.Key, pair.Value.Id)).ToArray();
+            endpoints = [.. devices.Where(pair => pair.Value.Transport == BluetoothTransport.LowEnergy).Select(pair => new KeyValuePair<string, string>(pair.Key, pair.Value.Id))];
         }
 
         foreach ((string key, string id) in endpoints)
@@ -326,7 +326,7 @@ public sealed class WindowsDevicePresenceService :
                 continue;
             }
 
-            GattDeviceService[] services = servicesResult.Services.ToArray();
+            GattDeviceService[] services = [.. servicesResult.Services];
 
             try
             {
@@ -364,28 +364,19 @@ public sealed class WindowsDevicePresenceService :
         return null;
     }
 
-    private sealed class ObservedDevice
+    private sealed class ObservedDevice(BluetoothTransport transport,
+        string id,
+        string name,
+        IReadOnlyDictionary<string, object> properties)
     {
-        private readonly Dictionary<string, object> properties;
+        private readonly Dictionary<string, object> properties = new(properties, StringComparer.OrdinalIgnoreCase);
         private byte? supplementalBatteryLevel;
 
-        public ObservedDevice(
-            BluetoothTransport transport,
-            string id,
-            string name,
-            IReadOnlyDictionary<string, object> properties)
-        {
-            Transport = transport;
-            Id = id;
-            Name = name;
-            this.properties = new Dictionary<string, object>(properties, StringComparer.OrdinalIgnoreCase);
-        }
+        public BluetoothTransport Transport { get; } = transport;
 
-        public BluetoothTransport Transport { get; }
+        public string Id { get; } = id;
 
-        public string Id { get; }
-
-        public string Name { get; private set; }
+        public string Name { get; private set; } = name;
 
         public string Identity => GetIdentity(properties, Id);
 

@@ -4,25 +4,19 @@ using System.Collections.ObjectModel;
 
 namespace Glance.RemovableDevices;
 
-public sealed partial class RemovableDevicesViewModel :
+public sealed partial class RemovableDevicesViewModel(ITextLocalizer localizer) :
     ObservableObject
 {
-    private readonly ITextLocalizer localizer;
+    private readonly ITextLocalizer localizer = localizer;
 
     [ObservableProperty]
     private bool hasDevices;
 
     [ObservableProperty]
-    private string compactStatusText;
+    private string compactStatusText = localizer.GetText("NoDevices");
 
     [ObservableProperty]
     private RemovableDeviceItemViewModel? selectedDevice;
-
-    public RemovableDevicesViewModel(ITextLocalizer localizer)
-    {
-        this.localizer = localizer;
-        compactStatusText = localizer.GetText("NoDevices");
-    }
 
     public ObservableCollection<RemovableDeviceItemViewModel> Devices { get; } = [];
 
@@ -30,8 +24,7 @@ public sealed partial class RemovableDevicesViewModel :
 
     public event EventHandler<RemovableDevice>? EjectRequested;
 
-    public void Update(
-        IReadOnlyList<RemovableDevice> devices,
+    public void Update(IReadOnlyList<RemovableDevice> devices,
         string? preferredDeviceId = null)
     {
         string? selectedId = SelectedDevice?.Device.Id;
@@ -60,8 +53,7 @@ public sealed partial class RemovableDevicesViewModel :
         UpdateCompactStatus();
     }
 
-    public void SetBusy(
-        string deviceId,
+    public void SetBusy(string deviceId,
         bool isBusy)
     {
         RemovableDeviceItemViewModel? item = Find(deviceId);
@@ -100,8 +92,7 @@ public sealed partial class RemovableDevicesViewModel :
     private string GetDetail(RemovableDevice device) =>
         localizer.GetText("StorageDetail", FormatSize(device.FreeBytes), FormatSize(device.TotalBytes));
 
-    private void ShowFailure(
-        string deviceId,
+    private void ShowFailure(string deviceId,
         string message)
     {
         RemovableDeviceItemViewModel? item = Find(deviceId);

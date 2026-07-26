@@ -6,7 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Glance.Shell.WinUI;
 
-public sealed class LocalizationModule : IModule
+public sealed class LocalizationModule :
+    IModule
 {
     public void Register(IServiceCollection services)
     {

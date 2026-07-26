@@ -8,7 +8,8 @@ using System;
 
 namespace Glance.FocusSession.WinUI;
 
-public sealed class FocusSessionModule : IGlanceModule
+public sealed class FocusSessionModule :
+    IGlanceModule
 {
     public void Register(IServiceCollection services)
     {

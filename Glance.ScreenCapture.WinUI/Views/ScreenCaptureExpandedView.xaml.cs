@@ -9,7 +9,8 @@ using Windows.Foundation;
 
 namespace Glance.ScreenCapture.WinUI;
 
-public sealed partial class ScreenCaptureExpandedView : UserControl
+public sealed partial class ScreenCaptureExpandedView :
+    UserControl
 {
     private const int CaptureCompletionDelayMs = 700;
 
@@ -74,8 +75,7 @@ public sealed partial class ScreenCaptureExpandedView : UserControl
 
         Rect localBounds = CaptureLandingTarget.TransformToVisual(island).TransformBounds(new Rect(0, 0, CaptureLandingTarget.ActualWidth, CaptureLandingTarget.ActualHeight));
         double scale = XamlRoot?.RasterizationScale ?? 1;
-        bounds = new NativeRectangle(
-            windowBounds.Left + (int)Math.Round(localBounds.X * scale),
+        bounds = new NativeRectangle(windowBounds.Left + (int)Math.Round(localBounds.X * scale),
             windowBounds.Top + (int)Math.Round(localBounds.Y * scale),
             Math.Max(1, (int)Math.Round(localBounds.Width * scale)),
             Math.Max(1, (int)Math.Round(localBounds.Height * scale)));

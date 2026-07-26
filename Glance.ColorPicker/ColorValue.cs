@@ -2,8 +2,7 @@ using System.Globalization;
 
 namespace Glance.ColorPicker;
 
-public readonly record struct ColorValue(
-    byte Red,
+public readonly record struct ColorValue(byte Red,
     byte Green,
     byte Blue)
 {

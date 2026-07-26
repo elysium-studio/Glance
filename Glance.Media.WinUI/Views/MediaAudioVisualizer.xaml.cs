@@ -7,7 +7,8 @@ using System.Numerics;
 
 namespace Glance.Media.WinUI;
 
-public sealed partial class MediaAudioVisualizer : UserControl
+public sealed partial class MediaAudioVisualizer :
+    UserControl
 {
     private FrameworkElement[]? bars;
     private MediaViewModel? viewModel;

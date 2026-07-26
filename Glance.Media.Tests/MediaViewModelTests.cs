@@ -100,7 +100,8 @@ public sealed class MediaViewModelTests
         Assert.False(viewModel.ShowAudioVisualization);
     }
 
-    private sealed class TestTextLocalizer : ITextLocalizer
+    private sealed class TestTextLocalizer :
+        ITextLocalizer
     {
         public string GetText(string key, params object[] arguments) => key;
     }

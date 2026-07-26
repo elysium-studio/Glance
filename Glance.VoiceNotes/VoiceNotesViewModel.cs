@@ -4,11 +4,11 @@ using System.Collections.ObjectModel;
 
 namespace Glance.VoiceNotes;
 
-public sealed partial class VoiceNotesViewModel :
+public sealed partial class VoiceNotesViewModel(ITextLocalizer localizer, VoiceNotesSettings? settings = null) :
     ObservableObject
 {
-    private readonly ITextLocalizer localizer;
-    private int recentRecordingLimit;
+    private readonly ITextLocalizer localizer = localizer;
+    private int recentRecordingLimit = GetRecentRecordingLimit(settings ?? new VoiceNotesSettings());
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ToggleGlyph))]
@@ -23,20 +23,13 @@ public sealed partial class VoiceNotesViewModel :
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ExpandedStatusText))]
-    private string statusText;
+    private string statusText = localizer.GetText("ReadyToRecord");
 
     [ObservableProperty]
     private bool hasRecordings;
 
     [ObservableProperty]
     private VoiceNoteItemViewModel? selectedRecording;
-
-    public VoiceNotesViewModel(ITextLocalizer localizer, VoiceNotesSettings? settings = null)
-    {
-        this.localizer = localizer;
-        recentRecordingLimit = GetRecentRecordingLimit(settings ?? new VoiceNotesSettings());
-        statusText = localizer.GetText("ReadyToRecord");
-    }
 
     public ObservableCollection<VoiceNoteItemViewModel> Recordings { get; } = [];
 
@@ -151,8 +144,7 @@ public sealed partial class VoiceNotesViewModel :
     }
 
     public void UpdateAudioLevels(IReadOnlyList<double> levels) =>
-        AudioLevelsChanged?.Invoke(
-            this,
+        AudioLevelsChanged?.Invoke(this,
             new VoiceLevelsChangedEventArgs([.. levels]));
 
     public void ApplySettings(VoiceNotesSettings settings)

@@ -9,8 +9,7 @@ public sealed partial class TimerExpandedView :
 {
     private readonly ModuleResourceTextLocalizer<TimerModule> localizer;
 
-    public TimerExpandedView(
-        TimerViewModel viewModel,
+    public TimerExpandedView(TimerViewModel viewModel,
         ModuleResourceTextLocalizer<TimerModule> localizer)
     {
         ViewModel = viewModel;

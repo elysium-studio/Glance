@@ -7,7 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Glance.Power.WinUI;
 
-public sealed class PowerModule : IGlanceModule
+public sealed class PowerModule :
+    IGlanceModule
 {
     public void Register(IServiceCollection services)
     {

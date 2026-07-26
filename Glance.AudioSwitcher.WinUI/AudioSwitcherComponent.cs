@@ -5,7 +5,7 @@ using System;
 
 namespace Glance.AudioSwitcher.WinUI;
 
-public sealed class AudioSwitcherComponent :
+public sealed partial class AudioSwitcherComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IDisposable
@@ -15,8 +15,7 @@ public sealed class AudioSwitcherComponent :
     private readonly ITextLocalizer localizer;
     private readonly AudioSwitcherViewModel viewModel;
 
-    public AudioSwitcherComponent(
-        AudioSwitcherViewModel viewModel,
+    public AudioSwitcherComponent(AudioSwitcherViewModel viewModel,
         IAudioDeviceService audioDeviceService,
         ModuleResourceTextLocalizer<AudioSwitcherModule> localizer)
     {

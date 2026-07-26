@@ -453,7 +453,6 @@ public sealed partial class DesktopIslandView :
             }
             catch (ArgumentException)
             {
-                // The destination can detach if the island changes state again mid-transition.
             }
         });
     }
@@ -537,7 +536,7 @@ public sealed partial class DesktopIslandView :
             if (dataView.Contains(StandardDataFormats.StorageItems))
             {
                 IReadOnlyList<IStorageItem> storageItems = await dataView.GetStorageItemsAsync();
-                items = storageItems.Select(CreateStorageItem).OfType<GlanceStorageItem>().ToArray();
+                items = [.. storageItems.Select(CreateStorageItem).OfType<GlanceStorageItem>()];
             }
         }
         catch (COMException)

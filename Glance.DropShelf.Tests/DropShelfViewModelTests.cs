@@ -135,7 +135,8 @@ public sealed class DropShelfViewModelTests
 
     private static DropShelfViewModel CreateViewModel() => new(new TestTextLocalizer());
 
-    private sealed class TestTextLocalizer : ITextLocalizer
+    private sealed class TestTextLocalizer :
+        ITextLocalizer
     {
         public string GetText(string key, params object[] arguments) =>
             arguments.Length == 0 ? key : $"{key}({string.Join(',', arguments)})";

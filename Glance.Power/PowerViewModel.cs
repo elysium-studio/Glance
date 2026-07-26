@@ -3,9 +3,10 @@ using Glance.Application.Abstractions;
 
 namespace Glance.Power;
 
-public sealed partial class PowerViewModel : ObservableObject
+public sealed partial class PowerViewModel(ITextLocalizer localizer) :
+    ObservableObject
 {
-    private readonly ITextLocalizer localizer;
+    private readonly ITextLocalizer localizer = localizer;
 
     [ObservableProperty]
     private double chargePercent = 100;
@@ -14,24 +15,16 @@ public sealed partial class PowerViewModel : ObservableObject
     private string chargeText = "AC";
 
     [ObservableProperty]
-    private string compactStatusText;
+    private string compactStatusText = localizer.GetText("Connected");
 
     [ObservableProperty]
     private bool hasBattery;
 
     [ObservableProperty]
-    private string statusText;
+    private string statusText = localizer.GetText("PowerStatus");
 
     [ObservableProperty]
-    private string detailText;
-
-    public PowerViewModel(ITextLocalizer localizer)
-    {
-        this.localizer = localizer;
-        compactStatusText = localizer.GetText("Connected");
-        statusText = localizer.GetText("PowerStatus");
-        detailText = localizer.GetText("Unavailable");
-    }
+    private string detailText = localizer.GetText("Unavailable");
 
     public string Title => localizer.GetText("ModuleTitle");
 
@@ -46,20 +39,15 @@ public sealed partial class PowerViewModel : ObservableObject
 
         (CompactStatusText, StatusText) = snapshot.BatteryState switch
         {
-            BatteryState.Charging => (
-                localizer.GetText("Charging"),
+            BatteryState.Charging => (localizer.GetText("Charging"),
                 localizer.GetText("Charging")),
-            BatteryState.Discharging => (
-                localizer.GetText("OnBattery"),
+            BatteryState.Discharging => (localizer.GetText("OnBattery"),
                 localizer.GetText("UsingBattery")),
-            BatteryState.Idle when percentage >= 99 => (
-                localizer.GetText("Charged"),
+            BatteryState.Idle when percentage >= 99 => (localizer.GetText("Charged"),
                 localizer.GetText("FullyCharged")),
-            BatteryState.Idle => (
-                localizer.GetText("Connected"),
+            BatteryState.Idle => (localizer.GetText("Connected"),
                 localizer.GetText("ConnectedToPower")),
-            _ => (
-                localizer.GetText("Connected"),
+            _ => (localizer.GetText("Connected"),
                 localizer.GetText("PowerStatus"))
         };
 

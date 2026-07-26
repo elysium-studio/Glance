@@ -1,7 +1,6 @@
 namespace Glance.VoiceNotes;
 
-public sealed class VoiceNoteItemViewModel(
-    VoiceNote recording,
+public sealed class VoiceNoteItemViewModel(VoiceNote recording,
     Action<VoiceNote> open,
     Action<VoiceNote> delete)
 {

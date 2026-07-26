@@ -183,6 +183,5 @@ internal static class NativeClipboardReader
     }
 }
 
-internal readonly record struct NativeClipboardCapture(
-    bool WasRead,
+internal readonly record struct NativeClipboardCapture(bool WasRead,
     ClipboardSnapshot? Snapshot);

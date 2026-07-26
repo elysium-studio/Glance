@@ -19,13 +19,13 @@ internal sealed class GlanceModuleManager :
     private readonly DispatcherQueue dispatcherQueue;
     private readonly IReadOnlyList<FileSystemWatcher> watchers;
     private readonly GlanceRuntimeServiceProvider runtimeServices;
-    private readonly HashSet<string> knownPackages = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> knownPackages = [with(StringComparer.OrdinalIgnoreCase)];
     private readonly ILogger<GlanceModuleManager> logger;
     private readonly GlanceBridgeRouter bridgeRouter;
     private readonly List<GlanceModuleRuntime> runtimes = [];
     private readonly ModulePreferenceService preferences;
     private readonly IServiceProvider applicationServices;
-    private readonly Dictionary<string, CancellationTokenSource> pendingPackages = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, CancellationTokenSource> pendingPackages = [with(StringComparer.OrdinalIgnoreCase)];
     private readonly object synchronization = new();
 
     public GlanceModuleManager(IServiceProvider applicationServices, GlanceRuntimeServiceProvider runtimeServices, DispatcherQueue dispatcherQueue, ILogger<GlanceModuleManager> logger)
@@ -38,11 +38,10 @@ internal sealed class GlanceModuleManager :
         bridgeRouter = applicationServices.GetRequiredService<GlanceBridgeRouter>();
 
         Directory.CreateDirectory(GlanceModuleLoader.UserModulesDirectory);
-        watchers = GlanceModuleLoader.ModuleDirectories
+        watchers = (FileSystemWatcher[])[.. GlanceModuleLoader.ModuleDirectories
             .Where(Directory.Exists)
             .Distinct(StringComparer.OrdinalIgnoreCase)
-            .Select(CreateWatcher)
-            .ToArray();
+            .Select(CreateWatcher)];
     }
 
     public async Task LoadStartupModulesAsync()
@@ -82,7 +81,7 @@ internal sealed class GlanceModuleManager :
 
         lock (synchronization)
         {
-            pending = pendingPackages.Values.ToArray();
+            pending = [.. pendingPackages.Values];
             pendingPackages.Clear();
         }
 
@@ -105,7 +104,7 @@ internal sealed class GlanceModuleManager :
         try
         {
             runtime = await GlanceModuleRuntime.CreateAsync(applicationServices, result.Modules);
-            IReadOnlyList<IGlanceComponent> components = runtime.Services.GetServices<IGlanceComponent>().ToArray();
+            IReadOnlyList<IGlanceComponent> components = (IGlanceComponent[])[.. runtime.Services.GetServices<IGlanceComponent>()];
 
             if (components.Count == 0)
             {
@@ -119,7 +118,7 @@ internal sealed class GlanceModuleManager :
 
             IServiceProvider moduleServices = runtime.Services;
             runtimeServices.AddModuleProvider(moduleServices);
-            await preferences.RegisterComponentsAsync(components, () => moduleServices.GetServices<IGlanceModuleSettingViewModel>().ToArray());
+            await preferences.RegisterComponentsAsync(components, () => (IGlanceModuleSettingViewModel[])[.. moduleServices.GetServices<IGlanceModuleSettingViewModel>()]);
             bridgeRouter.AddHandlers(moduleServices.GetServices<IGlanceApplicationMessageHandler>());
             runtimes.Add(runtime);
             runtime = null;

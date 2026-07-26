@@ -14,8 +14,7 @@ public sealed class DesktopModule :
     public void Register(IServiceCollection services)
     {
         services
-            .AddSingleton<IGlanceAttentionService, GlanceAttentionService>().AddSingleton<ModulePreferenceService>().AddViewFor(
-                ServiceLifetime.Singleton,
+            .AddSingleton<IGlanceAttentionService, GlanceAttentionService>().AddSingleton<ModulePreferenceService>().AddViewFor(ServiceLifetime.Singleton,
                 provider => new DesktopIslandView(),
                 provider => new DesktopIslandViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<ModulePreferenceService>(), provider.GetRequiredService<IGlanceAttentionService>(), provider.GetRequiredService<INavigator>(), provider.GetRequiredService<ILogger<DesktopIslandViewModel>>(), provider.GetRequiredService<GlanceSettings>()));
     }

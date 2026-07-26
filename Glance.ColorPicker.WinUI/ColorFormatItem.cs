@@ -4,25 +4,17 @@ using System.Runtime.CompilerServices;
 
 namespace Glance.ColorPicker.WinUI;
 
-public sealed class ColorFormatItem :
+public sealed class ColorFormatItem(string label,
+    string value,
+    Action copy) :
     INotifyPropertyChanged
 {
-    private readonly Action copy;
-    private string value;
-
-    public ColorFormatItem(
-        string label,
-        string value,
-        Action copy)
-    {
-        Label = label;
-        this.value = value;
-        this.copy = copy;
-    }
+    private readonly Action copy = copy;
+    private string value = value;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public string Label { get; }
+    public string Label { get; } = label;
 
     public string Value
     {

@@ -1,7 +1,6 @@
 namespace Glance.PrivacyControls;
 
-public sealed record MicrophoneState(
-    string DeviceName,
+public sealed record MicrophoneState(string DeviceName,
     bool IsAvailable,
     bool IsMuted,
     double PeakLevel)

@@ -54,7 +54,7 @@ internal sealed class GlanceBridgeConnection :
         {
             Kind = "capabilities",
             ProtocolVersion = GlanceBridgeProtocol.Version,
-            Capabilities = capabilities.ToArray()
+            Capabilities = [.. capabilities]
         };
 
         await QueueAsync(message, cancellationToken);

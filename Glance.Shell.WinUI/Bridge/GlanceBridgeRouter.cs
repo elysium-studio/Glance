@@ -27,7 +27,7 @@ internal sealed class GlanceBridgeRouter :
 
     public void AddHandlers(IEnumerable<IGlanceApplicationMessageHandler> values)
     {
-        IGlanceApplicationMessageHandler[] additions = values.ToArray();
+        IGlanceApplicationMessageHandler[] additions = [.. values];
 
         lock (synchronization)
         {
@@ -54,7 +54,7 @@ internal sealed class GlanceBridgeRouter :
         lock (synchronization)
         {
             connections.Add(connection);
-            targets = handlers.Where(handler => string.Equals(handler.ApplicationId, connection.ApplicationId, StringComparison.OrdinalIgnoreCase)).ToArray();
+            targets = [.. handlers.Where(handler => string.Equals(handler.ApplicationId, connection.ApplicationId, StringComparison.OrdinalIgnoreCase))];
         }
 
         foreach (IGlanceApplicationMessageHandler handler in targets)
@@ -70,7 +70,7 @@ internal sealed class GlanceBridgeRouter :
         lock (synchronization)
         {
             connections.Remove(connection);
-            targets = handlers.Where(handler => string.Equals(handler.ApplicationId, connection.ApplicationId, StringComparison.OrdinalIgnoreCase)).ToArray();
+            targets = [.. handlers.Where(handler => string.Equals(handler.ApplicationId, connection.ApplicationId, StringComparison.OrdinalIgnoreCase))];
         }
 
         foreach (IGlanceApplicationMessageHandler handler in targets)
@@ -83,12 +83,11 @@ internal sealed class GlanceBridgeRouter :
     {
         lock (synchronization)
         {
-            return handlers
+            return (string[])[.. handlers
                 .Where(handler => string.Equals(handler.ApplicationId, applicationId, StringComparison.OrdinalIgnoreCase) && preferences.IsEnabled(handler.ComponentId))
                 .SelectMany(handler => handler.Capabilities)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
-                .Order(StringComparer.OrdinalIgnoreCase)
-                .ToArray();
+                .Order(StringComparer.OrdinalIgnoreCase)];
         }
     }
 
@@ -103,12 +102,11 @@ internal sealed class GlanceBridgeRouter :
 
         lock (synchronization)
         {
-            targets = handlers
+            targets = [.. handlers
                 .Where(handler =>
                     string.Equals(handler.ApplicationId, connection.ApplicationId, StringComparison.OrdinalIgnoreCase) &&
                     preferences.IsEnabled(handler.ComponentId) &&
-                    handler.Capabilities.Contains(message.Capability, StringComparer.OrdinalIgnoreCase))
-                .ToArray();
+                    handler.Capabilities.Contains(message.Capability, StringComparer.OrdinalIgnoreCase))];
         }
 
         GlanceApplicationMessage applicationMessage = new(message.Capability, message.Topic, message.Payload);
@@ -132,7 +130,7 @@ internal sealed class GlanceBridgeRouter :
 
         lock (synchronization)
         {
-            snapshot = connections.ToArray();
+            snapshot = [.. connections];
         }
 
         foreach (GlanceBridgeConnection connection in snapshot)

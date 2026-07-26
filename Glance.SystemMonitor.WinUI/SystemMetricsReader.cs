@@ -121,8 +121,7 @@ internal sealed class SystemMetricsReader
 
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool GetSystemTimes(
-        out FileTime idleTime,
+    private static extern bool GetSystemTimes(out FileTime idleTime,
         out FileTime kernelTime,
         out FileTime userTime);
 
@@ -154,8 +153,7 @@ internal sealed class SystemMetricsReader
     }
 }
 
-internal readonly record struct SystemMetrics(
-    double CpuUsage,
+internal readonly record struct SystemMetrics(double CpuUsage,
     double MemoryUsage,
     ulong UsedMemory,
     ulong TotalMemory,

@@ -3,7 +3,8 @@ using System.Diagnostics;
 
 namespace Glance.FocusSession;
 
-public sealed partial class FocusSessionViewModel : ObservableObject
+public sealed partial class FocusSessionViewModel :
+    ObservableObject
 {
     private TimeSpan breakDuration;
     private TimeSpan focusDuration;
@@ -26,8 +27,7 @@ public sealed partial class FocusSessionViewModel : ObservableObject
     [ObservableProperty]
     private int completedFocusSessions;
 
-    public FocusSessionViewModel(
-        TimeSpan? focusDuration = null,
+    public FocusSessionViewModel(TimeSpan? focusDuration = null,
         TimeSpan? breakDuration = null)
     {
         this.focusDuration = focusDuration ?? TimeSpan.FromMinutes(25);

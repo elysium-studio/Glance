@@ -3,7 +3,8 @@ using System.Diagnostics;
 
 namespace Glance.Timer;
 
-public sealed partial class TimerViewModel : ObservableObject
+public sealed partial class TimerViewModel :
+    ObservableObject
 {
     private TimeSpan adjustment;
     private TimeSpan duration;

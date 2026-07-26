@@ -1,7 +1,6 @@
 namespace Glance.DropShelf;
 
-public sealed record DropShelfItem(
-    string Path,
+public sealed record DropShelfItem(string Path,
     string Name,
     bool IsFolder)
 {

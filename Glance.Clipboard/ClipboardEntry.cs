@@ -3,8 +3,7 @@ using System.Globalization;
 
 namespace Glance.Clipboard;
 
-public sealed record ClipboardEntry(
-    string Id,
+public sealed record ClipboardEntry(string Id,
     string Preview,
     string KindLabel,
     string Glyph,

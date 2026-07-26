@@ -6,8 +6,7 @@ public sealed class VoiceLevelsChangedEventArgs(IReadOnlyList<double> levels) :
     public IReadOnlyList<double> Levels { get; } = levels;
 }
 
-public sealed class VoiceRecordingCompletedEventArgs(
-    VoiceNote? recording,
+public sealed class VoiceRecordingCompletedEventArgs(VoiceNote? recording,
     Exception? error = null) :
     EventArgs
 {

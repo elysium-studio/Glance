@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace Glance.VoiceNotes.WinUI;
 
-public sealed class VoiceNotesComponent :
+public sealed partial class VoiceNotesComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IDisposable
@@ -22,8 +22,7 @@ public sealed class VoiceNotesComponent :
     private readonly double[] waveformHistory = new double[42];
     private long recordingStartedTimestamp;
 
-    public VoiceNotesComponent(
-        VoiceNotesViewModel viewModel,
+    public VoiceNotesComponent(VoiceNotesViewModel viewModel,
         IVoiceRecordingService recordingService,
         GlanceModuleOptions<VoiceNotesSettings> options,
         ModuleResourceTextLocalizer<VoiceNotesModule> localizer)
@@ -125,8 +124,7 @@ public sealed class VoiceNotesComponent :
         }
     }
 
-    private void HandleLevelsChanged(
-        object? sender,
+    private void HandleLevelsChanged(object? sender,
         VoiceLevelsChangedEventArgs args) =>
         dispatcherQueue.TryEnqueue(() =>
         {
@@ -148,8 +146,7 @@ public sealed class VoiceNotesComponent :
             viewModel.UpdateAudioLevels(waveformHistory);
         });
 
-    private void HandleRecordingCompleted(
-        object? sender,
+    private void HandleRecordingCompleted(object? sender,
         VoiceRecordingCompletedEventArgs args) =>
         dispatcherQueue.TryEnqueue(() =>
         {

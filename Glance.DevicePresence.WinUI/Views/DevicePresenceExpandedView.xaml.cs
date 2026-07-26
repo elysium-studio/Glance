@@ -11,8 +11,7 @@ public sealed partial class DevicePresenceExpandedView :
 {
     private readonly ModuleResourceTextLocalizer<DevicePresenceModule> localizer;
 
-    public DevicePresenceExpandedView(
-        DevicePresenceViewModel viewModel,
+    public DevicePresenceExpandedView(DevicePresenceViewModel viewModel,
         ModuleResourceTextLocalizer<DevicePresenceModule> localizer)
     {
         ViewModel = viewModel;

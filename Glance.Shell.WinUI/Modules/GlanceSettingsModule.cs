@@ -11,11 +11,9 @@ public sealed class GlanceSettingsModule :
     public void Register(IServiceCollection services)
     {
         services
-            .AddViewFor<PlacementView, IGlanceViewModel, PlacementViewModel>(
-                ServiceLifetime.Transient,
+            .AddViewFor<PlacementView, IGlanceViewModel, PlacementViewModel>(ServiceLifetime.Transient,
                 provider => new PlacementView(),
-                provider => new PlacementViewModel(
-                    provider,
+                provider => new PlacementViewModel(provider,
                     provider.GetRequiredService<IServiceFactory>(),
                     provider.GetRequiredService<IMessenger>(),
                     provider.GetRequiredService<IDisposer>(),
@@ -24,11 +22,9 @@ public sealed class GlanceSettingsModule :
                     provider.GetRequiredService<IWritableOptions<GlanceSettings>>(),
                     config => (int)config.Placement,
                     (config, placement) => config.Placement = (GlancePlacement)placement))
-            .AddViewFor<AutoHideView, IGlanceViewModel, AutoHideViewModel>(
-                ServiceLifetime.Transient,
+            .AddViewFor<AutoHideView, IGlanceViewModel, AutoHideViewModel>(ServiceLifetime.Transient,
                 provider => new AutoHideView(),
-                provider => new AutoHideViewModel(
-                    provider,
+                provider => new AutoHideViewModel(provider,
                     provider.GetRequiredService<IServiceFactory>(),
                     provider.GetRequiredService<IMessenger>(),
                     provider.GetRequiredService<IDisposer>(),

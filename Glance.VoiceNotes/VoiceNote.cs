@@ -1,7 +1,6 @@
 namespace Glance.VoiceNotes;
 
-public sealed record VoiceNote(
-    string FilePath,
+public sealed record VoiceNote(string FilePath,
     DateTimeOffset CreatedAt,
     TimeSpan Duration)
 {

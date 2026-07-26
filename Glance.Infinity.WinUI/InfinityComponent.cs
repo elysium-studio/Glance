@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace Glance.Infinity.WinUI;
 
-public sealed class InfinityComponent :
+public sealed partial class InfinityComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IGlanceAvailabilityComponent,

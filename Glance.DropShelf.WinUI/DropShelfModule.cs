@@ -7,7 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Glance.DropShelf.WinUI;
 
-public sealed class DropShelfModule : IGlanceModule
+public sealed class DropShelfModule :
+    IGlanceModule
 {
     public void Register(IServiceCollection services)
     {

@@ -4,7 +4,8 @@ using System;
 
 namespace Glance.Clipboard.WinUI;
 
-public sealed partial class ClipboardExpandedView : UserControl
+public sealed partial class ClipboardExpandedView :
+    UserControl
 {
     public ClipboardExpandedView(ClipboardShelfViewModel viewModel)
     {

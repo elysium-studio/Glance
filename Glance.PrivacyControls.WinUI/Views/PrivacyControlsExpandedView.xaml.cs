@@ -9,8 +9,7 @@ public sealed partial class PrivacyControlsExpandedView :
 {
     private readonly ModuleResourceTextLocalizer<PrivacyControlsModule> localizer;
 
-    public PrivacyControlsExpandedView(
-        PrivacyControlsViewModel viewModel,
+    public PrivacyControlsExpandedView(PrivacyControlsViewModel viewModel,
         ModuleResourceTextLocalizer<PrivacyControlsModule> localizer)
     {
         ViewModel = viewModel;

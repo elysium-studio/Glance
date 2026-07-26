@@ -4,17 +4,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.Marshalling;
+using System.Threading;
 
 namespace Glance.AudioSwitcher.WinUI;
 
-public sealed class WindowsAudioDeviceService :
+public sealed partial class WindowsAudioDeviceService :
     IAudioDeviceService,
     IMMNotificationClient,
     IDisposable
 {
     private readonly MMDeviceEnumerator deviceEnumerator = new();
-    private readonly Dictionary<string, TrackedOutputDevice> trackedOutputDevices = new(StringComparer.OrdinalIgnoreCase);
-    private readonly object gate = new();
+    private readonly Dictionary<string, TrackedOutputDevice> trackedOutputDevices = [with(StringComparer.OrdinalIgnoreCase)];
+    private readonly Lock gate = new();
     private bool isDisposed;
 
     public WindowsAudioDeviceService() =>
@@ -25,7 +27,7 @@ public sealed class WindowsAudioDeviceService :
     public IReadOnlyList<AudioOutputDevice> GetOutputDevices()
     {
         List<AudioOutputDevice> devices = [];
-        HashSet<string> activeDeviceIds = new(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> activeDeviceIds = [with(StringComparer.OrdinalIgnoreCase)];
         string? defaultDeviceId = GetDefaultDeviceId();
 
         try
@@ -54,8 +56,7 @@ public sealed class WindowsAudioDeviceService :
         {
         }
 
-        devices.Sort((left, right) =>
-            StringComparer.CurrentCultureIgnoreCase.Compare(left.Name, right.Name));
+        devices.Sort((left, right) => StringComparer.CurrentCultureIgnoreCase.Compare(left.Name, right.Name));
 
         return devices;
     }
@@ -188,11 +189,11 @@ public sealed class WindowsAudioDeviceService :
         }
     }
 
-    private void RemoveInactiveDevices(IReadOnlySet<string> activeDeviceIds)
+    private void RemoveInactiveDevices(HashSet<string> activeDeviceIds)
     {
         lock (gate)
         {
-            string[] inactiveDeviceIds = trackedOutputDevices.Keys.Where(id => !activeDeviceIds.Contains(id)).ToArray();
+            string[] inactiveDeviceIds = [.. trackedOutputDevices.Keys.Where(id => !activeDeviceIds.Contains(id))];
 
             foreach (string deviceId in inactiveDeviceIds)
             {
@@ -202,21 +203,19 @@ public sealed class WindowsAudioDeviceService :
         }
     }
 
-    private static void SetDefaultEndpoint(
-        IPolicyConfig policyConfig,
+    private static void SetDefaultEndpoint(IPolicyConfig policyConfig,
         string deviceId,
         AudioDeviceRole role) =>
         Marshal.ThrowExceptionForHR(policyConfig.SetDefaultEndpoint(deviceId, role));
 
-    private sealed class TrackedOutputDevice :
+    private sealed partial class TrackedOutputDevice :
         IDisposable
     {
         private readonly AudioEndpointVolume endpointVolume;
         private readonly AudioEndpointVolumeNotificationDelegate volumeChanged;
         private readonly MMDevice device;
 
-        public TrackedOutputDevice(
-            MMDevice device,
+        public TrackedOutputDevice(MMDevice device,
             Action changed)
         {
             this.device = device;
@@ -259,10 +258,10 @@ internal enum AudioDeviceRole
 [Guid("870AF99C-171D-4F9E-AF0D-E63DF40C2BC9")]
 internal sealed class PolicyConfigClient;
 
-[ComImport]
+[GeneratedComInterface]
 [Guid("F8679F50-850A-41CF-9C72-430F290290C8")]
 [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-internal interface IPolicyConfig
+internal partial interface IPolicyConfig
 {
     [PreserveSig]
     int GetMixFormat([MarshalAs(UnmanagedType.LPWStr)] string deviceId, IntPtr format);
@@ -295,8 +294,7 @@ internal interface IPolicyConfig
     int SetPropertyValue([MarshalAs(UnmanagedType.LPWStr)] string deviceId, IntPtr key, IntPtr value);
 
     [PreserveSig]
-    int SetDefaultEndpoint(
-        [MarshalAs(UnmanagedType.LPWStr)] string deviceId,
+    int SetDefaultEndpoint([MarshalAs(UnmanagedType.LPWStr)] string deviceId,
         AudioDeviceRole role);
 
     [PreserveSig]

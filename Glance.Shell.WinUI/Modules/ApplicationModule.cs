@@ -9,8 +9,7 @@ using System;
 
 namespace Glance.Shell.WinUI;
 
-public sealed class ApplicationModule(
-    string applicationData,
+public sealed class ApplicationModule(string applicationData,
     DispatcherQueue dispatcherQueue) :
     IModule
 {

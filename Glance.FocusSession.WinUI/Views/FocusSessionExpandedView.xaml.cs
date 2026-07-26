@@ -9,8 +9,7 @@ public sealed partial class FocusSessionExpandedView :
 {
     private readonly ModuleResourceTextLocalizer<FocusSessionModule> localizer;
 
-    public FocusSessionExpandedView(
-        FocusSessionViewModel viewModel,
+    public FocusSessionExpandedView(FocusSessionViewModel viewModel,
         ModuleResourceTextLocalizer<FocusSessionModule> localizer)
     {
         ViewModel = viewModel;
