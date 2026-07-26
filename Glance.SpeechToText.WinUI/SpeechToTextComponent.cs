@@ -7,6 +7,7 @@ namespace Glance.SpeechToText.WinUI;
 public sealed partial class SpeechToTextComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
+    IGlanceAvailabilityComponent,
     IAsyncDisposable
 {
     private readonly DispatcherQueue dispatcherQueue;
@@ -60,6 +61,11 @@ public sealed partial class SpeechToTextComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public bool IsAvailable =>
+        recognitionService.Availability is SpeechRecognitionAvailability.Ready or SpeechRecognitionAvailability.ModelRequired;
+
+    public event EventHandler? AvailabilityChanged;
 
     public async ValueTask DisposeAsync()
     {
@@ -116,7 +122,11 @@ public sealed partial class SpeechToTextComponent :
         await textCopyService.CopyAsync(text);
 
     private void HandleAvailabilityChanged(object? sender, SpeechRecognitionAvailabilityChangedEventArgs args) =>
-        dispatcherQueue.TryEnqueue(() => viewModel.SetAvailability(args.Availability));
+        dispatcherQueue.TryEnqueue(() =>
+        {
+            viewModel.SetAvailability(args.Availability);
+            AvailabilityChanged?.Invoke(this, EventArgs.Empty);
+        });
 
     private void HandleSpeechRecognized(object? sender, SpeechRecognizedEventArgs args) =>
         dispatcherQueue.TryEnqueue(() => viewModel.ApplyRecognition(args.Text, args.IsFinal));
