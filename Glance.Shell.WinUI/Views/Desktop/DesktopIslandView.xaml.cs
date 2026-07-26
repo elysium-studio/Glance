@@ -20,11 +20,13 @@ namespace Glance.Shell.WinUI;
 public sealed partial class DesktopIslandView :
     DesktopIsland
 {
+    private const int AttentionExpansionDurationMs = 4000;
     private const int ContextualDragExitDelayMs = 160;
     private const int InteractionExitDelayMs = 240;
     private const int StartupAttentionDelayMs = 2500;
 
     private readonly DispatcherQueue dispatcherQueue;
+    private DispatcherQueueTimer? attentionExpansionTimer;
     private DispatcherQueueTimer? contextualDragExitTimer;
     private DispatcherQueueTimer? interactionExitTimer;
     private DispatcherQueueTimer? startupAttentionTimer;
@@ -71,6 +73,7 @@ public sealed partial class DesktopIslandView :
         ViewModel.PropertyChanged -= HandleViewModelPropertyChanged;
         ViewModel.AttentionReceived -= HandleAttentionReceived;
         EndComponentInteraction();
+        StopAttentionExpansionTimer();
         StopContextualDragExitTimer();
         StopInteractionExitTimer();
         StopStartupAttentionTimer();
@@ -104,12 +107,58 @@ public sealed partial class DesktopIslandView :
         DispatcherQueue.TryEnqueue(() =>
         {
             Reveal();
+
+            if (request.Expand)
+            {
+                StartAttentionExpansionTimer();
+            }
+
             FrameworkElement presenter = ViewModel.IsExpanded
                 ? ExpandedPresenter
                 : CompactPresenter;
 
             FluentMotion.PlayPulse(presenter);
         });
+
+    private void StartAttentionExpansionTimer()
+    {
+        attentionExpansionTimer ??= CreateAttentionExpansionTimer();
+        attentionExpansionTimer.Stop();
+        attentionExpansionTimer.Start();
+    }
+
+    private DispatcherQueueTimer CreateAttentionExpansionTimer()
+    {
+        DispatcherQueueTimer timer = DispatcherQueue.CreateTimer();
+        timer.Interval = TimeSpan.FromMilliseconds(AttentionExpansionDurationMs);
+        timer.IsRepeating = false;
+        timer.Tick += HandleAttentionExpansionTimerTick;
+        return timer;
+    }
+
+    private void StopAttentionExpansionTimer() => attentionExpansionTimer?.Stop();
+
+    private void HandleAttentionExpansionTimerTick(DispatcherQueueTimer sender, object args)
+    {
+        sender.Stop();
+
+        if (isPointerOverIsland)
+        {
+            return;
+        }
+
+        if (IsPointerWithinInteractiveRegion)
+        {
+            isPointerOverIsland = true;
+            UpdateComponentInteraction();
+            return;
+        }
+
+        if (!isContextualDragActive)
+        {
+            Dismiss();
+        }
+    }
 
     private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
@@ -161,6 +210,7 @@ public sealed partial class DesktopIslandView :
 
     private void HandleIslandPointerEntered(object sender, PointerRoutedEventArgs args)
     {
+        StopAttentionExpansionTimer();
         StopInteractionExitTimer();
         isPointerOverIsland = true;
         UpdateComponentInteraction();
