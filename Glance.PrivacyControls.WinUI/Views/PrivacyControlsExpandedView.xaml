@@ -60,16 +60,20 @@
         <Button
             x:Uid="ToggleMuteButton"
             Grid.Column="2"
-            Width="36"
-            Height="36"
-            Padding="0"
             VerticalAlignment="Center"
             Click="{x:Bind ViewModel.ToggleMute}"
             Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}"
-            CornerRadius="18"
-            FontFamily="Segoe Fluent Icons"
-            FontSize="16"
-            IsEnabled="{x:Bind ViewModel.IsAvailable, Mode=OneWay}"
-            Style="{StaticResource AccentButtonStyle}" />
+            IsEnabled="{x:Bind ViewModel.IsAvailable, Mode=OneWay}">
+            <Button.Style>
+                <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+                    <Setter Property="Width" Value="36" />
+                    <Setter Property="Height" Value="36" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="CornerRadius" Value="18" />
+                    <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                    <Setter Property="FontSize" Value="16" />
+                </Style>
+            </Button.Style>
+        </Button>
     </Grid>
 </UserControl>

@@ -9,18 +9,6 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Themes/ColorPicker.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <Style
-                x:Key="ColorPickerActionButtonStyle"
-                BasedOn="{StaticResource SubtleButtonStyle}"
-                TargetType="Button">
-                <Setter Property="Width" Value="32" />
-                <Setter Property="Height" Value="32" />
-                <Setter Property="Padding" Value="0" />
-                <Setter Property="BorderThickness" Value="0" />
-                <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
-                <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                <Setter Property="FontSize" Value="14" />
-            </Style>
             <DataTemplate x:Key="ColorFormatItemTemplate" x:DataType="local:ColorFormatItem">
                 <Grid Margin="2,0,0,0" ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
@@ -47,9 +35,20 @@
                         <Button
                             AutomationProperties.Name="{x:Bind Value}"
                             Click="{x:Bind Copy}"
-                            Content="&#xE8C8;"
-                            Style="{StaticResource ColorPickerActionButtonStyle}"
-                            ToolTipService.ToolTip="{x:Bind Value}" />
+                            ToolTipService.ToolTip="{x:Bind Value}">
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                                    <Setter Property="Width" Value="32" />
+                                    <Setter Property="Height" Value="32" />
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
+                                    <Setter Property="Content" Value="&#xE8C8;" />
+                                    <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                                    <Setter Property="FontSize" Value="14" />
+                                </Style>
+                            </Button.Style>
+                        </Button>
                     </StackPanel>
                 </Grid>
             </DataTemplate>
@@ -93,17 +92,19 @@
         <Button
             x:Uid="PickButton"
             Grid.Column="2"
-            Width="36"
-            Height="36"
-            Padding="0"
             VerticalAlignment="Center"
-            Click="{x:Bind ViewModel.Pick}"
-            CornerRadius="18"
-            Style="{StaticResource AccentButtonStyle}">
-            <FontIcon
-                FontFamily="Segoe Fluent Icons"
-                FontSize="16"
-                Glyph="&#xEF3C;" />
+            Click="{x:Bind ViewModel.Pick}">
+            <Button.Style>
+                <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+                    <Setter Property="Width" Value="36" />
+                    <Setter Property="Height" Value="36" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="CornerRadius" Value="18" />
+                    <Setter Property="Content" Value="&#xEF3C;" />
+                    <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                    <Setter Property="FontSize" Value="16" />
+                </Style>
+            </Button.Style>
         </Button>
     </Grid>
 </UserControl>

@@ -10,18 +10,6 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Themes/VoiceNotes.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <Style
-                x:Key="VoiceNoteActionButtonStyle"
-                BasedOn="{StaticResource SubtleButtonStyle}"
-                TargetType="Button">
-                <Setter Property="Width" Value="32" />
-                <Setter Property="Height" Value="32" />
-                <Setter Property="Padding" Value="0" />
-                <Setter Property="BorderThickness" Value="0" />
-                <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
-                <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                <Setter Property="FontSize" Value="14" />
-            </Style>
             <DataTemplate x:Key="VoiceNoteItemTemplate" x:DataType="VoiceNotes:VoiceNoteItemViewModel">
                 <Grid Margin="2,0,0,0" ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
@@ -55,9 +43,20 @@
                         Grid.Column="1"
                         AutomationProperties.Name="{x:Bind FileName}"
                         Click="{x:Bind Open}"
-                        Content="&#xF5B0;"
-                        Style="{StaticResource VoiceNoteActionButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind FileName}" />
+                        ToolTipService.ToolTip="{x:Bind FileName}">
+                        <Button.Style>
+                            <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                                <Setter Property="Width" Value="32" />
+                                <Setter Property="Height" Value="32" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
+                                <Setter Property="Content" Value="&#xF5B0;" />
+                                <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                                <Setter Property="FontSize" Value="14" />
+                            </Style>
+                        </Button.Style>
+                    </Button>
                 </Grid>
             </DataTemplate>
         </ResourceDictionary>
@@ -140,15 +139,19 @@
         <Button
             x:Uid="RecordButton"
             Grid.Column="2"
-            Width="36"
-            Height="36"
-            Padding="0"
             VerticalAlignment="Center"
             Click="{x:Bind ViewModel.ToggleRecording}"
-            Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}"
-            CornerRadius="18"
-            FontFamily="Segoe Fluent Icons"
-            FontSize="16"
-            Style="{StaticResource AccentButtonStyle}" />
+            Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}">
+            <Button.Style>
+                <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+                    <Setter Property="Width" Value="36" />
+                    <Setter Property="Height" Value="36" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="CornerRadius" Value="18" />
+                    <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                    <Setter Property="FontSize" Value="16" />
+                </Style>
+            </Button.Style>
+        </Button>
     </Grid>
 </UserControl>

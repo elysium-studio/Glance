@@ -50,46 +50,65 @@
             Spacing="5">
             <Button
                 x:Uid="DecreaseButton"
-                Width="32"
-                Height="32"
-                Padding="0"
                 Click="{x:Bind ViewModel.DecreaseMinute}"
-                Content="&#xE738;"
-                CornerRadius="16"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="14"
-                IsEnabled="{x:Bind ViewModel.CanDecreaseMinute, Mode=OneWay}" />
+                IsEnabled="{x:Bind ViewModel.CanDecreaseMinute, Mode=OneWay}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                        <Setter Property="Width" Value="32" />
+                        <Setter Property="Height" Value="32" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Content" Value="&#xE738;" />
+                        <Setter Property="CornerRadius" Value="16" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="14" />
+                    </Style>
+                </Button.Style>
+            </Button>
             <Button
                 x:Uid="IncreaseButton"
-                Width="32"
-                Height="32"
-                Padding="0"
-                Click="{x:Bind ViewModel.AddMinute}"
-                Content="&#xE710;"
-                CornerRadius="16"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="14" />
+                Click="{x:Bind ViewModel.AddMinute}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                        <Setter Property="Width" Value="32" />
+                        <Setter Property="Height" Value="32" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Content" Value="&#xE710;" />
+                        <Setter Property="CornerRadius" Value="16" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="14" />
+                    </Style>
+                </Button.Style>
+            </Button>
             <Button
                 x:Uid="ToggleButton"
-                Width="36"
-                Height="36"
-                Padding="0"
                 Click="{x:Bind ViewModel.Toggle}"
-                Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}"
-                CornerRadius="18"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="16"
-                Style="{StaticResource AccentButtonStyle}" />
+                Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+                        <Setter Property="Width" Value="36" />
+                        <Setter Property="Height" Value="36" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="CornerRadius" Value="18" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="16" />
+                    </Style>
+                </Button.Style>
+            </Button>
             <Button
                 x:Uid="ResetButton"
-                Width="32"
-                Height="32"
-                Padding="0"
-                Click="{x:Bind ViewModel.Reset}"
-                Content="&#xE777;"
-                CornerRadius="16"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="14" />
+                Click="{x:Bind ViewModel.Reset}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                        <Setter Property="Width" Value="32" />
+                        <Setter Property="Height" Value="32" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Content" Value="&#xE777;" />
+                        <Setter Property="CornerRadius" Value="16" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="14" />
+                    </Style>
+                </Button.Style>
+            </Button>
         </StackPanel>
     </Grid>
 </UserControl>

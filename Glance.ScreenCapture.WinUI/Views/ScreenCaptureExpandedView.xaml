@@ -9,30 +9,6 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Themes/ScreenCapture.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <Style
-                x:Key="ScreenCaptureActionButtonStyle"
-                BasedOn="{StaticResource SubtleButtonStyle}"
-                TargetType="Button">
-                <Setter Property="Width" Value="32" />
-                <Setter Property="Height" Value="32" />
-                <Setter Property="Padding" Value="0" />
-                <Setter Property="BorderThickness" Value="0" />
-                <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
-                <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                <Setter Property="FontSize" Value="14" />
-            </Style>
-            <Style
-                x:Key="ScreenCaptureTitleButtonStyle"
-                BasedOn="{StaticResource SubtleButtonStyle}"
-                TargetType="Button">
-                <Setter Property="Height" Value="20" />
-                <Setter Property="MinHeight" Value="0" />
-                <Setter Property="MinWidth" Value="0" />
-                <Setter Property="Padding" Value="4,0" />
-                <Setter Property="HorizontalContentAlignment" Value="Left" />
-                <Setter Property="BorderThickness" Value="0" />
-                <Setter Property="CornerRadius" Value="4" />
-            </Style>
             <DataTemplate x:Key="CaptureItemTemplate" x:DataType="ScreenCapture:ScreenCaptureItemViewModel">
                 <Grid Margin="2,0,0,0" ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
@@ -42,8 +18,18 @@
                     <StackPanel Margin="-4,0,0,0" VerticalAlignment="Center" Spacing="1">
                         <Button
                             x:Uid="OpenCaptureButton"
-                            Click="{x:Bind Open}"
-                            Style="{StaticResource ScreenCaptureTitleButtonStyle}">
+                            Click="{x:Bind Open}">
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                                    <Setter Property="Height" Value="20" />
+                                    <Setter Property="MinHeight" Value="0" />
+                                    <Setter Property="MinWidth" Value="0" />
+                                    <Setter Property="Padding" Value="4,0" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="CornerRadius" Value="4" />
+                                </Style>
+                            </Button.Style>
                             <TextBlock
                                 MaxLines="1"
                                 Style="{StaticResource BodyStrongTextBlockStyle}"
@@ -64,19 +50,52 @@
                         Spacing="2">
                         <Button
                             x:Uid="CopyCaptureButton"
-                            Click="{x:Bind Copy}"
-                            Content="&#xE8C8;"
-                            Style="{StaticResource ScreenCaptureActionButtonStyle}" />
+                            Click="{x:Bind Copy}">
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                                    <Setter Property="Width" Value="32" />
+                                    <Setter Property="Height" Value="32" />
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
+                                    <Setter Property="Content" Value="&#xE8C8;" />
+                                    <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                                    <Setter Property="FontSize" Value="14" />
+                                </Style>
+                            </Button.Style>
+                        </Button>
                         <Button
                             x:Uid="RevealCaptureButton"
-                            Click="{x:Bind Reveal}"
-                            Content="&#xE838;"
-                            Style="{StaticResource ScreenCaptureActionButtonStyle}" />
+                            Click="{x:Bind Reveal}">
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                                    <Setter Property="Width" Value="32" />
+                                    <Setter Property="Height" Value="32" />
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
+                                    <Setter Property="Content" Value="&#xE838;" />
+                                    <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                                    <Setter Property="FontSize" Value="14" />
+                                </Style>
+                            </Button.Style>
+                        </Button>
                         <Button
                             x:Uid="DeleteCaptureButton"
-                            Click="{x:Bind Delete}"
-                            Content="&#xE74D;"
-                            Style="{StaticResource ScreenCaptureActionButtonStyle}" />
+                            Click="{x:Bind Delete}">
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                                    <Setter Property="Width" Value="32" />
+                                    <Setter Property="Height" Value="32" />
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
+                                    <Setter Property="Content" Value="&#xE74D;" />
+                                    <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                                    <Setter Property="FontSize" Value="14" />
+                                </Style>
+                            </Button.Style>
+                        </Button>
                     </StackPanel>
                 </Grid>
             </DataTemplate>
@@ -138,15 +157,21 @@
         </Grid>
         <Button
             Grid.Column="2"
-            Width="36"
-            Height="36"
-            Padding="0"
             VerticalAlignment="Center"
             AutomationProperties.Name="{x:Bind ViewModel.Title}"
-            CornerRadius="18"
             IsEnabled="{x:Bind WhenIdle(ViewModel.IsCapturing), Mode=OneWay}"
-            Style="{StaticResource AccentButtonStyle}"
             ToolTipService.ToolTip="{x:Bind ViewModel.Title}">
+            <Button.Style>
+                <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+                    <Setter Property="Width" Value="36" />
+                    <Setter Property="Height" Value="36" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="CornerRadius" Value="18" />
+                    <Setter Property="Content" Value="&#xE722;" />
+                    <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                    <Setter Property="FontSize" Value="16" />
+                </Style>
+            </Button.Style>
             <Button.Flyout>
                 <MenuFlyout
                     Closed="{x:Bind HandleCaptureMenuClosed}"
@@ -182,10 +207,6 @@
                     </MenuFlyoutItem>
                 </MenuFlyout>
             </Button.Flyout>
-            <FontIcon
-                FontFamily="Segoe Fluent Icons"
-                FontSize="16"
-                Glyph="&#xE722;" />
         </Button>
     </Grid>
 </UserControl>

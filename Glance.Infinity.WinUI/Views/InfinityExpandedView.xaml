@@ -59,28 +59,38 @@
             Height="36"
             VerticalAlignment="Center">
             <Button
-                Width="36"
-                Height="36"
                 AutomationProperties.Name="{x:Bind EditTitleLabel}"
                 Click="{x:Bind ViewModel.BeginEditing}"
-                Content="&#xE70F;"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="14"
-                Style="{StaticResource SubtleButtonStyle}"
                 ToolTipService.ToolTip="{x:Bind EditTitleLabel}"
-                Visibility="{x:Bind WhenCanEdit(ViewModel.IsConnected, ViewModel.IsEditing), Mode=OneWay}" />
+                Visibility="{x:Bind WhenCanEdit(ViewModel.IsConnected, ViewModel.IsEditing), Mode=OneWay}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Height" Value="36" />
+                        <Setter Property="Width" Value="36" />
+                        <Setter Property="Content" Value="&#xE70F;" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="14" />
+                    </Style>
+                </Button.Style>
+            </Button>
             <Button
-                Width="36"
-                Height="36"
                 AutomationProperties.Name="{x:Bind SaveTitleLabel}"
                 Click="{x:Bind ViewModel.CommitEditAsync}"
-                Content="&#xE74E;"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="14"
                 IsEnabled="{x:Bind IsSaveEnabled(ViewModel.IsConnected, ViewModel.IsSavingTitle), Mode=OneWay}"
-                Style="{StaticResource AccentButtonStyle}"
                 ToolTipService.ToolTip="{x:Bind SaveTitleLabel}"
-                Visibility="{x:Bind WhenEditing(ViewModel.IsEditing), Mode=OneWay}" />
+                Visibility="{x:Bind WhenEditing(ViewModel.IsEditing), Mode=OneWay}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Height" Value="36" />
+                        <Setter Property="Width" Value="36" />
+                        <Setter Property="Content" Value="&#xE74E;" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="14" />
+                    </Style>
+                </Button.Style>
+            </Button>
         </Grid>
     </Grid>
 </UserControl>
