@@ -1,5 +1,7 @@
 using System;
+using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
+using Elysium.Application.DependencyInjection;
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,10 +13,12 @@ public sealed class PresenceModule :
 {
     public void Register(IServiceCollection services)
     {
+        services.AddModuleOptions<PresenceSettings>("Presence", "presence.settings.dat", PresenceJsonContext.Default);
         services.AddSingleton<ModuleResourceTextLocalizer<PresenceModule>>();
         services.AddSingleton(new PresenceActivityPolicy(TimeSpan.FromMinutes(4)));
         services.AddSingleton<IPresenceService, WindowsPresenceService>();
         services.AddSingleton(provider => new PresenceViewModel(provider.GetRequiredService<IPresenceService>(), provider.GetRequiredService<ModuleResourceTextLocalizer<PresenceModule>>(), provider.GetRequiredService<IDispatcher>()));
         services.AddSingleton<IGlanceComponent, PresenceComponent>();
+        services.AddViewFor<ResumeAutomaticallySettingView, IGlanceModuleSettingViewModel, ResumeAutomaticallySettingViewModel>(ServiceLifetime.Transient, provider => new ResumeAutomaticallySettingView(), provider => new ResumeAutomaticallySettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<PresenceSettings>>().Current, provider.GetRequiredService<IWritableOptions<PresenceSettings>>()));
     }
 }

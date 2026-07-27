@@ -1,8 +1,10 @@
+using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace Glance.Timer.WinUI;
 
@@ -18,15 +20,18 @@ public sealed partial class TimerComponent :
     private readonly TimerViewModel viewModel;
     private readonly IGlanceAttentionService attentionService;
     private readonly GlanceModuleOptions<TimerSettings> options;
+    private readonly IWritableOptions<TimerSettings> writer;
 
     public TimerComponent(TimerViewModel viewModel,
         IGlanceAttentionService attentionService,
         GlanceModuleOptions<TimerSettings> options,
+        IWritableOptions<TimerSettings> writer,
         ModuleResourceTextLocalizer<TimerModule> localizer)
     {
         this.viewModel = viewModel;
         this.attentionService = attentionService;
         this.options = options;
+        this.writer = writer;
         this.localizer = localizer;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
@@ -44,7 +49,15 @@ public sealed partial class TimerComponent :
         timer.Tick += HandleTick;
 
         viewModel.PropertyChanged += HandlePropertyChanged;
+        viewModel.SessionStateChanged += HandleSessionStateChanged;
         options.Changed += HandleOptionsChanged;
+
+        if (viewModel.IsRunning)
+        {
+            timer.Start();
+        }
+
+        _ = PersistSessionAsync();
     }
 
     public string Id => "Timer";
@@ -70,6 +83,7 @@ public sealed partial class TimerComponent :
         timer.Stop();
         timer.Tick -= HandleTick;
         viewModel.PropertyChanged -= HandlePropertyChanged;
+        viewModel.SessionStateChanged -= HandleSessionStateChanged;
         options.Changed -= HandleOptionsChanged;
     }
 
@@ -99,5 +113,18 @@ public sealed partial class TimerComponent :
         {
             attentionService.RequestAttention(Id);
         }
+    }
+
+    private async void HandleSessionStateChanged(object? sender, EventArgs args) =>
+        await PersistSessionAsync();
+
+    private async Task PersistSessionAsync()
+    {
+        try
+        {
+            await writer.WriteAsync(settings => viewModel.WriteSessionState(settings));
+        }
+        catch
+        { }
     }
 }

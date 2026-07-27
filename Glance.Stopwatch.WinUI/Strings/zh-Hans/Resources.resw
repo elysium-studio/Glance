@@ -25,4 +25,10 @@
   <data name="ResetButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>重置</value>
   </data>
+  <data name="ResumeAutomaticallySettingCard.Header" xml:space="preserve">
+    <value>自动恢复</value>
+  </data>
+  <data name="ResumeAutomaticallySettingCard.Description" xml:space="preserve">
+    <value>在 Glance 启动时恢复此模块的上一次会话。</value>
+  </data>
 </root>

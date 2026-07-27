@@ -12,4 +12,10 @@
   <data name="ActiveDetail" xml:space="preserve"><value>[Àûţöɱàţîç šļééþ îš þŕévéñţéð]</value></data>
   <data name="StartLabel" xml:space="preserve"><value>[Ķééþ àŵàķé]</value></data>
   <data name="StopLabel" xml:space="preserve"><value>[Šţöþ ķééþîñĝ àŵàķé]</value></data>
+  <data name="ResumeAutomaticallySettingCard.Header" xml:space="preserve">
+    <value>[Řéšũḿé áũţöḿáţîçáļļý]</value>
+  </data>
+  <data name="ResumeAutomaticallySettingCard.Description" xml:space="preserve">
+    <value>[Řéšţöřé ţĥîš ḿöðũļé&apos;š þřéṽîöũš šéššîöñ ŵĥéñ Glance šţářţš.]</value>
+  </data>
 </root>

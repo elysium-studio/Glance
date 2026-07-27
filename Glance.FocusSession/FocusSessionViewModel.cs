@@ -28,7 +28,9 @@ public sealed partial class FocusSessionViewModel :
     private int completedFocusSessions;
 
     public FocusSessionViewModel(TimeSpan? focusDuration = null,
-        TimeSpan? breakDuration = null)
+        TimeSpan? breakDuration = null,
+        FocusSessionSettings? settings = null,
+        DateTimeOffset? now = null)
     {
         this.focusDuration = focusDuration ?? TimeSpan.FromMinutes(25);
         this.breakDuration = breakDuration ?? TimeSpan.FromMinutes(5);
@@ -45,10 +47,46 @@ public sealed partial class FocusSessionViewModel :
 
         phase = FocusSessionPhase.Focus;
         remaining = this.focusDuration;
+
+        if (settings is { ResumeAutomatically: true, SessionRemainingTicks: > 0 } &&
+            Enum.IsDefined(settings.SessionPhase))
+        {
+            phase = settings.SessionPhase;
+            remaining = TimeSpan.FromTicks(settings.SessionRemainingTicks);
+            completedFocusSessions = Math.Max(0, settings.SessionCompletedFocusSessions);
+
+            if (settings.SessionWasRunning)
+            {
+                DateTimeOffset current = now ?? DateTimeOffset.UtcNow;
+                remaining -= current > settings.SessionUpdatedUtc
+                    ? current - settings.SessionUpdatedUtc
+                    : TimeSpan.Zero;
+
+                if (remaining > TimeSpan.Zero)
+                {
+                    lastTimestamp = Stopwatch.GetTimestamp();
+                    isRunning = true;
+                }
+                else
+                {
+                    if (phase == FocusSessionPhase.Focus)
+                    {
+                        completedFocusSessions++;
+                    }
+
+                    phase = GetNextPhase(phase);
+                    remaining = GetDuration(phase);
+                }
+            }
+        }
+
         remainingText = FormatTime(remaining);
+        UpdateProgress();
     }
 
     public string ToggleGlyph => IsRunning ? "\uF8AE" : "\uF5B0";
+
+    public event EventHandler? SessionStateChanged;
 
     public void Toggle()
     {
@@ -56,11 +94,13 @@ public sealed partial class FocusSessionViewModel :
         {
             Refresh();
             IsRunning = false;
+            SessionStateChanged?.Invoke(this, EventArgs.Empty);
             return;
         }
 
         lastTimestamp = Stopwatch.GetTimestamp();
         IsRunning = true;
+        SessionStateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void Reset()
@@ -68,6 +108,7 @@ public sealed partial class FocusSessionViewModel :
         IsRunning = false;
         remaining = GetDuration(Phase);
         UpdateDisplay();
+        SessionStateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void Skip()
@@ -76,6 +117,7 @@ public sealed partial class FocusSessionViewModel :
         Phase = GetNextPhase(Phase);
         remaining = GetDuration(Phase);
         UpdateDisplay();
+        SessionStateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public FocusSessionPhase? Refresh()
@@ -106,19 +148,34 @@ public sealed partial class FocusSessionViewModel :
         Phase = GetNextPhase(completedPhase);
         remaining = GetDuration(Phase);
         UpdateDisplay();
+        SessionStateChanged?.Invoke(this, EventArgs.Empty);
         return completedPhase;
     }
 
     public void ApplySettings(FocusSessionSettings settings)
     {
-        focusDuration = TimeSpan.FromMinutes(Math.Clamp(settings.FocusDurationMinutes, 1, 180));
-        breakDuration = TimeSpan.FromMinutes(Math.Clamp(settings.BreakDurationMinutes, 1, 60));
+        TimeSpan updatedFocusDuration = TimeSpan.FromMinutes(Math.Clamp(settings.FocusDurationMinutes, 1, 180));
+        TimeSpan updatedBreakDuration = TimeSpan.FromMinutes(Math.Clamp(settings.BreakDurationMinutes, 1, 60));
+        bool durationsChanged = focusDuration != updatedFocusDuration || breakDuration != updatedBreakDuration;
+        focusDuration = updatedFocusDuration;
+        breakDuration = updatedBreakDuration;
 
-        if (!IsRunning)
+        if (!IsRunning && durationsChanged)
         {
             remaining = GetDuration(Phase);
             UpdateDisplay();
+            SessionStateChanged?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    public void WriteSessionState(FocusSessionSettings settings,
+        DateTimeOffset? now = null)
+    {
+        settings.SessionCompletedFocusSessions = CompletedFocusSessions;
+        settings.SessionPhase = Phase;
+        settings.SessionRemainingTicks = remaining.Ticks;
+        settings.SessionUpdatedUtc = now ?? DateTimeOffset.UtcNow;
+        settings.SessionWasRunning = IsRunning;
     }
 
     private static FocusSessionPhase GetNextPhase(FocusSessionPhase phase) =>
@@ -142,10 +199,14 @@ public sealed partial class FocusSessionViewModel :
 
     private void UpdateDisplay()
     {
+        RemainingText = FormatTime(remaining);
+        UpdateProgress();
+    }
+
+    private void UpdateProgress()
+    {
         TimeSpan duration = GetDuration(Phase);
         double elapsed = Math.Clamp((duration - remaining).TotalMilliseconds, 0, duration.TotalMilliseconds);
-
-        RemainingText = FormatTime(remaining);
         Progress = elapsed / duration.TotalMilliseconds * 100;
     }
 }

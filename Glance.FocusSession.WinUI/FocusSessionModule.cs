@@ -18,11 +18,12 @@ public sealed class FocusSessionModule :
         services.AddSingleton(provider =>
         {
             FocusSessionSettings settings = provider.GetRequiredService<GlanceModuleOptions<FocusSessionSettings>>().Current;
-            return new FocusSessionViewModel(TimeSpan.FromMinutes(settings.FocusDurationMinutes), TimeSpan.FromMinutes(settings.BreakDurationMinutes));
+            return new FocusSessionViewModel(TimeSpan.FromMinutes(settings.FocusDurationMinutes), TimeSpan.FromMinutes(settings.BreakDurationMinutes), settings);
         });
         services.AddSingleton<IGlanceComponent, FocusSessionComponent>();
         services
             .AddViewFor<FocusDurationSettingView, IGlanceModuleSettingViewModel, FocusDurationSettingViewModel>(ServiceLifetime.Transient, provider => new FocusDurationSettingView(), provider => new FocusDurationSettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<FocusSessionSettings>>().Current, provider.GetRequiredService<IWritableOptions<FocusSessionSettings>>()))
-            .AddViewFor<BreakDurationSettingView, IGlanceModuleSettingViewModel, BreakDurationSettingViewModel>(ServiceLifetime.Transient, provider => new BreakDurationSettingView(), provider => new BreakDurationSettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<FocusSessionSettings>>().Current, provider.GetRequiredService<IWritableOptions<FocusSessionSettings>>()));
+            .AddViewFor<BreakDurationSettingView, IGlanceModuleSettingViewModel, BreakDurationSettingViewModel>(ServiceLifetime.Transient, provider => new BreakDurationSettingView(), provider => new BreakDurationSettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<FocusSessionSettings>>().Current, provider.GetRequiredService<IWritableOptions<FocusSessionSettings>>()))
+            .AddViewFor<ResumeAutomaticallySettingView, IGlanceModuleSettingViewModel, ResumeAutomaticallySettingViewModel>(ServiceLifetime.Transient, provider => new ResumeAutomaticallySettingView(), provider => new ResumeAutomaticallySettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<FocusSessionSettings>>().Current, provider.GetRequiredService<IWritableOptions<FocusSessionSettings>>()));
     }
 }

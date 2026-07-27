@@ -81,4 +81,47 @@ public sealed class StopwatchViewModelTests
         Assert.Contains(nameof(StopwatchViewModel.IsRunning), changedProperties);
         Assert.Contains(nameof(StopwatchViewModel.ToggleGlyph), changedProperties);
     }
+
+    [Fact]
+    public void Constructor_DoesNotRestoreSessionByDefault()
+    {
+        StopwatchViewModel viewModel = new(new StopwatchSettings
+        {
+            SessionElapsedTicks = TimeSpan.FromMinutes(3).Ticks,
+            SessionWasRunning = true
+        });
+
+        Assert.False(viewModel.IsRunning);
+        Assert.Equal("00:00.00", viewModel.Elapsed);
+    }
+
+    [Fact]
+    public void Constructor_RestoresRunningSessionWhenEnabled()
+    {
+        DateTimeOffset now = new(2026, 7, 27, 12, 0, 0, TimeSpan.Zero);
+        StopwatchViewModel viewModel = new(new StopwatchSettings
+        {
+            ResumeAutomatically = true,
+            SessionElapsedTicks = TimeSpan.FromMinutes(2).Ticks,
+            SessionUpdatedUtc = now - TimeSpan.FromMinutes(1),
+            SessionWasRunning = true
+        }, now);
+
+        Assert.True(viewModel.IsRunning);
+        Assert.StartsWith("03:00.", viewModel.Elapsed);
+    }
+
+    [Fact]
+    public void WriteSessionState_PreservesResumePreference()
+    {
+        StopwatchSettings settings = new() { ResumeAutomatically = true };
+        StopwatchViewModel viewModel = new();
+        viewModel.Toggle();
+
+        viewModel.WriteSessionState(settings, DateTimeOffset.UnixEpoch);
+
+        Assert.True(settings.ResumeAutomatically);
+        Assert.True(settings.SessionWasRunning);
+        Assert.Equal(DateTimeOffset.UnixEpoch, settings.SessionUpdatedUtc);
+    }
 }

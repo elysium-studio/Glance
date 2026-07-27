@@ -15,4 +15,10 @@
   <data name="BreakDurationSettingCard.Description" xml:space="preserve">
     <value>Minutes in each break period.</value>
   </data>
+  <data name="ResumeAutomaticallySettingCard.Header" xml:space="preserve">
+    <value>Wznawiaj automatycznie</value>
+  </data>
+  <data name="ResumeAutomaticallySettingCard.Description" xml:space="preserve">
+    <value>Przywróć poprzednią sesję tego modułu po uruchomieniu Glance.</value>
+  </data>
 </root>

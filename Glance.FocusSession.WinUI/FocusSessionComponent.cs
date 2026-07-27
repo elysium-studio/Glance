@@ -1,8 +1,10 @@
+using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace Glance.FocusSession.WinUI;
 
@@ -18,15 +20,18 @@ public sealed partial class FocusSessionComponent :
     private readonly DispatcherQueueTimer timer;
     private readonly FocusSessionViewModel viewModel;
     private readonly GlanceModuleOptions<FocusSessionSettings> options;
+    private readonly IWritableOptions<FocusSessionSettings> writer;
 
     public FocusSessionComponent(FocusSessionViewModel viewModel,
         IGlanceAttentionService attentionService,
         GlanceModuleOptions<FocusSessionSettings> options,
+        IWritableOptions<FocusSessionSettings> writer,
         ModuleResourceTextLocalizer<FocusSessionModule> localizer)
     {
         this.viewModel = viewModel;
         this.attentionService = attentionService;
         this.options = options;
+        this.writer = writer;
         this.localizer = localizer;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
@@ -44,7 +49,15 @@ public sealed partial class FocusSessionComponent :
         timer.Tick += HandleTick;
 
         viewModel.PropertyChanged += HandlePropertyChanged;
+        viewModel.SessionStateChanged += HandleSessionStateChanged;
         options.Changed += HandleOptionsChanged;
+
+        if (viewModel.IsRunning)
+        {
+            timer.Start();
+        }
+
+        _ = PersistSessionAsync();
     }
 
     public string Id => "FocusSession";
@@ -70,6 +83,7 @@ public sealed partial class FocusSessionComponent :
         timer.Stop();
         timer.Tick -= HandleTick;
         viewModel.PropertyChanged -= HandlePropertyChanged;
+        viewModel.SessionStateChanged -= HandleSessionStateChanged;
         options.Changed -= HandleOptionsChanged;
     }
 
@@ -99,5 +113,18 @@ public sealed partial class FocusSessionComponent :
         {
             attentionService.RequestAttention(Id);
         }
+    }
+
+    private async void HandleSessionStateChanged(object? sender, EventArgs args) =>
+        await PersistSessionAsync();
+
+    private async Task PersistSessionAsync()
+    {
+        try
+        {
+            await writer.WriteAsync(settings => viewModel.WriteSessionState(settings));
+        }
+        catch
+        { }
     }
 }

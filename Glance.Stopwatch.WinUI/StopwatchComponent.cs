@@ -1,8 +1,10 @@
+using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace Glance.Stopwatch.WinUI;
 
@@ -14,11 +16,14 @@ public sealed partial class StopwatchComponent :
     private readonly DispatcherQueueTimer timer;
     private readonly ITextLocalizer localizer;
     private readonly StopwatchViewModel viewModel;
+    private readonly IWritableOptions<StopwatchSettings> writer;
 
     public StopwatchComponent(StopwatchViewModel viewModel,
+        IWritableOptions<StopwatchSettings> writer,
         ModuleResourceTextLocalizer<StopwatchModule> localizer)
     {
         this.viewModel = viewModel;
+        this.writer = writer;
         this.localizer = localizer;
 
         StopwatchCompactView compactView = new(viewModel);
@@ -35,6 +40,14 @@ public sealed partial class StopwatchComponent :
         timer.Tick += HandleTick;
 
         viewModel.PropertyChanged += HandlePropertyChanged;
+        viewModel.SessionStateChanged += HandleSessionStateChanged;
+
+        if (viewModel.IsRunning)
+        {
+            timer.Start();
+        }
+
+        _ = PersistSessionAsync();
     }
 
     public string Id => "Stopwatch";
@@ -58,6 +71,7 @@ public sealed partial class StopwatchComponent :
         timer.Stop();
         timer.Tick -= HandleTick;
         viewModel.PropertyChanged -= HandlePropertyChanged;
+        viewModel.SessionStateChanged -= HandleSessionStateChanged;
     }
 
     private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs args)
@@ -79,4 +93,17 @@ public sealed partial class StopwatchComponent :
 
     private void HandleTick(DispatcherQueueTimer sender, object args) =>
         viewModel.Refresh();
+
+    private async void HandleSessionStateChanged(object? sender, EventArgs args) =>
+        await PersistSessionAsync();
+
+    private async Task PersistSessionAsync()
+    {
+        try
+        {
+            await writer.WriteAsync(settings => viewModel.WriteSessionState(settings));
+        }
+        catch
+        { }
+    }
 }

@@ -15,4 +15,10 @@
   <data name="BreakDurationSettingCard.Description" xml:space="preserve">
     <value>Minutes in each break period.</value>
   </data>
+  <data name="ResumeAutomaticallySettingCard.Header" xml:space="preserve">
+    <value>自動的に再開</value>
+  </data>
+  <data name="ResumeAutomaticallySettingCard.Description" xml:space="preserve">
+    <value>Glance の起動時に、このモジュールの前回のセッションを復元します。</value>
+  </data>
 </root>

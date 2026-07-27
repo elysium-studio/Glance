@@ -76,6 +76,30 @@ public sealed class KeepAwakeViewModelTests
         Assert.False(viewModel.IsBusy);
     }
 
+    [Fact]
+    public async Task RestoreAsync_DoesNotStartWhenDisabled()
+    {
+        FakeKeepAwakeService service = new(false);
+        KeepAwakeViewModel viewModel = new(service, new FakeLocalizer());
+
+        await viewModel.RestoreAsync(false);
+
+        Assert.False(service.IsActive);
+        Assert.False(viewModel.IsActive);
+    }
+
+    [Fact]
+    public async Task RestoreAsync_StartsPreviousSessionWhenEnabled()
+    {
+        FakeKeepAwakeService service = new(false);
+        KeepAwakeViewModel viewModel = new(service, new FakeLocalizer());
+
+        await viewModel.RestoreAsync(true);
+
+        Assert.True(service.IsActive);
+        Assert.True(viewModel.IsActive);
+    }
+
     private sealed class FakeKeepAwakeService(bool isActive) :
         IKeepAwakeService
     {

@@ -25,4 +25,10 @@
   <data name="ResetButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Reimposta</value>
   </data>
+  <data name="ResumeAutomaticallySettingCard.Header" xml:space="preserve">
+    <value>Riprendi automaticamente</value>
+  </data>
+  <data name="ResumeAutomaticallySettingCard.Description" xml:space="preserve">
+    <value>Ripristina la sessione precedente di questo modulo all&apos;avvio di Glance.</value>
+  </data>
 </root>

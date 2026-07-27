@@ -33,6 +33,38 @@ public sealed partial class KeepAwakeViewModel(IKeepAwakeService keepAwakeServic
 
     public string ActionGlyph => IsActive ? "\uE71A" : "\uE768";
 
+    public event EventHandler? SessionStateChanged;
+
+    public async Task RestoreAsync(bool shouldResume)
+    {
+        if (!shouldResume || IsActive)
+        {
+            SessionStateChanged?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
+        bool succeeded;
+
+        try
+        {
+            succeeded = await keepAwakeService.SetActiveAsync(true).ConfigureAwait(false);
+        }
+        catch
+        {
+            succeeded = false;
+        }
+
+        Dispatch(() =>
+        {
+            if (succeeded)
+            {
+                IsActive = true;
+            }
+
+            SessionStateChanged?.Invoke(this, EventArgs.Empty);
+        });
+    }
+
     public async Task ToggleAsync()
     {
         if (IsBusy)
@@ -58,6 +90,7 @@ public sealed partial class KeepAwakeViewModel(IKeepAwakeService keepAwakeServic
             if (succeeded)
             {
                 IsActive = requestedState;
+                SessionStateChanged?.Invoke(this, EventArgs.Empty);
             }
 
             IsBusy = false;

@@ -76,6 +76,30 @@ public sealed class PresenceViewModelTests
         Assert.False(viewModel.IsBusy);
     }
 
+    [Fact]
+    public async Task RestoreAsync_DoesNotStartWhenDisabled()
+    {
+        FakePresenceService service = new(false);
+        PresenceViewModel viewModel = new(service, new FakeLocalizer());
+
+        await viewModel.RestoreAsync(false);
+
+        Assert.False(service.IsActive);
+        Assert.False(viewModel.IsActive);
+    }
+
+    [Fact]
+    public async Task RestoreAsync_StartsPreviousSessionWhenEnabled()
+    {
+        FakePresenceService service = new(false);
+        PresenceViewModel viewModel = new(service, new FakeLocalizer());
+
+        await viewModel.RestoreAsync(true);
+
+        Assert.True(service.IsActive);
+        Assert.True(viewModel.IsActive);
+    }
+
     private sealed class FakePresenceService(bool isActive) :
         IPresenceService
     {

@@ -12,4 +12,10 @@
   <data name="ActiveDetail" xml:space="preserve"><value>已阻止自动睡眠</value></data>
   <data name="StartLabel" xml:space="preserve"><value>保持唤醒</value></data>
   <data name="StopLabel" xml:space="preserve"><value>停止保持唤醒</value></data>
+  <data name="ResumeAutomaticallySettingCard.Header" xml:space="preserve">
+    <value>自动恢复</value>
+  </data>
+  <data name="ResumeAutomaticallySettingCard.Description" xml:space="preserve">
+    <value>在 Glance 启动时恢复此模块的上一次会话。</value>
+  </data>
 </root>

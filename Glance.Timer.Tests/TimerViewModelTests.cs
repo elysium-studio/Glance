@@ -176,4 +176,49 @@ public sealed class TimerViewModelTests
 
         Assert.Equal(2, changedProperties.Count(name => name == nameof(TimerViewModel.CanDecreaseMinute)));
     }
+
+    [Fact]
+    public void Constructor_DoesNotRestoreSessionByDefault()
+    {
+        TimerViewModel viewModel = new(new TimerSettings
+        {
+            SessionDurationTicks = TimeSpan.FromMinutes(12).Ticks,
+            SessionRemainingTicks = TimeSpan.FromMinutes(8).Ticks,
+            SessionWasRunning = true
+        });
+
+        Assert.False(viewModel.IsRunning);
+        Assert.Equal("05:00", viewModel.RemainingText);
+    }
+
+    [Fact]
+    public void Constructor_RestoresRunningSessionWhenEnabled()
+    {
+        DateTimeOffset now = new(2026, 7, 27, 12, 0, 0, TimeSpan.Zero);
+        TimerViewModel viewModel = new(new TimerSettings
+        {
+            ResumeAutomatically = true,
+            SessionDurationTicks = TimeSpan.FromMinutes(10).Ticks,
+            SessionRemainingTicks = TimeSpan.FromMinutes(8).Ticks,
+            SessionUpdatedUtc = now - TimeSpan.FromMinutes(2),
+            SessionWasRunning = true
+        }, now);
+
+        Assert.True(viewModel.IsRunning);
+        Assert.Equal("06:00", viewModel.RemainingText);
+    }
+
+    [Fact]
+    public void WriteSessionState_PreservesResumePreference()
+    {
+        TimerSettings settings = new() { ResumeAutomatically = true };
+        TimerViewModel viewModel = new();
+        viewModel.Toggle();
+
+        viewModel.WriteSessionState(settings, DateTimeOffset.UnixEpoch);
+
+        Assert.True(settings.ResumeAutomatically);
+        Assert.True(settings.SessionWasRunning);
+        Assert.Equal(DateTimeOffset.UnixEpoch, settings.SessionUpdatedUtc);
+    }
 }

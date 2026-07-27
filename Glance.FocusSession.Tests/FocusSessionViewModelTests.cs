@@ -152,4 +152,56 @@ public sealed class FocusSessionViewModelTests
         Assert.Contains(nameof(FocusSessionViewModel.Phase), changedProperties);
         Assert.Contains(nameof(FocusSessionViewModel.RemainingText), changedProperties);
     }
+
+    [Fact]
+    public void Constructor_DoesNotRestoreSessionByDefault()
+    {
+        FocusSessionViewModel viewModel = new(settings: new FocusSessionSettings
+        {
+            SessionPhase = FocusSessionPhase.Break,
+            SessionRemainingTicks = TimeSpan.FromMinutes(2).Ticks,
+            SessionWasRunning = true
+        });
+
+        Assert.False(viewModel.IsRunning);
+        Assert.Equal(FocusSessionPhase.Focus, viewModel.Phase);
+        Assert.Equal("25:00", viewModel.RemainingText);
+    }
+
+    [Fact]
+    public void Constructor_RestoresRunningSessionWhenEnabled()
+    {
+        DateTimeOffset now = new(2026, 7, 27, 12, 0, 0, TimeSpan.Zero);
+        FocusSessionViewModel viewModel = new(settings: new FocusSessionSettings
+        {
+            ResumeAutomatically = true,
+            SessionPhase = FocusSessionPhase.Focus,
+            SessionRemainingTicks = TimeSpan.FromMinutes(10).Ticks,
+            SessionUpdatedUtc = now - TimeSpan.FromMinutes(3),
+            SessionWasRunning = true
+        }, now: now);
+
+        Assert.True(viewModel.IsRunning);
+        Assert.Equal(FocusSessionPhase.Focus, viewModel.Phase);
+        Assert.Equal("07:00", viewModel.RemainingText);
+    }
+
+    [Fact]
+    public void Constructor_AdvancesExpiredSessionWithoutRestartingIt()
+    {
+        DateTimeOffset now = new(2026, 7, 27, 12, 0, 0, TimeSpan.Zero);
+        FocusSessionViewModel viewModel = new(settings: new FocusSessionSettings
+        {
+            ResumeAutomatically = true,
+            SessionPhase = FocusSessionPhase.Focus,
+            SessionRemainingTicks = TimeSpan.FromMinutes(1).Ticks,
+            SessionUpdatedUtc = now - TimeSpan.FromMinutes(2),
+            SessionWasRunning = true
+        }, now: now);
+
+        Assert.False(viewModel.IsRunning);
+        Assert.Equal(FocusSessionPhase.Break, viewModel.Phase);
+        Assert.Equal("05:00", viewModel.RemainingText);
+        Assert.Equal(1, viewModel.CompletedFocusSessions);
+    }
 }

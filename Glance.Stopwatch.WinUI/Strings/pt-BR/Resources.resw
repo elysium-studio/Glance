@@ -25,4 +25,10 @@
   <data name="ResetButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Redefinir</value>
   </data>
+  <data name="ResumeAutomaticallySettingCard.Header" xml:space="preserve">
+    <value>Retomar automaticamente</value>
+  </data>
+  <data name="ResumeAutomaticallySettingCard.Description" xml:space="preserve">
+    <value>Restaure a sessão anterior deste módulo quando o Glance iniciar.</value>
+  </data>
 </root>

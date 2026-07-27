@@ -49,4 +49,10 @@
   <data name="TimerAdjustmentSettingCard.Description" xml:space="preserve">
     <value>Minutes added or removed by the timer controls.</value>
   </data>
+  <data name="ResumeAutomaticallySettingCard.Header" xml:space="preserve">
+    <value>Reanudar automáticamente</value>
+  </data>
+  <data name="ResumeAutomaticallySettingCard.Description" xml:space="preserve">
+    <value>Restaura la sesión anterior de este módulo al iniciar Glance.</value>
+  </data>
 </root>

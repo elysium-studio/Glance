@@ -25,4 +25,10 @@
   <data name="ResetButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>リセット</value>
   </data>
+  <data name="ResumeAutomaticallySettingCard.Header" xml:space="preserve">
+    <value>自動的に再開</value>
+  </data>
+  <data name="ResumeAutomaticallySettingCard.Description" xml:space="preserve">
+    <value>Glance の起動時に、このモジュールの前回のセッションを復元します。</value>
+  </data>
 </root>

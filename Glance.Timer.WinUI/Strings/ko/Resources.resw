@@ -49,4 +49,10 @@
   <data name="TimerAdjustmentSettingCard.Description" xml:space="preserve">
     <value>Minutes added or removed by the timer controls.</value>
   </data>
+  <data name="ResumeAutomaticallySettingCard.Header" xml:space="preserve">
+    <value>자동으로 다시 시작</value>
+  </data>
+  <data name="ResumeAutomaticallySettingCard.Description" xml:space="preserve">
+    <value>Glance가 시작될 때 이 모듈의 이전 세션을 복원합니다.</value>
+  </data>
 </root>

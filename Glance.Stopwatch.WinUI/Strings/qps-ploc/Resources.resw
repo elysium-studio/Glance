@@ -25,4 +25,10 @@
   <data name="ResetButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>［!!! Reset !!!］</value>
   </data>
+  <data name="ResumeAutomaticallySettingCard.Header" xml:space="preserve">
+    <value>[Řéšũḿé áũţöḿáţîçáļļý]</value>
+  </data>
+  <data name="ResumeAutomaticallySettingCard.Description" xml:space="preserve">
+    <value>[Řéšţöřé ţĥîš ḿöðũļé&apos;š þřéṽîöũš šéššîöñ ŵĥéñ Glance šţářţš.]</value>
+  </data>
 </root>

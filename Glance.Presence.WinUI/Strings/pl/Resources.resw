@@ -12,4 +12,10 @@
   <data name="ActiveDetail" xml:space="preserve"><value>Pozostaniesz dostępny podczas nieobecności</value></data>
   <data name="StartLabel" xml:space="preserve"><value>Uruchom obecność</value></data>
   <data name="StopLabel" xml:space="preserve"><value>Zatrzymaj obecność</value></data>
+  <data name="ResumeAutomaticallySettingCard.Header" xml:space="preserve">
+    <value>Wznawiaj automatycznie</value>
+  </data>
+  <data name="ResumeAutomaticallySettingCard.Description" xml:space="preserve">
+    <value>Przywróć poprzednią sesję tego modułu po uruchomieniu Glance.</value>
+  </data>
 </root>

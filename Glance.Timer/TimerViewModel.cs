@@ -7,16 +7,46 @@ public sealed partial class TimerViewModel :
     ObservableObject
 {
     private TimeSpan adjustment;
+    private TimeSpan configuredDefaultDuration;
     private TimeSpan duration;
     private TimeSpan remaining;
     private long lastTimestamp;
 
-    public TimerViewModel(TimerSettings? settings = null)
+    public TimerViewModel(TimerSettings? settings = null,
+        DateTimeOffset? now = null)
     {
         TimerSettings initialSettings = settings ?? new TimerSettings();
         adjustment = GetAdjustment(initialSettings);
-        duration = GetDefaultDuration(initialSettings);
+        configuredDefaultDuration = GetDefaultDuration(initialSettings);
+        duration = configuredDefaultDuration;
         remaining = duration;
+
+        if (initialSettings.ResumeAutomatically &&
+            initialSettings.SessionDurationTicks > 0 &&
+            initialSettings.SessionRemainingTicks >= 0)
+        {
+            duration = TimeSpan.FromTicks(initialSettings.SessionDurationTicks);
+            remaining = TimeSpan.FromTicks(initialSettings.SessionRemainingTicks);
+
+            if (initialSettings.SessionWasRunning)
+            {
+                DateTimeOffset current = now ?? DateTimeOffset.UtcNow;
+                remaining -= current > initialSettings.SessionUpdatedUtc
+                    ? current - initialSettings.SessionUpdatedUtc
+                    : TimeSpan.Zero;
+
+                if (remaining > TimeSpan.Zero)
+                {
+                    lastTimestamp = Stopwatch.GetTimestamp();
+                    isRunning = true;
+                }
+                else
+                {
+                    remaining = TimeSpan.Zero;
+                }
+            }
+        }
+
         remainingText = FormatTime(remaining);
     }
 
@@ -31,6 +61,8 @@ public sealed partial class TimerViewModel :
 
     public string ToggleGlyph => IsRunning ? "\uF8AE" : "\uF5B0";
 
+    public event EventHandler? SessionStateChanged;
+
     public void Toggle()
     {
         if (IsRunning)
@@ -43,6 +75,8 @@ public sealed partial class TimerViewModel :
             lastTimestamp = Stopwatch.GetTimestamp();
             IsRunning = true;
         }
+
+        SessionStateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void Reset()
@@ -50,6 +84,7 @@ public sealed partial class TimerViewModel :
         IsRunning = false;
         remaining = duration;
         UpdateText();
+        SessionStateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void AddMinute()
@@ -59,6 +94,7 @@ public sealed partial class TimerViewModel :
         remaining += adjustment;
         UpdateText();
         OnPropertyChanged(nameof(CanDecreaseMinute));
+        SessionStateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void DecreaseMinute()
@@ -80,6 +116,7 @@ public sealed partial class TimerViewModel :
 
         UpdateText();
         OnPropertyChanged(nameof(CanDecreaseMinute));
+        SessionStateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public bool Refresh()
@@ -99,6 +136,7 @@ public sealed partial class TimerViewModel :
         {
             remaining = TimeSpan.Zero;
             IsRunning = false;
+            SessionStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
         UpdateText();
@@ -108,15 +146,28 @@ public sealed partial class TimerViewModel :
     public void ApplySettings(TimerSettings settings)
     {
         adjustment = GetAdjustment(settings);
+        TimeSpan defaultDuration = GetDefaultDuration(settings);
+        bool defaultDurationChanged = configuredDefaultDuration != defaultDuration;
+        configuredDefaultDuration = defaultDuration;
 
-        if (!IsRunning)
+        if (!IsRunning && defaultDurationChanged)
         {
-            duration = GetDefaultDuration(settings);
+            duration = configuredDefaultDuration;
             remaining = duration;
             UpdateText();
+            SessionStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
         OnPropertyChanged(nameof(CanDecreaseMinute));
+    }
+
+    public void WriteSessionState(TimerSettings settings,
+        DateTimeOffset? now = null)
+    {
+        settings.SessionDurationTicks = duration.Ticks;
+        settings.SessionRemainingTicks = remaining.Ticks;
+        settings.SessionUpdatedUtc = now ?? DateTimeOffset.UtcNow;
+        settings.SessionWasRunning = IsRunning;
     }
 
     private void UpdateText()

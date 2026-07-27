@@ -12,4 +12,10 @@
   <data name="ActiveDetail" xml:space="preserve"><value>离开期间仍会保持在线状态</value></data>
   <data name="StartLabel" xml:space="preserve"><value>启动在线状态</value></data>
   <data name="StopLabel" xml:space="preserve"><value>停止在线状态</value></data>
+  <data name="ResumeAutomaticallySettingCard.Header" xml:space="preserve">
+    <value>自动恢复</value>
+  </data>
+  <data name="ResumeAutomaticallySettingCard.Description" xml:space="preserve">
+    <value>在 Glance 启动时恢复此模块的上一次会话。</value>
+  </data>
 </root>
