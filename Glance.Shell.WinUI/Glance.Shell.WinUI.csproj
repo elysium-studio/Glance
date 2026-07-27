@@ -123,6 +123,7 @@
     </Task>
   </UsingTask>
   <Target Name="ArrangeGlanceModulesInBuildOutput" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true'">
+    <MSBuild Projects="@(GlanceModuleProject)" Targets="Build" BuildInParallel="$(BuildInParallel)" Properties="Configuration=$(Configuration);Platform=$(Platform)" />
     <ItemGroup>
       <GlanceModuleStagingDirectory Include="$(OutDir)Modules\AudioSwitcher;$(OutDir)Modules\Clipboard;$(OutDir)Modules\ColorPicker;$(OutDir)Modules\DevicePresence;$(OutDir)Modules\DropShelf;$(OutDir)Modules\FocusSession;$(OutDir)Modules\Infinity;$(OutDir)Modules\KeepAwake;$(OutDir)Modules\Media;$(OutDir)Modules\Power;$(OutDir)Modules\PrivacyControls;$(OutDir)Modules\RemovableDevices;$(OutDir)Modules\ScreenCapture;$(OutDir)Modules\SpeechToText;$(OutDir)Modules\Stopwatch;$(OutDir)Modules\SystemMonitor;$(OutDir)Modules\Timer;$(OutDir)Modules\VoiceNotes" />
       <ExistingGlanceModulePackage Include="$(OutDir)Modules\*.glance" />
