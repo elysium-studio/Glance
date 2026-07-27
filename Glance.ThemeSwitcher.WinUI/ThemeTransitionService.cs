@@ -6,13 +6,15 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Shapes;
 using System;
+using System.IO;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Graphics;
+using Windows.Storage.Streams;
 using WinRT.Interop;
 using WinUIEx;
 using PlatformWindowExtensions = Elysium.Platform.Windows.WindowExtensions;
@@ -22,9 +24,11 @@ namespace Glance.ThemeSwitcher.WinUI;
 public sealed partial class ThemeTransitionService :
     IDisposable
 {
+    private const uint CaptureBlt = 0x40000000;
     private const int ExtendedWindowStyleIndex = -20;
     private const int NoActivateWindowStyle = 0x08000000;
     private const int ShowWindowHidden = 0;
+    private const uint SourceCopy = 0x00CC0020;
     private const int ToolWindowStyle = 0x00000080;
     private const int TransparentWindowStyle = 0x00000020;
     private nint handle;
@@ -44,89 +48,90 @@ public sealed partial class ThemeTransitionService :
         RectInt32 bounds = DisplayArea.GetFromPoint(pointer, DisplayAreaFallback.Nearest).OuterBounds;
         double localX = cursor.X - bounds.X;
         double localY = cursor.Y - bounds.Y;
-        double radius = GetCoveringRadius(localX, localY, bounds.Width, bounds.Height);
-        double diameter = radius * 2;
+        InMemoryRandomAccessStream snapshotStream;
+        LoadedImageSurface snapshotSurface;
 
-        Ellipse wash = new()
+        try
         {
-            Width = diameter,
-            Height = diameter,
-            Fill = new SolidColorBrush(theme == ThemeVariant.Light
-                ? Windows.UI.Color.FromArgb(255, 246, 248, 252)
-                : Windows.UI.Color.FromArgb(255, 24, 26, 34)),
-            Stroke = new SolidColorBrush(theme == ThemeVariant.Light
-                ? Windows.UI.Color.FromArgb(255, 255, 190, 92)
-                : Windows.UI.Color.FromArgb(255, 126, 108, 255)),
-            StrokeThickness = 3,
-            IsHitTestVisible = false
-        };
-        Canvas.SetLeft(wash, localX - radius);
-        Canvas.SetTop(wash, localY - radius);
+            byte[] snapshot = CaptureDisplay(bounds);
+            snapshotStream = CreateBitmapStream(bounds.Width, bounds.Height, snapshot);
+
+            try
+            {
+                snapshotSurface = await LoadSurfaceAsync(snapshotStream, cancellationToken);
+            }
+            catch
+            {
+                snapshotStream.Dispose();
+                throw;
+            }
+        }
+        catch when (!cancellationToken.IsCancellationRequested)
+        {
+            await applyTheme();
+            return;
+        }
 
         Canvas root = new()
         {
-            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(1, 0, 0, 0)),
+            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0)),
             IsHitTestVisible = false
         };
-        root.Children.Add(wash);
 
         Window transitionWindow = GetWindow(root, bounds);
-        Visual washVisual = ElementCompositionPreview.GetElementVisual(wash);
-        washVisual.CenterPoint = new Vector3((float)radius, (float)radius, 0);
-        washVisual.Scale = new Vector3(0.015f);
         Visual rootVisual = ElementCompositionPreview.GetElementVisual(root);
         rootVisual.Opacity = 1;
+        Compositor compositor = rootVisual.Compositor;
+        CompositionSurfaceBrush snapshotBrush = compositor.CreateSurfaceBrush(snapshotSurface);
+        snapshotBrush.Stretch = CompositionStretch.Fill;
+        CompositionRadialGradientBrush cutoutBrush = compositor.CreateRadialGradientBrush();
+        cutoutBrush.MappingMode = CompositionMappingMode.Absolute;
+        cutoutBrush.ColorStops.Insert(0, compositor.CreateColorGradientStop(0, Windows.UI.Color.FromArgb(0, 255, 255, 255)));
+        cutoutBrush.ColorStops.Insert(1, compositor.CreateColorGradientStop(0.985f, Windows.UI.Color.FromArgb(0, 255, 255, 255)));
+        cutoutBrush.ColorStops.Insert(2, compositor.CreateColorGradientStop(1, Windows.UI.Color.FromArgb(255, 255, 255, 255)));
+        CompositionMaskBrush maskedSnapshotBrush = compositor.CreateMaskBrush();
+        maskedSnapshotBrush.Source = snapshotBrush;
+        maskedSnapshotBrush.Mask = cutoutBrush;
+        SpriteVisual snapshotVisual = compositor.CreateSpriteVisual();
+        snapshotVisual.Brush = maskedSnapshotBrush;
+        snapshotVisual.RelativeSizeAdjustment = Vector2.One;
+        ElementCompositionPreview.SetElementChildVisual(root, snapshotVisual);
         DispatcherQueue dispatcherQueue = transitionWindow.DispatcherQueue;
-
-        TaskCompletionSource<bool> loaded = new(TaskCreationOptions.RunContinuationsAsynchronously);
-        root.Loaded += HandleLoaded;
         bool shown = false;
 
         try
         {
-            transitionWindow.AppWindow.Show(false);
             shown = true;
-            await loaded.Task.WaitAsync(TimeSpan.FromSeconds(2), cancellationToken);
-            await RunOnDispatcherAsync(dispatcherQueue, root.UpdateLayout);
-            await WaitForRenderingFramesAsync(dispatcherQueue, 2, cancellationToken);
-            await RunOnDispatcherAsync(dispatcherQueue, () => transitionWindow.AppWindow.MoveAndResize(bounds));
-            await WaitForRenderingFramesAsync(dispatcherQueue, 2, cancellationToken);
+            await ShowPreparedAsync(transitionWindow, root, bounds, handle, cancellationToken);
             await RunOnDispatcherAsync(dispatcherQueue, () =>
             {
-                _ = DwmFlush();
-                PlatformWindowExtensions.viSetOpacity(handle, 255);
-                Compositor compositor = washVisual.Compositor;
-                CubicBezierEasingFunction revealEasing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
-                Vector3KeyFrameAnimation reveal = compositor.CreateVector3KeyFrameAnimation();
-                reveal.InsertKeyFrame(0, new Vector3(0.015f), revealEasing);
-                reveal.InsertKeyFrame(1, Vector3.One, revealEasing);
-                reveal.Duration = TimeSpan.FromMilliseconds(300);
-                washVisual.Scale = Vector3.One;
-                washVisual.StartAnimation(nameof(Visual.Scale), reveal);
+                Vector2 size = new((float)root.ActualWidth, (float)root.ActualHeight);
+                float centerX = size.X * (float)(localX / bounds.Width);
+                float centerY = size.Y * (float)(localY / bounds.Height);
+                cutoutBrush.CenterPoint = new Vector2(centerX, centerY);
+                cutoutBrush.EllipseRadius = Vector2.One;
             });
-
-            await Task.Delay(145, cancellationToken);
             await applyTheme().ConfigureAwait(false);
-            await Task.Delay(155, cancellationToken);
+            await WaitForRenderingFramesAsync(dispatcherQueue, 3, cancellationToken);
             await RunOnDispatcherAsync(dispatcherQueue, () =>
             {
-                Compositor compositor = rootVisual.Compositor;
-                ScalarKeyFrameAnimation fade = compositor.CreateScalarKeyFrameAnimation();
-                fade.InsertKeyFrame(0, 1);
-                fade.InsertKeyFrame(1, 0, compositor.CreateCubicBezierEasingFunction(new Vector2(0.4f, 0), new Vector2(1, 1)));
-                fade.Duration = TimeSpan.FromMilliseconds(150);
-                rootVisual.Opacity = 0;
-                rootVisual.StartAnimation(nameof(Visual.Opacity), fade);
+                float radius = (float)GetCoveringRadius(cutoutBrush.CenterPoint.X, cutoutBrush.CenterPoint.Y, root.ActualWidth, root.ActualHeight) * 1.02f;
+                CubicBezierEasingFunction easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
+                Vector2KeyFrameAnimation reveal = compositor.CreateVector2KeyFrameAnimation();
+                reveal.InsertKeyFrame(0, Vector2.One, easing);
+                reveal.InsertKeyFrame(1, new Vector2(radius), easing);
+                reveal.Duration = TimeSpan.FromMilliseconds(300);
+                cutoutBrush.EllipseRadius = new Vector2(radius);
+                cutoutBrush.StartAnimation(nameof(CompositionRadialGradientBrush.EllipseRadius), reveal);
             });
-            await Task.Delay(150, cancellationToken);
+            await Task.Delay(300, cancellationToken);
         }
         finally
         {
             await RunOnDispatcherAsync(dispatcherQueue, () =>
             {
-                root.Loaded -= HandleLoaded;
-                washVisual.StopAnimation(nameof(Visual.Scale));
-                rootVisual.StopAnimation(nameof(Visual.Opacity));
+                cutoutBrush.StopAnimation(nameof(CompositionRadialGradientBrush.EllipseRadius));
+                ElementCompositionPreview.SetElementChildVisual(root, null);
                 PlatformWindowExtensions.viSetOpacity(handle, 0);
 
                 if (shown)
@@ -134,10 +139,13 @@ public sealed partial class ThemeTransitionService :
                     _ = ShowWindow(handle, ShowWindowHidden);
                 }
             });
+            snapshotVisual.Dispose();
+            maskedSnapshotBrush.Dispose();
+            cutoutBrush.Dispose();
+            snapshotBrush.Dispose();
+            snapshotSurface.Dispose();
+            snapshotStream.Dispose();
         }
-
-        void HandleLoaded(object sender, RoutedEventArgs args) =>
-            loaded.TrySetResult(true);
     }
 
     public void Dispose()
@@ -181,6 +189,16 @@ public sealed partial class ThemeTransitionService :
             window.SetTitleBar(null);
             window.AppWindow.IsShownInSwitchers = false;
             handle = WindowNative.GetWindowHandle(window);
+
+            if (window.AppWindow.Presenter is OverlappedPresenter presenter)
+            {
+                presenter.IsAlwaysOnTop = true;
+                presenter.IsMaximizable = false;
+                presenter.IsMinimizable = false;
+                presenter.IsResizable = false;
+                presenter.SetBorderAndTitleBar(false, false);
+            }
+
             PlatformWindowExtensions.SetBorderless(handle, true);
             PlatformWindowExtensions.SetCornerRadius(handle, WindowCornerPreference.Sharp);
             PlatformWindowExtensions.SetTopMost(handle, true);
@@ -203,6 +221,133 @@ public sealed partial class ThemeTransitionService :
         double horizontal = Math.Max(x, width - x);
         double vertical = Math.Max(y, height - y);
         return Math.Sqrt(horizontal * horizontal + vertical * vertical);
+    }
+
+    private static byte[] CaptureDisplay(RectInt32 bounds)
+    {
+        _ = DwmFlush();
+        nint screenDeviceContext = GetDC(nint.Zero);
+
+        if (screenDeviceContext == nint.Zero)
+        {
+            throw new InvalidOperationException("Unable to access the desktop surface.");
+        }
+
+        nint memoryDeviceContext = CreateCompatibleDC(screenDeviceContext);
+        nint bitmap = CreateCompatibleBitmap(screenDeviceContext, bounds.Width, bounds.Height);
+        nint previousBitmap = SelectObject(memoryDeviceContext, bitmap);
+
+        try
+        {
+            if (!BitBlt(memoryDeviceContext, 0, 0, bounds.Width, bounds.Height, screenDeviceContext, bounds.X, bounds.Y, SourceCopy | CaptureBlt))
+            {
+                throw new InvalidOperationException("Unable to capture the current display.");
+            }
+
+            BitmapInfo bitmapInfo = new()
+            {
+                Header = new BitmapInfoHeader
+                {
+                    Size = (uint)Marshal.SizeOf<BitmapInfoHeader>(),
+                    Width = bounds.Width,
+                    Height = -bounds.Height,
+                    Planes = 1,
+                    BitCount = 32
+                }
+            };
+            byte[] pixels = new byte[bounds.Width * bounds.Height * 4];
+
+            if (GetDIBits(memoryDeviceContext, bitmap, 0, (uint)bounds.Height, pixels, ref bitmapInfo, 0) == 0)
+            {
+                throw new InvalidOperationException("Unable to read the captured display.");
+            }
+
+            for (int index = 3; index < pixels.Length; index += 4)
+            {
+                pixels[index] = byte.MaxValue;
+            }
+
+            return pixels;
+        }
+        finally
+        {
+            _ = SelectObject(memoryDeviceContext, previousBitmap);
+            _ = DeleteObject(bitmap);
+            _ = DeleteDC(memoryDeviceContext);
+            _ = ReleaseDC(nint.Zero, screenDeviceContext);
+        }
+    }
+
+    private static InMemoryRandomAccessStream CreateBitmapStream(int width,
+        int height,
+        byte[] pixels)
+    {
+        const int fileHeaderSize = 14;
+        const int informationHeaderSize = 40;
+        int pixelOffset = fileHeaderSize + informationHeaderSize;
+        InMemoryRandomAccessStream randomAccessStream = new();
+        Stream stream = randomAccessStream.AsStream();
+
+        using (BinaryWriter writer = new(stream, Encoding.UTF8, true))
+        {
+            writer.Write((ushort)0x4D42);
+            writer.Write(pixelOffset + pixels.Length);
+            writer.Write(0);
+            writer.Write(pixelOffset);
+            writer.Write(informationHeaderSize);
+            writer.Write(width);
+            writer.Write(-height);
+            writer.Write((ushort)1);
+            writer.Write((ushort)32);
+            writer.Write(0);
+            writer.Write(pixels.Length);
+            writer.Write((int)(96 * 39.3701));
+            writer.Write((int)(96 * 39.3701));
+            writer.Write(0);
+            writer.Write(0);
+            writer.Write(pixels);
+            writer.Flush();
+        }
+
+        randomAccessStream.Seek(0);
+        return randomAccessStream;
+    }
+
+    private static async Task<LoadedImageSurface> LoadSurfaceAsync(InMemoryRandomAccessStream stream,
+        CancellationToken cancellationToken)
+    {
+        LoadedImageSurface surface = LoadedImageSurface.StartLoadFromStream(stream);
+        TaskCompletionSource<bool> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        using CancellationTokenRegistration registration = cancellationToken.Register(() => completion.TrySetCanceled(cancellationToken));
+        surface.LoadCompleted += HandleLoadCompleted;
+
+        try
+        {
+            await completion.Task.WaitAsync(TimeSpan.FromSeconds(2), cancellationToken);
+            return surface;
+        }
+        catch
+        {
+            surface.Dispose();
+            throw;
+        }
+        finally
+        {
+            surface.LoadCompleted -= HandleLoadCompleted;
+        }
+
+        void HandleLoadCompleted(LoadedImageSurface sender,
+            LoadedImageSourceLoadCompletedEventArgs args)
+        {
+            if (args.Status == LoadedImageSourceLoadStatus.Success)
+            {
+                completion.TrySetResult(true);
+            }
+            else
+            {
+                completion.TrySetException(new InvalidOperationException($"Unable to load the display snapshot: {args.Status}."));
+            }
+        }
     }
 
     private static Task RunOnDispatcherAsync(DispatcherQueue dispatcherQueue,
@@ -239,7 +384,7 @@ public sealed partial class ThemeTransitionService :
         int count,
         CancellationToken cancellationToken)
     {
-        int frames = 0;
+        int renderedFrameCount = 0;
         TaskCompletionSource<bool> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
         using CancellationTokenRegistration registration = cancellationToken.Register(() => completion.TrySetCanceled(cancellationToken));
         await RunOnDispatcherAsync(dispatcherQueue, () => CompositionTarget.Rendering += HandleRendering);
@@ -255,17 +400,117 @@ public sealed partial class ThemeTransitionService :
 
         void HandleRendering(object? sender, object args)
         {
-            frames++;
+            renderedFrameCount++;
 
-            if (frames >= count)
+            if (renderedFrameCount >= count)
             {
                 completion.TrySetResult(true);
             }
         }
     }
 
+    private static async Task ShowPreparedAsync(Window window,
+        FrameworkElement root,
+        RectInt32 bounds,
+        nint handle,
+        CancellationToken cancellationToken)
+    {
+        DispatcherQueue dispatcherQueue = window.DispatcherQueue;
+        TaskCompletionSource<bool> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        using CancellationTokenRegistration registration = cancellationToken.Register(() => completion.TrySetCanceled(cancellationToken));
+        int renderedFrameCount = 0;
+        bool isPositioned = false;
+
+        await RunOnDispatcherAsync(dispatcherQueue, () =>
+        {
+            root.Loaded += HandleLoaded;
+            window.AppWindow.Show(false);
+        });
+
+        try
+        {
+            await completion.Task.WaitAsync(TimeSpan.FromSeconds(2), cancellationToken);
+        }
+        finally
+        {
+            await RunOnDispatcherAsync(dispatcherQueue, () =>
+            {
+                root.Loaded -= HandleLoaded;
+                CompositionTarget.Rendering -= HandleRendering;
+            });
+        }
+
+        void HandleLoaded(object sender, RoutedEventArgs args)
+        {
+            root.UpdateLayout();
+            CompositionTarget.Rendering += HandleRendering;
+        }
+
+        void HandleRendering(object? sender, object args)
+        {
+            renderedFrameCount++;
+
+            if (!isPositioned)
+            {
+                isPositioned = true;
+                window.AppWindow.MoveAndResize(bounds);
+                return;
+            }
+
+            if (renderedFrameCount < 3)
+            {
+                return;
+            }
+
+            CompositionTarget.Rendering -= HandleRendering;
+            _ = DwmFlush();
+            PlatformWindowExtensions.viSetOpacity(handle, 255);
+            completion.TrySetResult(true);
+        }
+    }
+
     [LibraryImport("dwmapi.dll")]
     private static partial int DwmFlush();
+
+    [LibraryImport("gdi32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool BitBlt(nint destination,
+        int destinationX,
+        int destinationY,
+        int width,
+        int height,
+        nint source,
+        int sourceX,
+        int sourceY,
+        uint operation);
+
+    [LibraryImport("gdi32.dll")]
+    private static partial nint CreateCompatibleBitmap(nint deviceContext,
+        int width,
+        int height);
+
+    [LibraryImport("gdi32.dll")]
+    private static partial nint CreateCompatibleDC(nint deviceContext);
+
+    [LibraryImport("gdi32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool DeleteDC(nint deviceContext);
+
+    [LibraryImport("gdi32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool DeleteObject(nint value);
+
+    [LibraryImport("user32.dll")]
+    private static partial nint GetDC(nint window);
+
+    [LibraryImport("gdi32.dll")]
+    private static partial int GetDIBits(nint deviceContext,
+        nint bitmap,
+        uint start,
+        uint lines,
+        byte[] pixels,
+        ref BitmapInfo bitmapInfo,
+        uint usage);
 
     [LibraryImport("user32.dll", EntryPoint = "GetCursorPos")]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -281,9 +526,51 @@ public sealed partial class ThemeTransitionService :
         int value);
 
     [LibraryImport("user32.dll")]
+    private static partial int ReleaseDC(nint window,
+        nint deviceContext);
+
+    [LibraryImport("gdi32.dll")]
+    private static partial nint SelectObject(nint deviceContext,
+        nint value);
+
+    [LibraryImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool ShowWindow(nint window,
         int command);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct BitmapInfo
+    {
+        public BitmapInfoHeader Header;
+
+        public uint Colors;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct BitmapInfoHeader
+    {
+        public uint Size;
+
+        public int Width;
+
+        public int Height;
+
+        public ushort Planes;
+
+        public ushort BitCount;
+
+        public uint Compression;
+
+        public uint ImageSize;
+
+        public int XPixelsPerMeter;
+
+        public int YPixelsPerMeter;
+
+        public uint ColorsUsed;
+
+        public uint ColorsImportant;
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     private struct NativePoint
