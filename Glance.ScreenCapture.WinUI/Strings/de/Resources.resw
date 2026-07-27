@@ -12,4 +12,5 @@
   <data name="RecentCaptureLimitSettingCard.Description" xml:space="preserve">
     <value>Maximum number of recent captures shown in the island.</value>
   </data>
+  <data name="EmptyDetail.Text" xml:space="preserve"><value>Wählen Sie einen Bereich, ein Fenster oder einen Bildschirm</value></data>
 </root>

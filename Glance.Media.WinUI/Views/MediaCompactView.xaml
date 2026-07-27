@@ -29,21 +29,15 @@
                 <Image Source="{x:Bind ToImageSource(ViewModel.Artwork), Mode=OneWay}" Stretch="UniformToFill" />
             </Grid>
         </Border>
-        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-            <Controls:MarqueeTextBlock
-                Height="20"
-                FontSize="14"
-                FontWeight="SemiBold"
-                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                Text="{x:Bind ViewModel.Title, Mode=OneWay}"
-                ToolTipService.ToolTip="{x:Bind ViewModel.Title, Mode=OneWay}" />
-            <Controls:MarqueeTextBlock
-                Height="16"
-                FontSize="12"
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                Text="{x:Bind ViewModel.Artist, Mode=OneWay}"
-                ToolTipService.ToolTip="{x:Bind ViewModel.Artist, Mode=OneWay}" />
-        </StackPanel>
+        <Controls:MarqueeTextBlock
+            Grid.Column="1"
+            Height="20"
+            VerticalAlignment="Center"
+            FontSize="14"
+            FontWeight="SemiBold"
+            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+            Text="{x:Bind ViewModel.Title, Mode=OneWay}"
+            ToolTipService.ToolTip="{x:Bind ViewModel.Title, Mode=OneWay}" />
         <Local:MediaAudioVisualizer
             Grid.Column="2"
             Width="23"

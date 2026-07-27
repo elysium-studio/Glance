@@ -16,23 +16,13 @@
             Height="28"
             Background="{x:Bind ToBrush(ViewModel.CurrentColor), Mode=OneWay}"
             CornerRadius="8" />
-        <StackPanel
+        <TextBlock
             Grid.Column="1"
             VerticalAlignment="Center"
-            Spacing="0">
-            <TextBlock
-                MaxLines="1"
-                Style="{StaticResource BodyStrongTextBlockStyle}"
-                Text="{x:Bind ViewModel.Hex, Mode=OneWay}"
-                TextTrimming="CharacterEllipsis"
-                TextWrapping="NoWrap" />
-            <TextBlock
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                MaxLines="1"
-                Style="{StaticResource CaptionTextBlockStyle}"
-                Text="HEX"
-                TextTrimming="CharacterEllipsis"
-                TextWrapping="NoWrap" />
-        </StackPanel>
+            MaxLines="1"
+            Style="{StaticResource BodyStrongTextBlockStyle}"
+            Text="{x:Bind ViewModel.Hex, Mode=OneWay}"
+            TextTrimming="CharacterEllipsis"
+            TextWrapping="NoWrap" />
     </Grid>
 </UserControl>

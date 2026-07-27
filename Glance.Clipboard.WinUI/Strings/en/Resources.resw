@@ -124,4 +124,5 @@
   <data name="ClipboardHistoryLimitSettingCard.Description" xml:space="preserve">
     <value>Maximum number of recent clipboard items to keep.</value>
   </data>
+  <data name="EmptyDetail.Text" xml:space="preserve"><value>Copy something to get started</value></data>
 </root>

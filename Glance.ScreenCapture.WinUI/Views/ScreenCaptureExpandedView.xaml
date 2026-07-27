@@ -127,7 +127,8 @@
             RowSpacing="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="14" />
-                <RowDefinition Height="*" />
+                <RowDefinition Height="22" />
+                <RowDefinition Height="18" />
             </Grid.RowDefinitions>
             <TextBlock
                 FontWeight="SemiBold"
@@ -137,15 +138,31 @@
             <Grid
                 x:Name="CaptureLandingTarget"
                 Grid.Row="1"
+                Grid.RowSpan="2"
                 VerticalAlignment="Stretch">
                 <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="22" />
+                        <RowDefinition Height="18" />
+                    </Grid.RowDefinitions>
                     <TextBlock
+                        VerticalAlignment="Center"
                         Style="{StaticResource BodyStrongTextBlockStyle}"
                         Text="{x:Bind ViewModel.StatusText, Mode=OneWay}"
                         TextTrimming="CharacterEllipsis"
                         TextWrapping="NoWrap"
                         Visibility="{x:Bind WhenEmpty(ViewModel.HasCaptures), Mode=OneWay}" />
+                    <TextBlock
+                        x:Uid="EmptyDetail"
+                        Grid.Row="1"
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="NoWrap"
+                        Visibility="{x:Bind WhenEmpty(ViewModel.HasCaptures), Mode=OneWay}" />
                     <Controls:CompactFlipView
+                        Grid.RowSpan="2"
                         Margin="-22,0,-12,0"
                         Background="Transparent"
                         ItemTemplate="{StaticResource CaptureItemTemplate}"
