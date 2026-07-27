@@ -5,11 +5,11 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="ModuleDisplayName" xml:space="preserve"><value>Anwesenheit</value></data>
-  <data name="ModuleDescription" xml:space="preserve"><value>Hält den Anwesenheitsstatus aktiv, indem nur bei Inaktivität eine Eingabe gesendet wird.</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Hält Ihren Status verfügbar, wenn Sie kurz weggehen müssen.</value></data>
   <data name="InactiveStatus" xml:space="preserve"><value>Bereit</value></data>
-  <data name="ActiveStatus" xml:space="preserve"><value>Anwesenheit aktiv</value></data>
-  <data name="InactiveDetail" xml:space="preserve"><value>Es wird keine Eingabe simuliert</value></data>
-  <data name="ActiveDetail" xml:space="preserve"><value>Eingaben werden nur bei Inaktivität gesendet</value></data>
+  <data name="ActiveStatus" xml:space="preserve"><value>Bleibt verfügbar</value></data>
+  <data name="InactiveDetail" xml:space="preserve"><value>Starten, wenn Sie kurz weggehen</value></data>
+  <data name="ActiveDetail" xml:space="preserve"><value>Sie bleiben verfügbar, während Sie weg sind</value></data>
   <data name="StartLabel" xml:space="preserve"><value>Anwesenheit starten</value></data>
   <data name="StopLabel" xml:space="preserve"><value>Anwesenheit beenden</value></data>
 </root>

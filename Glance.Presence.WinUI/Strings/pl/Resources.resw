@@ -5,11 +5,11 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="ModuleDisplayName" xml:space="preserve"><value>Obecność</value></data>
-  <data name="ModuleDescription" xml:space="preserve"><value>Utrzymuje aktywną obecność, wysyłając dane wejściowe tylko podczas bezczynności.</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Utrzymuj dostępny status, gdy musisz odejść.</value></data>
   <data name="InactiveStatus" xml:space="preserve"><value>Gotowe</value></data>
-  <data name="ActiveStatus" xml:space="preserve"><value>Obecność aktywna</value></data>
-  <data name="InactiveDetail" xml:space="preserve"><value>Dane wejściowe nie są symulowane</value></data>
-  <data name="ActiveDetail" xml:space="preserve"><value>Dane wejściowe są wysyłane tylko podczas bezczynności</value></data>
+  <data name="ActiveStatus" xml:space="preserve"><value>Pozostaje dostępny</value></data>
+  <data name="InactiveDetail" xml:space="preserve"><value>Włącz, gdy musisz odejść</value></data>
+  <data name="ActiveDetail" xml:space="preserve"><value>Pozostaniesz dostępny podczas nieobecności</value></data>
   <data name="StartLabel" xml:space="preserve"><value>Uruchom obecność</value></data>
   <data name="StopLabel" xml:space="preserve"><value>Zatrzymaj obecność</value></data>
 </root>

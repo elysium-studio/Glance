@@ -5,11 +5,11 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="ModuleDisplayName" xml:space="preserve"><value>在线状态</value></data>
-  <data name="ModuleDescription" xml:space="preserve"><value>仅在你空闲时发送输入，以保持活动状态。</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>需要暂时离开时，仍可保持在线状态。</value></data>
   <data name="InactiveStatus" xml:space="preserve"><value>就绪</value></data>
-  <data name="ActiveStatus" xml:space="preserve"><value>在线状态已启用</value></data>
-  <data name="InactiveDetail" xml:space="preserve"><value>未模拟任何输入</value></data>
-  <data name="ActiveDetail" xml:space="preserve"><value>仅在你空闲时发送输入</value></data>
+  <data name="ActiveStatus" xml:space="preserve"><value>正在保持在线</value></data>
+  <data name="InactiveDetail" xml:space="preserve"><value>需要暂时离开时启动</value></data>
+  <data name="ActiveDetail" xml:space="preserve"><value>离开期间仍会保持在线状态</value></data>
   <data name="StartLabel" xml:space="preserve"><value>启动在线状态</value></data>
   <data name="StopLabel" xml:space="preserve"><value>停止在线状态</value></data>
 </root>

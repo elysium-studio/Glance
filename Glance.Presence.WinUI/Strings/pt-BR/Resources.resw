@@ -5,11 +5,11 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="ModuleDisplayName" xml:space="preserve"><value>Presença</value></data>
-  <data name="ModuleDescription" xml:space="preserve"><value>Mantém uma presença ativa enviando entrada apenas enquanto você está ocioso.</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Mantenha seu status disponível quando precisar se afastar.</value></data>
   <data name="InactiveStatus" xml:space="preserve"><value>Pronto</value></data>
-  <data name="ActiveStatus" xml:space="preserve"><value>Presença ativa</value></data>
-  <data name="InactiveDetail" xml:space="preserve"><value>Nenhuma entrada está sendo simulada</value></data>
-  <data name="ActiveDetail" xml:space="preserve"><value>A entrada é enviada apenas enquanto você está ocioso</value></data>
+  <data name="ActiveStatus" xml:space="preserve"><value>Permanecendo disponível</value></data>
+  <data name="InactiveDetail" xml:space="preserve"><value>Inicie quando precisar se afastar</value></data>
+  <data name="ActiveDetail" xml:space="preserve"><value>Você continuará disponível enquanto estiver ausente</value></data>
   <data name="StartLabel" xml:space="preserve"><value>Iniciar presença</value></data>
   <data name="StopLabel" xml:space="preserve"><value>Parar presença</value></data>
 </root>

@@ -5,11 +5,11 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="ModuleDisplayName" xml:space="preserve"><value>현재 상태</value></data>
-  <data name="ModuleDescription" xml:space="preserve"><value>유휴 상태일 때만 입력을 보내 활성 상태를 유지합니다.</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>자리를 비워야 할 때도 대화 가능 상태를 유지합니다.</value></data>
   <data name="InactiveStatus" xml:space="preserve"><value>준비됨</value></data>
-  <data name="ActiveStatus" xml:space="preserve"><value>현재 상태 활성</value></data>
-  <data name="InactiveDetail" xml:space="preserve"><value>입력을 시뮬레이션하지 않음</value></data>
-  <data name="ActiveDetail" xml:space="preserve"><value>유휴 상태일 때만 입력을 보냄</value></data>
+  <data name="ActiveStatus" xml:space="preserve"><value>대화 가능 상태 유지 중</value></data>
+  <data name="InactiveDetail" xml:space="preserve"><value>자리를 비울 때 시작하세요</value></data>
+  <data name="ActiveDetail" xml:space="preserve"><value>자리를 비운 동안에도 대화 가능 상태를 유지합니다</value></data>
   <data name="StartLabel" xml:space="preserve"><value>현재 상태 시작</value></data>
   <data name="StopLabel" xml:space="preserve"><value>현재 상태 중지</value></data>
 </root>

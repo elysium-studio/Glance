@@ -5,11 +5,11 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="ModuleDisplayName" xml:space="preserve"><value>[Þŕéšéñçé]</value></data>
-  <data name="ModuleDescription" xml:space="preserve"><value>[Máîñţáîñ áñ áçţîvé þŕéšéñçé bý šéñðîñĝ îñþûţ õñļý ŵĥîļé ýõû áŕé îðļé.]</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>[Ķééþ ýõûŕ šţáţûš áváîļáþļé ŵĥéñévéŕ ýõû ñééð ţõ šţéþ áŵáý.]</value></data>
   <data name="InactiveStatus" xml:space="preserve"><value>[Ŕéáðý]</value></data>
-  <data name="ActiveStatus" xml:space="preserve"><value>[Þŕéšéñçé áçţîvé]</value></data>
-  <data name="InactiveDetail" xml:space="preserve"><value>[Ñõ îñþûţ îš béîñĝ šîɱûļáţéð]</value></data>
-  <data name="ActiveDetail" xml:space="preserve"><value>[Îñþûţ îš šéñţ õñļý ŵĥîļé ýõû áŕé îðļé]</value></data>
+  <data name="ActiveStatus" xml:space="preserve"><value>[Šţáýîñĝ áváîļáþļé]</value></data>
+  <data name="InactiveDetail" xml:space="preserve"><value>[Šţáŕţ ŵĥéñ ýõû ñééð ţõ šţéþ áŵáý]</value></data>
+  <data name="ActiveDetail" xml:space="preserve"><value>[Ýõû’ļļ šţáý áváîļáþļé ŵĥîļé ýõû’ŕé áŵáý]</value></data>
   <data name="StartLabel" xml:space="preserve"><value>[Šţáŕţ þŕéšéñçé]</value></data>
   <data name="StopLabel" xml:space="preserve"><value>[Šţõþ þŕéšéñçé]</value></data>
 </root>

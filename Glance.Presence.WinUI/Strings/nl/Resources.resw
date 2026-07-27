@@ -5,11 +5,11 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="ModuleDisplayName" xml:space="preserve"><value>Aanwezigheid</value></data>
-  <data name="ModuleDescription" xml:space="preserve"><value>Behoudt een actieve aanwezigheid door alleen invoer te verzenden wanneer u inactief bent.</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Houd uw status beschikbaar wanneer u even weg moet.</value></data>
   <data name="InactiveStatus" xml:space="preserve"><value>Gereed</value></data>
-  <data name="ActiveStatus" xml:space="preserve"><value>Aanwezigheid actief</value></data>
-  <data name="InactiveDetail" xml:space="preserve"><value>Er wordt geen invoer gesimuleerd</value></data>
-  <data name="ActiveDetail" xml:space="preserve"><value>Invoer wordt alleen verzonden wanneer u inactief bent</value></data>
+  <data name="ActiveStatus" xml:space="preserve"><value>Blijft beschikbaar</value></data>
+  <data name="InactiveDetail" xml:space="preserve"><value>Start wanneer u even weg moet</value></data>
+  <data name="ActiveDetail" xml:space="preserve"><value>U blijft beschikbaar terwijl u weg bent</value></data>
   <data name="StartLabel" xml:space="preserve"><value>Aanwezigheid starten</value></data>
   <data name="StopLabel" xml:space="preserve"><value>Aanwezigheid stoppen</value></data>
 </root>
