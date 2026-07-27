@@ -1,4 +1,5 @@
 using Elysium.Platform.Windows;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
@@ -21,7 +22,7 @@ using PlatformWindowExtensions = Elysium.Platform.Windows.WindowExtensions;
 
 namespace Glance.ThemeSwitcher.WinUI;
 
-public sealed partial class ThemeTransitionService :
+public sealed partial class ThemeTransitionService(ILogger<ThemeTransitionService> logger) :
     IDisposable
 {
     private const uint CaptureBlt = 0x40000000;
@@ -66,8 +67,9 @@ public sealed partial class ThemeTransitionService :
                 throw;
             }
         }
-        catch when (!cancellationToken.IsCancellationRequested)
+        catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
         {
+            logger.LogWarning(exception, "Unable to prepare the captured display for the {Theme} theme transition", theme);
             await applyTheme();
             return;
         }
@@ -85,13 +87,23 @@ public sealed partial class ThemeTransitionService :
         CompositionSurfaceBrush snapshotBrush = compositor.CreateSurfaceBrush(snapshotSurface);
         snapshotBrush.Stretch = CompositionStretch.Fill;
         CompositionRadialGradientBrush cutoutBrush = compositor.CreateRadialGradientBrush();
-        cutoutBrush.MappingMode = CompositionMappingMode.Absolute;
+        cutoutBrush.MappingMode = CompositionMappingMode.Relative;
+        cutoutBrush.CenterPoint = new Vector2((float)(localX / bounds.Width), (float)(localY / bounds.Height));
+        cutoutBrush.EllipseRadius = new Vector2(1f / bounds.Width, 1f / bounds.Height);
         cutoutBrush.ColorStops.Insert(0, compositor.CreateColorGradientStop(0, Windows.UI.Color.FromArgb(0, 255, 255, 255)));
         cutoutBrush.ColorStops.Insert(1, compositor.CreateColorGradientStop(0.985f, Windows.UI.Color.FromArgb(0, 255, 255, 255)));
         cutoutBrush.ColorStops.Insert(2, compositor.CreateColorGradientStop(1, Windows.UI.Color.FromArgb(255, 255, 255, 255)));
+        SpriteVisual maskVisual = compositor.CreateSpriteVisual();
+        maskVisual.Brush = cutoutBrush;
+        maskVisual.Size = new Vector2(bounds.Width, bounds.Height);
+        CompositionVisualSurface maskSurface = compositor.CreateVisualSurface();
+        maskSurface.SourceVisual = maskVisual;
+        maskSurface.SourceSize = maskVisual.Size;
+        CompositionSurfaceBrush maskSurfaceBrush = compositor.CreateSurfaceBrush(maskSurface);
+        maskSurfaceBrush.Stretch = CompositionStretch.Fill;
         CompositionMaskBrush maskedSnapshotBrush = compositor.CreateMaskBrush();
         maskedSnapshotBrush.Source = snapshotBrush;
-        maskedSnapshotBrush.Mask = cutoutBrush;
+        maskedSnapshotBrush.Mask = maskSurfaceBrush;
         SpriteVisual snapshotVisual = compositor.CreateSpriteVisual();
         snapshotVisual.Brush = maskedSnapshotBrush;
         snapshotVisual.RelativeSizeAdjustment = Vector2.One;
@@ -103,25 +115,19 @@ public sealed partial class ThemeTransitionService :
         {
             shown = true;
             await ShowPreparedAsync(transitionWindow, root, bounds, handle, cancellationToken);
-            await RunOnDispatcherAsync(dispatcherQueue, () =>
-            {
-                Vector2 size = new((float)root.ActualWidth, (float)root.ActualHeight);
-                float centerX = size.X * (float)(localX / bounds.Width);
-                float centerY = size.Y * (float)(localY / bounds.Height);
-                cutoutBrush.CenterPoint = new Vector2(centerX, centerY);
-                cutoutBrush.EllipseRadius = Vector2.One;
-            });
             await applyTheme().ConfigureAwait(false);
             await WaitForRenderingFramesAsync(dispatcherQueue, 3, cancellationToken);
             await RunOnDispatcherAsync(dispatcherQueue, () =>
             {
-                float radius = (float)GetCoveringRadius(cutoutBrush.CenterPoint.X, cutoutBrush.CenterPoint.Y, root.ActualWidth, root.ActualHeight) * 1.02f;
+                float radius = (float)GetCoveringRadius(localX, localY, bounds.Width, bounds.Height) * 1.02f;
+                Vector2 initialRadius = new(1f / bounds.Width, 1f / bounds.Height);
+                Vector2 finalRadius = new(radius / bounds.Width, radius / bounds.Height);
                 CubicBezierEasingFunction easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
                 Vector2KeyFrameAnimation reveal = compositor.CreateVector2KeyFrameAnimation();
-                reveal.InsertKeyFrame(0, Vector2.One, easing);
-                reveal.InsertKeyFrame(1, new Vector2(radius), easing);
+                reveal.InsertKeyFrame(0, initialRadius, easing);
+                reveal.InsertKeyFrame(1, finalRadius, easing);
                 reveal.Duration = TimeSpan.FromMilliseconds(300);
-                cutoutBrush.EllipseRadius = new Vector2(radius);
+                cutoutBrush.EllipseRadius = finalRadius;
                 cutoutBrush.StartAnimation(nameof(CompositionRadialGradientBrush.EllipseRadius), reveal);
             });
             await Task.Delay(300, cancellationToken);
@@ -141,6 +147,9 @@ public sealed partial class ThemeTransitionService :
             });
             snapshotVisual.Dispose();
             maskedSnapshotBrush.Dispose();
+            maskSurfaceBrush.Dispose();
+            maskSurface.Dispose();
+            maskVisual.Dispose();
             cutoutBrush.Dispose();
             snapshotBrush.Dispose();
             snapshotSurface.Dispose();
