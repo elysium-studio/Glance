@@ -36,7 +36,7 @@
                         Click="HandleModuleClick"
                         Description="{x:Bind Description}"
                         Header="{x:Bind DisplayName}"
-                        IsClickEnabled="{x:Bind CanOpenSettings, Mode=OneWay}">
+                        IsClickEnabled="{x:Bind CanExpand, Mode=OneWay}">
                         <ToggleSwitch AutomationProperties.Name="{x:Bind DisplayName}" IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
                     </CommunityToolkit:SettingsCard>
                 </DataTemplate>

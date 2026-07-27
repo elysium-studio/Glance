@@ -35,14 +35,14 @@ public sealed partial class ModuleSettingsItemViewModel :
 
     public bool HasSettings => availableSettings.Count > 0;
 
-    public bool CanOpenSettings => IsEnabled && HasSettings;
+    public bool CanExpand => IsEnabled && HasSettings;
 
     public ObservableCollection<IGlanceModuleSettingViewModel> Settings { get; } = [];
 
     private Func<ModuleSettingsItemViewModel, bool, Task<bool>> SetEnabled { get; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanOpenSettings))]
+    [NotifyPropertyChangedFor(nameof(CanExpand))]
     private bool isEnabled;
 
     partial void OnIsEnabledChanged(bool value)

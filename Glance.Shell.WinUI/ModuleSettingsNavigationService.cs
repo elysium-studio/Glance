@@ -12,7 +12,7 @@ public sealed class ModuleSettingsNavigationService
     {
         ArgumentNullException.ThrowIfNull(module);
 
-        if (!module.CanOpenSettings ||
+        if (!module.CanExpand ||
             ReferenceEquals(CurrentModule, module))
         {
             return;

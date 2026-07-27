@@ -26,7 +26,7 @@ public sealed partial class ModulePreferencesView :
         RoutedEventArgs args)
     {
         if (sender is SettingsCard { DataContext: ModuleSettingsItemViewModel module } &&
-            module.CanOpenSettings)
+            module.CanExpand)
         {
             navigation.NavigateTo(module);
         }
