@@ -4,16 +4,17 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:WinUI="using:Elysium.UI.WinUI">
-    <ScrollViewer>
-        <ItemsControl
-            Margin="36,0,36,36"
-            ItemTemplateSelector="{WinUI:ViewTemplateSelector}"
-            ItemsSource="{Binding Settings}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel Spacing="4" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-        </ItemsControl>
-    </ScrollViewer>
+    <ListView
+        Margin="36,0,36,36"
+        ItemTemplateSelector="{WinUI:ViewTemplateSelector}"
+        ItemsSource="{Binding Settings}"
+        SelectionMode="None">
+        <ListView.ItemContainerStyle>
+            <Style TargetType="ListViewItem">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Margin" Value="0,0,0,4" />
+            </Style>
+        </ListView.ItemContainerStyle>
+    </ListView>
 </UserControl>
