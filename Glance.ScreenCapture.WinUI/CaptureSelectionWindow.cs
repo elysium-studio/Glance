@@ -1,5 +1,6 @@
 using Elysium.Platform.Windows;
 using Glance.Application.Abstractions;
+using Microsoft.UI;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
@@ -28,11 +29,11 @@ namespace Glance.ScreenCapture.WinUI;
 
 internal sealed class CaptureSelectionWindow
 {
+    private const int AnimationDurationMs = CaptureBeatDurationMs + CaptureHoldDurationMs + FlightDurationMs;
     private const int CaptureBeatDurationMs = 83;
     private const int CaptureHoldDurationMs = 50;
     private const int ExtendedWindowStyleIndex = -20;
     private const int FlightDurationMs = 250;
-    private const int AnimationDurationMs = CaptureBeatDurationMs + CaptureHoldDurationMs + FlightDurationMs;
     private const int NoActivateExtendedWindowStyle = 0x08000000;
     private const int TransparentExtendedWindowStyle = 0x00000020;
 
@@ -155,6 +156,18 @@ internal sealed class CaptureSelectionWindow
     public static Task<CaptureSelectionResult?> SelectAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<CaptureSelectionCandidate> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue) =>
         ShowOnDispatcherAsync(bitmap, mode, candidates, localizer, dispatcherQueue);
 
+    public void Close()
+    {
+        if (window.DispatcherQueue.HasThreadAccess)
+        {
+            CloseCore();
+        }
+        else
+        {
+            window.DispatcherQueue.TryEnqueue(CloseCore);
+        }
+    }
+
     public Task PlayFlightAsync(DesktopCaptureBitmap capture, NativeRectangle landingBounds, Action onArrived)
     {
         TaskCompletionSource<bool> flightCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -227,6 +240,206 @@ internal sealed class CaptureSelectionWindow
         return reviewCompletion.Task;
     }
 
+    private static async Task CompleteSelectionAsync(Task<CaptureSelectionResult?> selection, TaskCompletionSource<CaptureSelectionResult?> result)
+    {
+        try
+        {
+            result.TrySetResult(await selection);
+        }
+        catch (Exception exception)
+        {
+            result.TrySetException(exception);
+        }
+    }
+
+    private static WriteableBitmap CreateImageSource(DesktopCaptureBitmap bitmap)
+    {
+        WriteableBitmap imageSource = new(bitmap.Width, bitmap.Height);
+        using Stream stream = imageSource.PixelBuffer.AsStream();
+        stream.Write(bitmap.Pixels);
+        imageSource.Invalidate();
+        return imageSource;
+    }
+
+    private static Rect CreateRectangle(Point start, Point end) =>
+        new(Math.Min(start.X, end.X), Math.Min(start.Y, end.Y), Math.Abs(end.X - start.X), Math.Abs(end.Y - start.Y));
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmFlush();
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool EnableWindow(nint window, [MarshalAs(UnmanagedType.Bool)] bool enable);
+
+    [DllImport("user32.dll")]
+    private static extern int GetWindowLong(nint window, int index);
+
+    private static Brush ResolveSmokeBrush()
+    {
+        if (Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("SmokeFillColorDefaultBrush", out object value) && value is Brush brush)
+        {
+            return brush;
+        }
+
+        return new SolidColorBrush(Color.FromArgb(77, 0, 0, 0));
+    }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetForegroundWindow(nint window);
+
+    [DllImport("user32.dll")]
+    private static extern int SetWindowLong(nint window, int index, int newValue);
+
+    private static Task<CaptureSelectionResult?> ShowOnDispatcherAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<CaptureSelectionCandidate> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue)
+    {
+        TaskCompletionSource<CaptureSelectionResult?> result = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        void ShowSelectionWindow()
+        {
+            try
+            {
+                WriteableBitmap imageSource = CreateImageSource(bitmap);
+                CaptureSelectionWindow selectionWindow = new(bitmap, mode, candidates, localizer, imageSource);
+                _ = CompleteSelectionAsync(selectionWindow.ShowAsync(), result);
+            }
+            catch (Exception exception)
+            {
+                result.TrySetException(exception);
+            }
+        }
+
+        if (dispatcherQueue.HasThreadAccess)
+        {
+            ShowSelectionWindow();
+        }
+        else if (!dispatcherQueue.TryEnqueue(ShowSelectionWindow))
+        {
+            result.TrySetException(new InvalidOperationException("Unable to open the capture selection window."));
+        }
+
+        return result.Task;
+    }
+
+    private static CompositionScopedBatch StartFlightAnimation(Border captureSurface, Rect sourceBounds, Rect targetBounds)
+    {
+        Visual captureVisual = ElementCompositionPreview.GetElementVisual(captureSurface);
+        Compositor compositor = captureVisual.Compositor;
+        TimeSpan duration = TimeSpan.FromMilliseconds(AnimationDurationMs);
+        SineEasingFunction captureEasing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.InOut);
+        SineEasingFunction flightEasing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.Out);
+        SineEasingFunction fadeEasing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.InOut);
+        float captureBeatProgress = CaptureBeatDurationMs / (float)AnimationDurationMs;
+        float flightStartProgress = (CaptureBeatDurationMs + CaptureHoldDurationMs) / (float)AnimationDurationMs;
+        float fadeStartProgress = (AnimationDurationMs - CaptureBeatDurationMs) / (float)AnimationDurationMs;
+
+        Vector3 sourceOffset = captureVisual.Offset;
+        Vector3 sourceCenter = new((float)sourceBounds.Width / 2, (float)sourceBounds.Height / 2, 0);
+        Vector3 targetCenter = new((float)(targetBounds.X + (targetBounds.Width / 2)), (float)(targetBounds.Y + (targetBounds.Height / 2)), 0);
+        Vector3 targetOffset = targetCenter - sourceCenter;
+        float targetScale = Math.Min(1, Math.Min(64f / Math.Max(1, (float)sourceBounds.Width), 40f / Math.Max(1, (float)sourceBounds.Height)));
+        Vector3 capturedScale = new(0.965f, 0.965f, 1);
+        Vector3 finalScale = new(targetScale, targetScale, 1);
+
+        captureVisual.CenterPoint = sourceCenter;
+
+        Vector3KeyFrameAnimation offsetAnimation = compositor.CreateVector3KeyFrameAnimation();
+        offsetAnimation.Duration = duration;
+        offsetAnimation.InsertKeyFrame(0, sourceOffset);
+        offsetAnimation.InsertKeyFrame(flightStartProgress, sourceOffset);
+        offsetAnimation.InsertKeyFrame(1, targetOffset, flightEasing);
+
+        Vector3KeyFrameAnimation scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
+        scaleAnimation.Duration = duration;
+        scaleAnimation.InsertKeyFrame(0, Vector3.One);
+        scaleAnimation.InsertKeyFrame(captureBeatProgress, capturedScale, captureEasing);
+        scaleAnimation.InsertKeyFrame(flightStartProgress, capturedScale);
+        scaleAnimation.InsertKeyFrame(1, finalScale, flightEasing);
+
+        ScalarKeyFrameAnimation opacityAnimation = compositor.CreateScalarKeyFrameAnimation();
+        opacityAnimation.Duration = duration;
+        opacityAnimation.InsertKeyFrame(0, 1);
+        opacityAnimation.InsertKeyFrame(fadeStartProgress, 1);
+        opacityAnimation.InsertKeyFrame(1, 0, fadeEasing);
+
+        CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+        captureVisual.Offset = targetOffset;
+        captureVisual.Scale = finalScale;
+        captureVisual.Opacity = 0;
+        captureVisual.StartAnimation(nameof(Visual.Offset), offsetAnimation);
+        captureVisual.StartAnimation(nameof(Visual.Scale), scaleAnimation);
+        captureVisual.StartAnimation(nameof(Visual.Opacity), opacityAnimation);
+        batch.End();
+        return batch;
+    }
+
+    private void ActivateReviewInput()
+    {
+        int extendedStyle = GetWindowLong(windowHandle, ExtendedWindowStyleIndex);
+        extendedStyle &= ~(NoActivateExtendedWindowStyle | TransparentExtendedWindowStyle);
+        _ = SetWindowLong(windowHandle, ExtendedWindowStyleIndex, extendedStyle);
+        _ = EnableWindow(windowHandle, true);
+        window.Activate();
+        _ = SetForegroundWindow(windowHandle);
+        reviewSurface?.Focus();
+    }
+
+    private void CancelSelection()
+    {
+        if (selectionCompleted)
+        {
+            return;
+        }
+
+        selectionCompleted = true;
+        completion.TrySetResult(null);
+        CloseCore();
+    }
+
+    private void ClearHighlight()
+    {
+        smokeCutout.Rect = Rect.Empty;
+        highlight.Visibility = Visibility.Collapsed;
+    }
+
+    private void CloseCore()
+    {
+        if (closed)
+        {
+            return;
+        }
+
+        closed = true;
+        CompositionTarget.Rendering -= HandleCompositionRendering;
+        DetachSelectionHandlers();
+        root.KeyDown -= HandleReviewKeyDown;
+        CaptureReviewSurface? surface = reviewSurface;
+        reviewSurface = null;
+        surface?.CancelImmediately();
+
+        if (surface is not null)
+        {
+            root.Children.Remove(surface.Content);
+        }
+
+        try
+        {
+            PlatformWindowExtensions.viSetOpacity(windowHandle, 0);
+            window.AppWindow.Hide();
+        }
+        catch (COMException)
+        {
+        }
+
+        try
+        {
+            window.Close();
+        }
+        catch (COMException)
+        {
+        }
+    }
+
     private async Task CompleteReviewAsync(CaptureReviewSurface surface, TaskCompletionSource<DesktopCaptureBitmap?> reviewCompletion)
     {
         try
@@ -264,41 +477,186 @@ internal sealed class CaptureSelectionWindow
             }
         }
     }
-
-    public void Close()
+    private void CompleteSelection(CaptureSelectionCandidate candidate)
     {
-        if (window.DispatcherQueue.HasThreadAccess)
+        if (selectionCompleted)
         {
-            CloseCore();
+            return;
         }
-        else
+
+        selectionCompleted = true;
+        root.ReleasePointerCaptures();
+        DetachSelectionHandlers();
+        completion.TrySetResult(new CaptureSelectionResult(candidate, this));
+    }
+
+    private void DetachSelectionHandlers()
+    {
+        root.KeyDown -= HandleKeyDown;
+        root.PointerMoved -= HandlePointerMoved;
+        root.PointerPressed -= HandlePointerPressed;
+        root.PointerReleased -= HandlePointerReleased;
+    }
+
+    private CaptureSelectionCandidate? FindCandidate(Point point)
+    {
+        (int x, int y) = ToScreen(point);
+        CaptureSelectionCandidate candidate = candidates.FirstOrDefault(value => value.Bounds.Contains(x, y));
+        return candidate.Bounds.Width > 0 ? candidate : null;
+    }
+
+    private void HandleClosed(object sender, WindowEventArgs args)
+    {
+        closed = true;
+        CompositionTarget.Rendering -= HandleCompositionRendering;
+        DetachSelectionHandlers();
+        root.KeyDown -= HandleReviewKeyDown;
+        reviewSurface?.CancelImmediately();
+        reviewSurface = null;
+
+        if (!selectionCompleted)
         {
-            window.DispatcherQueue.TryEnqueue(CloseCore);
+            selectionCompleted = true;
+            completion.TrySetResult(null);
         }
     }
 
-    private Task<CaptureSelectionResult?> ShowAsync()
+    private void HandleCompositionRendering(object? sender, object args)
     {
-        AppWindow appWindow = window.AppWindow;
+        renderedFrameCount++;
 
-        if (appWindow.Presenter is OverlappedPresenter presenter)
+        if (closed || isShown)
         {
-            presenter.IsAlwaysOnTop = true;
-            presenter.IsMaximizable = false;
-            presenter.IsMinimizable = false;
-            presenter.IsResizable = false;
-            presenter.SetBorderAndTitleBar(false, false);
+            CompositionTarget.Rendering -= HandleCompositionRendering;
+            return;
         }
 
-        PlatformWindowExtensions.SetBorderless(windowHandle, true);
-        PlatformWindowExtensions.SetCornerRadius(windowHandle, WindowCornerPreference.Sharp);
-        PlatformWindowExtensions.SetTopMost(windowHandle, true);
-        PlatformWindowExtensions.viSetOpacity(windowHandle, 0);
-        appWindow.IsShownInSwitchers = false;
-        appWindow.MoveAndResize(new RectInt32(-32000, -32000, bitmap.Width, bitmap.Height));
-        appWindow.Show(false);
-        return completion.Task;
+        if (!isPositioned)
+        {
+            isPositioned = true;
+            window.AppWindow.MoveAndResize(new RectInt32(bitmap.OriginX, bitmap.OriginY, bitmap.Width, bitmap.Height));
+            return;
+        }
+
+        if (renderedFrameCount < 3)
+        {
+            return;
+        }
+
+        CompositionTarget.Rendering -= HandleCompositionRendering;
+        window.Activate();
+        _ = DwmFlush();
+        root.Focus(FocusState.Programmatic);
+        PlatformWindowExtensions.viSetOpacity(windowHandle, 255);
+        isShown = true;
+
+        if (mode == ScreenCaptureMode.AllDisplays)
+        {
+            CompleteSelection(new CaptureSelectionCandidate(bitmap.Bounds));
+        }
     }
+
+    private void HandleKeyDown(object sender, KeyRoutedEventArgs args)
+    {
+        if (args.Key == Windows.System.VirtualKey.Escape)
+        {
+            args.Handled = true;
+            CancelSelection();
+        }
+    }
+
+    private void HandlePointerMoved(object sender, PointerRoutedEventArgs args)
+    {
+        Point point = args.GetCurrentPoint(root).Position;
+
+        if (mode == ScreenCaptureMode.Region)
+        {
+            if (isDragging)
+            {
+                UpdateRegionHighlight(point);
+            }
+
+            return;
+        }
+
+        CaptureSelectionCandidate? candidate = FindCandidate(point);
+
+        if (candidate is null)
+        {
+            ClearHighlight();
+            return;
+        }
+
+        ShowHighlight(ToLocal(candidate.Value.Bounds));
+    }
+
+    private void HandlePointerPressed(object sender, PointerRoutedEventArgs args)
+    {
+        Point point = args.GetCurrentPoint(root).Position;
+
+        if (mode == ScreenCaptureMode.Region)
+        {
+            selectionStart = point;
+            isDragging = true;
+            root.CapturePointer(args.Pointer);
+            UpdateRegionHighlight(point);
+
+            return;
+        }
+
+        CaptureSelectionCandidate? candidate = FindCandidate(point);
+
+        if (candidate is not null)
+        {
+            CompleteSelection(candidate.Value);
+        }
+    }
+
+    private void HandlePointerReleased(object sender, PointerRoutedEventArgs args)
+    {
+        if (mode != ScreenCaptureMode.Region || !isDragging)
+        {
+            return;
+        }
+
+        isDragging = false;
+        root.ReleasePointerCapture(args.Pointer);
+        Point end = args.GetCurrentPoint(root).Position;
+        Rect local = CreateRectangle(selectionStart, end);
+
+        if (local.Width < 4 || local.Height < 4)
+        {
+            ClearHighlight();
+            return;
+        }
+
+        CompleteSelection(new CaptureSelectionCandidate(ToScreen(local)));
+    }
+
+    private void HandleReviewKeyDown(object sender, KeyRoutedEventArgs args)
+    {
+        if (args.Key == Windows.System.VirtualKey.Escape)
+        {
+            args.Handled = true;
+            reviewSurface?.Dismiss();
+        }
+        else if (args.Key == Windows.System.VirtualKey.Enter)
+        {
+            args.Handled = true;
+            reviewSurface?.Confirm();
+        }
+    }
+
+    private void HandleRootLoaded(object sender, RoutedEventArgs args)
+    {
+        root.Loaded -= HandleRootLoaded;
+        root.UpdateLayout();
+        UpdateSmokeBounds();
+        CompositionTarget.Rendering += HandleCompositionRendering;
+    }
+
+    private void HandleRootSizeChanged(object sender, SizeChangedEventArgs args) =>
+        UpdateSmokeBounds();
 
     private void PlayFlight(DesktopCaptureBitmap capture, NativeRectangle landingBounds, Action onArrived, TaskCompletionSource<bool> flightCompletion)
     {
@@ -430,366 +788,32 @@ internal sealed class CaptureSelectionWindow
                 Finish(exception);
             }
         };
+
         CompositionTarget.Rendering += renderingHandler;
     }
 
-    private static WriteableBitmap CreateImageSource(DesktopCaptureBitmap bitmap)
+    private Task<CaptureSelectionResult?> ShowAsync()
     {
-        WriteableBitmap imageSource = new(bitmap.Width, bitmap.Height);
-        using Stream stream = imageSource.PixelBuffer.AsStream();
-        stream.Write(bitmap.Pixels);
-        imageSource.Invalidate();
-        return imageSource;
+        AppWindow appWindow = window.AppWindow;
+
+        if (appWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.IsAlwaysOnTop = true;
+            presenter.IsMaximizable = false;
+            presenter.IsMinimizable = false;
+            presenter.IsResizable = false;
+            presenter.SetBorderAndTitleBar(false, false);
+        }
+
+        PlatformWindowExtensions.SetBorderless(windowHandle, true);
+        PlatformWindowExtensions.SetCornerRadius(windowHandle, WindowCornerPreference.Sharp);
+        PlatformWindowExtensions.SetTopMost(windowHandle, true);
+        PlatformWindowExtensions.viSetOpacity(windowHandle, 0);
+        appWindow.IsShownInSwitchers = false;
+        appWindow.MoveAndResize(new RectInt32(-32000, -32000, bitmap.Width, bitmap.Height));
+        appWindow.Show(false);
+        return completion.Task;
     }
-
-    private static Brush ResolveSmokeBrush()
-    {
-        if (Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("SmokeFillColorDefaultBrush", out object value) && value is Brush brush)
-        {
-            return brush;
-        }
-
-        return new SolidColorBrush(Windows.UI.Color.FromArgb(77, 0, 0, 0));
-    }
-
-    private static Task<CaptureSelectionResult?> ShowOnDispatcherAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<CaptureSelectionCandidate> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue)
-    {
-        TaskCompletionSource<CaptureSelectionResult?> result = new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        void ShowSelectionWindow()
-        {
-            try
-            {
-                WriteableBitmap imageSource = CreateImageSource(bitmap);
-                CaptureSelectionWindow selectionWindow = new(bitmap, mode, candidates, localizer, imageSource);
-                _ = CompleteSelectionAsync(selectionWindow.ShowAsync(), result);
-            }
-            catch (Exception exception)
-            {
-                result.TrySetException(exception);
-            }
-        }
-
-        if (dispatcherQueue.HasThreadAccess)
-        {
-            ShowSelectionWindow();
-        }
-        else if (!dispatcherQueue.TryEnqueue(ShowSelectionWindow))
-        {
-            result.TrySetException(new InvalidOperationException("Unable to open the capture selection window."));
-        }
-
-        return result.Task;
-    }
-
-    private static async Task CompleteSelectionAsync(Task<CaptureSelectionResult?> selection, TaskCompletionSource<CaptureSelectionResult?> result)
-    {
-        try
-        {
-            result.TrySetResult(await selection);
-        }
-        catch (Exception exception)
-        {
-            result.TrySetException(exception);
-        }
-    }
-
-    private static CompositionScopedBatch StartFlightAnimation(Border captureSurface, Rect sourceBounds, Rect targetBounds)
-    {
-        Visual captureVisual = ElementCompositionPreview.GetElementVisual(captureSurface);
-        Compositor compositor = captureVisual.Compositor;
-        TimeSpan duration = TimeSpan.FromMilliseconds(AnimationDurationMs);
-        SineEasingFunction captureEasing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.InOut);
-        SineEasingFunction flightEasing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.Out);
-        SineEasingFunction fadeEasing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.InOut);
-        float captureBeatProgress = CaptureBeatDurationMs / (float)AnimationDurationMs;
-        float flightStartProgress = (CaptureBeatDurationMs + CaptureHoldDurationMs) / (float)AnimationDurationMs;
-        float fadeStartProgress = (AnimationDurationMs - CaptureBeatDurationMs) / (float)AnimationDurationMs;
-
-        Vector3 sourceOffset = captureVisual.Offset;
-        Vector3 sourceCenter = new((float)sourceBounds.Width / 2, (float)sourceBounds.Height / 2, 0);
-        Vector3 targetCenter = new((float)(targetBounds.X + (targetBounds.Width / 2)), (float)(targetBounds.Y + (targetBounds.Height / 2)), 0);
-        Vector3 targetOffset = targetCenter - sourceCenter;
-        float targetScale = Math.Min(1, Math.Min(64f / Math.Max(1, (float)sourceBounds.Width), 40f / Math.Max(1, (float)sourceBounds.Height)));
-        Vector3 capturedScale = new(0.965f, 0.965f, 1);
-        Vector3 finalScale = new(targetScale, targetScale, 1);
-
-        captureVisual.CenterPoint = sourceCenter;
-
-        Vector3KeyFrameAnimation offsetAnimation = compositor.CreateVector3KeyFrameAnimation();
-        offsetAnimation.Duration = duration;
-        offsetAnimation.InsertKeyFrame(0, sourceOffset);
-        offsetAnimation.InsertKeyFrame(flightStartProgress, sourceOffset);
-        offsetAnimation.InsertKeyFrame(1, targetOffset, flightEasing);
-
-        Vector3KeyFrameAnimation scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
-        scaleAnimation.Duration = duration;
-        scaleAnimation.InsertKeyFrame(0, Vector3.One);
-        scaleAnimation.InsertKeyFrame(captureBeatProgress, capturedScale, captureEasing);
-        scaleAnimation.InsertKeyFrame(flightStartProgress, capturedScale);
-        scaleAnimation.InsertKeyFrame(1, finalScale, flightEasing);
-
-        ScalarKeyFrameAnimation opacityAnimation = compositor.CreateScalarKeyFrameAnimation();
-        opacityAnimation.Duration = duration;
-        opacityAnimation.InsertKeyFrame(0, 1);
-        opacityAnimation.InsertKeyFrame(fadeStartProgress, 1);
-        opacityAnimation.InsertKeyFrame(1, 0, fadeEasing);
-
-        CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
-        captureVisual.Offset = targetOffset;
-        captureVisual.Scale = finalScale;
-        captureVisual.Opacity = 0;
-        captureVisual.StartAnimation(nameof(Visual.Offset), offsetAnimation);
-        captureVisual.StartAnimation(nameof(Visual.Scale), scaleAnimation);
-        captureVisual.StartAnimation(nameof(Visual.Opacity), opacityAnimation);
-        batch.End();
-        return batch;
-    }
-
-    private void HandleRootLoaded(object sender, RoutedEventArgs args)
-    {
-        root.Loaded -= HandleRootLoaded;
-        root.UpdateLayout();
-        UpdateSmokeBounds();
-        CompositionTarget.Rendering += HandleCompositionRendering;
-    }
-
-    private void HandleRootSizeChanged(object sender, SizeChangedEventArgs args) =>
-        UpdateSmokeBounds();
-
-    private void HandleCompositionRendering(object? sender, object args)
-    {
-        renderedFrameCount++;
-
-        if (closed || isShown)
-        {
-            CompositionTarget.Rendering -= HandleCompositionRendering;
-            return;
-        }
-
-        if (!isPositioned)
-        {
-            isPositioned = true;
-            window.AppWindow.MoveAndResize(new RectInt32(bitmap.OriginX, bitmap.OriginY, bitmap.Width, bitmap.Height));
-            return;
-        }
-
-        if (renderedFrameCount < 3)
-        {
-            return;
-        }
-
-        CompositionTarget.Rendering -= HandleCompositionRendering;
-        window.Activate();
-        _ = DwmFlush();
-        root.Focus(FocusState.Programmatic);
-        PlatformWindowExtensions.viSetOpacity(windowHandle, 255);
-        isShown = true;
-
-        if (mode == ScreenCaptureMode.AllDisplays)
-        {
-            CompleteSelection(new CaptureSelectionCandidate(bitmap.Bounds));
-        }
-    }
-
-    private void HandleKeyDown(object sender, KeyRoutedEventArgs args)
-    {
-        if (args.Key == Windows.System.VirtualKey.Escape)
-        {
-            args.Handled = true;
-            CancelSelection();
-        }
-    }
-
-    private void HandleReviewKeyDown(object sender, KeyRoutedEventArgs args)
-    {
-        if (args.Key == Windows.System.VirtualKey.Escape)
-        {
-            args.Handled = true;
-            reviewSurface?.Dismiss();
-        }
-        else if (args.Key == Windows.System.VirtualKey.Enter)
-        {
-            args.Handled = true;
-            reviewSurface?.Confirm();
-        }
-    }
-
-    private void ActivateReviewInput()
-    {
-        int extendedStyle = GetWindowLong(windowHandle, ExtendedWindowStyleIndex);
-        extendedStyle &= ~(NoActivateExtendedWindowStyle | TransparentExtendedWindowStyle);
-        _ = SetWindowLong(windowHandle, ExtendedWindowStyleIndex, extendedStyle);
-        _ = EnableWindow(windowHandle, true);
-        window.Activate();
-        _ = SetForegroundWindow(windowHandle);
-        reviewSurface?.Focus();
-    }
-
-    private void HandlePointerPressed(object sender, PointerRoutedEventArgs args)
-    {
-        Point point = args.GetCurrentPoint(root).Position;
-
-        if (mode == ScreenCaptureMode.Region)
-        {
-            selectionStart = point;
-            isDragging = true;
-            root.CapturePointer(args.Pointer);
-            UpdateRegionHighlight(point);
-            return;
-        }
-
-        CaptureSelectionCandidate? candidate = FindCandidate(point);
-
-        if (candidate is not null)
-        {
-            CompleteSelection(candidate.Value);
-        }
-    }
-
-    private void HandlePointerMoved(object sender, PointerRoutedEventArgs args)
-    {
-        Point point = args.GetCurrentPoint(root).Position;
-
-        if (mode == ScreenCaptureMode.Region)
-        {
-            if (isDragging)
-            {
-                UpdateRegionHighlight(point);
-            }
-
-            return;
-        }
-
-        CaptureSelectionCandidate? candidate = FindCandidate(point);
-
-        if (candidate is null)
-        {
-            ClearHighlight();
-            return;
-        }
-
-        ShowHighlight(ToLocal(candidate.Value.Bounds));
-    }
-
-    private void HandlePointerReleased(object sender, PointerRoutedEventArgs args)
-    {
-        if (mode != ScreenCaptureMode.Region || !isDragging)
-        {
-            return;
-        }
-
-        isDragging = false;
-        root.ReleasePointerCapture(args.Pointer);
-        Point end = args.GetCurrentPoint(root).Position;
-        Rect local = CreateRectangle(selectionStart, end);
-
-        if (local.Width < 4 || local.Height < 4)
-        {
-            ClearHighlight();
-            return;
-        }
-
-        CompleteSelection(new CaptureSelectionCandidate(ToScreen(local)));
-    }
-
-    private void HandleClosed(object sender, WindowEventArgs args)
-    {
-        closed = true;
-        CompositionTarget.Rendering -= HandleCompositionRendering;
-        DetachSelectionHandlers();
-        root.KeyDown -= HandleReviewKeyDown;
-        reviewSurface?.CancelImmediately();
-        reviewSurface = null;
-
-        if (!selectionCompleted)
-        {
-            selectionCompleted = true;
-            completion.TrySetResult(null);
-        }
-    }
-
-    private void CompleteSelection(CaptureSelectionCandidate candidate)
-    {
-        if (selectionCompleted)
-        {
-            return;
-        }
-
-        selectionCompleted = true;
-        root.ReleasePointerCaptures();
-        DetachSelectionHandlers();
-        completion.TrySetResult(new CaptureSelectionResult(candidate, this));
-    }
-
-    private void CancelSelection()
-    {
-        if (selectionCompleted)
-        {
-            return;
-        }
-
-        selectionCompleted = true;
-        completion.TrySetResult(null);
-        CloseCore();
-    }
-
-    private void CloseCore()
-    {
-        if (closed)
-        {
-            return;
-        }
-
-        closed = true;
-        CompositionTarget.Rendering -= HandleCompositionRendering;
-        DetachSelectionHandlers();
-        root.KeyDown -= HandleReviewKeyDown;
-        CaptureReviewSurface? surface = reviewSurface;
-        reviewSurface = null;
-        surface?.CancelImmediately();
-
-        if (surface is not null)
-        {
-            root.Children.Remove(surface.Content);
-        }
-
-        try
-        {
-            PlatformWindowExtensions.viSetOpacity(windowHandle, 0);
-            window.AppWindow.Hide();
-        }
-        catch (COMException)
-        {
-        }
-
-        try
-        {
-            window.Close();
-        }
-        catch (COMException)
-        {
-        }
-    }
-
-    private void DetachSelectionHandlers()
-    {
-        root.KeyDown -= HandleKeyDown;
-        root.PointerMoved -= HandlePointerMoved;
-        root.PointerPressed -= HandlePointerPressed;
-        root.PointerReleased -= HandlePointerReleased;
-    }
-
-    private CaptureSelectionCandidate? FindCandidate(Point point)
-    {
-        (int x, int y) = ToScreen(point);
-        CaptureSelectionCandidate candidate = candidates.FirstOrDefault(value => value.Bounds.Contains(x, y));
-        return candidate.Bounds.Width > 0 ? candidate : null;
-    }
-
-    private void UpdateRegionHighlight(Point end) =>
-        ShowHighlight(CreateRectangle(selectionStart, end));
-
     private void ShowHighlight(Rect rectangle)
     {
         smokeCutout.Rect = rectangle;
@@ -799,29 +823,6 @@ internal sealed class CaptureSelectionWindow
         highlight.Height = rectangle.Height;
         highlight.Visibility = Visibility.Visible;
     }
-
-    private void ClearHighlight()
-    {
-        smokeCutout.Rect = Rect.Empty;
-        highlight.Visibility = Visibility.Collapsed;
-    }
-
-    [DllImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool EnableWindow(nint window, [MarshalAs(UnmanagedType.Bool)] bool enable);
-
-    [DllImport("user32.dll")]
-    private static extern int GetWindowLong(nint window, int index);
-
-    [DllImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool SetForegroundWindow(nint window);
-
-    [DllImport("user32.dll")]
-    private static extern int SetWindowLong(nint window, int index, int newValue);
-
-    private void UpdateSmokeBounds() =>
-        smokeBounds.Rect = new Rect(0, 0, root.ActualWidth, root.ActualHeight);
 
     private Rect ToLocal(NativeRectangle rectangle)
     {
@@ -844,11 +845,10 @@ internal sealed class CaptureSelectionWindow
         return (bitmap.OriginX + (int)Math.Round(point.X * scaleX), bitmap.OriginY + (int)Math.Round(point.Y * scaleY));
     }
 
-    private static Rect CreateRectangle(Point start, Point end) =>
-        new(Math.Min(start.X, end.X), Math.Min(start.Y, end.Y), Math.Abs(end.X - start.X), Math.Abs(end.Y - start.Y));
-
-    [DllImport("dwmapi.dll")]
-    private static extern int DwmFlush();
+    private void UpdateRegionHighlight(Point end) =>
+                        ShowHighlight(CreateRectangle(selectionStart, end));
+    private void UpdateSmokeBounds() =>
+        smokeBounds.Rect = new Rect(0, 0, root.ActualWidth, root.ActualHeight);
 }
 
 internal sealed record CaptureSelectionResult(CaptureSelectionCandidate Candidate, CaptureSelectionWindow Overlay);
