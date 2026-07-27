@@ -66,7 +66,13 @@ public sealed partial class ThemeSwitcherViewModel(IThemeController controller,
     public async Task InitializeAsync()
     {
         ThemeChangeResult result = await controller.RefreshAsync(settings);
-        ApplyResult(result, settings.Preference);
+        ThemePreference initialPreference = settings.Preference == ThemePreference.Sunset
+            ? ThemePreference.Sunset
+            : result.EffectiveTheme == ThemeVariant.Light
+                ? ThemePreference.Light
+                : ThemePreference.Dark;
+        settings.Preference = initialPreference;
+        ApplyResult(result, initialPreference);
     }
 
     public Task SelectLightAsync() => SelectAsync(ThemePreference.Light);

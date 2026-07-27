@@ -1,3 +1,4 @@
+using Elysium.Platform.Windows;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -11,26 +12,18 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Graphics;
-using WinRT;
 using WinRT.Interop;
 using WinUIEx;
+using PlatformWindowExtensions = Elysium.Platform.Windows.WindowExtensions;
 
 namespace Glance.ThemeSwitcher.WinUI;
 
 public sealed partial class ThemeTransitionService
 {
-    private const int CaptionStyle = 0x00C00000;
-    private const uint DwmBorderColorAttribute = 34;
-    private const uint DwmColorNone = 0xFFFFFFFE;
-    private const uint DwmCornerPreferenceAttribute = 33;
-    private const uint DwmDoNotRound = 1;
     private const int ExtendedWindowStyleIndex = -20;
     private const int NoActivateWindowStyle = 0x08000000;
-    private const int ResizableFrameStyle = 0x00040000;
-    private const int SystemMenuStyle = 0x00080000;
     private const int ToolWindowStyle = 0x00000080;
     private const int TransparentWindowStyle = 0x00000020;
-    private const int WindowStyleIndex = -16;
 
     public async Task PlayAsync(ThemeVariant theme,
         Func<Task> applyTheme,
@@ -72,46 +65,55 @@ public sealed partial class ThemeTransitionService
         };
         root.Children.Add(wash);
 
-        Window window = CreateWindow(root, bounds);
+        (Window window, nint handle) = CreateWindow(root, bounds);
         Visual washVisual = ElementCompositionPreview.GetElementVisual(wash);
         washVisual.CenterPoint = new Vector3((float)radius, (float)radius, 0);
-        washVisual.Scale = Vector3.Zero;
+        washVisual.Scale = new Vector3(0.015f);
         Visual rootVisual = ElementCompositionPreview.GetElementVisual(root);
         rootVisual.Opacity = 1;
 
         TaskCompletionSource<bool> loaded = new(TaskCreationOptions.RunContinuationsAsynchronously);
         root.Loaded += (_, _) => loaded.TrySetResult(true);
-        window.AppWindow.Show(activateWindow: false);
+        window.AppWindow.Show(false);
 
         try
         {
             await loaded.Task.WaitAsync(TimeSpan.FromSeconds(2), cancellationToken);
+            root.UpdateLayout();
+            await WaitForRenderingFramesAsync(2, cancellationToken);
+            window.AppWindow.MoveAndResize(bounds);
+            await WaitForRenderingFramesAsync(2, cancellationToken);
+            _ = DwmFlush();
+            PlatformWindowExtensions.viSetOpacity(handle, 255);
+
             Compositor compositor = washVisual.Compositor;
             CubicBezierEasingFunction revealEasing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
             Vector3KeyFrameAnimation reveal = compositor.CreateVector3KeyFrameAnimation();
             reveal.InsertKeyFrame(0, new Vector3(0.015f), revealEasing);
             reveal.InsertKeyFrame(1, Vector3.One, revealEasing);
             reveal.Duration = TimeSpan.FromMilliseconds(300);
-            washVisual.StartAnimation(nameof(Visual.Scale), reveal);
+            washVisual.Scale = Vector3.One;
+            Task revealCompletion = PlayAnimationAsync(washVisual, nameof(Visual.Scale), reveal, cancellationToken);
 
             await Task.Delay(145, cancellationToken);
             await applyTheme();
-            await Task.Delay(155, cancellationToken);
+            await revealCompletion;
 
             ScalarKeyFrameAnimation fade = compositor.CreateScalarKeyFrameAnimation();
             fade.InsertKeyFrame(0, 1);
             fade.InsertKeyFrame(1, 0, compositor.CreateCubicBezierEasingFunction(new Vector2(0.4f, 0), new Vector2(1, 1)));
             fade.Duration = TimeSpan.FromMilliseconds(150);
-            rootVisual.StartAnimation(nameof(Visual.Opacity), fade);
-            await Task.Delay(150, cancellationToken);
+            rootVisual.Opacity = 0;
+            await PlayAnimationAsync(rootVisual, nameof(Visual.Opacity), fade, cancellationToken);
         }
         finally
         {
+            PlatformWindowExtensions.viSetOpacity(handle, 0);
             window.Close();
         }
     }
 
-    private static Window CreateWindow(UIElement content,
+    private static (Window Window, nint Handle) CreateWindow(UIElement content,
         RectInt32 bounds)
     {
         Window window = new()
@@ -123,24 +125,16 @@ public sealed partial class ThemeTransitionService
         window.SetTitleBar(null);
         window.AppWindow.IsShownInSwitchers = false;
 
-        OverlappedPresenter presenter = window.AppWindow.Presenter.As<OverlappedPresenter>();
-        presenter.SetBorderAndTitleBar(false, false);
-        presenter.IsAlwaysOnTop = true;
-        presenter.IsMaximizable = false;
-        presenter.IsMinimizable = false;
-        presenter.IsResizable = false;
-
         nint handle = WindowNative.GetWindowHandle(window);
-        int style = GetWindowLong(handle, WindowStyleIndex);
-        _ = SetWindowLong(handle, WindowStyleIndex, style & ~CaptionStyle & ~ResizableFrameStyle & ~SystemMenuStyle);
+        PlatformWindowExtensions.SetBorderless(handle, true);
+        PlatformWindowExtensions.SetCornerRadius(handle, WindowCornerPreference.Sharp);
+        PlatformWindowExtensions.SetTopMost(handle, true);
+        PlatformWindowExtensions.viSetOpacity(handle, 0);
+
         int extendedStyle = GetWindowLong(handle, ExtendedWindowStyleIndex);
         _ = SetWindowLong(handle, ExtendedWindowStyleIndex, extendedStyle | TransparentWindowStyle | ToolWindowStyle | NoActivateWindowStyle);
-        uint cornerPreference = DwmDoNotRound;
-        uint borderColor = DwmColorNone;
-        _ = DwmSetWindowAttribute(handle, DwmCornerPreferenceAttribute, in cornerPreference, sizeof(uint));
-        _ = DwmSetWindowAttribute(handle, DwmBorderColorAttribute, in borderColor, sizeof(uint));
-        window.AppWindow.MoveAndResize(bounds);
-        return window;
+        window.AppWindow.MoveAndResize(new RectInt32(-32000, -32000, bounds.Width, bounds.Height));
+        return (window, handle);
     }
 
     private static double GetCoveringRadius(double x,
@@ -152,6 +146,63 @@ public sealed partial class ThemeTransitionService
         double vertical = Math.Max(y, height - y);
         return Math.Sqrt(horizontal * horizontal + vertical * vertical);
     }
+
+    private static async Task PlayAnimationAsync(Visual visual,
+        string propertyName,
+        CompositionAnimation animation,
+        CancellationToken cancellationToken)
+    {
+        TaskCompletionSource<bool> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        using CancellationTokenRegistration registration = cancellationToken.Register(() => completion.TrySetCanceled(cancellationToken));
+        using CompositionScopedBatch batch = visual.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+        batch.Completed += HandleCompleted;
+        visual.StartAnimation(propertyName, animation);
+        batch.End();
+
+        try
+        {
+            await completion.Task.WaitAsync(TimeSpan.FromSeconds(2), cancellationToken);
+        }
+        finally
+        {
+            batch.Completed -= HandleCompleted;
+            visual.StopAnimation(propertyName);
+        }
+
+        void HandleCompleted(object sender, CompositionBatchCompletedEventArgs args) =>
+            completion.TrySetResult(true);
+    }
+
+    private static async Task WaitForRenderingFramesAsync(int count,
+        CancellationToken cancellationToken)
+    {
+        int frames = 0;
+        TaskCompletionSource<bool> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        using CancellationTokenRegistration registration = cancellationToken.Register(() => completion.TrySetCanceled(cancellationToken));
+        CompositionTarget.Rendering += HandleRendering;
+
+        try
+        {
+            await completion.Task.WaitAsync(TimeSpan.FromSeconds(2), cancellationToken);
+        }
+        finally
+        {
+            CompositionTarget.Rendering -= HandleRendering;
+        }
+
+        void HandleRendering(object? sender, object args)
+        {
+            frames++;
+
+            if (frames >= count)
+            {
+                completion.TrySetResult(true);
+            }
+        }
+    }
+
+    [LibraryImport("dwmapi.dll")]
+    private static partial int DwmFlush();
 
     [LibraryImport("user32.dll", EntryPoint = "GetCursorPos")]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -165,12 +216,6 @@ public sealed partial class ThemeTransitionService
     private static partial int SetWindowLong(nint window,
         int index,
         int value);
-
-    [LibraryImport("dwmapi.dll")]
-    private static partial int DwmSetWindowAttribute(nint window,
-        uint attribute,
-        in uint value,
-        uint size);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct NativePoint

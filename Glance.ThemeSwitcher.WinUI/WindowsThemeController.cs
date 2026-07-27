@@ -18,6 +18,12 @@ public sealed class WindowsThemeController(WindowsSystemThemeService systemTheme
     {
         try
         {
+            if (!initialized && settings.Preference != ThemePreference.Sunset)
+            {
+                initialized = true;
+                return new ThemeChangeResult(true, CurrentTheme, null);
+            }
+
             ThemeChangeResult result = settings.Preference switch
             {
                 ThemePreference.Light => await ApplyAsync(ThemeVariant.Light, null, initialized && settings.AnimateTransitions, cancellationToken),

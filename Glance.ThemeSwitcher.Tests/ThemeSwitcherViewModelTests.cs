@@ -58,10 +58,27 @@ public sealed class ThemeSwitcherViewModelTests
         Assert.Equal("Location required", viewModel.DetailText);
     }
 
+    [Fact]
+    public async Task InitializeAsync_AdoptsTheCurrentWindowsThemeForManualMode()
+    {
+        ThemeSwitcherSettings settings = new() { Preference = ThemePreference.Light };
+        FakeThemeController controller = new()
+        {
+            CurrentTheme = ThemeVariant.Dark
+        };
+        ThemeSwitcherViewModel viewModel = new(controller, settings, new FakeLocalizer());
+
+        await viewModel.InitializeAsync();
+
+        Assert.Equal(ThemePreference.Dark, viewModel.Preference);
+        Assert.Equal(ThemeVariant.Dark, viewModel.EffectiveTheme);
+        Assert.Equal(ThemePreference.Dark, settings.Preference);
+    }
+
     private sealed class FakeThemeController :
         IThemeController
     {
-        public ThemeVariant CurrentTheme => ThemeVariant.Light;
+        public ThemeVariant CurrentTheme { get; init; } = ThemeVariant.Light;
 
         public ThemeChangeResult SelectionResult { get; init; } = new(true, ThemeVariant.Dark, null);
 
