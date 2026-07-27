@@ -24,22 +24,11 @@
                 Foreground="{ThemeResource GlanceFocusSessionIconBrush}"
                 Glyph="&#xE708;" />
         </Grid>
-        <Grid
+        <TextBlock
             Grid.Column="1"
-            Height="28"
-            VerticalAlignment="Center">
-            <TextBlock
-                HorizontalAlignment="Left"
-                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                Style="{StaticResource BodyStrongTextBlockStyle}"
-                Text="{x:Bind ViewModel.RemainingText, Mode=OneWay}" />
-            <ProgressBar
-                Height="2"
-                VerticalAlignment="Bottom"
-                Background="{ThemeResource GlanceFocusSessionTrackBrush}"
-                Foreground="{ThemeResource GlanceFocusSessionIconBrush}"
-                Maximum="100"
-                Value="{x:Bind ViewModel.Progress, Mode=OneWay}" />
-        </Grid>
+            VerticalAlignment="Center"
+            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+            Style="{StaticResource BodyStrongTextBlockStyle}"
+            Text="{x:Bind ViewModel.RemainingText, Mode=OneWay}" />
     </Grid>
 </UserControl>
