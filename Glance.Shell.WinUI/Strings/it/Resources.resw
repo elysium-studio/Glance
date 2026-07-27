@@ -10,8 +10,6 @@
   <data name="ModulesSectionTitle.Text" xml:space="preserve"><value>Moduli</value></data>
   <data name="WindowsSectionTitle.Text" xml:space="preserve"><value>Windows</value></data>
   <data name="ModulesDescription.Text" xml:space="preserve"><value>Scegli i moduli visualizzati in Glance e trascinali nell’ordine preferito.</value></data>
-  <data name="ModulesReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Riordina</value></data>
-  <data name="ModulesReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Riordina</value></data>
   <data name="ModulesReorderCancelButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Annulla</value></data>
   <data name="ModulesReorderCancelButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Annulla</value></data>
   <data name="ModulesReorderDoneButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Fine</value></data>

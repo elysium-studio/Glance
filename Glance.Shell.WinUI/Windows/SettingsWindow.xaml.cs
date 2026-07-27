@@ -12,7 +12,8 @@ namespace Glance.Shell.WinUI;
 
 public sealed partial class SettingsWindow :
     Window,
-    IRecipient<ModuleSettingsNavigationRequestedEventArgs>
+    IRecipient<ModuleSettingsNavigationRequestedEventArgs>,
+    IRecipient<ModuleReorderingRequestedEventArgs>
 {
     private const int WindowWidth = 1100;
     private const int WindowHeight = 680;
@@ -31,6 +32,7 @@ public sealed partial class SettingsWindow :
         InitializeComponent();
 
         messenger.Register<ModuleSettingsNavigationRequestedEventArgs>(this);
+        messenger.Register<ModuleReorderingRequestedEventArgs>(this);
         Closed += HandleClosed;
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
@@ -67,6 +69,9 @@ public sealed partial class SettingsWindow :
         UpdateNavigation(ViewModel.SelectedItem);
     }
 
+    public void Receive(ModuleReorderingRequestedEventArgs message) =>
+        ViewModel.BeginReordering();
+
     private void HandleLoaded(object sender,
         RoutedEventArgs args) =>
         UpdateNavigation(ViewModel.SelectedItem);
@@ -81,10 +86,6 @@ public sealed partial class SettingsWindow :
     private void HandleBackRequested(TitleBar sender,
         object args) =>
         GoBack();
-
-    private void HandleBeginReordering(object sender,
-        RoutedEventArgs args) =>
-        ViewModel.BeginReordering();
 
     private async void HandleCompleteReordering(object sender,
         RoutedEventArgs args)

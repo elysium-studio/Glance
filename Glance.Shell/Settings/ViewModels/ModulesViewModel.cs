@@ -120,6 +120,7 @@ public sealed partial class ModulesViewModel :
             preference.IsEnabled,
             availableSettings.OrderBy(setting => setting.Order),
             module => Messenger.Send(new ModuleSettingsNavigationRequestedEventArgs(module)),
+            () => Messenger.Send(new ModuleReorderingRequestedEventArgs()),
             (_, enabled) => preferences.SetEnabledAsync(preference.Id, enabled));
     }
 

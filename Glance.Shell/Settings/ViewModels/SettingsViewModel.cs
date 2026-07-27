@@ -10,11 +10,9 @@ public sealed partial class SettingsViewModel :
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanReorderCurrentView))]
-    [NotifyPropertyChangedFor(nameof(CanStartReordering))]
     private ISettingViewModel? currentView;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanStartReordering))]
     private bool isReorderingCurrentView;
 
     public SettingsViewModel(IServiceProvider provider,
@@ -29,9 +27,6 @@ public sealed partial class SettingsViewModel :
 
     public bool CanReorderCurrentView =>
         CurrentView is IReorderableSettingViewModel { CanReorder: true };
-
-    public bool CanStartReordering =>
-        CanReorderCurrentView && !IsReorderingCurrentView;
 
     public void NavigateTo(ISettingViewModel? viewModel)
     {

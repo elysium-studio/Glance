@@ -89,18 +89,6 @@
                         Orientation="Horizontal"
                         Spacing="8">
                         <Button
-                            x:Uid="ModulesReorderButton"
-                            Width="32"
-                            Height="32"
-                            Click="HandleBeginReordering"
-                            Padding="0"
-                            Visibility="{x:Bind ToVisibility(ViewModel.CanStartReordering), Mode=OneWay}">
-                            <FontIcon
-                                FontFamily="Segoe Fluent Icons"
-                                FontSize="12"
-                                Glyph="&#xE76F;" />
-                        </Button>
-                        <Button
                             x:Uid="ModulesReorderCancelButton"
                             Width="32"
                             Height="32"
