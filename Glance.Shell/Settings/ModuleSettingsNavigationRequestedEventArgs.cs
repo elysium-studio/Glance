@@ -10,3 +10,7 @@ public sealed class ModuleSettingsNavigationRequestedEventArgs
 
     public ModuleSettingsItemViewModel Module { get; }
 }
+
+public sealed class ModuleReorderingRequestedEventArgs
+{
+}
