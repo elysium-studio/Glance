@@ -81,7 +81,6 @@
                         <DataTemplate x:DataType="Shell:ISettingViewModel">
                             <ListView
                                 Margin="36,0,36,36"
-                                ItemTemplateSelector="{WinUI:ViewTemplateSelector}"
                                 ItemsSource="{x:Bind}"
                                 SelectionMode="None">
                                 <ListView.ItemContainerStyle>
@@ -91,6 +90,14 @@
                                         <Setter Property="Margin" Value="0,0,0,4" />
                                     </Style>
                                 </ListView.ItemContainerStyle>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <ContentControl
+                                            HorizontalContentAlignment="Stretch"
+                                            Content="{Binding}"
+                                            ContentTemplateSelector="{WinUI:ViewTemplateSelector}" />
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
                             </ListView>
                         </DataTemplate>
                     </ContentControl.ContentTemplate>
