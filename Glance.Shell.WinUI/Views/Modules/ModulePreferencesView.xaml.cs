@@ -14,6 +14,7 @@ public sealed partial class ModulePreferencesView :
     UserControl
 {
     private const double ReorderThreshold = 6;
+    private ModuleSettingsItemViewModel? draggedModule;
     private IAsyncOperation<DataPackageOperation>? reorderOperation;
     private ListViewItem? reorderCandidate;
     private Point reorderStartPoint;
@@ -35,10 +36,6 @@ public sealed partial class ModulePreferencesView :
 
     public static Visibility WhenSettingsUnavailable(bool hasSettings) =>
         hasSettings ? Visibility.Collapsed : Visibility.Visible;
-
-    private async void HandleDragItemsCompleted(ListViewBase sender,
-        DragItemsCompletedEventArgs args) =>
-        await ViewModel.SaveOrderAsync();
 
     private void HandleModulePointerPressed(object sender,
         PointerRoutedEventArgs args)
@@ -85,6 +82,8 @@ public sealed partial class ModulePreferencesView :
         }
 
         _ = container.CapturePointer(args.Pointer);
+        draggedModule = (ModuleSettingsItemViewModel)ModulesListView.ItemFromContainer(container);
+        container.DragStarting += HandleModuleDragStarting;
         reorderOperation = container.StartDragAsync(args.GetCurrentPoint(container));
         reorderOperation.Completed = HandleReorderOperationCompleted;
         args.Handled = true;
@@ -99,14 +98,93 @@ public sealed partial class ModulePreferencesView :
         }
     }
 
+    private void HandleModuleDragStarting(UIElement sender,
+        DragStartingEventArgs args)
+    {
+        args.Data.RequestedOperation = DataPackageOperation.Move;
+        args.Data.SetText(draggedModule?.Id ?? string.Empty);
+    }
+
+    private void HandleModuleDragOver(object sender,
+        DragEventArgs args)
+    {
+        if (draggedModule is null)
+        {
+            return;
+        }
+
+        args.AcceptedOperation = DataPackageOperation.Move;
+        args.DragUIOverride.IsCaptionVisible = false;
+        args.Handled = true;
+    }
+
+    private async void HandleModuleDrop(object sender,
+        DragEventArgs args)
+    {
+        if (draggedModule is null)
+        {
+            return;
+        }
+
+        int oldIndex = ViewModel.Modules.IndexOf(draggedModule);
+        int insertionIndex = FindInsertionIndex(args.GetPosition(ModulesListView));
+
+        if (insertionIndex > oldIndex)
+        {
+            insertionIndex--;
+        }
+
+        int newIndex = Math.Clamp(insertionIndex, 0, ViewModel.Modules.Count - 1);
+
+        if (oldIndex >= 0 &&
+            oldIndex != newIndex)
+        {
+            ViewModel.Modules.Move(oldIndex, newIndex);
+            await ViewModel.SaveOrderAsync();
+        }
+
+        args.AcceptedOperation = DataPackageOperation.Move;
+        args.Handled = true;
+    }
+
     private void HandleReorderOperationCompleted(IAsyncOperation<DataPackageOperation> operation,
         AsyncStatus status) =>
         DispatcherQueue.TryEnqueue(() =>
         {
+            if (reorderCandidate is not null)
+            {
+                reorderCandidate.DragStarting -= HandleModuleDragStarting;
+            }
+
             reorderCandidate?.ReleasePointerCaptures();
             reorderOperation = null;
+            draggedModule = null;
             ResetReorderCandidate();
         });
+
+    private int FindInsertionIndex(Point pointerPosition)
+    {
+        int lastRealizedIndex = -1;
+
+        for (int index = 0; index < ViewModel.Modules.Count; index++)
+        {
+            if (ModulesListView.ContainerFromIndex(index) is not ListViewItem container)
+            {
+                continue;
+            }
+
+            lastRealizedIndex = index;
+            Rect bounds = container.TransformToVisual(ModulesListView)
+                .TransformBounds(new Rect(0, 0, container.ActualWidth, container.ActualHeight));
+
+            if (pointerPosition.Y < bounds.Y + (bounds.Height / 2))
+            {
+                return index;
+            }
+        }
+
+        return lastRealizedIndex + 1;
+    }
 
     private ListViewItem? FindListViewItem(DependencyObject source)
     {

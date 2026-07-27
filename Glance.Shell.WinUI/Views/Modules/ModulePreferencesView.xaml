@@ -18,12 +18,10 @@
         <ListView
             x:Name="ModulesListView"
             AllowDrop="True"
-            CanDragItems="True"
-            CanReorderItems="True"
-            DragItemsCompleted="{x:Bind HandleDragItemsCompleted}"
+            DragOver="{x:Bind HandleModuleDragOver}"
+            Drop="{x:Bind HandleModuleDrop}"
             ItemsSource="{x:Bind ViewModel.Modules, Mode=OneWay}"
             MaxHeight="480"
-            ReorderMode="Enabled"
             ScrollViewer.VerticalScrollBarVisibility="Auto"
             ScrollViewer.VerticalScrollMode="Enabled"
             SelectionMode="None">
