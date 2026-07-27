@@ -134,27 +134,37 @@ internal sealed class CaptureReviewSurface
 
     public void PlayEntrance(Rect sourceBounds)
     {
+        ElementCompositionPreview.SetIsTranslationEnabled(animationPreview, true);
+
         Visual animationVisual = ElementCompositionPreview.GetElementVisual(animationPreview);
         Visual previewVisual = ElementCompositionPreview.GetElementVisual(previewHost);
         Visual backdropVisual = ElementCompositionPreview.GetElementVisual(reviewBackdrop);
-        Vector3 animationOffset = animationVisual.Offset;
+        Vector3 targetTranslation = animationPreview.Translation;
         Vector3 sourceCenter = new((float)(sourceBounds.X + (sourceBounds.Width / 2)), (float)(sourceBounds.Y + (sourceBounds.Height / 2)), 0);
         Vector3 targetCenter = new((float)(PreviewBounds.X + (PreviewBounds.Width / 2)), (float)(PreviewBounds.Y + (PreviewBounds.Height / 2)), 0);
-        Vector3 sourceOffset = animationOffset + sourceCenter - targetCenter;
+        Vector3 sourceTranslation = targetTranslation + sourceCenter - targetCenter;
         Vector3 sourceScale = new((float)Math.Max(0.01, sourceBounds.Width / PreviewBounds.Width), (float)Math.Max(0.01, sourceBounds.Height / PreviewBounds.Height), 1);
 
         animationVisual.CenterPoint = new Vector3((float)PreviewBounds.Width / 2, (float)PreviewBounds.Height / 2, 0);
-        animationVisual.Offset = sourceOffset;
+        animationPreview.Translation = sourceTranslation;
         animationVisual.Scale = sourceScale;
         animationVisual.Opacity = 1;
         previewVisual.Opacity = 0;
         backdropVisual.Opacity = 0;
 
+        int preparationFrames = 0;
         entranceRenderingHandler = (_, _) =>
         {
+            preparationFrames++;
+
+            if (preparationFrames < 2)
+            {
+                return;
+            }
+
             CompositionTarget.Rendering -= entranceRenderingHandler;
             entranceRenderingHandler = null;
-            StartEntranceAnimations(animationVisual, previewVisual, backdropVisual, animationOffset, sourceOffset, sourceScale);
+            StartEntranceAnimations(animationVisual, previewVisual, backdropVisual, targetTranslation, sourceTranslation, sourceScale);
         };
 
         CompositionTarget.Rendering += entranceRenderingHandler;
@@ -223,30 +233,30 @@ internal sealed class CaptureReviewSurface
         entranceTimer = null;
     }
 
-    private void StartEntranceAnimations(Visual animationVisual, Visual previewVisual, Visual backdropVisual, Vector3 animationOffset, Vector3 sourceOffset, Vector3 sourceScale)
+    private void StartEntranceAnimations(Visual animationVisual, Visual previewVisual, Visual backdropVisual, Vector3 targetTranslation, Vector3 sourceTranslation, Vector3 sourceScale)
     {
         Compositor compositor = animationVisual.Compositor;
         TimeSpan duration = TimeSpan.FromMilliseconds(EntranceDurationMs);
         CubicBezierEasingFunction travelEasing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 0.84f), new Vector2(0.28f, 1));
         SineEasingFunction fadeEasing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.Out);
 
-        Vector3KeyFrameAnimation offsetAnimation = compositor.CreateVector3KeyFrameAnimation();
-        offsetAnimation.Duration = duration;
-        offsetAnimation.InsertKeyFrame(0, sourceOffset);
-        offsetAnimation.InsertKeyFrame(1, animationOffset, travelEasing);
+        Vector3KeyFrameAnimation translationAnimation = compositor.CreateVector3KeyFrameAnimation();
+        translationAnimation.Duration = duration;
+        translationAnimation.InsertKeyFrame(0, sourceTranslation);
+        translationAnimation.InsertKeyFrame(1, targetTranslation, travelEasing);
 
         Vector3KeyFrameAnimation scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
         scaleAnimation.Duration = duration;
         scaleAnimation.InsertKeyFrame(0, sourceScale);
         scaleAnimation.InsertKeyFrame(1, Vector3.One, travelEasing);
 
-        animationVisual.Offset = animationOffset;
+        animationPreview.Translation = targetTranslation;
         animationVisual.Scale = Vector3.One;
         animationVisual.Opacity = 0;
         previewVisual.Opacity = 1;
         backdropVisual.Opacity = 1;
 
-        animationVisual.StartAnimation(nameof(Visual.Offset), offsetAnimation);
+        animationVisual.StartAnimation("Translation", translationAnimation);
         animationVisual.StartAnimation(nameof(Visual.Scale), scaleAnimation);
         animationVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 1, 0, duration, fadeEasing, 0.9f));
         previewVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, fadeEasing, 0.86f));
