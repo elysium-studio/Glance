@@ -196,7 +196,7 @@ internal sealed class CaptureSelectionWindow
                 root.Children.Insert(root.Children.Count - 1, reviewSurface.Content);
                 root.KeyDown += HandleReviewKeyDown;
                 root.UpdateLayout();
-                await reviewSurface.PlayEntranceAsync(ToLocal(capture.Bounds));
+                reviewSurface.PlayEntrance(ToLocal(capture.Bounds));
                 DesktopCaptureBitmap? result = await reviewSurface.Completion;
                 reviewCompletion.TrySetResult(result);
 
@@ -619,6 +619,7 @@ internal sealed class CaptureSelectionWindow
         root.KeyDown -= HandleReviewKeyDown;
         reviewSurface?.CancelImmediately();
         reviewSurface?.Detach();
+        reviewSurface = null;
 
         if (!selectionCompleted)
         {
@@ -662,10 +663,32 @@ internal sealed class CaptureSelectionWindow
         CompositionTarget.Rendering -= HandleCompositionRendering;
         DetachSelectionHandlers();
         root.KeyDown -= HandleReviewKeyDown;
-        reviewSurface?.CancelImmediately();
-        reviewSurface?.Detach();
-        PlatformWindowExtensions.viSetOpacity(windowHandle, 0);
-        window.Close();
+        CaptureReviewSurface? surface = reviewSurface;
+        reviewSurface = null;
+        surface?.CancelImmediately();
+        surface?.Detach();
+
+        if (surface is not null)
+        {
+            root.Children.Remove(surface.Content);
+        }
+
+        try
+        {
+            PlatformWindowExtensions.viSetOpacity(windowHandle, 0);
+            window.AppWindow.Hide();
+        }
+        catch (COMException)
+        {
+        }
+
+        try
+        {
+            window.Close();
+        }
+        catch (COMException)
+        {
+        }
     }
 
     private void DetachSelectionHandlers()
