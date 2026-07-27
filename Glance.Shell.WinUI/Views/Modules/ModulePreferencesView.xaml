@@ -18,7 +18,6 @@
             CanReorderItems="True"
             DragItemsCompleted="{x:Bind HandleDragItemsCompleted}"
             ItemsSource="{x:Bind ViewModel.Modules, Mode=OneWay}"
-            MaxHeight="480"
             ReorderMode="Enabled"
             ScrollViewer.VerticalScrollBarVisibility="Auto"
             ScrollViewer.VerticalScrollMode="Enabled"
