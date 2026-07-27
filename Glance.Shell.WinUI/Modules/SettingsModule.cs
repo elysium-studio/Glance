@@ -14,7 +14,7 @@ public sealed class SettingsModule :
     {
         services
             .AddViewFor(ServiceLifetime.Transient,
-                provider => new SettingsWindow(provider.GetRequiredService<ModuleSettingsNavigationService>(), provider.GetRequiredService<ITextLocalizer>()),
+                provider => new SettingsWindow(provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<ITextLocalizer>()),
                 provider => new SettingsViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IEnumerable<ISettingViewModel>>()))
             .AddViewFor<GlanceView, ISettingViewModel, GlanceViewModel>(ServiceLifetime.Transient,
                 provider => new GlanceView(),

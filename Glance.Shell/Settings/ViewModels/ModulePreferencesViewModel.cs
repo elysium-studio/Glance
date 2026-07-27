@@ -34,6 +34,17 @@ public sealed partial class ModulePreferencesViewModel :
     public Task SaveOrderAsync() =>
         preferences.SetOrderAsync(Modules.Select(item => item.Id));
 
+    public void NavigateToSettings(ModuleSettingsItemViewModel module)
+    {
+        ArgumentNullException.ThrowIfNull(module);
+
+        if (module.CanExpand &&
+            Modules.Contains(module))
+        {
+            Messenger.Send(new ModuleSettingsNavigationRequestedEventArgs(module));
+        }
+    }
+
     public override void Dispose()
     {
         preferences.ComponentsAdded -= HandleComponentsAdded;

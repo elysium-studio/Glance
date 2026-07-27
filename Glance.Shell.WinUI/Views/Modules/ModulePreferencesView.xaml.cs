@@ -7,13 +7,7 @@ namespace Glance.Shell.WinUI;
 public sealed partial class ModulePreferencesView :
     UserControl
 {
-    private readonly ModuleSettingsNavigationService navigation;
-
-    public ModulePreferencesView(ModuleSettingsNavigationService navigation)
-    {
-        this.navigation = navigation;
-        InitializeComponent();
-    }
+    public ModulePreferencesView() => InitializeComponent();
 
     public ModulePreferencesViewModel ViewModel =>
         (ModulePreferencesViewModel)DataContext;
@@ -28,7 +22,7 @@ public sealed partial class ModulePreferencesView :
         if (sender is SettingsCard { DataContext: ModuleSettingsItemViewModel module } &&
             module.CanExpand)
         {
-            navigation.NavigateTo(module);
+            ViewModel.NavigateToSettings(module);
         }
     }
 }

@@ -1,29 +1,31 @@
+using CommunityToolkit.Mvvm.Messaging;
 using Glance.Application.Abstractions;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System;
 using System.Collections.ObjectModel;
 using Windows.Graphics;
 
 namespace Glance.Shell.WinUI;
 
 public sealed partial class SettingsWindow :
-    Window
+    Window,
+    IRecipient<ModuleSettingsNavigationRequestedEventArgs>
 {
     private const int WindowWidth = 1100;
     private const int WindowHeight = 680;
     private readonly ITextLocalizer localizer;
-    private readonly ModuleSettingsNavigationService moduleNavigation;
+    private readonly IMessenger messenger;
+    private ModuleSettingsItemViewModel? currentModule;
 
-    public SettingsWindow(ModuleSettingsNavigationService moduleNavigation,
+    public SettingsWindow(IMessenger messenger,
         ITextLocalizer localizer)
     {
-        this.moduleNavigation = moduleNavigation;
+        this.messenger = messenger;
         this.localizer = localizer;
         InitializeComponent();
 
-        moduleNavigation.CurrentModuleChanged += HandleCurrentModuleChanged;
+        messenger.Register<ModuleSettingsNavigationRequestedEventArgs>(this);
         Closed += HandleClosed;
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
@@ -45,6 +47,18 @@ public sealed partial class SettingsWindow :
 
     public SettingsViewModel ViewModel => (SettingsViewModel)((FrameworkElement)Content).DataContext;
 
+    public void Receive(ModuleSettingsNavigationRequestedEventArgs message)
+    {
+        if (!message.Module.CanExpand ||
+            ReferenceEquals(currentModule, message.Module))
+        {
+            return;
+        }
+
+        currentModule = message.Module;
+        UpdateNavigation(ViewModel.SelectedItem);
+    }
+
     private void HandleLoaded(object sender,
         RoutedEventArgs args) =>
         UpdateNavigation(ViewModel.SelectedItem);
@@ -52,17 +66,13 @@ public sealed partial class SettingsWindow :
     private void HandleNavigationSelectionChanged(NavigationView sender,
         NavigationViewSelectionChangedEventArgs args)
     {
-        moduleNavigation.GoBack();
+        currentModule = null;
         UpdateNavigation(args.SelectedItem as ISettingViewModel);
     }
 
-    private void HandleCurrentModuleChanged(object? sender,
-        EventArgs args) =>
-        UpdateNavigation(ViewModel.SelectedItem);
-
     private void HandleBackRequested(TitleBar sender,
         object args) =>
-        moduleNavigation.GoBack();
+        GoBack();
 
     private void HandleBreadcrumbItemClicked(BreadcrumbBar sender,
         BreadcrumbBarItemClickedEventArgs args)
@@ -70,16 +80,27 @@ public sealed partial class SettingsWindow :
         if (args.Index == 0 &&
             BreadcrumbItems.Count > 1)
         {
-            moduleNavigation.GoBack();
+            GoBack();
         }
     }
 
     private void HandleClosed(object sender,
         WindowEventArgs args)
     {
-        moduleNavigation.CurrentModuleChanged -= HandleCurrentModuleChanged;
-        moduleNavigation.GoBack();
+        messenger.UnregisterAll(this);
+        currentModule = null;
         Closed -= HandleClosed;
+    }
+
+    private void GoBack()
+    {
+        if (currentModule is null)
+        {
+            return;
+        }
+
+        currentModule = null;
+        UpdateNavigation(ViewModel.SelectedItem);
     }
 
     private void UpdateNavigation(ISettingViewModel? selectedItem)
@@ -92,7 +113,7 @@ public sealed partial class SettingsWindow :
             _ => string.Empty
         };
         ModuleSettingsItemViewModel? module = selectedItem is ModulesViewModel
-            ? moduleNavigation.CurrentModule
+            ? currentModule
             : null;
 
         BreadcrumbItems.Clear();
