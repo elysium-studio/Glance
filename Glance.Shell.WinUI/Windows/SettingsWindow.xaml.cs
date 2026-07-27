@@ -86,9 +86,9 @@ public sealed partial class SettingsWindow :
     {
         string pageTitle = selectedItem switch
         {
-            GlanceViewModel => localizer.GetText("GlanceSectionTitle.Text"),
-            ModulesViewModel => localizer.GetText("ModulesSectionTitle.Text"),
-            WindowsViewModel => localizer.GetText("WindowsSectionTitle.Text"),
+            GlanceViewModel => localizer.GetText("GlanceSectionTitle/Text"),
+            ModulesViewModel => localizer.GetText("ModulesSectionTitle/Text"),
+            WindowsViewModel => localizer.GetText("WindowsSectionTitle/Text"),
             _ => string.Empty
         };
         ModuleSettingsItemViewModel? module = selectedItem is ModulesViewModel
