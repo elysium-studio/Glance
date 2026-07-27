@@ -1,9 +1,6 @@
-using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
-using Glance.Application.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
 
 namespace Glance.Shell.WinUI;
 
@@ -14,8 +11,7 @@ public sealed class ModulesSettingsModule :
     {
         services
             .AddView<ModuleAttentionSettingView>(ServiceLifetime.Transient, provider => new ModuleAttentionSettingView())
-            .AddViewFor<ModulePreferencesView, IModulesViewModel, ModulePreferencesViewModel>(ServiceLifetime.Transient,
-                provider => new ModulePreferencesView(),
-                provider => new ModulePreferencesViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<ModulePreferenceService>(), provider.GetRequiredService<IEnumerable<IGlanceModuleSettingViewModel>>()));
+            .AddView<ModulesDescriptionView>(ServiceLifetime.Transient, provider => new ModulesDescriptionView())
+            .AddView<ModuleSettingsItemView>(ServiceLifetime.Transient, provider => new ModuleSettingsItemView());
     }
 }

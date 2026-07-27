@@ -21,7 +21,7 @@ public sealed class SettingsModule :
                 provider => new GlanceViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IEnumerable<IGlanceViewModel>>()))
             .AddViewFor<ModulesView, ISettingViewModel, ModulesViewModel>(ServiceLifetime.Transient,
                 provider => new ModulesView(),
-                provider => new ModulesViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IEnumerable<IModulesViewModel>>()))
+                provider => new ModulesViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<ModulePreferenceService>(), provider.GetRequiredService<IEnumerable<IGlanceModuleSettingViewModel>>()))
             .AddViewFor<WindowsView, ISettingViewModel, WindowsViewModel>(ServiceLifetime.Transient,
                 provider => new WindowsView(),
                 provider => new WindowsViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IEnumerable<IWindowsViewModel>>()));

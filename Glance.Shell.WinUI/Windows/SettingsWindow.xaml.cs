@@ -129,9 +129,7 @@ public sealed partial class SettingsWindow :
         }
 
         bool showModuleSettings = module is not null;
-        OverviewContent.Visibility = showModuleSettings ? Visibility.Collapsed : Visibility.Visible;
-        ModuleSettingsContent.DataContext = module;
-        ModuleSettingsContent.Visibility = showModuleSettings ? Visibility.Visible : Visibility.Collapsed;
+        ViewModel.NavigateTo(module?.Settings ?? selectedItem);
         AppTitleBar.IsBackButtonEnabled = showModuleSettings;
         AppTitleBar.IsBackButtonVisible = showModuleSettings;
     }

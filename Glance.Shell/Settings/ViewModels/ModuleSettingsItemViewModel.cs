@@ -1,14 +1,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Glance.Application.Abstractions;
-using System.Collections.ObjectModel;
 
 namespace Glance.Shell;
 
 public sealed partial class ModuleSettingsItemViewModel :
     ObservableObject,
-    IDisposable
+    IModulesViewModel
 {
-    private readonly IReadOnlyList<IGlanceModuleSettingViewModel> availableSettings;
+    private readonly Action<ModuleSettingsItemViewModel> navigate;
     private bool suppressPersistence;
 
     public ModuleSettingsItemViewModel(string id,
@@ -16,12 +15,14 @@ public sealed partial class ModuleSettingsItemViewModel :
         string description,
         bool isEnabled,
         IEnumerable<IGlanceModuleSettingViewModel> settings,
+        Action<ModuleSettingsItemViewModel> navigate,
         Func<ModuleSettingsItemViewModel, bool, Task<bool>> setEnabled)
     {
         Id = id;
         DisplayName = displayName;
         Description = description;
-        availableSettings = [.. settings];
+        Settings = new ModuleSettingsViewModel(settings);
+        this.navigate = navigate;
         this.isEnabled = isEnabled;
         SetEnabled = setEnabled;
         RefreshSettings();
@@ -33,13 +34,21 @@ public sealed partial class ModuleSettingsItemViewModel :
 
     public string Description { get; }
 
-    public bool HasSettings => availableSettings.Count > 0;
+    public bool HasSettings => Settings.HasSettings;
 
     public bool CanExpand => IsEnabled && HasSettings;
 
-    public ObservableCollection<IGlanceModuleSettingViewModel> Settings { get; } = [];
+    public ModuleSettingsViewModel Settings { get; }
 
     private Func<ModuleSettingsItemViewModel, bool, Task<bool>> SetEnabled { get; }
+
+    public void NavigateToSettings()
+    {
+        if (CanExpand)
+        {
+            navigate(this);
+        }
+    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanExpand))]
@@ -69,28 +78,9 @@ public sealed partial class ModuleSettingsItemViewModel :
 
     public void Dispose()
     {
-        Settings.Clear();
-
-        foreach (IGlanceModuleSettingViewModel setting in availableSettings)
-        {
-            setting.Dispose();
-        }
-
+        Settings.Dispose();
         GC.SuppressFinalize(this);
     }
 
-    private void RefreshSettings()
-    {
-        Settings.Clear();
-
-        if (!IsEnabled)
-        {
-            return;
-        }
-
-        foreach (IGlanceModuleSettingViewModel setting in availableSettings)
-        {
-            Settings.Add(setting);
-        }
-    }
+    private void RefreshSettings() => Settings.SetEnabled(IsEnabled);
 }
