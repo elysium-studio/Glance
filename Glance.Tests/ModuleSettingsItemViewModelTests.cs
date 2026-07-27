@@ -17,19 +17,19 @@ public sealed class ModuleSettingsItemViewModelTests
 
         item.IsEnabled = false;
         Assert.Empty(item.Settings);
-        Assert.False(item.CanExpand);
+        Assert.False(item.CanOpenSettings);
 
         item.IsEnabled = true;
         Assert.Equal([first, second], item.Settings);
-        Assert.True(item.CanExpand);
+        Assert.True(item.CanOpenSettings);
     }
 
     [Fact]
-    public void ModuleWithoutSettingsCannotExpand()
+    public void ModuleWithoutSettingsCannotOpenSettings()
     {
         ModuleSettingsItemViewModel item = new("Stopwatch", "Stopwatch", "Elapsed time", true, [], (_, _) => Task.FromResult(true));
 
-        Assert.False(item.CanExpand);
+        Assert.False(item.CanOpenSettings);
     }
 
     [Fact]

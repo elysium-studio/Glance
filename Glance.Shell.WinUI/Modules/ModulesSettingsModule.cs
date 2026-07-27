@@ -13,9 +13,10 @@ public sealed class ModulesSettingsModule :
     public void Register(IServiceCollection services)
     {
         services
+            .AddSingleton<ModuleSettingsNavigationService>()
             .AddView<ModuleAttentionSettingView>(ServiceLifetime.Transient, provider => new ModuleAttentionSettingView())
             .AddViewFor<ModulePreferencesView, IModulesViewModel, ModulePreferencesViewModel>(ServiceLifetime.Transient,
-                provider => new ModulePreferencesView(),
+                provider => new ModulePreferencesView(provider.GetRequiredService<ModuleSettingsNavigationService>()),
                 provider => new ModulePreferencesViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<ModulePreferenceService>(), provider.GetRequiredService<IEnumerable<IGlanceModuleSettingViewModel>>()));
     }
 }

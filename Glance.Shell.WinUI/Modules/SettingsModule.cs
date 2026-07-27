@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
+using Glance.Application.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 
@@ -13,7 +14,7 @@ public sealed class SettingsModule :
     {
         services
             .AddViewFor(ServiceLifetime.Transient,
-                provider => new SettingsWindow(),
+                provider => new SettingsWindow(provider.GetRequiredService<ModuleSettingsNavigationService>(), provider.GetRequiredService<ITextLocalizer>()),
                 provider => new SettingsViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IEnumerable<ISettingViewModel>>()))
             .AddViewFor<GlanceView, ISettingViewModel, GlanceViewModel>(ServiceLifetime.Transient,
                 provider => new GlanceView(),
