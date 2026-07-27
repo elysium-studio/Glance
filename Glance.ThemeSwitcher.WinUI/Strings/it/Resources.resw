@@ -19,6 +19,4 @@
   <data name="LocationDenied" xml:space="preserve"><value>La modalità tramonto richiede l’accesso alla posizione</value></data>
   <data name="SunsetUnavailable" xml:space="preserve"><value>Alba e tramonto non sono disponibili qui oggi</value></data>
   <data name="ThemeChangeFailed" xml:space="preserve"><value>Impossibile cambiare il tema di Windows</value></data>
-  <data name="AnimateTransitionsSettingCard.Header" xml:space="preserve"><value>Anima i cambi di tema</value></data>
-  <data name="AnimateTransitionsSettingCard.Description" xml:space="preserve"><value>Mostra una transizione radiale quando cambia il tema.</value></data>
 </root>

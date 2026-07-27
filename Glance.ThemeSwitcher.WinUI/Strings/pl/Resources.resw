@@ -19,6 +19,4 @@
   <data name="LocationDenied" xml:space="preserve"><value>Tryb zachodu słońca wymaga dostępu do lokalizacji</value></data>
   <data name="SunsetUnavailable" xml:space="preserve"><value>Dane wschodu i zachodu słońca są tu dziś niedostępne</value></data>
   <data name="ThemeChangeFailed" xml:space="preserve"><value>Nie udało się zmienić motywu systemu Windows</value></data>
-  <data name="AnimateTransitionsSettingCard.Header" xml:space="preserve"><value>Animuj zmiany motywu</value></data>
-  <data name="AnimateTransitionsSettingCard.Description" xml:space="preserve"><value>Pokazuj przejście promieniowe podczas zmiany motywu.</value></data>
 </root>

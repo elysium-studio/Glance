@@ -19,6 +19,4 @@
   <data name="LocationDenied" xml:space="preserve"><value>La localisation est nécessaire pour ce mode</value></data>
   <data name="SunsetUnavailable" xml:space="preserve"><value>Le lever et le coucher du soleil sont indisponibles ici aujourd’hui</value></data>
   <data name="ThemeChangeFailed" xml:space="preserve"><value>Impossible de modifier le thème Windows</value></data>
-  <data name="AnimateTransitionsSettingCard.Header" xml:space="preserve"><value>Animer les changements de thème</value></data>
-  <data name="AnimateTransitionsSettingCard.Description" xml:space="preserve"><value>Affiche une transition radiale lors du changement de thème.</value></data>
 </root>

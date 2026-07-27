@@ -19,6 +19,4 @@
   <data name="LocationDenied" xml:space="preserve"><value>日落模式需要位置访问权限</value></data>
   <data name="SunsetUnavailable" xml:space="preserve"><value>今天无法获取此位置的日出和日落时间</value></data>
   <data name="ThemeChangeFailed" xml:space="preserve"><value>无法更改 Windows 主题</value></data>
-  <data name="AnimateTransitionsSettingCard.Header" xml:space="preserve"><value>主题切换动画</value></data>
-  <data name="AnimateTransitionsSettingCard.Description" xml:space="preserve"><value>主题更改时显示径向过渡。</value></data>
 </root>

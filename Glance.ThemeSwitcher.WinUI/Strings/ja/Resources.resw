@@ -19,6 +19,4 @@
   <data name="LocationDenied" xml:space="preserve"><value>日没モードには位置情報へのアクセスが必要です</value></data>
   <data name="SunsetUnavailable" xml:space="preserve"><value>今日はこの場所の日の出と日没を利用できません</value></data>
   <data name="ThemeChangeFailed" xml:space="preserve"><value>Windows テーマを変更できませんでした</value></data>
-  <data name="AnimateTransitionsSettingCard.Header" xml:space="preserve"><value>テーマ変更をアニメーション化</value></data>
-  <data name="AnimateTransitionsSettingCard.Description" xml:space="preserve"><value>テーマの変更時に放射状の切り替えを表示します。</value></data>
 </root>

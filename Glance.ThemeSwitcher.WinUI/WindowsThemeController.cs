@@ -7,7 +7,6 @@ namespace Glance.ThemeSwitcher.WinUI;
 
 public sealed class WindowsThemeController(WindowsSystemThemeService systemThemeService,
     WindowsLocationService locationService,
-    ThemeTransitionService transitionService,
     ILogger<WindowsThemeController> logger) :
     IThemeController
 {
@@ -15,7 +14,7 @@ public sealed class WindowsThemeController(WindowsSystemThemeService systemTheme
 
     public ThemeVariant CurrentTheme => systemThemeService.CurrentTheme;
 
-    public async Task<ThemeChangeResult> RefreshAsync(ThemeSwitcherSettings settings,
+    public Task<ThemeChangeResult> RefreshAsync(ThemeSwitcherSettings settings,
         CancellationToken cancellationToken = default)
     {
         try
@@ -23,25 +22,25 @@ public sealed class WindowsThemeController(WindowsSystemThemeService systemTheme
             if (!initialized && settings.Preference != ThemePreference.Sunset)
             {
                 initialized = true;
-                return new ThemeChangeResult(true, CurrentTheme, null);
+                return Task.FromResult(new ThemeChangeResult(true, CurrentTheme, null));
             }
 
             ThemeChangeResult result = settings.Preference switch
             {
-                ThemePreference.Light => await ApplyAsync(ThemeVariant.Light, null, initialized && settings.AnimateTransitions, cancellationToken),
-                ThemePreference.Dark => await ApplyAsync(ThemeVariant.Dark, null, initialized && settings.AnimateTransitions, cancellationToken),
-                ThemePreference.Sunset when settings.HasLocation => await ApplySolarAsync(settings.Latitude, settings.Longitude, initialized && settings.AnimateTransitions, cancellationToken),
+                ThemePreference.Light => Apply(ThemeVariant.Light),
+                ThemePreference.Dark => Apply(ThemeVariant.Dark),
+                ThemePreference.Sunset when settings.HasLocation => ApplySolar(settings.Latitude, settings.Longitude, cancellationToken),
                 ThemePreference.Sunset => new ThemeChangeResult(false, CurrentTheme, null, ErrorKey: "LocationRequired"),
                 _ => new ThemeChangeResult(true, CurrentTheme, null)
             };
             initialized = true;
-            return result;
+            return Task.FromResult(result);
         }
         catch (Exception exception)
         {
             logger.LogError(exception, "Failed to refresh the Windows theme");
             initialized = true;
-            return new ThemeChangeResult(false, CurrentTheme, null, ErrorKey: "ThemeChangeFailed");
+            return Task.FromResult(new ThemeChangeResult(false, CurrentTheme, null, ErrorKey: "ThemeChangeFailed"));
         }
     }
 
@@ -53,8 +52,8 @@ public sealed class WindowsThemeController(WindowsSystemThemeService systemTheme
         {
             return preference switch
             {
-                ThemePreference.Light => await ApplyAsync(ThemeVariant.Light, null, settings.AnimateTransitions, cancellationToken),
-                ThemePreference.Dark => await ApplyAsync(ThemeVariant.Dark, null, settings.AnimateTransitions, cancellationToken),
+                ThemePreference.Light => Apply(ThemeVariant.Light),
+                ThemePreference.Dark => Apply(ThemeVariant.Dark),
                 ThemePreference.Sunset => await SelectSunsetAsync(settings, cancellationToken),
                 _ => new ThemeChangeResult(true, CurrentTheme, null)
             };
@@ -85,13 +84,12 @@ public sealed class WindowsThemeController(WindowsSystemThemeService systemTheme
             longitude = location.Value.Longitude;
         }
 
-        ThemeChangeResult result = await ApplySolarAsync(latitude, longitude, settings.AnimateTransitions, cancellationToken);
+        ThemeChangeResult result = ApplySolar(latitude, longitude, cancellationToken);
         return result with { Latitude = latitude, Longitude = longitude };
     }
 
-    private async Task<ThemeChangeResult> ApplySolarAsync(double latitude,
+    private ThemeChangeResult ApplySolar(double latitude,
         double longitude,
-        bool animate,
         CancellationToken cancellationToken)
     {
         DateTimeOffset now = DateTimeOffset.Now;
@@ -129,28 +127,16 @@ public sealed class WindowsThemeController(WindowsSystemThemeService systemTheme
             nextChange = tomorrow.Sunrise;
         }
 
-        return await ApplyAsync(theme, nextChange, animate, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        return Apply(theme, nextChange);
     }
 
-    private async Task<ThemeChangeResult> ApplyAsync(ThemeVariant theme,
-        DateTimeOffset? nextChange,
-        bool animate,
-        CancellationToken cancellationToken)
+    private ThemeChangeResult Apply(ThemeVariant theme,
+        DateTimeOffset? nextChange = null)
     {
         if (CurrentTheme != theme)
         {
-            if (animate)
-            {
-                await transitionService.PlayAsync(theme, () =>
-                {
-                    systemThemeService.Apply(theme);
-                    return Task.CompletedTask;
-                }, cancellationToken);
-            }
-            else
-            {
-                systemThemeService.Apply(theme);
-            }
+            systemThemeService.Apply(theme);
         }
 
         return new ThemeChangeResult(true, theme, nextChange);

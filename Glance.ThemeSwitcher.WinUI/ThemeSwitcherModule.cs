@@ -1,4 +1,3 @@
-using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
 using Glance.Application.Abstractions;
@@ -16,10 +15,8 @@ public sealed class ThemeSwitcherModule :
         services.AddSingleton<ModuleResourceTextLocalizer<ThemeSwitcherModule>>();
         services.AddSingleton<WindowsSystemThemeService>();
         services.AddSingleton<WindowsLocationService>();
-        services.AddSingleton<ThemeTransitionService>();
         services.AddSingleton<IThemeController, WindowsThemeController>();
         services.AddSingleton(provider => new ThemeSwitcherViewModel(provider.GetRequiredService<IThemeController>(), provider.GetRequiredService<GlanceModuleOptions<ThemeSwitcherSettings>>().Current, provider.GetRequiredService<ModuleResourceTextLocalizer<ThemeSwitcherModule>>(), provider.GetRequiredService<IDispatcher>()));
         services.AddSingleton<IGlanceComponent, ThemeSwitcherComponent>();
-        services.AddViewFor<AnimateTransitionsSettingView, IGlanceModuleSettingViewModel, AnimateTransitionsSettingViewModel>(ServiceLifetime.Transient, provider => new AnimateTransitionsSettingView(), provider => new AnimateTransitionsSettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<ThemeSwitcherSettings>>().Current, provider.GetRequiredService<IWritableOptions<ThemeSwitcherSettings>>()));
     }
 }

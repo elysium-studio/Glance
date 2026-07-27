@@ -19,6 +19,4 @@
   <data name="LocationDenied" xml:space="preserve"><value>Location access is needed for sunset mode</value></data>
   <data name="SunsetUnavailable" xml:space="preserve"><value>Sunrise and sunset are unavailable here today</value></data>
   <data name="ThemeChangeFailed" xml:space="preserve"><value>Couldn&apos;t change the Windows theme</value></data>
-  <data name="AnimateTransitionsSettingCard.Header" xml:space="preserve"><value>Animate theme changes</value></data>
-  <data name="AnimateTransitionsSettingCard.Description" xml:space="preserve"><value>Show a radial transition when the theme changes.</value></data>
 </root>

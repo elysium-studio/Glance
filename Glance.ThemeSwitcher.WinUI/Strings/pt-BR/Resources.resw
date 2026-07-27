@@ -19,6 +19,4 @@
   <data name="LocationDenied" xml:space="preserve"><value>O modo pôr do sol precisa de acesso à localização</value></data>
   <data name="SunsetUnavailable" xml:space="preserve"><value>Nascer e pôr do sol não estão disponíveis aqui hoje</value></data>
   <data name="ThemeChangeFailed" xml:space="preserve"><value>Não foi possível alterar o tema do Windows</value></data>
-  <data name="AnimateTransitionsSettingCard.Header" xml:space="preserve"><value>Animar mudanças de tema</value></data>
-  <data name="AnimateTransitionsSettingCard.Description" xml:space="preserve"><value>Mostra uma transição radial quando o tema muda.</value></data>
 </root>

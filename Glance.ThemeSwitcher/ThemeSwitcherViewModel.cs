@@ -103,7 +103,6 @@ public sealed partial class ThemeSwitcherViewModel(IThemeController controller,
 
     public void WriteSettings(ThemeSwitcherSettings target)
     {
-        target.AnimateTransitions = settings.AnimateTransitions;
         target.HasLocation = settings.HasLocation;
         target.Latitude = settings.Latitude;
         target.Longitude = settings.Longitude;

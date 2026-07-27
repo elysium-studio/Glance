@@ -19,6 +19,4 @@
   <data name="LocationDenied" xml:space="preserve"><value>Locatietoegang is nodig voor de zonsondergangmodus</value></data>
   <data name="SunsetUnavailable" xml:space="preserve"><value>Zonsopgang en zonsondergang zijn hier vandaag niet beschikbaar</value></data>
   <data name="ThemeChangeFailed" xml:space="preserve"><value>Het Windows-thema kon niet worden gewijzigd</value></data>
-  <data name="AnimateTransitionsSettingCard.Header" xml:space="preserve"><value>Themawijzigingen animeren</value></data>
-  <data name="AnimateTransitionsSettingCard.Description" xml:space="preserve"><value>Toon een radiale overgang wanneer het thema verandert.</value></data>
 </root>

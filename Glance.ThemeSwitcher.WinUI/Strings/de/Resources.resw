@@ -19,6 +19,4 @@
   <data name="LocationDenied" xml:space="preserve"><value>Für den Sonnenuntergangsmodus ist Standortzugriff erforderlich</value></data>
   <data name="SunsetUnavailable" xml:space="preserve"><value>Sonnenaufgang und Sonnenuntergang sind hier heute nicht verfügbar</value></data>
   <data name="ThemeChangeFailed" xml:space="preserve"><value>Das Windows-Design konnte nicht geändert werden</value></data>
-  <data name="AnimateTransitionsSettingCard.Header" xml:space="preserve"><value>Designwechsel animieren</value></data>
-  <data name="AnimateTransitionsSettingCard.Description" xml:space="preserve"><value>Beim Designwechsel einen radialen Übergang anzeigen.</value></data>
 </root>

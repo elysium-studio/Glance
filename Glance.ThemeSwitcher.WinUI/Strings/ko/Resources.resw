@@ -19,6 +19,4 @@
   <data name="LocationDenied" xml:space="preserve"><value>일몰 모드에는 위치 액세스가 필요합니다</value></data>
   <data name="SunsetUnavailable" xml:space="preserve"><value>오늘은 이 위치의 일출과 일몰을 사용할 수 없습니다</value></data>
   <data name="ThemeChangeFailed" xml:space="preserve"><value>Windows 테마를 변경하지 못했습니다</value></data>
-  <data name="AnimateTransitionsSettingCard.Header" xml:space="preserve"><value>테마 변경 애니메이션</value></data>
-  <data name="AnimateTransitionsSettingCard.Description" xml:space="preserve"><value>테마가 변경될 때 방사형 전환을 표시합니다.</value></data>
 </root>

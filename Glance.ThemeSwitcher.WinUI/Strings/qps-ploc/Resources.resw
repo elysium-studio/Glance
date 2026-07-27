@@ -19,6 +19,4 @@
   <data name="LocationDenied" xml:space="preserve"><value>[Ļöçáţîöñ áççéšš îš ñééðéð ƒöř šũñšéţ ḿöðé]</value></data>
   <data name="SunsetUnavailable" xml:space="preserve"><value>[Šũñřîšé áñð šũñšéţ ářé ũñáṽáîļáþļé ĥéřé ţöðáý]</value></data>
   <data name="ThemeChangeFailed" xml:space="preserve"><value>[Çöũļðñ&apos;ţ çĥáñĝé ţĥé Windows ţĥéḿé]</value></data>
-  <data name="AnimateTransitionsSettingCard.Header" xml:space="preserve"><value>[Áñîḿáţé ţĥéḿé çĥáñĝéš]</value></data>
-  <data name="AnimateTransitionsSettingCard.Description" xml:space="preserve"><value>[Šĥöŵ á řáðîáļ ţřáñšîţîöñ ŵĥéñ ţĥé ţĥéḿé çĥáñĝéš.]</value></data>
 </root>
