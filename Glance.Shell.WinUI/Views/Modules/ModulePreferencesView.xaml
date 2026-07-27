@@ -16,6 +16,7 @@
             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
             TextWrapping="Wrap" />
         <ListView
+            x:Name="ModulesListView"
             AllowDrop="True"
             CanDragItems="True"
             CanReorderItems="True"
@@ -41,14 +42,7 @@
                             Header="{x:Bind DisplayName}"
                             IsClickEnabled="False"
                             Visibility="{x:Bind local:ModulePreferencesView.WhenSettingsUnavailable(CanExpand), Mode=OneWay}">
-                            <StackPanel Orientation="Horizontal" Spacing="12">
-                                <FontIcon
-                                    FontSize="14"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Glyph="&#xE76F;"
-                                    IsHitTestVisible="False" />
-                                <ToggleSwitch AutomationProperties.Name="{x:Bind DisplayName}" IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
-                            </StackPanel>
+                            <ToggleSwitch AutomationProperties.Name="{x:Bind DisplayName}" IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
                         </CommunityToolkit:SettingsCard>
                         <CommunityToolkit:SettingsExpander
                             Description="{x:Bind Description}"
@@ -57,14 +51,7 @@
                             ItemsSource="{x:Bind Settings, Mode=OneWay}"
                             Visibility="{x:Bind local:ModulePreferencesView.WhenSettingsAvailable(CanExpand), Mode=OneWay}">
                             <CommunityToolkit:SettingsExpander.Content>
-                                <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <FontIcon
-                                        FontSize="14"
-                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        Glyph="&#xE76F;"
-                                        IsHitTestVisible="False" />
-                                    <ToggleSwitch AutomationProperties.Name="{x:Bind DisplayName}" IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
-                                </StackPanel>
+                                <ToggleSwitch AutomationProperties.Name="{x:Bind DisplayName}" IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
                             </CommunityToolkit:SettingsExpander.Content>
                             <CommunityToolkit:SettingsExpander.ItemTemplate>
                                 <DataTemplate x:DataType="Application:IGlanceModuleSettingViewModel">
