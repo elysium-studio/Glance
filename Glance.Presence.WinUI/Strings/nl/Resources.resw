@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Aanwezigheid</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Behoudt een actieve aanwezigheid door alleen invoer te verzenden wanneer u inactief bent.</value></data>
+  <data name="InactiveStatus" xml:space="preserve"><value>Gereed</value></data>
+  <data name="ActiveStatus" xml:space="preserve"><value>Aanwezigheid actief</value></data>
+  <data name="InactiveDetail" xml:space="preserve"><value>Er wordt geen invoer gesimuleerd</value></data>
+  <data name="ActiveDetail" xml:space="preserve"><value>Invoer wordt alleen verzonden wanneer u inactief bent</value></data>
+  <data name="StartLabel" xml:space="preserve"><value>Aanwezigheid starten</value></data>
+  <data name="StopLabel" xml:space="preserve"><value>Aanwezigheid stoppen</value></data>
+</root>

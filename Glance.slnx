@@ -54,6 +54,15 @@
   <Project Path="Glance.KeepAwake.Tests/Glance.KeepAwake.Tests.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.Presence.WinUI/Glance.Presence.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Presence/Glance.Presence.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Presence.Tests/Glance.Presence.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.FocusSession.Tests/Glance.FocusSession.Tests.csproj">
     <Platform Project="x64" />
   </Project>

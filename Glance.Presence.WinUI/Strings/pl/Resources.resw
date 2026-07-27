@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Obecność</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Utrzymuje aktywną obecność, wysyłając dane wejściowe tylko podczas bezczynności.</value></data>
+  <data name="InactiveStatus" xml:space="preserve"><value>Gotowe</value></data>
+  <data name="ActiveStatus" xml:space="preserve"><value>Obecność aktywna</value></data>
+  <data name="InactiveDetail" xml:space="preserve"><value>Dane wejściowe nie są symulowane</value></data>
+  <data name="ActiveDetail" xml:space="preserve"><value>Dane wejściowe są wysyłane tylko podczas bezczynności</value></data>
+  <data name="StartLabel" xml:space="preserve"><value>Uruchom obecność</value></data>
+  <data name="StopLabel" xml:space="preserve"><value>Zatrzymaj obecność</value></data>
+</root>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Presencia</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Mantén una presencia activa enviando entradas solo mientras estás inactivo.</value></data>
+  <data name="InactiveStatus" xml:space="preserve"><value>Listo</value></data>
+  <data name="ActiveStatus" xml:space="preserve"><value>Presencia activa</value></data>
+  <data name="InactiveDetail" xml:space="preserve"><value>No se está simulando ninguna entrada</value></data>
+  <data name="ActiveDetail" xml:space="preserve"><value>La entrada solo se envía mientras estás inactivo</value></data>
+  <data name="StartLabel" xml:space="preserve"><value>Iniciar presencia</value></data>
+  <data name="StopLabel" xml:space="preserve"><value>Detener presencia</value></data>
+</root>
