@@ -37,6 +37,7 @@ internal sealed class CaptureSelectionWindow
     private readonly TaskCompletionSource<CaptureSelectionResult?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly Canvas flightCanvas;
     private readonly Border highlight;
+    private readonly ITextLocalizer localizer;
     private readonly ScreenCaptureMode mode;
     private readonly Grid root;
     private readonly Grid selectionChrome;
@@ -50,6 +51,7 @@ internal sealed class CaptureSelectionWindow
     private bool isPositioned;
     private bool isShown;
     private int renderedFrameCount;
+    private CaptureReviewSurface? reviewSurface;
     private bool selectionCompleted;
     private Point selectionStart;
 
@@ -58,6 +60,7 @@ internal sealed class CaptureSelectionWindow
         this.bitmap = bitmap;
         this.mode = mode;
         this.candidates = candidates;
+        this.localizer = localizer;
 
         smokeBounds = new RectangleGeometry();
         smokeCutout = new RectangleGeometry();
@@ -172,6 +175,55 @@ internal sealed class CaptureSelectionWindow
         return flightCompletion.Task;
     }
 
+    public Task<DesktopCaptureBitmap?> ReviewAsync(DesktopCaptureBitmap capture)
+    {
+        TaskCompletionSource<DesktopCaptureBitmap?> reviewCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        async void ShowReview()
+        {
+            try
+            {
+                if (closed)
+                {
+                    reviewCompletion.TrySetResult(null);
+                    return;
+                }
+
+                reviewSurface?.Detach();
+                reviewSurface = new CaptureReviewSurface(capture, localizer, root.ActualWidth, root.ActualHeight);
+                selectionChrome.Visibility = Visibility.Collapsed;
+                root.Background = null;
+                root.Children.Insert(root.Children.Count - 1, reviewSurface.Content);
+                root.KeyDown += HandleReviewKeyDown;
+                root.UpdateLayout();
+                await reviewSurface.PlayEntranceAsync(ToLocal(capture.Bounds));
+                DesktopCaptureBitmap? result = await reviewSurface.Completion;
+                reviewCompletion.TrySetResult(result);
+
+                if (result is null)
+                {
+                    CloseCore();
+                }
+            }
+            catch (Exception exception)
+            {
+                reviewCompletion.TrySetException(exception);
+                CloseCore();
+            }
+        }
+
+        if (window.DispatcherQueue.HasThreadAccess)
+        {
+            ShowReview();
+        }
+        else if (!window.DispatcherQueue.TryEnqueue(ShowReview))
+        {
+            reviewCompletion.TrySetException(new InvalidOperationException("Unable to open the capture review."));
+        }
+
+        return reviewCompletion.Task;
+    }
+
     public void Close()
     {
         if (window.DispatcherQueue.HasThreadAccess)
@@ -221,7 +273,7 @@ internal sealed class CaptureSelectionWindow
 
         flightInProgress = true;
         WriteableBitmap source = CreateImageSource(capture);
-        Rect sourceBounds = ToLocal(capture.Bounds);
+        Rect sourceBounds = reviewSurface?.SelectedPreviewBounds ?? ToLocal(capture.Bounds);
         Rect targetBounds = ToLocal(landingBounds);
         Image image = new() { Source = source, Stretch = Stretch.Fill };
         Border captureSurface = new()
@@ -236,6 +288,15 @@ internal sealed class CaptureSelectionWindow
         };
         Canvas.SetLeft(captureSurface, sourceBounds.X);
         Canvas.SetTop(captureSurface, sourceBounds.Y);
+        root.KeyDown -= HandleReviewKeyDown;
+        reviewSurface?.Detach();
+
+        if (reviewSurface is not null)
+        {
+            root.Children.Remove(reviewSurface.Content);
+            reviewSurface = null;
+        }
+
         flightCanvas.Children.Add(captureSurface);
         root.UpdateLayout();
         onArrived();
@@ -469,6 +530,20 @@ internal sealed class CaptureSelectionWindow
         }
     }
 
+    private void HandleReviewKeyDown(object sender, KeyRoutedEventArgs args)
+    {
+        if (args.Key == Windows.System.VirtualKey.Escape)
+        {
+            args.Handled = true;
+            reviewSurface?.Dismiss();
+        }
+        else if (args.Key == Windows.System.VirtualKey.Enter)
+        {
+            args.Handled = true;
+            reviewSurface?.Confirm();
+        }
+    }
+
     private void HandlePointerPressed(object sender, PointerRoutedEventArgs args)
     {
         Point point = args.GetCurrentPoint(root).Position;
@@ -541,6 +616,9 @@ internal sealed class CaptureSelectionWindow
         closed = true;
         CompositionTarget.Rendering -= HandleCompositionRendering;
         DetachSelectionHandlers();
+        root.KeyDown -= HandleReviewKeyDown;
+        reviewSurface?.CancelImmediately();
+        reviewSurface?.Detach();
 
         if (!selectionCompleted)
         {
@@ -583,6 +661,9 @@ internal sealed class CaptureSelectionWindow
         closed = true;
         CompositionTarget.Rendering -= HandleCompositionRendering;
         DetachSelectionHandlers();
+        root.KeyDown -= HandleReviewKeyDown;
+        reviewSurface?.CancelImmediately();
+        reviewSurface?.Detach();
         PlatformWindowExtensions.viSetOpacity(windowHandle, 0);
         window.Close();
     }

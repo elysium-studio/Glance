@@ -93,8 +93,16 @@ public sealed partial class WindowsScreenCaptureService :
                 : selection.Bounds == desktop.Bounds
                     ? desktop
                     : desktop.Crop(selection.Bounds);
-            ScreenCaptureItem capture = await SaveAsync(result, mode);
-            pendingAnimationFrame = new CaptureAnimationFrame(result, overlay);
+            DesktopCaptureBitmap? reviewedCapture = await overlay.ReviewAsync(result);
+
+            if (reviewedCapture is null)
+            {
+                overlay = null;
+                return null;
+            }
+
+            ScreenCaptureItem capture = await SaveAsync(reviewedCapture, mode);
+            pendingAnimationFrame = new CaptureAnimationFrame(reviewedCapture, overlay);
             overlay = null;
             return capture;
         }

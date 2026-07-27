@@ -13,4 +13,7 @@
     <value>Maximum number of recent captures shown in the island.</value>
   </data>
   <data name="EmptyDetail.Text" xml:space="preserve"><value>Wählen Sie einen Bereich, ein Fenster oder einen Bildschirm</value></data>
+  <data name="CropCapture" xml:space="preserve"><value>Screenshot zuschneiden</value></data>
+  <data name="DismissCapture" xml:space="preserve"><value>Verwerfen</value></data>
+  <data name="ConfirmCapture" xml:space="preserve"><value>Speichern</value></data>
 </root>
