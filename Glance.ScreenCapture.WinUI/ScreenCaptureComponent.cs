@@ -112,6 +112,9 @@ public sealed partial class ScreenCaptureComponent :
                 return;
             }
 
+            Task<bool>? automaticCopyTask = options.Current.CopyToClipboardAutomatically
+                ? screenCaptureService.TryCopyAsync(capture)
+                : null;
             CaptureAnimationFrame? frame = (screenCaptureService as WindowsScreenCaptureService)?.TakeAnimationFrame();
             NativeRectangle? landingBounds = await GetLandingBoundsAsync();
             bool capturePresented = false;
@@ -155,6 +158,11 @@ public sealed partial class ScreenCaptureComponent :
                 PresentCapture();
                 expandedView.CompleteCapturePresentation();
             });
+
+            if (automaticCopyTask is not null && !await automaticCopyTask)
+            {
+                logger.LogWarning("The completed screen capture could not be copied to the clipboard automatically");
+            }
         }
         catch (Exception exception)
         {

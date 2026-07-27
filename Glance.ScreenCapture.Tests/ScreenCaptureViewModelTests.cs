@@ -4,6 +4,10 @@ namespace Glance.ScreenCapture.Tests;
 
 public sealed class ScreenCaptureViewModelTests
 {
+    [Fact]
+    public void Settings_DoNotCopyCapturesByDefault() =>
+        Assert.False(new ScreenCaptureSettings().CopyToClipboardAutomatically);
+
     [Theory]
     [InlineData(ScreenCaptureMode.Region)]
     [InlineData(ScreenCaptureMode.Window)]
