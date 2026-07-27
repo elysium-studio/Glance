@@ -19,7 +19,7 @@ namespace Glance.ScreenCapture.WinUI;
 internal sealed class CaptureReviewSurface
 {
     private const int DismissDurationMs = 240;
-    private const int EntranceDurationMs = 460;
+    private const int EntranceDurationMs = 360;
     private readonly Border animationPreview;
     private readonly double availableHeight;
     private readonly DesktopCaptureBitmap bitmap;
@@ -59,8 +59,7 @@ internal sealed class CaptureReviewSurface
         animationPreview = CreatePreviewHost(imageSource, previewWidth, previewHeight);
         animationPreview.Translation = new Vector3(0, 0, 40);
         animationPreview.IsHitTestVisible = false;
-        animationPreview.BorderBrush = ResolveBrush("AccentFillColorDefaultBrush", Windows.UI.Color.FromArgb(255, 104, 216, 255));
-        animationPreview.BorderThickness = new Thickness(2);
+        animationPreview.BorderThickness = new Thickness(0);
 
         Canvas.SetLeft(animationPreview, previewX);
         Canvas.SetTop(animationPreview, previewY);
@@ -228,22 +227,17 @@ internal sealed class CaptureReviewSurface
     {
         Compositor compositor = animationVisual.Compositor;
         TimeSpan duration = TimeSpan.FromMilliseconds(EntranceDurationMs);
-        SineEasingFunction captureEasing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.InOut);
         CubicBezierEasingFunction travelEasing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 0.84f), new Vector2(0.28f, 1));
         SineEasingFunction fadeEasing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.Out);
-        Vector3 capturedScale = new(sourceScale.X * 0.965f, sourceScale.Y * 0.965f, 1);
 
         Vector3KeyFrameAnimation offsetAnimation = compositor.CreateVector3KeyFrameAnimation();
         offsetAnimation.Duration = duration;
         offsetAnimation.InsertKeyFrame(0, sourceOffset);
-        offsetAnimation.InsertKeyFrame(0.18f, sourceOffset);
         offsetAnimation.InsertKeyFrame(1, animationOffset, travelEasing);
 
         Vector3KeyFrameAnimation scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
         scaleAnimation.Duration = duration;
         scaleAnimation.InsertKeyFrame(0, sourceScale);
-        scaleAnimation.InsertKeyFrame(0.12f, capturedScale, captureEasing);
-        scaleAnimation.InsertKeyFrame(0.18f, capturedScale);
         scaleAnimation.InsertKeyFrame(1, Vector3.One, travelEasing);
 
         animationVisual.Offset = animationOffset;
@@ -254,8 +248,8 @@ internal sealed class CaptureReviewSurface
 
         animationVisual.StartAnimation(nameof(Visual.Offset), offsetAnimation);
         animationVisual.StartAnimation(nameof(Visual.Scale), scaleAnimation);
-        animationVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 1, 0, duration, fadeEasing, 0.88f));
-        previewVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, fadeEasing, 0.84f));
+        animationVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 1, 0, duration, fadeEasing, 0.9f));
+        previewVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, fadeEasing, 0.86f));
         backdropVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, fadeEasing, 0));
 
         entranceTimer = reviewLayer.DispatcherQueue.CreateTimer();
