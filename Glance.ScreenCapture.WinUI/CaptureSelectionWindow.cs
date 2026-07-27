@@ -179,7 +179,7 @@ internal sealed class CaptureSelectionWindow
     {
         TaskCompletionSource<DesktopCaptureBitmap?> reviewCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        async void ShowReview()
+        void ShowReview()
         {
             try
             {
@@ -197,13 +197,7 @@ internal sealed class CaptureSelectionWindow
                 root.KeyDown += HandleReviewKeyDown;
                 root.UpdateLayout();
                 ActivateReviewInput();
-                DesktopCaptureBitmap? result = await reviewSurface.Completion;
-                reviewCompletion.TrySetResult(result);
-
-                if (result is null)
-                {
-                    CloseCore();
-                }
+                _ = CompleteReviewAsync(reviewSurface, reviewCompletion);
             }
             catch (Exception exception)
             {
@@ -222,6 +216,44 @@ internal sealed class CaptureSelectionWindow
         }
 
         return reviewCompletion.Task;
+    }
+
+    private async Task CompleteReviewAsync(CaptureReviewSurface surface, TaskCompletionSource<DesktopCaptureBitmap?> reviewCompletion)
+    {
+        try
+        {
+            DesktopCaptureBitmap? result = await surface.Completion.ConfigureAwait(false);
+
+            void Complete()
+            {
+                reviewCompletion.TrySetResult(result);
+
+                if (result is null)
+                {
+                    CloseCore();
+                }
+            }
+
+            if (window.DispatcherQueue.HasThreadAccess)
+            {
+                Complete();
+            }
+            else if (!window.DispatcherQueue.TryEnqueue(Complete))
+            {
+                reviewCompletion.TrySetException(new InvalidOperationException("Unable to complete the capture review."));
+            }
+        }
+        catch (Exception exception)
+        {
+            if (!window.DispatcherQueue.TryEnqueue(() =>
+            {
+                reviewCompletion.TrySetException(exception);
+                CloseCore();
+            }))
+            {
+                reviewCompletion.TrySetException(exception);
+            }
+        }
     }
 
     public void Close()
