@@ -29,8 +29,11 @@ internal sealed class CaptureSelectionWindow
 {
     private const int CaptureBeatDurationMs = 83;
     private const int CaptureHoldDurationMs = 50;
+    private const int ExtendedWindowStyleIndex = -20;
     private const int FlightDurationMs = 250;
     private const int AnimationDurationMs = CaptureBeatDurationMs + CaptureHoldDurationMs + FlightDurationMs;
+    private const int NoActivateExtendedWindowStyle = 0x08000000;
+    private const int TransparentExtendedWindowStyle = 0x00000020;
 
     private readonly DesktopCaptureBitmap bitmap;
     private readonly IReadOnlyList<CaptureSelectionCandidate> candidates;
@@ -191,12 +194,14 @@ internal sealed class CaptureSelectionWindow
 
                 reviewSurface?.Detach();
                 reviewSurface = new CaptureReviewSurface(capture, localizer, root.ActualWidth, root.ActualHeight);
+                root.ReleasePointerCaptures();
                 selectionChrome.Visibility = Visibility.Collapsed;
                 root.Background = null;
                 root.Children.Insert(root.Children.Count - 1, reviewSurface.Content);
                 root.KeyDown += HandleReviewKeyDown;
                 root.UpdateLayout();
-                reviewSurface.PlayEntrance(ToLocal(capture.Bounds));
+                ActivateReviewInput();
+                reviewSurface.PlayEntrance();
                 DesktopCaptureBitmap? result = await reviewSurface.Completion;
                 reviewCompletion.TrySetResult(result);
 
@@ -544,6 +549,17 @@ internal sealed class CaptureSelectionWindow
         }
     }
 
+    private void ActivateReviewInput()
+    {
+        int extendedStyle = GetWindowLong(windowHandle, ExtendedWindowStyleIndex);
+        extendedStyle &= ~(NoActivateExtendedWindowStyle | TransparentExtendedWindowStyle);
+        _ = SetWindowLong(windowHandle, ExtendedWindowStyleIndex, extendedStyle);
+        _ = EnableWindow(windowHandle, true);
+        window.Activate();
+        _ = SetForegroundWindow(windowHandle);
+        reviewSurface?.Focus();
+    }
+
     private void HandlePointerPressed(object sender, PointerRoutedEventArgs args)
     {
         Point point = args.GetCurrentPoint(root).Position;
@@ -636,6 +652,7 @@ internal sealed class CaptureSelectionWindow
         }
 
         selectionCompleted = true;
+        root.ReleasePointerCaptures();
         DetachSelectionHandlers();
         completion.TrySetResult(new CaptureSelectionResult(candidate, this));
     }
@@ -724,6 +741,20 @@ internal sealed class CaptureSelectionWindow
         smokeCutout.Rect = Rect.Empty;
         highlight.Visibility = Visibility.Collapsed;
     }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool EnableWindow(nint window, [MarshalAs(UnmanagedType.Bool)] bool enable);
+
+    [DllImport("user32.dll")]
+    private static extern int GetWindowLong(nint window, int index);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetForegroundWindow(nint window);
+
+    [DllImport("user32.dll")]
+    private static extern int SetWindowLong(nint window, int index, int newValue);
 
     private void UpdateSmokeBounds() =>
         smokeBounds.Rect = new Rect(0, 0, root.ActualWidth, root.ActualHeight);

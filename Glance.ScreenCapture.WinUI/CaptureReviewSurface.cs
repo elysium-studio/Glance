@@ -1,7 +1,6 @@
 using CommunityToolkit.WinUI.Controls;
 using Glance.Application.Abstractions;
 using Microsoft.UI.Composition;
-using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
@@ -110,10 +109,16 @@ internal sealed class CaptureReviewSurface
             Background = new SolidColorBrush(Windows.UI.Color.FromArgb(178, 8, 10, 14)),
             IsHitTestVisible = false
         };
-        Canvas reviewCanvas = new();
+        Canvas reviewCanvas = new()
+        {
+            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(1, 0, 0, 0))
+        };
         reviewCanvas.Children.Add(previewHost);
         reviewCanvas.Children.Add(toolbar);
-        reviewLayer = new Grid();
+        reviewLayer = new Grid
+        {
+            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(1, 0, 0, 0))
+        };
         reviewLayer.Children.Add(reviewBackdrop);
         reviewLayer.Children.Add(reviewCanvas);
     }
@@ -135,52 +140,29 @@ internal sealed class CaptureReviewSurface
         }
     }
 
-    public void PlayEntrance(Rect sourceBounds)
+    public void Focus()
+    {
+        reviewLayer.IsHitTestVisible = true;
+        reviewLayer.Focus(FocusState.Programmatic);
+    }
+
+    public void PlayEntrance()
     {
         Visual previewVisual = ElementCompositionPreview.GetElementVisual(previewHost);
         Visual toolbarVisual = ElementCompositionPreview.GetElementVisual(toolbar);
         Visual backdropVisual = ElementCompositionPreview.GetElementVisual(reviewBackdrop);
-        Vector3 targetCenter = new((float)(PreviewBounds.X + (PreviewBounds.Width / 2)), (float)(PreviewBounds.Y + (PreviewBounds.Height / 2)), 0);
-        Vector3 sourceCenter = new((float)(sourceBounds.X + (sourceBounds.Width / 2)), (float)(sourceBounds.Y + (sourceBounds.Height / 2)), 0);
+        Compositor compositor = previewVisual.Compositor;
+        TimeSpan duration = TimeSpan.FromMilliseconds(ParkDurationMs);
+        SineEasingFunction easing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.Out);
         previewVisual.CenterPoint = new Vector3((float)PreviewBounds.Width / 2, (float)PreviewBounds.Height / 2, 0);
-        previewVisual.Offset = sourceCenter - targetCenter;
-        previewVisual.Scale = new Vector3((float)Math.Max(0.01, sourceBounds.Width / PreviewBounds.Width), (float)Math.Max(0.01, sourceBounds.Height / PreviewBounds.Height), 1);
-        toolbarVisual.Offset = new Vector3(0, -8, 48);
+        previewVisual.Opacity = 1;
+        previewVisual.Scale = Vector3.One;
         toolbarVisual.Opacity = 0;
         backdropVisual.Opacity = 0;
-
-        void Start()
-        {
-            if (completed)
-            {
-                return;
-            }
-
-            Compositor compositor = previewVisual.Compositor;
-            TimeSpan duration = TimeSpan.FromMilliseconds(ParkDurationMs);
-            SineEasingFunction easing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.Out);
-            previewVisual.Offset = Vector3.Zero;
-            previewVisual.Scale = Vector3.One;
-            toolbarVisual.Offset = new Vector3(0, 0, 48);
-            toolbarVisual.Opacity = 1;
-            backdropVisual.Opacity = 1;
-            previewVisual.StartAnimation(nameof(Visual.Offset), CreateVectorAnimation(compositor, sourceCenter - targetCenter, Vector3.Zero, duration, easing));
-            previewVisual.StartAnimation(nameof(Visual.Scale), CreateVectorAnimation(compositor, new Vector3((float)Math.Max(0.01, sourceBounds.Width / PreviewBounds.Width), (float)Math.Max(0.01, sourceBounds.Height / PreviewBounds.Height), 1), Vector3.One, duration, easing));
-            toolbarVisual.StartAnimation(nameof(Visual.Offset), CreateVectorAnimation(compositor, new Vector3(0, -8, 48), new Vector3(0, 0, 48), duration, easing, 0.55f));
-            toolbarVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, easing, 0.55f));
-            backdropVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, easing, 0));
-        }
-
-        DispatcherQueue dispatcherQueue = previewHost.DispatcherQueue;
-
-        if (!dispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, Start))
-        {
-            previewVisual.Offset = Vector3.Zero;
-            previewVisual.Scale = Vector3.One;
-            toolbarVisual.Offset = new Vector3(0, 0, 48);
-            toolbarVisual.Opacity = 1;
-            backdropVisual.Opacity = 1;
-        }
+        toolbarVisual.Opacity = 1;
+        backdropVisual.Opacity = 1;
+        toolbarVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, easing, 0.35f));
+        backdropVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, easing, 0));
     }
 
     public void Confirm()
