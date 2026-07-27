@@ -1,5 +1,6 @@
 using Elysium.Platform.Windows;
 using Microsoft.UI.Composition;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -75,6 +76,7 @@ public sealed partial class ThemeTransitionService :
         washVisual.Scale = new Vector3(0.015f);
         Visual rootVisual = ElementCompositionPreview.GetElementVisual(root);
         rootVisual.Opacity = 1;
+        DispatcherQueue dispatcherQueue = transitionWindow.DispatcherQueue;
 
         TaskCompletionSource<bool> loaded = new(TaskCreationOptions.RunContinuationsAsynchronously);
         root.Loaded += HandleLoaded;
@@ -85,45 +87,53 @@ public sealed partial class ThemeTransitionService :
             transitionWindow.AppWindow.Show(false);
             shown = true;
             await loaded.Task.WaitAsync(TimeSpan.FromSeconds(2), cancellationToken);
-            root.UpdateLayout();
-            await WaitForRenderingFramesAsync(2, cancellationToken);
-            transitionWindow.AppWindow.MoveAndResize(bounds);
-            await WaitForRenderingFramesAsync(2, cancellationToken);
-            _ = DwmFlush();
-            PlatformWindowExtensions.viSetOpacity(handle, 255);
-
-            Compositor compositor = washVisual.Compositor;
-            CubicBezierEasingFunction revealEasing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
-            Vector3KeyFrameAnimation reveal = compositor.CreateVector3KeyFrameAnimation();
-            reveal.InsertKeyFrame(0, new Vector3(0.015f), revealEasing);
-            reveal.InsertKeyFrame(1, Vector3.One, revealEasing);
-            reveal.Duration = TimeSpan.FromMilliseconds(300);
-            washVisual.Scale = Vector3.One;
-            washVisual.StartAnimation(nameof(Visual.Scale), reveal);
+            await RunOnDispatcherAsync(dispatcherQueue, root.UpdateLayout);
+            await WaitForRenderingFramesAsync(dispatcherQueue, 2, cancellationToken);
+            await RunOnDispatcherAsync(dispatcherQueue, () => transitionWindow.AppWindow.MoveAndResize(bounds));
+            await WaitForRenderingFramesAsync(dispatcherQueue, 2, cancellationToken);
+            await RunOnDispatcherAsync(dispatcherQueue, () =>
+            {
+                _ = DwmFlush();
+                PlatformWindowExtensions.viSetOpacity(handle, 255);
+                Compositor compositor = washVisual.Compositor;
+                CubicBezierEasingFunction revealEasing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
+                Vector3KeyFrameAnimation reveal = compositor.CreateVector3KeyFrameAnimation();
+                reveal.InsertKeyFrame(0, new Vector3(0.015f), revealEasing);
+                reveal.InsertKeyFrame(1, Vector3.One, revealEasing);
+                reveal.Duration = TimeSpan.FromMilliseconds(300);
+                washVisual.Scale = Vector3.One;
+                washVisual.StartAnimation(nameof(Visual.Scale), reveal);
+            });
 
             await Task.Delay(145, cancellationToken);
-            await applyTheme();
+            await applyTheme().ConfigureAwait(false);
             await Task.Delay(155, cancellationToken);
-
-            ScalarKeyFrameAnimation fade = compositor.CreateScalarKeyFrameAnimation();
-            fade.InsertKeyFrame(0, 1);
-            fade.InsertKeyFrame(1, 0, compositor.CreateCubicBezierEasingFunction(new Vector2(0.4f, 0), new Vector2(1, 1)));
-            fade.Duration = TimeSpan.FromMilliseconds(150);
-            rootVisual.Opacity = 0;
-            rootVisual.StartAnimation(nameof(Visual.Opacity), fade);
+            await RunOnDispatcherAsync(dispatcherQueue, () =>
+            {
+                Compositor compositor = rootVisual.Compositor;
+                ScalarKeyFrameAnimation fade = compositor.CreateScalarKeyFrameAnimation();
+                fade.InsertKeyFrame(0, 1);
+                fade.InsertKeyFrame(1, 0, compositor.CreateCubicBezierEasingFunction(new Vector2(0.4f, 0), new Vector2(1, 1)));
+                fade.Duration = TimeSpan.FromMilliseconds(150);
+                rootVisual.Opacity = 0;
+                rootVisual.StartAnimation(nameof(Visual.Opacity), fade);
+            });
             await Task.Delay(150, cancellationToken);
         }
         finally
         {
-            root.Loaded -= HandleLoaded;
-            washVisual.StopAnimation(nameof(Visual.Scale));
-            rootVisual.StopAnimation(nameof(Visual.Opacity));
-            PlatformWindowExtensions.viSetOpacity(handle, 0);
-
-            if (shown)
+            await RunOnDispatcherAsync(dispatcherQueue, () =>
             {
-                _ = ShowWindow(handle, ShowWindowHidden);
-            }
+                root.Loaded -= HandleLoaded;
+                washVisual.StopAnimation(nameof(Visual.Scale));
+                rootVisual.StopAnimation(nameof(Visual.Opacity));
+                PlatformWindowExtensions.viSetOpacity(handle, 0);
+
+                if (shown)
+                {
+                    _ = ShowWindow(handle, ShowWindowHidden);
+                }
+            });
         }
 
         void HandleLoaded(object sender, RoutedEventArgs args) =>
@@ -137,10 +147,25 @@ public sealed partial class ThemeTransitionService :
             return;
         }
 
-        PlatformWindowExtensions.viSetOpacity(handle, 0);
-        window.Close();
+        Window closingWindow = window;
+        nint closingHandle = handle;
         window = null;
         handle = 0;
+
+        void Close()
+        {
+            PlatformWindowExtensions.viSetOpacity(closingHandle, 0);
+            closingWindow.Close();
+        }
+
+        if (closingWindow.DispatcherQueue.HasThreadAccess)
+        {
+            Close();
+        }
+        else
+        {
+            _ = closingWindow.DispatcherQueue.TryEnqueue(Close);
+        }
     }
 
     private Window GetWindow(UIElement content,
@@ -180,13 +205,44 @@ public sealed partial class ThemeTransitionService :
         return Math.Sqrt(horizontal * horizontal + vertical * vertical);
     }
 
-    private static async Task WaitForRenderingFramesAsync(int count,
+    private static Task RunOnDispatcherAsync(DispatcherQueue dispatcherQueue,
+        Action action)
+    {
+        if (dispatcherQueue.HasThreadAccess)
+        {
+            action();
+            return Task.CompletedTask;
+        }
+
+        TaskCompletionSource<bool> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (!dispatcherQueue.TryEnqueue(() =>
+        {
+            try
+            {
+                action();
+                completion.TrySetResult(true);
+            }
+            catch (Exception exception)
+            {
+                completion.TrySetException(exception);
+            }
+        }))
+        {
+            completion.TrySetException(new InvalidOperationException("The theme transition dispatcher is unavailable."));
+        }
+
+        return completion.Task;
+    }
+
+    private static async Task WaitForRenderingFramesAsync(DispatcherQueue dispatcherQueue,
+        int count,
         CancellationToken cancellationToken)
     {
         int frames = 0;
         TaskCompletionSource<bool> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
         using CancellationTokenRegistration registration = cancellationToken.Register(() => completion.TrySetCanceled(cancellationToken));
-        CompositionTarget.Rendering += HandleRendering;
+        await RunOnDispatcherAsync(dispatcherQueue, () => CompositionTarget.Rendering += HandleRendering);
 
         try
         {
@@ -194,7 +250,7 @@ public sealed partial class ThemeTransitionService :
         }
         finally
         {
-            CompositionTarget.Rendering -= HandleRendering;
+            await RunOnDispatcherAsync(dispatcherQueue, () => CompositionTarget.Rendering -= HandleRendering);
         }
 
         void HandleRendering(object? sender, object args)

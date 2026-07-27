@@ -7,7 +7,8 @@ namespace Glance.ThemeSwitcher;
 
 public sealed partial class ThemeSwitcherViewModel(IThemeController controller,
     ThemeSwitcherSettings settings,
-    ITextLocalizer localizer) :
+    ITextLocalizer localizer,
+    IDispatcher? dispatcher = null) :
     ObservableObject
 {
     private ThemeSwitcherSettings settings = settings;
@@ -65,14 +66,17 @@ public sealed partial class ThemeSwitcherViewModel(IThemeController controller,
 
     public async Task InitializeAsync()
     {
-        ThemeChangeResult result = await controller.RefreshAsync(settings);
-        ThemePreference initialPreference = settings.Preference == ThemePreference.Sunset
-            ? ThemePreference.Sunset
-            : result.EffectiveTheme == ThemeVariant.Light
-                ? ThemePreference.Light
-                : ThemePreference.Dark;
-        settings.Preference = initialPreference;
-        ApplyResult(result, initialPreference);
+        ThemeChangeResult result = await controller.RefreshAsync(settings).ConfigureAwait(false);
+        Dispatch(() =>
+        {
+            ThemePreference initialPreference = settings.Preference == ThemePreference.Sunset
+                ? ThemePreference.Sunset
+                : result.EffectiveTheme == ThemeVariant.Light
+                    ? ThemePreference.Light
+                    : ThemePreference.Dark;
+            settings.Preference = initialPreference;
+            ApplyResult(result, initialPreference);
+        });
     }
 
     public Task SelectLightAsync() => SelectAsync(ThemePreference.Light);
@@ -88,8 +92,8 @@ public sealed partial class ThemeSwitcherViewModel(IThemeController controller,
             return;
         }
 
-        ThemeChangeResult result = await controller.RefreshAsync(settings);
-        ApplyResult(result, Preference);
+        ThemeChangeResult result = await controller.RefreshAsync(settings).ConfigureAwait(false);
+        Dispatch(() => ApplyResult(result, Preference));
     }
 
     public void ApplySettings(ThemeSwitcherSettings updatedSettings)
@@ -116,10 +120,19 @@ public sealed partial class ThemeSwitcherViewModel(IThemeController controller,
         IsBusy = true;
         ErrorText = null;
 
+        ThemeChangeResult result;
+
         try
         {
-            ThemeChangeResult result = await controller.SelectAsync(requestedPreference, settings);
+            result = await controller.SelectAsync(requestedPreference, settings).ConfigureAwait(false);
+        }
+        catch
+        {
+            result = new ThemeChangeResult(false, EffectiveTheme, null, ErrorKey: "ThemeChangeFailed");
+        }
 
+        Dispatch(() =>
+        {
             if (result.Succeeded)
             {
                 if (result.Latitude is double latitude && result.Longitude is double longitude)
@@ -137,11 +150,9 @@ public sealed partial class ThemeSwitcherViewModel(IThemeController controller,
             {
                 ErrorText = localizer.GetText(result.ErrorKey ?? "ThemeChangeFailed");
             }
-        }
-        finally
-        {
+
             IsBusy = false;
-        }
+        });
     }
 
     private void ApplyResult(ThemeChangeResult result,
@@ -158,5 +169,16 @@ public sealed partial class ThemeSwitcherViewModel(IThemeController controller,
         EffectiveTheme = result.EffectiveTheme;
         NextChange = result.NextChange;
         OnPropertyChanged(nameof(DetailText));
+    }
+
+    private void Dispatch(Action action)
+    {
+        if (dispatcher is null)
+        {
+            action();
+            return;
+        }
+
+        dispatcher.Dispatch(action);
     }
 }

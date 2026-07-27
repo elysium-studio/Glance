@@ -75,6 +75,23 @@ public sealed class ThemeSwitcherViewModelTests
         Assert.Equal(ThemePreference.Dark, settings.Preference);
     }
 
+    [Fact]
+    public async Task SelectDarkAsync_DispatchesStateChanges()
+    {
+        QueuedDispatcher dispatcher = new();
+        ThemeSwitcherViewModel viewModel = new(new FakeThemeController(), new ThemeSwitcherSettings(), new FakeLocalizer(), dispatcher);
+
+        await viewModel.SelectDarkAsync();
+
+        Assert.True(viewModel.IsBusy);
+        Assert.Single(dispatcher.Actions);
+
+        dispatcher.Actions[0]();
+
+        Assert.False(viewModel.IsBusy);
+        Assert.Equal(ThemePreference.Dark, viewModel.Preference);
+    }
+
     private sealed class FakeThemeController :
         IThemeController
     {
@@ -106,5 +123,14 @@ public sealed class ThemeSwitcherViewModelTests
             "LocationDenied" => "Location required",
             _ => key
         };
+    }
+
+    private sealed class QueuedDispatcher :
+        IDispatcher
+    {
+        public List<Action> Actions { get; } = [];
+
+        public void Dispatch(Action action) =>
+            Actions.Add(action);
     }
 }
