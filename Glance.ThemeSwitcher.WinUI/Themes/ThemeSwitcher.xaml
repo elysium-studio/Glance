@@ -11,6 +11,14 @@
             <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FF24170A" />
             <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#CC24170A" />
             <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#66FFFFFF" />
+            <StaticResource x:Key="ToggleButtonBackgroundChecked" ResourceKey="AccentButtonBackground" />
+            <StaticResource x:Key="ToggleButtonBackgroundCheckedPointerOver" ResourceKey="AccentButtonBackgroundPointerOver" />
+            <StaticResource x:Key="ToggleButtonBackgroundCheckedPressed" ResourceKey="AccentButtonBackgroundPressed" />
+            <StaticResource x:Key="ToggleButtonBackgroundCheckedDisabled" ResourceKey="AccentButtonBackgroundDisabled" />
+            <StaticResource x:Key="ToggleButtonForegroundChecked" ResourceKey="AccentButtonForeground" />
+            <StaticResource x:Key="ToggleButtonForegroundCheckedPointerOver" ResourceKey="AccentButtonForegroundPointerOver" />
+            <StaticResource x:Key="ToggleButtonForegroundCheckedPressed" ResourceKey="AccentButtonForegroundPressed" />
+            <StaticResource x:Key="ToggleButtonForegroundCheckedDisabled" ResourceKey="AccentButtonForegroundDisabled" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="GlanceThemeSwitcherIconBrush" Color="#FF9A4F00" />
@@ -23,6 +31,14 @@
             <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FFFFFFFF" />
             <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#CCFFFFFF" />
             <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#66000000" />
+            <StaticResource x:Key="ToggleButtonBackgroundChecked" ResourceKey="AccentButtonBackground" />
+            <StaticResource x:Key="ToggleButtonBackgroundCheckedPointerOver" ResourceKey="AccentButtonBackgroundPointerOver" />
+            <StaticResource x:Key="ToggleButtonBackgroundCheckedPressed" ResourceKey="AccentButtonBackgroundPressed" />
+            <StaticResource x:Key="ToggleButtonBackgroundCheckedDisabled" ResourceKey="AccentButtonBackgroundDisabled" />
+            <StaticResource x:Key="ToggleButtonForegroundChecked" ResourceKey="AccentButtonForeground" />
+            <StaticResource x:Key="ToggleButtonForegroundCheckedPointerOver" ResourceKey="AccentButtonForegroundPointerOver" />
+            <StaticResource x:Key="ToggleButtonForegroundCheckedPressed" ResourceKey="AccentButtonForegroundPressed" />
+            <StaticResource x:Key="ToggleButtonForegroundCheckedDisabled" ResourceKey="AccentButtonForegroundDisabled" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <StaticResource x:Key="GlanceThemeSwitcherIconBrush" ResourceKey="SystemColorWindowTextColorBrush" />
@@ -35,6 +51,14 @@
             <StaticResource x:Key="AccentButtonForegroundPointerOver" ResourceKey="SystemColorHighlightTextColorBrush" />
             <StaticResource x:Key="AccentButtonForegroundPressed" ResourceKey="SystemColorHighlightTextColorBrush" />
             <StaticResource x:Key="AccentButtonForegroundDisabled" ResourceKey="SystemColorGrayTextColorBrush" />
+            <StaticResource x:Key="ToggleButtonBackgroundChecked" ResourceKey="AccentButtonBackground" />
+            <StaticResource x:Key="ToggleButtonBackgroundCheckedPointerOver" ResourceKey="AccentButtonBackgroundPointerOver" />
+            <StaticResource x:Key="ToggleButtonBackgroundCheckedPressed" ResourceKey="AccentButtonBackgroundPressed" />
+            <StaticResource x:Key="ToggleButtonBackgroundCheckedDisabled" ResourceKey="AccentButtonBackgroundDisabled" />
+            <StaticResource x:Key="ToggleButtonForegroundChecked" ResourceKey="AccentButtonForeground" />
+            <StaticResource x:Key="ToggleButtonForegroundCheckedPointerOver" ResourceKey="AccentButtonForegroundPointerOver" />
+            <StaticResource x:Key="ToggleButtonForegroundCheckedPressed" ResourceKey="AccentButtonForegroundPressed" />
+            <StaticResource x:Key="ToggleButtonForegroundCheckedDisabled" ResourceKey="AccentButtonForegroundDisabled" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

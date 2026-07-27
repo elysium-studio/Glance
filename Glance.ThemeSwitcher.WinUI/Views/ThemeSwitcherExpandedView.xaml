@@ -63,16 +63,16 @@
             VerticalAlignment="Center"
             Orientation="Horizontal"
             Spacing="2">
-            <Button
+            <ToggleButton
+                x:Name="LightButton"
                 x:Uid="LightButton"
                 AutomationProperties.Name="{x:Bind LightLabel}"
-                Background="{x:Bind LightBackground(ViewModel.Preference), Mode=OneWay}"
-                Click="{x:Bind ViewModel.SelectLightAsync}"
-                Foreground="{x:Bind LightForeground(ViewModel.Preference), Mode=OneWay}"
+                Click="{x:Bind SelectLight}"
+                IsChecked="{x:Bind IsLight(ViewModel.Preference), Mode=OneWay}"
                 IsEnabled="{x:Bind IsActionEnabled(ViewModel.IsBusy), Mode=OneWay}"
                 ToolTipService.ToolTip="{x:Bind LightLabel}">
-                <Button.Style>
-                    <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                <ToggleButton.Style>
+                    <Style BasedOn="{StaticResource DefaultToggleButtonStyle}" TargetType="ToggleButton">
                         <Setter Property="Width" Value="32" />
                         <Setter Property="Height" Value="32" />
                         <Setter Property="Padding" Value="0" />
@@ -81,18 +81,18 @@
                         <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
                         <Setter Property="FontSize" Value="14" />
                     </Style>
-                </Button.Style>
-            </Button>
-            <Button
+                </ToggleButton.Style>
+            </ToggleButton>
+            <ToggleButton
+                x:Name="SunsetButton"
                 x:Uid="SunsetButton"
                 AutomationProperties.Name="{x:Bind SunsetLabel}"
-                Background="{x:Bind SunsetBackground(ViewModel.Preference), Mode=OneWay}"
-                Click="{x:Bind ViewModel.SelectSunsetAsync}"
-                Foreground="{x:Bind SunsetForeground(ViewModel.Preference), Mode=OneWay}"
+                Click="{x:Bind SelectSunset}"
+                IsChecked="{x:Bind IsSunset(ViewModel.Preference), Mode=OneWay}"
                 IsEnabled="{x:Bind IsActionEnabled(ViewModel.IsBusy), Mode=OneWay}"
                 ToolTipService.ToolTip="{x:Bind SunsetLabel}">
-                <Button.Style>
-                    <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                <ToggleButton.Style>
+                    <Style BasedOn="{StaticResource DefaultToggleButtonStyle}" TargetType="ToggleButton">
                         <Setter Property="Width" Value="32" />
                         <Setter Property="Height" Value="32" />
                         <Setter Property="Padding" Value="0" />
@@ -101,18 +101,18 @@
                         <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
                         <Setter Property="FontSize" Value="14" />
                     </Style>
-                </Button.Style>
-            </Button>
-            <Button
+                </ToggleButton.Style>
+            </ToggleButton>
+            <ToggleButton
+                x:Name="DarkButton"
                 x:Uid="DarkButton"
                 AutomationProperties.Name="{x:Bind DarkLabel}"
-                Background="{x:Bind DarkBackground(ViewModel.Preference), Mode=OneWay}"
-                Click="{x:Bind ViewModel.SelectDarkAsync}"
-                Foreground="{x:Bind DarkForeground(ViewModel.Preference), Mode=OneWay}"
+                Click="{x:Bind SelectDark}"
+                IsChecked="{x:Bind IsDark(ViewModel.Preference), Mode=OneWay}"
                 IsEnabled="{x:Bind IsActionEnabled(ViewModel.IsBusy), Mode=OneWay}"
                 ToolTipService.ToolTip="{x:Bind DarkLabel}">
-                <Button.Style>
-                    <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                <ToggleButton.Style>
+                    <Style BasedOn="{StaticResource DefaultToggleButtonStyle}" TargetType="ToggleButton">
                         <Setter Property="Width" Value="32" />
                         <Setter Property="Height" Value="32" />
                         <Setter Property="Padding" Value="0" />
@@ -121,8 +121,8 @@
                         <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
                         <Setter Property="FontSize" Value="14" />
                     </Style>
-                </Button.Style>
-            </Button>
+                </ToggleButton.Style>
+            </ToggleButton>
         </StackPanel>
     </Grid>
 </UserControl>

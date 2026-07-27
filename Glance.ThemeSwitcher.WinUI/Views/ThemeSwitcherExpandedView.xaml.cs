@@ -1,7 +1,6 @@
 using Glance.UI.WinUI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
 using System.ComponentModel;
 
 namespace Glance.ThemeSwitcher.WinUI;
@@ -33,25 +32,29 @@ public sealed partial class ThemeSwitcherExpandedView :
 
     public string DarkLabel => localizer.GetText("DarkLabel");
 
-    private Brush LightBackground(ThemePreference preference) => GetBackground(preference == ThemePreference.Light);
+    private bool IsLight(ThemePreference preference) => preference == ThemePreference.Light;
 
-    private Brush SunsetBackground(ThemePreference preference) => GetBackground(preference == ThemePreference.Sunset);
+    private bool IsSunset(ThemePreference preference) => preference == ThemePreference.Sunset;
 
-    private Brush DarkBackground(ThemePreference preference) => GetBackground(preference == ThemePreference.Dark);
+    private bool IsDark(ThemePreference preference) => preference == ThemePreference.Dark;
 
-    private Brush LightForeground(ThemePreference preference) => GetForeground(preference == ThemePreference.Light);
+    private void SelectLight()
+    {
+        UpdateSelection(ThemePreference.Light);
+        _ = ViewModel.SelectLightAsync();
+    }
 
-    private Brush SunsetForeground(ThemePreference preference) => GetForeground(preference == ThemePreference.Sunset);
+    private void SelectSunset()
+    {
+        UpdateSelection(ThemePreference.Sunset);
+        _ = ViewModel.SelectSunsetAsync();
+    }
 
-    private Brush DarkForeground(ThemePreference preference) => GetForeground(preference == ThemePreference.Dark);
-
-    private Brush GetBackground(bool selected) => selected
-        ? (Brush)Resources["GlanceThemeSwitcherIconBrush"]
-        : new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
-
-    private Brush GetForeground(bool selected) => selected
-        ? (Brush)Resources["GlanceThemeSwitcherSelectedForegroundBrush"]
-        : (Brush)Microsoft.UI.Xaml.Application.Current.Resources["TextFillColorPrimaryBrush"];
+    private void SelectDark()
+    {
+        UpdateSelection(ThemePreference.Dark);
+        _ = ViewModel.SelectDarkAsync();
+    }
 
     private bool IsActionEnabled(bool isBusy) => !isBusy;
 
@@ -65,9 +68,21 @@ public sealed partial class ThemeSwitcherExpandedView :
 
     private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
+        if (args.PropertyName is nameof(ThemeSwitcherViewModel.Preference) or nameof(ThemeSwitcherViewModel.ErrorText))
+        {
+            UpdateSelection(ViewModel.Preference);
+        }
+
         if (args.PropertyName == nameof(ThemeSwitcherViewModel.EffectiveTheme))
         {
             ThemeSwitcherMotion.Play(StatusIndicator);
         }
+    }
+
+    private void UpdateSelection(ThemePreference preference)
+    {
+        LightButton.IsChecked = preference == ThemePreference.Light;
+        SunsetButton.IsChecked = preference == ThemePreference.Sunset;
+        DarkButton.IsChecked = preference == ThemePreference.Dark;
     }
 }
