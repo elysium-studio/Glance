@@ -27,8 +27,8 @@ public sealed partial class WindowsScreenCaptureService :
     private const int SmVirtualScreenX = 76;
     private const int SmVirtualScreenY = 77;
     private const uint SourceCopy = 0x00CC0020;
-    private const int OffscreenWindowCoordinate = -32000;
-    private const uint SetWindowPositionFlags = 0x0001 | 0x0004 | 0x0010 | 0x0200;
+    private const int ShowWindowHide = 0;
+    private const int ShowWindowShowNoActivate = 4;
     private readonly DispatcherQueue dispatcherQueue;
     private readonly ITextLocalizer localizer;
     private readonly string captureFolderPath;
@@ -75,7 +75,7 @@ public sealed partial class WindowsScreenCaptureService :
 
         try
         {
-            MoveWindowsOffscreen(applicationWindows);
+            HideApplicationWindows(applicationWindows);
             _ = NativeMethods.DwmFlush();
 
             DesktopCaptureBitmap desktop = CaptureVirtualDesktop();
@@ -339,9 +339,9 @@ public sealed partial class WindowsScreenCaptureService :
         {
             NativeMethods.GetWindowThreadProcessId(window, out uint windowProcessId);
 
-            if (windowProcessId == processId && NativeMethods.IsWindowVisible(window) && NativeMethods.GetWindowRect(window, out NativeRect bounds))
+            if (windowProcessId == processId && NativeMethods.IsWindowVisible(window))
             {
-                windows.Add(new ApplicationWindowState(window, bounds.Left, bounds.Top));
+                windows.Add(new ApplicationWindowState(window));
             }
 
             return true;
@@ -349,11 +349,11 @@ public sealed partial class WindowsScreenCaptureService :
         return windows;
     }
 
-    private static void MoveWindowsOffscreen(IEnumerable<ApplicationWindowState> windows)
+    private static void HideApplicationWindows(IEnumerable<ApplicationWindowState> windows)
     {
         foreach (ApplicationWindowState window in windows)
         {
-            _ = NativeMethods.SetWindowPos(window.Handle, nint.Zero, OffscreenWindowCoordinate, OffscreenWindowCoordinate, 0, 0, SetWindowPositionFlags);
+            _ = NativeMethods.ShowWindow(window.Handle, ShowWindowHide);
         }
     }
 
@@ -361,7 +361,7 @@ public sealed partial class WindowsScreenCaptureService :
     {
         foreach (ApplicationWindowState window in windows)
         {
-            _ = NativeMethods.SetWindowPos(window.Handle, nint.Zero, window.X, window.Y, 0, 0, SetWindowPositionFlags);
+            _ = NativeMethods.ShowWindow(window.Handle, ShowWindowShowNoActivate);
         }
     }
 
@@ -532,7 +532,7 @@ public sealed partial class WindowsScreenCaptureService :
         public int Bottom;
     }
 
-    private readonly record struct ApplicationWindowState(nint Handle, int X, int Y);
+    private readonly record struct ApplicationWindowState(nint Handle);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct MonitorInfo
@@ -623,6 +623,6 @@ public sealed partial class WindowsScreenCaptureService :
 
         [LibraryImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static partial bool SetWindowPos(nint window, nint insertAfter, int x, int y, int width, int height, uint flags);
+        public static partial bool ShowWindow(nint window, int command);
     }
 }

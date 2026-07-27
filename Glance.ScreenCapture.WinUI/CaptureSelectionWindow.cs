@@ -70,11 +70,13 @@ internal sealed class CaptureSelectionWindow
         GeometryGroup smokeGeometry = new() { FillRule = FillRule.EvenOdd };
         smokeGeometry.Children.Add(smokeBounds);
         smokeGeometry.Children.Add(smokeCutout);
+
         Microsoft.UI.Xaml.Shapes.Path smokeOverlay = new()
         {
             Data = smokeGeometry,
             Fill = ResolveSmokeBrush()
         };
+
         highlight = new Border
         {
             Background = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0)),
@@ -83,6 +85,7 @@ internal sealed class CaptureSelectionWindow
             CornerRadius = new CornerRadius(4),
             Visibility = Visibility.Collapsed
         };
+
         Canvas selectionCanvas = new();
         selectionCanvas.Children.Add(highlight);
 
@@ -99,6 +102,7 @@ internal sealed class CaptureSelectionWindow
                 _ => string.Empty
             }
         };
+
         Border instructionContainer = new()
         {
             HorizontalAlignment = HorizontalAlignment.Center,
