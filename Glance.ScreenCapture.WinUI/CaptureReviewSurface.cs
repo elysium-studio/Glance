@@ -57,6 +57,7 @@ internal sealed class CaptureReviewSurface
 
         animationPreview = CreatePreviewHost(imageSource, previewWidth, previewHeight);
         animationPreview.Translation = new Vector3(0, 0, 40);
+        animationPreview.IsHitTestVisible = false;
 
         Canvas.SetLeft(animationPreview, previewX);
         Canvas.SetTop(animationPreview, previewY);
@@ -98,7 +99,8 @@ internal sealed class CaptureReviewSurface
 
         reviewBackdrop = new Border
         {
-            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(178, 8, 10, 14))
+            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(178, 8, 10, 14)),
+            IsHitTestVisible = false
         };
 
         Canvas reviewCanvas = new()
@@ -109,6 +111,7 @@ internal sealed class CaptureReviewSurface
         reviewCanvas.Children.Add(previewHost);
         reviewCanvas.Children.Add(animationPreview);
         reviewCanvas.Children.Add(toolbar);
+        Canvas.SetZIndex(toolbar, 2);
 
         reviewLayer = new Grid
         {
