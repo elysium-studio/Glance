@@ -682,8 +682,6 @@ internal sealed class CaptureSelectionWindow
             Width = Math.Max(1, sourceBounds.Width),
             Height = Math.Max(1, sourceBounds.Height),
             Background = new SolidColorBrush(Color.FromArgb(255, 16, 20, 28)),
-            BorderBrush = new SolidColorBrush(Color.FromArgb(230, 104, 216, 255)),
-            BorderThickness = new Thickness(2),
             CornerRadius = new CornerRadius(8),
             Child = image
         };

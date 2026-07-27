@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using System;
@@ -12,16 +13,24 @@ namespace Glance.ScreenCapture.WinUI;
 internal sealed class CaptureCropOverlay :
     Canvas
 {
-    private const double HandleSize = 12;
-    private const double HitTargetSize = 18;
+    private const double CornerHandleSize = 56;
+    private const double HandleLength = 28;
+    private const double HandleSize = 32;
+    private const double HandleThickness = 3;
     private const double MinimumCropSize = 48;
+    internal const double VisualPadding = HandleSize / 2;
     private readonly Border bottomShade;
-    private readonly Dictionary<CropInteraction, Border> handles;
+    private readonly Dictionary<CropInteraction, Thumb> handles;
+    private readonly Dictionary<CropInteraction, FrameworkElement> handleVisuals;
     private readonly Border horizontalLineOne;
     private readonly Border horizontalLineTwo;
     private readonly Border leftShade;
     private readonly Border rightShade;
     private readonly Border selectionBorder;
+    private readonly Border sizeHint;
+    private readonly TextBlock sizeHintText;
+    private readonly int sourceHeight;
+    private readonly int sourceWidth;
     private readonly double surfaceHeight;
     private readonly double surfaceWidth;
     private readonly Border topShade;
@@ -31,15 +40,19 @@ internal sealed class CaptureCropOverlay :
     private CropInteraction interaction;
     private Rect interactionBounds;
     private Point interactionPoint;
+    private double resizeDeltaX;
+    private double resizeDeltaY;
 
-    public CaptureCropOverlay(double width, double height, Brush foreground)
+    public CaptureCropOverlay(double width, double height, int sourceWidth, int sourceHeight)
     {
+        SolidColorBrush foreground = new(Color.FromArgb(255, 255, 255, 255));
+        this.sourceWidth = sourceWidth;
+        this.sourceHeight = sourceHeight;
         surfaceWidth = width;
         surfaceHeight = height;
-        Width = width;
-        Height = height;
+        Width = width + (VisualPadding * 2);
+        Height = height + (VisualPadding * 2);
         Background = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0));
-        Clip = new RectangleGeometry { Rect = new Rect(0, 0, width, height) };
 
         topShade = CreateShade();
         bottomShade = CreateShade();
@@ -48,24 +61,49 @@ internal sealed class CaptureCropOverlay :
         selectionBorder = new Border
         {
             BorderBrush = foreground,
-            BorderThickness = new Thickness(2),
-            CornerRadius = new CornerRadius(4),
+            BorderThickness = new Thickness(1),
             IsHitTestVisible = false
         };
         verticalLineOne = CreateGuide(foreground);
         verticalLineTwo = CreateGuide(foreground);
         horizontalLineOne = CreateGuide(foreground);
         horizontalLineTwo = CreateGuide(foreground);
-        handles = new Dictionary<CropInteraction, Border>
+        sizeHintText = new TextBlock
         {
-            [CropInteraction.TopLeft] = CreateHandle(foreground),
-            [CropInteraction.Top] = CreateHandle(foreground),
-            [CropInteraction.TopRight] = CreateHandle(foreground),
-            [CropInteraction.Right] = CreateHandle(foreground),
-            [CropInteraction.BottomRight] = CreateHandle(foreground),
-            [CropInteraction.Bottom] = CreateHandle(foreground),
-            [CropInteraction.BottomLeft] = CreateHandle(foreground),
-            [CropInteraction.Left] = CreateHandle(foreground)
+            FontSize = 12,
+            Foreground = foreground
+        };
+        sizeHint = new Border
+        {
+            Padding = new Thickness(8, 4, 8, 4),
+            Background = new SolidColorBrush(Color.FromArgb(220, 0, 0, 0)),
+            CornerRadius = new CornerRadius(2),
+            Child = sizeHintText,
+            Visibility = Visibility.Collapsed,
+            IsHitTestVisible = false
+        };
+        Canvas.SetZIndex(sizeHint, 5);
+        handles = new Dictionary<CropInteraction, Thumb>
+        {
+            [CropInteraction.TopLeft] = CreateHandle(CropInteraction.TopLeft),
+            [CropInteraction.Top] = CreateHandle(CropInteraction.Top),
+            [CropInteraction.TopRight] = CreateHandle(CropInteraction.TopRight),
+            [CropInteraction.Right] = CreateHandle(CropInteraction.Right),
+            [CropInteraction.BottomRight] = CreateHandle(CropInteraction.BottomRight),
+            [CropInteraction.Bottom] = CreateHandle(CropInteraction.Bottom),
+            [CropInteraction.BottomLeft] = CreateHandle(CropInteraction.BottomLeft),
+            [CropInteraction.Left] = CreateHandle(CropInteraction.Left)
+        };
+        handleVisuals = new Dictionary<CropInteraction, FrameworkElement>
+        {
+            [CropInteraction.TopLeft] = CreateCornerHandle(CropInteraction.TopLeft, foreground),
+            [CropInteraction.Top] = CreateEdgeHandle(CropInteraction.Top, foreground),
+            [CropInteraction.TopRight] = CreateCornerHandle(CropInteraction.TopRight, foreground),
+            [CropInteraction.Right] = CreateEdgeHandle(CropInteraction.Right, foreground),
+            [CropInteraction.BottomRight] = CreateCornerHandle(CropInteraction.BottomRight, foreground),
+            [CropInteraction.Bottom] = CreateEdgeHandle(CropInteraction.Bottom, foreground),
+            [CropInteraction.BottomLeft] = CreateCornerHandle(CropInteraction.BottomLeft, foreground),
+            [CropInteraction.Left] = CreateEdgeHandle(CropInteraction.Left, foreground)
         };
 
         Children.Add(topShade);
@@ -77,10 +115,19 @@ internal sealed class CaptureCropOverlay :
         Children.Add(verticalLineTwo);
         Children.Add(horizontalLineOne);
         Children.Add(horizontalLineTwo);
+        Children.Add(sizeHint);
 
-        foreach (Border handle in handles.Values)
+        foreach (Thumb handle in handles.Values)
         {
+            handle.DragStarted += HandleResizeDragStarted;
+            handle.DragDelta += HandleResizeDragDelta;
+            handle.DragCompleted += HandleResizeDragCompleted;
             Children.Add(handle);
+        }
+
+        foreach (FrameworkElement handleVisual in handleVisuals.Values)
+        {
+            Children.Add(handleVisual);
         }
 
         cropBounds = new Rect(0, 0, width, height);
@@ -96,28 +143,31 @@ internal sealed class CaptureCropOverlay :
 
     private void HandlePointerPressed(object sender, PointerRoutedEventArgs args)
     {
-        Point point = args.GetCurrentPoint(this).Position;
-        interaction = ResolveInteraction(point);
-
-        if (interaction == CropInteraction.None)
+        if (IsResizeHandle(args.OriginalSource))
         {
             return;
         }
 
+        Point point = ToSurfacePoint(args.GetCurrentPoint(this).Position);
+        if (!cropBounds.Contains(point) || !CapturePointer(args.Pointer))
+        {
+            return;
+        }
+
+        interaction = CropInteraction.Move;
         interactionPoint = point;
         interactionBounds = cropBounds;
-        CapturePointer(args.Pointer);
         args.Handled = true;
     }
 
     private void HandlePointerMoved(object sender, PointerRoutedEventArgs args)
     {
-        if (interaction == CropInteraction.None)
+        if (interaction != CropInteraction.Move)
         {
             return;
         }
 
-        Point point = args.GetCurrentPoint(this).Position;
+        Point point = ToSurfacePoint(args.GetCurrentPoint(this).Position);
         double deltaX = point.X - interactionPoint.X;
         double deltaY = point.Y - interactionPoint.Y;
         cropBounds = CalculateBounds(interactionBounds, interaction, deltaX, deltaY);
@@ -127,7 +177,7 @@ internal sealed class CaptureCropOverlay :
 
     private void HandlePointerReleased(object sender, PointerRoutedEventArgs args)
     {
-        if (interaction == CropInteraction.None)
+        if (interaction != CropInteraction.Move)
         {
             return;
         }
@@ -139,64 +189,78 @@ internal sealed class CaptureCropOverlay :
 
     private void HandlePointerCanceled(object sender, PointerRoutedEventArgs args)
     {
+        if (interaction != CropInteraction.Move)
+        {
+            return;
+        }
+
         interaction = CropInteraction.None;
         ReleasePointerCapture(args.Pointer);
     }
 
-    private void HandlePointerCaptureLost(object sender, PointerRoutedEventArgs args) =>
-        interaction = CropInteraction.None;
-
-    private CropInteraction ResolveInteraction(Point point)
+    private void HandlePointerCaptureLost(object sender, PointerRoutedEventArgs args)
     {
-        bool nearLeft = Math.Abs(point.X - cropBounds.X) <= HitTargetSize;
-        bool nearRight = Math.Abs(point.X - cropBounds.Right) <= HitTargetSize;
-        bool nearTop = Math.Abs(point.Y - cropBounds.Y) <= HitTargetSize;
-        bool nearBottom = Math.Abs(point.Y - cropBounds.Bottom) <= HitTargetSize;
-        bool withinHorizontalRange = point.X >= cropBounds.X - HitTargetSize && point.X <= cropBounds.Right + HitTargetSize;
-        bool withinVerticalRange = point.Y >= cropBounds.Y - HitTargetSize && point.Y <= cropBounds.Bottom + HitTargetSize;
-
-        if (nearLeft && nearTop)
+        if (interaction == CropInteraction.Move)
         {
-            return CropInteraction.TopLeft;
+            interaction = CropInteraction.None;
         }
-
-        if (nearRight && nearTop)
-        {
-            return CropInteraction.TopRight;
-        }
-
-        if (nearRight && nearBottom)
-        {
-            return CropInteraction.BottomRight;
-        }
-
-        if (nearLeft && nearBottom)
-        {
-            return CropInteraction.BottomLeft;
-        }
-
-        if (nearTop && withinHorizontalRange)
-        {
-            return CropInteraction.Top;
-        }
-
-        if (nearRight && withinVerticalRange)
-        {
-            return CropInteraction.Right;
-        }
-
-        if (nearBottom && withinHorizontalRange)
-        {
-            return CropInteraction.Bottom;
-        }
-
-        if (nearLeft && withinVerticalRange)
-        {
-            return CropInteraction.Left;
-        }
-
-        return cropBounds.Contains(point) ? CropInteraction.Move : CropInteraction.None;
     }
+
+    private void HandleResizeDragStarted(object sender, DragStartedEventArgs args)
+    {
+        if (sender is not FrameworkElement { Tag: CropInteraction mode })
+        {
+            return;
+        }
+
+        interaction = mode;
+        interactionBounds = cropBounds;
+        resizeDeltaX = 0;
+        resizeDeltaY = 0;
+        SetResizeFeedbackVisible(true);
+    }
+
+    private void HandleResizeDragDelta(object sender, DragDeltaEventArgs args)
+    {
+        if (interaction is CropInteraction.None or CropInteraction.Move)
+        {
+            return;
+        }
+
+        resizeDeltaX += args.HorizontalChange;
+        resizeDeltaY += args.VerticalChange;
+        cropBounds = CalculateBounds(interactionBounds, interaction, resizeDeltaX, resizeDeltaY);
+        UpdateVisuals();
+    }
+
+    private void HandleResizeDragCompleted(object sender, DragCompletedEventArgs args)
+    {
+        if (interaction != CropInteraction.Move)
+        {
+            interaction = CropInteraction.None;
+            SetResizeFeedbackVisible(false);
+        }
+    }
+
+    private bool IsResizeHandle(object source)
+    {
+        DependencyObject? current = source as DependencyObject;
+
+        while (current is not null && !ReferenceEquals(current, this))
+        {
+            if (current is Thumb)
+            {
+                return true;
+            }
+
+            current = VisualTreeHelper.GetParent(current);
+        }
+
+        return false;
+    }
+
+    private static Point ToSurfacePoint(Point point) =>
+        new(point.X - VisualPadding, point.Y - VisualPadding);
 
     private Rect CalculateBounds(Rect bounds, CropInteraction mode, double deltaX, double deltaY)
     {
@@ -237,20 +301,21 @@ internal sealed class CaptureCropOverlay :
 
     private void UpdateVisuals()
     {
-        SetBounds(topShade, 0, 0, surfaceWidth, cropBounds.Y);
-        SetBounds(bottomShade, 0, cropBounds.Bottom, surfaceWidth, surfaceHeight - cropBounds.Bottom);
-        SetBounds(leftShade, 0, cropBounds.Y, cropBounds.X, cropBounds.Height);
-        SetBounds(rightShade, cropBounds.Right, cropBounds.Y, surfaceWidth - cropBounds.Right, cropBounds.Height);
-        SetBounds(selectionBorder, cropBounds.X, cropBounds.Y, cropBounds.Width, cropBounds.Height);
+        SetBounds(topShade, VisualPadding, VisualPadding, surfaceWidth, cropBounds.Y);
+        SetBounds(bottomShade, VisualPadding, VisualPadding + cropBounds.Bottom, surfaceWidth, surfaceHeight - cropBounds.Bottom);
+        SetBounds(leftShade, VisualPadding, VisualPadding + cropBounds.Y, cropBounds.X, cropBounds.Height);
+        SetBounds(rightShade, VisualPadding + cropBounds.Right, VisualPadding + cropBounds.Y, surfaceWidth - cropBounds.Right, cropBounds.Height);
+        SetBounds(selectionBorder, VisualPadding + cropBounds.X, VisualPadding + cropBounds.Y, cropBounds.Width, cropBounds.Height);
 
         double verticalOne = cropBounds.X + (cropBounds.Width / 3);
         double verticalTwo = cropBounds.X + ((cropBounds.Width / 3) * 2);
         double horizontalOne = cropBounds.Y + (cropBounds.Height / 3);
         double horizontalTwo = cropBounds.Y + ((cropBounds.Height / 3) * 2);
-        SetBounds(verticalLineOne, verticalOne, cropBounds.Y, 1, cropBounds.Height);
-        SetBounds(verticalLineTwo, verticalTwo, cropBounds.Y, 1, cropBounds.Height);
-        SetBounds(horizontalLineOne, cropBounds.X, horizontalOne, cropBounds.Width, 1);
-        SetBounds(horizontalLineTwo, cropBounds.X, horizontalTwo, cropBounds.Width, 1);
+        SetBounds(verticalLineOne, VisualPadding + verticalOne, VisualPadding + cropBounds.Y, 1, cropBounds.Height);
+        SetBounds(verticalLineTwo, VisualPadding + verticalTwo, VisualPadding + cropBounds.Y, 1, cropBounds.Height);
+        SetBounds(horizontalLineOne, VisualPadding + cropBounds.X, VisualPadding + horizontalOne, cropBounds.Width, 1);
+        SetBounds(horizontalLineTwo, VisualPadding + cropBounds.X, VisualPadding + horizontalTwo, cropBounds.Width, 1);
+        UpdateSizeHint();
 
         SetHandle(CropInteraction.TopLeft, cropBounds.X, cropBounds.Y);
         SetHandle(CropInteraction.Top, cropBounds.X + (cropBounds.Width / 2), cropBounds.Y);
@@ -264,10 +329,48 @@ internal sealed class CaptureCropOverlay :
 
     private void SetHandle(CropInteraction mode, double centerX, double centerY)
     {
-        Border handle = handles[mode];
-        double x = Math.Clamp(centerX - (HandleSize / 2), 0, surfaceWidth - HandleSize);
-        double y = Math.Clamp(centerY - (HandleSize / 2), 0, surfaceHeight - HandleSize);
+        Thumb handle = handles[mode];
+        double visualCenterX = VisualPadding + centerX;
+        double visualCenterY = VisualPadding + centerY;
+        double x = visualCenterX - (HandleSize / 2);
+        double y = visualCenterY - (HandleSize / 2);
         SetBounds(handle, x, y, HandleSize, HandleSize);
+
+        FrameworkElement handleVisual = handleVisuals[mode];
+        Canvas.SetLeft(handleVisual, visualCenterX - (handleVisual.Width / 2));
+        Canvas.SetTop(handleVisual, visualCenterY - (handleVisual.Height / 2));
+    }
+
+    private void SetResizeFeedbackVisible(bool visible)
+    {
+        Visibility visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+        verticalLineOne.Visibility = visibility;
+        verticalLineTwo.Visibility = visibility;
+        horizontalLineOne.Visibility = visibility;
+        horizontalLineTwo.Visibility = visibility;
+        sizeHint.Visibility = visibility;
+    }
+
+    private void UpdateSizeHint()
+    {
+        double scaleX = sourceWidth / surfaceWidth;
+        double scaleY = sourceHeight / surfaceHeight;
+        int left = Math.Clamp((int)Math.Floor(cropBounds.X * scaleX), 0, sourceWidth - 1);
+        int top = Math.Clamp((int)Math.Floor(cropBounds.Y * scaleY), 0, sourceHeight - 1);
+        int right = Math.Clamp((int)Math.Ceiling(cropBounds.Right * scaleX), left + 1, sourceWidth);
+        int bottom = Math.Clamp((int)Math.Ceiling(cropBounds.Bottom * scaleY), top + 1, sourceHeight);
+        sizeHintText.Text = $"{right - left} × {bottom - top}";
+        sizeHintText.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        Size textSize = sizeHintText.DesiredSize;
+        double hintWidth = textSize.Width + sizeHint.Padding.Left + sizeHint.Padding.Right;
+        double hintHeight = textSize.Height + sizeHint.Padding.Top + sizeHint.Padding.Bottom;
+        double centerX = VisualPadding + cropBounds.X + (cropBounds.Width / 2);
+        double bottomY = VisualPadding + cropBounds.Bottom;
+
+        sizeHint.Width = hintWidth;
+        sizeHint.Height = hintHeight;
+        Canvas.SetLeft(sizeHint, centerX - (hintWidth / 2));
+        Canvas.SetTop(sizeHint, bottomY - hintHeight - 10);
     }
 
     private static void SetBounds(FrameworkElement element, double x, double y, double width, double height)
@@ -289,21 +392,76 @@ internal sealed class CaptureCropOverlay :
         new()
         {
             Background = foreground,
-            Opacity = 0.5,
+            Opacity = 0.55,
+            Visibility = Visibility.Collapsed,
             IsHitTestVisible = false
         };
 
-    private static Border CreateHandle(Brush foreground) =>
-        new()
+    private static Thumb CreateHandle(CropInteraction mode)
+    {
+        Thumb handle = new()
         {
             Width = HandleSize,
             Height = HandleSize,
+            Opacity = 0,
+            IsTabStop = false,
+            Tag = mode
+        };
+
+        Canvas.SetZIndex(handle, 3);
+        return handle;
+    }
+
+    private static FrameworkElement CreateEdgeHandle(CropInteraction mode, Brush foreground)
+    {
+        bool horizontal = mode is CropInteraction.Top or CropInteraction.Bottom;
+        Border visual = new()
+        {
+            Width = horizontal ? HandleLength : HandleThickness,
+            Height = horizontal ? HandleThickness : HandleLength,
             Background = foreground,
-            BorderBrush = new SolidColorBrush(Color.FromArgb(128, 0, 0, 0)),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(HandleSize / 2),
             IsHitTestVisible = false
         };
+
+        Canvas.SetZIndex(visual, 4);
+        return visual;
+    }
+
+    private static FrameworkElement CreateCornerHandle(CropInteraction mode, Brush foreground)
+    {
+        bool left = mode is CropInteraction.TopLeft or CropInteraction.BottomLeft;
+        bool top = mode is CropInteraction.TopLeft or CropInteraction.TopRight;
+        Canvas visual = new()
+        {
+            Width = CornerHandleSize,
+            Height = CornerHandleSize,
+            IsHitTestVisible = false
+        };
+        Border horizontal = new()
+        {
+            Width = HandleLength,
+            Height = HandleThickness,
+            Background = foreground,
+            IsHitTestVisible = false
+        };
+        Border vertical = new()
+        {
+            Width = HandleThickness,
+            Height = HandleLength,
+            Background = foreground,
+            IsHitTestVisible = false
+        };
+        double center = CornerHandleSize / 2;
+
+        Canvas.SetLeft(horizontal, left ? center : center - HandleLength);
+        Canvas.SetTop(horizontal, center - (HandleThickness / 2));
+        Canvas.SetLeft(vertical, center - (HandleThickness / 2));
+        Canvas.SetTop(vertical, top ? center : center - HandleLength);
+        visual.Children.Add(horizontal);
+        visual.Children.Add(vertical);
+        Canvas.SetZIndex(visual, 4);
+        return visual;
+    }
 
     private enum CropInteraction
     {
