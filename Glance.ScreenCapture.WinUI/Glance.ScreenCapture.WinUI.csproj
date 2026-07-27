@@ -7,19 +7,14 @@
     <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
     <EnablePreviewFeatures>true</EnablePreviewFeatures>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <Nullable>enable</Nullable>
     <Platforms>AnyCPU;x64</Platforms>
     <DefaultLanguage>en</DefaultLanguage>
   </PropertyGroup>
   <ItemGroup>
     <PRIResource Include="Strings\**\*.resw" />
-    <None Include="$(NuGetPackageRoot)communitytoolkit.winui.controls.imagecropper\8.3.260402-preview2\lib\net9.0-windows10.0.19041\CommunityToolkit.WinUI.Controls.ImageCropper.pri" Link="CommunityToolkit.WinUI.Controls.ImageCropper.pri" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="$(NuGetPackageRoot)communitytoolkit.winui.extensions\8.3.260402-preview2\lib\net9.0-windows10.0.19041\CommunityToolkit.WinUI.Extensions.pri" Link="CommunityToolkit.WinUI.Extensions.pri" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="$(NuGetPackageRoot)microsoft.graphics.win2d\1.4.0\runtimes\win-x64\native\Microsoft.Graphics.Canvas.dll" Link="Microsoft.Graphics.Canvas.dll" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.WinUI.Controls.ImageCropper" Version="8.3.260402-preview2" />
     <PackageReference Include="Elysium.UI.Controls.WinUI" Version="$(ElysiumVersion)" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />

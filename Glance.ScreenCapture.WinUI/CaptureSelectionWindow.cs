@@ -73,8 +73,7 @@ internal sealed class CaptureSelectionWindow
         Microsoft.UI.Xaml.Shapes.Path smokeOverlay = new()
         {
             Data = smokeGeometry,
-            Fill = ResolveSmokeBrush(),
-            IsHitTestVisible = false
+            Fill = ResolveSmokeBrush()
         };
         highlight = new Border
         {
@@ -82,10 +81,9 @@ internal sealed class CaptureSelectionWindow
             BorderBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 104, 216, 255)),
             BorderThickness = new Thickness(2),
             CornerRadius = new CornerRadius(4),
-            IsHitTestVisible = false,
             Visibility = Visibility.Collapsed
         };
-        Canvas selectionCanvas = new() { IsHitTestVisible = false };
+        Canvas selectionCanvas = new();
         selectionCanvas.Children.Add(highlight);
 
         TextBlock instruction = new()
@@ -111,18 +109,17 @@ internal sealed class CaptureSelectionWindow
             CornerRadius = new CornerRadius(8),
             Child = instruction
         };
-        selectionChrome = new Grid { IsHitTestVisible = false };
+        selectionChrome = new Grid();
         selectionChrome.Children.Add(smokeOverlay);
         selectionChrome.Children.Add(selectionCanvas);
         selectionChrome.Children.Add(instructionContainer);
-        flightCanvas = new Canvas { IsHitTestVisible = false };
+        flightCanvas = new Canvas();
         root = new Grid
         {
             Background = new ImageBrush { ImageSource = imageSource, Stretch = Stretch.Fill },
             IsTabStop = true
         };
         root.Children.Add(selectionChrome);
-        root.Children.Add(flightCanvas);
         root.KeyDown += HandleKeyDown;
         root.PointerMoved += HandlePointerMoved;
         root.PointerPressed += HandlePointerPressed;
@@ -192,16 +189,14 @@ internal sealed class CaptureSelectionWindow
                     return;
                 }
 
-                reviewSurface?.Detach();
                 reviewSurface = new CaptureReviewSurface(capture, localizer, root.ActualWidth, root.ActualHeight);
                 root.ReleasePointerCaptures();
                 selectionChrome.Visibility = Visibility.Collapsed;
                 root.Background = null;
-                root.Children.Insert(root.Children.Count - 1, reviewSurface.Content);
+                root.Children.Add(reviewSurface.Content);
                 root.KeyDown += HandleReviewKeyDown;
                 root.UpdateLayout();
                 ActivateReviewInput();
-                reviewSurface.PlayEntrance();
                 DesktopCaptureBitmap? result = await reviewSurface.Completion;
                 reviewCompletion.TrySetResult(result);
 
@@ -294,7 +289,6 @@ internal sealed class CaptureSelectionWindow
         Canvas.SetLeft(captureSurface, sourceBounds.X);
         Canvas.SetTop(captureSurface, sourceBounds.Y);
         root.KeyDown -= HandleReviewKeyDown;
-        reviewSurface?.Detach();
 
         if (reviewSurface is not null)
         {
@@ -302,6 +296,7 @@ internal sealed class CaptureSelectionWindow
             reviewSurface = null;
         }
 
+        root.Children.Add(flightCanvas);
         flightCanvas.Children.Add(captureSurface);
         root.UpdateLayout();
         onArrived();
@@ -634,7 +629,6 @@ internal sealed class CaptureSelectionWindow
         DetachSelectionHandlers();
         root.KeyDown -= HandleReviewKeyDown;
         reviewSurface?.CancelImmediately();
-        reviewSurface?.Detach();
         reviewSurface = null;
 
         if (!selectionCompleted)
@@ -683,7 +677,6 @@ internal sealed class CaptureSelectionWindow
         CaptureReviewSurface? surface = reviewSurface;
         reviewSurface = null;
         surface?.CancelImmediately();
-        surface?.Detach();
 
         if (surface is not null)
         {

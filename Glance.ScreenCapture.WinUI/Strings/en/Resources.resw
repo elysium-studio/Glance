@@ -34,7 +34,6 @@
     <value>Maximum number of recent captures shown in the island.</value>
   </data>
   <data name="EmptyDetail.Text" xml:space="preserve"><value>Choose a region, window, or screen</value></data>
-  <data name="CropCapture" xml:space="preserve"><value>Crop screenshot</value></data>
   <data name="DismissCapture" xml:space="preserve"><value>Discard</value></data>
   <data name="ConfirmCapture" xml:space="preserve"><value>Save</value></data>
 </root>

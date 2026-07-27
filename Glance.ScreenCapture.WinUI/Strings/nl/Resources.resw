@@ -13,7 +13,6 @@
     <value>Maximum number of recent captures shown in the island.</value>
   </data>
   <data name="EmptyDetail.Text" xml:space="preserve"><value>Kies een gebied, venster of scherm</value></data>
-  <data name="CropCapture" xml:space="preserve"><value>Schermafbeelding bijsnijden</value></data>
   <data name="DismissCapture" xml:space="preserve"><value>Negeren</value></data>
   <data name="ConfirmCapture" xml:space="preserve"><value>Opslaan</value></data>
 </root>

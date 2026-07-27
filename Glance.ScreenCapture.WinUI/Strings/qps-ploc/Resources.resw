@@ -13,7 +13,6 @@
     <value>Maximum number of recent captures shown in the island.</value>
   </data>
   <data name="EmptyDetail.Text" xml:space="preserve"><value>［!!! Çĥõõšé á ŕéĝîõñ, ŵîñðõŵ, õŕ šçŕééñ !!!］</value></data>
-  <data name="CropCapture" xml:space="preserve"><value>[Çřöþ šçřëëñšĥöţ]</value></data>
   <data name="DismissCapture" xml:space="preserve"><value>[Ðïšçåřð]</value></data>
   <data name="ConfirmCapture" xml:space="preserve"><value>[Šåvë]</value></data>
 </root>

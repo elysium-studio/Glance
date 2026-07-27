@@ -13,7 +13,6 @@
     <value>Maximum number of recent captures shown in the island.</value>
   </data>
   <data name="EmptyDetail.Text" xml:space="preserve"><value>영역, 창 또는 화면 선택</value></data>
-  <data name="CropCapture" xml:space="preserve"><value>스크린샷 자르기</value></data>
   <data name="DismissCapture" xml:space="preserve"><value>버리기</value></data>
   <data name="ConfirmCapture" xml:space="preserve"><value>저장</value></data>
 </root>
