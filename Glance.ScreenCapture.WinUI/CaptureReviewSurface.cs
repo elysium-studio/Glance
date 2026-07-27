@@ -90,10 +90,9 @@ internal sealed class CaptureReviewSurface
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(24),
             Child = toolbarContent,
-            Shadow = new ThemeShadow()
+            Shadow = new ThemeShadow(),
+            Translation = new Vector3(0, 0, 48)
         };
-
-        toolbar.Translation = new Vector3(0, 0, 48);
         toolbar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
 
         double toolbarHeight = toolbar.DesiredSize.Height;
