@@ -57,6 +57,7 @@ internal sealed class CaptureReviewSurface
         };
         cropOverlay = new CaptureCropOverlay(previewWidth, previewHeight, bitmap.Width, bitmap.Height);
         previewHost = CreatePreviewHost(previewImage, previewWidth, previewHeight);
+        ElementCompositionPreview.SetIsTranslationEnabled(previewHost, true);
         previewHost.Translation = new Vector3(0, 0, 32);
 
         Canvas.SetLeft(previewHost, previewX);
@@ -69,6 +70,7 @@ internal sealed class CaptureReviewSurface
             Source = imageSource,
             Stretch = Stretch.Fill
         }, previewWidth, previewHeight);
+        ElementCompositionPreview.SetIsTranslationEnabled(animationPreview, true);
         animationPreview.Translation = new Vector3(0, 0, 40);
         animationPreview.IsHitTestVisible = false;
         animationPreview.BorderThickness = new Thickness(0);
@@ -104,6 +106,7 @@ internal sealed class CaptureReviewSurface
             Shadow = new ThemeShadow(),
             Translation = new Vector3(0, 0, 48)
         };
+        ElementCompositionPreview.SetIsTranslationEnabled(toolbar, true);
         toolbar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
 
         double toolbarHeight = toolbar.DesiredSize.Height;

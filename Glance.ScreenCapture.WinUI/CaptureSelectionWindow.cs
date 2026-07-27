@@ -683,8 +683,11 @@ internal sealed class CaptureSelectionWindow
             Height = Math.Max(1, sourceBounds.Height),
             Background = new SolidColorBrush(Color.FromArgb(255, 16, 20, 28)),
             CornerRadius = new CornerRadius(8),
-            Child = image
+            Child = image,
+            Shadow = new ThemeShadow(),
+            Translation = new Vector3(0, 0, 40)
         };
+        ElementCompositionPreview.SetIsTranslationEnabled(captureSurface, true);
 
         Canvas.SetLeft(captureSurface, sourceBounds.X);
         Canvas.SetTop(captureSurface, sourceBounds.Y);
