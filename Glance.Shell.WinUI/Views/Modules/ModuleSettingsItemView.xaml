@@ -8,7 +8,10 @@
         Click="{x:Bind ViewModel.NavigateToSettings}"
         Description="{x:Bind ViewModel.Description}"
         Header="{x:Bind ViewModel.DisplayName}"
-        IsClickEnabled="{x:Bind ViewModel.CanExpand, Mode=OneWay}">
-        <ToggleSwitch AutomationProperties.Name="{x:Bind ViewModel.DisplayName}" IsOn="{x:Bind ViewModel.IsEnabled, Mode=TwoWay}" />
+        IsClickEnabled="{x:Bind ViewModel.CanNavigate, Mode=OneWay}">
+        <ToggleSwitch
+            AutomationProperties.Name="{x:Bind ViewModel.DisplayName}"
+            IsEnabled="{x:Bind ViewModel.CanInteract, Mode=OneWay}"
+            IsOn="{x:Bind ViewModel.IsEnabled, Mode=TwoWay}" />
     </CommunityToolkit:SettingsCard>
 </UserControl>

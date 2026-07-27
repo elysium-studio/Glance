@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
 using Elysium.Presentation;
@@ -7,25 +8,26 @@ namespace Glance.Shell;
 
 public sealed partial class ModulesViewModel :
     ObservableCollectionViewModel<IModulesViewModel>,
-    ISettingViewModel
+    IReorderableSettingViewModel
 {
     private readonly ModulePreferenceService preferences;
+    private IReadOnlyList<ModuleSettingsItemViewModel>? originalOrder;
 
     public ModulesViewModel(IServiceProvider provider,
         IServiceFactory factory,
         IMessenger messenger,
         IDisposer disposer,
         ModulePreferenceService preferences,
+        ITextLocalizer localizer,
         IEnumerable<IGlanceModuleSettingViewModel> settings) :
         base(provider, factory, messenger, disposer)
     {
         this.preferences = preferences;
+        Description = localizer.GetText("ModulesDescription/Text");
         ILookup<string, IGlanceModuleSettingViewModel> settingsByModule = settings
             .Concat(preferences.CreateRuntimeSettings())
             .OrderBy(setting => setting.Order)
             .ToLookup(setting => setting.ModuleId, StringComparer.OrdinalIgnoreCase);
-
-        Add(new ModulesDescriptionViewModel());
 
         foreach (GlanceModulePreference preference in preferences.GetPreferences())
         {
@@ -35,9 +37,64 @@ public sealed partial class ModulesViewModel :
         preferences.ComponentsAdded += HandleComponentsAdded;
     }
 
+    public bool CanReorder => this.OfType<ModuleSettingsItemViewModel>().Skip(1).Any();
+
+    public string Description { get; }
+
+    [ObservableProperty]
+    private bool isReordering;
+
+    public void BeginReordering()
+    {
+        if (IsReordering || !CanReorder)
+        {
+            return;
+        }
+
+        originalOrder = [.. this.OfType<ModuleSettingsItemViewModel>()];
+        SetReordering(true);
+    }
+
+    public async Task CompleteReorderingAsync()
+    {
+        if (!IsReordering)
+        {
+            return;
+        }
+
+        await preferences.SetOrderAsync(this.OfType<ModuleSettingsItemViewModel>().Select(item => item.Id));
+        originalOrder = null;
+        SetReordering(false);
+    }
+
+    public void CancelReordering()
+    {
+        if (!IsReordering)
+        {
+            return;
+        }
+
+        if (originalOrder is not null)
+        {
+            for (int targetIndex = 0; targetIndex < originalOrder.Count; targetIndex++)
+            {
+                int currentIndex = IndexOf(originalOrder[targetIndex]);
+
+                if (currentIndex >= 0 && currentIndex != targetIndex)
+                {
+                    Move(currentIndex, targetIndex);
+                }
+            }
+        }
+
+        originalOrder = null;
+        SetReordering(false);
+    }
+
     public override void Dispose()
     {
         preferences.ComponentsAdded -= HandleComponentsAdded;
+        originalOrder = null;
         base.Dispose();
     }
 
@@ -68,6 +125,8 @@ public sealed partial class ModulesViewModel :
     private void HandleComponentsAdded(object? sender,
         GlanceComponentsAddedEventArgs args)
     {
+        CancelReordering();
+
         ILookup<string, IGlanceModuleSettingViewModel> settingsByModule = args.CreateSettings()
             .OrderBy(setting => setting.Order)
             .ToLookup(setting => setting.ModuleId, StringComparer.OrdinalIgnoreCase);
@@ -80,7 +139,17 @@ public sealed partial class ModulesViewModel :
                 .Select(item => item.Id)
                 .TakeWhile(id => !string.Equals(id, component.Id, StringComparison.OrdinalIgnoreCase))
                 .Count();
-            Insert(Math.Min(index + 1, Count), CreateItem(preference, settingsByModule[component.Id]));
+            Insert(Math.Min(index, Count), CreateItem(preference, settingsByModule[component.Id]));
+        }
+    }
+
+    private void SetReordering(bool value)
+    {
+        IsReordering = value;
+
+        foreach (ModuleSettingsItemViewModel module in this.OfType<ModuleSettingsItemViewModel>())
+        {
+            module.IsReordering = value;
         }
     }
 }

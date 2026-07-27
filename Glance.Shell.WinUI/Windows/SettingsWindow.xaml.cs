@@ -1,8 +1,10 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Glance.Application.Abstractions;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
 using System.Collections.ObjectModel;
 using Windows.Graphics;
 
@@ -15,14 +17,17 @@ public sealed partial class SettingsWindow :
     private const int WindowWidth = 1100;
     private const int WindowHeight = 680;
     private readonly ITextLocalizer localizer;
+    private readonly ILogger<SettingsWindow> logger;
     private readonly IMessenger messenger;
     private ModuleSettingsItemViewModel? currentModule;
 
     public SettingsWindow(IMessenger messenger,
-        ITextLocalizer localizer)
+        ITextLocalizer localizer,
+        ILogger<SettingsWindow> logger)
     {
         this.messenger = messenger;
         this.localizer = localizer;
+        this.logger = logger;
         InitializeComponent();
 
         messenger.Register<ModuleSettingsNavigationRequestedEventArgs>(this);
@@ -46,6 +51,9 @@ public sealed partial class SettingsWindow :
     public ObservableCollection<string> BreadcrumbItems { get; } = [];
 
     public SettingsViewModel ViewModel => (SettingsViewModel)((FrameworkElement)Content).DataContext;
+
+    public Visibility ToVisibility(bool value) =>
+        value ? Visibility.Visible : Visibility.Collapsed;
 
     public void Receive(ModuleSettingsNavigationRequestedEventArgs message)
     {
@@ -74,6 +82,27 @@ public sealed partial class SettingsWindow :
         object args) =>
         GoBack();
 
+    private void HandleBeginReordering(object sender,
+        RoutedEventArgs args) =>
+        ViewModel.BeginReordering();
+
+    private async void HandleCompleteReordering(object sender,
+        RoutedEventArgs args)
+    {
+        try
+        {
+            await ViewModel.CompleteReorderingAsync();
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Failed to save module order");
+        }
+    }
+
+    private void HandleCancelReordering(object sender,
+        RoutedEventArgs args) =>
+        ViewModel.CancelReordering();
+
     private void HandleBreadcrumbItemClicked(BreadcrumbBar sender,
         BreadcrumbBarItemClickedEventArgs args)
     {
@@ -87,6 +116,7 @@ public sealed partial class SettingsWindow :
     private void HandleClosed(object sender,
         WindowEventArgs args)
     {
+        ViewModel.CancelReordering();
         messenger.UnregisterAll(this);
         currentModule = null;
         Closed -= HandleClosed;
@@ -94,6 +124,12 @@ public sealed partial class SettingsWindow :
 
     private void GoBack()
     {
+        if (ViewModel.IsReorderingCurrentView)
+        {
+            ViewModel.CancelReordering();
+            return;
+        }
+
         if (currentModule is null)
         {
             return;

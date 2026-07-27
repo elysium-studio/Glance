@@ -10,6 +10,9 @@
   <data name="ModulesSectionTitle.Text" xml:space="preserve"><value>Modules</value></data>
   <data name="WindowsSectionTitle.Text" xml:space="preserve"><value>Windows</value></data>
   <data name="ModulesDescription.Text" xml:space="preserve"><value>Choisissez les modules affichés dans Glance et faites-les glisser dans l’ordre souhaité.</value></data>
+  <data name="ModulesReorderButton.Content" xml:space="preserve"><value>Réorganiser</value></data>
+  <data name="ModulesReorderCancelButton.Content" xml:space="preserve"><value>Annuler</value></data>
+  <data name="ModulesReorderDoneButton.Content" xml:space="preserve"><value>Terminé</value></data>
   <data name="GlancePlacementCard.Header" xml:space="preserve"><value>Position de Glance</value></data>
   <data name="GlancePlacementCard.Description" xml:space="preserve"><value>Choisissez si Glance apparaît en haut ou en bas de l’écran</value></data>
   <data name="GlancePlacementTopOption.Content" xml:space="preserve"><value>Haut</value></data>

@@ -10,6 +10,9 @@
   <data name="ModulesSectionTitle.Text" xml:space="preserve"><value>[Mødülés]</value></data>
   <data name="WindowsSectionTitle.Text" xml:space="preserve"><value>[Wïndøws]</value></data>
   <data name="ModulesDescription.Text" xml:space="preserve"><value>[Çhøøsé whïçh módülés åppéår ïn Glance ånd dråg thém ïntø yøür préférred ørdér.]</value></data>
+  <data name="ModulesReorderButton.Content" xml:space="preserve"><value>[Réørdér]</value></data>
+  <data name="ModulesReorderCancelButton.Content" xml:space="preserve"><value>[Çånçél]</value></data>
+  <data name="ModulesReorderDoneButton.Content" xml:space="preserve"><value>[Døné]</value></data>
   <data name="GlancePlacementCard.Header" xml:space="preserve"><value>[Glance plåçémént]</value></data>
   <data name="GlancePlacementCard.Description" xml:space="preserve"><value>[Çhøøsé whéthér Glance åppéårs åt thé tøp ør bøttøm øf thé sçréén]</value></data>
   <data name="GlancePlacementTopOption.Content" xml:space="preserve"><value>[Tøp]</value></data>

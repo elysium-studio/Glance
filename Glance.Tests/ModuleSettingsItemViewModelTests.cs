@@ -41,6 +41,9 @@ public sealed class ModuleSettingsItemViewModelTests
         ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", true, [setting], _ => navigationRequests++, (_, _) => Task.FromResult(true));
 
         item.NavigateToSettings();
+        item.IsReordering = true;
+        item.NavigateToSettings();
+        item.IsReordering = false;
         item.IsEnabled = false;
         item.NavigateToSettings();
 

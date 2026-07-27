@@ -1,7 +1,14 @@
 using System.Collections;
+using System.ComponentModel;
 
 namespace Glance.Shell;
 
 public interface ISettingViewModel :
     IEnumerable,
-    IDisposable;
+    IDisposable,
+    INotifyPropertyChanged
+{
+    string? Description => null;
+
+    bool IsReordering => false;
+}

@@ -11,7 +11,6 @@ public sealed class ModulesSettingsModule :
     {
         services
             .AddView<ModuleAttentionSettingView>(ServiceLifetime.Transient, provider => new ModuleAttentionSettingView())
-            .AddView<ModulesDescriptionView>(ServiceLifetime.Transient, provider => new ModulesDescriptionView())
             .AddView<ModuleSettingsItemView>(ServiceLifetime.Transient, provider => new ModuleSettingsItemView());
     }
 }
