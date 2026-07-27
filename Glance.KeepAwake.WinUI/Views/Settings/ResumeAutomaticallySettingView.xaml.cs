@@ -2,10 +2,10 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.KeepAwake.WinUI;
 
-public sealed partial class ResumeAutomaticallySettingView :
+public sealed partial class KeepAwakeResumeAutomaticallySettingView :
     UserControl
 {
-    public ResumeAutomaticallySettingView() => InitializeComponent();
+    public KeepAwakeResumeAutomaticallySettingView() => InitializeComponent();
 
-    public ResumeAutomaticallySettingViewModel ViewModel => (ResumeAutomaticallySettingViewModel)DataContext;
+    public KeepAwakeResumeAutomaticallySettingViewModel ViewModel => (KeepAwakeResumeAutomaticallySettingViewModel)DataContext;
 }

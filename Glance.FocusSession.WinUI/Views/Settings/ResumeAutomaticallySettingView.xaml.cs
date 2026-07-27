@@ -2,10 +2,10 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.FocusSession.WinUI;
 
-public sealed partial class ResumeAutomaticallySettingView :
+public sealed partial class FocusSessionResumeAutomaticallySettingView :
     UserControl
 {
-    public ResumeAutomaticallySettingView() => InitializeComponent();
+    public FocusSessionResumeAutomaticallySettingView() => InitializeComponent();
 
-    public ResumeAutomaticallySettingViewModel ViewModel => (ResumeAutomaticallySettingViewModel)DataContext;
+    public FocusSessionResumeAutomaticallySettingViewModel ViewModel => (FocusSessionResumeAutomaticallySettingViewModel)DataContext;
 }

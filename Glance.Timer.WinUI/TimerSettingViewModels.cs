@@ -23,7 +23,7 @@ public sealed partial class TimerAdjustmentSettingViewModel(IServiceProvider pro
     IWritableOptions<TimerSettings> writer) :
     ModuleSettingViewModel<TimerSettings, double>(provider, factory, messenger, disposer, dispatcher, settings, writer, "Timer", 20, config => config.AdjustmentMinutes, (config, value) => config.AdjustmentMinutes = Math.Clamp(value, 0.5, 60));
 
-public sealed partial class ResumeAutomaticallySettingViewModel(IServiceProvider provider,
+public sealed partial class TimerResumeAutomaticallySettingViewModel(IServiceProvider provider,
     IServiceFactory factory,
     IMessenger messenger,
     IDisposer disposer,

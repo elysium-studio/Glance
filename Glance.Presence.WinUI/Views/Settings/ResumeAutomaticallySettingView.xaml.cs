@@ -2,10 +2,10 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.Presence.WinUI;
 
-public sealed partial class ResumeAutomaticallySettingView :
+public sealed partial class PresenceResumeAutomaticallySettingView :
     UserControl
 {
-    public ResumeAutomaticallySettingView() => InitializeComponent();
+    public PresenceResumeAutomaticallySettingView() => InitializeComponent();
 
-    public ResumeAutomaticallySettingViewModel ViewModel => (ResumeAutomaticallySettingViewModel)DataContext;
+    public PresenceResumeAutomaticallySettingViewModel ViewModel => (PresenceResumeAutomaticallySettingViewModel)DataContext;
 }

@@ -2,10 +2,10 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.Timer.WinUI;
 
-public sealed partial class ResumeAutomaticallySettingView :
+public sealed partial class TimerResumeAutomaticallySettingView :
     UserControl
 {
-    public ResumeAutomaticallySettingView() => InitializeComponent();
+    public TimerResumeAutomaticallySettingView() => InitializeComponent();
 
-    public ResumeAutomaticallySettingViewModel ViewModel => (ResumeAutomaticallySettingViewModel)DataContext;
+    public TimerResumeAutomaticallySettingViewModel ViewModel => (TimerResumeAutomaticallySettingViewModel)DataContext;
 }

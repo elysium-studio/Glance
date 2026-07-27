@@ -2,10 +2,10 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.Stopwatch.WinUI;
 
-public sealed partial class ResumeAutomaticallySettingView :
+public sealed partial class StopwatchResumeAutomaticallySettingView :
     UserControl
 {
-    public ResumeAutomaticallySettingView() => InitializeComponent();
+    public StopwatchResumeAutomaticallySettingView() => InitializeComponent();
 
-    public ResumeAutomaticallySettingViewModel ViewModel => (ResumeAutomaticallySettingViewModel)DataContext;
+    public StopwatchResumeAutomaticallySettingViewModel ViewModel => (StopwatchResumeAutomaticallySettingViewModel)DataContext;
 }
