@@ -79,7 +79,6 @@ internal sealed class CaptureCropOverlay :
             Background = new SolidColorBrush(Color.FromArgb(220, 0, 0, 0)),
             CornerRadius = new CornerRadius(2),
             Child = sizeHintText,
-            Visibility = Visibility.Collapsed,
             IsHitTestVisible = false
         };
         Canvas.SetZIndex(sizeHint, 5);
@@ -348,7 +347,6 @@ internal sealed class CaptureCropOverlay :
         verticalLineTwo.Visibility = visibility;
         horizontalLineOne.Visibility = visibility;
         horizontalLineTwo.Visibility = visibility;
-        sizeHint.Visibility = visibility;
     }
 
     private void UpdateSizeHint()

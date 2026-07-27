@@ -33,6 +33,12 @@
   <data name="RecentCaptureLimitSettingCard.Description" xml:space="preserve">
     <value>Maximum number of recent captures shown in the island.</value>
   </data>
+  <data name="CopyToClipboardAutomaticallySettingCard.Header" xml:space="preserve">
+    <value>Copy captures automatically</value>
+  </data>
+  <data name="CopyToClipboardAutomaticallySettingCard.Description" xml:space="preserve">
+    <value>Copy each saved screen capture to the clipboard.</value>
+  </data>
   <data name="EmptyDetail.Text" xml:space="preserve"><value>Choose a region, window, or screen</value></data>
   <data name="DismissCapture" xml:space="preserve"><value>Discard</value></data>
   <data name="ConfirmCapture" xml:space="preserve"><value>Save</value></data>

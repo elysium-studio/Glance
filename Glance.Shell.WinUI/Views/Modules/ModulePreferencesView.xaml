@@ -35,43 +35,43 @@
             </ListView.ItemContainerStyle>
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="Shell:ModuleSettingsItemViewModel">
-                    <Grid Background="Transparent" ColumnSpacing="4">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="28" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <FontIcon
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Top"
-                            FontSize="12"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Glyph="&#xE784;"
-                            IsHitTestVisible="False"
-                            Margin="0,22,0,0" />
-                        <Grid Grid.Column="1">
-                            <CommunityToolkit:SettingsCard
-                                Description="{x:Bind Description}"
-                                Header="{x:Bind DisplayName}"
-                                IsClickEnabled="False"
-                                Visibility="{x:Bind local:ModulePreferencesView.WhenSettingsUnavailable(CanExpand), Mode=OneWay}">
+                    <Grid Background="Transparent">
+                        <CommunityToolkit:SettingsCard
+                            Description="{x:Bind Description}"
+                            Header="{x:Bind DisplayName}"
+                            IsClickEnabled="False"
+                            Visibility="{x:Bind local:ModulePreferencesView.WhenSettingsUnavailable(CanExpand), Mode=OneWay}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon
+                                    FontSize="14"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Glyph="&#xE76F;"
+                                    IsHitTestVisible="False" />
                                 <ToggleSwitch AutomationProperties.Name="{x:Bind DisplayName}" IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
-                            </CommunityToolkit:SettingsCard>
-                            <CommunityToolkit:SettingsExpander
-                                Description="{x:Bind Description}"
-                                Header="{x:Bind DisplayName}"
-                                IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
-                                ItemsSource="{x:Bind Settings, Mode=OneWay}"
-                                Visibility="{x:Bind local:ModulePreferencesView.WhenSettingsAvailable(CanExpand), Mode=OneWay}">
-                                <CommunityToolkit:SettingsExpander.Content>
+                            </StackPanel>
+                        </CommunityToolkit:SettingsCard>
+                        <CommunityToolkit:SettingsExpander
+                            Description="{x:Bind Description}"
+                            Header="{x:Bind DisplayName}"
+                            IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
+                            ItemsSource="{x:Bind Settings, Mode=OneWay}"
+                            Visibility="{x:Bind local:ModulePreferencesView.WhenSettingsAvailable(CanExpand), Mode=OneWay}">
+                            <CommunityToolkit:SettingsExpander.Content>
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <FontIcon
+                                        FontSize="14"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Glyph="&#xE76F;"
+                                        IsHitTestVisible="False" />
                                     <ToggleSwitch AutomationProperties.Name="{x:Bind DisplayName}" IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
-                                </CommunityToolkit:SettingsExpander.Content>
-                                <CommunityToolkit:SettingsExpander.ItemTemplate>
-                                    <DataTemplate x:DataType="Application:IGlanceModuleSettingViewModel">
-                                        <ContentControl HorizontalContentAlignment="Stretch" Content="{x:Bind}" ContentTemplateSelector="{WinUI:ViewTemplateSelector}" />
-                                    </DataTemplate>
-                                </CommunityToolkit:SettingsExpander.ItemTemplate>
-                            </CommunityToolkit:SettingsExpander>
-                        </Grid>
+                                </StackPanel>
+                            </CommunityToolkit:SettingsExpander.Content>
+                            <CommunityToolkit:SettingsExpander.ItemTemplate>
+                                <DataTemplate x:DataType="Application:IGlanceModuleSettingViewModel">
+                                    <ContentControl HorizontalContentAlignment="Stretch" Content="{x:Bind}" ContentTemplateSelector="{WinUI:ViewTemplateSelector}" />
+                                </DataTemplate>
+                            </CommunityToolkit:SettingsExpander.ItemTemplate>
+                        </CommunityToolkit:SettingsExpander>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
