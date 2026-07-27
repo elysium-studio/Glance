@@ -24,6 +24,7 @@ internal sealed class CaptureReviewSurface
     private readonly double availableHeight;
     private readonly DesktopCaptureBitmap bitmap;
     private readonly TaskCompletionSource<DesktopCaptureBitmap?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly CaptureCropOverlay cropOverlay;
     private readonly Border previewHost;
     private readonly Border reviewBackdrop;
     private readonly Grid reviewLayer;
@@ -49,14 +50,27 @@ internal sealed class CaptureReviewSurface
         PreviewBounds = new Rect(previewX, previewY, previewWidth, previewHeight);
 
         WriteableBitmap imageSource = CreateImageSource(bitmap);
+        Image previewImage = new()
+        {
+            Source = imageSource,
+            Stretch = Stretch.Fill
+        };
+        cropOverlay = new CaptureCropOverlay(previewWidth, previewHeight, ResolveBrush("TextOnAccentFillColorPrimaryBrush", Windows.UI.Color.FromArgb(255, 255, 255, 255)));
+        Grid previewContent = new();
+        previewContent.Children.Add(previewImage);
+        previewContent.Children.Add(cropOverlay);
 
-        previewHost = CreatePreviewHost(imageSource, previewWidth, previewHeight);
+        previewHost = CreatePreviewHost(previewContent, previewWidth, previewHeight);
         previewHost.Translation = new Vector3(0, 0, 32);
 
         Canvas.SetLeft(previewHost, previewX);
         Canvas.SetTop(previewHost, previewY);
 
-        animationPreview = CreatePreviewHost(imageSource, previewWidth, previewHeight);
+        animationPreview = CreatePreviewHost(new Image
+        {
+            Source = imageSource,
+            Stretch = Stretch.Fill
+        }, previewWidth, previewHeight);
         animationPreview.Translation = new Vector3(0, 0, 40);
         animationPreview.IsHitTestVisible = false;
         animationPreview.BorderThickness = new Thickness(0);
@@ -103,10 +117,7 @@ internal sealed class CaptureReviewSurface
             IsHitTestVisible = false
         };
 
-        Canvas reviewCanvas = new()
-        {
-            IsHitTestVisible = false
-        };
+        Canvas reviewCanvas = new();
 
         reviewCanvas.Children.Add(previewHost);
         reviewCanvas.Children.Add(animationPreview);
@@ -128,7 +139,14 @@ internal sealed class CaptureReviewSurface
 
     public Rect PreviewBounds { get; }
 
-    public Rect SelectedPreviewBounds => PreviewBounds;
+    public Rect SelectedPreviewBounds
+    {
+        get
+        {
+            Rect crop = cropOverlay.CropBounds;
+            return new Rect(PreviewBounds.X + crop.X, PreviewBounds.Y + crop.Y, crop.Width, crop.Height);
+        }
+    }
 
     public void Focus() => reviewLayer.Focus(FocusState.Programmatic);
 
@@ -179,7 +197,7 @@ internal sealed class CaptureReviewSurface
 
         transitioning = true;
         StopEntrance();
-        Complete(bitmap);
+        Complete(CreateCroppedBitmap());
     }
 
     public void Dismiss()
@@ -319,7 +337,25 @@ internal sealed class CaptureReviewSurface
         completion.TrySetResult(result);
     }
 
-    private static Border CreatePreviewHost(ImageSource imageSource, double width, double height) =>
+    private DesktopCaptureBitmap CreateCroppedBitmap()
+    {
+        Rect crop = cropOverlay.CropBounds;
+        double scaleX = bitmap.Width / PreviewBounds.Width;
+        double scaleY = bitmap.Height / PreviewBounds.Height;
+        int left = Math.Clamp((int)Math.Floor(crop.X * scaleX), 0, bitmap.Width - 1);
+        int top = Math.Clamp((int)Math.Floor(crop.Y * scaleY), 0, bitmap.Height - 1);
+        int right = Math.Clamp((int)Math.Ceiling(crop.Right * scaleX), left + 1, bitmap.Width);
+        int bottom = Math.Clamp((int)Math.Ceiling(crop.Bottom * scaleY), top + 1, bitmap.Height);
+
+        if (left == 0 && top == 0 && right == bitmap.Width && bottom == bitmap.Height)
+        {
+            return bitmap;
+        }
+
+        return bitmap.Crop(new NativeRectangle(bitmap.OriginX + left, bitmap.OriginY + top, right - left, bottom - top));
+    }
+
+    private static Border CreatePreviewHost(UIElement content, double width, double height) =>
         new()
         {
             Width = width,
@@ -328,11 +364,7 @@ internal sealed class CaptureReviewSurface
             BorderBrush = ResolveBrush("ControlStrokeColorDefaultBrush", Windows.UI.Color.FromArgb(72, 255, 255, 255)),
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(8),
-            Child = new Image
-            {
-                Source = imageSource,
-                Stretch = Stretch.Fill
-            },
+            Child = content,
             Shadow = new ThemeShadow()
         };
 
