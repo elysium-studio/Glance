@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,7 +7,8 @@ namespace Glance.ThemeSwitcher.WinUI;
 
 public sealed class WindowsThemeController(WindowsSystemThemeService systemThemeService,
     WindowsLocationService locationService,
-    ThemeTransitionService transitionService) :
+    ThemeTransitionService transitionService,
+    ILogger<WindowsThemeController> logger) :
     IThemeController
 {
     private bool initialized;
@@ -35,8 +37,9 @@ public sealed class WindowsThemeController(WindowsSystemThemeService systemTheme
             initialized = true;
             return result;
         }
-        catch
+        catch (Exception exception)
         {
+            logger.LogError(exception, "Failed to refresh the Windows theme");
             initialized = true;
             return new ThemeChangeResult(false, CurrentTheme, null, ErrorKey: "ThemeChangeFailed");
         }
@@ -56,8 +59,9 @@ public sealed class WindowsThemeController(WindowsSystemThemeService systemTheme
                 _ => new ThemeChangeResult(true, CurrentTheme, null)
             };
         }
-        catch
+        catch (Exception exception)
         {
+            logger.LogError(exception, "Failed to select the Windows theme preference {ThemePreference}", preference);
             return new ThemeChangeResult(false, CurrentTheme, null, ErrorKey: "ThemeChangeFailed");
         }
     }
