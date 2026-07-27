@@ -44,11 +44,11 @@ internal sealed class GlanceModuleManager :
             .Select(CreateWatcher)];
     }
 
-    public async Task LoadStartupModulesAsync()
+    public void LoadStartupModules()
     {
         foreach (GlanceModuleLoadResult result in GlanceModuleLoader.Load())
         {
-            await InstallAsync(result);
+            InstallAsync(result).GetAwaiter().GetResult();
         }
     }
 

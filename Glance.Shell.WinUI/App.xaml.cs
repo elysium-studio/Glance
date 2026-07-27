@@ -39,7 +39,7 @@ public sealed partial class App
         ViewModelExtension.DefaultProvider = runtimeServices;
 
         moduleManager = new GlanceModuleManager(host.Services, runtimeServices, dispatcherQueue, host.Services.GetRequiredService<ILogger<GlanceModuleManager>>());
-        moduleManager.LoadStartupModulesAsync().GetAwaiter().GetResult();
+        moduleManager.LoadStartupModules();
 
         _ = host.Services.GetRequiredKeyedService<DesktopIslandView>("DesktopIslandView");
         moduleManager.StartWatching();

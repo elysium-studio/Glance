@@ -1,3 +1,4 @@
+using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
 
 namespace Glance.KeepAwake.Tests;
@@ -57,6 +58,24 @@ public sealed class KeepAwakeViewModelTests
         Assert.Equal("Ready", viewModel.StatusText);
     }
 
+    [Fact]
+    public async Task ToggleAsync_DispatchesCompletedState()
+    {
+        FakeDispatcher dispatcher = new();
+        KeepAwakeViewModel viewModel = new(new FakeKeepAwakeService(false), new FakeLocalizer(), dispatcher);
+
+        await viewModel.ToggleAsync();
+
+        Assert.Single(dispatcher.Actions);
+        Assert.False(viewModel.IsActive);
+        Assert.True(viewModel.IsBusy);
+
+        dispatcher.Actions[0]();
+
+        Assert.True(viewModel.IsActive);
+        Assert.False(viewModel.IsBusy);
+    }
+
     private sealed class FakeKeepAwakeService(bool isActive) :
         IKeepAwakeService
     {
@@ -89,5 +108,13 @@ public sealed class KeepAwakeViewModelTests
             "StopLabel" => "Stop",
             _ => key
         };
+    }
+
+    private sealed class FakeDispatcher :
+        IDispatcher
+    {
+        public List<Action> Actions { get; } = [];
+
+        public void Dispatch(Action action) => Actions.Add(action);
     }
 }

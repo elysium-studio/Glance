@@ -13,6 +13,7 @@ public sealed class WindowsKeepAwakeService :
 {
     private readonly BlockingCollection<StateRequest> requests = [];
     private readonly Thread worker;
+    private volatile bool isActive;
     private bool isDisposed;
 
     public WindowsKeepAwakeService()
@@ -25,7 +26,7 @@ public sealed class WindowsKeepAwakeService :
         worker.Start();
     }
 
-    public bool IsActive { get; private set; }
+    public bool IsActive => isActive;
 
     public async Task<bool> SetActiveAsync(bool isActive,
         CancellationToken cancellationToken = default)
@@ -61,7 +62,7 @@ public sealed class WindowsKeepAwakeService :
 
             if (succeeded)
             {
-                IsActive = request.IsActive;
+                isActive = request.IsActive;
             }
 
             request.Completion.SetResult(succeeded);

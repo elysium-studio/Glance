@@ -1,3 +1,4 @@
+using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +12,7 @@ public sealed class KeepAwakeModule :
     {
         services.AddSingleton<ModuleResourceTextLocalizer<KeepAwakeModule>>();
         services.AddSingleton<IKeepAwakeService, WindowsKeepAwakeService>();
-        services.AddSingleton(provider => new KeepAwakeViewModel(provider.GetRequiredService<IKeepAwakeService>(), provider.GetRequiredService<ModuleResourceTextLocalizer<KeepAwakeModule>>()));
+        services.AddSingleton(provider => new KeepAwakeViewModel(provider.GetRequiredService<IKeepAwakeService>(), provider.GetRequiredService<ModuleResourceTextLocalizer<KeepAwakeModule>>(), provider.GetRequiredService<IDispatcher>()));
         services.AddSingleton<IGlanceComponent, KeepAwakeComponent>();
     }
 }

@@ -1,10 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
 
 namespace Glance.KeepAwake;
 
 public sealed partial class KeepAwakeViewModel(IKeepAwakeService keepAwakeService,
-    ITextLocalizer localizer) :
+    ITextLocalizer localizer,
+    IDispatcher? dispatcher = null) :
     ObservableObject
 {
     [ObservableProperty]
@@ -39,19 +41,37 @@ public sealed partial class KeepAwakeViewModel(IKeepAwakeService keepAwakeServic
         }
 
         IsBusy = true;
+        bool requestedState = !IsActive;
+        bool succeeded;
 
         try
         {
-            bool requestedState = !IsActive;
+            succeeded = await keepAwakeService.SetActiveAsync(requestedState).ConfigureAwait(false);
+        }
+        catch
+        {
+            succeeded = false;
+        }
 
-            if (await keepAwakeService.SetActiveAsync(requestedState))
+        Dispatch(() =>
+        {
+            if (succeeded)
             {
                 IsActive = requestedState;
             }
-        }
-        finally
-        {
+
             IsBusy = false;
+        });
+    }
+
+    private void Dispatch(Action action)
+    {
+        if (dispatcher is null)
+        {
+            action();
+            return;
         }
+
+        dispatcher.Dispatch(action);
     }
 }
