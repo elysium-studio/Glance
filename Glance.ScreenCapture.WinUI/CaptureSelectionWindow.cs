@@ -19,6 +19,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Graphics;
+using Windows.UI;
 using WinRT.Interop;
 using WinUIEx;
 using PlatformWindowExtensions = Elysium.Platform.Windows.WindowExtensions;
@@ -79,8 +80,8 @@ internal sealed class CaptureSelectionWindow
 
         highlight = new Border
         {
-            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0)),
-            BorderBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 104, 216, 255)),
+            Background = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0)),
+            BorderBrush = new SolidColorBrush(Color.FromArgb(255, 104, 216, 255)),
             BorderThickness = new Thickness(2),
             CornerRadius = new CornerRadius(4),
             Visibility = Visibility.Collapsed
@@ -93,7 +94,7 @@ internal sealed class CaptureSelectionWindow
         {
             FontSize = 14,
             FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
-            Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 255, 255)),
+            Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255)),
             Text = mode switch
             {
                 ScreenCaptureMode.Region => localizer.GetText("SelectRegionInstruction"),
@@ -109,20 +110,23 @@ internal sealed class CaptureSelectionWindow
             VerticalAlignment = VerticalAlignment.Top,
             Margin = new Thickness(0, 24, 0, 0),
             Padding = new Thickness(14, 8, 14, 8),
-            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(220, 24, 24, 24)),
+            Background = new SolidColorBrush(Color.FromArgb(220, 24, 24, 24)),
             CornerRadius = new CornerRadius(8),
             Child = instruction
         };
+
         selectionChrome = new Grid();
         selectionChrome.Children.Add(smokeOverlay);
         selectionChrome.Children.Add(selectionCanvas);
         selectionChrome.Children.Add(instructionContainer);
         flightCanvas = new Canvas();
+
         root = new Grid
         {
             Background = new ImageBrush { ImageSource = imageSource, Stretch = Stretch.Fill },
             IsTabStop = true
         };
+
         root.Children.Add(selectionChrome);
         root.KeyDown += HandleKeyDown;
         root.PointerMoved += HandlePointerMoved;
@@ -142,6 +146,7 @@ internal sealed class CaptureSelectionWindow
             ExtendsContentIntoTitleBar = true,
             SystemBackdrop = new TransparentTintBackdrop()
         };
+
         window.SetTitleBar(null);
         window.Closed += HandleClosed;
         windowHandle = WindowNative.GetWindowHandle(window);
@@ -311,17 +316,20 @@ internal sealed class CaptureSelectionWindow
         WriteableBitmap source = CreateImageSource(capture);
         Rect sourceBounds = reviewSurface?.SelectedPreviewBounds ?? ToLocal(capture.Bounds);
         Rect targetBounds = ToLocal(landingBounds);
+
         Image image = new() { Source = source, Stretch = Stretch.Fill };
+
         Border captureSurface = new()
         {
             Width = Math.Max(1, sourceBounds.Width),
             Height = Math.Max(1, sourceBounds.Height),
-            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 16, 20, 28)),
-            BorderBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(230, 104, 216, 255)),
+            Background = new SolidColorBrush(Color.FromArgb(255, 16, 20, 28)),
+            BorderBrush = new SolidColorBrush(Color.FromArgb(230, 104, 216, 255)),
             BorderThickness = new Thickness(2),
             CornerRadius = new CornerRadius(8),
             Child = image
         };
+
         Canvas.SetLeft(captureSurface, sourceBounds.X);
         Canvas.SetTop(captureSurface, sourceBounds.Y);
         root.KeyDown -= HandleReviewKeyDown;
