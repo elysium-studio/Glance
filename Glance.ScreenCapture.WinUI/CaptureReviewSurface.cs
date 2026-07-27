@@ -55,16 +55,14 @@ internal sealed class CaptureReviewSurface
             Source = imageSource,
             Stretch = Stretch.Fill
         };
-        cropOverlay = new CaptureCropOverlay(previewWidth, previewHeight, ResolveBrush("TextOnAccentFillColorPrimaryBrush", Windows.UI.Color.FromArgb(255, 255, 255, 255)));
-        Grid previewContent = new();
-        previewContent.Children.Add(previewImage);
-        previewContent.Children.Add(cropOverlay);
-
-        previewHost = CreatePreviewHost(previewContent, previewWidth, previewHeight);
+        cropOverlay = new CaptureCropOverlay(previewWidth, previewHeight, bitmap.Width, bitmap.Height);
+        previewHost = CreatePreviewHost(previewImage, previewWidth, previewHeight);
         previewHost.Translation = new Vector3(0, 0, 32);
 
         Canvas.SetLeft(previewHost, previewX);
         Canvas.SetTop(previewHost, previewY);
+        Canvas.SetLeft(cropOverlay, previewX - CaptureCropOverlay.VisualPadding);
+        Canvas.SetTop(cropOverlay, previewY - CaptureCropOverlay.VisualPadding);
 
         animationPreview = CreatePreviewHost(new Image
         {
@@ -121,6 +119,7 @@ internal sealed class CaptureReviewSurface
 
         reviewCanvas.Children.Add(previewHost);
         reviewCanvas.Children.Add(animationPreview);
+        reviewCanvas.Children.Add(cropOverlay);
 
         reviewLayer = new Grid
         {
@@ -156,6 +155,7 @@ internal sealed class CaptureReviewSurface
 
         Visual animationVisual = ElementCompositionPreview.GetElementVisual(animationPreview);
         Visual previewVisual = ElementCompositionPreview.GetElementVisual(previewHost);
+        Visual cropVisual = ElementCompositionPreview.GetElementVisual(cropOverlay);
         Visual backdropVisual = ElementCompositionPreview.GetElementVisual(reviewBackdrop);
         Vector3 targetTranslation = animationPreview.Translation;
         Vector3 sourceCenter = new((float)(sourceBounds.X + (sourceBounds.Width / 2)), (float)(sourceBounds.Y + (sourceBounds.Height / 2)), 0);
@@ -168,6 +168,8 @@ internal sealed class CaptureReviewSurface
         animationVisual.Scale = sourceScale;
         animationVisual.Opacity = 1;
         previewVisual.Opacity = 0;
+        cropVisual.Opacity = 0;
+        cropOverlay.IsHitTestVisible = false;
         backdropVisual.Opacity = 0;
 
         int preparationFrames = 0;
@@ -182,7 +184,7 @@ internal sealed class CaptureReviewSurface
 
             CompositionTarget.Rendering -= entranceRenderingHandler;
             entranceRenderingHandler = null;
-            StartEntranceAnimations(animationVisual, previewVisual, backdropVisual, targetTranslation, sourceTranslation, sourceScale);
+            StartEntranceAnimations(animationVisual, previewVisual, cropVisual, backdropVisual, targetTranslation, sourceTranslation, sourceScale);
         };
 
         CompositionTarget.Rendering += entranceRenderingHandler;
@@ -231,6 +233,7 @@ internal sealed class CaptureReviewSurface
         sender.Tick -= HandleEntranceCompleted;
         entranceTimer = null;
         animationPreview.Visibility = Visibility.Collapsed;
+        cropOverlay.IsHitTestVisible = true;
     }
 
     private void StopEntrance()
@@ -243,15 +246,17 @@ internal sealed class CaptureReviewSurface
 
         if (entranceTimer is null)
         {
+            cropOverlay.IsHitTestVisible = true;
             return;
         }
 
         entranceTimer.Stop();
         entranceTimer.Tick -= HandleEntranceCompleted;
         entranceTimer = null;
+        cropOverlay.IsHitTestVisible = true;
     }
 
-    private void StartEntranceAnimations(Visual animationVisual, Visual previewVisual, Visual backdropVisual, Vector3 targetTranslation, Vector3 sourceTranslation, Vector3 sourceScale)
+    private void StartEntranceAnimations(Visual animationVisual, Visual previewVisual, Visual cropVisual, Visual backdropVisual, Vector3 targetTranslation, Vector3 sourceTranslation, Vector3 sourceScale)
     {
         Compositor compositor = animationVisual.Compositor;
         TimeSpan duration = TimeSpan.FromMilliseconds(EntranceDurationMs);
@@ -272,12 +277,14 @@ internal sealed class CaptureReviewSurface
         animationVisual.Scale = Vector3.One;
         animationVisual.Opacity = 0;
         previewVisual.Opacity = 1;
+        cropVisual.Opacity = 1;
         backdropVisual.Opacity = 1;
 
         animationVisual.StartAnimation("Translation", translationAnimation);
         animationVisual.StartAnimation(nameof(Visual.Scale), scaleAnimation);
         animationVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 1, 0, duration, fadeEasing, 0.9f));
         previewVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, fadeEasing, 0.86f));
+        cropVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, fadeEasing, 0.86f));
         backdropVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, fadeEasing, 0));
 
         entranceTimer = reviewLayer.DispatcherQueue.CreateTimer();
@@ -299,6 +306,7 @@ internal sealed class CaptureReviewSurface
     {
         Visual previewVisual = ElementCompositionPreview.GetElementVisual(previewHost);
         Visual animationVisual = ElementCompositionPreview.GetElementVisual(animationPreview);
+        Visual cropVisual = ElementCompositionPreview.GetElementVisual(cropOverlay);
         Visual toolbarVisual = ElementCompositionPreview.GetElementVisual(toolbar);
         Visual backdropVisual = ElementCompositionPreview.GetElementVisual(reviewBackdrop);
         Compositor compositor = previewVisual.Compositor;
@@ -308,6 +316,7 @@ internal sealed class CaptureReviewSurface
 
         AnimateDown(previewVisual, distance, duration, easing);
         AnimateDown(animationVisual, distance, duration, easing);
+        AnimateDown(cropVisual, distance, duration, easing);
         AnimateDown(toolbarVisual, distance, duration, easing);
 
         backdropVisual.Opacity = 0;
