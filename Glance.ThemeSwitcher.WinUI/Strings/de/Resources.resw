@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Designumschalter</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Windows zwischen hellem, dunklem und sonnenuntergangsabhängigem Design umschalten.</value></data>
+  <data name="LightStatus" xml:space="preserve"><value>Heller Modus</value></data>
+  <data name="DarkStatus" xml:space="preserve"><value>Dunkler Modus</value></data>
+  <data name="AutomaticStatus" xml:space="preserve"><value>Sonnenuntergangszeitplan</value></data>
+  <data name="ManualDetail" xml:space="preserve"><value>Bleibt bis zur nächsten Änderung aktiv</value></data>
+  <data name="UntilSunsetDetail" xml:space="preserve"><value>Dunkel um {0}</value></data>
+  <data name="UntilSunriseDetail" xml:space="preserve"><value>Hell um {0}</value></data>
+  <data name="LightLabel" xml:space="preserve"><value>Hell</value></data>
+  <data name="SunsetLabel" xml:space="preserve"><value>Sonnenuntergang</value></data>
+  <data name="DarkLabel" xml:space="preserve"><value>Dunkel</value></data>
+  <data name="LocationRequired" xml:space="preserve"><value>Sonnenuntergang wählen, um den Standortzugriff zu erlauben</value></data>
+  <data name="LocationDenied" xml:space="preserve"><value>Für den Sonnenuntergangsmodus ist Standortzugriff erforderlich</value></data>
+  <data name="SunsetUnavailable" xml:space="preserve"><value>Sonnenaufgang und Sonnenuntergang sind hier heute nicht verfügbar</value></data>
+  <data name="ThemeChangeFailed" xml:space="preserve"><value>Das Windows-Design konnte nicht geändert werden</value></data>
+  <data name="AnimateTransitionsSettingCard.Header" xml:space="preserve"><value>Designwechsel animieren</value></data>
+  <data name="AnimateTransitionsSettingCard.Description" xml:space="preserve"><value>Beim Designwechsel einen radialen Übergang anzeigen.</value></data>
+</root>

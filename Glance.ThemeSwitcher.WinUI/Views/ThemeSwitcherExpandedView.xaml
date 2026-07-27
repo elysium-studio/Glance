@@ -1,0 +1,128 @@
+<UserControl
+    x:Class="Glance.ThemeSwitcher.WinUI.ThemeSwitcherExpandedView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Themes/ThemeSwitcher.xaml" />
+    </UserControl.Resources>
+    <Grid Padding="20,12,20,26" ColumnSpacing="18">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid
+            x:Name="StatusIndicator"
+            Width="36"
+            Height="36"
+            VerticalAlignment="Center">
+            <FontIcon
+                Width="30"
+                Height="30"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="30"
+                Foreground="{ThemeResource GlanceThemeSwitcherIconBrush}"
+                Glyph="{x:Bind ViewModel.Glyph, Mode=OneWay}" />
+        </Grid>
+        <Grid
+            Grid.Column="1"
+            Height="58"
+            VerticalAlignment="Center"
+            RowSpacing="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="14" />
+                <RowDefinition Height="22" />
+                <RowDefinition Height="18" />
+            </Grid.RowDefinitions>
+            <TextBlock
+                FontWeight="SemiBold"
+                Foreground="{ThemeResource GlanceThemeSwitcherIconBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{x:Bind ToUpper(Title)}" />
+            <TextBlock
+                Grid.Row="1"
+                VerticalAlignment="Center"
+                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                Style="{StaticResource BodyStrongTextBlockStyle}"
+                Text="{x:Bind ViewModel.StatusText, Mode=OneWay}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap" />
+            <TextBlock
+                Grid.Row="2"
+                VerticalAlignment="Center"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{x:Bind ViewModel.DetailText, Mode=OneWay}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap" />
+        </Grid>
+        <StackPanel
+            Grid.Column="2"
+            VerticalAlignment="Center"
+            Orientation="Horizontal"
+            Spacing="2">
+            <Button
+                x:Uid="LightButton"
+                AutomationProperties.Name="{x:Bind LightLabel}"
+                Background="{x:Bind LightBackground(ViewModel.Preference), Mode=OneWay}"
+                Click="{x:Bind ViewModel.SelectLightAsync}"
+                Foreground="{x:Bind LightForeground(ViewModel.Preference), Mode=OneWay}"
+                IsEnabled="{x:Bind IsActionEnabled(ViewModel.IsBusy), Mode=OneWay}"
+                ToolTipService.ToolTip="{x:Bind LightLabel}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                        <Setter Property="Width" Value="32" />
+                        <Setter Property="Height" Value="32" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="CornerRadius" Value="16" />
+                        <Setter Property="Content" Value="&#xE706;" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="14" />
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Button
+                x:Uid="SunsetButton"
+                AutomationProperties.Name="{x:Bind SunsetLabel}"
+                Background="{x:Bind SunsetBackground(ViewModel.Preference), Mode=OneWay}"
+                Click="{x:Bind ViewModel.SelectSunsetAsync}"
+                Foreground="{x:Bind SunsetForeground(ViewModel.Preference), Mode=OneWay}"
+                IsEnabled="{x:Bind IsActionEnabled(ViewModel.IsBusy), Mode=OneWay}"
+                ToolTipService.ToolTip="{x:Bind SunsetLabel}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                        <Setter Property="Width" Value="32" />
+                        <Setter Property="Height" Value="32" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="CornerRadius" Value="16" />
+                        <Setter Property="Content" Value="&#xE823;" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="14" />
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Button
+                x:Uid="DarkButton"
+                AutomationProperties.Name="{x:Bind DarkLabel}"
+                Background="{x:Bind DarkBackground(ViewModel.Preference), Mode=OneWay}"
+                Click="{x:Bind ViewModel.SelectDarkAsync}"
+                Foreground="{x:Bind DarkForeground(ViewModel.Preference), Mode=OneWay}"
+                IsEnabled="{x:Bind IsActionEnabled(ViewModel.IsBusy), Mode=OneWay}"
+                ToolTipService.ToolTip="{x:Bind DarkLabel}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                        <Setter Property="Width" Value="32" />
+                        <Setter Property="Height" Value="32" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="CornerRadius" Value="16" />
+                        <Setter Property="Content" Value="&#xE708;" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="14" />
+                    </Style>
+                </Button.Style>
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

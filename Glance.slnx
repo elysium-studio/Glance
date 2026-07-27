@@ -169,6 +169,15 @@
   <Project Path="Glance.Tests/Glance.Tests.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.ThemeSwitcher.WinUI/Glance.ThemeSwitcher.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.ThemeSwitcher/Glance.ThemeSwitcher.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.ThemeSwitcher.Tests/Glance.ThemeSwitcher.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.Timer.WinUI/Glance.Timer.WinUI.csproj">
     <Platform Project="x64" />
   </Project>

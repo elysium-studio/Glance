@@ -24,6 +24,7 @@ The island remains at the top or bottom of the desktop in a compact state, expan
 - **Bluetooth Devices** — see connected Bluetooth accessories and their available battery levels. Newly connected or newly low-battery devices can automatically request attention.
 - **Keep Awake** — prevent automatic system sleep until you explicitly stop the module.
 - **Presence** — maintain an active session by sending an F15 input pulse only after four minutes of genuine inactivity.
+- **Theme Switcher** — switch Windows between light and dark themes manually, or follow local sunrise and sunset with an animated radial transition.
 
 ## Architecture
 

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Cambio de tema</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Cambia Windows entre temas claro, oscuro o según la puesta de sol.</value></data>
+  <data name="LightStatus" xml:space="preserve"><value>Modo claro</value></data>
+  <data name="DarkStatus" xml:space="preserve"><value>Modo oscuro</value></data>
+  <data name="AutomaticStatus" xml:space="preserve"><value>Horario de puesta de sol</value></data>
+  <data name="ManualDetail" xml:space="preserve"><value>Se mantiene así hasta que lo cambies</value></data>
+  <data name="UntilSunsetDetail" xml:space="preserve"><value>Oscuro a las {0}</value></data>
+  <data name="UntilSunriseDetail" xml:space="preserve"><value>Claro a las {0}</value></data>
+  <data name="LightLabel" xml:space="preserve"><value>Claro</value></data>
+  <data name="SunsetLabel" xml:space="preserve"><value>Puesta de sol</value></data>
+  <data name="DarkLabel" xml:space="preserve"><value>Oscuro</value></data>
+  <data name="LocationRequired" xml:space="preserve"><value>Elige Puesta de sol para permitir el acceso a la ubicación</value></data>
+  <data name="LocationDenied" xml:space="preserve"><value>El modo puesta de sol necesita acceso a la ubicación</value></data>
+  <data name="SunsetUnavailable" xml:space="preserve"><value>Hoy no hay datos de amanecer y puesta de sol para esta ubicación</value></data>
+  <data name="ThemeChangeFailed" xml:space="preserve"><value>No se pudo cambiar el tema de Windows</value></data>
+  <data name="AnimateTransitionsSettingCard.Header" xml:space="preserve"><value>Animar cambios de tema</value></data>
+  <data name="AnimateTransitionsSettingCard.Description" xml:space="preserve"><value>Muestra una transición radial al cambiar el tema.</value></data>
+</root>
