@@ -85,7 +85,8 @@
             RowSpacing="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="14" />
-                <RowDefinition Height="*" />
+                <RowDefinition Height="22" />
+                <RowDefinition Height="18" />
             </Grid.RowDefinitions>
             <TextBlock
                 FontWeight="SemiBold"
@@ -94,13 +95,24 @@
                 Text="{x:Bind ToUpper(ViewModel.Title)}" />
             <TextBlock
                 Grid.Row="1"
+                VerticalAlignment="Center"
                 Style="{StaticResource BodyStrongTextBlockStyle}"
                 Text="{x:Bind ViewModel.Summary, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="NoWrap"
                 Visibility="{x:Bind WhenEmpty(ViewModel.HasItems), Mode=OneWay}" />
+            <TextBlock
+                Grid.Row="2"
+                VerticalAlignment="Center"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{x:Bind ViewModel.Detail, Mode=OneWay}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap"
+                Visibility="{x:Bind WhenEmpty(ViewModel.HasItems), Mode=OneWay}" />
             <Grid
                 Grid.Row="1"
+                Grid.RowSpan="2"
                 ColumnSpacing="6"
                 Visibility="{x:Bind WhenPopulated(ViewModel.HasItems), Mode=OneWay}">
                 <Grid.ColumnDefinitions>
