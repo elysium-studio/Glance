@@ -192,7 +192,6 @@ internal sealed class CaptureSelectionWindow
                 reviewSurface = new CaptureReviewSurface(capture, localizer, root.ActualWidth, root.ActualHeight);
                 root.ReleasePointerCaptures();
                 selectionChrome.Visibility = Visibility.Collapsed;
-                root.Background = null;
                 root.Children.Add(reviewSurface.Content);
                 root.KeyDown += HandleReviewKeyDown;
                 root.UpdateLayout();

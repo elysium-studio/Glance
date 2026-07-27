@@ -19,7 +19,7 @@ namespace Glance.ScreenCapture.WinUI;
 internal sealed class CaptureReviewSurface
 {
     private const int DismissDurationMs = 240;
-    private const int EntranceDurationMs = 280;
+    private const int EntranceDurationMs = 460;
     private readonly Border animationPreview;
     private readonly double availableHeight;
     private readonly DesktopCaptureBitmap bitmap;
@@ -30,6 +30,7 @@ internal sealed class CaptureReviewSurface
     private readonly Border toolbar;
     private DispatcherQueueTimer? dismissTimer;
     private DispatcherQueueTimer? entranceTimer;
+    private EventHandler<object>? entranceRenderingHandler;
     private bool completed;
     private bool transitioning;
 
@@ -58,6 +59,8 @@ internal sealed class CaptureReviewSurface
         animationPreview = CreatePreviewHost(imageSource, previewWidth, previewHeight);
         animationPreview.Translation = new Vector3(0, 0, 40);
         animationPreview.IsHitTestVisible = false;
+        animationPreview.BorderBrush = ResolveBrush("AccentFillColorDefaultBrush", Windows.UI.Color.FromArgb(255, 104, 216, 255));
+        animationPreview.BorderThickness = new Thickness(2);
 
         Canvas.SetLeft(animationPreview, previewX);
         Canvas.SetTop(animationPreview, previewY);
@@ -139,36 +142,30 @@ internal sealed class CaptureReviewSurface
         Visual previewVisual = ElementCompositionPreview.GetElementVisual(previewHost);
         Visual toolbarVisual = ElementCompositionPreview.GetElementVisual(toolbar);
         Visual backdropVisual = ElementCompositionPreview.GetElementVisual(reviewBackdrop);
-        Compositor compositor = animationVisual.Compositor;
-        TimeSpan duration = TimeSpan.FromMilliseconds(EntranceDurationMs);
-        SineEasingFunction easing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.Out);
         Vector3 animationOffset = animationVisual.Offset;
+        Vector3 toolbarOffset = toolbarVisual.Offset;
         Vector3 sourceCenter = new((float)(sourceBounds.X + (sourceBounds.Width / 2)), (float)(sourceBounds.Y + (sourceBounds.Height / 2)), 0);
         Vector3 targetCenter = new((float)(PreviewBounds.X + (PreviewBounds.Width / 2)), (float)(PreviewBounds.Y + (PreviewBounds.Height / 2)), 0);
         Vector3 sourceOffset = animationOffset + sourceCenter - targetCenter;
         Vector3 sourceScale = new((float)Math.Max(0.01, sourceBounds.Width / PreviewBounds.Width), (float)Math.Max(0.01, sourceBounds.Height / PreviewBounds.Height), 1);
 
         animationVisual.CenterPoint = new Vector3((float)PreviewBounds.Width / 2, (float)PreviewBounds.Height / 2, 0);
-        animationVisual.Offset = animationOffset;
-        animationVisual.Scale = Vector3.One;
-        animationVisual.Opacity = 0;
-        previewVisual.Opacity = 1;
-        toolbarVisual.Opacity = 1;
-        backdropVisual.Opacity = 1;
+        animationVisual.Offset = sourceOffset;
+        animationVisual.Scale = sourceScale;
+        animationVisual.Opacity = 1;
+        previewVisual.Opacity = 0;
+        toolbarVisual.Offset = toolbarOffset + new Vector3(0, -12, 0);
+        toolbarVisual.Opacity = 0;
+        backdropVisual.Opacity = 0;
 
-        animationVisual.StartAnimation(nameof(Visual.Offset), CreateVectorAnimation(compositor, sourceOffset, animationOffset, duration, easing));
-        animationVisual.StartAnimation(nameof(Visual.Scale), CreateVectorAnimation(compositor, sourceScale, Vector3.One, duration, easing));
-        animationVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 1, 0, duration, easing, 0.82f));
-        previewVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, easing, 0.72f));
-        toolbarVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, easing, 0.62f));
-        backdropVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, easing, 0));
+        entranceRenderingHandler = (_, _) =>
+        {
+            CompositionTarget.Rendering -= entranceRenderingHandler;
+            entranceRenderingHandler = null;
+            StartEntranceAnimations(animationVisual, previewVisual, toolbarVisual, backdropVisual, animationOffset, toolbarOffset, sourceOffset, sourceScale);
+        };
 
-        entranceTimer?.Stop();
-        entranceTimer = reviewLayer.DispatcherQueue.CreateTimer();
-        entranceTimer.Interval = duration;
-        entranceTimer.IsRepeating = false;
-        entranceTimer.Tick += HandleEntranceCompleted;
-        entranceTimer.Start();
+        CompositionTarget.Rendering += entranceRenderingHandler;
     }
 
     public void Confirm()
@@ -179,7 +176,7 @@ internal sealed class CaptureReviewSurface
         }
 
         transitioning = true;
-        StopEntranceTimer();
+        StopEntrance();
         Complete(bitmap);
     }
 
@@ -191,7 +188,7 @@ internal sealed class CaptureReviewSurface
         }
 
         transitioning = true;
-        StopEntranceTimer();
+        StopEntrance();
         PlayDismissAnimation();
 
         dismissTimer = reviewLayer.DispatcherQueue.CreateTimer();
@@ -203,7 +200,7 @@ internal sealed class CaptureReviewSurface
 
     public void CancelImmediately()
     {
-        StopEntranceTimer();
+        StopEntrance();
         dismissTimer?.Stop();
         Complete(null);
     }
@@ -216,8 +213,14 @@ internal sealed class CaptureReviewSurface
         animationPreview.Visibility = Visibility.Collapsed;
     }
 
-    private void StopEntranceTimer()
+    private void StopEntrance()
     {
+        if (entranceRenderingHandler is not null)
+        {
+            CompositionTarget.Rendering -= entranceRenderingHandler;
+            entranceRenderingHandler = null;
+        }
+
         if (entranceTimer is null)
         {
             return;
@@ -226,6 +229,51 @@ internal sealed class CaptureReviewSurface
         entranceTimer.Stop();
         entranceTimer.Tick -= HandleEntranceCompleted;
         entranceTimer = null;
+    }
+
+    private void StartEntranceAnimations(Visual animationVisual, Visual previewVisual, Visual toolbarVisual, Visual backdropVisual, Vector3 animationOffset, Vector3 toolbarOffset, Vector3 sourceOffset, Vector3 sourceScale)
+    {
+        Compositor compositor = animationVisual.Compositor;
+        TimeSpan duration = TimeSpan.FromMilliseconds(EntranceDurationMs);
+        SineEasingFunction captureEasing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.InOut);
+        CubicBezierEasingFunction travelEasing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 0.84f), new Vector2(0.28f, 1));
+        SineEasingFunction fadeEasing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.Out);
+        Vector3 capturedScale = new(sourceScale.X * 0.965f, sourceScale.Y * 0.965f, 1);
+
+        Vector3KeyFrameAnimation offsetAnimation = compositor.CreateVector3KeyFrameAnimation();
+        offsetAnimation.Duration = duration;
+        offsetAnimation.InsertKeyFrame(0, sourceOffset);
+        offsetAnimation.InsertKeyFrame(0.18f, sourceOffset);
+        offsetAnimation.InsertKeyFrame(1, animationOffset, travelEasing);
+
+        Vector3KeyFrameAnimation scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
+        scaleAnimation.Duration = duration;
+        scaleAnimation.InsertKeyFrame(0, sourceScale);
+        scaleAnimation.InsertKeyFrame(0.12f, capturedScale, captureEasing);
+        scaleAnimation.InsertKeyFrame(0.18f, capturedScale);
+        scaleAnimation.InsertKeyFrame(1, Vector3.One, travelEasing);
+
+        animationVisual.Offset = animationOffset;
+        animationVisual.Scale = Vector3.One;
+        animationVisual.Opacity = 0;
+        previewVisual.Opacity = 1;
+        toolbarVisual.Offset = toolbarOffset;
+        toolbarVisual.Opacity = 1;
+        backdropVisual.Opacity = 1;
+
+        animationVisual.StartAnimation(nameof(Visual.Offset), offsetAnimation);
+        animationVisual.StartAnimation(nameof(Visual.Scale), scaleAnimation);
+        animationVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 1, 0, duration, fadeEasing, 0.88f));
+        previewVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, fadeEasing, 0.84f));
+        toolbarVisual.StartAnimation(nameof(Visual.Offset), CreateVectorAnimation(compositor, toolbarOffset + new Vector3(0, -12, 0), toolbarOffset, duration, travelEasing, 0.54f));
+        toolbarVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, fadeEasing, 0.54f));
+        backdropVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, fadeEasing, 0));
+
+        entranceTimer = reviewLayer.DispatcherQueue.CreateTimer();
+        entranceTimer.Interval = duration;
+        entranceTimer.IsRepeating = false;
+        entranceTimer.Tick += HandleEntranceCompleted;
+        entranceTimer.Start();
     }
 
     private void HandleDismissCompleted(DispatcherQueueTimer sender, object args)
@@ -326,6 +374,16 @@ internal sealed class CaptureReviewSurface
         Vector3KeyFrameAnimation animation = compositor.CreateVector3KeyFrameAnimation();
         animation.Duration = duration;
         animation.InsertKeyFrame(0, from);
+        animation.InsertKeyFrame(1, to, easing);
+        return animation;
+    }
+
+    private static Vector3KeyFrameAnimation CreateVectorAnimation(Compositor compositor, Vector3 from, Vector3 to, TimeSpan duration, CompositionEasingFunction easing, float delayProgress)
+    {
+        Vector3KeyFrameAnimation animation = compositor.CreateVector3KeyFrameAnimation();
+        animation.Duration = duration;
+        animation.InsertKeyFrame(0, from);
+        animation.InsertKeyFrame(delayProgress, from);
         animation.InsertKeyFrame(1, to, easing);
         return animation;
     }
