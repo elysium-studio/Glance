@@ -38,6 +38,24 @@ public sealed class ModulesViewModelTests
         Assert.Equal(1, context.Writer.WriteCount);
     }
 
+    [Fact]
+    public async Task CompletingReorderingEnablesItemsBeforePersistenceFinishes()
+    {
+        TestContext context = new();
+        ModulesViewModel viewModel = context.CreateViewModel();
+
+        viewModel.BeginReordering();
+        context.Writer.DelayWrites = true;
+        Task completion = viewModel.CompleteReorderingAsync();
+
+        Assert.False(viewModel.IsReordering);
+        Assert.All(viewModel.Cast<ModuleSettingsItemViewModel>(), item => Assert.False(item.IsReordering));
+        Assert.False(completion.IsCompleted);
+
+        context.Writer.FinishWrite();
+        await completion;
+    }
+
     private sealed class TestContext
     {
         private readonly IGlanceComponent[] components =
@@ -102,6 +120,10 @@ public sealed class ModulesViewModelTests
     {
         public int WriteCount { get; private set; }
 
+        public bool DelayWrites { get; set; }
+
+        private TaskCompletionSource<bool>? completion;
+
         public Task<GlanceSettings?> ReadAsync(CancellationToken cancellationToken = default) =>
             Task.FromResult<GlanceSettings?>(settings);
 
@@ -110,7 +132,10 @@ public sealed class ModulesViewModelTests
         {
             update(settings);
             WriteCount++;
-            return Task.CompletedTask;
+            completion = DelayWrites
+                ? new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously)
+                : null;
+            return completion?.Task ?? Task.CompletedTask;
         }
 
         public Task WriteAsync(GlanceSettings value,
@@ -119,5 +144,7 @@ public sealed class ModulesViewModelTests
             WriteCount++;
             return Task.CompletedTask;
         }
+
+        public void FinishWrite() => completion?.SetResult(true);
     }
 }

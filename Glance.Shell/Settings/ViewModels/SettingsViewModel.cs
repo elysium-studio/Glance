@@ -62,8 +62,9 @@ public sealed partial class SettingsViewModel :
             return;
         }
 
-        await reorderable.CompleteReorderingAsync();
+        Task persistence = reorderable.CompleteReorderingAsync();
         IsReorderingCurrentView = reorderable.IsReordering;
+        await persistence;
     }
 
     public void CancelReordering()

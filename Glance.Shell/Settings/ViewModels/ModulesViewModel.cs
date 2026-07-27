@@ -62,9 +62,10 @@ public sealed partial class ModulesViewModel :
             return;
         }
 
-        await preferences.SetOrderAsync(this.OfType<ModuleSettingsItemViewModel>().Select(item => item.Id));
+        string[] orderedIds = [.. this.OfType<ModuleSettingsItemViewModel>().Select(item => item.Id)];
         originalOrder = null;
         SetReordering(false);
+        await preferences.SetOrderAsync(orderedIds);
     }
 
     public void CancelReordering()

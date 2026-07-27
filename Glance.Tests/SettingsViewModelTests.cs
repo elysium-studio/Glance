@@ -53,6 +53,24 @@ public sealed class SettingsViewModelTests
         Assert.False(viewModel.IsReorderingCurrentView);
     }
 
+    [Fact]
+    public async Task CompletingReorderingExitsModeBeforePersistenceFinishes()
+    {
+        TestReorderableSettingViewModel overview = new();
+        SettingsViewModel viewModel = new(null!, null!, null!, null!, [overview]);
+
+        viewModel.BeginReordering();
+        overview.DelayCompletion = true;
+        Task completion = viewModel.CompleteReorderingAsync();
+
+        Assert.False(overview.IsReordering);
+        Assert.False(viewModel.IsReorderingCurrentView);
+        Assert.False(completion.IsCompleted);
+
+        overview.FinishCompletion();
+        await completion;
+    }
+
     private sealed class TestSettingViewModel :
         List<object>,
         ISettingViewModel
@@ -78,6 +96,10 @@ public sealed class SettingsViewModelTests
 
         public bool WasCompleted { get; private set; }
 
+        public bool DelayCompletion { get; set; }
+
+        private TaskCompletionSource<bool>? completion;
+
         event PropertyChangedEventHandler? INotifyPropertyChanged.PropertyChanged
         {
             add { }
@@ -90,8 +112,13 @@ public sealed class SettingsViewModelTests
         {
             WasCompleted = true;
             IsReordering = false;
-            return Task.CompletedTask;
+            completion = DelayCompletion
+                ? new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously)
+                : null;
+            return completion?.Task ?? Task.CompletedTask;
         }
+
+        public void FinishCompletion() => completion?.SetResult(true);
 
         public void CancelReordering() => IsReordering = false;
 

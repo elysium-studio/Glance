@@ -10,9 +10,12 @@
   <data name="ModulesSectionTitle.Text" xml:space="preserve"><value>Module</value></data>
   <data name="WindowsSectionTitle.Text" xml:space="preserve"><value>Windows</value></data>
   <data name="ModulesDescription.Text" xml:space="preserve"><value>Wähle aus, welche Module in Glance angezeigt werden, und ziehe sie in die gewünschte Reihenfolge.</value></data>
-  <data name="ModulesReorderButton.Content" xml:space="preserve"><value>Neu anordnen</value></data>
-  <data name="ModulesReorderCancelButton.Content" xml:space="preserve"><value>Abbrechen</value></data>
-  <data name="ModulesReorderDoneButton.Content" xml:space="preserve"><value>Fertig</value></data>
+  <data name="ModulesReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Neu anordnen</value></data>
+  <data name="ModulesReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Neu anordnen</value></data>
+  <data name="ModulesReorderCancelButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Abbrechen</value></data>
+  <data name="ModulesReorderCancelButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Abbrechen</value></data>
+  <data name="ModulesReorderDoneButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Fertig</value></data>
+  <data name="ModulesReorderDoneButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Fertig</value></data>
   <data name="GlancePlacementCard.Header" xml:space="preserve"><value>Position von Glance</value></data>
   <data name="GlancePlacementCard.Description" xml:space="preserve"><value>Lege fest, ob Glance oben oder unten auf dem Bildschirm erscheint</value></data>
   <data name="GlancePlacementTopOption.Content" xml:space="preserve"><value>Oben</value></data>

@@ -10,9 +10,12 @@
   <data name="ModulesSectionTitle.Text" xml:space="preserve"><value>モジュール</value></data>
   <data name="WindowsSectionTitle.Text" xml:space="preserve"><value>Windows</value></data>
   <data name="ModulesDescription.Text" xml:space="preserve"><value>Glance に表示するモジュールを選び、好みの順序にドラッグします。</value></data>
-  <data name="ModulesReorderButton.Content" xml:space="preserve"><value>並べ替え</value></data>
-  <data name="ModulesReorderCancelButton.Content" xml:space="preserve"><value>キャンセル</value></data>
-  <data name="ModulesReorderDoneButton.Content" xml:space="preserve"><value>完了</value></data>
+  <data name="ModulesReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>並べ替え</value></data>
+  <data name="ModulesReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>並べ替え</value></data>
+  <data name="ModulesReorderCancelButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>キャンセル</value></data>
+  <data name="ModulesReorderCancelButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>キャンセル</value></data>
+  <data name="ModulesReorderDoneButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>完了</value></data>
+  <data name="ModulesReorderDoneButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>完了</value></data>
   <data name="GlancePlacementCard.Header" xml:space="preserve"><value>Glance の配置</value></data>
   <data name="GlancePlacementCard.Description" xml:space="preserve"><value>Glance を画面の上部または下部に表示します</value></data>
   <data name="GlancePlacementTopOption.Content" xml:space="preserve"><value>上</value></data>
