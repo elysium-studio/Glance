@@ -68,42 +68,64 @@
                         </DataTemplate>
                     </BreadcrumbBar.ItemTemplate>
                 </BreadcrumbBar>
-                <StackPanel
+                <Grid
                     Grid.Row="1"
                     Margin="36,0,36,12"
-                    HorizontalAlignment="Right"
-                    Orientation="Horizontal"
-                    Spacing="8"
+                    ColumnSpacing="12"
                     Visibility="{x:Bind ToVisibility(ViewModel.CanReorderCurrentView), Mode=OneWay}">
-                    <Button
-                        x:Uid="ModulesReorderButton"
-                        Width="32"
-                        Height="32"
-                        Click="HandleBeginReordering"
-                        Padding="0"
-                        Visibility="{x:Bind ToVisibility(ViewModel.CanStartReordering), Mode=OneWay}">
-                        <SymbolIcon Symbol="Sort" />
-                    </Button>
-                    <Button
-                        x:Uid="ModulesReorderCancelButton"
-                        Width="32"
-                        Height="32"
-                        Click="HandleCancelReordering"
-                        Padding="0"
-                        Visibility="{x:Bind ToVisibility(ViewModel.IsReorderingCurrentView), Mode=OneWay}">
-                        <SymbolIcon Symbol="Cancel" />
-                    </Button>
-                    <Button
-                        x:Uid="ModulesReorderDoneButton"
-                        Width="32"
-                        Height="32"
-                        Click="HandleCompleteReordering"
-                        Padding="0"
-                        Style="{StaticResource AccentButtonStyle}"
-                        Visibility="{x:Bind ToVisibility(ViewModel.IsReorderingCurrentView), Mode=OneWay}">
-                        <SymbolIcon Symbol="Accept" />
-                    </Button>
-                </StackPanel>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.CurrentView.Description, Mode=OneWay}"
+                        TextWrapping="Wrap" />
+                    <StackPanel
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="8">
+                        <Button
+                            x:Uid="ModulesReorderButton"
+                            Width="32"
+                            Height="32"
+                            Click="HandleBeginReordering"
+                            Padding="0"
+                            Visibility="{x:Bind ToVisibility(ViewModel.CanStartReordering), Mode=OneWay}">
+                            <FontIcon
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="12"
+                                Glyph="&#xE76F;" />
+                        </Button>
+                        <Button
+                            x:Uid="ModulesReorderCancelButton"
+                            Width="32"
+                            Height="32"
+                            Click="HandleCancelReordering"
+                            Padding="0"
+                            Visibility="{x:Bind ToVisibility(ViewModel.IsReorderingCurrentView), Mode=OneWay}">
+                            <FontIcon
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="12"
+                                Glyph="&#xE711;" />
+                        </Button>
+                        <Button
+                            x:Uid="ModulesReorderDoneButton"
+                            Width="32"
+                            Height="32"
+                            Click="HandleCompleteReordering"
+                            Padding="0"
+                            Visibility="{x:Bind ToVisibility(ViewModel.IsReorderingCurrentView), Mode=OneWay}">
+                            <FontIcon
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="12"
+                                Glyph="&#xE73E;" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
                 <ContentControl
                     Grid.Row="2"
                     HorizontalContentAlignment="Stretch"
@@ -120,20 +142,10 @@
                                 AllowDrop="{x:Bind IsReordering, Mode=OneWay}"
                                 CanDragItems="{x:Bind IsReordering, Mode=OneWay}"
                                 CanReorderItems="{x:Bind IsReordering, Mode=OneWay}"
-                                Header="{x:Bind Description, Mode=OneWay}"
                                 Margin="36,0,36,36"
                                 ItemsSource="{x:Bind}"
                                 ReorderMode="Enabled"
                                 SelectionMode="None">
-                                <ListView.HeaderTemplate>
-                                    <DataTemplate>
-                                        <TextBlock
-                                            Margin="0,0,0,12"
-                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                            Text="{Binding}"
-                                            TextWrapping="Wrap" />
-                                    </DataTemplate>
-                                </ListView.HeaderTemplate>
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">
                                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
