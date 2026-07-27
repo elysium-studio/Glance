@@ -83,6 +83,8 @@ internal sealed class CaptureReviewSurface
         toolbar = new Border
         {
             Padding = new Thickness(6),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Top,
             Background = ResolveMicaBrush(),
             BorderBrush = ResolveBrush("SurfaceStrokeColorDefaultBrush", Windows.UI.Color.FromArgb(48, 255, 255, 255)),
             BorderThickness = new Thickness(1),
@@ -94,11 +96,8 @@ internal sealed class CaptureReviewSurface
         toolbar.Translation = new Vector3(0, 0, 48);
         toolbar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
 
-        double toolbarWidth = toolbar.DesiredSize.Width;
         double toolbarHeight = toolbar.DesiredSize.Height;
-
-        Canvas.SetLeft(toolbar, Math.Round((availableWidth - toolbarWidth) / 2));
-        Canvas.SetTop(toolbar, Math.Max(20, previewY - toolbarHeight - 14));
+        toolbar.Margin = new Thickness(0, Math.Max(20, previewY - toolbarHeight - 14), 0, 0);
 
         reviewBackdrop = new Border
         {
@@ -108,13 +107,11 @@ internal sealed class CaptureReviewSurface
 
         Canvas reviewCanvas = new()
         {
-            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(1, 0, 0, 0))
+            IsHitTestVisible = false
         };
 
         reviewCanvas.Children.Add(previewHost);
         reviewCanvas.Children.Add(animationPreview);
-        reviewCanvas.Children.Add(toolbar);
-        Canvas.SetZIndex(toolbar, 2);
 
         reviewLayer = new Grid
         {
@@ -124,6 +121,7 @@ internal sealed class CaptureReviewSurface
 
         reviewLayer.Children.Add(reviewBackdrop);
         reviewLayer.Children.Add(reviewCanvas);
+        reviewLayer.Children.Add(toolbar);
     }
 
     public FrameworkElement Content => reviewLayer;
