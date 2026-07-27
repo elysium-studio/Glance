@@ -197,6 +197,7 @@ internal sealed class CaptureSelectionWindow
                 root.KeyDown += HandleReviewKeyDown;
                 root.UpdateLayout();
                 ActivateReviewInput();
+                reviewSurface.PlayEntrance(ToLocal(capture.Bounds));
                 _ = CompleteReviewAsync(reviewSurface, reviewCompletion);
             }
             catch (Exception exception)
@@ -331,11 +332,11 @@ internal sealed class CaptureSelectionWindow
         root.Children.Add(flightCanvas);
         flightCanvas.Children.Add(captureSurface);
         root.UpdateLayout();
-        onArrived();
         root.Background = null;
         selectionChrome.Visibility = Visibility.Collapsed;
 
         CompositionScopedBatch? animationBatch = null;
+        DispatcherQueueTimer? fallbackTimer = null;
         EventHandler<object>? renderingHandler = null;
         bool finished = false;
 
@@ -353,8 +354,28 @@ internal sealed class CaptureSelectionWindow
                 CompositionTarget.Rendering -= renderingHandler;
             }
 
+            if (fallbackTimer is not null)
+            {
+                fallbackTimer.Stop();
+                fallbackTimer.Tick -= HandleFallback;
+                fallbackTimer = null;
+            }
+
             animationBatch?.Dispose();
             animationBatch = null;
+
+            if (exception is null)
+            {
+                try
+                {
+                    onArrived();
+                }
+                catch (Exception arrivalException)
+                {
+                    exception = arrivalException;
+                }
+            }
+
             CloseCore();
 
             if (exception is null)
@@ -366,6 +387,8 @@ internal sealed class CaptureSelectionWindow
                 flightCompletion.TrySetException(exception);
             }
         }
+
+        void HandleFallback(DispatcherQueueTimer sender, object args) => Finish();
 
         int preparationFrames = 0;
         renderingHandler = (_, _) =>
@@ -385,6 +408,11 @@ internal sealed class CaptureSelectionWindow
                 _ = DwmFlush();
                 animationBatch = StartFlightAnimation(captureSurface, sourceBounds, targetBounds);
                 animationBatch.Completed += (_, _) => Finish();
+                fallbackTimer = window.DispatcherQueue.CreateTimer();
+                fallbackTimer.Interval = TimeSpan.FromMilliseconds(AnimationDurationMs + 120);
+                fallbackTimer.IsRepeating = false;
+                fallbackTimer.Tick += HandleFallback;
+                fallbackTimer.Start();
             }
             catch (Exception exception)
             {

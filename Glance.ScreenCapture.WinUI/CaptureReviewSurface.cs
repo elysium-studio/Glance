@@ -1,7 +1,10 @@
 using Glance.Application.Abstractions;
+using Microsoft.UI.Composition;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
@@ -15,14 +18,25 @@ namespace Glance.ScreenCapture.WinUI;
 
 internal sealed class CaptureReviewSurface
 {
+    private const int DismissDurationMs = 240;
+    private const int EntranceDurationMs = 280;
+    private readonly Border animationPreview;
+    private readonly double availableHeight;
     private readonly DesktopCaptureBitmap bitmap;
     private readonly TaskCompletionSource<DesktopCaptureBitmap?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly Border previewHost;
+    private readonly Border reviewBackdrop;
     private readonly Grid reviewLayer;
+    private readonly Border toolbar;
+    private DispatcherQueueTimer? dismissTimer;
+    private DispatcherQueueTimer? entranceTimer;
     private bool completed;
+    private bool transitioning;
 
     public CaptureReviewSurface(DesktopCaptureBitmap bitmap, ITextLocalizer localizer, double availableWidth, double availableHeight)
     {
         this.bitmap = bitmap;
+        this.availableHeight = availableHeight;
 
         double maximumWidth = Math.Max(240, availableWidth - 96);
         double maximumHeight = Math.Max(160, availableHeight - 180);
@@ -33,27 +47,19 @@ internal sealed class CaptureReviewSurface
         double previewY = Math.Round((availableHeight - previewHeight + 42) / 2);
         PreviewBounds = new Rect(previewX, previewY, previewWidth, previewHeight);
 
-        Image preview = new()
-        {
-            Source = CreateImageSource(bitmap),
-            Stretch = Stretch.Fill
-        };
+        WriteableBitmap imageSource = CreateImageSource(bitmap);
 
-        Border previewHost = new()
-        {
-            Width = previewWidth,
-            Height = previewHeight,
-            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 16, 20, 28)),
-            BorderBrush = ResolveBrush("ControlStrokeColorDefaultBrush", Windows.UI.Color.FromArgb(72, 255, 255, 255)),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(8),
-            Child = preview,
-            Shadow = new ThemeShadow()
-        };
+        previewHost = CreatePreviewHost(imageSource, previewWidth, previewHeight);
+        previewHost.Translation = new Vector3(0, 0, 32);
 
-        previewHost?.Translation = new Vector3(0, 0, 32);
         Canvas.SetLeft(previewHost, previewX);
         Canvas.SetTop(previewHost, previewY);
+
+        animationPreview = CreatePreviewHost(imageSource, previewWidth, previewHeight);
+        animationPreview.Translation = new Vector3(0, 0, 40);
+
+        Canvas.SetLeft(animationPreview, previewX);
+        Canvas.SetTop(animationPreview, previewY);
 
         Button dismissButton = CreateToolbarButton("\uE711", localizer.GetText("DismissCapture"), false);
         dismissButton.Click += (_, _) => Dismiss();
@@ -70,7 +76,7 @@ internal sealed class CaptureReviewSurface
         toolbarContent.Children.Add(dismissButton);
         toolbarContent.Children.Add(confirmButton);
 
-        Border toolbar = new()
+        toolbar = new Border
         {
             Padding = new Thickness(6),
             Background = ResolveMicaBrush(),
@@ -81,16 +87,16 @@ internal sealed class CaptureReviewSurface
             Shadow = new ThemeShadow()
         };
 
-        toolbar?.Translation = new Vector3(0, 0, 48);
-        toolbar?.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        toolbar.Translation = new Vector3(0, 0, 48);
+        toolbar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
 
-        double toolbarWidth = toolbar?.DesiredSize.Width ?? 0;
-        double toolbarHeight = toolbar?.DesiredSize.Height ?? 0;
+        double toolbarWidth = toolbar.DesiredSize.Width;
+        double toolbarHeight = toolbar.DesiredSize.Height;
 
         Canvas.SetLeft(toolbar, Math.Round((availableWidth - toolbarWidth) / 2));
         Canvas.SetTop(toolbar, Math.Max(20, previewY - toolbarHeight - 14));
 
-        Border reviewBackdrop = new()
+        reviewBackdrop = new Border
         {
             Background = new SolidColorBrush(Windows.UI.Color.FromArgb(178, 8, 10, 14))
         };
@@ -101,6 +107,7 @@ internal sealed class CaptureReviewSurface
         };
 
         reviewCanvas.Children.Add(previewHost);
+        reviewCanvas.Children.Add(animationPreview);
         reviewCanvas.Children.Add(toolbar);
 
         reviewLayer = new Grid
@@ -123,11 +130,139 @@ internal sealed class CaptureReviewSurface
 
     public void Focus() => reviewLayer.Focus(FocusState.Programmatic);
 
-    public void Confirm() => Complete(bitmap);
+    public void PlayEntrance(Rect sourceBounds)
+    {
+        Visual animationVisual = ElementCompositionPreview.GetElementVisual(animationPreview);
+        Visual previewVisual = ElementCompositionPreview.GetElementVisual(previewHost);
+        Visual toolbarVisual = ElementCompositionPreview.GetElementVisual(toolbar);
+        Visual backdropVisual = ElementCompositionPreview.GetElementVisual(reviewBackdrop);
+        Compositor compositor = animationVisual.Compositor;
+        TimeSpan duration = TimeSpan.FromMilliseconds(EntranceDurationMs);
+        SineEasingFunction easing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.Out);
+        Vector3 animationOffset = animationVisual.Offset;
+        Vector3 sourceCenter = new((float)(sourceBounds.X + (sourceBounds.Width / 2)), (float)(sourceBounds.Y + (sourceBounds.Height / 2)), 0);
+        Vector3 targetCenter = new((float)(PreviewBounds.X + (PreviewBounds.Width / 2)), (float)(PreviewBounds.Y + (PreviewBounds.Height / 2)), 0);
+        Vector3 sourceOffset = animationOffset + sourceCenter - targetCenter;
+        Vector3 sourceScale = new((float)Math.Max(0.01, sourceBounds.Width / PreviewBounds.Width), (float)Math.Max(0.01, sourceBounds.Height / PreviewBounds.Height), 1);
 
-    public void Dismiss() => Complete(null);
+        animationVisual.CenterPoint = new Vector3((float)PreviewBounds.Width / 2, (float)PreviewBounds.Height / 2, 0);
+        animationVisual.Offset = animationOffset;
+        animationVisual.Scale = Vector3.One;
+        animationVisual.Opacity = 0;
+        previewVisual.Opacity = 1;
+        toolbarVisual.Opacity = 1;
+        backdropVisual.Opacity = 1;
 
-    public void CancelImmediately() => Complete(null);
+        animationVisual.StartAnimation(nameof(Visual.Offset), CreateVectorAnimation(compositor, sourceOffset, animationOffset, duration, easing));
+        animationVisual.StartAnimation(nameof(Visual.Scale), CreateVectorAnimation(compositor, sourceScale, Vector3.One, duration, easing));
+        animationVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 1, 0, duration, easing, 0.82f));
+        previewVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, easing, 0.72f));
+        toolbarVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, easing, 0.62f));
+        backdropVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 0, 1, duration, easing, 0));
+
+        entranceTimer?.Stop();
+        entranceTimer = reviewLayer.DispatcherQueue.CreateTimer();
+        entranceTimer.Interval = duration;
+        entranceTimer.IsRepeating = false;
+        entranceTimer.Tick += HandleEntranceCompleted;
+        entranceTimer.Start();
+    }
+
+    public void Confirm()
+    {
+        if (completed || transitioning)
+        {
+            return;
+        }
+
+        transitioning = true;
+        StopEntranceTimer();
+        Complete(bitmap);
+    }
+
+    public void Dismiss()
+    {
+        if (completed || transitioning)
+        {
+            return;
+        }
+
+        transitioning = true;
+        StopEntranceTimer();
+        PlayDismissAnimation();
+
+        dismissTimer = reviewLayer.DispatcherQueue.CreateTimer();
+        dismissTimer.Interval = TimeSpan.FromMilliseconds(DismissDurationMs);
+        dismissTimer.IsRepeating = false;
+        dismissTimer.Tick += HandleDismissCompleted;
+        dismissTimer.Start();
+    }
+
+    public void CancelImmediately()
+    {
+        StopEntranceTimer();
+        dismissTimer?.Stop();
+        Complete(null);
+    }
+
+    private void HandleEntranceCompleted(DispatcherQueueTimer sender, object args)
+    {
+        sender.Stop();
+        sender.Tick -= HandleEntranceCompleted;
+        entranceTimer = null;
+        animationPreview.Visibility = Visibility.Collapsed;
+    }
+
+    private void StopEntranceTimer()
+    {
+        if (entranceTimer is null)
+        {
+            return;
+        }
+
+        entranceTimer.Stop();
+        entranceTimer.Tick -= HandleEntranceCompleted;
+        entranceTimer = null;
+    }
+
+    private void HandleDismissCompleted(DispatcherQueueTimer sender, object args)
+    {
+        sender.Stop();
+        sender.Tick -= HandleDismissCompleted;
+        dismissTimer = null;
+        Complete(null);
+    }
+
+    private void PlayDismissAnimation()
+    {
+        Visual previewVisual = ElementCompositionPreview.GetElementVisual(previewHost);
+        Visual animationVisual = ElementCompositionPreview.GetElementVisual(animationPreview);
+        Visual toolbarVisual = ElementCompositionPreview.GetElementVisual(toolbar);
+        Visual backdropVisual = ElementCompositionPreview.GetElementVisual(reviewBackdrop);
+        Compositor compositor = previewVisual.Compositor;
+        TimeSpan duration = TimeSpan.FromMilliseconds(DismissDurationMs);
+        SineEasingFunction easing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.In);
+        float distance = (float)Math.Max(120, availableHeight - PreviewBounds.Y + 48);
+
+        AnimateDown(previewVisual, distance, duration, easing);
+        AnimateDown(animationVisual, distance, duration, easing);
+        AnimateDown(toolbarVisual, distance, duration, easing);
+
+        backdropVisual.Opacity = 0;
+        backdropVisual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(compositor, 1, 0, duration, easing, 0));
+    }
+
+    private static void AnimateDown(Visual visual, float distance, TimeSpan duration, CompositionEasingFunction easing)
+    {
+        Vector3 offset = visual.Offset;
+        Vector3 destination = offset + new Vector3(0, distance, 0);
+        float opacity = visual.Opacity;
+
+        visual.Offset = destination;
+        visual.Opacity = 0;
+        visual.StartAnimation(nameof(Visual.Offset), CreateVectorAnimation(visual.Compositor, offset, destination, duration, easing));
+        visual.StartAnimation(nameof(Visual.Opacity), CreateScalarAnimation(visual.Compositor, opacity, 0, duration, easing, 0.55f));
+    }
 
     private void Complete(DesktopCaptureBitmap? result)
     {
@@ -139,6 +274,23 @@ internal sealed class CaptureReviewSurface
         completed = true;
         completion.TrySetResult(result);
     }
+
+    private static Border CreatePreviewHost(ImageSource imageSource, double width, double height) =>
+        new()
+        {
+            Width = width,
+            Height = height,
+            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 16, 20, 28)),
+            BorderBrush = ResolveBrush("ControlStrokeColorDefaultBrush", Windows.UI.Color.FromArgb(72, 255, 255, 255)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(8),
+            Child = new Image
+            {
+                Source = imageSource,
+                Stretch = Stretch.Fill
+            },
+            Shadow = new ThemeShadow()
+        };
 
     private static Button CreateToolbarButton(string glyph, string label, bool accent)
     {
@@ -164,6 +316,30 @@ internal sealed class CaptureReviewSurface
         AutomationProperties.SetName(button, label);
         ToolTipService.SetToolTip(button, label);
         return button;
+    }
+
+    private static Vector3KeyFrameAnimation CreateVectorAnimation(Compositor compositor, Vector3 from, Vector3 to, TimeSpan duration, CompositionEasingFunction easing)
+    {
+        Vector3KeyFrameAnimation animation = compositor.CreateVector3KeyFrameAnimation();
+        animation.Duration = duration;
+        animation.InsertKeyFrame(0, from);
+        animation.InsertKeyFrame(1, to, easing);
+        return animation;
+    }
+
+    private static ScalarKeyFrameAnimation CreateScalarAnimation(Compositor compositor, float from, float to, TimeSpan duration, CompositionEasingFunction easing, float delayProgress)
+    {
+        ScalarKeyFrameAnimation animation = compositor.CreateScalarKeyFrameAnimation();
+        animation.Duration = duration;
+        animation.InsertKeyFrame(0, from);
+
+        if (delayProgress > 0)
+        {
+            animation.InsertKeyFrame(delayProgress, from);
+        }
+
+        animation.InsertKeyFrame(1, to, easing);
+        return animation;
     }
 
     private static WriteableBitmap CreateImageSource(DesktopCaptureBitmap bitmap)
