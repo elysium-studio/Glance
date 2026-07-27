@@ -41,6 +41,8 @@ public sealed partial class ModulesViewModel :
 
     public string Description { get; }
 
+    public bool SupportsReordering => CanReorder;
+
     [ObservableProperty]
     private bool isReordering;
 

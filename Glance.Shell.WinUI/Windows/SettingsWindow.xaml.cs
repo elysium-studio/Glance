@@ -104,6 +104,15 @@ public sealed partial class SettingsWindow :
         RoutedEventArgs args) =>
         ViewModel.CancelReordering();
 
+    private void HandleModuleDragItemsStarting(object sender,
+        DragItemsStartingEventArgs args)
+    {
+        if (!ViewModel.IsReorderingCurrentView)
+        {
+            args.Cancel = true;
+        }
+    }
+
     private void HandleBreadcrumbItemClicked(BreadcrumbBar sender,
         BreadcrumbBarItemClickedEventArgs args)
     {

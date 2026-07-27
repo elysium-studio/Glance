@@ -11,4 +11,6 @@ public interface ISettingViewModel :
     string? Description => null;
 
     bool IsReordering => false;
+
+    bool SupportsReordering => false;
 }

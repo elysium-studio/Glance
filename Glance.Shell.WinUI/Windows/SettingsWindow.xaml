@@ -72,6 +72,7 @@
                     Grid.Row="1"
                     Margin="36,0,36,12"
                     ColumnSpacing="12"
+                    MinHeight="32"
                     Visibility="{x:Bind ToVisibility(ViewModel.CanReorderCurrentView), Mode=OneWay}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -128,8 +129,9 @@
                         <DataTemplate x:DataType="Shell:ISettingViewModel">
                             <ListView
                                 AllowDrop="{x:Bind IsReordering, Mode=OneWay}"
-                                CanDragItems="{x:Bind IsReordering, Mode=OneWay}"
+                                CanDragItems="{x:Bind SupportsReordering, Mode=OneWay}"
                                 CanReorderItems="{x:Bind IsReordering, Mode=OneWay}"
+                                DragItemsStarting="HandleModuleDragItemsStarting"
                                 Margin="36,0,36,36"
                                 ItemsSource="{x:Bind}"
                                 ReorderMode="Enabled"
