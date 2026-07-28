@@ -68,6 +68,20 @@ public sealed class RemovableDevicesViewModelTests
     }
 
     [Fact]
+    public void Update_RemovingEveryDeviceRestoresEmptyState()
+    {
+        RemovableDevicesViewModel viewModel = new(new FakeLocalizer());
+        viewModel.Update([CreateDevice("usb-a", "E:\\", "Archive")]);
+
+        viewModel.Update([]);
+
+        Assert.False(viewModel.HasDevices);
+        Assert.Empty(viewModel.Devices);
+        Assert.Null(viewModel.SelectedDevice);
+        Assert.Equal("No removable devices", viewModel.CompactStatusText);
+    }
+
+    [Fact]
     public void DevicePage_ExposesStorageUsageAndFunctionActions()
     {
         RemovableDevicesViewModel viewModel = new(new FakeLocalizer());

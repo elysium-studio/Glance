@@ -115,7 +115,7 @@ public sealed class WindowsRemovableDeviceService :
             {
                 string rootPath = NormalizeRoot(drive.RootDirectory.FullName);
 
-                if (TryGetDriveMetadata(rootPath, out DriveMetadata? driveMetadata))
+                if (TryGetDriveMetadata(rootPath, out DriveMetadata? driveMetadata) && driveMetadata is not null)
                 {
                     metadata[rootPath] = driveMetadata;
                 }

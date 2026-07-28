@@ -141,20 +141,22 @@
                 Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ToUpper(Title)}" />
             <TextBlock
+                x:Name="EmptyState"
                 x:Uid="EmptyMessage"
                 Grid.Row="1"
                 Style="{StaticResource BodyStrongTextBlockStyle}"
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="NoWrap"
-                Visibility="{x:Bind WhenEmpty(ViewModel.HasDevices), Mode=OneWay}" />
+                x:Load="{x:Bind WhenEmpty(ViewModel.HasDevices), Mode=OneWay}" />
             <Controls:CompactFlipView
+                x:Name="DevicePages"
                 Grid.Row="1"
                 Margin="-22,0,0,0"
                 Background="Transparent"
                 ItemTemplate="{StaticResource RemovableDeviceItemTemplate}"
                 ItemsSource="{x:Bind ViewModel.Devices}"
                 SelectedItem="{x:Bind ViewModel.SelectedDevice, Mode=TwoWay}"
-                Visibility="{x:Bind WhenPopulated(ViewModel.HasDevices), Mode=OneWay}" />
+                x:Load="{x:Bind ViewModel.HasDevices, Mode=OneWay}" />
         </Grid>
     </Grid>
 </UserControl>

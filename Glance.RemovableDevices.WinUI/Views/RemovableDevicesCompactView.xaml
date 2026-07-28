@@ -25,12 +25,24 @@
                 Glyph="&#xE88E;" />
         </Grid>
         <TextBlock
+            x:Name="EmptyStatusText"
             Grid.Column="1"
             VerticalAlignment="Center"
             MaxLines="1"
             Style="{StaticResource BodyStrongTextBlockStyle}"
             Text="{x:Bind ViewModel.CompactStatusText, Mode=OneWay}"
             TextTrimming="CharacterEllipsis"
-            TextWrapping="NoWrap" />
+            TextWrapping="NoWrap"
+            x:Load="{x:Bind WhenEmpty(ViewModel.HasDevices), Mode=OneWay}" />
+        <TextBlock
+            x:Name="DeviceStatusText"
+            Grid.Column="1"
+            VerticalAlignment="Center"
+            MaxLines="1"
+            Style="{StaticResource BodyStrongTextBlockStyle}"
+            Text="{x:Bind ViewModel.CompactStatusText, Mode=OneWay}"
+            TextTrimming="CharacterEllipsis"
+            TextWrapping="NoWrap"
+            x:Load="{x:Bind ViewModel.HasDevices, Mode=OneWay}" />
     </Grid>
 </UserControl>
