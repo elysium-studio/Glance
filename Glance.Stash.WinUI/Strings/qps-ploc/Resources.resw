@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve"><value>[Stäsh]</value></data>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>[Stäsh]</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>[Këëp üsëfül tëxt änd lïñks wïthïñ rëäçh.]</value></data>
+  <data name="EmptySummary" xml:space="preserve"><value>[Ñøthïñg stäshëd]</value></data>
+  <data name="KindText" xml:space="preserve"><value>[Tëxt]</value></data>
+  <data name="KindLink" xml:space="preserve"><value>[Lïñk]</value></data>
+  <data name="LinkDetail" xml:space="preserve"><value>[{0} · Lïñk]</value></data>
+  <data name="EmptyMessage.Text" xml:space="preserve"><value>[Ñøthïñg stäshëd]</value></data>
+  <data name="EmptyDetail.Text" xml:space="preserve"><value>[Ðräg tëxt ør ä lïñk hërë]</value></data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>[Çøpÿ thïs ïtëm]</value></data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Çøpÿ]</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>[Øpëñ thïs lïñk]</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Øpëñ lïñk]</value></data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>[Rëmøvë thïs ïtëm]</value></data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Rëmøvë]</value></data>
+</root>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve"><value>Raccolta</value></data>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Raccolta</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Tieni a portata di mano testi e collegamenti utili.</value></data>
+  <data name="EmptySummary" xml:space="preserve"><value>Nessun elemento salvato</value></data>
+  <data name="KindText" xml:space="preserve"><value>Testo</value></data>
+  <data name="KindLink" xml:space="preserve"><value>Collegamento</value></data>
+  <data name="LinkDetail" xml:space="preserve"><value>{0} · Collegamento</value></data>
+  <data name="EmptyMessage.Text" xml:space="preserve"><value>Nessun elemento salvato</value></data>
+  <data name="EmptyDetail.Text" xml:space="preserve"><value>Trascina qui testo o un collegamento</value></data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Copia questo elemento</value></data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Copia</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Apri questo collegamento</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Apri collegamento</value></data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Rimuovi questo elemento</value></data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Rimuovi</value></data>
+</root>

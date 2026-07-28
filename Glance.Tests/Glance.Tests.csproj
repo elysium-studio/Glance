@@ -24,6 +24,7 @@
     <None Include="..\Glance.Media.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\Media\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\Glance.Power.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\Power\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\Glance.Shell.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\Shell\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\Glance.Stash.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\Stash\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\Glance.Stopwatch.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\Stopwatch\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\Glance.SystemMonitor.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\SystemMonitor\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\Glance.Timer.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\Timer\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />

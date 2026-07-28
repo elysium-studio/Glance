@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve"><value>暂存</value></data>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>暂存</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>随手保存有用的文本和链接。</value></data>
+  <data name="EmptySummary" xml:space="preserve"><value>没有暂存内容</value></data>
+  <data name="KindText" xml:space="preserve"><value>文本</value></data>
+  <data name="KindLink" xml:space="preserve"><value>链接</value></data>
+  <data name="LinkDetail" xml:space="preserve"><value>{0} · 链接</value></data>
+  <data name="EmptyMessage.Text" xml:space="preserve"><value>没有暂存内容</value></data>
+  <data name="EmptyDetail.Text" xml:space="preserve"><value>将文本或链接拖到此处</value></data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>复制此项目</value></data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>复制</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>打开此链接</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>打开链接</value></data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>移除此项目</value></data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>移除</value></data>
+</root>

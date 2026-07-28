@@ -473,7 +473,7 @@ public sealed partial class DesktopIslandView :
 
     private void HandleDragEnter(object sender, DragEventArgs args)
     {
-        if (!CanAcceptContent(args.DataView))
+        if (!TryGetContentKind(args.DataView, out GlanceContentKind kind))
         {
             args.AcceptedOperation = DataPackageOperation.None;
             ScheduleContextualDragExit();
@@ -488,14 +488,14 @@ public sealed partial class DesktopIslandView :
         {
             if (isContextualDragActive && session == contextualDragSession)
             {
-                ViewModel.TryActivateContent(GlanceContentKind.FilesAndFolders);
+                ViewModel.TryActivateContent(kind);
             }
         });
     }
 
     private void HandleDragOver(object sender, DragEventArgs args)
     {
-        if (!CanAcceptContent(args.DataView))
+        if (!TryGetContentKind(args.DataView, out _))
         {
             args.AcceptedOperation = DataPackageOperation.None;
             ScheduleContextualDragExit();
@@ -509,34 +509,60 @@ public sealed partial class DesktopIslandView :
     private void HandleDragLeave(object sender, DragEventArgs args) =>
         ScheduleContextualDragExit();
 
-    private bool CanAcceptContent(DataPackageView dataView)
+    private bool TryGetContentKind(DataPackageView dataView,
+        out GlanceContentKind kind)
     {
         try
         {
-            return dataView.Contains(StandardDataFormats.StorageItems) &&
-                ViewModel.CanHandleContent(GlanceContentKind.FilesAndFolders);
+            if (dataView.Contains(StandardDataFormats.StorageItems))
+            {
+                if (ViewModel.CanHandleContent(GlanceContentKind.FilesAndFolders))
+                {
+                    kind = GlanceContentKind.FilesAndFolders;
+                    return true;
+                }
+
+                kind = default;
+                return false;
+            }
+
+            if ((dataView.Contains(StandardDataFormats.WebLink) ||
+                dataView.Contains(StandardDataFormats.ApplicationLink)) &&
+                ViewModel.CanHandleContent(GlanceContentKind.WebLink))
+            {
+                kind = GlanceContentKind.WebLink;
+                return true;
+            }
+
+            if (dataView.Contains(StandardDataFormats.Text) &&
+                ViewModel.CanHandleContent(GlanceContentKind.Text))
+            {
+                kind = GlanceContentKind.Text;
+                return true;
+            }
         }
         catch (COMException)
         {
-            return false;
         }
+
+        kind = default;
+        return false;
     }
 
     private async void HandleDrop(object sender, DragEventArgs args)
     {
         StopContextualDragExitTimer();
         DragOperationDeferral deferral = args.GetDeferral();
-        GlanceStorageItem[] items = [];
+        GlanceContentContext? context = null;
         bool contentHandled = false;
 
         try
         {
             DataPackageView dataView = args.DataView;
 
-            if (dataView.Contains(StandardDataFormats.StorageItems))
+            if (TryGetContentKind(dataView, out GlanceContentKind kind))
             {
-                IReadOnlyList<IStorageItem> storageItems = await dataView.GetStorageItemsAsync();
-                items = [.. storageItems.Select(CreateStorageItem).OfType<GlanceStorageItem>()];
+                context = await CreateContentContextAsync(dataView, kind);
             }
         }
         catch (COMException)
@@ -550,12 +576,11 @@ public sealed partial class DesktopIslandView :
             await CompleteDropDeferralAsync(deferral);
         }
 
-        if (items.Length > 0)
+        if (context is not null)
         {
             try
             {
-                await ProcessStorageItemsAsync(items);
-                contentHandled = true;
+                contentHandled = await ProcessContentAsync(context);
             }
             catch (Exception)
             {
@@ -649,11 +674,11 @@ public sealed partial class DesktopIslandView :
         }
     }
 
-    private Task ProcessStorageItemsAsync(IReadOnlyList<GlanceStorageItem> items)
+    private Task<bool> ProcessContentAsync(GlanceContentContext context)
     {
         if (DispatcherQueue.HasThreadAccess)
         {
-            return AddStorageItemsAsync(items);
+            return ViewModel.HandleContentAsync(context);
         }
 
         TaskCompletionSource<bool> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -662,8 +687,7 @@ public sealed partial class DesktopIslandView :
         {
             try
             {
-                await AddStorageItemsAsync(items);
-                completion.TrySetResult(true);
+                completion.TrySetResult(await ViewModel.HandleContentAsync(context));
             }
             catch (Exception exception)
             {
@@ -677,12 +701,26 @@ public sealed partial class DesktopIslandView :
         return completion.Task;
     }
 
-    private async Task AddStorageItemsAsync(IReadOnlyList<GlanceStorageItem> items)
+    private static async Task<GlanceContentContext?> CreateContentContextAsync(DataPackageView dataView,
+        GlanceContentKind kind)
     {
-        if (items.Count > 0)
+        if (kind == GlanceContentKind.FilesAndFolders)
         {
-            await ViewModel.HandleContentAsync(new GlanceContentContext(GlanceContentKind.FilesAndFolders, items));
+            IReadOnlyList<IStorageItem> storageItems = await dataView.GetStorageItemsAsync();
+            GlanceStorageItem[] items = [.. storageItems.Select(CreateStorageItem).OfType<GlanceStorageItem>()];
+            return items.Length == 0 ? null : new GlanceContentContext(kind, items);
         }
+
+        if (kind == GlanceContentKind.WebLink)
+        {
+            Uri? uri = dataView.Contains(StandardDataFormats.WebLink)
+                ? await dataView.GetWebLinkAsync()
+                : await dataView.GetApplicationLinkAsync();
+            return uri is null ? null : new GlanceContentContext(kind, [], uri.AbsoluteUri);
+        }
+
+        string text = await dataView.GetTextAsync();
+        return string.IsNullOrWhiteSpace(text) ? null : new GlanceContentContext(kind, [], text);
     }
 
     private static GlanceStorageItem? CreateStorageItem(IStorageItem storageItem)

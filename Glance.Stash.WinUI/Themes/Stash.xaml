@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Default">
+            <SolidColorBrush x:Key="GlanceStashIconBrush" Color="#FFFFA37A" />
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FFFFA37A" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E6FFA37A" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CCFFA37A" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#28FFFFFF" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="GlanceStashIconBrush" Color="#9A3412" />
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FF9A3412" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E69A3412" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CC9A3412" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#28000000" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="HighContrast">
+            <StaticResource x:Key="GlanceStashIconBrush" ResourceKey="SystemColorWindowTextColorBrush" />
+            <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundDisabled" ResourceKey="SystemColorButtonFaceColorBrush" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

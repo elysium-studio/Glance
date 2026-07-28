@@ -16,6 +16,7 @@ public sealed class LocalizationResourceTests
         "Media",
         "Power",
         "Shell",
+        "Stash",
         "Stopwatch",
         "SystemMonitor",
         "Timer",

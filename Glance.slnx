@@ -158,6 +158,15 @@
   <Project Path="Glance.Stopwatch.Tests/Glance.Stopwatch.Tests.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.Stash.WinUI/Glance.Stash.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Stash/Glance.Stash.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Stash.Tests/Glance.Stash.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.SystemMonitor.WinUI/Glance.SystemMonitor.WinUI.csproj">
     <Platform Project="x64" />
   </Project>

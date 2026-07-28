@@ -12,6 +12,7 @@ The island remains at the top or bottom of the desktop in a compact state, expan
 - **System Monitor** — follow CPU, memory, and network activity at a glance.
 - **Power** — view AC or battery state and battery percentage where available.
 - **Clipboard** — browse recent clipboard entries and copy, remove, or send an entry to the focused application.
+- **Stash** — drag in text or links for later, browse saved items, copy them back, or open saved links. Its history is stored in a module-owned SQLite database.
 - **Drop Shelf** — temporarily collect files and folders, then drag them together to another location.
 - **Focus Session** — run a focused work session with a clear remaining-time display.
 - **Audio Switcher** — move quickly between available playback devices.

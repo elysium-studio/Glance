@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve"><value>보관함</value></data>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>보관함</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>유용한 텍스트와 링크를 가까이에 보관합니다.</value></data>
+  <data name="EmptySummary" xml:space="preserve"><value>보관된 항목 없음</value></data>
+  <data name="KindText" xml:space="preserve"><value>텍스트</value></data>
+  <data name="KindLink" xml:space="preserve"><value>링크</value></data>
+  <data name="LinkDetail" xml:space="preserve"><value>{0} · 링크</value></data>
+  <data name="EmptyMessage.Text" xml:space="preserve"><value>보관된 항목 없음</value></data>
+  <data name="EmptyDetail.Text" xml:space="preserve"><value>텍스트 또는 링크를 여기로 끌어오세요</value></data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>이 항목 복사</value></data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>복사</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>이 링크 열기</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>링크 열기</value></data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>이 항목 제거</value></data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>제거</value></data>
+</root>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve"><value>Stash</value></data>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Stash</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Keep useful text and links within reach.</value></data>
+  <data name="EmptySummary" xml:space="preserve"><value>Nothing stashed</value></data>
+  <data name="KindText" xml:space="preserve"><value>Text</value></data>
+  <data name="KindLink" xml:space="preserve"><value>Link</value></data>
+  <data name="LinkDetail" xml:space="preserve"><value>{0} · Link</value></data>
+  <data name="EmptyMessage.Text" xml:space="preserve"><value>Nothing stashed</value></data>
+  <data name="EmptyDetail.Text" xml:space="preserve"><value>Drag text or a link here</value></data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Copy this item</value></data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Copy</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Open this link</value></data>
+  <data name="OpenButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Open link</value></data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Remove this item from Stash</value></data>
+  <data name="RemoveButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Remove</value></data>
+</root>
