@@ -8,6 +8,7 @@ using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.Accessibility;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
+using Windows.Win32.UI.Shell;
 
 namespace Glance.Magnifier.WinUI;
 
@@ -16,6 +17,8 @@ internal sealed partial class WindowsMagnifierService :
 {
     private readonly bool isInitialized = MagnificationNativeMethods.MagInitialize();
     private readonly IUIAutomation? automation = CreateAutomation();
+    private readonly ITaskbarList? taskbarList = CreateTaskbarList();
+    private readonly HashSet<nint> removedTaskbarWindows = [];
     private CancellationTokenSource? toolbarSuppression;
     private bool isDisposed;
 
@@ -83,11 +86,18 @@ internal sealed partial class WindowsMagnifierService :
         isDisposed = true;
         toolbarSuppression?.Cancel();
         toolbarSuppression?.Dispose();
+        RestoreNativeTaskbarEntries();
 
         if (automation is not null &&
             Marshal.IsComObject(automation))
         {
             Marshal.FinalReleaseComObject(automation);
+        }
+
+        if (taskbarList is not null &&
+            Marshal.IsComObject(taskbarList))
+        {
+            Marshal.FinalReleaseComObject(taskbarList);
         }
 
         if (isInitialized)
@@ -151,6 +161,8 @@ internal sealed partial class WindowsMagnifierService :
                 {
                     MagnificationNativeMethods.ShowWindow(window, 0);
                 }
+
+                RemoveNativeTaskbarEntry(window);
             }
 
             return true;
@@ -194,11 +206,61 @@ internal sealed partial class WindowsMagnifierService :
         }
     }
 
+    private void RemoveNativeTaskbarEntry(nint window)
+    {
+        if (taskbarList is null)
+        {
+            return;
+        }
+
+        try
+        {
+            taskbarList.DeleteTab(new HWND(window));
+            removedTaskbarWindows.Add(window);
+        }
+        catch (COMException)
+        { }
+    }
+
+    private void RestoreNativeTaskbarEntries()
+    {
+        if (taskbarList is null)
+        {
+            return;
+        }
+
+        foreach (nint window in removedTaskbarWindows)
+        {
+            try
+            {
+                taskbarList.AddTab(new HWND(window));
+            }
+            catch (COMException)
+            { }
+        }
+
+        removedTaskbarWindows.Clear();
+    }
+
     private static IUIAutomation? CreateAutomation()
     {
         try
         {
             return (IUIAutomation)new CUIAutomation();
+        }
+        catch (COMException)
+        {
+            return null;
+        }
+    }
+
+    private static ITaskbarList? CreateTaskbarList()
+    {
+        try
+        {
+            ITaskbarList taskbarList = (ITaskbarList)new TaskbarList();
+            taskbarList.HrInit();
+            return taskbarList;
         }
         catch (COMException)
         {
