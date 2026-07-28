@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -13,7 +14,6 @@ internal sealed partial class WindowsMagnifierService :
 {
     private readonly bool isInitialized = MagnificationNativeMethods.MagInitialize();
     private CancellationTokenSource? toolbarSuppression;
-    private nint nativeToolbar;
     private bool isDisposed;
 
     public MagnifierState GetState()
@@ -43,9 +43,7 @@ internal sealed partial class WindowsMagnifierService :
 
     public bool Close()
     {
-        bool succeeded = SendShortcut(VIRTUAL_KEY.VK_ESCAPE);
-        nativeToolbar = nint.Zero;
-        return succeeded;
+        return SendShortcut(VIRTUAL_KEY.VK_ESCAPE);
     }
 
     public void Dispose()
@@ -89,41 +87,64 @@ internal sealed partial class WindowsMagnifierService :
 
     private void HideNativeToolbar()
     {
-        if (nativeToolbar != nint.Zero &&
-            MagnificationNativeMethods.IsWindow(nativeToolbar))
-        {
-            MagnificationNativeMethods.ShowWindow(nativeToolbar, 0);
-            return;
-        }
-
-        nativeToolbar = nint.Zero;
+        HashSet<uint> processIds = [];
 
         foreach (Process process in Process.GetProcessesByName("Magnify"))
         {
             using (process)
             {
-                nint window;
-
                 try
                 {
-                    process.Refresh();
-                    window = process.MainWindowHandle;
+                    processIds.Add((uint)process.Id);
                 }
                 catch (InvalidOperationException)
-                {
-                    continue;
-                }
-
-                if (window == nint.Zero)
-                {
-                    continue;
-                }
-
-                nativeToolbar = window;
-                MagnificationNativeMethods.ShowWindow(window, 0);
-                return;
+                { }
             }
         }
+
+        if (processIds.Count == 0)
+        {
+            return;
+        }
+
+        MagnificationNativeMethods.EnumWindows((window, _) =>
+        {
+            MagnificationNativeMethods.GetWindowThreadProcessId(window, out uint processId);
+
+            if (processIds.Contains(processId) &&
+                IsNativeMagnifierSurface(window))
+            {
+                MagnificationNativeMethods.ShowWindow(window, 0);
+            }
+
+            return true;
+        }, nint.Zero);
+    }
+
+    private static bool IsNativeMagnifierSurface(nint window)
+    {
+        string className = GetWindowClassName(window);
+
+        if (className is "MagUIClass" or "ScreenMagnifierUIWnd")
+        {
+            return true;
+        }
+
+        return GetWindowTitle(window).Contains("Magnifier Touch", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static unsafe string GetWindowClassName(nint window)
+    {
+        char* buffer = stackalloc char[256];
+        int length = MagnificationNativeMethods.GetClassName(window, buffer, 256);
+        return length > 0 ? new(buffer, 0, length) : string.Empty;
+    }
+
+    private static unsafe string GetWindowTitle(nint window)
+    {
+        char* buffer = stackalloc char[256];
+        int length = MagnificationNativeMethods.GetWindowText(window, buffer, 256);
+        return length > 0 ? new(buffer, 0, length) : string.Empty;
     }
 
     private static bool SendShortcut(VIRTUAL_KEY key)
@@ -151,6 +172,10 @@ internal sealed partial class WindowsMagnifierService :
 
 internal static partial class MagnificationNativeMethods
 {
+    [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+    public delegate bool EnumWindowsCallback(nint window,
+        nint parameter);
+
     [LibraryImport("Magnification.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool MagInitialize();
@@ -165,11 +190,26 @@ internal static partial class MagnificationNativeMethods
         out int xOffset,
         out int yOffset);
 
-    [LibraryImport("user32.dll")]
+    [LibraryImport("user32.dll", EntryPoint = "EnumWindows")]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool IsWindow(nint window);
+    public static partial bool EnumWindows(EnumWindowsCallback callback,
+        nint parameter);
 
-    [LibraryImport("user32.dll")]
+    [LibraryImport("user32.dll", EntryPoint = "GetWindowThreadProcessId")]
+    public static partial uint GetWindowThreadProcessId(nint window,
+        out uint processId);
+
+    [LibraryImport("user32.dll", EntryPoint = "GetClassNameW")]
+    public static unsafe partial int GetClassName(nint window,
+        char* className,
+        int maximumCount);
+
+    [LibraryImport("user32.dll", EntryPoint = "GetWindowTextW")]
+    public static unsafe partial int GetWindowText(nint window,
+        char* text,
+        int maximumCount);
+
+    [LibraryImport("user32.dll", EntryPoint = "ShowWindow")]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool ShowWindow(nint window,
         int command);

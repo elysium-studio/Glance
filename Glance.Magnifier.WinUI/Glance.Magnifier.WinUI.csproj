@@ -7,6 +7,7 @@
     <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnablePreviewFeatures>true</EnablePreviewFeatures>
     <Platforms>AnyCPU;x64</Platforms>
     <DefaultLanguage>en</DefaultLanguage>
