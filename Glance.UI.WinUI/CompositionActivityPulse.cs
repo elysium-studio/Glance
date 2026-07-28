@@ -9,6 +9,7 @@ namespace Glance.UI.WinUI;
 
 public sealed class CompositionActivityPulse
 {
+    private readonly FrameworkElement owner;
     private readonly FrameworkElement ring;
     private readonly INotifyPropertyChanged source;
     private readonly string propertyName;
@@ -23,12 +24,20 @@ public sealed class CompositionActivityPulse
         string propertyName,
         Func<bool> isActive)
     {
+        this.owner = owner;
         this.ring = ring;
         this.source = source;
         this.propertyName = propertyName;
         this.isActive = isActive;
         owner.Loaded += OnLoaded;
         owner.Unloaded += OnUnloaded;
+        source.PropertyChanged += OnPropertyChanged;
+        isSubscribed = true;
+
+        if (owner.IsLoaded)
+        {
+            Update();
+        }
     }
 
     private void OnLoaded(object sender, RoutedEventArgs args)
@@ -55,10 +64,28 @@ public sealed class CompositionActivityPulse
 
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
-        if (args.PropertyName == propertyName)
+        if (args.PropertyName != propertyName)
         {
-            Update();
+            return;
         }
+
+        if (owner.DispatcherQueue.HasThreadAccess)
+        {
+            if (owner.IsLoaded)
+            {
+                Update();
+            }
+
+            return;
+        }
+
+        owner.DispatcherQueue.TryEnqueue(() =>
+        {
+            if (owner.IsLoaded)
+            {
+                Update();
+            }
+        });
     }
 
     private void Update()
