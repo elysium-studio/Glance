@@ -2,8 +2,11 @@ using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Win32;
@@ -18,10 +21,13 @@ public sealed partial class ClipboardComponent :
     private readonly ClipboardChangeListener? clipboardChangeListener;
     private readonly DispatcherQueueTimer clipboardPollTimer;
     private readonly DispatcherQueue dispatcherQueue;
+    private readonly Dictionary<string, string> localHashesById = [with(StringComparer.Ordinal)];
+    private readonly Dictionary<string, string> localIdsByHash = [with(StringComparer.Ordinal)];
     private readonly List<ClipboardEntry> localEntries = [];
     private readonly Dictionary<string, ClipboardSnapshot> localSnapshots = [with(StringComparer.Ordinal)];
     private readonly SemaphoreSlim refreshGate = new(1, 1);
     private readonly ITextLocalizer localizer;
+    private readonly ClipboardRepository repository;
     private readonly ClipboardShelfViewModel viewModel;
     private readonly GlanceModuleOptions<ClipboardSettings> options;
     private bool isDisposed;
@@ -29,6 +35,7 @@ public sealed partial class ClipboardComponent :
 
     public ClipboardComponent(ClipboardShelfViewModel viewModel,
         GlanceModuleOptions<ClipboardSettings> options,
+        ClipboardRepository repository,
         ModuleResourceTextLocalizer<ClipboardModule> localizer)
     {
         ClipboardDiagnostics.Initialize();
@@ -36,6 +43,7 @@ public sealed partial class ClipboardComponent :
 
         this.viewModel = viewModel;
         this.options = options;
+        this.repository = repository;
         this.localizer = localizer;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         clipboardPollTimer = dispatcherQueue.CreateTimer();
@@ -51,6 +59,8 @@ public sealed partial class ClipboardComponent :
         ExpandedAnimationElement = expandedView.ConnectedAnimationElement;
 
         viewModel.ConfigureActions(CopyAsync, PasteAsync, RemoveAsync, ClearAsync);
+        RestoreEntries(repository.Load(HistoryLimit));
+        PublishEntries();
 
         try
         {
@@ -164,17 +174,35 @@ public sealed partial class ClipboardComponent :
             return;
         }
 
+        string contentHash = CreateContentHash(snapshot);
+
+        if (localIdsByHash.TryGetValue(contentHash, out string? existingId))
+        {
+            ClipboardEntry? existingEntry = localEntries.Find(entry => entry.Id == existingId);
+
+            if (existingEntry is not null)
+            {
+                PromoteEntry(existingEntry);
+                TryPersist(() => repository.Promote(existingId), "PromoteFailed");
+                lastSequenceNumber = sequenceNumber;
+                ClipboardDiagnostics.Write("Capture", $"Promoted {DescribeSnapshot(snapshot)}. Sequence={sequenceNumber}; Count={localEntries.Count}");
+                return;
+            }
+        }
+
         string id = $"Local.{Guid.NewGuid():N}";
-        ClipboardEntry entry = CreateEntryFromSnapshot(id, DateTimeOffset.Now, snapshot);
+        DateTimeOffset timestamp = DateTimeOffset.Now;
+        ClipboardEntry entry = CreateEntryFromSnapshot(id, timestamp, snapshot);
 
         localEntries.Insert(0, entry);
-        localSnapshots[id] = snapshot;
+        TrackSnapshot(id, contentHash, snapshot);
+        TryPersist(() => repository.Save(CreateRecord(id, contentHash, timestamp, snapshot), HistoryLimit), "SaveFailed");
 
         while (localEntries.Count > HistoryLimit)
         {
             ClipboardEntry removed = localEntries[^1];
             localEntries.RemoveAt(localEntries.Count - 1);
-            localSnapshots.Remove(removed.Id);
+            UntrackSnapshot(removed.Id);
         }
 
         lastSequenceNumber = sequenceNumber;
@@ -190,9 +218,10 @@ public sealed partial class ClipboardComponent :
             {
                 ClipboardEntry removed = localEntries[^1];
                 localEntries.RemoveAt(localEntries.Count - 1);
-                localSnapshots.Remove(removed.Id);
+                UntrackSnapshot(removed.Id);
             }
 
+            TryPersist(() => repository.Trim(HistoryLimit), "TrimFailed");
             PublishEntries();
         });
 
@@ -230,6 +259,7 @@ public sealed partial class ClipboardComponent :
             {
                 lastSequenceNumber = PInvoke.GetClipboardSequenceNumber();
                 PromoteEntry(entry);
+                TryPersist(() => repository.Promote(entry.Id), "PromoteFailed");
                 PublishEntries();
             }
 
@@ -268,14 +298,24 @@ public sealed partial class ClipboardComponent :
 
     private Task<bool> RemoveAsync(ClipboardEntry entry)
     {
-        bool removed = localSnapshots.Remove(entry.Id);
-        if (removed)
+        if (!localSnapshots.ContainsKey(entry.Id))
         {
-            localEntries.RemoveAll(candidate => candidate.Id == entry.Id);
-            PublishEntries();
+            return Task.FromResult(false);
         }
 
-        return Task.FromResult(removed);
+        try
+        {
+            repository.Remove(entry.Id);
+            localEntries.RemoveAll(candidate => candidate.Id == entry.Id);
+            UntrackSnapshot(entry.Id);
+            PublishEntries();
+            return Task.FromResult(true);
+        }
+        catch (Exception exception)
+        {
+            ClipboardDiagnostics.WriteException("RemoveFailed", exception);
+            return Task.FromResult(false);
+        }
     }
 
     private async Task<bool> ClearAsync()
@@ -290,8 +330,11 @@ public sealed partial class ClipboardComponent :
                 return false;
             }
 
+            repository.Clear();
             localEntries.Clear();
             localSnapshots.Clear();
+            localHashesById.Clear();
+            localIdsByHash.Clear();
             lastSequenceNumber = PInvoke.GetClipboardSequenceNumber();
             PublishEntries();
             ClipboardDiagnostics.Write("Clear", $"Completed. Sequence={lastSequenceNumber}");
@@ -309,6 +352,130 @@ public sealed partial class ClipboardComponent :
         if (localEntries.Remove(entry))
         {
             localEntries.Insert(0, entry);
+        }
+    }
+
+    private void RestoreEntries(IReadOnlyList<ClipboardRecord> records)
+    {
+        foreach (ClipboardRecord record in records)
+        {
+            ClipboardSnapshot snapshot = new()
+            {
+                ApplicationLink = record.ApplicationLink,
+                Bitmap = record.Bitmap,
+                FilePaths = record.FilePaths,
+                Html = record.Html,
+                Rtf = record.Rtf,
+                Text = record.Text,
+                WebLink = record.WebLink
+            };
+
+            if (!snapshot.HasContent)
+            {
+                continue;
+            }
+
+            localEntries.Add(CreateEntryFromSnapshot(record.Id, record.Timestamp, snapshot));
+            TrackSnapshot(record.Id, record.ContentHash, snapshot);
+        }
+    }
+
+    private void TrackSnapshot(string id,
+        string contentHash,
+        ClipboardSnapshot snapshot)
+    {
+        localSnapshots[id] = snapshot;
+        localHashesById[id] = contentHash;
+        localIdsByHash[contentHash] = id;
+    }
+
+    private void UntrackSnapshot(string id)
+    {
+        localSnapshots.Remove(id);
+
+        if (localHashesById.Remove(id, out string? contentHash))
+        {
+            localIdsByHash.Remove(contentHash);
+        }
+    }
+
+    private static ClipboardRecord CreateRecord(string id,
+        string contentHash,
+        DateTimeOffset timestamp,
+        ClipboardSnapshot snapshot) =>
+        new(id,
+            contentHash,
+            timestamp,
+            snapshot.Text,
+            snapshot.Html,
+            snapshot.Rtf,
+            snapshot.Bitmap,
+            snapshot.FilePaths,
+            snapshot.WebLink,
+            snapshot.ApplicationLink);
+
+    private static string CreateContentHash(ClipboardSnapshot snapshot)
+    {
+        using IncrementalHash hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        AppendString(hash, snapshot.ApplicationLink);
+        AppendBytes(hash, snapshot.Bitmap);
+        AppendStrings(hash, snapshot.FilePaths);
+        AppendString(hash, snapshot.Html);
+        AppendString(hash, snapshot.Rtf);
+        AppendString(hash, snapshot.Text);
+        AppendString(hash, snapshot.WebLink);
+        return Convert.ToHexString(hash.GetHashAndReset());
+    }
+
+    private static void AppendString(IncrementalHash hash,
+        string? value) =>
+        AppendBytes(hash, value is null ? null : Encoding.UTF8.GetBytes(value));
+
+    private static void AppendStrings(IncrementalHash hash,
+        IReadOnlyList<string>? values)
+    {
+        AppendInteger(hash, values?.Count ?? -1);
+
+        if (values is null)
+        {
+            return;
+        }
+
+        foreach (string value in values)
+        {
+            AppendString(hash, value);
+        }
+    }
+
+    private static void AppendBytes(IncrementalHash hash,
+        byte[]? value)
+    {
+        AppendInteger(hash, value?.Length ?? -1);
+
+        if (value is not null)
+        {
+            hash.AppendData(value);
+        }
+    }
+
+    private static void AppendInteger(IncrementalHash hash,
+        int value)
+    {
+        Span<byte> bytes = stackalloc byte[sizeof(int)];
+        BinaryPrimitives.WriteInt32LittleEndian(bytes, value);
+        hash.AppendData(bytes);
+    }
+
+    private static void TryPersist(Action action,
+        string stage)
+    {
+        try
+        {
+            action();
+        }
+        catch (Exception exception)
+        {
+            ClipboardDiagnostics.WriteException(stage, exception);
         }
     }
 

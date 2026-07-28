@@ -130,7 +130,14 @@ public sealed class StashRepository
                 return;
             }
 
-            SQLitePCL.raw.SetProvider(new SQLitePCL.SQLite3Provider_winsqlite3());
+            try
+            {
+                SQLitePCL.raw.SetProvider(new SQLitePCL.SQLite3Provider_winsqlite3());
+            }
+            catch (InvalidOperationException)
+            {
+            }
+
             providerInitialized = true;
         }
     }
