@@ -3,7 +3,6 @@ using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
 using Glance.Application.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 
 namespace Glance.Shell.WinUI;
@@ -16,8 +15,7 @@ public sealed class SettingsModule :
         services
             .AddViewFor(ServiceLifetime.Transient,
                 provider => new SettingsWindow(provider.GetRequiredService<IMessenger>(),
-                    provider.GetRequiredService<ITextLocalizer>(),
-                    provider.GetRequiredService<ILogger<SettingsWindow>>()),
+                    provider.GetRequiredService<ITextLocalizer>()),
                 provider => new SettingsViewModel(provider,
                     provider.GetRequiredService<IServiceFactory>(),
                     provider.GetRequiredService<IMessenger>(),

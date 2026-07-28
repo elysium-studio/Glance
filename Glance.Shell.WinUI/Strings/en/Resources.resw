@@ -9,11 +9,7 @@
   <data name="GlanceSectionTitle.Text" xml:space="preserve"><value>Glance</value></data>
   <data name="ModulesSectionTitle.Text" xml:space="preserve"><value>Modules</value></data>
   <data name="WindowsSectionTitle.Text" xml:space="preserve"><value>Windows</value></data>
-  <data name="ModulesDescription.Text" xml:space="preserve"><value>Choose which modules appear in Glance and drag them into your preferred order.</value></data>
-  <data name="ModulesReorderCancelButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Cancel</value></data>
-  <data name="ModulesReorderCancelButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Cancel</value></data>
-  <data name="ModulesReorderDoneButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Done</value></data>
-  <data name="ModulesReorderDoneButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Done</value></data>
+  <data name="ModulesDescription.Text" xml:space="preserve"><value>Choose which modules appear in Glance.</value></data>
   <data name="GlancePlacementCard.Header" xml:space="preserve"><value>Glance placement</value></data>
   <data name="GlancePlacementCard.Description" xml:space="preserve"><value>Choose whether Glance appears at the top or bottom of the screen</value></data>
   <data name="GlancePlacementTopOption.Content" xml:space="preserve"><value>Top</value></data>

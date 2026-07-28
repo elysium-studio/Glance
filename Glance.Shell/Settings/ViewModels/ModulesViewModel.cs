@@ -1,4 +1,3 @@
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
 using Elysium.Presentation;
@@ -8,10 +7,9 @@ namespace Glance.Shell;
 
 public sealed partial class ModulesViewModel :
     ObservableCollectionViewModel<IModulesViewModel>,
-    IReorderableSettingViewModel
+    ISettingViewModel
 {
     private readonly ModulePreferenceService preferences;
-    private IReadOnlyList<ModuleSettingsItemViewModel>? originalOrder;
 
     public ModulesViewModel(IServiceProvider provider,
         IServiceFactory factory,
@@ -37,67 +35,11 @@ public sealed partial class ModulesViewModel :
         preferences.ComponentsAdded += HandleComponentsAdded;
     }
 
-    public bool CanReorder => this.OfType<ModuleSettingsItemViewModel>().Skip(1).Any();
-
     public string Description { get; }
-
-    public bool SupportsReordering => CanReorder;
-
-    [ObservableProperty]
-    private bool isReordering;
-
-    public void BeginReordering()
-    {
-        if (IsReordering || !CanReorder)
-        {
-            return;
-        }
-
-        originalOrder = [.. this.OfType<ModuleSettingsItemViewModel>()];
-        SetReordering(true);
-    }
-
-    public async Task CompleteReorderingAsync()
-    {
-        if (!IsReordering)
-        {
-            return;
-        }
-
-        string[] orderedIds = [.. this.OfType<ModuleSettingsItemViewModel>().Select(item => item.Id)];
-        originalOrder = null;
-        SetReordering(false);
-        await preferences.SetOrderAsync(orderedIds);
-    }
-
-    public void CancelReordering()
-    {
-        if (!IsReordering)
-        {
-            return;
-        }
-
-        if (originalOrder is not null)
-        {
-            for (int targetIndex = 0; targetIndex < originalOrder.Count; targetIndex++)
-            {
-                int currentIndex = IndexOf(originalOrder[targetIndex]);
-
-                if (currentIndex >= 0 && currentIndex != targetIndex)
-                {
-                    Move(currentIndex, targetIndex);
-                }
-            }
-        }
-
-        originalOrder = null;
-        SetReordering(false);
-    }
 
     public override void Dispose()
     {
         preferences.ComponentsAdded -= HandleComponentsAdded;
-        originalOrder = null;
         base.Dispose();
     }
 
@@ -122,15 +64,12 @@ public sealed partial class ModulesViewModel :
             preference.IsEnabled,
             availableSettings.OrderBy(setting => setting.Order),
             module => Messenger.Send(new ModuleSettingsNavigationRequestedEventArgs(module)),
-            () => Messenger.Send(new ModuleReorderingRequestedEventArgs()),
             (_, enabled) => preferences.SetEnabledAsync(preference.Id, enabled));
     }
 
     private void HandleComponentsAdded(object? sender,
         GlanceComponentsAddedEventArgs args)
     {
-        CancelReordering();
-
         ILookup<string, IGlanceModuleSettingViewModel> settingsByModule = args.CreateSettings()
             .OrderBy(setting => setting.Order)
             .ToLookup(setting => setting.ModuleId, StringComparer.OrdinalIgnoreCase);
@@ -144,16 +83,6 @@ public sealed partial class ModulesViewModel :
                 .TakeWhile(id => !string.Equals(id, component.Id, StringComparison.OrdinalIgnoreCase))
                 .Count();
             Insert(Math.Min(index, Count), CreateItem(preference, settingsByModule[component.Id]));
-        }
-    }
-
-    private void SetReordering(bool value)
-    {
-        IsReordering = value;
-
-        foreach (ModuleSettingsItemViewModel module in this.OfType<ModuleSettingsItemViewModel>())
-        {
-            module.IsReordering = value;
         }
     }
 }

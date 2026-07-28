@@ -1,10 +1,8 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Glance.Application.Abstractions;
-using Microsoft.Extensions.Logging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System;
 using System.Collections.ObjectModel;
 using Windows.Graphics;
 
@@ -12,27 +10,22 @@ namespace Glance.Shell.WinUI;
 
 public sealed partial class SettingsWindow :
     Window,
-    IRecipient<ModuleSettingsNavigationRequestedEventArgs>,
-    IRecipient<ModuleReorderingRequestedEventArgs>
+    IRecipient<ModuleSettingsNavigationRequestedEventArgs>
 {
     private const int WindowWidth = 1100;
     private const int WindowHeight = 680;
     private readonly ITextLocalizer localizer;
-    private readonly ILogger<SettingsWindow> logger;
     private readonly IMessenger messenger;
     private ModuleSettingsItemViewModel? currentModule;
 
     public SettingsWindow(IMessenger messenger,
-        ITextLocalizer localizer,
-        ILogger<SettingsWindow> logger)
+        ITextLocalizer localizer)
     {
         this.messenger = messenger;
         this.localizer = localizer;
-        this.logger = logger;
         InitializeComponent();
 
         messenger.Register<ModuleSettingsNavigationRequestedEventArgs>(this);
-        messenger.Register<ModuleReorderingRequestedEventArgs>(this);
         Closed += HandleClosed;
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
@@ -54,9 +47,6 @@ public sealed partial class SettingsWindow :
 
     public SettingsViewModel ViewModel => (SettingsViewModel)((FrameworkElement)Content).DataContext;
 
-    public Visibility ToVisibility(bool value) =>
-        value ? Visibility.Visible : Visibility.Collapsed;
-
     public void Receive(ModuleSettingsNavigationRequestedEventArgs message)
     {
         if (!message.Module.CanExpand ||
@@ -68,9 +58,6 @@ public sealed partial class SettingsWindow :
         currentModule = message.Module;
         UpdateNavigation(ViewModel.SelectedItem);
     }
-
-    public void Receive(ModuleReorderingRequestedEventArgs message) =>
-        ViewModel.BeginReordering();
 
     private void HandleLoaded(object sender,
         RoutedEventArgs args) =>
@@ -87,32 +74,6 @@ public sealed partial class SettingsWindow :
         object args) =>
         GoBack();
 
-    private async void HandleCompleteReordering(object sender,
-        RoutedEventArgs args)
-    {
-        try
-        {
-            await ViewModel.CompleteReorderingAsync();
-        }
-        catch (Exception exception)
-        {
-            logger.LogError(exception, "Failed to save module order");
-        }
-    }
-
-    private void HandleCancelReordering(object sender,
-        RoutedEventArgs args) =>
-        ViewModel.CancelReordering();
-
-    private void HandleModuleDragItemsStarting(object sender,
-        DragItemsStartingEventArgs args)
-    {
-        if (!ViewModel.IsReorderingCurrentView)
-        {
-            args.Cancel = true;
-        }
-    }
-
     private void HandleBreadcrumbItemClicked(BreadcrumbBar sender,
         BreadcrumbBarItemClickedEventArgs args)
     {
@@ -126,7 +87,6 @@ public sealed partial class SettingsWindow :
     private void HandleClosed(object sender,
         WindowEventArgs args)
     {
-        ViewModel.CancelReordering();
         messenger.UnregisterAll(this);
         currentModule = null;
         Closed -= HandleClosed;
@@ -134,12 +94,6 @@ public sealed partial class SettingsWindow :
 
     private void GoBack()
     {
-        if (ViewModel.IsReorderingCurrentView)
-        {
-            ViewModel.CancelReordering();
-            return;
-        }
-
         if (currentModule is null)
         {
             return;

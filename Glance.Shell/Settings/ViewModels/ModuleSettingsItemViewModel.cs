@@ -8,7 +8,6 @@ public sealed partial class ModuleSettingsItemViewModel :
     IModulesViewModel
 {
     private readonly Action<ModuleSettingsItemViewModel> navigate;
-    private readonly Action requestReordering;
     private bool suppressPersistence;
 
     public ModuleSettingsItemViewModel(string id,
@@ -17,7 +16,6 @@ public sealed partial class ModuleSettingsItemViewModel :
         bool isEnabled,
         IEnumerable<IGlanceModuleSettingViewModel> settings,
         Action<ModuleSettingsItemViewModel> navigate,
-        Action requestReordering,
         Func<ModuleSettingsItemViewModel, bool, Task<bool>> setEnabled)
     {
         Id = id;
@@ -25,7 +23,6 @@ public sealed partial class ModuleSettingsItemViewModel :
         Description = description;
         Settings = new ModuleSettingsViewModel(settings);
         this.navigate = navigate;
-        this.requestReordering = requestReordering;
         this.isEnabled = isEnabled;
         SetEnabled = setEnabled;
         RefreshSettings();
@@ -41,38 +38,20 @@ public sealed partial class ModuleSettingsItemViewModel :
 
     public bool CanExpand => IsEnabled && HasSettings;
 
-    public bool CanInteract => !IsReordering;
-
-    public bool CanNavigate => CanExpand && CanInteract;
-
     public ModuleSettingsViewModel Settings { get; }
 
     private Func<ModuleSettingsItemViewModel, bool, Task<bool>> SetEnabled { get; }
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanInteract))]
-    [NotifyPropertyChangedFor(nameof(CanNavigate))]
-    private bool isReordering;
-
     public void NavigateToSettings()
     {
-        if (CanNavigate)
+        if (CanExpand)
         {
             navigate(this);
         }
     }
 
-    public void RequestReordering()
-    {
-        if (!IsReordering)
-        {
-            requestReordering();
-        }
-    }
-
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanExpand))]
-    [NotifyPropertyChangedFor(nameof(CanNavigate))]
     private bool isEnabled;
 
     partial void OnIsEnabledChanged(bool value)

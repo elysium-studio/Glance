@@ -9,8 +9,4 @@ public interface ISettingViewModel :
     INotifyPropertyChanged
 {
     string? Description => null;
-
-    bool IsReordering => false;
-
-    bool SupportsReordering => false;
 }

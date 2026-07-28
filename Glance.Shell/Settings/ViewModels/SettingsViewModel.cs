@@ -9,11 +9,7 @@ public sealed partial class SettingsViewModel :
     ObservableCollectionViewModel<ISettingViewModel>
 {
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanReorderCurrentView))]
     private ISettingViewModel? currentView;
-
-    [ObservableProperty]
-    private bool isReorderingCurrentView;
 
     public SettingsViewModel(IServiceProvider provider,
         IServiceFactory factory,
@@ -25,50 +21,5 @@ public sealed partial class SettingsViewModel :
         CurrentView = SelectedItem;
     }
 
-    public bool CanReorderCurrentView =>
-        CurrentView is IReorderableSettingViewModel { CanReorder: true };
-
-    public void NavigateTo(ISettingViewModel? viewModel)
-    {
-        if (ReferenceEquals(CurrentView, viewModel))
-        {
-            return;
-        }
-
-        CancelReordering();
-        CurrentView = viewModel;
-    }
-
-    public void BeginReordering()
-    {
-        if (CurrentView is not IReorderableSettingViewModel reorderable)
-        {
-            return;
-        }
-
-        reorderable.BeginReordering();
-        IsReorderingCurrentView = reorderable.IsReordering;
-    }
-
-    public async Task CompleteReorderingAsync()
-    {
-        if (CurrentView is not IReorderableSettingViewModel reorderable)
-        {
-            return;
-        }
-
-        Task persistence = reorderable.CompleteReorderingAsync();
-        IsReorderingCurrentView = reorderable.IsReordering;
-        await persistence;
-    }
-
-    public void CancelReordering()
-    {
-        if (CurrentView is IReorderableSettingViewModel reorderable)
-        {
-            reorderable.CancelReordering();
-        }
-
-        IsReorderingCurrentView = false;
-    }
+    public void NavigateTo(ISettingViewModel? viewModel) => CurrentView = viewModel;
 }

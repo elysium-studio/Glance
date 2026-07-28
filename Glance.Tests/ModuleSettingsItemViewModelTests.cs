@@ -11,7 +11,7 @@ public sealed class ModuleSettingsItemViewModelTests
     {
         TestSetting first = new("Timer", 10);
         TestSetting second = new("Timer", 20);
-        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", true, [first, second], _ => { }, () => { }, (_, _) => Task.FromResult(true));
+        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", true, [first, second], _ => { }, (_, _) => Task.FromResult(true));
 
         Assert.IsAssignableFrom<ISettingViewModel>(item.Settings);
         Assert.Equal([first, second], item.Settings);
@@ -28,7 +28,7 @@ public sealed class ModuleSettingsItemViewModelTests
     [Fact]
     public void ModuleWithoutSettingsCannotExpand()
     {
-        ModuleSettingsItemViewModel item = new("Stopwatch", "Stopwatch", "Elapsed time", true, [], _ => { }, () => { }, (_, _) => Task.FromResult(true));
+        ModuleSettingsItemViewModel item = new("Stopwatch", "Stopwatch", "Elapsed time", true, [], _ => { }, (_, _) => Task.FromResult(true));
 
         Assert.False(item.CanExpand);
     }
@@ -38,12 +38,9 @@ public sealed class ModuleSettingsItemViewModelTests
     {
         int navigationRequests = 0;
         TestSetting setting = new("Timer", 10);
-        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", true, [setting], _ => navigationRequests++, () => { }, (_, _) => Task.FromResult(true));
+        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", true, [setting], _ => navigationRequests++, (_, _) => Task.FromResult(true));
 
         item.NavigateToSettings();
-        item.IsReordering = true;
-        item.NavigateToSettings();
-        item.IsReordering = false;
         item.IsEnabled = false;
         item.NavigateToSettings();
 
@@ -51,23 +48,10 @@ public sealed class ModuleSettingsItemViewModelTests
     }
 
     [Fact]
-    public void ModuleCanRequestReorderingOnlyOutsideReorderMode()
-    {
-        int reorderRequests = 0;
-        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", true, [], _ => { }, () => reorderRequests++, (_, _) => Task.FromResult(true));
-
-        item.RequestReordering();
-        item.IsReordering = true;
-        item.RequestReordering();
-
-        Assert.Equal(1, reorderRequests);
-    }
-
-    [Fact]
     public void DisposeDisposesOwnedSettingViewModels()
     {
         TestSetting setting = new("Timer", 10);
-        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", false, [setting], _ => { }, () => { }, (_, _) => Task.FromResult(true));
+        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", false, [setting], _ => { }, (_, _) => Task.FromResult(true));
 
         item.Dispose();
         item.Dispose();
