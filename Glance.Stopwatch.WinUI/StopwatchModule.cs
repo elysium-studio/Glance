@@ -16,6 +16,6 @@ public sealed class StopwatchModule :
         services.AddSingleton<ModuleResourceTextLocalizer<StopwatchModule>>();
         services.AddSingleton(provider => new StopwatchViewModel(provider.GetRequiredService<GlanceModuleOptions<StopwatchSettings>>().Current));
         services.AddSingleton<IGlanceComponent, StopwatchComponent>();
-        services.AddViewFor<ResumeAutomaticallySettingView, IGlanceModuleSettingViewModel, ResumeAutomaticallySettingViewModel>(ServiceLifetime.Transient, provider => new ResumeAutomaticallySettingView(), provider => new ResumeAutomaticallySettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<StopwatchSettings>>().Current, provider.GetRequiredService<IWritableOptions<StopwatchSettings>>()));
+        services.AddViewFor<StopwatchResumeAutomaticallySettingView, IGlanceModuleSettingViewModel, StopwatchResumeAutomaticallySettingViewModel>(ServiceLifetime.Transient, provider => new StopwatchResumeAutomaticallySettingView(), provider => new StopwatchResumeAutomaticallySettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<StopwatchSettings>>().Current, provider.GetRequiredService<IWritableOptions<StopwatchSettings>>()));
     }
 }

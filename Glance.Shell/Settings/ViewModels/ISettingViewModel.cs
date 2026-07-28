@@ -1,4 +1,12 @@
+using System.Collections;
+using System.ComponentModel;
+
 namespace Glance.Shell;
 
 public interface ISettingViewModel :
-    IDisposable;
+    IEnumerable,
+    IDisposable,
+    INotifyPropertyChanged
+{
+    string? Description => null;
+}

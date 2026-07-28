@@ -142,27 +142,6 @@ public sealed class ModulePreferenceService
         await SaveAsync();
     }
 
-    public async Task SetOrderAsync(IEnumerable<string> orderedIds)
-    {
-        Dictionary<string, GlanceModulePreference> preferences = settings.Modules
-            .Where(item => GetComponent(item.Id) is not null)
-            .ToDictionary(item => item.Id, StringComparer.OrdinalIgnoreCase);
-        List<GlanceModulePreference> ordered = [];
-
-        foreach (string id in orderedIds)
-        {
-            if (preferences.Remove(id, out GlanceModulePreference? preference))
-            {
-                ordered.Add(preference);
-            }
-        }
-
-        ordered.AddRange(preferences.Values);
-        ordered.AddRange(settings.Modules.Where(item => GetComponent(item.Id) is null));
-        settings.Modules = ordered;
-        await SaveAsync();
-    }
-
     private void Normalize()
     {
         Dictionary<string, GlanceModulePreference> saved = settings.Modules

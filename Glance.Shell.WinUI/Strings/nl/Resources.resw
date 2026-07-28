@@ -9,7 +9,7 @@
   <data name="GlanceSectionTitle.Text" xml:space="preserve"><value>Glance</value></data>
   <data name="ModulesSectionTitle.Text" xml:space="preserve"><value>Modules</value></data>
   <data name="WindowsSectionTitle.Text" xml:space="preserve"><value>Windows</value></data>
-  <data name="ModulesDescription.Text" xml:space="preserve"><value>Kies welke modules in Glance verschijnen en sleep ze naar de gewenste volgorde.</value></data>
+  <data name="ModulesDescription.Text" xml:space="preserve"><value>Kies welke modules in Glance verschijnen.</value></data>
   <data name="GlancePlacementCard.Header" xml:space="preserve"><value>Plaatsing van Glance</value></data>
   <data name="GlancePlacementCard.Description" xml:space="preserve"><value>Kies of Glance bovenaan of onderaan het scherm verschijnt</value></data>
   <data name="GlancePlacementTopOption.Content" xml:space="preserve"><value>Boven</value></data>

@@ -11,5 +11,5 @@ public sealed partial class FocusDurationSettingViewModel(IServiceProvider provi
 public sealed partial class BreakDurationSettingViewModel(IServiceProvider provider, IServiceFactory factory, IMessenger messenger, IDisposer disposer, IDispatcher dispatcher, FocusSessionSettings settings, IWritableOptions<FocusSessionSettings> writer) :
     ModuleSettingViewModel<FocusSessionSettings, double>(provider, factory, messenger, disposer, dispatcher, settings, writer, "FocusSession", 20, config => config.BreakDurationMinutes, (config, value) => config.BreakDurationMinutes = Math.Clamp(value, 1, 60));
 
-public sealed partial class ResumeAutomaticallySettingViewModel(IServiceProvider provider, IServiceFactory factory, IMessenger messenger, IDisposer disposer, IDispatcher dispatcher, FocusSessionSettings settings, IWritableOptions<FocusSessionSettings> writer) :
+public sealed partial class FocusSessionResumeAutomaticallySettingViewModel(IServiceProvider provider, IServiceFactory factory, IMessenger messenger, IDisposer disposer, IDispatcher dispatcher, FocusSessionSettings settings, IWritableOptions<FocusSessionSettings> writer) :
     ModuleSettingViewModel<FocusSessionSettings, bool>(provider, factory, messenger, disposer, dispatcher, settings, writer, "FocusSession", 30, config => config.ResumeAutomatically, (config, value) => config.ResumeAutomatically = value);

@@ -11,8 +11,9 @@ public sealed class ModuleSettingsItemViewModelTests
     {
         TestSetting first = new("Timer", 10);
         TestSetting second = new("Timer", 20);
-        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", true, [first, second], (_, _) => Task.FromResult(true));
+        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", true, [first, second], _ => { }, (_, _) => Task.FromResult(true));
 
+        Assert.IsAssignableFrom<ISettingViewModel>(item.Settings);
         Assert.Equal([first, second], item.Settings);
 
         item.IsEnabled = false;
@@ -27,20 +28,35 @@ public sealed class ModuleSettingsItemViewModelTests
     [Fact]
     public void ModuleWithoutSettingsCannotExpand()
     {
-        ModuleSettingsItemViewModel item = new("Stopwatch", "Stopwatch", "Elapsed time", true, [], (_, _) => Task.FromResult(true));
+        ModuleSettingsItemViewModel item = new("Stopwatch", "Stopwatch", "Elapsed time", true, [], _ => { }, (_, _) => Task.FromResult(true));
 
         Assert.False(item.CanExpand);
+    }
+
+    [Fact]
+    public void EnabledModuleWithSettingsCanRequestNavigation()
+    {
+        int navigationRequests = 0;
+        TestSetting setting = new("Timer", 10);
+        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", true, [setting], _ => navigationRequests++, (_, _) => Task.FromResult(true));
+
+        item.NavigateToSettings();
+        item.IsEnabled = false;
+        item.NavigateToSettings();
+
+        Assert.Equal(1, navigationRequests);
     }
 
     [Fact]
     public void DisposeDisposesOwnedSettingViewModels()
     {
         TestSetting setting = new("Timer", 10);
-        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", false, [setting], (_, _) => Task.FromResult(true));
+        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", false, [setting], _ => { }, (_, _) => Task.FromResult(true));
 
         item.Dispose();
+        item.Dispose();
 
-        Assert.True(setting.IsDisposed);
+        Assert.Equal(1, setting.DisposeCount);
     }
 
     private sealed class TestSetting(string moduleId, int order) :
@@ -50,8 +66,8 @@ public sealed class ModuleSettingsItemViewModelTests
 
         public int Order { get; } = order;
 
-        public bool IsDisposed { get; private set; }
+        public int DisposeCount { get; private set; }
 
-        public void Dispose() => IsDisposed = true;
+        public void Dispose() => DisposeCount++;
     }
 }

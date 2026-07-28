@@ -9,7 +9,7 @@
   <data name="GlanceSectionTitle.Text" xml:space="preserve"><value>Glance</value></data>
   <data name="ModulesSectionTitle.Text" xml:space="preserve"><value>모듈</value></data>
   <data name="WindowsSectionTitle.Text" xml:space="preserve"><value>Windows</value></data>
-  <data name="ModulesDescription.Text" xml:space="preserve"><value>Glance에 표시할 모듈을 선택하고 원하는 순서로 끌어 놓으세요.</value></data>
+  <data name="ModulesDescription.Text" xml:space="preserve"><value>Glance에 표시할 모듈을 선택하세요.</value></data>
   <data name="GlancePlacementCard.Header" xml:space="preserve"><value>Glance 위치</value></data>
   <data name="GlancePlacementCard.Description" xml:space="preserve"><value>Glance를 화면 위쪽 또는 아래쪽에 표시합니다</value></data>
   <data name="GlancePlacementTopOption.Content" xml:space="preserve"><value>위</value></data>
