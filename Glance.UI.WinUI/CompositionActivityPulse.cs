@@ -2,24 +2,26 @@ using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Shapes;
 using System;
 using System.ComponentModel;
 using System.Numerics;
+using Windows.UI;
 
 namespace Glance.UI.WinUI;
 
 public sealed class CompositionActivityPulse
 {
     private readonly FrameworkElement owner;
-    private readonly FrameworkElement ring;
+    private readonly Shape ring;
     private readonly string propertyName;
     private readonly Func<bool> isActive;
-    private EventHandler<object>? loadedRenderingHandler;
-    private Visual? visual;
+    private CompositionColorBrush? pulseBrush;
+    private ShapeVisual? visual;
     private bool isRunning;
 
     public CompositionActivityPulse(FrameworkElement owner,
-        FrameworkElement ring,
+        Shape ring,
         INotifyPropertyChanged source,
         string propertyName,
         Func<bool> isActive)
@@ -29,60 +31,13 @@ public sealed class CompositionActivityPulse
         this.propertyName = propertyName;
         this.isActive = isActive;
         source.PropertyChanged += OnPropertyChanged;
-        ring.Loaded += OnLoaded;
-        ring.Unloaded += OnUnloaded;
+        owner.ActualThemeChanged += OnActualThemeChanged;
         _ = GetVisual();
-
-        if (ring.IsLoaded)
-        {
-            Refresh();
-        }
+        Update();
     }
 
     public void Refresh() =>
         owner.DispatcherQueue.TryEnqueue(Update);
-
-    private void OnLoaded(object sender, RoutedEventArgs args)
-    {
-        Stop();
-        ScheduleLoadedRefresh();
-    }
-
-    private void OnUnloaded(object sender, RoutedEventArgs args)
-    {
-        CancelLoadedRefresh();
-        Stop();
-    }
-
-    private void ScheduleLoadedRefresh()
-    {
-        CancelLoadedRefresh();
-        int preparationFrames = 0;
-        loadedRenderingHandler = (_, _) =>
-        {
-            preparationFrames++;
-
-            if (preparationFrames < 2)
-            {
-                return;
-            }
-
-            CancelLoadedRefresh();
-            Update();
-        };
-        CompositionTarget.Rendering += loadedRenderingHandler;
-    }
-
-    private void CancelLoadedRefresh()
-    {
-        if (loadedRenderingHandler is null)
-        {
-            return;
-        }
-
-        CompositionTarget.Rendering -= loadedRenderingHandler;
-        loadedRenderingHandler = null;
-    }
 
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
@@ -94,14 +49,11 @@ public sealed class CompositionActivityPulse
         Refresh();
     }
 
+    private void OnActualThemeChanged(FrameworkElement sender, object args) =>
+        owner.DispatcherQueue.TryEnqueue(UpdateBrush);
+
     private void Update()
     {
-        if (!ring.IsLoaded)
-        {
-            Stop();
-            return;
-        }
-
         if (isActive())
         {
             Start();
@@ -119,7 +71,7 @@ public sealed class CompositionActivityPulse
             return;
         }
 
-        Visual pulseVisual = GetVisual();
+        ShapeVisual pulseVisual = GetVisual();
         Compositor compositor = pulseVisual.Compositor;
         CubicBezierEasingFunction easing = compositor.CreateCubicBezierEasingFunction(new(.16f, 1), new(.3f, 1));
         Vector3KeyFrameAnimation scale = compositor.CreateVector3KeyFrameAnimation();
@@ -140,21 +92,46 @@ public sealed class CompositionActivityPulse
         isRunning = true;
     }
 
-    private Visual GetVisual()
+    private ShapeVisual GetVisual()
     {
         if (visual is not null)
         {
             return visual;
         }
 
-        visual = ElementCompositionPreview.GetElementVisual(ring);
+        Compositor compositor = ElementCompositionPreview.GetElementVisual(ring).Compositor;
         float width = (float)(ring.ActualWidth > 0 ? ring.ActualWidth : ring.Width);
         float height = (float)(ring.ActualHeight > 0 ? ring.ActualHeight : ring.Height);
+        CompositionEllipseGeometry geometry = compositor.CreateEllipseGeometry();
+        geometry.Center = new(width / 2, height / 2);
+        geometry.Radius = new(MathF.Max(0, width / 2 - .75f), MathF.Max(0, height / 2 - .75f));
+        pulseBrush = compositor.CreateColorBrush(GetColor());
+        CompositionSpriteShape sprite = compositor.CreateSpriteShape(geometry);
+        sprite.StrokeBrush = pulseBrush;
+        sprite.StrokeThickness = 1.5f;
+        visual = compositor.CreateShapeVisual();
+        visual.Size = new(width, height);
+        visual.Shapes.Add(sprite);
         visual.CenterPoint = new(width / 2, height / 2, 0);
         visual.Scale = Vector3.One;
         visual.Opacity = 0;
+        ring.StrokeThickness = 0;
+        ElementCompositionPreview.SetElementChildVisual(ring, visual);
         return visual;
     }
+
+    private void UpdateBrush()
+    {
+        if (pulseBrush is not null)
+        {
+            pulseBrush.Color = GetColor();
+        }
+    }
+
+    private Color GetColor() =>
+        ring.Stroke is SolidColorBrush brush
+            ? brush.Color
+            : Color.FromArgb(255, 255, 255, 255);
 
     private void Stop()
     {

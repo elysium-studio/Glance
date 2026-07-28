@@ -54,7 +54,7 @@
                     Width="36"
                     Height="36"
                     IsHitTestVisible="False"
-                    Opacity="0"
+                    Opacity="1"
                     Stroke="{ThemeResource GlanceStopwatchIconBrush}"
                     StrokeThickness="1.5" />
                 <Button

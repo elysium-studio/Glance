@@ -81,7 +81,7 @@
                     Width="36"
                     Height="36"
                     IsHitTestVisible="False"
-                    Opacity="0"
+                    Opacity="1"
                     Stroke="{ThemeResource GlanceFocusSessionIconBrush}"
                     StrokeThickness="1.5" />
                 <Button
