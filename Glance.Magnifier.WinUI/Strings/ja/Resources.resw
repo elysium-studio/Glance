@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>拡大鏡</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>アイランドから Windows 拡大鏡を操作します。</value></data>
+  <data name="ActiveDetail" xml:space="preserve"><value>Windows 拡大鏡が有効です</value></data>
+  <data name="InactiveDetail" xml:space="preserve"><value>画面は標準サイズで表示されています</value></data>
+  <data name="UnavailableDetail" xml:space="preserve"><value>Windows 拡大鏡を利用できません</value></data>
+  <data name="StartLabel" xml:space="preserve"><value>拡大鏡を開始</value></data>
+  <data name="ZoomInLabel" xml:space="preserve"><value>拡大</value></data>
+  <data name="ZoomOutLabel" xml:space="preserve"><value>縮小</value></data>
+  <data name="CloseLabel" xml:space="preserve"><value>拡大鏡を閉じる</value></data>
+</root>

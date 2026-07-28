@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>放大镜</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>直接从灵动岛控制 Windows 放大镜。</value></data>
+  <data name="ActiveDetail" xml:space="preserve"><value>Windows 放大镜已启用</value></data>
+  <data name="InactiveDetail" xml:space="preserve"><value>屏幕以正常大小显示</value></data>
+  <data name="UnavailableDetail" xml:space="preserve"><value>Windows 放大镜不可用</value></data>
+  <data name="StartLabel" xml:space="preserve"><value>启动放大镜</value></data>
+  <data name="ZoomInLabel" xml:space="preserve"><value>放大</value></data>
+  <data name="ZoomOutLabel" xml:space="preserve"><value>缩小</value></data>
+  <data name="CloseLabel" xml:space="preserve"><value>关闭放大镜</value></data>
+</root>

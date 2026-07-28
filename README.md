@@ -24,6 +24,7 @@ The island remains at the top or bottom of the desktop in a compact state, expan
 - **Removable Devices** — view connected removable storage, inspect capacity, open it in Explorer, and request safe ejection. Multiple devices are presented as pages within the module.
 - **Bluetooth Devices** — see connected Bluetooth accessories and their available battery levels. Newly connected or newly low-battery devices can automatically request attention.
 - **Keep Awake** — prevent automatic system sleep until you explicitly stop the module.
+- **Magnifier** — view the current Windows Magnifier zoom level and control magnification from the expanded island.
 - **Presence** — maintain an active session by sending an F15 input pulse only after four minutes of genuine inactivity.
 - **Theme Switcher** — switch Windows between light and dark themes manually, or follow local sunrise and sunset with an animated radial transition.
 

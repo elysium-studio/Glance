@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Vergrootglas</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Bedien Windows Vergrootglas vanuit het eiland.</value></data>
+  <data name="ActiveDetail" xml:space="preserve"><value>Windows Vergrootglas is actief</value></data>
+  <data name="InactiveDetail" xml:space="preserve"><value>Het scherm wordt op normale grootte weergegeven</value></data>
+  <data name="UnavailableDetail" xml:space="preserve"><value>Windows Vergrootglas is niet beschikbaar</value></data>
+  <data name="StartLabel" xml:space="preserve"><value>Vergrootglas starten</value></data>
+  <data name="ZoomInLabel" xml:space="preserve"><value>Inzoomen</value></data>
+  <data name="ZoomOutLabel" xml:space="preserve"><value>Uitzoomen</value></data>
+  <data name="CloseLabel" xml:space="preserve"><value>Vergrootglas sluiten</value></data>
+</root>

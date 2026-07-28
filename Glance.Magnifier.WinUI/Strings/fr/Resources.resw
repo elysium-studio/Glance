@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Loupe</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Contrôlez la Loupe Windows sans quitter l’îlot.</value></data>
+  <data name="ActiveDetail" xml:space="preserve"><value>La Loupe Windows est active</value></data>
+  <data name="InactiveDetail" xml:space="preserve"><value>L’écran est affiché à sa taille normale</value></data>
+  <data name="UnavailableDetail" xml:space="preserve"><value>La Loupe Windows n’est pas disponible</value></data>
+  <data name="StartLabel" xml:space="preserve"><value>Démarrer la Loupe</value></data>
+  <data name="ZoomInLabel" xml:space="preserve"><value>Zoom avant</value></data>
+  <data name="ZoomOutLabel" xml:space="preserve"><value>Zoom arrière</value></data>
+  <data name="CloseLabel" xml:space="preserve"><value>Fermer la Loupe</value></data>
+</root>
