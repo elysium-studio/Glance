@@ -7,6 +7,7 @@ namespace Glance.Stopwatch.WinUI;
 public sealed partial class StopwatchExpandedView :
     UserControl
 {
+    private readonly CompositionActivityPulse activityPulse;
     private readonly ModuleResourceTextLocalizer<StopwatchModule> localizer;
 
     public StopwatchExpandedView(StopwatchViewModel viewModel,
@@ -15,6 +16,7 @@ public sealed partial class StopwatchExpandedView :
         ViewModel = viewModel;
         this.localizer = localizer;
         InitializeComponent();
+        activityPulse = new(this, PulseRing, viewModel, nameof(StopwatchViewModel.IsRunning), () => viewModel.IsRunning);
     }
 
     public StopwatchViewModel ViewModel { get; }

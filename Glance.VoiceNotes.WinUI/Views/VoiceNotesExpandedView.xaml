@@ -136,22 +136,35 @@
                     ViewModel="{x:Bind ViewModel}" />
             </Grid>
         </Grid>
-        <Button
-            x:Uid="RecordButton"
+        <Grid
             Grid.Column="2"
+            Width="36"
+            Height="36"
             VerticalAlignment="Center"
-            Click="{x:Bind ViewModel.ToggleRecording}"
-            Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}">
-            <Button.Style>
-                <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
-                    <Setter Property="Width" Value="36" />
-                    <Setter Property="Height" Value="36" />
-                    <Setter Property="Padding" Value="0" />
-                    <Setter Property="CornerRadius" Value="18" />
-                    <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                    <Setter Property="FontSize" Value="16" />
-                </Style>
-            </Button.Style>
-        </Button>
+            HorizontalAlignment="Center">
+            <Ellipse
+                x:Name="PulseRing"
+                Width="36"
+                Height="36"
+                IsHitTestVisible="False"
+                Opacity="0"
+                Stroke="{ThemeResource GlanceVoiceNotesIconBrush}"
+                StrokeThickness="1.5" />
+            <Button
+                x:Uid="RecordButton"
+                Click="{x:Bind ViewModel.ToggleRecording}"
+                Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+                        <Setter Property="Width" Value="36" />
+                        <Setter Property="Height" Value="36" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="CornerRadius" Value="18" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="16" />
+                    </Style>
+                </Button.Style>
+            </Button>
+        </Grid>
     </Grid>
 </UserControl>

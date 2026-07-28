@@ -7,6 +7,7 @@ namespace Glance.Timer.WinUI;
 public sealed partial class TimerExpandedView :
     UserControl
 {
+    private readonly CompositionActivityPulse activityPulse;
     private readonly ModuleResourceTextLocalizer<TimerModule> localizer;
 
     public TimerExpandedView(TimerViewModel viewModel,
@@ -15,6 +16,7 @@ public sealed partial class TimerExpandedView :
         ViewModel = viewModel;
         this.localizer = localizer;
         InitializeComponent();
+        activityPulse = new(this, PulseRing, viewModel, nameof(TimerViewModel.IsRunning), () => viewModel.IsRunning);
     }
 
     public TimerViewModel ViewModel { get; }

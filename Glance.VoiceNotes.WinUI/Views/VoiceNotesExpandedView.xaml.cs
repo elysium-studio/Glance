@@ -7,6 +7,7 @@ namespace Glance.VoiceNotes.WinUI;
 public sealed partial class VoiceNotesExpandedView :
     UserControl
 {
+    private readonly CompositionActivityPulse activityPulse;
     private readonly ModuleResourceTextLocalizer<VoiceNotesModule> localizer;
 
     public VoiceNotesExpandedView(VoiceNotesViewModel viewModel,
@@ -15,6 +16,7 @@ public sealed partial class VoiceNotesExpandedView :
         ViewModel = viewModel;
         this.localizer = localizer;
         InitializeComponent();
+        activityPulse = new(this, PulseRing, viewModel, nameof(VoiceNotesViewModel.IsRecording), () => viewModel.IsRecording);
     }
 
     public VoiceNotesViewModel ViewModel { get; }
