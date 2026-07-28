@@ -11,12 +11,11 @@ public sealed class CompositionActivityPulse
 {
     private readonly FrameworkElement owner;
     private readonly FrameworkElement ring;
-    private readonly INotifyPropertyChanged source;
     private readonly string propertyName;
     private readonly Func<bool> isActive;
     private Visual? visual;
+    private bool isLoaded;
     private bool isRunning;
-    private bool isSubscribed;
 
     public CompositionActivityPulse(FrameworkElement owner,
         FrameworkElement ring,
@@ -26,15 +25,14 @@ public sealed class CompositionActivityPulse
     {
         this.owner = owner;
         this.ring = ring;
-        this.source = source;
         this.propertyName = propertyName;
         this.isActive = isActive;
         owner.Loaded += OnLoaded;
         owner.Unloaded += OnUnloaded;
         source.PropertyChanged += OnPropertyChanged;
-        isSubscribed = true;
+        isLoaded = owner.XamlRoot is not null;
 
-        if (owner.IsLoaded)
+        if (isLoaded)
         {
             Update();
         }
@@ -42,23 +40,13 @@ public sealed class CompositionActivityPulse
 
     private void OnLoaded(object sender, RoutedEventArgs args)
     {
-        if (!isSubscribed)
-        {
-            source.PropertyChanged += OnPropertyChanged;
-            isSubscribed = true;
-        }
-
+        isLoaded = true;
         Update();
     }
 
     private void OnUnloaded(object sender, RoutedEventArgs args)
     {
-        if (isSubscribed)
-        {
-            source.PropertyChanged -= OnPropertyChanged;
-            isSubscribed = false;
-        }
-
+        isLoaded = false;
         Stop();
     }
 
@@ -69,27 +57,16 @@ public sealed class CompositionActivityPulse
             return;
         }
 
-        if (owner.DispatcherQueue.HasThreadAccess)
-        {
-            if (owner.IsLoaded)
-            {
-                Update();
-            }
-
-            return;
-        }
-
-        owner.DispatcherQueue.TryEnqueue(() =>
-        {
-            if (owner.IsLoaded)
-            {
-                Update();
-            }
-        });
+        owner.DispatcherQueue.TryEnqueue(Update);
     }
 
     private void Update()
     {
+        if (!isLoaded)
+        {
+            return;
+        }
+
         if (isActive())
         {
             Start();
