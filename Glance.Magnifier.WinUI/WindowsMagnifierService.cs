@@ -5,6 +5,8 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.Accessibility;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
 
 namespace Glance.Magnifier.WinUI;
@@ -13,6 +15,7 @@ internal sealed partial class WindowsMagnifierService :
     IMagnifierService
 {
     private readonly bool isInitialized = MagnificationNativeMethods.MagInitialize();
+    private readonly IUIAutomation? automation = CreateAutomation();
     private CancellationTokenSource? toolbarSuppression;
     private bool isDisposed;
 
@@ -81,6 +84,12 @@ internal sealed partial class WindowsMagnifierService :
         toolbarSuppression?.Cancel();
         toolbarSuppression?.Dispose();
 
+        if (automation is not null &&
+            Marshal.IsComObject(automation))
+        {
+            Marshal.FinalReleaseComObject(automation);
+        }
+
         if (isInitialized)
         {
             MagnificationNativeMethods.MagUninitialize();
@@ -138,11 +147,63 @@ internal sealed partial class WindowsMagnifierService :
             if (processIds.Contains(processId) &&
                 IsNativeMagnifierSurface(window))
             {
-                MagnificationNativeMethods.ShowWindow(window, 0);
+                if (!MinimizeNativeMagnifierSurface(window))
+                {
+                    MagnificationNativeMethods.ShowWindow(window, 0);
+                }
             }
 
             return true;
         }, nint.Zero);
+    }
+
+    private bool MinimizeNativeMagnifierSurface(nint window)
+    {
+        if (automation is null)
+        {
+            return false;
+        }
+
+        IUIAutomationElement? element = null;
+        object? pattern = null;
+
+        try
+        {
+            element = automation.ElementFromHandle(new HWND(window));
+            pattern = element.GetCurrentPattern(UIA_PATTERN_ID.UIA_WindowPatternId);
+            ((IUIAutomationWindowPattern)pattern).SetWindowVisualState(WindowVisualState.WindowVisualState_Minimized);
+            return true;
+        }
+        catch (COMException)
+        {
+            return false;
+        }
+        finally
+        {
+            if (pattern is not null &&
+                Marshal.IsComObject(pattern))
+            {
+                Marshal.FinalReleaseComObject(pattern);
+            }
+
+            if (element is not null &&
+                Marshal.IsComObject(element))
+            {
+                Marshal.FinalReleaseComObject(element);
+            }
+        }
+    }
+
+    private static IUIAutomation? CreateAutomation()
+    {
+        try
+        {
+            return (IUIAutomation)new CUIAutomation();
+        }
+        catch (COMException)
+        {
+            return null;
+        }
     }
 
     private static bool IsMagnifierRunning()

@@ -1,1 +1,7 @@
 SendInput
+IUIAutomation
+IUIAutomationElement
+IUIAutomationWindowPattern
+CUIAutomation
+UIA_PATTERN_ID
+WindowVisualState
