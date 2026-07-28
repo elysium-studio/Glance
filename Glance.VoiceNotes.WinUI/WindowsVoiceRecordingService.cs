@@ -13,15 +13,18 @@ internal sealed class WindowsVoiceRecordingService :
     private const int LevelCount = 12;
 
     private readonly object gate = new();
+    private readonly VoiceNoteRepository repository;
     private readonly string recordingsPath;
     private WaveInEvent? capture;
     private string? currentFilePath;
     private long recordingStartedTimestamp;
     private WaveFileWriter? writer;
 
-    public WindowsVoiceRecordingService(string recordingsPath)
+    public WindowsVoiceRecordingService(string recordingsPath,
+        VoiceNoteRepository repository)
     {
         this.recordingsPath = recordingsPath;
+        this.repository = repository;
         Directory.CreateDirectory(recordingsPath);
     }
 
@@ -40,7 +43,32 @@ internal sealed class WindowsVoiceRecordingService :
 
         try
         {
-            return [.. Directory.EnumerateFiles(recordingsPath, "*.wav").Select(CreateVoiceNote).OfType<VoiceNote>().OrderByDescending(recording => recording.CreatedAt).Take(maximumCount)];
+            Dictionary<string, VoiceNote> recordings = repository.Load().ToDictionary(recording => recording.FilePath, StringComparer.OrdinalIgnoreCase);
+            HashSet<string> filePaths = [with(StringComparer.OrdinalIgnoreCase), .. Directory.EnumerateFiles(recordingsPath, "*.wav")];
+
+            foreach (string missingPath in recordings.Keys.Where(path => !filePaths.Contains(path)).ToArray())
+            {
+                recordings.Remove(missingPath);
+                repository.Remove(missingPath);
+            }
+
+            foreach (string filePath in filePaths)
+            {
+                if (recordings.ContainsKey(filePath))
+                {
+                    continue;
+                }
+
+                VoiceNote? recording = CreateVoiceNote(filePath);
+
+                if (recording is not null)
+                {
+                    recordings[filePath] = recording;
+                    repository.Save(recording);
+                }
+            }
+
+            return [.. recordings.Values.OrderByDescending(recording => recording.CreatedAt).Take(maximumCount)];
         }
         catch
         {
@@ -150,6 +178,7 @@ internal sealed class WindowsVoiceRecordingService :
                 File.Delete(recording.FilePath);
             }
 
+            repository.Remove(recording.FilePath);
             return true;
         }
         catch
@@ -241,6 +270,7 @@ internal sealed class WindowsVoiceRecordingService :
             new FileInfo(completedFilePath).Length > 44)
         {
             recording = new VoiceNote(completedFilePath, File.GetCreationTime(completedFilePath), duration);
+            repository.Save(recording);
         }
         else if (completedFilePath is not null)
         {

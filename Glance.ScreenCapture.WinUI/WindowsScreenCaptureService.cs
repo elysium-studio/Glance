@@ -31,14 +31,17 @@ public sealed partial class WindowsScreenCaptureService :
     private const int ShowWindowShowNoActivate = 4;
     private readonly DispatcherQueue dispatcherQueue;
     private readonly ITextLocalizer localizer;
+    private readonly ScreenCaptureRepository repository;
     private readonly string captureFolderPath;
     private readonly FileSystemWatcher captureWatcher;
     private readonly System.Threading.Timer captureWatcherDebounceTimer;
     private CaptureAnimationFrame? pendingAnimationFrame;
 
-    public WindowsScreenCaptureService(ModuleResourceTextLocalizer<ScreenCaptureModule> localizer)
+    public WindowsScreenCaptureService(ModuleResourceTextLocalizer<ScreenCaptureModule> localizer,
+        ScreenCaptureRepository repository)
     {
         this.localizer = localizer;
+        this.repository = repository;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         captureFolderPath = ResolveCaptureFolderPath();
         Directory.CreateDirectory(captureFolderPath);
@@ -49,6 +52,7 @@ public sealed partial class WindowsScreenCaptureService :
             EnableRaisingEvents = true
         };
         captureWatcher.Deleted += HandleCaptureFolderChanged;
+        captureWatcher.Created += HandleCaptureFolderChanged;
         captureWatcher.Renamed += HandleCaptureFolderChanged;
     }
 
@@ -124,6 +128,7 @@ public sealed partial class WindowsScreenCaptureService :
         pendingAnimationFrame = null;
         captureWatcher.EnableRaisingEvents = false;
         captureWatcher.Deleted -= HandleCaptureFolderChanged;
+        captureWatcher.Created -= HandleCaptureFolderChanged;
         captureWatcher.Renamed -= HandleCaptureFolderChanged;
         captureWatcher.Dispose();
         captureWatcherDebounceTimer.Dispose();
@@ -148,11 +153,29 @@ public sealed partial class WindowsScreenCaptureService :
                 return [];
             }
 
-            return [.. Directory.EnumerateFiles(captureFolderPath, "Glance *.png")
-                .Select(path => new FileInfo(path))
-                .OrderByDescending(file => file.CreationTimeUtc)
-                .Take(maximumCount)
-                .Select(CreateRecentItem)];
+            Dictionary<string, ScreenCaptureItem> captures = repository.Load().ToDictionary(capture => capture.FilePath, StringComparer.OrdinalIgnoreCase);
+            FileInfo[] files = [.. Directory.EnumerateFiles(captureFolderPath, "Glance *.png").Select(path => new FileInfo(path))];
+            HashSet<string> filePaths = [with(StringComparer.OrdinalIgnoreCase), .. files.Select(file => file.FullName)];
+
+            foreach (string missingPath in captures.Keys.Where(path => !filePaths.Contains(path)).ToArray())
+            {
+                captures.Remove(missingPath);
+                repository.Remove(missingPath);
+            }
+
+            foreach (FileInfo file in files)
+            {
+                if (captures.ContainsKey(file.FullName))
+                {
+                    continue;
+                }
+
+                ScreenCaptureItem capture = CreateRecentItem(file);
+                captures[file.FullName] = capture;
+                repository.Save(capture);
+            }
+
+            return [.. captures.Values.OrderByDescending(capture => capture.CapturedAt).Take(maximumCount)];
         }
         catch
         {
@@ -214,6 +237,7 @@ public sealed partial class WindowsScreenCaptureService :
         try
         {
             File.Delete(capture.FilePath);
+            repository.Remove(capture.FilePath);
             return true;
         }
         catch
@@ -269,7 +293,9 @@ public sealed partial class WindowsScreenCaptureService :
         encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Ignore, (uint)bitmap.Width, (uint)bitmap.Height, 96, 96, bitmap.Pixels);
         await encoder.FlushAsync();
 
-        return new ScreenCaptureItem(file.Path, file.Name, DateTimeOffset.Now, bitmap.Width, bitmap.Height, mode);
+        ScreenCaptureItem capture = new(file.Path, file.Name, DateTimeOffset.Now, bitmap.Width, bitmap.Height, mode);
+        repository.Save(capture);
+        return capture;
     }
 
     private static ScreenCaptureItem CreateRecentItem(FileInfo file)

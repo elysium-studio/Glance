@@ -8,6 +8,7 @@ public sealed partial class ColorPickerViewModel :
     IDisposable
 {
     private readonly IColorPickerService colorPickerService;
+    private readonly ColorHistoryRepository? repository;
     private readonly ITextCopyService textCopyService;
     private int recentColorLimit;
 
@@ -22,15 +23,25 @@ public sealed partial class ColorPickerViewModel :
 
     public ColorPickerViewModel(IColorPickerService colorPickerService,
         ITextCopyService textCopyService,
-        ColorPickerSettings? settings = null)
+        ColorPickerSettings? settings = null,
+        ColorHistoryRepository? repository = null)
     {
         this.colorPickerService = colorPickerService;
         this.textCopyService = textCopyService;
+        this.repository = repository;
         recentColorLimit = GetRecentColorLimit(settings ?? new ColorPickerSettings());
 
         colorPickerService.PreviewChanged += HandlePreviewChanged;
         colorPickerService.ColorPicked += HandleColorPicked;
         colorPickerService.PickingCancelled += HandlePickingCancelled;
+
+        if (repository is not null)
+        {
+            foreach (ColorValue color in repository.Load(recentColorLimit))
+            {
+                RecentColors.Add(color);
+            }
+        }
     }
 
     public string Hex => CurrentColor.Hex;
@@ -85,6 +96,7 @@ public sealed partial class ColorPickerViewModel :
         }
 
         RecentColors.Insert(0, args.Color);
+        TryPersist(() => repository?.Save(args.Color, recentColorLimit));
 
         while (RecentColors.Count > recentColorLimit)
         {
@@ -103,8 +115,21 @@ public sealed partial class ColorPickerViewModel :
         {
             RecentColors.RemoveAt(RecentColors.Count - 1);
         }
+
+        TryPersist(() => repository?.Trim(recentColorLimit));
     }
 
     private static int GetRecentColorLimit(ColorPickerSettings settings) =>
         (int)Math.Clamp(settings.RecentColorLimit, 1, 12);
+
+    private static void TryPersist(Action action)
+    {
+        try
+        {
+            action();
+        }
+        catch
+        {
+        }
+    }
 }

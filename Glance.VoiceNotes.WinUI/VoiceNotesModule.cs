@@ -16,8 +16,9 @@ public sealed class VoiceNotesModule :
     {
         services.AddModuleOptions<VoiceNotesSettings>("VoiceNotes", "voice-notes.settings.dat", VoiceNotesJsonContext.Default);
         services.AddSingleton<ModuleResourceTextLocalizer<VoiceNotesModule>>();
+        services.AddSingleton(new VoiceNoteRepository(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "VoiceNotes", "voice-notes.db")));
         services.AddSingleton<IVoiceRecordingService>(provider =>
-            new WindowsVoiceRecordingService(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "VoiceNotes")));
+            new WindowsVoiceRecordingService(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "VoiceNotes"), provider.GetRequiredService<VoiceNoteRepository>()));
         services.AddSingleton(provider => new VoiceNotesViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<VoiceNotesModule>>(), provider.GetRequiredService<GlanceModuleOptions<VoiceNotesSettings>>().Current));
         services.AddSingleton<IGlanceComponent, VoiceNotesComponent>();
         services.AddViewFor<RecentRecordingLimitSettingView, IGlanceModuleSettingViewModel, RecentRecordingLimitSettingViewModel>(ServiceLifetime.Transient, provider => new RecentRecordingLimitSettingView(), provider => new RecentRecordingLimitSettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<VoiceNotesSettings>>().Current, provider.GetRequiredService<IWritableOptions<VoiceNotesSettings>>()));

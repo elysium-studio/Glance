@@ -63,6 +63,33 @@ public sealed class ColorPickerViewModelTests
     }
 
     [Fact]
+    public void RecentColors_AreRestoredFromPersistentHistory()
+    {
+        string directory = Path.Combine(Path.GetTempPath(), $"Glance.ColorPicker.Tests.{Guid.NewGuid():N}");
+        string databasePath = Path.Combine(directory, "colors.db");
+
+        try
+        {
+            FakeColorPickerService picker = new();
+            ColorHistoryRepository repository = new(databasePath);
+            ColorPickerViewModel viewModel = new(picker, new FakeTextCopyService(), repository: repository);
+
+            picker.Complete(new ColorValue(12, 34, 56));
+
+            ColorPickerViewModel restored = new(new FakeColorPickerService(), new FakeTextCopyService(), repository: new ColorHistoryRepository(databasePath));
+
+            Assert.Equal([new ColorValue(12, 34, 56)], restored.RecentColors);
+        }
+        finally
+        {
+            if (Directory.Exists(directory))
+            {
+                Directory.Delete(directory, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
     public void CopyFunctions_CopyExpectedFormats()
     {
         FakeTextCopyService clipboard = new();

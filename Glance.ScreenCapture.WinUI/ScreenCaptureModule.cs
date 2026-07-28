@@ -4,6 +4,8 @@ using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.IO;
 
 namespace Glance.ScreenCapture.WinUI;
 
@@ -14,6 +16,7 @@ public sealed class ScreenCaptureModule :
     {
         services.AddModuleOptions<ScreenCaptureSettings>("ScreenCapture", "screen-capture.settings.dat", ScreenCaptureJsonContext.Default);
         services.AddSingleton<ModuleResourceTextLocalizer<ScreenCaptureModule>>();
+        services.AddSingleton(new ScreenCaptureRepository(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "ScreenCapture", "screen-captures.db")));
         services.AddSingleton<IScreenCaptureService, WindowsScreenCaptureService>();
         services.AddSingleton(provider => new ScreenCaptureViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<ScreenCaptureModule>>(), provider.GetRequiredService<GlanceModuleOptions<ScreenCaptureSettings>>().Current));
         services.AddSingleton<IGlanceComponent, ScreenCaptureComponent>();

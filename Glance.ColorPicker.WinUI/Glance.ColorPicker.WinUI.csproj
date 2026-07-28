@@ -5,6 +5,7 @@
     <RootNamespace>Glance.ColorPicker.WinUI</RootNamespace>
     <UseWinUI>true</UseWinUI>
     <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <EnablePreviewFeatures>true</EnablePreviewFeatures>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
