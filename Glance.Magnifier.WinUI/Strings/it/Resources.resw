@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Lente di ingrandimento</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Controlla la Lente di ingrandimento di Windows dall’isola.</value></data>
+  <data name="ActiveDetail" xml:space="preserve"><value>La Lente di ingrandimento è attiva</value></data>
+  <data name="InactiveDetail" xml:space="preserve"><value>Lo schermo è visualizzato a dimensione normale</value></data>
+  <data name="UnavailableDetail" xml:space="preserve"><value>La Lente di ingrandimento non è disponibile</value></data>
+  <data name="ZoomInLabel" xml:space="preserve"><value>Ingrandisci</value></data>
+  <data name="ZoomOutLabel" xml:space="preserve"><value>Riduci</value></data>
+  <data name="CloseLabel" xml:space="preserve"><value>Chiudi Lente di ingrandimento</value></data>
+</root>

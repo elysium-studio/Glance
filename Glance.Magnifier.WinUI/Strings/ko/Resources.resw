@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>돋보기</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>아일랜드에서 Windows 돋보기를 제어합니다.</value></data>
+  <data name="ActiveDetail" xml:space="preserve"><value>Windows 돋보기가 활성화됨</value></data>
+  <data name="InactiveDetail" xml:space="preserve"><value>화면이 기본 크기로 표시됨</value></data>
+  <data name="UnavailableDetail" xml:space="preserve"><value>Windows 돋보기를 사용할 수 없음</value></data>
+  <data name="ZoomInLabel" xml:space="preserve"><value>확대</value></data>
+  <data name="ZoomOutLabel" xml:space="preserve"><value>축소</value></data>
+  <data name="CloseLabel" xml:space="preserve"><value>돋보기 닫기</value></data>
+</root>
