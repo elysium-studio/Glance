@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,24 +50,7 @@ internal sealed partial class WindowsMagnifierService :
             return true;
         }
 
-        try
-        {
-            string executable = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "Magnify.exe");
-            using Process? process = Process.Start(new ProcessStartInfo(executable)
-            {
-                UseShellExecute = false,
-                WindowStyle = ProcessWindowStyle.Hidden
-            });
-            return process is not null;
-        }
-        catch (InvalidOperationException)
-        {
-            return false;
-        }
-        catch (System.ComponentModel.Win32Exception)
-        {
-            return false;
-        }
+        return SendShortcut(VIRTUAL_KEY.VK_ADD);
     }
 
     public bool ZoomIn()
