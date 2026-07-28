@@ -23,6 +23,8 @@ public sealed partial class MagnifierExpandedView :
 
     public string Title => localizer.GetText("ModuleDisplayName");
 
+    public string StartLabel => localizer.GetText("StartLabel");
+
     public string ZoomInLabel => localizer.GetText("ZoomInLabel");
 
     public string ZoomOutLabel => localizer.GetText("ZoomOutLabel");
@@ -31,4 +33,10 @@ public sealed partial class MagnifierExpandedView :
 
     private string ToUpper(string value) =>
         value.ToUpperInvariant();
+
+    private Visibility WhenRunning(bool value) =>
+        value ? Visibility.Visible : Visibility.Collapsed;
+
+    private Visibility WhenStopped(bool value) =>
+        value ? Visibility.Collapsed : Visibility.Visible;
 }

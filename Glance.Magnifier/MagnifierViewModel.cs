@@ -16,22 +16,33 @@ public sealed partial class MagnifierViewModel(IMagnifierService magnifierServic
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanClose))]
+    [NotifyPropertyChangedFor(nameof(CanStart))]
+    [NotifyPropertyChangedFor(nameof(CanZoomIn))]
+    [NotifyPropertyChangedFor(nameof(CanZoomOut))]
+    [NotifyPropertyChangedFor(nameof(DetailText))]
+    private bool isRunning;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanClose))]
+    [NotifyPropertyChangedFor(nameof(CanStart))]
     [NotifyPropertyChangedFor(nameof(CanZoomIn))]
     [NotifyPropertyChangedFor(nameof(CanZoomOut))]
     [NotifyPropertyChangedFor(nameof(DetailText))]
     private bool isAvailable = true;
 
-    public bool CanClose => IsAvailable && ZoomFactor > 1;
+    public bool CanClose => IsAvailable && IsRunning;
 
-    public bool CanZoomIn => IsAvailable && ZoomFactor < 16;
+    public bool CanStart => IsAvailable && !IsRunning;
 
-    public bool CanZoomOut => IsAvailable && ZoomFactor > 1;
+    public bool CanZoomIn => IsAvailable && IsRunning && ZoomFactor < 16;
+
+    public bool CanZoomOut => IsAvailable && IsRunning && ZoomFactor > 1;
 
     public string ZoomText => $"{ZoomFactor * 100:0}%";
 
     public string DetailText => !IsAvailable
         ? localizer.GetText("UnavailableDetail")
-        : ZoomFactor > 1
+        : IsRunning
             ? localizer.GetText("ActiveDetail")
             : localizer.GetText("InactiveDetail");
 
@@ -39,7 +50,16 @@ public sealed partial class MagnifierViewModel(IMagnifierService magnifierServic
     {
         MagnifierState state = magnifierService.GetState();
         IsAvailable = state.IsAvailable;
+        IsRunning = state.IsRunning;
         ZoomFactor = Math.Clamp(state.ZoomFactor, 1, 16);
+    }
+
+    public void Start()
+    {
+        if (CanStart)
+        {
+            magnifierService.Start();
+        }
     }
 
     public void ZoomIn()

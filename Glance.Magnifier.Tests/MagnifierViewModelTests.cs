@@ -7,7 +7,7 @@ public sealed class MagnifierViewModelTests
     [Fact]
     public void Refresh_UsesCurrentMagnification()
     {
-        FakeMagnifierService service = new(new(true, 2.25));
+        FakeMagnifierService service = new(new(true, true, 2.25));
         MagnifierViewModel viewModel = new(service, new FakeLocalizer());
 
         viewModel.Refresh();
@@ -22,7 +22,7 @@ public sealed class MagnifierViewModelTests
     [Fact]
     public void Refresh_DisablesControlsWhenUnavailable()
     {
-        MagnifierViewModel viewModel = new(new FakeMagnifierService(new(false, 1)), new FakeLocalizer());
+        MagnifierViewModel viewModel = new(new FakeMagnifierService(new(false, false, 1)), new FakeLocalizer());
 
         viewModel.Refresh();
 
@@ -36,8 +36,9 @@ public sealed class MagnifierViewModelTests
     [Fact]
     public void ZoomIn_RequestsWindowsMagnifierShortcut()
     {
-        FakeMagnifierService service = new(new(true, 1));
+        FakeMagnifierService service = new(new(true, true, 1));
         MagnifierViewModel viewModel = new(service, new FakeLocalizer());
+        viewModel.Refresh();
 
         viewModel.ZoomIn();
 
@@ -47,7 +48,7 @@ public sealed class MagnifierViewModelTests
     [Fact]
     public void ZoomOut_DoesNotRequestShortcutAtNormalSize()
     {
-        FakeMagnifierService service = new(new(true, 1));
+        FakeMagnifierService service = new(new(true, true, 1));
         MagnifierViewModel viewModel = new(service, new FakeLocalizer());
 
         viewModel.ZoomOut();
@@ -58,13 +59,26 @@ public sealed class MagnifierViewModelTests
     [Fact]
     public void Close_RequestsWindowsMagnifierShortcutWhenActive()
     {
-        FakeMagnifierService service = new(new(true, 2));
+        FakeMagnifierService service = new(new(true, true, 2));
         MagnifierViewModel viewModel = new(service, new FakeLocalizer());
         viewModel.Refresh();
 
         viewModel.Close();
 
         Assert.Equal(1, service.CloseCount);
+    }
+
+    [Fact]
+    public void Start_RequestsMagnifierLaunchWhenStopped()
+    {
+        FakeMagnifierService service = new(new(true, false, 1));
+        MagnifierViewModel viewModel = new(service, new FakeLocalizer());
+        viewModel.Refresh();
+
+        viewModel.Start();
+
+        Assert.Equal(1, service.StartCount);
+        Assert.False(viewModel.CanZoomIn);
     }
 
     private sealed class FakeMagnifierService(MagnifierState state) :
@@ -76,8 +90,16 @@ public sealed class MagnifierViewModelTests
 
         public int CloseCount { get; private set; }
 
+        public int StartCount { get; private set; }
+
         public MagnifierState GetState() =>
             state;
+
+        public bool Start()
+        {
+            StartCount++;
+            return true;
+        }
 
         public bool ZoomIn()
         {

@@ -9,6 +9,7 @@
   <data name="ActiveDetail" xml:space="preserve"><value>A Lupa do Windows está ativa</value></data>
   <data name="InactiveDetail" xml:space="preserve"><value>A tela está no tamanho normal</value></data>
   <data name="UnavailableDetail" xml:space="preserve"><value>A Lupa do Windows não está disponível</value></data>
+  <data name="StartLabel" xml:space="preserve"><value>Iniciar Lupa</value></data>
   <data name="ZoomInLabel" xml:space="preserve"><value>Ampliar</value></data>
   <data name="ZoomOutLabel" xml:space="preserve"><value>Reduzir</value></data>
   <data name="CloseLabel" xml:space="preserve"><value>Fechar Lupa</value></data>

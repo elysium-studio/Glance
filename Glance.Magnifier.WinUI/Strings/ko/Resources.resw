@@ -9,6 +9,7 @@
   <data name="ActiveDetail" xml:space="preserve"><value>Windows 돋보기가 활성화됨</value></data>
   <data name="InactiveDetail" xml:space="preserve"><value>화면이 기본 크기로 표시됨</value></data>
   <data name="UnavailableDetail" xml:space="preserve"><value>Windows 돋보기를 사용할 수 없음</value></data>
+  <data name="StartLabel" xml:space="preserve"><value>돋보기 시작</value></data>
   <data name="ZoomInLabel" xml:space="preserve"><value>확대</value></data>
   <data name="ZoomOutLabel" xml:space="preserve"><value>축소</value></data>
   <data name="CloseLabel" xml:space="preserve"><value>돋보기 닫기</value></data>

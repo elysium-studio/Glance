@@ -5,6 +5,8 @@ public interface IMagnifierService :
 {
     MagnifierState GetState();
 
+    bool Start();
+
     bool ZoomIn();
 
     bool ZoomOut();

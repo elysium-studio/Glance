@@ -64,10 +64,29 @@
             Orientation="Horizontal"
             Spacing="4">
             <Button
+                AutomationProperties.Name="{x:Bind StartLabel}"
+                Click="{x:Bind ViewModel.Start}"
+                IsEnabled="{x:Bind ViewModel.CanStart, Mode=OneWay}"
+                ToolTipService.ToolTip="{x:Bind StartLabel}"
+                Visibility="{x:Bind WhenStopped(ViewModel.IsRunning), Mode=OneWay}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+                        <Setter Property="Width" Value="36" />
+                        <Setter Property="Height" Value="36" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="CornerRadius" Value="18" />
+                        <Setter Property="Content" Value="&#xE768;" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="14" />
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Button
                 AutomationProperties.Name="{x:Bind ZoomOutLabel}"
                 Click="{x:Bind ViewModel.ZoomOut}"
                 IsEnabled="{x:Bind ViewModel.CanZoomOut, Mode=OneWay}"
-                ToolTipService.ToolTip="{x:Bind ZoomOutLabel}">
+                ToolTipService.ToolTip="{x:Bind ZoomOutLabel}"
+                Visibility="{x:Bind WhenRunning(ViewModel.IsRunning), Mode=OneWay}">
                 <Button.Style>
                     <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
                         <Setter Property="Width" Value="36" />
@@ -83,7 +102,8 @@
                 AutomationProperties.Name="{x:Bind ZoomInLabel}"
                 Click="{x:Bind ViewModel.ZoomIn}"
                 IsEnabled="{x:Bind ViewModel.CanZoomIn, Mode=OneWay}"
-                ToolTipService.ToolTip="{x:Bind ZoomInLabel}">
+                ToolTipService.ToolTip="{x:Bind ZoomInLabel}"
+                Visibility="{x:Bind WhenRunning(ViewModel.IsRunning), Mode=OneWay}">
                 <Button.Style>
                     <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
                         <Setter Property="Width" Value="36" />
@@ -100,7 +120,8 @@
                 AutomationProperties.Name="{x:Bind CloseLabel}"
                 Click="{x:Bind ViewModel.Close}"
                 IsEnabled="{x:Bind ViewModel.CanClose, Mode=OneWay}"
-                ToolTipService.ToolTip="{x:Bind CloseLabel}">
+                ToolTipService.ToolTip="{x:Bind CloseLabel}"
+                Visibility="{x:Bind WhenRunning(ViewModel.IsRunning), Mode=OneWay}">
                 <Button.Style>
                     <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
                         <Setter Property="Width" Value="36" />

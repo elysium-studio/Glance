@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,13 +21,54 @@ internal sealed partial class WindowsMagnifierService :
     {
         HideNativeToolbar();
 
-        if (!isInitialized ||
-            !MagnificationNativeMethods.MagGetFullscreenTransform(out float zoomFactor, out _, out _))
+        if (!isInitialized)
         {
-            return new(false, 1);
+            return new(false, false, 1);
         }
 
-        return new(true, Math.Max(1, zoomFactor));
+        bool isRunning = IsMagnifierRunning();
+
+        if (!isRunning ||
+            !MagnificationNativeMethods.MagGetFullscreenTransform(out float zoomFactor, out _, out _))
+        {
+            return new(true, isRunning, 1);
+        }
+
+        return new(true, true, Math.Max(1, zoomFactor));
+    }
+
+    public bool Start()
+    {
+        if (!isInitialized)
+        {
+            return false;
+        }
+
+        BeginSuppressingNativeToolbar();
+
+        if (IsMagnifierRunning())
+        {
+            return true;
+        }
+
+        try
+        {
+            string executable = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "Magnify.exe");
+            using Process? process = Process.Start(new ProcessStartInfo(executable)
+            {
+                UseShellExecute = false,
+                WindowStyle = ProcessWindowStyle.Hidden
+            });
+            return process is not null;
+        }
+        catch (InvalidOperationException)
+        {
+            return false;
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            return false;
+        }
     }
 
     public bool ZoomIn()
@@ -75,7 +117,7 @@ internal sealed partial class WindowsMagnifierService :
     {
         try
         {
-            for (int attempt = 0; attempt < 80; attempt++)
+            for (int attempt = 0; attempt < 400; attempt++)
             {
                 HideNativeToolbar();
                 await Task.Delay(25, cancellationToken);
@@ -119,6 +161,18 @@ internal sealed partial class WindowsMagnifierService :
 
             return true;
         }, nint.Zero);
+    }
+
+    private static bool IsMagnifierRunning()
+    {
+        Process[] processes = Process.GetProcessesByName("Magnify");
+
+        foreach (Process process in processes)
+        {
+            process.Dispose();
+        }
+
+        return processes.Length > 0;
     }
 
     private static bool IsNativeMagnifierSurface(nint window)
