@@ -27,12 +27,27 @@ public sealed class CompositionActivityPulse
         this.propertyName = propertyName;
         this.isActive = isActive;
         source.PropertyChanged += OnPropertyChanged;
+        ring.Loaded += OnLoaded;
+        ring.Unloaded += OnUnloaded;
         _ = GetVisual();
-        Update();
+
+        if (ring.IsLoaded)
+        {
+            Refresh();
+        }
     }
 
     public void Refresh() =>
         owner.DispatcherQueue.TryEnqueue(Update);
+
+    private void OnLoaded(object sender, RoutedEventArgs args)
+    {
+        Stop();
+        Update();
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs args) =>
+        Stop();
 
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
@@ -46,6 +61,12 @@ public sealed class CompositionActivityPulse
 
     private void Update()
     {
+        if (!ring.IsLoaded)
+        {
+            Stop();
+            return;
+        }
+
         if (isActive())
         {
             Start();
