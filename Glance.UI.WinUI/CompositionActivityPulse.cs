@@ -1,6 +1,7 @@
 using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Hosting;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.ComponentModel;
 using System.Numerics;
@@ -13,6 +14,7 @@ public sealed class CompositionActivityPulse
     private readonly FrameworkElement ring;
     private readonly string propertyName;
     private readonly Func<bool> isActive;
+    private EventHandler<object>? loadedRenderingHandler;
     private Visual? visual;
     private bool isRunning;
 
@@ -43,11 +45,44 @@ public sealed class CompositionActivityPulse
     private void OnLoaded(object sender, RoutedEventArgs args)
     {
         Stop();
-        Update();
+        ScheduleLoadedRefresh();
     }
 
-    private void OnUnloaded(object sender, RoutedEventArgs args) =>
+    private void OnUnloaded(object sender, RoutedEventArgs args)
+    {
+        CancelLoadedRefresh();
         Stop();
+    }
+
+    private void ScheduleLoadedRefresh()
+    {
+        CancelLoadedRefresh();
+        int preparationFrames = 0;
+        loadedRenderingHandler = (_, _) =>
+        {
+            preparationFrames++;
+
+            if (preparationFrames < 2)
+            {
+                return;
+            }
+
+            CancelLoadedRefresh();
+            Update();
+        };
+        CompositionTarget.Rendering += loadedRenderingHandler;
+    }
+
+    private void CancelLoadedRefresh()
+    {
+        if (loadedRenderingHandler is null)
+        {
+            return;
+        }
+
+        CompositionTarget.Rendering -= loadedRenderingHandler;
+        loadedRenderingHandler = null;
+    }
 
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
