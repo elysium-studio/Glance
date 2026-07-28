@@ -74,7 +74,7 @@
                 StrokeThickness="1.5" />
             <Button
                 AutomationProperties.Name="{x:Bind ViewModel.ActionLabel, Mode=OneWay}"
-                Click="{x:Bind ViewModel.ToggleAsync}"
+                Click="{x:Bind ToggleAsync}"
                 Content="{x:Bind ViewModel.ActionGlyph, Mode=OneWay}"
                 IsEnabled="{x:Bind IsActionEnabled(ViewModel.IsBusy), Mode=OneWay}"
                 ToolTipService.ToolTip="{x:Bind ViewModel.ActionLabel, Mode=OneWay}">

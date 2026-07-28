@@ -14,7 +14,6 @@ public sealed class CompositionActivityPulse
     private readonly string propertyName;
     private readonly Func<bool> isActive;
     private Visual? visual;
-    private bool isLoaded;
     private bool isRunning;
 
     public CompositionActivityPulse(FrameworkElement owner,
@@ -27,28 +26,13 @@ public sealed class CompositionActivityPulse
         this.ring = ring;
         this.propertyName = propertyName;
         this.isActive = isActive;
-        owner.Loaded += OnLoaded;
-        owner.Unloaded += OnUnloaded;
         source.PropertyChanged += OnPropertyChanged;
-        isLoaded = owner.XamlRoot is not null;
-
-        if (isLoaded)
-        {
-            Update();
-        }
-    }
-
-    private void OnLoaded(object sender, RoutedEventArgs args)
-    {
-        isLoaded = true;
+        _ = GetVisual();
         Update();
     }
 
-    private void OnUnloaded(object sender, RoutedEventArgs args)
-    {
-        isLoaded = false;
-        Stop();
-    }
+    public void Refresh() =>
+        owner.DispatcherQueue.TryEnqueue(Update);
 
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
@@ -57,16 +41,11 @@ public sealed class CompositionActivityPulse
             return;
         }
 
-        owner.DispatcherQueue.TryEnqueue(Update);
+        Refresh();
     }
 
     private void Update()
     {
-        if (!isLoaded)
-        {
-            return;
-        }
-
         if (isActive())
         {
             Start();
@@ -84,12 +63,8 @@ public sealed class CompositionActivityPulse
             return;
         }
 
-        visual ??= ElementCompositionPreview.GetElementVisual(ring);
-        visual.CenterPoint = new((float)ring.ActualWidth / 2, (float)ring.ActualHeight / 2, 0);
-        visual.Scale = Vector3.One;
-        visual.Opacity = 0;
-
-        Compositor compositor = visual.Compositor;
+        Visual pulseVisual = GetVisual();
+        Compositor compositor = pulseVisual.Compositor;
         CubicBezierEasingFunction easing = compositor.CreateCubicBezierEasingFunction(new(.16f, 1), new(.3f, 1));
         Vector3KeyFrameAnimation scale = compositor.CreateVector3KeyFrameAnimation();
         scale.Duration = TimeSpan.FromMilliseconds(1400);
@@ -104,9 +79,25 @@ public sealed class CompositionActivityPulse
         opacity.InsertKeyFrame(.12f, .58f);
         opacity.InsertKeyFrame(1, 0, easing);
 
-        visual.StartAnimation(nameof(Visual.Scale), scale);
-        visual.StartAnimation(nameof(Visual.Opacity), opacity);
+        pulseVisual.StartAnimation(nameof(Visual.Scale), scale);
+        pulseVisual.StartAnimation(nameof(Visual.Opacity), opacity);
         isRunning = true;
+    }
+
+    private Visual GetVisual()
+    {
+        if (visual is not null)
+        {
+            return visual;
+        }
+
+        visual = ElementCompositionPreview.GetElementVisual(ring);
+        float width = (float)(ring.ActualWidth > 0 ? ring.ActualWidth : ring.Width);
+        float height = (float)(ring.ActualHeight > 0 ? ring.ActualHeight : ring.Height);
+        visual.CenterPoint = new(width / 2, height / 2, 0);
+        visual.Scale = Vector3.One;
+        visual.Opacity = 0;
+        return visual;
     }
 
     private void Stop()

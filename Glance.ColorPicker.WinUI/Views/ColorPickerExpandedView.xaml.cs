@@ -36,6 +36,12 @@ public sealed partial class ColorPickerExpandedView :
 
     public string Title => localizer.GetText("ModuleDisplayName");
 
+    private void Pick()
+    {
+        ViewModel.Pick();
+        activityPulse.Refresh();
+    }
+
     private string ToUpper(string value) => value.ToUpperInvariant();
 
     private SolidColorBrush ToBrush(ColorValue color) =>

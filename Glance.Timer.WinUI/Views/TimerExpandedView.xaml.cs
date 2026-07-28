@@ -25,5 +25,11 @@ public sealed partial class TimerExpandedView :
 
     public string Title => localizer.GetText("ModuleDisplayName");
 
+    private void Toggle()
+    {
+        ViewModel.Toggle();
+        activityPulse.Refresh();
+    }
+
     private string ToUpper(string value) => value.ToUpperInvariant();
 }

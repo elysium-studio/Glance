@@ -28,6 +28,12 @@ public sealed partial class PresenceExpandedView :
     private bool IsActionEnabled(bool isBusy) =>
         !isBusy;
 
+    private async void ToggleAsync()
+    {
+        await ViewModel.ToggleAsync();
+        activityPulse.Refresh();
+    }
+
     private string ToUpper(string value) =>
         value.ToUpperInvariant();
 }

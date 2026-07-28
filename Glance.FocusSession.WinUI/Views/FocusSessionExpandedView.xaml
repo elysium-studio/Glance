@@ -86,7 +86,7 @@
                     StrokeThickness="1.5" />
                 <Button
                     x:Uid="ToggleButton"
-                    Click="{x:Bind ViewModel.Toggle}"
+                    Click="{x:Bind Toggle}"
                     Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}">
                     <Button.Style>
                         <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">

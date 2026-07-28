@@ -105,7 +105,7 @@
                 StrokeThickness="1.5" />
             <Button
                 x:Uid="PickButton"
-                Click="{x:Bind ViewModel.Pick}">
+                Click="{x:Bind Pick}">
                 <Button.Style>
                     <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
                         <Setter Property="Width" Value="36" />

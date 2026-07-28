@@ -152,7 +152,7 @@
                 StrokeThickness="1.5" />
             <Button
                 x:Uid="RecordButton"
-                Click="{x:Bind ViewModel.ToggleRecording}"
+                Click="{x:Bind ToggleRecording}"
                 Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}">
                 <Button.Style>
                     <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
