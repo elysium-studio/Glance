@@ -17,9 +17,11 @@ public sealed partial class MediaAlbumAmbience :
 
     private MediaViewModel? viewModel;
     private Visual? ambientVisual;
-    private Visual? incomingArtworkVisual;
+    private Image currentArtworkImage;
+    private Image nextArtworkImage;
+    private Visual? currentArtworkVisual;
     private Visual? motionVisual;
-    private Visual? outgoingArtworkVisual;
+    private Visual? nextArtworkVisual;
     private CompositionRoundedRectangleGeometry? clipGeometry;
     private CompositionGeometricClip? roundedClip;
     private CompositionEasingFunction? easing;
@@ -27,9 +29,15 @@ public sealed partial class MediaAlbumAmbience :
     private ImplicitAnimationCollection? ambientImplicitAnimations;
     private ImageSource? currentArtwork;
     private int artworkTransitionGeneration;
+    private bool isArtworkTransitioning;
     private bool isPanning;
 
-    public MediaAlbumAmbience() => InitializeComponent();
+    public MediaAlbumAmbience()
+    {
+        InitializeComponent();
+        currentArtworkImage = PrimaryArtwork;
+        nextArtworkImage = SecondaryArtwork;
+    }
 
     public MediaViewModel? ViewModel
     {
@@ -54,11 +62,11 @@ public sealed partial class MediaAlbumAmbience :
         Compositor compositor = ElementCompositionPreview.GetElementVisual(this).Compositor;
         ambientVisual = ElementCompositionPreview.GetElementVisual(this);
         motionVisual = ElementCompositionPreview.GetElementVisual(MotionLayer);
-        incomingArtworkVisual = ElementCompositionPreview.GetElementVisual(IncomingArtwork);
-        outgoingArtworkVisual = ElementCompositionPreview.GetElementVisual(OutgoingArtwork);
+        currentArtworkVisual = ElementCompositionPreview.GetElementVisual(currentArtworkImage);
+        nextArtworkVisual = ElementCompositionPreview.GetElementVisual(nextArtworkImage);
         ambientVisual.Opacity = 0;
-        incomingArtworkVisual.Opacity = IncomingArtwork.Source is null ? 0 : 1;
-        outgoingArtworkVisual.Opacity = 0;
+        currentArtworkVisual.Opacity = currentArtworkImage.Source is null ? 0 : 1;
+        nextArtworkVisual.Opacity = 0;
         clipGeometry = compositor.CreateRoundedRectangleGeometry();
         clipGeometry.CornerRadius = new Vector2(28);
         clipGeometry.Size = new Vector2((float)ActualWidth, (float)ActualHeight);
@@ -96,11 +104,12 @@ public sealed partial class MediaAlbumAmbience :
         motionImplicitAnimations = null;
         ambientImplicitAnimations = null;
         ambientVisual = null;
-        incomingArtworkVisual = null;
+        currentArtworkVisual = null;
         motionVisual = null;
-        outgoingArtworkVisual = null;
+        nextArtworkVisual = null;
         easing = null;
         artworkTransitionGeneration++;
+        isArtworkTransitioning = false;
     }
 
     private void HandleSizeChanged(object sender, SizeChangedEventArgs args)
@@ -183,53 +192,78 @@ public sealed partial class MediaAlbumAmbience :
 
         currentArtwork = artwork;
 
-        if (incomingArtworkVisual is null || outgoingArtworkVisual is null || easing is null)
+        if (currentArtworkVisual is null || nextArtworkVisual is null || easing is null)
         {
-            IncomingArtwork.Source = artwork;
+            currentArtworkImage.Source = artwork;
             return;
         }
 
-        Visual incomingVisual = incomingArtworkVisual;
-        Visual outgoingVisual = outgoingArtworkVisual;
+        if (isArtworkTransitioning)
+        {
+            FinishArtworkTransition();
+        }
+
+        Visual currentVisual = currentArtworkVisual;
+        Visual nextVisual = nextArtworkVisual;
         int transitionGeneration = ++artworkTransitionGeneration;
-        incomingVisual.StopAnimation(nameof(Visual.Opacity));
-        outgoingVisual.StopAnimation(nameof(Visual.Opacity));
+        currentVisual.StopAnimation(nameof(Visual.Opacity));
+        nextVisual.StopAnimation(nameof(Visual.Opacity));
 
         if (artwork is null)
         {
-            StartArtworkOpacityAnimation(incomingVisual, 0, ArtworkTransitionDurationMs);
-            StartArtworkOpacityAnimation(outgoingVisual, 0, ArtworkTransitionDurationMs);
+            CompositionScopedBatch fadeOutBatch = currentVisual.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+            StartArtworkOpacityAnimation(currentVisual, 0, ArtworkTransitionDurationMs);
+            fadeOutBatch.Completed += (_, _) =>
+            {
+                fadeOutBatch.Dispose();
+
+                if (transitionGeneration == artworkTransitionGeneration)
+                {
+                    currentArtworkImage.Source = null;
+                    currentVisual.Opacity = 0;
+                }
+            };
+            fadeOutBatch.End();
             return;
         }
 
-        if (IncomingArtwork.Source is null)
+        if (currentArtworkImage.Source is null)
         {
-            IncomingArtwork.Source = artwork;
-            incomingVisual.Opacity = 1;
-            outgoingVisual.Opacity = 0;
+            currentArtworkImage.Source = artwork;
+            currentVisual.Opacity = 1;
+            nextVisual.Opacity = 0;
             return;
         }
 
-        OutgoingArtwork.Source = IncomingArtwork.Source;
-        outgoingVisual.Opacity = 1;
-        IncomingArtwork.Source = artwork;
-        incomingVisual.Opacity = 0;
+        nextArtworkImage.Source = artwork;
+        nextVisual.Opacity = 0;
+        currentVisual.Opacity = 1;
+        isArtworkTransitioning = true;
 
-        CompositionScopedBatch transition = incomingVisual.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
-        StartArtworkOpacityAnimation(outgoingVisual, 0, ArtworkTransitionDurationMs);
-        StartArtworkOpacityAnimation(incomingVisual, 1, ArtworkTransitionDurationMs);
+        CompositionScopedBatch transition = nextVisual.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+        StartArtworkOpacityAnimation(nextVisual, 1, ArtworkTransitionDurationMs);
         transition.Completed += (_, _) =>
         {
             transition.Dispose();
 
             if (transitionGeneration == artworkTransitionGeneration)
             {
-                OutgoingArtwork.Source = null;
-                outgoingVisual.Opacity = 0;
-                incomingVisual.Opacity = 1;
+                FinishArtworkTransition();
             }
         };
         transition.End();
+    }
+
+    private void FinishArtworkTransition()
+    {
+        currentArtworkVisual!.StopAnimation(nameof(Visual.Opacity));
+        nextArtworkVisual!.StopAnimation(nameof(Visual.Opacity));
+        currentArtworkImage.Source = null;
+        currentArtworkVisual.Opacity = 0;
+        nextArtworkVisual.Opacity = nextArtworkImage.Source is null ? 0 : 1;
+        (currentArtworkImage, nextArtworkImage) = (nextArtworkImage, currentArtworkImage);
+        (currentArtworkVisual, nextArtworkVisual) = (nextArtworkVisual, currentArtworkVisual);
+        isArtworkTransitioning = false;
     }
 
     private void UpdateState()

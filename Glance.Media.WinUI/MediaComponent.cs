@@ -4,6 +4,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.ComponentModel;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Windows.Media;
 using Windows.Media.Control;
@@ -26,6 +27,7 @@ public sealed partial class MediaComponent :
     private readonly AudioLevelMonitor audioLevelMonitor;
     private GlobalSystemMediaTransportControlsSessionManager? sessionManager;
     private GlobalSystemMediaTransportControlsSession? session;
+    private string? currentArtworkHash;
     private string? currentTitle;
 
     public MediaComponent(MediaViewModel viewModel,
@@ -199,15 +201,18 @@ public sealed partial class MediaComponent :
         GlobalSystemMediaTransportControlsSessionPlaybackInfo? playbackInfo =
             mediaSession.GetPlaybackInfo();
         IRandomAccessStreamWithContentType? artworkStream = null;
+        string? artworkHash = null;
 
         if (properties.Thumbnail is not null)
         {
             try
             {
                 artworkStream = await properties.Thumbnail.OpenReadAsync();
+                artworkHash = await CalculateArtworkHash(artworkStream);
             }
             catch
             {
+                artworkHash = Guid.NewGuid().ToString();
             }
         }
 
@@ -221,33 +226,38 @@ public sealed partial class MediaComponent :
                 viewModel.HasSession = true;
                 ApplyPlaybackInfo(playbackInfo);
 
-                if (artworkStream is not null)
+                if (!string.Equals(currentArtworkHash, artworkHash, StringComparison.Ordinal))
                 {
-                    BitmapImage artwork = new();
-                    await artwork.SetSourceAsync(artworkStream);
-                    viewModel.Artwork = artwork;
+                    if (artworkStream is not null)
+                    {
+                        BitmapImage artwork = new();
+                        await artwork.SetSourceAsync(artworkStream);
+                        viewModel.Artwork = artwork;
 
-                    try
-                    {
-                        artworkStream.Seek(0);
-                        BitmapImage ambientArtwork = new()
+                        try
                         {
-                            DecodePixelHeight = 3,
-                            DecodePixelType = DecodePixelType.Physical,
-                            DecodePixelWidth = 3
-                        };
-                        await ambientArtwork.SetSourceAsync(artworkStream);
-                        viewModel.AmbientArtwork = ambientArtwork;
+                            artworkStream.Seek(0);
+                            BitmapImage ambientArtwork = new()
+                            {
+                                DecodePixelHeight = 3,
+                                DecodePixelType = DecodePixelType.Physical,
+                                DecodePixelWidth = 3
+                            };
+                            await ambientArtwork.SetSourceAsync(artworkStream);
+                            viewModel.AmbientArtwork = ambientArtwork;
+                        }
+                        catch
+                        {
+                            viewModel.AmbientArtwork = null;
+                        }
                     }
-                    catch
+                    else
                     {
+                        viewModel.Artwork = null;
                         viewModel.AmbientArtwork = null;
                     }
-                }
-                else
-                {
-                    viewModel.Artwork = null;
-                    viewModel.AmbientArtwork = null;
+
+                    currentArtworkHash = artworkHash;
                 }
 
                 if (currentTitle is not null &&
@@ -276,6 +286,7 @@ public sealed partial class MediaComponent :
 
     private void ShowEmptyState()
     {
+        currentArtworkHash = null;
         currentTitle = null;
         viewModel.Title = localizer.GetText("NothingPlaying");
         viewModel.Artist = localizer.GetText("OpenMediaApp");
@@ -288,6 +299,21 @@ public sealed partial class MediaComponent :
         viewModel.CanSkipNext = false;
         viewModel.CanTogglePlayback = false;
         UpdateAudioCaptureState();
+    }
+
+    private static async Task<string> CalculateArtworkHash(IRandomAccessStream stream)
+    {
+        if (stream.Size > int.MaxValue)
+        {
+            throw new InvalidOperationException();
+        }
+
+        using DataReader reader = new(stream.GetInputStreamAt(0));
+        await reader.LoadAsync((uint)stream.Size);
+        byte[] bytes = new byte[(int)stream.Size];
+        reader.ReadBytes(bytes);
+        stream.Seek(0);
+        return Convert.ToHexString(SHA256.HashData(bytes));
     }
 
     private void ApplyPlaybackInfo(GlobalSystemMediaTransportControlsSessionPlaybackInfo? playbackInfo)

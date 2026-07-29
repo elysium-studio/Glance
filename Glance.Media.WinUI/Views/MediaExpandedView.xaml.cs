@@ -19,6 +19,9 @@ public sealed partial class MediaExpandedView :
 
     private ImageSource? ToImageSource(object? value) => value as ImageSource;
 
+    private Visibility WhenArtworkUnavailable(object? artwork) =>
+        artwork is null ? Visibility.Visible : Visibility.Collapsed;
+
     private string ToUpper(string value) => value.ToUpperInvariant();
 
     private Visibility WhenAvailable(bool isAvailable) =>

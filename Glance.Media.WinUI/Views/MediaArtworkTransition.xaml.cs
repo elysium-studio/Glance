@@ -11,9 +11,9 @@ namespace Glance.Media.WinUI;
 public sealed partial class MediaArtworkTransition :
     UserControl
 {
-    private const int IncomingDelayMs = 130;
-    private const int IncomingDurationMs = 230;
-    private const int OutgoingDurationMs = 180;
+    private const int IncomingDelayMs = 210;
+    private const int IncomingDurationMs = 320;
+    private const int OutgoingDurationMs = 260;
 
     public static readonly DependencyProperty SourceProperty =
         DependencyProperty.Register(nameof(Source), typeof(ImageSource),
@@ -49,14 +49,16 @@ public sealed partial class MediaArtworkTransition :
         Visual perspectiveVisual = ElementCompositionPreview.GetElementVisual(PerspectiveLayer);
         Compositor compositor = perspectiveVisual.Compositor;
         Matrix4x4 perspective = Matrix4x4.Identity;
-        perspective.M34 = -1f / 500f;
+        perspective.M34 = -1f / 350f;
         perspectiveVisual.TransformMatrix = perspective;
-        easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.2f, 0.82f), new Vector2(0.2f, 1));
+        easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.18f, 0.86f), new Vector2(0.2f, 1));
         UpdateVisuals();
         currentVisual!.RotationAngleInDegrees = 0;
         currentVisual.Opacity = currentImage.Source is null ? 0 : 1;
+        currentVisual.Scale = Vector3.One;
         nextVisual!.RotationAngleInDegrees = 0;
         nextVisual.Opacity = 0;
+        nextVisual.Scale = Vector3.One;
         displayedSource = Source;
     }
 
@@ -122,8 +124,9 @@ public sealed partial class MediaArtworkTransition :
         if (source is null)
         {
             CompositionScopedBatch fadeOutBatch = currentVisual.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
-            StartScalarAnimation(currentVisual, nameof(Visual.RotationAngleInDegrees), -88, OutgoingDurationMs);
-            StartScalarAnimation(currentVisual, nameof(Visual.Opacity), 0, OutgoingDurationMs);
+            StartScalarAnimation(currentVisual, nameof(Visual.RotationAngleInDegrees), -90, OutgoingDurationMs);
+            StartOutgoingOpacityAnimation(currentVisual);
+            StartScaleAnimation(currentVisual, new Vector3(0.94f, 0.94f, 1), OutgoingDurationMs);
             fadeOutBatch.Completed += (_, _) =>
             {
                 fadeOutBatch.Dispose();
@@ -133,6 +136,7 @@ public sealed partial class MediaArtworkTransition :
                     currentImage.Source = null;
                     currentVisual.RotationAngleInDegrees = 0;
                     currentVisual.Opacity = 0;
+                    currentVisual.Scale = Vector3.One;
                 }
             };
             fadeOutBatch.End();
@@ -144,19 +148,23 @@ public sealed partial class MediaArtworkTransition :
             currentImage.Source = source;
             currentVisual.RotationAngleInDegrees = 0;
             currentVisual.Opacity = 1;
+            currentVisual.Scale = Vector3.One;
             return;
         }
 
         nextImage.Source = source;
-        nextVisual.RotationAngleInDegrees = 88;
+        nextVisual.RotationAngleInDegrees = 90;
         nextVisual.Opacity = 0;
+        nextVisual.Scale = new Vector3(0.94f, 0.94f, 1);
         isTransitioning = true;
 
         CompositionScopedBatch flipBatch = currentVisual.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
-        StartScalarAnimation(currentVisual, nameof(Visual.RotationAngleInDegrees), -88, OutgoingDurationMs);
-        StartScalarAnimation(currentVisual, nameof(Visual.Opacity), 0, OutgoingDurationMs);
+        StartScalarAnimation(currentVisual, nameof(Visual.RotationAngleInDegrees), -90, OutgoingDurationMs);
+        StartOutgoingOpacityAnimation(currentVisual);
+        StartScaleAnimation(currentVisual, new Vector3(0.94f, 0.94f, 1), OutgoingDurationMs);
         StartScalarAnimation(nextVisual, nameof(Visual.RotationAngleInDegrees), 0, IncomingDurationMs, IncomingDelayMs);
-        StartScalarAnimation(nextVisual, nameof(Visual.Opacity), 1, IncomingDurationMs, IncomingDelayMs);
+        StartIncomingOpacityAnimation(nextVisual);
+        StartScaleAnimation(nextVisual, Vector3.One, IncomingDurationMs, IncomingDelayMs);
         flipBatch.Completed += (_, _) =>
         {
             flipBatch.Dispose();
@@ -175,8 +183,10 @@ public sealed partial class MediaArtworkTransition :
         currentImage.Source = null;
         currentVisual!.RotationAngleInDegrees = 0;
         currentVisual.Opacity = 0;
+        currentVisual.Scale = Vector3.One;
         nextVisual!.RotationAngleInDegrees = 0;
         nextVisual.Opacity = nextImage.Source is null ? 0 : 1;
+        nextVisual.Scale = Vector3.One;
         (currentImage, nextImage) = (nextImage, currentImage);
         (currentVisual, nextVisual) = (nextVisual, currentVisual);
         isTransitioning = false;
@@ -186,8 +196,39 @@ public sealed partial class MediaArtworkTransition :
     {
         currentVisual?.StopAnimation(nameof(Visual.RotationAngleInDegrees));
         currentVisual?.StopAnimation(nameof(Visual.Opacity));
+        currentVisual?.StopAnimation(nameof(Visual.Scale));
         nextVisual?.StopAnimation(nameof(Visual.RotationAngleInDegrees));
         nextVisual?.StopAnimation(nameof(Visual.Opacity));
+        nextVisual?.StopAnimation(nameof(Visual.Scale));
+    }
+
+    private void StartOutgoingOpacityAnimation(Visual visual)
+    {
+        ScalarKeyFrameAnimation animation = visual.Compositor.CreateScalarKeyFrameAnimation();
+        animation.InsertKeyFrame(0.82f, 1);
+        animation.InsertKeyFrame(1, 0);
+        animation.Duration = TimeSpan.FromMilliseconds(OutgoingDurationMs);
+        visual.StartAnimation(nameof(Visual.Opacity), animation);
+    }
+
+    private void StartIncomingOpacityAnimation(Visual visual)
+    {
+        ScalarKeyFrameAnimation animation = visual.Compositor.CreateScalarKeyFrameAnimation();
+        animation.InsertKeyFrame(0, 0);
+        animation.InsertKeyFrame(0.08f, 1);
+        animation.InsertKeyFrame(1, 1);
+        animation.Duration = TimeSpan.FromMilliseconds(IncomingDurationMs);
+        animation.DelayTime = TimeSpan.FromMilliseconds(IncomingDelayMs);
+        visual.StartAnimation(nameof(Visual.Opacity), animation);
+    }
+
+    private void StartScaleAnimation(Visual visual, Vector3 scale, int durationMs, int delayMs = 0)
+    {
+        Vector3KeyFrameAnimation animation = visual.Compositor.CreateVector3KeyFrameAnimation();
+        animation.InsertKeyFrame(1, scale, easing);
+        animation.Duration = TimeSpan.FromMilliseconds(durationMs);
+        animation.DelayTime = TimeSpan.FromMilliseconds(delayMs);
+        visual.StartAnimation(nameof(Visual.Scale), animation);
     }
 
     private void StartScalarAnimation(Visual visual, string property, float value, int durationMs, int delayMs = 0)

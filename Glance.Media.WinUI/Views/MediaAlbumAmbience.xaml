@@ -12,11 +12,11 @@
     <Grid>
         <Grid x:Name="MotionLayer">
             <Image
-                x:Name="OutgoingArtwork"
+                x:Name="PrimaryArtwork"
                 Opacity="0"
                 Stretch="UniformToFill" />
             <Image
-                x:Name="IncomingArtwork"
+                x:Name="SecondaryArtwork"
                 Opacity="0"
                 Stretch="UniformToFill" />
         </Grid>
