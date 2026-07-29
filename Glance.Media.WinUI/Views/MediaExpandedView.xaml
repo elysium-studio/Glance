@@ -41,7 +41,7 @@
                 Spacing="2">
                 <TextBlock
                     FontWeight="SemiBold"
-                    Foreground="{ThemeResource GlanceMediaIconBrush}"
+                    Foreground="{x:Bind ToAccentBrush(ViewModel.AccentColor), Mode=OneWay}"
                     MaxLines="1"
                     Style="{StaticResource CaptionTextBlockStyle}"
                     Text="{x:Bind ToUpper(ViewModel.Source), Mode=OneWay}"
@@ -68,6 +68,7 @@
                 <Local:MediaAudioVisualizer
                     Width="23"
                     Height="16"
+                    AccentColor="{x:Bind ViewModel.AccentColor, Mode=OneWay}"
                     HorizontalAlignment="Center"
                     Visibility="{x:Bind WhenAvailable(ViewModel.ShowAudioVisualization), Mode=OneWay}"
                     ViewModel="{x:Bind ViewModel}" />
@@ -96,6 +97,20 @@
                         Click="{x:Bind ViewModel.TogglePlayback}"
                         Content="{x:Bind ViewModel.PlayPauseGlyph, Mode=OneWay}"
                         IsEnabled="{x:Bind ViewModel.CanTogglePlayback, Mode=OneWay}">
+                        <Button.Resources>
+                            <SolidColorBrush x:Key="AccentButtonBackground" Color="{x:Bind ToAccentColor(ViewModel.AccentColor), Mode=OneWay}" />
+                            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="{x:Bind ToPointerOverColor(ViewModel.AccentColor), Mode=OneWay}" />
+                            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="{x:Bind ToPressedColor(ViewModel.AccentColor), Mode=OneWay}" />
+                            <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="{x:Bind ToDisabledColor(ViewModel.AccentColor), Mode=OneWay}" />
+                            <SolidColorBrush x:Key="AccentButtonForeground" Color="{x:Bind ToForegroundColor(ViewModel.AccentColor), Mode=OneWay}" />
+                            <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="{x:Bind ToPointerOverForegroundColor(ViewModel.AccentColor), Mode=OneWay}" />
+                            <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="{x:Bind ToPressedForegroundColor(ViewModel.AccentColor), Mode=OneWay}" />
+                            <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="{x:Bind ToDisabledForegroundColor(ViewModel.AccentColor), Mode=OneWay}" />
+                            <SolidColorBrush x:Key="AccentButtonBorderBrush" Color="{x:Bind ToBorderColor(ViewModel.AccentColor), Mode=OneWay}" />
+                            <SolidColorBrush x:Key="AccentButtonBorderBrushPointerOver" Color="{x:Bind ToPointerOverBorderColor(ViewModel.AccentColor), Mode=OneWay}" />
+                            <SolidColorBrush x:Key="AccentButtonBorderBrushPressed" Color="{x:Bind ToPressedBorderColor(ViewModel.AccentColor), Mode=OneWay}" />
+                            <SolidColorBrush x:Key="AccentButtonBorderBrushDisabled" Color="{x:Bind ToDisabledBorderColor(ViewModel.AccentColor), Mode=OneWay}" />
+                        </Button.Resources>
                         <Button.Style>
                             <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
                                 <Setter Property="Width" Value="36" />

@@ -2,6 +2,7 @@ using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Numerics;
 
@@ -10,10 +11,20 @@ namespace Glance.Media.WinUI;
 public sealed partial class MediaAudioVisualizer :
     UserControl
 {
+    public static readonly DependencyProperty AccentColorProperty =
+        DependencyProperty.Register(nameof(AccentColor), typeof(uint),
+            typeof(MediaAudioVisualizer), new PropertyMetadata(MediaViewModel.DefaultAccentColor, HandleAccentColorChanged));
+
     private FrameworkElement[]? bars;
     private MediaViewModel? viewModel;
 
     public MediaAudioVisualizer() => InitializeComponent();
+
+    public uint AccentColor
+    {
+        get => (uint)GetValue(AccentColorProperty);
+        set => SetValue(AccentColorProperty, value);
+    }
 
     public MediaViewModel? ViewModel
     {
@@ -34,6 +45,7 @@ public sealed partial class MediaAudioVisualizer :
     private void HandleLoaded(object sender, RoutedEventArgs args)
     {
         bars = [BarOne, BarTwo, BarThree, BarFour, BarFive];
+        ApplyAccentColor();
 
         foreach (FrameworkElement bar in bars)
         {
@@ -66,6 +78,19 @@ public sealed partial class MediaAudioVisualizer :
         {
             viewModel.AudioLevelsChanged -= HandleAudioLevelsChanged;
         }
+    }
+
+    private static void HandleAccentColorChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args) =>
+        ((MediaAudioVisualizer)sender).ApplyAccentColor();
+
+    private void ApplyAccentColor()
+    {
+        SolidColorBrush brush = MediaAccentPalette.GetBrush(AccentColor);
+        BarOne.Background = brush;
+        BarTwo.Background = brush;
+        BarThree.Background = brush;
+        BarFour.Background = brush;
+        BarFive.Background = brush;
     }
 
     private void HandleAudioLevelsChanged(object? sender, AudioLevelsChangedEventArgs args)

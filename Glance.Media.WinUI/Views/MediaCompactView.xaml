@@ -46,6 +46,7 @@
             Grid.Column="2"
             Width="23"
             Height="18"
+            AccentColor="{x:Bind ViewModel.AccentColor, Mode=OneWay}"
             Margin="4,0,4,0"
             VerticalAlignment="Center"
             Visibility="{x:Bind WhenAvailable(ViewModel.ShowAudioVisualization), Mode=OneWay}"

@@ -373,6 +373,17 @@ public sealed partial class MediaComponent :
                     {
                         if (artworkStream is not null)
                         {
+                            uint accentColor = MediaViewModel.DefaultAccentColor;
+
+                            try
+                            {
+                                accentColor = await MediaArtworkColorAnalyzer.GetDominantColorAsync(artworkStream);
+                            }
+                            catch
+                            {
+                            }
+
+                            artworkStream.Seek(0);
                             BitmapImage artwork = new();
                             await artwork.SetSourceAsync(artworkStream);
                             MediaAmbientArtwork? ambientArtwork = null;
@@ -397,6 +408,7 @@ public sealed partial class MediaComponent :
                                 }
 
                                 viewModel.Artwork = artwork;
+                                viewModel.AccentColor = accentColor;
 
                                 if (ambientArtwork is not null)
                                 {
@@ -418,6 +430,7 @@ public sealed partial class MediaComponent :
                         {
                             viewModel.Artwork = null;
                             viewModel.AmbientArtwork = null;
+                            viewModel.AccentColor = MediaViewModel.DefaultAccentColor;
                             currentArtworkHash = artworkHash;
                         }
                     }
@@ -466,6 +479,7 @@ public sealed partial class MediaComponent :
         viewModel.Source = localizer.GetText("ModuleTitle");
         viewModel.Artwork = null;
         viewModel.AmbientArtwork = null;
+        viewModel.AccentColor = MediaViewModel.DefaultAccentColor;
         viewModel.IsPlaying = false;
         viewModel.HasSession = false;
         viewModel.CanSkipPrevious = false;

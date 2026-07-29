@@ -17,6 +17,7 @@ public sealed class MediaViewModelTests
         Assert.False(viewModel.HasSession);
         Assert.False(viewModel.CanTogglePlayback);
         Assert.Null(viewModel.Artwork);
+        Assert.Equal(MediaViewModel.DefaultAccentColor, viewModel.AccentColor);
     }
 
     [Theory]
@@ -87,6 +88,18 @@ public sealed class MediaViewModelTests
         Assert.True(viewModel.CanSkipPrevious);
         Assert.True(viewModel.CanSkipNext);
         Assert.True(viewModel.CanTogglePlayback);
+    }
+
+    [Fact]
+    public void AccentColor_RaisesPropertyChanged()
+    {
+        MediaViewModel viewModel = new(new TestTextLocalizer());
+        string? changedProperty = null;
+        viewModel.PropertyChanged += (_, args) => changedProperty = args.PropertyName;
+
+        viewModel.AccentColor = 0xFF336699;
+
+        Assert.Equal(nameof(MediaViewModel.AccentColor), changedProperty);
     }
 
     [Fact]

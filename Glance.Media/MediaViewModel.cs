@@ -10,6 +10,8 @@ public sealed partial class MediaViewModel :
     IRecipient<OptionsChangedEventArgs<MediaSettings>>,
     IDisposable
 {
+    public const uint DefaultAccentColor = 0xFFFF8A65;
+
     private readonly IDispatcher? dispatcher;
     private readonly IMessenger? messenger;
 
@@ -27,6 +29,9 @@ public sealed partial class MediaViewModel :
 
     [ObservableProperty]
     private object? ambientArtwork;
+
+    [ObservableProperty]
+    private uint accentColor = DefaultAccentColor;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PlayPauseGlyph))]

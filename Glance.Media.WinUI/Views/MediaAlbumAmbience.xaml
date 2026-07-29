@@ -4,15 +4,18 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     IsHitTestVisible="False"
     Loaded="{x:Bind HandleLoaded}"
+    Opacity="0"
     SizeChanged="{x:Bind HandleSizeChanged}"
     Unloaded="{x:Bind HandleUnloaded}">
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Media.xaml" />
     </UserControl.Resources>
-    <Grid>
-        <Grid x:Name="MotionLayer">
-            <Grid x:Name="ArtworkHost" />
+    <Border Background="Transparent" CornerRadius="28">
+        <Grid>
+            <Grid x:Name="MotionLayer">
+                <Grid x:Name="ArtworkHost" />
+            </Grid>
+            <Rectangle Fill="{ThemeResource AcrylicInAppFillColorDefaultBrush}" />
         </Grid>
-        <Rectangle Fill="{ThemeResource AcrylicInAppFillColorDefaultBrush}" />
-    </Grid>
+    </Border>
 </UserControl>

@@ -13,10 +13,10 @@
         IsHitTestVisible="False"
         Orientation="Horizontal"
         Spacing="2">
-        <Border x:Name="BarOne" Width="3" Height="16" Background="{ThemeResource GlanceMediaIconBrush}" CornerRadius="2" />
-        <Border x:Name="BarTwo" Width="3" Height="16" Background="{ThemeResource GlanceMediaIconBrush}" CornerRadius="2" />
-        <Border x:Name="BarThree" Width="3" Height="16" Background="{ThemeResource GlanceMediaIconBrush}" CornerRadius="2" />
-        <Border x:Name="BarFour" Width="3" Height="16" Background="{ThemeResource GlanceMediaIconBrush}" CornerRadius="2" />
-        <Border x:Name="BarFive" Width="3" Height="16" Background="{ThemeResource GlanceMediaIconBrush}" CornerRadius="2" />
+        <Border x:Name="BarOne" Width="3" Height="16" CornerRadius="2" />
+        <Border x:Name="BarTwo" Width="3" Height="16" CornerRadius="2" />
+        <Border x:Name="BarThree" Width="3" Height="16" CornerRadius="2" />
+        <Border x:Name="BarFour" Width="3" Height="16" CornerRadius="2" />
+        <Border x:Name="BarFive" Width="3" Height="16" CornerRadius="2" />
     </StackPanel>
 </UserControl>
