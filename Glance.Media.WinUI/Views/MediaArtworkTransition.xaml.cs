@@ -169,6 +169,8 @@ public sealed partial class MediaArtworkTransition :
         Visual visibleVisual = currentVisual!;
 
         isPreparing = true;
+        Canvas.SetZIndex(currentImage, 0);
+        Canvas.SetZIndex(preparedImage, 1);
         preparedVisual.RotationAngleInDegrees = 90;
         preparedVisual.Opacity = 0;
         preparedVisual.Scale = new Vector3(0.94f, 0.94f, 1);

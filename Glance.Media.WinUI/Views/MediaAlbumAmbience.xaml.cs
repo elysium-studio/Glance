@@ -247,6 +247,8 @@ public sealed partial class MediaAlbumAmbience :
         Image preparedImage = nextArtworkImage;
 
         isArtworkPreparing = true;
+        Canvas.SetZIndex(currentArtworkImage, 0);
+        Canvas.SetZIndex(preparedImage, 1);
         nextArtworkVisual!.Opacity = 0;
         currentArtworkVisual!.Opacity = 1;
         preparedImage.Source = artwork;
