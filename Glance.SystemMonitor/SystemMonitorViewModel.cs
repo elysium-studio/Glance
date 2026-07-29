@@ -29,6 +29,12 @@ public sealed partial class SystemMonitorViewModel(ITextLocalizer localizer) :
     [ObservableProperty]
     private string uploadText = "0 KB/s";
 
+    public event EventHandler? MetricsUpdated;
+
+    public double DownloadBytesPerSecond { get; private set; }
+
+    public double UploadBytesPerSecond { get; private set; }
+
     public void Update(double cpu,
         double memory,
         ulong usedBytes,
@@ -43,6 +49,9 @@ public sealed partial class SystemMonitorViewModel(ITextLocalizer localizer) :
         MemoryDetail = localizer.GetText("MemoryUsageFormat", FormatBytes(usedBytes), FormatBytes(totalBytes));
         DownloadText = FormatRate(downloadBytesPerSecond);
         UploadText = FormatRate(uploadBytesPerSecond);
+        DownloadBytesPerSecond = downloadBytesPerSecond;
+        UploadBytesPerSecond = uploadBytesPerSecond;
+        MetricsUpdated?.Invoke(this, EventArgs.Empty);
     }
 
     private static string FormatBytes(ulong bytes)

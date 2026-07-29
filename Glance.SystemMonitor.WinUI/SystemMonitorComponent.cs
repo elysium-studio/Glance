@@ -27,7 +27,7 @@ public sealed partial class SystemMonitorComponent :
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
         SystemMonitorCompactView compactView = new(viewModel);
-        SystemMonitorExpandedView expandedView = new(viewModel, localizer);
+        SystemMonitorExpandedView expandedView = new(viewModel);
 
         CompactContent = compactView;
         ExpandedContent = expandedView;

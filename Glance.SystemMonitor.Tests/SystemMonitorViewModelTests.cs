@@ -30,6 +30,20 @@ public sealed class SystemMonitorViewModelTests
     }
 
     [Fact]
+    public void Update_RaisesOneMetricsUpdatedEventWithNumericNetworkValues()
+    {
+        SystemMonitorViewModel viewModel = CreateViewModel();
+        int updateCount = 0;
+        viewModel.MetricsUpdated += (_, _) => updateCount++;
+
+        viewModel.Update(42.4, 67.8, 0, 0, 2048, 1024);
+
+        Assert.Equal(1, updateCount);
+        Assert.Equal(2048, viewModel.DownloadBytesPerSecond);
+        Assert.Equal(1024, viewModel.UploadBytesPerSecond);
+    }
+
+    [Fact]
     public void Update_FormatsMemoryInGigabytes()
     {
         SystemMonitorViewModel viewModel = CreateViewModel();

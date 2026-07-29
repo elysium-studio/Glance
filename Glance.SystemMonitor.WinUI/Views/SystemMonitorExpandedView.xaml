@@ -1,11 +1,12 @@
 <UserControl
     x:Class="Glance.SystemMonitor.WinUI.SystemMonitorExpandedView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Glance.SystemMonitor.WinUI">
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/System.xaml" />
     </UserControl.Resources>
-    <Grid Padding="20,12,20,26" ColumnSpacing="18">
+    <Grid Padding="20,10,20,26" ColumnSpacing="18">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
@@ -25,109 +26,108 @@
                 Foreground="{ThemeResource GlanceSystemIconBrush}"
                 Glyph="&#xEEA1;" />
         </Grid>
-        <Grid Grid.Column="1" RowSpacing="3">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <TextBlock
-                FontWeight="SemiBold"
-                Foreground="{ThemeResource GlanceSystemIconBrush}"
-                Style="{StaticResource CaptionTextBlockStyle}"
-                Text="{x:Bind ToUpper(Title)}" />
-            <Grid Grid.Row="1" ColumnSpacing="8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Border
-                    x:Name="CpuMetric"
-                    Padding="8,6"
-                    VerticalAlignment="Center"
-                    Background="{ThemeResource ControlFillColorSecondaryBrush}"
-                    CornerRadius="{StaticResource OverlayCornerRadius}">
-                    <StackPanel Spacing="3">
+        <Grid Grid.Column="1" ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border
+                x:Name="CpuMetric"
+                Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                CornerRadius="{StaticResource OverlayCornerRadius}">
+                <Grid>
+                    <local:SystemMetricGraph
+                        x:Name="CpuGraph"
+                        Margin="6,26,6,6"
+                        GridStroke="{ThemeResource GlanceSystemGraphGridBrush}"
+                        PrimaryStroke="{ThemeResource GlanceSystemCpuGraphBrush}" />
+                    <StackPanel Margin="8,6" Spacing="1">
                         <TextBlock
                             x:Uid="ProcessorLabel"
                             FontWeight="SemiBold"
-                            Foreground="{ThemeResource GlanceSystemIconBrush}"
+                            Foreground="{ThemeResource GlanceSystemCpuGraphBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}" />
                         <TextBlock
                             Style="{StaticResource BodyStrongTextBlockStyle}"
                             Text="{x:Bind ViewModel.CpuText, Mode=OneWay}" />
-                        <ProgressBar
-                            Height="3"
-                            Foreground="{ThemeResource GlanceSystemIconBrush}"
-                            Maximum="100"
-                            Value="{x:Bind ViewModel.CpuUsage, Mode=OneWay}" />
                     </StackPanel>
-                </Border>
-                <Border
-                    x:Name="MemoryMetric"
-                    Grid.Column="1"
-                    Padding="8,6"
-                    VerticalAlignment="Center"
-                    Background="{ThemeResource ControlFillColorSecondaryBrush}"
-                    CornerRadius="{StaticResource OverlayCornerRadius}">
-                    <StackPanel Spacing="3">
+                </Grid>
+            </Border>
+            <Border
+                x:Name="MemoryMetric"
+                Grid.Column="1"
+                Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                CornerRadius="{StaticResource OverlayCornerRadius}">
+                <Grid>
+                    <local:SystemMetricGraph
+                        x:Name="MemoryGraph"
+                        Margin="6,26,6,6"
+                        GridStroke="{ThemeResource GlanceSystemGraphGridBrush}"
+                        PrimaryStroke="{ThemeResource GlanceSystemMemoryGraphBrush}" />
+                    <StackPanel Margin="8,6" Spacing="1">
                         <TextBlock
                             x:Uid="MemoryLabel"
                             FontWeight="SemiBold"
-                            Foreground="{ThemeResource GlanceSystemIconBrush}"
+                            Foreground="{ThemeResource GlanceSystemMemoryGraphBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}" />
                         <TextBlock
                             Style="{StaticResource BodyStrongTextBlockStyle}"
                             Text="{x:Bind ViewModel.MemoryText, Mode=OneWay}" />
-                        <ProgressBar
-                            Height="3"
-                            Foreground="{ThemeResource GlanceSystemIconBrush}"
-                            Maximum="100"
-                            Value="{x:Bind ViewModel.MemoryUsage, Mode=OneWay}" />
                     </StackPanel>
-                </Border>
-                <Border
-                    x:Name="NetworkMetric"
-                    Grid.Column="2"
-                    Padding="8,4"
-                    VerticalAlignment="Center"
-                    Background="{ThemeResource ControlFillColorSecondaryBrush}"
-                    CornerRadius="{StaticResource OverlayCornerRadius}">
-                    <StackPanel Spacing="1">
+                </Grid>
+            </Border>
+            <Border
+                x:Name="NetworkMetric"
+                Grid.Column="2"
+                Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                CornerRadius="{StaticResource OverlayCornerRadius}">
+                <Grid>
+                    <local:SystemMetricGraph
+                        x:Name="NetworkGraph"
+                        Margin="6,26,6,6"
+                        GridStroke="{ThemeResource GlanceSystemGraphGridBrush}"
+                        Maximum="0"
+                        PrimaryStroke="{ThemeResource GlanceSystemNetworkDownloadGraphBrush}"
+                        SecondaryStroke="{ThemeResource GlanceSystemNetworkUploadGraphBrush}" />
+                    <Grid Margin="8,5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
                         <TextBlock
                             x:Uid="NetworkLabel"
                             FontWeight="SemiBold"
-                            Foreground="{ThemeResource GlanceSystemIconBrush}"
+                            Foreground="{ThemeResource GlanceSystemNetworkDownloadGraphBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}" />
-                        <StackPanel Spacing="0">
-                            <StackPanel Orientation="Horizontal" Spacing="3">
-                                <FontIcon
-                                    Margin="0,1,0,0"
-                                    VerticalAlignment="Center"
-                                    FontSize="10"
-                                    Foreground="{ThemeResource GlanceSystemIconBrush}"
-                                    Glyph="&#xE74B;" />
-                                <TextBlock
-                                    FontWeight="SemiBold"
-                                    Style="{StaticResource CaptionTextBlockStyle}"
-                                    Text="{x:Bind ViewModel.DownloadText, Mode=OneWay}" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="3">
-                                <FontIcon
-                                    Margin="0,1,0,0"
-                                    VerticalAlignment="Center"
-                                    FontSize="10"
-                                    Foreground="{ThemeResource GlanceSystemIconBrush}"
-                                    Glyph="&#xE74A;" />
-                                <TextBlock
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Style="{StaticResource CaptionTextBlockStyle}"
-                                    Text="{x:Bind ViewModel.UploadText, Mode=OneWay}" />
-                            </StackPanel>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="3">
+                            <FontIcon
+                                Margin="0,1,0,0"
+                                VerticalAlignment="Center"
+                                FontSize="10"
+                                Foreground="{ThemeResource GlanceSystemNetworkDownloadGraphBrush}"
+                                Glyph="&#xE74B;" />
+                            <TextBlock
+                                FontWeight="SemiBold"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.DownloadText, Mode=OneWay}" />
                         </StackPanel>
-                    </StackPanel>
-                </Border>
-            </Grid>
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="3">
+                            <FontIcon
+                                Margin="0,1,0,0"
+                                VerticalAlignment="Center"
+                                FontSize="10"
+                                Foreground="{ThemeResource GlanceSystemNetworkUploadGraphBrush}"
+                                Glyph="&#xE74A;" />
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.UploadText, Mode=OneWay}" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>
