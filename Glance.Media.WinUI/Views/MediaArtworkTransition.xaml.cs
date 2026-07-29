@@ -25,6 +25,7 @@ public sealed partial class MediaArtworkTransition :
     private Visual? nextVisual;
     private CompositionEasingFunction? easing;
     private ImageSource? displayedSource;
+    private EventHandler<object>? preparationRenderingHandler;
     private int transitionGeneration;
     private bool isPreparing;
     private bool isTransitioning;
@@ -66,6 +67,7 @@ public sealed partial class MediaArtworkTransition :
     private void HandleUnloaded(object sender, RoutedEventArgs args)
     {
         transitionGeneration++;
+        CancelPreparation();
         StopAnimations();
         currentVisual = null;
         nextVisual = null;
@@ -122,7 +124,7 @@ public sealed partial class MediaArtworkTransition :
         }
 
         int generation = ++transitionGeneration;
-        isPreparing = false;
+        CancelPreparation();
         StopAnimations();
 
         if (source is null)
@@ -165,37 +167,6 @@ public sealed partial class MediaArtworkTransition :
         Image preparedImage = nextImage;
         Visual preparedVisual = nextVisual!;
         Visual visibleVisual = currentVisual!;
-        RoutedEventHandler openedHandler = null!;
-        ExceptionRoutedEventHandler failedHandler = null!;
-
-        void RemoveHandlers()
-        {
-            preparedImage.ImageOpened -= openedHandler;
-            preparedImage.ImageFailed -= failedHandler;
-        }
-
-        openedHandler = (_, _) =>
-        {
-            RemoveHandlers();
-
-            if (generation == transitionGeneration &&
-                ReferenceEquals(preparedImage, nextImage) &&
-                ReferenceEquals(preparedImage.Source, displayedSource))
-            {
-                BeginTransition(generation);
-            }
-        };
-        failedHandler = (_, _) =>
-        {
-            RemoveHandlers();
-
-            if (generation == transitionGeneration &&
-                ReferenceEquals(preparedImage, nextImage))
-            {
-                preparedImage.Source = null;
-                isPreparing = false;
-            }
-        };
 
         isPreparing = true;
         preparedVisual.RotationAngleInDegrees = 90;
@@ -204,9 +175,19 @@ public sealed partial class MediaArtworkTransition :
         visibleVisual.RotationAngleInDegrees = 0;
         visibleVisual.Opacity = 1;
         visibleVisual.Scale = Vector3.One;
-        preparedImage.ImageOpened += openedHandler;
-        preparedImage.ImageFailed += failedHandler;
         preparedImage.Source = source;
+        preparationRenderingHandler = (_, _) =>
+        {
+            CancelPreparationHandler();
+
+            if (generation == transitionGeneration &&
+                ReferenceEquals(preparedImage, nextImage) &&
+                ReferenceEquals(preparedImage.Source, displayedSource))
+            {
+                BeginTransition(generation);
+            }
+        };
+        CompositionTarget.Rendering += preparationRenderingHandler;
     }
 
     private void BeginTransition(int generation)
@@ -252,6 +233,23 @@ public sealed partial class MediaArtworkTransition :
         (currentVisual, nextVisual) = (nextVisual, currentVisual);
         isPreparing = false;
         isTransitioning = false;
+    }
+
+    private void CancelPreparation()
+    {
+        CancelPreparationHandler();
+        isPreparing = false;
+    }
+
+    private void CancelPreparationHandler()
+    {
+        if (preparationRenderingHandler is null)
+        {
+            return;
+        }
+
+        CompositionTarget.Rendering -= preparationRenderingHandler;
+        preparationRenderingHandler = null;
     }
 
     private void StopAnimations()

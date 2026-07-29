@@ -28,6 +28,7 @@ public sealed partial class MediaAlbumAmbience :
     private ImplicitAnimationCollection? motionImplicitAnimations;
     private ImplicitAnimationCollection? ambientImplicitAnimations;
     private ImageSource? currentArtwork;
+    private EventHandler<object>? artworkPreparationRenderingHandler;
     private int artworkTransitionGeneration;
     private bool isArtworkPreparing;
     private bool isArtworkTransitioning;
@@ -104,6 +105,7 @@ public sealed partial class MediaAlbumAmbience :
         clipGeometry = null;
         motionImplicitAnimations = null;
         ambientImplicitAnimations = null;
+        CancelArtworkPreparation();
         ambientVisual = null;
         currentArtworkVisual = null;
         motionVisual = null;
@@ -206,7 +208,7 @@ public sealed partial class MediaAlbumAmbience :
         }
 
         int transitionGeneration = ++artworkTransitionGeneration;
-        isArtworkPreparing = false;
+        CancelArtworkPreparation();
         currentArtworkVisual.StopAnimation(nameof(Visual.Opacity));
         nextArtworkVisual.StopAnimation(nameof(Visual.Opacity));
 
@@ -243,18 +245,14 @@ public sealed partial class MediaAlbumAmbience :
     private void PrepareArtworkTransition(ImageSource artwork, int transitionGeneration)
     {
         Image preparedImage = nextArtworkImage;
-        RoutedEventHandler openedHandler = null!;
-        ExceptionRoutedEventHandler failedHandler = null!;
 
-        void RemoveHandlers()
+        isArtworkPreparing = true;
+        nextArtworkVisual!.Opacity = 0;
+        currentArtworkVisual!.Opacity = 1;
+        preparedImage.Source = artwork;
+        artworkPreparationRenderingHandler = (_, _) =>
         {
-            preparedImage.ImageOpened -= openedHandler;
-            preparedImage.ImageFailed -= failedHandler;
-        }
-
-        openedHandler = (_, _) =>
-        {
-            RemoveHandlers();
+            CancelArtworkPreparationHandler();
 
             if (transitionGeneration == artworkTransitionGeneration &&
                 ReferenceEquals(preparedImage, nextArtworkImage) &&
@@ -263,24 +261,7 @@ public sealed partial class MediaAlbumAmbience :
                 BeginArtworkTransition(transitionGeneration);
             }
         };
-        failedHandler = (_, _) =>
-        {
-            RemoveHandlers();
-
-            if (transitionGeneration == artworkTransitionGeneration &&
-                ReferenceEquals(preparedImage, nextArtworkImage))
-            {
-                preparedImage.Source = null;
-                isArtworkPreparing = false;
-            }
-        };
-
-        isArtworkPreparing = true;
-        nextArtworkVisual!.Opacity = 0;
-        currentArtworkVisual!.Opacity = 1;
-        preparedImage.ImageOpened += openedHandler;
-        preparedImage.ImageFailed += failedHandler;
-        preparedImage.Source = artwork;
+        CompositionTarget.Rendering += artworkPreparationRenderingHandler;
     }
 
     private void BeginArtworkTransition(int transitionGeneration)
@@ -318,6 +299,23 @@ public sealed partial class MediaAlbumAmbience :
         (currentArtworkVisual, nextArtworkVisual) = (nextArtworkVisual, currentArtworkVisual);
         isArtworkPreparing = false;
         isArtworkTransitioning = false;
+    }
+
+    private void CancelArtworkPreparation()
+    {
+        CancelArtworkPreparationHandler();
+        isArtworkPreparing = false;
+    }
+
+    private void CancelArtworkPreparationHandler()
+    {
+        if (artworkPreparationRenderingHandler is null)
+        {
+            return;
+        }
+
+        CompositionTarget.Rendering -= artworkPreparationRenderingHandler;
+        artworkPreparationRenderingHandler = null;
     }
 
     private void UpdateState()
