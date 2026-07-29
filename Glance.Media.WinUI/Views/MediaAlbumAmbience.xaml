@@ -1,0 +1,20 @@
+<UserControl
+    x:Class="Glance.Media.WinUI.MediaAlbumAmbience"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    IsHitTestVisible="False"
+    Loaded="{x:Bind HandleLoaded}"
+    SizeChanged="{x:Bind HandleSizeChanged}"
+    Unloaded="{x:Bind HandleUnloaded}">
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Themes/Media.xaml" />
+    </UserControl.Resources>
+    <Grid x:Name="MotionLayer">
+        <Image
+            x:Name="AmbientArtwork"
+            Opacity="0.92"
+            Stretch="UniformToFill" />
+        <Grid x:Name="BlurHost" />
+        <Border Background="{ThemeResource GlanceMediaAmbientTintBrush}" />
+    </Grid>
+</UserControl>
