@@ -12,8 +12,8 @@
     <Grid x:Name="MotionLayer">
         <Image
             x:Name="AmbientArtwork"
-            Opacity="0.92"
             Stretch="UniformToFill" />
+        <Border Background="{ThemeResource GlanceMediaAmbientBaseBrush}" />
         <Grid x:Name="BlurHost" />
         <Border Background="{ThemeResource GlanceMediaAmbientTintBrush}" />
     </Grid>

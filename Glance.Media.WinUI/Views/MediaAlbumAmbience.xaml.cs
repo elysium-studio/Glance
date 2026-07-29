@@ -163,6 +163,7 @@ public sealed partial class MediaAlbumAmbience :
 
         blurVisual = compositor.CreateSpriteVisual();
         blurVisual.Brush = blurBrush;
+        blurVisual.Opacity = 0.72f;
         blurVisual.Size = new Vector2((float)ActualWidth, (float)ActualHeight);
         ElementCompositionPreview.SetElementChildVisual(BlurHost, blurVisual);
     }
@@ -218,7 +219,7 @@ public sealed partial class MediaAlbumAmbience :
         double energy = Average(args.Levels, 0, args.Levels.Count);
 
         float scale = (float)(1.45 + (bass * 0.035));
-        float opacity = (float)(0.4 + (energy * 0.05));
+        float opacity = (float)(0.72 + (energy * 0.04));
 
         ApplyResponse(scale, opacity);
     }
@@ -234,7 +235,7 @@ public sealed partial class MediaAlbumAmbience :
         }
 
         bool hasArtwork = viewModel?.HasSession == true && viewModel.Artwork is ImageSource;
-        float opacity = hasArtwork ? 0.4f : 0;
+        float opacity = hasArtwork ? 0.72f : 0;
 
         if (ShouldPan)
         {

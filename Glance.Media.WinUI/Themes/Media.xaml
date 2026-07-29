@@ -2,10 +2,11 @@
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Default">
             <SolidColorBrush x:Key="GlanceMediaIconBrush" Color="#FF8A65" />
+            <SolidColorBrush x:Key="GlanceMediaAmbientBaseBrush" Color="#FF1C1E24" />
             <LinearGradientBrush x:Key="GlanceMediaAmbientTintBrush" StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Offset="0" Color="#C40E131E" />
-                <GradientStop Offset="0.58" Color="#B8151A27" />
-                <GradientStop Offset="1" Color="#AA261A22" />
+                <GradientStop Offset="0" Color="#E60E131E" />
+                <GradientStop Offset="0.58" Color="#DE151A27" />
+                <GradientStop Offset="1" Color="#D6261A22" />
             </LinearGradientBrush>
             <SolidColorBrush x:Key="AccentButtonBackground" Color="#FFFF8A65" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E6FF8A65" />
@@ -14,10 +15,11 @@
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="GlanceMediaIconBrush" Color="#B23A1D" />
+            <SolidColorBrush x:Key="GlanceMediaAmbientBaseBrush" Color="#FFF2F2F2" />
             <LinearGradientBrush x:Key="GlanceMediaAmbientTintBrush" StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Offset="0" Color="#D9FFFFFF" />
-                <GradientStop Offset="0.58" Color="#CCFFFDFC" />
-                <GradientStop Offset="1" Color="#BCFFF2ED" />
+                <GradientStop Offset="0" Color="#EDFFFFFF" />
+                <GradientStop Offset="0.58" Color="#E5FFFDFC" />
+                <GradientStop Offset="1" Color="#DCFFF2ED" />
             </LinearGradientBrush>
             <SolidColorBrush x:Key="AccentButtonBackground" Color="#FFB23A1D" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E6B23A1D" />
@@ -26,6 +28,7 @@
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <StaticResource x:Key="GlanceMediaIconBrush" ResourceKey="SystemColorWindowTextColorBrush" />
+            <StaticResource x:Key="GlanceMediaAmbientBaseBrush" ResourceKey="SystemColorWindowColorBrush" />
             <StaticResource x:Key="GlanceMediaAmbientTintBrush" ResourceKey="SystemColorWindowColorBrush" />
             <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemColorHighlightColorBrush" />
             <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="SystemColorHighlightColorBrush" />
