@@ -1,4 +1,3 @@
-using Microsoft.Graphics.Canvas.Effects;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -13,20 +12,16 @@ namespace Glance.Media.WinUI;
 public sealed partial class MediaAlbumAmbience :
     UserControl
 {
-    private const int ArtworkTransitionDurationMs = 620;
-    private const string CrossFadeEffectName = "ArtworkCrossFade";
-    private const string CrossFadeProperty = $"{CrossFadeEffectName}.CrossFade";
-    private const string CurrentSourceName = "CurrentArtwork";
-    private const string NextSourceName = "NextArtwork";
+    private const int ArtworkTransitionDurationMs = 520;
 
     private MediaViewModel? viewModel;
     private Visual? ambientVisual;
     private Visual? motionVisual;
-    private SpriteVisual? artworkVisual;
-    private CompositionEffectBrush? artworkEffectBrush;
+    private ContainerVisual? artworkContainerVisual;
+    private SpriteVisual? currentArtworkVisual;
+    private SpriteVisual? nextArtworkVisual;
     private CompositionSurfaceBrush? currentSurfaceBrush;
     private CompositionSurfaceBrush? nextSurfaceBrush;
-    private CompositionSurfaceBrush? retiredSurfaceBrush;
     private CompositionRoundedRectangleGeometry? clipGeometry;
     private CompositionGeometricClip? roundedClip;
     private CompositionEasingFunction? easing;
@@ -35,7 +30,6 @@ public sealed partial class MediaAlbumAmbience :
     private MediaAmbientArtwork? desiredArtwork;
     private MediaAmbientArtwork? currentArtwork;
     private MediaAmbientArtwork? nextArtwork;
-    private MediaAmbientArtwork? retiredArtwork;
     private int artworkTransitionGeneration;
     private bool isArtworkTransitioning;
     private bool isPanning;
@@ -108,25 +102,23 @@ public sealed partial class MediaAlbumAmbience :
             currentArtwork.Dispose();
         }
 
-        retiredArtwork?.Dispose();
         ElementCompositionPreview.SetElementChildVisual(ArtworkHost, null);
         currentSurfaceBrush?.Dispose();
         nextSurfaceBrush?.Dispose();
-        retiredSurfaceBrush?.Dispose();
-        artworkEffectBrush?.Dispose();
-        artworkVisual?.Dispose();
+        currentArtworkVisual?.Dispose();
+        nextArtworkVisual?.Dispose();
+        artworkContainerVisual?.Dispose();
         motionImplicitAnimations?.Dispose();
         ambientImplicitAnimations?.Dispose();
         roundedClip?.Dispose();
         clipGeometry?.Dispose();
         currentSurfaceBrush = null;
         nextSurfaceBrush = null;
-        retiredSurfaceBrush = null;
-        artworkEffectBrush = null;
-        artworkVisual = null;
+        currentArtworkVisual = null;
+        nextArtworkVisual = null;
+        artworkContainerVisual = null;
         currentArtwork = null;
         nextArtwork = null;
-        retiredArtwork = null;
         desiredArtwork = null;
         roundedClip = null;
         clipGeometry = null;
@@ -153,19 +145,17 @@ public sealed partial class MediaAlbumAmbience :
 
     private void CreateArtworkVisual(Compositor compositor)
     {
-        using CrossFadeEffect crossFade = new()
-        {
-            Name = CrossFadeEffectName,
-            CrossFade = 0,
-            Source1 = new CompositionEffectSourceParameter(CurrentSourceName),
-            Source2 = new CompositionEffectSourceParameter(NextSourceName)
-        };
-        using CompositionEffectFactory factory = compositor.CreateEffectFactory(crossFade, [CrossFadeProperty]);
-        artworkEffectBrush = factory.CreateBrush();
-        artworkVisual = compositor.CreateSpriteVisual();
-        artworkVisual.Brush = artworkEffectBrush;
-        artworkVisual.RelativeSizeAdjustment = Vector2.One;
-        ElementCompositionPreview.SetElementChildVisual(ArtworkHost, artworkVisual);
+        artworkContainerVisual = compositor.CreateContainerVisual();
+        artworkContainerVisual.RelativeSizeAdjustment = Vector2.One;
+        currentArtworkVisual = compositor.CreateSpriteVisual();
+        currentArtworkVisual.RelativeSizeAdjustment = Vector2.One;
+        currentArtworkVisual.Opacity = 0;
+        nextArtworkVisual = compositor.CreateSpriteVisual();
+        nextArtworkVisual.RelativeSizeAdjustment = Vector2.One;
+        nextArtworkVisual.Opacity = 0;
+        artworkContainerVisual.Children.InsertAtBottom(currentArtworkVisual);
+        artworkContainerVisual.Children.InsertAtTop(nextArtworkVisual);
+        ElementCompositionPreview.SetElementChildVisual(ArtworkHost, artworkContainerVisual);
     }
 
     private void Subscribe()
@@ -227,7 +217,7 @@ public sealed partial class MediaAlbumAmbience :
         MediaAmbientArtwork? artwork = viewModel?.AmbientArtwork as MediaAmbientArtwork;
         desiredArtwork = artwork;
 
-        if (artworkEffectBrush is null || artworkVisual is null)
+        if (currentArtworkVisual is null || nextArtworkVisual is null)
         {
             return;
         }
@@ -257,9 +247,8 @@ public sealed partial class MediaAlbumAmbience :
     {
         currentArtwork = artwork;
         currentSurfaceBrush = CreateSurfaceBrush(artwork);
-        artworkEffectBrush!.SetSourceParameter(CurrentSourceName, currentSurfaceBrush);
-        artworkEffectBrush.SetSourceParameter(NextSourceName, currentSurfaceBrush);
-        artworkEffectBrush.Properties.InsertScalar(CrossFadeProperty, 0);
+        currentArtworkVisual!.Brush = currentSurfaceBrush;
+        currentArtworkVisual.Opacity = 1;
     }
 
     private void StartArtworkTransition(MediaAmbientArtwork artwork)
@@ -267,18 +256,18 @@ public sealed partial class MediaAlbumAmbience :
         int transitionGeneration = ++artworkTransitionGeneration;
         nextArtwork = artwork;
         nextSurfaceBrush = CreateSurfaceBrush(artwork);
-        artworkEffectBrush!.SetSourceParameter(CurrentSourceName, currentSurfaceBrush);
-        artworkEffectBrush.SetSourceParameter(NextSourceName, nextSurfaceBrush);
-        artworkEffectBrush.Properties.StopAnimation(CrossFadeProperty);
-        artworkEffectBrush.Properties.InsertScalar(CrossFadeProperty, 0);
+        nextArtworkVisual!.Brush = nextSurfaceBrush;
+        currentArtworkVisual!.StopAnimation(nameof(Visual.Opacity));
+        nextArtworkVisual.StopAnimation(nameof(Visual.Opacity));
+        currentArtworkVisual.Opacity = 1;
+        nextArtworkVisual.Opacity = 0;
+        artworkContainerVisual!.Children.Remove(nextArtworkVisual);
+        artworkContainerVisual.Children.InsertAtTop(nextArtworkVisual);
         isArtworkTransitioning = true;
 
-        ScalarKeyFrameAnimation animation = artworkEffectBrush.Compositor.CreateScalarKeyFrameAnimation();
-        animation.InsertKeyFrame(0, 0);
-        animation.InsertKeyFrame(1, 1, easing);
-        animation.Duration = TimeSpan.FromMilliseconds(ArtworkTransitionDurationMs);
-        CompositionScopedBatch batch = artworkEffectBrush.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
-        artworkEffectBrush.Properties.StartAnimation(CrossFadeProperty, animation);
+        CompositionScopedBatch batch = currentArtworkVisual.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+        StartArtworkOpacityAnimation(currentArtworkVisual, 0);
+        StartArtworkOpacityAnimation(nextArtworkVisual, 1);
         batch.Completed += (_, _) =>
         {
             batch.Dispose();
@@ -299,42 +288,54 @@ public sealed partial class MediaAlbumAmbience :
 
     private void PromoteNextArtwork()
     {
-        if (nextArtwork is null || nextSurfaceBrush is null || artworkEffectBrush is null)
+        if (nextArtwork is null ||
+            nextSurfaceBrush is null ||
+            currentArtworkVisual is null ||
+            nextArtworkVisual is null)
         {
             return;
         }
 
-        artworkEffectBrush.Properties.StopAnimation(CrossFadeProperty);
+        currentArtworkVisual.StopAnimation(nameof(Visual.Opacity));
+        nextArtworkVisual.StopAnimation(nameof(Visual.Opacity));
+        currentArtworkVisual.Opacity = 0;
+        nextArtworkVisual.Opacity = 1;
         MediaAmbientArtwork? previousArtwork = currentArtwork;
         CompositionSurfaceBrush? previousBrush = currentSurfaceBrush;
-        retiredSurfaceBrush?.Dispose();
-
-        if (retiredArtwork is not null &&
-            !ReferenceEquals(retiredArtwork, desiredArtwork) &&
-            !ReferenceEquals(retiredArtwork, viewModel?.AmbientArtwork))
-        {
-            retiredArtwork.Dispose();
-        }
-
-        retiredArtwork = previousArtwork;
-        retiredSurfaceBrush = previousBrush;
         currentArtwork = nextArtwork;
         currentSurfaceBrush = nextSurfaceBrush;
         nextArtwork = null;
         nextSurfaceBrush = null;
-        artworkEffectBrush.SetSourceParameter(CurrentSourceName, currentSurfaceBrush);
-        artworkEffectBrush.SetSourceParameter(NextSourceName, currentSurfaceBrush);
-        artworkEffectBrush.Properties.InsertScalar(CrossFadeProperty, 0);
+        (currentArtworkVisual, nextArtworkVisual) = (nextArtworkVisual, currentArtworkVisual);
+        nextArtworkVisual.Brush = null;
+        nextArtworkVisual.Opacity = 0;
+        previousBrush?.Dispose();
+
+        if (previousArtwork is not null &&
+            !ReferenceEquals(previousArtwork, desiredArtwork) &&
+            !ReferenceEquals(previousArtwork, viewModel?.AmbientArtwork))
+        {
+            previousArtwork.Dispose();
+        }
+
         isArtworkTransitioning = false;
     }
 
     private CompositionSurfaceBrush CreateSurfaceBrush(MediaAmbientArtwork artwork)
     {
-        CompositionSurfaceBrush brush = artworkEffectBrush!.Compositor.CreateSurfaceBrush(artwork.Surface);
+        CompositionSurfaceBrush brush = currentArtworkVisual!.Compositor.CreateSurfaceBrush(artwork.Surface);
         brush.Stretch = CompositionStretch.UniformToFill;
         brush.HorizontalAlignmentRatio = 0.5f;
         brush.VerticalAlignmentRatio = 0.5f;
         return brush;
+    }
+
+    private void StartArtworkOpacityAnimation(Visual visual, float opacity)
+    {
+        ScalarKeyFrameAnimation animation = visual.Compositor.CreateScalarKeyFrameAnimation();
+        animation.InsertKeyFrame(1, opacity, easing);
+        animation.Duration = TimeSpan.FromMilliseconds(ArtworkTransitionDurationMs);
+        visual.StartAnimation(nameof(Visual.Opacity), animation);
     }
 
     private void UpdateState()
