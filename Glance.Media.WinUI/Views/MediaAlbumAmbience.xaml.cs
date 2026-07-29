@@ -24,7 +24,9 @@ public sealed partial class MediaAlbumAmbience :
     private CompositionRoundedRectangleGeometry? clipGeometry;
     private CompositionGeometricClip? roundedClip;
     private CompositionEasingFunction? easing;
-    private double phase;
+    private ImplicitAnimationCollection? motionImplicitAnimations;
+    private ImplicitAnimationCollection? ambientImplicitAnimations;
+    private bool isPanning;
 
     public MediaAlbumAmbience() => InitializeComponent();
 
@@ -61,13 +63,28 @@ public sealed partial class MediaAlbumAmbience :
         CreateBlurVisual(compositor);
         Subscribe();
         UpdateArtwork();
-        UpdateState(animate: false);
+        UpdateState();
+        ConfigureResponseAnimations(compositor);
     }
 
     private void HandleUnloaded(object sender, RoutedEventArgs args)
     {
         Unsubscribe();
+        StopPanning();
+
+        if (motionVisual is not null)
+        {
+            motionVisual.ImplicitAnimations = null;
+        }
+
+        if (ambientVisual is not null)
+        {
+            ambientVisual.ImplicitAnimations = null;
+        }
+
         ElementCompositionPreview.SetElementChildVisual(BlurHost, null);
+        motionImplicitAnimations?.Dispose();
+        ambientImplicitAnimations?.Dispose();
         blurVisual?.Dispose();
         blurBrush?.Dispose();
         artworkBrush?.Dispose();
@@ -80,6 +97,8 @@ public sealed partial class MediaAlbumAmbience :
         artworkSurface = null;
         roundedClip = null;
         clipGeometry = null;
+        motionImplicitAnimations = null;
+        ambientImplicitAnimations = null;
         ambientVisual = null;
         motionVisual = null;
         easing = null;
@@ -112,13 +131,13 @@ public sealed partial class MediaAlbumAmbience :
     {
         GaussianBlurEffect blur = new()
         {
-            BlurAmount = 68,
+            BlurAmount = 110,
             BorderMode = EffectBorderMode.Hard,
             Source = new CompositionEffectSourceParameter("artwork")
         };
         SaturationEffect saturation = new()
         {
-            Saturation = 1.22f,
+            Saturation = 1.3f,
             Source = blur
         };
 
@@ -185,21 +204,17 @@ public sealed partial class MediaAlbumAmbience :
 
         double bass = Average(args.Levels, 0, 2);
         double energy = Average(args.Levels, 0, args.Levels.Count);
-        double upperRange = Average(args.Levels, 3, 2);
-        phase += 0.018 + (energy * 0.035);
 
-        float scale = (float)(1.16 + (bass * 0.04));
-        float horizontalDrift = (float)((Math.Cos(phase) * (5.5 + (energy * 5.5))) + ((upperRange - bass) * 2));
-        float verticalDrift = (float)(Math.Sin(phase * 0.72) * (3.5 + (energy * 4.5)));
-        float opacity = (float)(0.36 + (energy * 0.06));
+        float scale = (float)(1.24 + (bass * 0.04));
+        float opacity = (float)(0.4 + (energy * 0.05));
 
-        AnimateMotion(scale, horizontalDrift, verticalDrift, opacity, TimeSpan.FromMilliseconds(160));
+        ApplyResponse(scale, opacity);
     }
 
     private void UpdateArtwork() =>
         AmbientArtwork.Source = viewModel?.Artwork as ImageSource;
 
-    private void UpdateState(bool animate = true)
+    private void UpdateState()
     {
         if (ambientVisual is null || motionVisual is null || easing is null)
         {
@@ -207,58 +222,111 @@ public sealed partial class MediaAlbumAmbience :
         }
 
         bool hasArtwork = viewModel?.HasSession == true && viewModel.Artwork is ImageSource;
-        float opacity = hasArtwork ? 0.36f : 0;
-        TimeSpan duration = animate ? TimeSpan.FromMilliseconds(220) : TimeSpan.Zero;
+        float opacity = hasArtwork ? 0.4f : 0;
+
+        if (ShouldPan)
+        {
+            StartPanning();
+        }
+        else
+        {
+            StopPanning();
+        }
 
         if (!CanAnimate)
         {
-            phase = 0;
-            AnimateMotion(1.16f, 0, 0, opacity, duration);
+            ApplyResponse(1.24f, opacity);
             return;
         }
 
-        AnimateMotion(1.16f, 0, 0, opacity, duration);
+        ApplyResponse(1.24f, opacity);
     }
 
-    private void AnimateMotion(float scale, float horizontalDrift, float verticalDrift, float opacity, TimeSpan duration)
+    private void ConfigureResponseAnimations(Compositor compositor)
     {
         if (motionVisual is null || ambientVisual is null || easing is null)
         {
             return;
         }
 
-        if (duration == TimeSpan.Zero)
+        Vector3KeyFrameAnimation scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
+        scaleAnimation.Target = nameof(Visual.Scale);
+        scaleAnimation.Duration = TimeSpan.FromMilliseconds(220);
+        scaleAnimation.InsertExpressionKeyFrame(1, "this.FinalValue", easing);
+        motionImplicitAnimations = compositor.CreateImplicitAnimationCollection();
+        motionImplicitAnimations[nameof(Visual.Scale)] = scaleAnimation;
+        motionVisual.ImplicitAnimations = motionImplicitAnimations;
+
+        ScalarKeyFrameAnimation opacityAnimation = compositor.CreateScalarKeyFrameAnimation();
+        opacityAnimation.Target = nameof(Visual.Opacity);
+        opacityAnimation.Duration = TimeSpan.FromMilliseconds(220);
+        opacityAnimation.InsertExpressionKeyFrame(1, "this.FinalValue", easing);
+        ambientImplicitAnimations = compositor.CreateImplicitAnimationCollection();
+        ambientImplicitAnimations[nameof(Visual.Opacity)] = opacityAnimation;
+        ambientVisual.ImplicitAnimations = ambientImplicitAnimations;
+    }
+
+    private void StartPanning()
+    {
+        if (motionVisual is null || isPanning)
         {
-            motionVisual.StopAnimation(nameof(Visual.Scale));
-            motionVisual.StopAnimation(nameof(Visual.Offset));
-            ambientVisual.StopAnimation(nameof(Visual.Opacity));
-            motionVisual.Scale = new Vector3(scale, scale, 1);
-            motionVisual.Offset = new Vector3(horizontalDrift, verticalDrift, 0);
-            ambientVisual.Opacity = opacity;
             return;
         }
 
         Compositor compositor = motionVisual.Compositor;
-        Vector3KeyFrameAnimation scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
-        scaleAnimation.Duration = duration;
-        scaleAnimation.InsertKeyFrame(1, new Vector3(scale, scale, 1), easing);
-        motionVisual.StartAnimation(nameof(Visual.Scale), scaleAnimation);
+        CompositionEasingFunction panEasing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.45f, 0), new Vector2(0.55f, 1));
+        ScalarKeyFrameAnimation horizontalAnimation = compositor.CreateScalarKeyFrameAnimation();
+        horizontalAnimation.Duration = TimeSpan.FromSeconds(12);
+        horizontalAnimation.IterationBehavior = AnimationIterationBehavior.Forever;
+        horizontalAnimation.InsertKeyFrame(0, -14, panEasing);
+        horizontalAnimation.InsertKeyFrame(0.5f, 14, panEasing);
+        horizontalAnimation.InsertKeyFrame(1, -14, panEasing);
+        motionVisual.StartAnimation("Offset.X", horizontalAnimation);
 
-        Vector3KeyFrameAnimation offsetAnimation = compositor.CreateVector3KeyFrameAnimation();
-        offsetAnimation.Duration = duration;
-        offsetAnimation.InsertKeyFrame(1, new Vector3(horizontalDrift, verticalDrift, 0), easing);
-        motionVisual.StartAnimation(nameof(Visual.Offset), offsetAnimation);
+        ScalarKeyFrameAnimation verticalAnimation = compositor.CreateScalarKeyFrameAnimation();
+        verticalAnimation.Duration = TimeSpan.FromSeconds(15);
+        verticalAnimation.IterationBehavior = AnimationIterationBehavior.Forever;
+        verticalAnimation.InsertKeyFrame(0, 0, panEasing);
+        verticalAnimation.InsertKeyFrame(0.25f, -9, panEasing);
+        verticalAnimation.InsertKeyFrame(0.75f, 9, panEasing);
+        verticalAnimation.InsertKeyFrame(1, 0, panEasing);
+        motionVisual.StartAnimation("Offset.Y", verticalAnimation);
+        isPanning = true;
+    }
 
-        ScalarKeyFrameAnimation opacityAnimation = compositor.CreateScalarKeyFrameAnimation();
-        opacityAnimation.Duration = duration;
-        opacityAnimation.InsertKeyFrame(1, opacity, easing);
-        ambientVisual.StartAnimation(nameof(Visual.Opacity), opacityAnimation);
+    private void StopPanning()
+    {
+        if (motionVisual is null || !isPanning)
+        {
+            return;
+        }
+
+        motionVisual.StopAnimation("Offset.X");
+        motionVisual.StopAnimation("Offset.Y");
+        motionVisual.Offset = Vector3.Zero;
+        isPanning = false;
+    }
+
+    private void ApplyResponse(float scale, float opacity)
+    {
+        if (motionVisual is null || ambientVisual is null)
+        {
+            return;
+        }
+
+        motionVisual.Scale = new Vector3(scale, scale, 1);
+        ambientVisual.Opacity = opacity;
     }
 
     private bool CanAnimate =>
         viewModel?.Artwork is ImageSource &&
         viewModel.HasSession &&
         viewModel.IsPlaying &&
+        viewModel.ShowAudioVisualization;
+
+    private bool ShouldPan =>
+        viewModel?.Artwork is ImageSource &&
+        viewModel.HasSession &&
         viewModel.ShowAudioVisualization;
 
     private static double Average(IReadOnlyList<double> levels, int start, int count)
