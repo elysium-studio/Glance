@@ -220,6 +220,7 @@ public sealed partial class MediaComponent :
                 viewModel.Source = source;
                 viewModel.HasSession = true;
                 viewModel.Artwork = null;
+                viewModel.AmbientArtwork = null;
                 ApplyPlaybackInfo(playbackInfo);
 
                 if (artworkStream is not null)
@@ -227,6 +228,23 @@ public sealed partial class MediaComponent :
                     BitmapImage artwork = new();
                     viewModel.Artwork = artwork;
                     await artwork.SetSourceAsync(artworkStream);
+
+                    try
+                    {
+                        artworkStream.Seek(0);
+                        BitmapImage ambientArtwork = new()
+                        {
+                            DecodePixelHeight = 3,
+                            DecodePixelType = DecodePixelType.Physical,
+                            DecodePixelWidth = 3
+                        };
+                        viewModel.AmbientArtwork = ambientArtwork;
+                        await ambientArtwork.SetSourceAsync(artworkStream);
+                    }
+                    catch
+                    {
+                        viewModel.AmbientArtwork = null;
+                    }
                 }
 
                 if (currentTitle is not null &&
@@ -260,6 +278,7 @@ public sealed partial class MediaComponent :
         viewModel.Artist = localizer.GetText("OpenMediaApp");
         viewModel.Source = localizer.GetText("ModuleTitle");
         viewModel.Artwork = null;
+        viewModel.AmbientArtwork = null;
         viewModel.IsPlaying = false;
         viewModel.HasSession = false;
         viewModel.CanSkipPrevious = false;
