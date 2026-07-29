@@ -68,6 +68,12 @@ public sealed partial class DesktopIslandView :
         };
     }
 
+    public Visibility WhenPinned(bool isPinned) =>
+        isPinned ? Visibility.Visible : Visibility.Collapsed;
+
+    public Visibility WhenNotPinned(bool isPinned) =>
+        isPinned ? Visibility.Collapsed : Visibility.Visible;
+
     private void HandleLoaded(object sender, RoutedEventArgs args)
     {
         previousIndex = ViewModel.SelectedIndex;
@@ -179,6 +185,12 @@ public sealed partial class DesktopIslandView :
         {
             UpdateExpansionLockComponent();
             UpdateComponentInteraction();
+            return;
+        }
+
+        if (args.PropertyName == nameof(DesktopIslandViewModel.IsPinned))
+        {
+            ApplyExpansionLock();
             return;
         }
 
@@ -383,14 +395,14 @@ public sealed partial class DesktopIslandView :
             expansionLockComponent = null;
         }
 
-        IsExpansionLocked = false;
+        IsExpansionLocked = ViewModel.IsPinned;
     }
 
     private void HandleExpansionLockChanged(object? sender, EventArgs args) =>
         DispatcherQueue.TryEnqueue(ApplyExpansionLock);
 
     private void ApplyExpansionLock() =>
-        IsExpansionLocked = expansionLockComponent?.IsExpansionLocked == true;
+        IsExpansionLocked = ViewModel.IsPinned || expansionLockComponent?.IsExpansionLocked == true;
 
     private void HandleIslandDeactivated(object? sender, EventArgs args)
     {

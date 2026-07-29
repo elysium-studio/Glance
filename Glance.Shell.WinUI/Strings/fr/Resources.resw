@@ -20,6 +20,14 @@
   <data name="BooleanToggle.OffContent" xml:space="preserve"><value>Non</value></data>
   <data name="AutoHideCard.Header" xml:space="preserve"><value>Masquer automatiquement</value></data>
   <data name="AutoHideCard.Description" xml:space="preserve"><value>Masque Glance lorsqu’il est inactif et l’affiche lorsque le pointeur approche de l’indicateur au bord de l’écran</value></data>
+  <data name="GlanceExpansionCard.Header" xml:space="preserve"><value>Développement de l’îlot</value></data>
+  <data name="GlanceExpansionCard.Description" xml:space="preserve"><value>Choisissez si Glance se développe au survol du pointeur ou reste toujours développé</value></data>
+  <data name="GlanceExpansionHoverOption.Content" xml:space="preserve"><value>Développer au survol</value></data>
+  <data name="GlanceExpansionPinnedOption.Content" xml:space="preserve"><value>Toujours développé</value></data>
+  <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Garder développé</value></data>
+  <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Garder l’îlot développé</value></data>
+  <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Développer au survol</value></data>
+  <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Ne plus garder l’îlot développé</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>Autoriser les alertes</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>Autoriser ce module à s’afficher lorsqu’un élément nécessite votre attention</value></data>
 </root>

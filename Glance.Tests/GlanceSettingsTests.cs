@@ -12,6 +12,7 @@ public sealed class GlanceSettingsTests
         GlanceSettings settings = new();
 
         Assert.False(settings.AutoHide);
+        Assert.Equal(GlanceExpansionMode.ExpandOnHover, settings.ExpansionMode);
         Assert.Empty(settings.Modules);
         Assert.Equal(GlancePlacement.Top, settings.Placement);
         Assert.True(settings.StartWithWindows);
@@ -23,6 +24,7 @@ public sealed class GlanceSettingsTests
         GlanceSettings settings = new()
         {
             AutoHide = true,
+            ExpansionMode = GlanceExpansionMode.AlwaysExpanded,
             Placement = GlancePlacement.Bottom,
             StartWithWindows = false,
             Modules =
@@ -41,6 +43,7 @@ public sealed class GlanceSettingsTests
 
         Assert.NotNull(result);
         Assert.True(result.AutoHide);
+        Assert.Equal(GlanceExpansionMode.AlwaysExpanded, result.ExpansionMode);
         Assert.Equal(GlancePlacement.Bottom, result.Placement);
         Assert.False(result.StartWithWindows);
         Assert.Single(result.Modules);

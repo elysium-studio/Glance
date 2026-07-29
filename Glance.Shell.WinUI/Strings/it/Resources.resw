@@ -20,6 +20,14 @@
   <data name="BooleanToggle.OffContent" xml:space="preserve"><value>No</value></data>
   <data name="AutoHideCard.Header" xml:space="preserve"><value>Nascondi automaticamente</value></data>
   <data name="AutoHideCard.Description" xml:space="preserve"><value>Nasconde Glance quando è inattivo e lo mostra quando il puntatore si avvicina all’indicatore sul bordo dello schermo</value></data>
+  <data name="GlanceExpansionCard.Header" xml:space="preserve"><value>Espansione dell’isola</value></data>
+  <data name="GlanceExpansionCard.Description" xml:space="preserve"><value>Scegli se Glance si espande al passaggio del puntatore o rimane sempre espanso</value></data>
+  <data name="GlanceExpansionHoverOption.Content" xml:space="preserve"><value>Espandi al passaggio</value></data>
+  <data name="GlanceExpansionPinnedOption.Content" xml:space="preserve"><value>Sempre espanso</value></data>
+  <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Mantieni espanso</value></data>
+  <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Mantieni l’isola espansa</value></data>
+  <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Espandi al passaggio</value></data>
+  <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Non mantenere più l’isola espansa</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>Consenti avvisi</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>Consenti al modulo di mostrarsi quando qualcosa richiede la tua attenzione</value></data>
 </root>

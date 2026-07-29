@@ -20,6 +20,14 @@
   <data name="BooleanToggle.OffContent" xml:space="preserve"><value>Nie</value></data>
   <data name="AutoHideCard.Header" xml:space="preserve"><value>Automatyczne ukrywanie</value></data>
   <data name="AutoHideCard.Description" xml:space="preserve"><value>Ukrywa Glance, gdy nie jest używany, i pokazuje go, gdy wskaźnik zbliży się do znacznika przy krawędzi ekranu</value></data>
+  <data name="GlanceExpansionCard.Header" xml:space="preserve"><value>Rozwijanie wyspy</value></data>
+  <data name="GlanceExpansionCard.Description" xml:space="preserve"><value>Wybierz, czy Glance rozwija się po wskazaniu, czy pozostaje zawsze rozwinięty</value></data>
+  <data name="GlanceExpansionHoverOption.Content" xml:space="preserve"><value>Rozwiń po wskazaniu</value></data>
+  <data name="GlanceExpansionPinnedOption.Content" xml:space="preserve"><value>Zawsze rozwinięty</value></data>
+  <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Pozostaw rozwinięty</value></data>
+  <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Pozostaw wyspę rozwiniętą</value></data>
+  <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Rozwiń po wskazaniu</value></data>
+  <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Nie pozostawiaj wyspy rozwiniętej</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>Zezwalaj na alerty</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>Pozwól temu modułowi pojawić się, gdy coś wymaga Twojej uwagi</value></data>
 </root>
