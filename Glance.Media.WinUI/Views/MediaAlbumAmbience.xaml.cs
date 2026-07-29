@@ -208,10 +208,8 @@ public sealed partial class MediaAlbumAmbience :
         }
 
         double bass = Average(args.Levels, 0, 2);
-        double energy = Average(args.Levels, 0, args.Levels.Count);
         float scale = (float)(1.38 + (bass * 0.035));
-        float opacity = (float)(0.92 + (energy * 0.025));
-        ApplyResponse(scale, opacity);
+        ApplyMotionResponse(scale);
     }
 
     private void UpdateArtwork()
@@ -303,8 +301,8 @@ public sealed partial class MediaAlbumAmbience :
         MediaTransitionDiagnostics.Write(DiagnosticSource, $"Transition begin Generation={transitionGeneration} From={currentArtwork?.Id.ToString() ?? "null"} To={nextArtwork?.Id.ToString() ?? "null"}");
         isArtworkPreparing = false;
         isArtworkTransitioning = true;
-        currentArtworkVisual.Opacity = 0;
-        nextArtworkVisual.Opacity = 1;
+        currentArtworkVisual.Opacity = 1;
+        nextArtworkVisual.Opacity = 0;
         CompositionScopedBatch batch = currentArtworkVisual.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
         StartArtworkOpacityAnimation(currentArtworkVisual, 1, 0);
         StartArtworkOpacityAnimation(nextArtworkVisual, 0, 1);
@@ -495,6 +493,16 @@ public sealed partial class MediaAlbumAmbience :
 
         motionVisual.Scale = new Vector3(scale, scale, 1);
         ambientVisual.Opacity = opacity;
+    }
+
+    private void ApplyMotionResponse(float scale)
+    {
+        if (motionVisual is null)
+        {
+            return;
+        }
+
+        motionVisual.Scale = new Vector3(scale, scale, 1);
     }
 
     private bool CanAnimate =>
