@@ -18,6 +18,8 @@ public sealed partial class MediaComponent :
     IGlanceAttentionComponent,
     IDisposable
 {
+    private const int MediaRefreshDelayMs = 120;
+
     private static readonly double[] SilentAudioLevels = [0, 0, 0, 0, 0];
 
     private readonly MediaViewModel viewModel;
@@ -25,10 +27,12 @@ public sealed partial class MediaComponent :
     private readonly IGlanceAttentionService attentionService;
     private readonly DispatcherQueue dispatcherQueue;
     private readonly AudioLevelMonitor audioLevelMonitor;
+    private DispatcherQueueTimer? mediaRefreshTimer;
     private GlobalSystemMediaTransportControlsSessionManager? sessionManager;
     private GlobalSystemMediaTransportControlsSession? session;
     private string? currentArtworkHash;
     private string? currentTitle;
+    private int refreshGeneration;
 
     public MediaComponent(MediaViewModel viewModel,
         IGlanceAttentionService attentionService,
@@ -78,10 +82,17 @@ public sealed partial class MediaComponent :
         viewModel.PropertyChanged -= HandleViewModelPropertyChanged;
         audioLevelMonitor.LevelsChanged -= HandleAudioLevelsChanged;
         audioLevelMonitor.Dispose();
+        refreshGeneration++;
 
         if (sessionManager is not null)
         {
             sessionManager.CurrentSessionChanged -= HandleCurrentSessionChanged;
+        }
+
+        if (mediaRefreshTimer is not null)
+        {
+            mediaRefreshTimer.Stop();
+            mediaRefreshTimer.Tick -= HandleMediaRefreshTimerTick;
         }
 
         DetachSession();
@@ -116,6 +127,7 @@ public sealed partial class MediaComponent :
 
     private void AttachSession(GlobalSystemMediaTransportControlsSession? newSession)
     {
+        mediaRefreshTimer?.Stop();
         DetachSession();
         session = newSession;
 
@@ -128,6 +140,8 @@ public sealed partial class MediaComponent :
 
     private void DetachSession()
     {
+        refreshGeneration++;
+
         if (session is not null)
         {
             session.MediaPropertiesChanged -= HandleMediaPropertiesChanged;
@@ -138,7 +152,29 @@ public sealed partial class MediaComponent :
 
     private void HandleMediaPropertiesChanged(GlobalSystemMediaTransportControlsSession sender,
         MediaPropertiesChangedEventArgs args) =>
-        dispatcherQueue.TryEnqueue(async () => await Refresh());
+        dispatcherQueue.TryEnqueue(ScheduleMediaRefresh);
+
+    private void ScheduleMediaRefresh()
+    {
+        mediaRefreshTimer ??= CreateMediaRefreshTimer();
+        mediaRefreshTimer.Stop();
+        mediaRefreshTimer.Start();
+    }
+
+    private DispatcherQueueTimer CreateMediaRefreshTimer()
+    {
+        DispatcherQueueTimer timer = dispatcherQueue.CreateTimer();
+        timer.Interval = TimeSpan.FromMilliseconds(MediaRefreshDelayMs);
+        timer.IsRepeating = false;
+        timer.Tick += HandleMediaRefreshTimerTick;
+        return timer;
+    }
+
+    private async void HandleMediaRefreshTimerTick(DispatcherQueueTimer sender, object args)
+    {
+        sender.Stop();
+        await Refresh();
+    }
 
     private void HandlePlaybackInfoChanged(GlobalSystemMediaTransportControlsSession sender,
         PlaybackInfoChangedEventArgs args) =>
@@ -180,6 +216,7 @@ public sealed partial class MediaComponent :
 
     private async Task Refresh()
     {
+        int generation = ++refreshGeneration;
         GlobalSystemMediaTransportControlsSession? mediaSession = session;
 
         if (mediaSession is null)
@@ -218,8 +255,18 @@ public sealed partial class MediaComponent :
 
         try
         {
+            if (generation != refreshGeneration || !ReferenceEquals(mediaSession, session))
+            {
+                return;
+            }
+
             await RunOnDispatcherAsync(async () =>
             {
+                if (generation != refreshGeneration || !ReferenceEquals(mediaSession, session))
+                {
+                    return;
+                }
+
                 viewModel.Title = title;
                 viewModel.Artist = artist;
                 viewModel.Source = source;

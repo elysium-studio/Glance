@@ -11,7 +11,7 @@ namespace Glance.Media.WinUI;
 public sealed partial class MediaArtworkTransition :
     UserControl
 {
-    private const int IncomingDelayMs = 210;
+    private const int IncomingDelayMs = OutgoingDurationMs;
     private const int IncomingDurationMs = 320;
     private const int OutgoingDurationMs = 260;
 
