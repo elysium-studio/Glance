@@ -48,6 +48,7 @@ public sealed partial class MediaAlbumAmbience :
         Compositor compositor = ElementCompositionPreview.GetElementVisual(this).Compositor;
         ambientVisual = ElementCompositionPreview.GetElementVisual(this);
         motionVisual = ElementCompositionPreview.GetElementVisual(MotionLayer);
+        ambientVisual.Opacity = 0;
         clipGeometry = compositor.CreateRoundedRectangleGeometry();
         clipGeometry.CornerRadius = new Vector2(28);
         clipGeometry.Size = new Vector2((float)ActualWidth, (float)ActualHeight);
@@ -57,8 +58,8 @@ public sealed partial class MediaAlbumAmbience :
         easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.22f, 0.72f), new Vector2(0.18f, 1));
         Subscribe();
         UpdateArtwork();
-        UpdateState();
         ConfigureResponseAnimations(compositor);
+        UpdateState();
     }
 
     private void HandleUnloaded(object sender, RoutedEventArgs args)
@@ -206,7 +207,7 @@ public sealed partial class MediaAlbumAmbience :
 
         ScalarKeyFrameAnimation opacityAnimation = compositor.CreateScalarKeyFrameAnimation();
         opacityAnimation.Target = nameof(Visual.Opacity);
-        opacityAnimation.Duration = TimeSpan.FromMilliseconds(220);
+        opacityAnimation.Duration = TimeSpan.FromMilliseconds(280);
         opacityAnimation.InsertExpressionKeyFrame(1, "this.FinalValue", easing);
         ambientImplicitAnimations = compositor.CreateImplicitAnimationCollection();
         ambientImplicitAnimations[nameof(Visual.Opacity)] = opacityAnimation;

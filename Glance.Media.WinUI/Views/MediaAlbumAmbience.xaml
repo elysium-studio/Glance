@@ -15,6 +15,6 @@
                 x:Name="AmbientArtwork"
                 Stretch="UniformToFill" />
         </Grid>
-        <Border Background="{ThemeResource GlanceMediaAmbientMaterialBrush}" />
+        <Rectangle Fill="{ThemeResource AcrylicInAppFillColorDefaultBrush}" />
     </Grid>
 </UserControl>
