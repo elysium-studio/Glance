@@ -26,6 +26,7 @@ public sealed partial class MediaAlbumAmbience :
     private CompositionEffectBrush? artworkEffectBrush;
     private CompositionSurfaceBrush? currentSurfaceBrush;
     private CompositionSurfaceBrush? nextSurfaceBrush;
+    private CompositionSurfaceBrush? retiredSurfaceBrush;
     private CompositionRoundedRectangleGeometry? clipGeometry;
     private CompositionGeometricClip? roundedClip;
     private CompositionEasingFunction? easing;
@@ -34,6 +35,7 @@ public sealed partial class MediaAlbumAmbience :
     private MediaAmbientArtwork? desiredArtwork;
     private MediaAmbientArtwork? currentArtwork;
     private MediaAmbientArtwork? nextArtwork;
+    private MediaAmbientArtwork? retiredArtwork;
     private int artworkTransitionGeneration;
     private bool isArtworkTransitioning;
     private bool isPanning;
@@ -106,9 +108,11 @@ public sealed partial class MediaAlbumAmbience :
             currentArtwork.Dispose();
         }
 
+        retiredArtwork?.Dispose();
         ElementCompositionPreview.SetElementChildVisual(ArtworkHost, null);
         currentSurfaceBrush?.Dispose();
         nextSurfaceBrush?.Dispose();
+        retiredSurfaceBrush?.Dispose();
         artworkEffectBrush?.Dispose();
         artworkVisual?.Dispose();
         motionImplicitAnimations?.Dispose();
@@ -117,10 +121,13 @@ public sealed partial class MediaAlbumAmbience :
         clipGeometry?.Dispose();
         currentSurfaceBrush = null;
         nextSurfaceBrush = null;
+        retiredSurfaceBrush = null;
         artworkEffectBrush = null;
         artworkVisual = null;
         currentArtwork = null;
         nextArtwork = null;
+        retiredArtwork = null;
+        desiredArtwork = null;
         roundedClip = null;
         clipGeometry = null;
         motionImplicitAnimations = null;
@@ -150,8 +157,8 @@ public sealed partial class MediaAlbumAmbience :
         {
             Name = CrossFadeEffectName,
             CrossFade = 0,
-            Source1 = new CompositionEffectSourceParameter(NextSourceName),
-            Source2 = new CompositionEffectSourceParameter(CurrentSourceName)
+            Source1 = new CompositionEffectSourceParameter(CurrentSourceName),
+            Source2 = new CompositionEffectSourceParameter(NextSourceName)
         };
         using CompositionEffectFactory factory = compositor.CreateEffectFactory(crossFade, [CrossFadeProperty]);
         artworkEffectBrush = factory.CreateBrush();
@@ -225,14 +232,16 @@ public sealed partial class MediaAlbumAmbience :
             return;
         }
 
-        if (artwork is null || ReferenceEquals(currentArtwork, artwork))
+        if (artwork is null ||
+            ReferenceEquals(currentArtwork, artwork) ||
+            ReferenceEquals(nextArtwork, artwork))
         {
             return;
         }
 
         if (isArtworkTransitioning)
         {
-            PromoteNextArtwork();
+            return;
         }
 
         if (currentArtwork is null)
@@ -277,6 +286,12 @@ public sealed partial class MediaAlbumAmbience :
             if (transitionGeneration == artworkTransitionGeneration)
             {
                 PromoteNextArtwork();
+
+                if (desiredArtwork is not null &&
+                    !ReferenceEquals(desiredArtwork, currentArtwork))
+                {
+                    StartArtworkTransition(desiredArtwork);
+                }
             }
         };
         batch.End();
@@ -292,6 +307,17 @@ public sealed partial class MediaAlbumAmbience :
         artworkEffectBrush.Properties.StopAnimation(CrossFadeProperty);
         MediaAmbientArtwork? previousArtwork = currentArtwork;
         CompositionSurfaceBrush? previousBrush = currentSurfaceBrush;
+        retiredSurfaceBrush?.Dispose();
+
+        if (retiredArtwork is not null &&
+            !ReferenceEquals(retiredArtwork, desiredArtwork) &&
+            !ReferenceEquals(retiredArtwork, viewModel?.AmbientArtwork))
+        {
+            retiredArtwork.Dispose();
+        }
+
+        retiredArtwork = previousArtwork;
+        retiredSurfaceBrush = previousBrush;
         currentArtwork = nextArtwork;
         currentSurfaceBrush = nextSurfaceBrush;
         nextArtwork = null;
@@ -299,15 +325,6 @@ public sealed partial class MediaAlbumAmbience :
         artworkEffectBrush.SetSourceParameter(CurrentSourceName, currentSurfaceBrush);
         artworkEffectBrush.SetSourceParameter(NextSourceName, currentSurfaceBrush);
         artworkEffectBrush.Properties.InsertScalar(CrossFadeProperty, 0);
-        previousBrush?.Dispose();
-
-        if (previousArtwork is not null &&
-            !ReferenceEquals(previousArtwork, desiredArtwork) &&
-            !ReferenceEquals(previousArtwork, viewModel?.AmbientArtwork))
-        {
-            previousArtwork.Dispose();
-        }
-
         isArtworkTransitioning = false;
     }
 
