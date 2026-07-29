@@ -9,12 +9,12 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Media.xaml" />
     </UserControl.Resources>
-    <Grid x:Name="MotionLayer">
-        <Image
-            x:Name="AmbientArtwork"
-            Stretch="UniformToFill" />
-        <Border Background="{ThemeResource GlanceMediaAmbientBaseBrush}" />
-        <Grid x:Name="BlurHost" />
-        <Border Background="{ThemeResource GlanceMediaAmbientTintBrush}" />
+    <Grid>
+        <Grid x:Name="MotionLayer">
+            <Image
+                x:Name="AmbientArtwork"
+                Stretch="UniformToFill" />
+        </Grid>
+        <Border Background="{ThemeResource GlanceMediaAmbientMaterialBrush}" />
     </Grid>
 </UserControl>

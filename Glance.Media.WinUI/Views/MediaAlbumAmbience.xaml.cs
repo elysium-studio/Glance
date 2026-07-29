@@ -1,4 +1,3 @@
-using Microsoft.Graphics.Canvas.Effects;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -17,10 +16,6 @@ public sealed partial class MediaAlbumAmbience :
     private MediaViewModel? viewModel;
     private Visual? ambientVisual;
     private Visual? motionVisual;
-    private SpriteVisual? blurVisual;
-    private CompositionVisualSurface? artworkSurface;
-    private CompositionSurfaceBrush? artworkBrush;
-    private CompositionEffectBrush? blurBrush;
     private CompositionRoundedRectangleGeometry? clipGeometry;
     private CompositionGeometricClip? roundedClip;
     private CompositionEasingFunction? easing;
@@ -60,7 +55,6 @@ public sealed partial class MediaAlbumAmbience :
         ambientVisual.Clip = roundedClip;
         motionVisual.CenterPoint = new Vector3((float)ActualWidth / 2, (float)ActualHeight / 2, 0);
         easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.22f, 0.72f), new Vector2(0.18f, 1));
-        CreateBlurVisual(compositor);
         Subscribe();
         UpdateArtwork();
         UpdateState();
@@ -82,19 +76,10 @@ public sealed partial class MediaAlbumAmbience :
             ambientVisual.ImplicitAnimations = null;
         }
 
-        ElementCompositionPreview.SetElementChildVisual(BlurHost, null);
         motionImplicitAnimations?.Dispose();
         ambientImplicitAnimations?.Dispose();
-        blurVisual?.Dispose();
-        blurBrush?.Dispose();
-        artworkBrush?.Dispose();
-        artworkSurface?.Dispose();
         roundedClip?.Dispose();
         clipGeometry?.Dispose();
-        blurVisual = null;
-        blurBrush = null;
-        artworkBrush = null;
-        artworkSurface = null;
         roundedClip = null;
         clipGeometry = null;
         motionImplicitAnimations = null;
@@ -111,61 +96,10 @@ public sealed partial class MediaAlbumAmbience :
             motionVisual.CenterPoint = new Vector3((float)args.NewSize.Width / 2, (float)args.NewSize.Height / 2, 0);
         }
 
-        if (blurVisual is not null)
-        {
-            blurVisual.Size = new Vector2((float)args.NewSize.Width, (float)args.NewSize.Height);
-        }
-
-        if (artworkSurface is not null)
-        {
-            artworkSurface.SourceSize = new Vector2((float)args.NewSize.Width, (float)args.NewSize.Height);
-        }
-
         if (clipGeometry is not null)
         {
             clipGeometry.Size = new Vector2((float)args.NewSize.Width, (float)args.NewSize.Height);
         }
-    }
-
-    private void CreateBlurVisual(Compositor compositor)
-    {
-        GaussianBlurEffect firstBlur = new()
-        {
-            BlurAmount = 250,
-            BorderMode = EffectBorderMode.Hard,
-            Source = new CompositionEffectSourceParameter("artwork")
-        };
-        GaussianBlurEffect secondBlur = new()
-        {
-            BlurAmount = 250,
-            BorderMode = EffectBorderMode.Hard,
-            Source = firstBlur
-        };
-        GaussianBlurEffect thirdBlur = new()
-        {
-            BlurAmount = 250,
-            BorderMode = EffectBorderMode.Hard,
-            Source = secondBlur
-        };
-        SaturationEffect saturation = new()
-        {
-            Saturation = 1.42f,
-            Source = thirdBlur
-        };
-
-        artworkSurface = compositor.CreateVisualSurface();
-        artworkSurface.SourceVisual = ElementCompositionPreview.GetElementVisual(AmbientArtwork);
-        artworkSurface.SourceSize = new Vector2((float)ActualWidth, (float)ActualHeight);
-        artworkBrush = compositor.CreateSurfaceBrush(artworkSurface);
-        artworkBrush.Stretch = CompositionStretch.Fill;
-        blurBrush = compositor.CreateEffectFactory(saturation).CreateBrush();
-        blurBrush.SetSourceParameter("artwork", artworkBrush);
-
-        blurVisual = compositor.CreateSpriteVisual();
-        blurVisual.Brush = blurBrush;
-        blurVisual.Opacity = 0.72f;
-        blurVisual.Size = new Vector2((float)ActualWidth, (float)ActualHeight);
-        ElementCompositionPreview.SetElementChildVisual(BlurHost, blurVisual);
     }
 
     private void Subscribe()
@@ -218,8 +152,8 @@ public sealed partial class MediaAlbumAmbience :
         double bass = Average(args.Levels, 0, 2);
         double energy = Average(args.Levels, 0, args.Levels.Count);
 
-        float scale = (float)(1.45 + (bass * 0.035));
-        float opacity = (float)(0.72 + (energy * 0.04));
+        float scale = (float)(1.38 + (bass * 0.035));
+        float opacity = (float)(0.92 + (energy * 0.025));
 
         ApplyResponse(scale, opacity);
     }
@@ -235,7 +169,7 @@ public sealed partial class MediaAlbumAmbience :
         }
 
         bool hasArtwork = viewModel?.HasSession == true && viewModel.Artwork is ImageSource;
-        float opacity = hasArtwork ? 0.72f : 0;
+        float opacity = hasArtwork ? 0.92f : 0;
 
         if (ShouldPan)
         {
@@ -248,11 +182,11 @@ public sealed partial class MediaAlbumAmbience :
 
         if (!CanAnimate)
         {
-            ApplyResponse(1.45f, opacity);
+            ApplyResponse(1.38f, opacity);
             return;
         }
 
-        ApplyResponse(1.45f, opacity);
+        ApplyResponse(1.38f, opacity);
     }
 
     private void ConfigureResponseAnimations(Compositor compositor)
