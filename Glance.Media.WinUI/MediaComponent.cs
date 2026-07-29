@@ -86,6 +86,7 @@ public sealed partial class MediaComponent :
         viewModel.PropertyChanged -= HandleViewModelPropertyChanged;
         audioLevelMonitor.LevelsChanged -= HandleAudioLevelsChanged;
         audioLevelMonitor.Dispose();
+        (viewModel.AmbientArtwork as IDisposable)?.Dispose();
         refreshGeneration++;
 
         if (sessionManager is not null)
@@ -374,23 +375,24 @@ public sealed partial class MediaComponent :
                         {
                             BitmapImage artwork = new();
                             await artwork.SetSourceAsync(artworkStream);
-                            viewModel.Artwork = artwork;
+                            MediaAmbientArtwork? ambientArtwork = null;
 
                             try
                             {
                                 artworkStream.Seek(0);
-                                BitmapImage ambientArtwork = new()
-                                {
-                                    DecodePixelHeight = 3,
-                                    DecodePixelType = DecodePixelType.Physical,
-                                    DecodePixelWidth = 3
-                                };
-                                await ambientArtwork.SetSourceAsync(artworkStream);
-                                viewModel.AmbientArtwork = ambientArtwork;
+                                IRandomAccessStream ambientStream = artworkStream;
+                                artworkStream = null;
+                                ambientArtwork = await MediaAmbientArtwork.LoadAsync(ambientStream);
                             }
                             catch
                             {
-                                viewModel.AmbientArtwork = null;
+                            }
+
+                            viewModel.Artwork = artwork;
+
+                            if (ambientArtwork is not null)
+                            {
+                                viewModel.AmbientArtwork = ambientArtwork;
                             }
                         }
                         else

@@ -11,14 +11,7 @@
     </UserControl.Resources>
     <Grid>
         <Grid x:Name="MotionLayer">
-            <Image
-                x:Name="PrimaryArtwork"
-                Opacity="0"
-                Stretch="UniformToFill" />
-            <Image
-                x:Name="SecondaryArtwork"
-                Opacity="0"
-                Stretch="UniformToFill" />
+            <Grid x:Name="ArtworkHost" />
         </Grid>
         <Rectangle Fill="{ThemeResource AcrylicInAppFillColorDefaultBrush}" />
     </Grid>
