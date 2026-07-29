@@ -80,8 +80,14 @@ public sealed partial class DesktopIslandView :
         ViewModel.PropertyChanged += HandleViewModelPropertyChanged;
         ViewModel.AttentionReceived += HandleAttentionReceived;
         Deactivated += HandleIslandDeactivated;
-        UpdateExpansionLockComponent();
+        DispatcherQueue.TryEnqueue(InitializeExpansionState);
         StartStartupAttentionTimer();
+    }
+
+    private void InitializeExpansionState()
+    {
+        ViewModel.IsExpanded = ViewModel.IsPinned;
+        UpdateExpansionLockComponent();
     }
 
     private void HandleUnloaded(object sender, RoutedEventArgs args)
