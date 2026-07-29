@@ -19,11 +19,7 @@
                 x:Name="ArtworkContainer"
                 Width="28"
                 Height="28"
-                CornerRadius="7"
-                Translation="0,0,8">
-                <Border.Shadow>
-                    <ThemeShadow />
-                </Border.Shadow>
+                CornerRadius="7">
                 <Grid>
                     <Border
                         Background="{ThemeResource ControlFillColorSecondaryBrush}"

@@ -10,10 +10,20 @@
         <Image
             x:Name="PrimaryArtwork"
             Opacity="0"
-            Stretch="UniformToFill" />
+            Stretch="UniformToFill"
+            Translation="0,0,8">
+            <Image.Shadow>
+                <ThemeShadow />
+            </Image.Shadow>
+        </Image>
         <Image
             x:Name="SecondaryArtwork"
             Opacity="0"
-            Stretch="UniformToFill" />
+            Stretch="UniformToFill"
+            Translation="0,0,8">
+            <Image.Shadow>
+                <ThemeShadow />
+            </Image.Shadow>
+        </Image>
     </Grid>
 </UserControl>
