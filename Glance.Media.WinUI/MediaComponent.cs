@@ -322,6 +322,7 @@ public sealed partial class MediaComponent :
             mediaSession.GetPlaybackInfo();
         IRandomAccessStreamWithContentType? artworkStream = null;
         string? artworkHash = null;
+        uint accentColor = MediaViewModel.DefaultAccentColor;
 
         if (properties.Thumbnail is not null)
         {
@@ -334,6 +335,18 @@ public sealed partial class MediaComponent :
             {
                 artworkStream?.Dispose();
                 artworkStream = null;
+            }
+        }
+
+        if (artworkStream is not null &&
+            !string.Equals(currentArtworkHash, artworkHash, StringComparison.Ordinal))
+        {
+            try
+            {
+                accentColor = await MediaArtworkColorAnalyzer.GetDominantColorAsync(artworkStream);
+            }
+            catch
+            {
             }
         }
 
@@ -373,16 +386,6 @@ public sealed partial class MediaComponent :
                     {
                         if (artworkStream is not null)
                         {
-                            uint accentColor = MediaViewModel.DefaultAccentColor;
-
-                            try
-                            {
-                                accentColor = await MediaArtworkColorAnalyzer.GetDominantColorAsync(artworkStream);
-                            }
-                            catch
-                            {
-                            }
-
                             artworkStream.Seek(0);
                             BitmapImage artwork = new();
                             await artwork.SetSourceAsync(artworkStream);
