@@ -74,6 +74,9 @@ public sealed partial class DesktopIslandView :
     public Visibility WhenNotPinned(bool isPinned) =>
         isPinned ? Visibility.Collapsed : Visibility.Visible;
 
+    public object? ToBackgroundContent(IGlanceComponent? component) =>
+        (component as IGlanceBackgroundComponent)?.BackgroundContent;
+
     private void HandleLoaded(object sender, RoutedEventArgs args)
     {
         previousIndex = ViewModel.SelectedIndex;

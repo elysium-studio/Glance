@@ -14,6 +14,7 @@ namespace Glance.Media.WinUI;
 
 public sealed partial class MediaComponent :
     IGlanceComponent,
+    IGlanceBackgroundComponent,
     IGlanceConnectedAnimationComponent,
     IGlanceAttentionComponent,
     IDisposable
@@ -49,6 +50,10 @@ public sealed partial class MediaComponent :
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         audioLevelMonitor = new AudioLevelMonitor();
 
+        BackgroundContent = new MediaAlbumAmbience
+        {
+            ViewModel = viewModel
+        };
         MediaCompactView compactView = new(viewModel);
         MediaExpandedView expandedView = new(viewModel);
 
@@ -72,6 +77,8 @@ public sealed partial class MediaComponent :
     public int Order => 20;
 
     public object CompactContent { get; }
+
+    public object BackgroundContent { get; }
 
     public object ExpandedContent { get; }
 
