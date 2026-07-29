@@ -129,16 +129,28 @@ public sealed partial class MediaAlbumAmbience :
 
     private void CreateBlurVisual(Compositor compositor)
     {
-        GaussianBlurEffect blur = new()
+        GaussianBlurEffect firstBlur = new()
         {
-            BlurAmount = 220,
+            BlurAmount = 250,
             BorderMode = EffectBorderMode.Hard,
             Source = new CompositionEffectSourceParameter("artwork")
         };
+        GaussianBlurEffect secondBlur = new()
+        {
+            BlurAmount = 250,
+            BorderMode = EffectBorderMode.Hard,
+            Source = firstBlur
+        };
+        GaussianBlurEffect thirdBlur = new()
+        {
+            BlurAmount = 250,
+            BorderMode = EffectBorderMode.Hard,
+            Source = secondBlur
+        };
         SaturationEffect saturation = new()
         {
-            Saturation = 1.3f,
-            Source = blur
+            Saturation = 1.42f,
+            Source = thirdBlur
         };
 
         artworkSurface = compositor.CreateVisualSurface();
