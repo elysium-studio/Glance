@@ -100,17 +100,8 @@ public sealed partial class MediaAlbumAmbience :
             ambientVisual.ImplicitAnimations = null;
         }
 
-        if (nextArtwork is not null &&
-            !ReferenceEquals(nextArtwork, viewModel?.AmbientArtwork))
-        {
-            nextArtwork.Dispose();
-        }
-
-        if (currentArtwork is not null &&
-            !ReferenceEquals(currentArtwork, viewModel?.AmbientArtwork))
-        {
-            currentArtwork.Dispose();
-        }
+        nextArtwork?.Dispose();
+        currentArtwork?.Dispose();
 
         ElementCompositionPreview.SetElementChildVisual(ArtworkHost, null);
         currentSurfaceBrush?.Dispose();
@@ -261,7 +252,7 @@ public sealed partial class MediaAlbumAmbience :
     private void SetCurrentArtwork(MediaAmbientArtwork artwork)
     {
         MediaTransitionDiagnostics.Write(DiagnosticSource, $"Set current Artwork={artwork.Id}");
-        currentArtwork = artwork;
+        currentArtwork = artwork.Retain();
         currentSurfaceBrush = CreateSurfaceBrush(artwork);
         currentArtworkVisual!.Brush = currentSurfaceBrush;
         currentArtworkVisual.Opacity = 1;
@@ -271,7 +262,7 @@ public sealed partial class MediaAlbumAmbience :
     {
         int transitionGeneration = ++artworkTransitionGeneration;
         MediaTransitionDiagnostics.Write(DiagnosticSource, $"Prepare transition Generation={transitionGeneration} From={currentArtwork?.Id.ToString() ?? "null"} To={artwork.Id}");
-        nextArtwork = artwork;
+        nextArtwork = artwork.Retain();
         nextSurfaceBrush = CreateSurfaceBrush(artwork);
         nextArtworkVisual!.Brush = nextSurfaceBrush;
         currentArtworkVisual!.StopAnimation(nameof(Visual.Opacity));
@@ -365,13 +356,8 @@ public sealed partial class MediaAlbumAmbience :
         nextArtworkVisual.Opacity = 0;
         previousBrush?.Dispose();
 
-        if (previousArtwork is not null &&
-            !ReferenceEquals(previousArtwork, desiredArtwork) &&
-            !ReferenceEquals(previousArtwork, viewModel?.AmbientArtwork))
-        {
-            MediaTransitionDiagnostics.Write(DiagnosticSource, $"Disposing previous Artwork={previousArtwork.Id}");
-            previousArtwork.Dispose();
-        }
+        MediaTransitionDiagnostics.Write(DiagnosticSource, $"Releasing previous Artwork={previousArtwork?.Id.ToString() ?? "null"}");
+        previousArtwork?.Dispose();
 
         isArtworkTransitioning = false;
         MediaTransitionDiagnostics.Write(DiagnosticSource, $"Promotion complete Current={currentArtwork?.Id.ToString() ?? "null"}");

@@ -34,6 +34,7 @@ public sealed partial class MediaComponent :
     private DispatcherQueueTimer? sessionMissingTimer;
     private GlobalSystemMediaTransportControlsSessionManager? sessionManager;
     private GlobalSystemMediaTransportControlsSession? session;
+    private MediaAmbientArtwork? currentAmbientArtwork;
     private string? currentArtworkHash;
     private string? currentTitle;
     private int refreshGeneration;
@@ -86,7 +87,7 @@ public sealed partial class MediaComponent :
         viewModel.PropertyChanged -= HandleViewModelPropertyChanged;
         audioLevelMonitor.LevelsChanged -= HandleAudioLevelsChanged;
         audioLevelMonitor.Dispose();
-        (viewModel.AmbientArtwork as IDisposable)?.Dispose();
+        SetAmbientArtwork(null);
         refreshGeneration++;
 
         if (sessionManager is not null)
@@ -432,7 +433,7 @@ public sealed partial class MediaComponent :
 
                                 if (ambientArtwork is not null)
                                 {
-                                    viewModel.AmbientArtwork = ambientArtwork;
+                                    SetAmbientArtwork(ambientArtwork);
                                 }
 
                                 currentArtworkHash = artworkHash;
@@ -451,7 +452,7 @@ public sealed partial class MediaComponent :
                         {
                             MediaTransitionDiagnostics.Write("Component", $"Artwork clearing Generation={generation} Hash={ShortHash(artworkHash)}");
                             viewModel.Artwork = null;
-                            viewModel.AmbientArtwork = null;
+                            SetAmbientArtwork(null);
                             viewModel.AccentColor = MediaViewModel.DefaultAccentColor;
                             currentArtworkHash = artworkHash;
                         }
@@ -506,7 +507,7 @@ public sealed partial class MediaComponent :
         viewModel.Artist = localizer.GetText("OpenMediaApp");
         viewModel.Source = localizer.GetText("ModuleTitle");
         viewModel.Artwork = null;
-        viewModel.AmbientArtwork = null;
+        SetAmbientArtwork(null);
         viewModel.AccentColor = MediaViewModel.DefaultAccentColor;
         viewModel.IsPlaying = false;
         viewModel.HasSession = false;
@@ -589,6 +590,19 @@ public sealed partial class MediaComponent :
         }
 
         return completion.Task;
+    }
+
+    private void SetAmbientArtwork(MediaAmbientArtwork? artwork)
+    {
+        if (ReferenceEquals(currentAmbientArtwork, artwork))
+        {
+            return;
+        }
+
+        MediaAmbientArtwork? previousArtwork = currentAmbientArtwork;
+        currentAmbientArtwork = artwork;
+        viewModel.AmbientArtwork = artwork;
+        previousArtwork?.Dispose();
     }
 
     private static string FormatSourceName(string sourceAppUserModelId)

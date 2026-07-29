@@ -12,7 +12,9 @@ internal sealed partial class MediaAmbientArtwork :
 {
     private static int nextId;
 
+    private readonly object sync = new();
     private LoadedImageSurface? surface;
+    private int referenceCount = 1;
 
     private MediaAmbientArtwork(LoadedImageSurface surface)
     {
@@ -23,8 +25,27 @@ internal sealed partial class MediaAmbientArtwork :
 
     public int Id { get; }
 
-    public LoadedImageSurface Surface =>
-        surface ?? throw new ObjectDisposedException(nameof(MediaAmbientArtwork));
+    public LoadedImageSurface Surface
+    {
+        get
+        {
+            lock (sync)
+            {
+                return surface ?? throw new ObjectDisposedException(nameof(MediaAmbientArtwork));
+            }
+        }
+    }
+
+    public MediaAmbientArtwork Retain()
+    {
+        lock (sync)
+        {
+            ObjectDisposedException.ThrowIf(surface is null, this);
+            referenceCount++;
+            MediaTransitionDiagnostics.Write("Surface", $"Retain Artwork={Id} References={referenceCount}");
+            return this;
+        }
+    }
 
     public static Task<MediaAmbientArtwork?> LoadAsync(IRandomAccessStream stream)
     {
@@ -66,9 +87,32 @@ internal sealed partial class MediaAmbientArtwork :
 
     public void Dispose()
     {
-        MediaTransitionDiagnostics.Write("Surface", $"Dispose Artwork={Id} HasSurface={surface is not null}");
-        surface?.Dispose();
-        surface = null;
+        LoadedImageSurface? releasedSurface = null;
+
+        lock (sync)
+        {
+            if (referenceCount == 0)
+            {
+                MediaTransitionDiagnostics.Write("Surface", $"Release ignored Artwork={Id} References=0");
+                return;
+            }
+
+            referenceCount--;
+            MediaTransitionDiagnostics.Write("Surface", $"Release Artwork={Id} References={referenceCount}");
+
+            if (referenceCount == 0)
+            {
+                releasedSurface = surface;
+                surface = null;
+            }
+        }
+
+        if (releasedSurface is not null)
+        {
+            MediaTransitionDiagnostics.Write("Surface", $"Dispose Artwork={Id}");
+            releasedSurface.Dispose();
+        }
+
         GC.SuppressFinalize(this);
     }
 }
