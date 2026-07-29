@@ -128,12 +128,12 @@ public sealed partial class MediaAlbumAmbience :
 
     private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
-        if (args.PropertyName == nameof(MediaViewModel.Artwork))
+        if (args.PropertyName == nameof(MediaViewModel.AmbientArtwork))
         {
             UpdateArtwork();
         }
 
-        if (args.PropertyName is nameof(MediaViewModel.Artwork) or
+        if (args.PropertyName is nameof(MediaViewModel.AmbientArtwork) or
             nameof(MediaViewModel.HasSession) or
             nameof(MediaViewModel.IsPlaying) or
             nameof(MediaViewModel.ShowAudioVisualization))
@@ -159,7 +159,7 @@ public sealed partial class MediaAlbumAmbience :
     }
 
     private void UpdateArtwork() =>
-        AmbientArtwork.Source = viewModel?.Artwork as ImageSource;
+        AmbientArtwork.Source = viewModel?.AmbientArtwork as ImageSource;
 
     private void UpdateState()
     {
@@ -168,7 +168,7 @@ public sealed partial class MediaAlbumAmbience :
             return;
         }
 
-        bool hasArtwork = viewModel?.HasSession == true && viewModel.Artwork is ImageSource;
+        bool hasArtwork = viewModel?.HasSession == true && viewModel.AmbientArtwork is ImageSource;
         float opacity = hasArtwork ? 0.92f : 0;
 
         if (ShouldPan)
@@ -266,13 +266,13 @@ public sealed partial class MediaAlbumAmbience :
     }
 
     private bool CanAnimate =>
-        viewModel?.Artwork is ImageSource &&
+        viewModel?.AmbientArtwork is ImageSource &&
         viewModel.HasSession &&
         viewModel.IsPlaying &&
         viewModel.ShowAudioVisualization;
 
     private bool ShouldPan =>
-        viewModel?.Artwork is ImageSource &&
+        viewModel?.AmbientArtwork is ImageSource &&
         viewModel.HasSession &&
         viewModel.ShowAudioVisualization;
 

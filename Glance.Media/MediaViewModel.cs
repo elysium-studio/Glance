@@ -26,6 +26,9 @@ public sealed partial class MediaViewModel :
     private object? artwork;
 
     [ObservableProperty]
+    private object? ambientArtwork;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PlayPauseGlyph))]
     private bool isPlaying;
 
