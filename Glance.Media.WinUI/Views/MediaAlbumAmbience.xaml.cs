@@ -112,7 +112,7 @@ public sealed partial class MediaAlbumAmbience :
     {
         GaussianBlurEffect blur = new()
         {
-            BlurAmount = 48,
+            BlurAmount = 68,
             BorderMode = EffectBorderMode.Hard,
             Source = new CompositionEffectSourceParameter("artwork")
         };
@@ -186,14 +186,14 @@ public sealed partial class MediaAlbumAmbience :
         double bass = Average(args.Levels, 0, 2);
         double energy = Average(args.Levels, 0, args.Levels.Count);
         double upperRange = Average(args.Levels, 3, 2);
-        phase += 0.045 + (energy * 0.08);
+        phase += 0.018 + (energy * 0.035);
 
-        float scale = (float)(1.08 + (bass * 0.035));
-        float horizontalDrift = (float)((Math.Cos(phase) * (0.8 + (energy * 2.6))) + ((upperRange - bass) * 1.5));
-        float verticalDrift = (float)(Math.Sin(phase * 0.78) * (0.5 + (energy * 1.8)));
+        float scale = (float)(1.16 + (bass * 0.04));
+        float horizontalDrift = (float)((Math.Cos(phase) * (5.5 + (energy * 5.5))) + ((upperRange - bass) * 2));
+        float verticalDrift = (float)(Math.Sin(phase * 0.72) * (3.5 + (energy * 4.5)));
         float opacity = (float)(0.36 + (energy * 0.06));
 
-        AnimateMotion(scale, horizontalDrift, verticalDrift, opacity, TimeSpan.FromMilliseconds(120));
+        AnimateMotion(scale, horizontalDrift, verticalDrift, opacity, TimeSpan.FromMilliseconds(160));
     }
 
     private void UpdateArtwork() =>
@@ -213,11 +213,11 @@ public sealed partial class MediaAlbumAmbience :
         if (!CanAnimate)
         {
             phase = 0;
-            AnimateMotion(1.08f, 0, 0, opacity, duration);
+            AnimateMotion(1.16f, 0, 0, opacity, duration);
             return;
         }
 
-        AnimateMotion(1.08f, 0, 0, opacity, duration);
+        AnimateMotion(1.16f, 0, 0, opacity, duration);
     }
 
     private void AnimateMotion(float scale, float horizontalDrift, float verticalDrift, float opacity, TimeSpan duration)
