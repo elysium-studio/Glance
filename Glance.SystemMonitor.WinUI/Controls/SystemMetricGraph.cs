@@ -16,19 +16,20 @@ public sealed partial class SystemMetricGraph :
     private const int SampleCapacity = 48;
     private const int GridColumnCount = 6;
     private const int GridRowCount = 3;
-    private static readonly TimeSpan TransitionDuration = TimeSpan.FromMilliseconds(220);
+    private static readonly TimeSpan TransitionDuration = TimeSpan.FromMilliseconds(280);
     private readonly double[] primarySamples = new double[SampleCapacity];
     private readonly double[] secondarySamples = new double[SampleCapacity];
     private readonly List<SpriteVisual> primarySegments = [];
     private readonly List<SpriteVisual> secondarySegments = [];
     private readonly List<SpriteVisual> gridLines = [];
     private ContainerVisual? rootVisual;
+    private ContainerVisual? primaryVisual;
+    private ContainerVisual? secondaryVisual;
     private CompositionColorBrush? primaryBrush;
     private CompositionColorBrush? secondaryBrush;
     private CompositionColorBrush? gridBrush;
     private Compositor? compositor;
     private double dynamicMaximum = 1024;
-    private bool hasRendered;
 
     public SystemMetricGraph()
     {
@@ -72,16 +73,24 @@ public sealed partial class SystemMetricGraph :
 
     public void AddSample(double primary, double? secondary = null)
     {
-        ShiftSamples(primarySamples, Math.Max(0, primary));
-        ShiftSamples(secondarySamples, Math.Max(0, secondary ?? 0));
+        double primaryValue = Math.Max(0, primary);
+        double secondaryValue = Math.Max(0, secondary ?? 0);
 
         if (Maximum <= 0)
         {
-            double currentMaximum = Math.Max(primarySamples.Max(), secondarySamples.Max());
-            dynamicMaximum = Math.Max(1024, Math.Max(currentMaximum * 1.1, dynamicMaximum * 0.92));
+            double currentMaximum = Math.Max(Math.Max(primarySamples.Max(), secondarySamples.Max()), Math.Max(primaryValue, secondaryValue));
+            dynamicMaximum = GetDynamicMaximum(currentMaximum);
         }
 
-        Render(true);
+        if (IsLoaded && ActualWidth > 0 && ActualHeight > 0)
+        {
+            EnsureVisuals();
+            RenderNextSample(primarySamples, primaryValue, primarySegments, primaryVisual, 2);
+            RenderNextSample(secondarySamples, secondaryValue, secondarySegments, secondaryVisual, 1.5f);
+        }
+
+        ShiftSamples(primarySamples, primaryValue);
+        ShiftSamples(secondarySamples, secondaryValue);
     }
 
     private static void ShiftSamples(double[] samples, double value)
@@ -95,22 +104,22 @@ public sealed partial class SystemMetricGraph :
         if (sender is SystemMetricGraph graph)
         {
             graph.UpdateBrushes();
-            graph.Render(false);
+            graph.Render();
         }
     }
 
     private void HandleLoaded(object sender, RoutedEventArgs args)
     {
         EnsureVisuals();
-        Render(false);
+        Render();
     }
 
-    private void HandleSizeChanged(object sender, SizeChangedEventArgs args) => Render(false);
+    private void HandleSizeChanged(object sender, SizeChangedEventArgs args) => Render();
 
     private void HandleActualThemeChanged(FrameworkElement sender, object args)
     {
         UpdateBrushes();
-        Render(false);
+        Render();
     }
 
     private void EnsureVisuals()
@@ -123,6 +132,10 @@ public sealed partial class SystemMetricGraph :
         compositor = ElementCompositionPreview.GetElementVisual(this).Compositor;
         rootVisual = compositor.CreateContainerVisual();
         rootVisual.Clip = compositor.CreateInsetClip();
+        primaryVisual = compositor.CreateContainerVisual();
+        secondaryVisual = compositor.CreateContainerVisual();
+        rootVisual.Children.InsertAtTop(primaryVisual);
+        rootVisual.Children.InsertAtTop(secondaryVisual);
         ElementCompositionPreview.SetElementChildVisual(this, rootVisual);
 
         for (int index = 0; index < GridColumnCount - 1 + GridRowCount - 1; index++)
@@ -132,15 +145,15 @@ public sealed partial class SystemMetricGraph :
             rootVisual.Children.InsertAtBottom(line);
         }
 
-        for (int index = 0; index < SampleCapacity - 1; index++)
+        for (int index = 0; index < SampleCapacity; index++)
         {
             SpriteVisual primarySegment = compositor.CreateSpriteVisual();
             primarySegments.Add(primarySegment);
-            rootVisual.Children.InsertAtTop(primarySegment);
+            primaryVisual.Children.InsertAtTop(primarySegment);
 
             SpriteVisual secondarySegment = compositor.CreateSpriteVisual();
             secondarySegments.Add(secondarySegment);
-            rootVisual.Children.InsertAtTop(secondarySegment);
+            secondaryVisual.Children.InsertAtTop(secondarySegment);
         }
 
         UpdateBrushes();
@@ -177,7 +190,7 @@ public sealed partial class SystemMetricGraph :
         }
     }
 
-    private void Render(bool animate)
+    private void Render()
     {
         if (!IsLoaded)
         {
@@ -194,10 +207,15 @@ public sealed partial class SystemMetricGraph :
         float width = (float)ActualWidth;
         float height = (float)ActualHeight;
         rootVisual.Size = new Vector2(width, height);
+        primaryVisual!.Size = new Vector2(width, height);
+        secondaryVisual!.Size = new Vector2(width, height);
+        primaryVisual.StopAnimation(nameof(primaryVisual.Offset));
+        secondaryVisual.StopAnimation(nameof(secondaryVisual.Offset));
+        primaryVisual.Offset = Vector3.Zero;
+        secondaryVisual.Offset = Vector3.Zero;
         RenderGrid(width, height);
-        RenderSeries(primarySamples, primarySegments, width, height, 2, animate && hasRendered);
-        RenderSeries(secondarySamples, secondarySegments, width, height, 1.5f, animate && hasRendered);
-        hasRendered = true;
+        RenderSeries(primarySamples, primarySegments, width, height, 2);
+        RenderSeries(secondarySamples, secondarySegments, width, height, 1.5f);
     }
 
     private void RenderGrid(float width, float height)
@@ -207,30 +225,64 @@ public sealed partial class SystemMetricGraph :
         for (int column = 1; column < GridColumnCount; column++)
         {
             float x = width * column / GridColumnCount;
-            SetLine(gridLines[lineIndex++], new Vector2(x, 0), new Vector2(x, height), 1, false);
+            SetLine(gridLines[lineIndex++], new Vector2(x, 0), new Vector2(x, height), 1);
         }
 
         for (int row = 1; row < GridRowCount; row++)
         {
             float y = height * row / GridRowCount;
-            SetLine(gridLines[lineIndex++], new Vector2(0, y), new Vector2(width, y), 1, false);
+            SetLine(gridLines[lineIndex++], new Vector2(0, y), new Vector2(width, y), 1);
         }
     }
 
-    private void RenderSeries(double[] samples, IReadOnlyList<SpriteVisual> segments, float width, float height, float thickness, bool animate)
+    private void RenderSeries(double[] samples, IReadOnlyList<SpriteVisual> segments, float width, float height, float thickness)
     {
         double maximum = Maximum > 0 ? Maximum : dynamicMaximum;
         float horizontalStep = width / (SampleCapacity - 1);
 
-        for (int index = 0; index < segments.Count; index++)
+        for (int index = 0; index < SampleCapacity - 1; index++)
         {
             Vector2 start = new(index * horizontalStep, GetY(samples[index], maximum, height));
             Vector2 end = new((index + 1) * horizontalStep, GetY(samples[index + 1], maximum, height));
-            SetLine(segments[index], start, end, thickness, animate);
+            SetLine(segments[index], start, end, thickness);
+            segments[index].IsVisible = true;
         }
+
+        segments[^1].IsVisible = false;
     }
 
-    private void SetLine(SpriteVisual visual, Vector2 start, Vector2 end, float thickness, bool animate)
+    private void RenderNextSample(double[] samples, double nextSample, IReadOnlyList<SpriteVisual> segments, ContainerVisual? visual, float thickness)
+    {
+        if (compositor is null || visual is null)
+        {
+            return;
+        }
+
+        float width = (float)ActualWidth;
+        float height = (float)ActualHeight;
+        float horizontalStep = width / (SampleCapacity - 1);
+        double maximum = Maximum > 0 ? Maximum : dynamicMaximum;
+
+        visual.StopAnimation(nameof(visual.Offset));
+        visual.Offset = Vector3.Zero;
+
+        for (int index = 0; index < SampleCapacity; index++)
+        {
+            double endValue = index == SampleCapacity - 1 ? nextSample : samples[index + 1];
+            Vector2 start = new(index * horizontalStep, GetY(samples[index], maximum, height));
+            Vector2 end = new((index + 1) * horizontalStep, GetY(endValue, maximum, height));
+            SetLine(segments[index], start, end, thickness);
+            segments[index].IsVisible = true;
+        }
+
+        CubicBezierEasingFunction easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.2f, 0), new Vector2(0, 1));
+        Vector3KeyFrameAnimation animation = compositor.CreateVector3KeyFrameAnimation();
+        animation.Duration = TransitionDuration;
+        animation.InsertKeyFrame(1, new Vector3(-horizontalStep, 0, 0), easing);
+        visual.StartAnimation(nameof(visual.Offset), animation);
+    }
+
+    private static void SetLine(SpriteVisual visual, Vector2 start, Vector2 end, float thickness)
     {
         Vector2 delta = end - start;
         float length = Math.Max(1, delta.Length());
@@ -239,24 +291,20 @@ public sealed partial class SystemMetricGraph :
         Vector2 size = new(length + 1, thickness);
         visual.CenterPoint = new Vector3(0, thickness / 2, 0);
         visual.RotationAngle = angle;
+        visual.Offset = offset;
+        visual.Size = size;
+    }
 
-        if (!animate || compositor is null)
+    private static double GetDynamicMaximum(double value)
+    {
+        double maximum = 1024;
+
+        while (maximum < value * 1.1)
         {
-            visual.Offset = offset;
-            visual.Size = size;
-            return;
+            maximum *= 2;
         }
 
-        CubicBezierEasingFunction easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.2f, 0), new Vector2(0, 1));
-        Vector3KeyFrameAnimation offsetAnimation = compositor.CreateVector3KeyFrameAnimation();
-        offsetAnimation.Duration = TransitionDuration;
-        offsetAnimation.InsertKeyFrame(1, offset, easing);
-        visual.StartAnimation(nameof(visual.Offset), offsetAnimation);
-
-        Vector2KeyFrameAnimation sizeAnimation = compositor.CreateVector2KeyFrameAnimation();
-        sizeAnimation.Duration = TransitionDuration;
-        sizeAnimation.InsertKeyFrame(1, size, easing);
-        visual.StartAnimation(nameof(visual.Size), sizeAnimation);
+        return maximum;
     }
 
     private static float GetY(double value, double maximum, float height)
