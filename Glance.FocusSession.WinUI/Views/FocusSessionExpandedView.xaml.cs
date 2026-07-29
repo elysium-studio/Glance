@@ -7,6 +7,7 @@ namespace Glance.FocusSession.WinUI;
 public sealed partial class FocusSessionExpandedView :
     UserControl
 {
+    private readonly CompositionActivityPulse activityPulse;
     private readonly ModuleResourceTextLocalizer<FocusSessionModule> localizer;
 
     public FocusSessionExpandedView(FocusSessionViewModel viewModel,
@@ -15,6 +16,7 @@ public sealed partial class FocusSessionExpandedView :
         ViewModel = viewModel;
         this.localizer = localizer;
         InitializeComponent();
+        activityPulse = new(this, PulseRing, viewModel, nameof(FocusSessionViewModel.IsRunning), () => viewModel.IsRunning);
     }
 
     public FocusSessionViewModel ViewModel { get; }
@@ -22,6 +24,12 @@ public sealed partial class FocusSessionExpandedView :
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
     public string Title => localizer.GetText("ModuleDisplayName");
+
+    private void Toggle()
+    {
+        ViewModel.Toggle();
+        activityPulse.Refresh();
+    }
 
     private string ToUpper(string value) => value.ToUpperInvariant();
 }

@@ -48,21 +48,31 @@
             VerticalAlignment="Center"
             Orientation="Horizontal"
             Spacing="6">
-            <Button
-                x:Uid="ToggleButton"
-                Click="{x:Bind ViewModel.Toggle}"
-                Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}">
-                <Button.Style>
-                    <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
-                        <Setter Property="Width" Value="36" />
-                        <Setter Property="Height" Value="36" />
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="CornerRadius" Value="18" />
-                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                        <Setter Property="FontSize" Value="16" />
-                    </Style>
-                </Button.Style>
-            </Button>
+            <Grid Width="36" Height="36">
+                <Ellipse
+                    x:Name="PulseRing"
+                    Width="36"
+                    Height="36"
+                    IsHitTestVisible="False"
+                    Opacity="1"
+                    Stroke="{ThemeResource GlanceStopwatchIconBrush}"
+                    StrokeThickness="1.5" />
+                <Button
+                    x:Uid="ToggleButton"
+                    Click="{x:Bind Toggle}"
+                    Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}">
+                    <Button.Style>
+                        <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+                            <Setter Property="Width" Value="36" />
+                            <Setter Property="Height" Value="36" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="CornerRadius" Value="18" />
+                            <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                            <Setter Property="FontSize" Value="16" />
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
             <Button
                 x:Uid="ResetButton"
                 Click="{x:Bind ViewModel.Reset}">

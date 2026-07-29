@@ -7,6 +7,7 @@ namespace Glance.KeepAwake.WinUI;
 public sealed partial class KeepAwakeExpandedView :
     UserControl
 {
+    private readonly CompositionActivityPulse activityPulse;
     private readonly ModuleResourceTextLocalizer<KeepAwakeModule> localizer;
 
     public KeepAwakeExpandedView(KeepAwakeViewModel viewModel,
@@ -15,6 +16,7 @@ public sealed partial class KeepAwakeExpandedView :
         ViewModel = viewModel;
         this.localizer = localizer;
         InitializeComponent();
+        activityPulse = new(this, PulseRing, viewModel, nameof(KeepAwakeViewModel.IsActive), () => viewModel.IsActive);
     }
 
     public KeepAwakeViewModel ViewModel { get; }
@@ -25,6 +27,12 @@ public sealed partial class KeepAwakeExpandedView :
 
     private bool IsActionEnabled(bool isBusy) =>
         !isBusy;
+
+    private async void ToggleAsync()
+    {
+        await ViewModel.ToggleAsync();
+        activityPulse.Refresh();
+    }
 
     private string ToUpper(string value) =>
         value.ToUpperInvariant();

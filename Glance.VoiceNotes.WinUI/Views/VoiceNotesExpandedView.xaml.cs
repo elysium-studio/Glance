@@ -7,6 +7,7 @@ namespace Glance.VoiceNotes.WinUI;
 public sealed partial class VoiceNotesExpandedView :
     UserControl
 {
+    private readonly CompositionActivityPulse activityPulse;
     private readonly ModuleResourceTextLocalizer<VoiceNotesModule> localizer;
 
     public VoiceNotesExpandedView(VoiceNotesViewModel viewModel,
@@ -15,6 +16,7 @@ public sealed partial class VoiceNotesExpandedView :
         ViewModel = viewModel;
         this.localizer = localizer;
         InitializeComponent();
+        activityPulse = new(this, PulseRing, viewModel, nameof(VoiceNotesViewModel.IsRecording), () => viewModel.IsRecording);
     }
 
     public VoiceNotesViewModel ViewModel { get; }
@@ -22,6 +24,12 @@ public sealed partial class VoiceNotesExpandedView :
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
     public string Title => localizer.GetText("ModuleDisplayName");
+
+    private void ToggleRecording()
+    {
+        ViewModel.ToggleRecording();
+        activityPulse.Refresh();
+    }
 
     private string ToUpper(string value) => value.ToUpperInvariant();
 

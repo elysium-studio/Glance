@@ -10,6 +10,7 @@ namespace Glance.ColorPicker.WinUI;
 public sealed partial class ColorPickerExpandedView :
     UserControl
 {
+    private readonly CompositionActivityPulse activityPulse;
     private readonly ModuleResourceTextLocalizer<ColorPickerModule> localizer;
 
     public ColorPickerExpandedView(ColorPickerViewModel viewModel, ModuleResourceTextLocalizer<ColorPickerModule> localizer)
@@ -24,6 +25,7 @@ public sealed partial class ColorPickerExpandedView :
         ];
         viewModel.PropertyChanged += HandleViewModelPropertyChanged;
         InitializeComponent();
+        activityPulse = new(this, PulseRing, viewModel, nameof(ColorPickerViewModel.IsPicking), () => viewModel.IsPicking);
     }
 
     public ColorPickerViewModel ViewModel { get; }
@@ -33,6 +35,12 @@ public sealed partial class ColorPickerExpandedView :
     public FrameworkElement ConnectedAnimationElement => ColorSwatch;
 
     public string Title => localizer.GetText("ModuleDisplayName");
+
+    private void Pick()
+    {
+        ViewModel.Pick();
+        activityPulse.Refresh();
+    }
 
     private string ToUpper(string value) => value.ToUpperInvariant();
 

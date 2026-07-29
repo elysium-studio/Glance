@@ -89,22 +89,35 @@
                 ItemsSource="{x:Bind Formats}"
                 SelectedIndex="0" />
         </Grid>
-        <Button
-            x:Uid="PickButton"
+        <Grid
             Grid.Column="2"
+            Width="36"
+            Height="36"
             VerticalAlignment="Center"
-            Click="{x:Bind ViewModel.Pick}">
-            <Button.Style>
-                <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
-                    <Setter Property="Width" Value="36" />
-                    <Setter Property="Height" Value="36" />
-                    <Setter Property="Padding" Value="0" />
-                    <Setter Property="CornerRadius" Value="18" />
-                    <Setter Property="Content" Value="&#xEF3C;" />
-                    <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                    <Setter Property="FontSize" Value="16" />
-                </Style>
-            </Button.Style>
-        </Button>
+            HorizontalAlignment="Center">
+            <Ellipse
+                x:Name="PulseRing"
+                Width="36"
+                Height="36"
+                IsHitTestVisible="False"
+                Opacity="1"
+                Stroke="{ThemeResource GlanceColorPickerIconBrush}"
+                StrokeThickness="1.5" />
+            <Button
+                x:Uid="PickButton"
+                Click="{x:Bind Pick}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+                        <Setter Property="Width" Value="36" />
+                        <Setter Property="Height" Value="36" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="CornerRadius" Value="18" />
+                        <Setter Property="Content" Value="&#xEF3C;" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="16" />
+                    </Style>
+                </Button.Style>
+            </Button>
+        </Grid>
     </Grid>
 </UserControl>

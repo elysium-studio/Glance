@@ -7,6 +7,7 @@ namespace Glance.Presence.WinUI;
 public sealed partial class PresenceExpandedView :
     UserControl
 {
+    private readonly CompositionActivityPulse activityPulse;
     private readonly ModuleResourceTextLocalizer<PresenceModule> localizer;
 
     public PresenceExpandedView(PresenceViewModel viewModel,
@@ -15,6 +16,7 @@ public sealed partial class PresenceExpandedView :
         ViewModel = viewModel;
         this.localizer = localizer;
         InitializeComponent();
+        activityPulse = new(this, PulseRing, viewModel, nameof(PresenceViewModel.IsActive), () => viewModel.IsActive);
     }
 
     public PresenceViewModel ViewModel { get; }
@@ -25,6 +27,12 @@ public sealed partial class PresenceExpandedView :
 
     private bool IsActionEnabled(bool isBusy) =>
         !isBusy;
+
+    private async void ToggleAsync()
+    {
+        await ViewModel.ToggleAsync();
+        activityPulse.Refresh();
+    }
 
     private string ToUpper(string value) =>
         value.ToUpperInvariant();
