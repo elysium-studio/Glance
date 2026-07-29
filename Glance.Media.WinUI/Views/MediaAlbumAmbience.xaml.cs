@@ -21,6 +21,8 @@ public sealed partial class MediaAlbumAmbience :
     private CompositionVisualSurface? artworkSurface;
     private CompositionSurfaceBrush? artworkBrush;
     private CompositionEffectBrush? blurBrush;
+    private CompositionRoundedRectangleGeometry? clipGeometry;
+    private CompositionGeometricClip? roundedClip;
     private CompositionEasingFunction? easing;
     private double phase;
 
@@ -49,7 +51,11 @@ public sealed partial class MediaAlbumAmbience :
         Compositor compositor = ElementCompositionPreview.GetElementVisual(this).Compositor;
         ambientVisual = ElementCompositionPreview.GetElementVisual(this);
         motionVisual = ElementCompositionPreview.GetElementVisual(MotionLayer);
-        ambientVisual.Clip = compositor.CreateInsetClip();
+        clipGeometry = compositor.CreateRoundedRectangleGeometry();
+        clipGeometry.CornerRadius = new Vector2(28);
+        clipGeometry.Size = new Vector2((float)ActualWidth, (float)ActualHeight);
+        roundedClip = compositor.CreateGeometricClip(clipGeometry);
+        ambientVisual.Clip = roundedClip;
         motionVisual.CenterPoint = new Vector3((float)ActualWidth / 2, (float)ActualHeight / 2, 0);
         easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.22f, 0.72f), new Vector2(0.18f, 1));
         CreateBlurVisual(compositor);
@@ -66,10 +72,14 @@ public sealed partial class MediaAlbumAmbience :
         blurBrush?.Dispose();
         artworkBrush?.Dispose();
         artworkSurface?.Dispose();
+        roundedClip?.Dispose();
+        clipGeometry?.Dispose();
         blurVisual = null;
         blurBrush = null;
         artworkBrush = null;
         artworkSurface = null;
+        roundedClip = null;
+        clipGeometry = null;
         ambientVisual = null;
         motionVisual = null;
         easing = null;
@@ -91,15 +101,25 @@ public sealed partial class MediaAlbumAmbience :
         {
             artworkSurface.SourceSize = new Vector2((float)args.NewSize.Width, (float)args.NewSize.Height);
         }
+
+        if (clipGeometry is not null)
+        {
+            clipGeometry.Size = new Vector2((float)args.NewSize.Width, (float)args.NewSize.Height);
+        }
     }
 
     private void CreateBlurVisual(Compositor compositor)
     {
         GaussianBlurEffect blur = new()
         {
-            BlurAmount = 30,
+            BlurAmount = 48,
             BorderMode = EffectBorderMode.Hard,
             Source = new CompositionEffectSourceParameter("artwork")
+        };
+        SaturationEffect saturation = new()
+        {
+            Saturation = 1.22f,
+            Source = blur
         };
 
         artworkSurface = compositor.CreateVisualSurface();
@@ -107,7 +127,7 @@ public sealed partial class MediaAlbumAmbience :
         artworkSurface.SourceSize = new Vector2((float)ActualWidth, (float)ActualHeight);
         artworkBrush = compositor.CreateSurfaceBrush(artworkSurface);
         artworkBrush.Stretch = CompositionStretch.Fill;
-        blurBrush = compositor.CreateEffectFactory(blur).CreateBrush();
+        blurBrush = compositor.CreateEffectFactory(saturation).CreateBrush();
         blurBrush.SetSourceParameter("artwork", artworkBrush);
 
         blurVisual = compositor.CreateSpriteVisual();
@@ -171,7 +191,7 @@ public sealed partial class MediaAlbumAmbience :
         float scale = (float)(1.08 + (bass * 0.035));
         float horizontalDrift = (float)((Math.Cos(phase) * (0.8 + (energy * 2.6))) + ((upperRange - bass) * 1.5));
         float verticalDrift = (float)(Math.Sin(phase * 0.78) * (0.5 + (energy * 1.8)));
-        float opacity = (float)(0.26 + (energy * 0.08));
+        float opacity = (float)(0.36 + (energy * 0.06));
 
         AnimateMotion(scale, horizontalDrift, verticalDrift, opacity, TimeSpan.FromMilliseconds(120));
     }
@@ -187,7 +207,7 @@ public sealed partial class MediaAlbumAmbience :
         }
 
         bool hasArtwork = viewModel?.HasSession == true && viewModel.Artwork is ImageSource;
-        float opacity = hasArtwork ? 0.26f : 0;
+        float opacity = hasArtwork ? 0.36f : 0;
         TimeSpan duration = animate ? TimeSpan.FromMilliseconds(220) : TimeSpan.Zero;
 
         if (!CanAnimate)

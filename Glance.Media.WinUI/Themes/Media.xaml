@@ -2,7 +2,11 @@
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Default">
             <SolidColorBrush x:Key="GlanceMediaIconBrush" Color="#FF8A65" />
-            <SolidColorBrush x:Key="GlanceMediaAmbientTintBrush" Color="#99111724" />
+            <LinearGradientBrush x:Key="GlanceMediaAmbientTintBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Offset="0" Color="#A60E131E" />
+                <GradientStop Offset="0.58" Color="#94151A27" />
+                <GradientStop Offset="1" Color="#86261A22" />
+            </LinearGradientBrush>
             <SolidColorBrush x:Key="AccentButtonBackground" Color="#FFFF8A65" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E6FF8A65" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CCFF8A65" />
@@ -10,7 +14,11 @@
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="GlanceMediaIconBrush" Color="#B23A1D" />
-            <SolidColorBrush x:Key="GlanceMediaAmbientTintBrush" Color="#B8FFFFFF" />
+            <LinearGradientBrush x:Key="GlanceMediaAmbientTintBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Offset="0" Color="#C7FFFFFF" />
+                <GradientStop Offset="0.58" Color="#B8FFFDFC" />
+                <GradientStop Offset="1" Color="#A3FFF2ED" />
+            </LinearGradientBrush>
             <SolidColorBrush x:Key="AccentButtonBackground" Color="#FFB23A1D" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E6B23A1D" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CCB23A1D" />
