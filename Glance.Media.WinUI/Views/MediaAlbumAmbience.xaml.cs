@@ -13,14 +13,20 @@ namespace Glance.Media.WinUI;
 public sealed partial class MediaAlbumAmbience :
     UserControl
 {
+    private const int ArtworkTransitionDurationMs = 560;
+
     private MediaViewModel? viewModel;
     private Visual? ambientVisual;
+    private Visual? incomingArtworkVisual;
     private Visual? motionVisual;
+    private Visual? outgoingArtworkVisual;
     private CompositionRoundedRectangleGeometry? clipGeometry;
     private CompositionGeometricClip? roundedClip;
     private CompositionEasingFunction? easing;
     private ImplicitAnimationCollection? motionImplicitAnimations;
     private ImplicitAnimationCollection? ambientImplicitAnimations;
+    private ImageSource? currentArtwork;
+    private int artworkTransitionGeneration;
     private bool isPanning;
 
     public MediaAlbumAmbience() => InitializeComponent();
@@ -48,7 +54,11 @@ public sealed partial class MediaAlbumAmbience :
         Compositor compositor = ElementCompositionPreview.GetElementVisual(this).Compositor;
         ambientVisual = ElementCompositionPreview.GetElementVisual(this);
         motionVisual = ElementCompositionPreview.GetElementVisual(MotionLayer);
+        incomingArtworkVisual = ElementCompositionPreview.GetElementVisual(IncomingArtwork);
+        outgoingArtworkVisual = ElementCompositionPreview.GetElementVisual(OutgoingArtwork);
         ambientVisual.Opacity = 0;
+        incomingArtworkVisual.Opacity = IncomingArtwork.Source is null ? 0 : 1;
+        outgoingArtworkVisual.Opacity = 0;
         clipGeometry = compositor.CreateRoundedRectangleGeometry();
         clipGeometry.CornerRadius = new Vector2(28);
         clipGeometry.Size = new Vector2((float)ActualWidth, (float)ActualHeight);
@@ -86,8 +96,11 @@ public sealed partial class MediaAlbumAmbience :
         motionImplicitAnimations = null;
         ambientImplicitAnimations = null;
         ambientVisual = null;
+        incomingArtworkVisual = null;
         motionVisual = null;
+        outgoingArtworkVisual = null;
         easing = null;
+        artworkTransitionGeneration++;
     }
 
     private void HandleSizeChanged(object sender, SizeChangedEventArgs args)
@@ -159,8 +172,65 @@ public sealed partial class MediaAlbumAmbience :
         ApplyResponse(scale, opacity);
     }
 
-    private void UpdateArtwork() =>
-        AmbientArtwork.Source = viewModel?.AmbientArtwork as ImageSource;
+    private void UpdateArtwork()
+    {
+        ImageSource? artwork = viewModel?.AmbientArtwork as ImageSource;
+
+        if (ReferenceEquals(currentArtwork, artwork))
+        {
+            return;
+        }
+
+        currentArtwork = artwork;
+
+        if (incomingArtworkVisual is null || outgoingArtworkVisual is null || easing is null)
+        {
+            IncomingArtwork.Source = artwork;
+            return;
+        }
+
+        Visual incomingVisual = incomingArtworkVisual;
+        Visual outgoingVisual = outgoingArtworkVisual;
+        int transitionGeneration = ++artworkTransitionGeneration;
+        incomingVisual.StopAnimation(nameof(Visual.Opacity));
+        outgoingVisual.StopAnimation(nameof(Visual.Opacity));
+
+        if (artwork is null)
+        {
+            StartArtworkOpacityAnimation(incomingVisual, 0, ArtworkTransitionDurationMs);
+            StartArtworkOpacityAnimation(outgoingVisual, 0, ArtworkTransitionDurationMs);
+            return;
+        }
+
+        if (IncomingArtwork.Source is null)
+        {
+            IncomingArtwork.Source = artwork;
+            incomingVisual.Opacity = 1;
+            outgoingVisual.Opacity = 0;
+            return;
+        }
+
+        OutgoingArtwork.Source = IncomingArtwork.Source;
+        outgoingVisual.Opacity = 1;
+        IncomingArtwork.Source = artwork;
+        incomingVisual.Opacity = 0;
+
+        CompositionScopedBatch transition = incomingVisual.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+        StartArtworkOpacityAnimation(outgoingVisual, 0, ArtworkTransitionDurationMs);
+        StartArtworkOpacityAnimation(incomingVisual, 1, ArtworkTransitionDurationMs);
+        transition.Completed += (_, _) =>
+        {
+            transition.Dispose();
+
+            if (transitionGeneration == artworkTransitionGeneration)
+            {
+                OutgoingArtwork.Source = null;
+                outgoingVisual.Opacity = 0;
+                incomingVisual.Opacity = 1;
+            }
+        };
+        transition.End();
+    }
 
     private void UpdateState()
     {
@@ -264,6 +334,14 @@ public sealed partial class MediaAlbumAmbience :
 
         motionVisual.Scale = new Vector3(scale, scale, 1);
         ambientVisual.Opacity = opacity;
+    }
+
+    private void StartArtworkOpacityAnimation(Visual visual, float opacity, int durationMs)
+    {
+        ScalarKeyFrameAnimation animation = visual.Compositor.CreateScalarKeyFrameAnimation();
+        animation.InsertKeyFrame(1, opacity, easing);
+        animation.Duration = TimeSpan.FromMilliseconds(durationMs);
+        visual.StartAnimation(nameof(Visual.Opacity), animation);
     }
 
     private bool CanAnimate =>

@@ -1,0 +1,19 @@
+<UserControl
+    x:Class="Glance.Media.WinUI.MediaArtworkTransition"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    IsHitTestVisible="False"
+    Loaded="{x:Bind HandleLoaded}"
+    SizeChanged="{x:Bind HandleSizeChanged}"
+    Unloaded="{x:Bind HandleUnloaded}">
+    <Grid x:Name="PerspectiveLayer">
+        <Image
+            x:Name="PrimaryArtwork"
+            Opacity="0"
+            Stretch="UniformToFill" />
+        <Image
+            x:Name="SecondaryArtwork"
+            Opacity="0"
+            Stretch="UniformToFill" />
+    </Grid>
+</UserControl>

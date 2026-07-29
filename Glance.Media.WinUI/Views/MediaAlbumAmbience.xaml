@@ -12,7 +12,12 @@
     <Grid>
         <Grid x:Name="MotionLayer">
             <Image
-                x:Name="AmbientArtwork"
+                x:Name="OutgoingArtwork"
+                Opacity="0"
+                Stretch="UniformToFill" />
+            <Image
+                x:Name="IncomingArtwork"
+                Opacity="0"
                 Stretch="UniformToFill" />
         </Grid>
         <Rectangle Fill="{ThemeResource AcrylicInAppFillColorDefaultBrush}" />

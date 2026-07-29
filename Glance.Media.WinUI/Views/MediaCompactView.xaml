@@ -26,7 +26,7 @@
                     FontSize="18"
                     Foreground="{ThemeResource GlanceMediaIconBrush}"
                     Glyph="&#xE8D6;" />
-                <Image Source="{x:Bind ToImageSource(ViewModel.Artwork), Mode=OneWay}" Stretch="UniformToFill" />
+                <Local:MediaArtworkTransition Source="{x:Bind ToImageSource(ViewModel.Artwork), Mode=OneWay}" />
             </Grid>
         </Border>
         <Controls:MarqueeTextBlock

@@ -219,15 +219,13 @@ public sealed partial class MediaComponent :
                 viewModel.Artist = artist;
                 viewModel.Source = source;
                 viewModel.HasSession = true;
-                viewModel.Artwork = null;
-                viewModel.AmbientArtwork = null;
                 ApplyPlaybackInfo(playbackInfo);
 
                 if (artworkStream is not null)
                 {
                     BitmapImage artwork = new();
-                    viewModel.Artwork = artwork;
                     await artwork.SetSourceAsync(artworkStream);
+                    viewModel.Artwork = artwork;
 
                     try
                     {
@@ -238,13 +236,18 @@ public sealed partial class MediaComponent :
                             DecodePixelType = DecodePixelType.Physical,
                             DecodePixelWidth = 3
                         };
-                        viewModel.AmbientArtwork = ambientArtwork;
                         await ambientArtwork.SetSourceAsync(artworkStream);
+                        viewModel.AmbientArtwork = ambientArtwork;
                     }
                     catch
                     {
                         viewModel.AmbientArtwork = null;
                     }
+                }
+                else
+                {
+                    viewModel.Artwork = null;
+                    viewModel.AmbientArtwork = null;
                 }
 
                 if (currentTitle is not null &&
