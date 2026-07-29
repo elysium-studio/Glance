@@ -26,7 +26,4 @@ public sealed partial class MediaExpandedView :
 
     private Visibility WhenAvailable(bool isAvailable) =>
         isAvailable ? Visibility.Visible : Visibility.Collapsed;
-
-    private Visibility WhenUnavailable(bool isAvailable) =>
-        isAvailable ? Visibility.Collapsed : Visibility.Visible;
 }

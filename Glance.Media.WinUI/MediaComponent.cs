@@ -20,6 +20,7 @@ public sealed partial class MediaComponent :
 {
     private const int ArtworkMissingDelayMs = 700;
     private const int MediaRefreshDelayMs = 120;
+    private const int SessionMissingDelayMs = 700;
 
     private static readonly double[] SilentAudioLevels = [0, 0, 0, 0, 0];
 
@@ -30,6 +31,7 @@ public sealed partial class MediaComponent :
     private readonly AudioLevelMonitor audioLevelMonitor;
     private DispatcherQueueTimer? artworkMissingTimer;
     private DispatcherQueueTimer? mediaRefreshTimer;
+    private DispatcherQueueTimer? sessionMissingTimer;
     private GlobalSystemMediaTransportControlsSessionManager? sessionManager;
     private GlobalSystemMediaTransportControlsSession? session;
     private string? currentArtworkHash;
@@ -103,6 +105,12 @@ public sealed partial class MediaComponent :
             artworkMissingTimer.Tick -= HandleArtworkMissingTimerTick;
         }
 
+        if (sessionMissingTimer is not null)
+        {
+            sessionMissingTimer.Stop();
+            sessionMissingTimer.Tick -= HandleSessionMissingTimerTick;
+        }
+
         DetachSession();
     }
 
@@ -127,11 +135,23 @@ public sealed partial class MediaComponent :
 
     private void HandleCurrentSessionChanged(GlobalSystemMediaTransportControlsSessionManager sender,
         CurrentSessionChangedEventArgs args) =>
-        dispatcherQueue.TryEnqueue(async () =>
+        dispatcherQueue.TryEnqueue(() => UpdateCurrentSession(sender.GetCurrentSession()));
+
+    private async void UpdateCurrentSession(GlobalSystemMediaTransportControlsSession? newSession)
+    {
+        if (newSession is null)
         {
-            AttachSession(sender.GetCurrentSession());
-            await Refresh();
-        });
+            artworkMissingTimer?.Stop();
+            mediaRefreshTimer?.Stop();
+            DetachSession();
+            ScheduleSessionMissingCheck();
+            return;
+        }
+
+        sessionMissingTimer?.Stop();
+        AttachSession(newSession);
+        await Refresh();
+    }
 
     private void AttachSession(GlobalSystemMediaTransportControlsSession? newSession)
     {
@@ -205,6 +225,37 @@ public sealed partial class MediaComponent :
     {
         sender.Stop();
         await Refresh(allowArtworkClear: true);
+    }
+
+    private void ScheduleSessionMissingCheck()
+    {
+        sessionMissingTimer ??= CreateSessionMissingTimer();
+        sessionMissingTimer.Stop();
+        sessionMissingTimer.Start();
+    }
+
+    private DispatcherQueueTimer CreateSessionMissingTimer()
+    {
+        DispatcherQueueTimer timer = dispatcherQueue.CreateTimer();
+        timer.Interval = TimeSpan.FromMilliseconds(SessionMissingDelayMs);
+        timer.IsRepeating = false;
+        timer.Tick += HandleSessionMissingTimerTick;
+        return timer;
+    }
+
+    private async void HandleSessionMissingTimerTick(DispatcherQueueTimer sender, object args)
+    {
+        sender.Stop();
+        GlobalSystemMediaTransportControlsSession? currentSession = sessionManager?.GetCurrentSession();
+
+        if (currentSession is not null)
+        {
+            AttachSession(currentSession);
+            await Refresh();
+            return;
+        }
+
+        ShowEmptyState();
     }
 
     private void HandlePlaybackInfoChanged(GlobalSystemMediaTransportControlsSession sender,

@@ -53,31 +53,13 @@
                     FontWeight="SemiBold"
                     Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                     Text="{x:Bind ViewModel.Title, Mode=OneWay}"
-                    ToolTipService.ToolTip="{x:Bind ViewModel.Title, Mode=OneWay}"
-                    Visibility="{x:Bind WhenAvailable(ViewModel.HasSession), Mode=OneWay}" />
+                    ToolTipService.ToolTip="{x:Bind ViewModel.Title, Mode=OneWay}" />
                 <Controls:MarqueeTextBlock
                     Height="16"
                     FontSize="12"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Text="{x:Bind ViewModel.Artist, Mode=OneWay}"
-                    ToolTipService.ToolTip="{x:Bind ViewModel.Artist, Mode=OneWay}"
-                    Visibility="{x:Bind WhenAvailable(ViewModel.HasSession), Mode=OneWay}" />
-                <TextBlock
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    MaxLines="1"
-                    Style="{StaticResource BodyStrongTextBlockStyle}"
-                    Text="{x:Bind ViewModel.Title, Mode=OneWay}"
-                    TextTrimming="CharacterEllipsis"
-                    TextWrapping="NoWrap"
-                    Visibility="{x:Bind WhenUnavailable(ViewModel.HasSession), Mode=OneWay}" />
-                <TextBlock
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    MaxLines="1"
-                    Style="{StaticResource CaptionTextBlockStyle}"
-                    Text="{x:Bind ViewModel.Artist, Mode=OneWay}"
-                    TextTrimming="CharacterEllipsis"
-                    TextWrapping="NoWrap"
-                    Visibility="{x:Bind WhenUnavailable(ViewModel.HasSession), Mode=OneWay}" />
+                    ToolTipService.ToolTip="{x:Bind ViewModel.Artist, Mode=OneWay}" />
             </StackPanel>
             <StackPanel
                 Grid.Column="2"
