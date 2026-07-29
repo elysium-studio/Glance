@@ -150,8 +150,8 @@ public sealed partial class MediaAlbumAmbience :
         {
             Name = CrossFadeEffectName,
             CrossFade = 0,
-            Source1 = new CompositionEffectSourceParameter(CurrentSourceName),
-            Source2 = new CompositionEffectSourceParameter(NextSourceName)
+            Source1 = new CompositionEffectSourceParameter(NextSourceName),
+            Source2 = new CompositionEffectSourceParameter(CurrentSourceName)
         };
         using CompositionEffectFactory factory = compositor.CreateEffectFactory(crossFade, [CrossFadeProperty]);
         artworkEffectBrush = factory.CreateBrush();
