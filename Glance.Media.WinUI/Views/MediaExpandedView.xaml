@@ -19,16 +19,19 @@
                 x:Name="ArtworkContainer"
                 Width="64"
                 Height="64"
-                Background="{ThemeResource ControlFillColorSecondaryBrush}"
                 CornerRadius="{StaticResource OverlayCornerRadius}">
                 <Grid>
-                    <FontIcon
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontSize="24"
-                        Foreground="{ThemeResource GlanceMediaIconBrush}"
-                        Glyph="&#xE8D6;"
-                        Visibility="{x:Bind WhenArtworkUnavailable(ViewModel.Artwork), Mode=OneWay}" />
+                    <Border
+                        Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                        CornerRadius="{StaticResource OverlayCornerRadius}"
+                        Visibility="{x:Bind WhenArtworkUnavailable(ViewModel.Artwork), Mode=OneWay}">
+                        <FontIcon
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontSize="24"
+                            Foreground="{ThemeResource GlanceMediaIconBrush}"
+                            Glyph="&#xE8D6;" />
+                    </Border>
                     <Local:MediaArtworkTransition Source="{x:Bind ToImageSource(ViewModel.Artwork), Mode=OneWay}" />
                 </Grid>
             </Border>

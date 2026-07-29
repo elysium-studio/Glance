@@ -18,6 +18,7 @@ public sealed partial class MediaComponent :
     IGlanceAttentionComponent,
     IDisposable
 {
+    private const int ArtworkMissingDelayMs = 700;
     private const int MediaRefreshDelayMs = 120;
 
     private static readonly double[] SilentAudioLevels = [0, 0, 0, 0, 0];
@@ -27,6 +28,7 @@ public sealed partial class MediaComponent :
     private readonly IGlanceAttentionService attentionService;
     private readonly DispatcherQueue dispatcherQueue;
     private readonly AudioLevelMonitor audioLevelMonitor;
+    private DispatcherQueueTimer? artworkMissingTimer;
     private DispatcherQueueTimer? mediaRefreshTimer;
     private GlobalSystemMediaTransportControlsSessionManager? sessionManager;
     private GlobalSystemMediaTransportControlsSession? session;
@@ -95,6 +97,12 @@ public sealed partial class MediaComponent :
             mediaRefreshTimer.Tick -= HandleMediaRefreshTimerTick;
         }
 
+        if (artworkMissingTimer is not null)
+        {
+            artworkMissingTimer.Stop();
+            artworkMissingTimer.Tick -= HandleArtworkMissingTimerTick;
+        }
+
         DetachSession();
     }
 
@@ -127,6 +135,7 @@ public sealed partial class MediaComponent :
 
     private void AttachSession(GlobalSystemMediaTransportControlsSession? newSession)
     {
+        artworkMissingTimer?.Stop();
         mediaRefreshTimer?.Stop();
         DetachSession();
         session = newSession;
@@ -176,6 +185,28 @@ public sealed partial class MediaComponent :
         await Refresh();
     }
 
+    private void ScheduleArtworkMissingCheck()
+    {
+        artworkMissingTimer ??= CreateArtworkMissingTimer();
+        artworkMissingTimer.Stop();
+        artworkMissingTimer.Start();
+    }
+
+    private DispatcherQueueTimer CreateArtworkMissingTimer()
+    {
+        DispatcherQueueTimer timer = dispatcherQueue.CreateTimer();
+        timer.Interval = TimeSpan.FromMilliseconds(ArtworkMissingDelayMs);
+        timer.IsRepeating = false;
+        timer.Tick += HandleArtworkMissingTimerTick;
+        return timer;
+    }
+
+    private async void HandleArtworkMissingTimerTick(DispatcherQueueTimer sender, object args)
+    {
+        sender.Stop();
+        await Refresh(allowArtworkClear: true);
+    }
+
     private void HandlePlaybackInfoChanged(GlobalSystemMediaTransportControlsSession sender,
         PlaybackInfoChangedEventArgs args) =>
         dispatcherQueue.TryEnqueue(RefreshPlaybackState);
@@ -214,7 +245,7 @@ public sealed partial class MediaComponent :
         }
     }
 
-    private async Task Refresh()
+    private async Task Refresh(bool allowArtworkClear = false)
     {
         int generation = ++refreshGeneration;
         GlobalSystemMediaTransportControlsSession? mediaSession = session;
@@ -249,7 +280,8 @@ public sealed partial class MediaComponent :
             }
             catch
             {
-                artworkHash = Guid.NewGuid().ToString();
+                artworkStream?.Dispose();
+                artworkStream = null;
             }
         }
 
@@ -273,38 +305,51 @@ public sealed partial class MediaComponent :
                 viewModel.HasSession = true;
                 ApplyPlaybackInfo(playbackInfo);
 
-                if (!string.Equals(currentArtworkHash, artworkHash, StringComparison.Ordinal))
-                {
-                    if (artworkStream is not null)
-                    {
-                        BitmapImage artwork = new();
-                        await artwork.SetSourceAsync(artworkStream);
-                        viewModel.Artwork = artwork;
+                bool preserveArtwork = artworkStream is null &&
+                    currentArtworkHash is not null &&
+                    !allowArtworkClear;
 
-                        try
+                if (preserveArtwork)
+                {
+                    ScheduleArtworkMissingCheck();
+                }
+                else
+                {
+                    artworkMissingTimer?.Stop();
+
+                    if (!string.Equals(currentArtworkHash, artworkHash, StringComparison.Ordinal))
+                    {
+                        if (artworkStream is not null)
                         {
-                            artworkStream.Seek(0);
-                            BitmapImage ambientArtwork = new()
+                            BitmapImage artwork = new();
+                            await artwork.SetSourceAsync(artworkStream);
+                            viewModel.Artwork = artwork;
+
+                            try
                             {
-                                DecodePixelHeight = 3,
-                                DecodePixelType = DecodePixelType.Physical,
-                                DecodePixelWidth = 3
-                            };
-                            await ambientArtwork.SetSourceAsync(artworkStream);
-                            viewModel.AmbientArtwork = ambientArtwork;
+                                artworkStream.Seek(0);
+                                BitmapImage ambientArtwork = new()
+                                {
+                                    DecodePixelHeight = 3,
+                                    DecodePixelType = DecodePixelType.Physical,
+                                    DecodePixelWidth = 3
+                                };
+                                await ambientArtwork.SetSourceAsync(artworkStream);
+                                viewModel.AmbientArtwork = ambientArtwork;
+                            }
+                            catch
+                            {
+                                viewModel.AmbientArtwork = null;
+                            }
                         }
-                        catch
+                        else
                         {
+                            viewModel.Artwork = null;
                             viewModel.AmbientArtwork = null;
                         }
-                    }
-                    else
-                    {
-                        viewModel.Artwork = null;
-                        viewModel.AmbientArtwork = null;
-                    }
 
-                    currentArtworkHash = artworkHash;
+                        currentArtworkHash = artworkHash;
+                    }
                 }
 
                 if (currentTitle is not null &&
@@ -333,6 +378,7 @@ public sealed partial class MediaComponent :
 
     private void ShowEmptyState()
     {
+        artworkMissingTimer?.Stop();
         currentArtworkHash = null;
         currentTitle = null;
         viewModel.Title = localizer.GetText("NothingPlaying");
