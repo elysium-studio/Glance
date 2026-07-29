@@ -20,14 +20,11 @@ internal static class MediaAccentPalette
 
     public static Color GetForeground(uint value) => GetContrastingForeground(GetAccent(value), 255);
 
-    public static Color GetPointerOverForeground(uint value) =>
-        GetContrastingForeground(GetPointerOver(value), 255);
+    public static Color GetPointerOverForeground(uint value) => GetForeground(value);
 
-    public static Color GetPressedForeground(uint value) =>
-        GetContrastingForeground(GetPressed(value), 255);
+    public static Color GetPressedForeground(uint value) => GetForeground(value);
 
-    public static Color GetDisabledForeground(uint value) =>
-        GetContrastingForeground(GetDisabled(value), 112);
+    public static Color GetDisabledForeground(uint value) => GetForeground(value);
 
     public static Color GetBorder(uint value) => WithAlpha(GetForeground(value), 44);
 
