@@ -30,13 +30,25 @@ internal sealed partial class CursorColorPreviewWindow :
     private const int WindowStyleIndex = -16;
 
     private readonly Border colorPreview;
+    private readonly FontIcon pickerIcon;
     private readonly Window window = new();
     private bool isVisible;
 
     public CursorColorPreviewWindow()
     {
+        pickerIcon = new FontIcon
+        {
+            FontFamily = new FontFamily("Segoe Fluent Icons"),
+            FontSize = 12,
+            Glyph = "\uEF3C",
+            IsHitTestVisible = false
+        };
+
         colorPreview = new Border
         {
+            BorderBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(153, 255, 255, 255)),
+            BorderThickness = new Thickness(1),
+            Child = pickerIcon,
             CornerRadius = new CornerRadius(6),
             IsHitTestVisible = false
         };
@@ -69,6 +81,7 @@ internal sealed partial class CursorColorPreviewWindow :
     public void Show(ColorValue color, int cursorX, int cursorY)
     {
         colorPreview.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, color.Red, color.Green, color.Blue));
+        pickerIcon.Foreground = new SolidColorBrush(GetContrastingColor(color));
 
         PointInt32 cursor = new(cursorX, cursorY);
         RectInt32 bounds = DisplayArea.GetFromPoint(cursor, DisplayAreaFallback.Nearest).OuterBounds;
@@ -92,6 +105,14 @@ internal sealed partial class CursorColorPreviewWindow :
             window.AppWindow.Show(activateWindow: false);
             isVisible = true;
         }
+    }
+
+    private static Windows.UI.Color GetContrastingColor(ColorValue color)
+    {
+        double luminance = ((0.2126 * color.Red) + (0.7152 * color.Green) + (0.0722 * color.Blue)) / 255;
+        return luminance > 0.55
+            ? Windows.UI.Color.FromArgb(255, 0, 0, 0)
+            : Windows.UI.Color.FromArgb(255, 255, 255, 255);
     }
 
     public void Hide()

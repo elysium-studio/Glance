@@ -9,11 +9,10 @@ public sealed partial class WindowsColorPickerService :
     IDisposable
 {
     private const int EscapeKey = 0x1B;
-    private const int LeftMouseButton = 0x01;
     private readonly DispatcherQueueTimer trackingTimer;
     private CursorColorPreviewWindow? cursorPreviewWindow;
+    private ColorPickerInputWindow? inputWindow;
     private bool isPicking;
-    private bool isWaitingForMouseRelease;
 
     public WindowsColorPickerService()
     {
@@ -39,8 +38,9 @@ public sealed partial class WindowsColorPickerService :
         }
 
         isPicking = true;
-        isWaitingForMouseRelease = IsKeyPressed(LeftMouseButton);
         cursorPreviewWindow ??= new CursorColorPreviewWindow();
+        inputWindow ??= CreateInputWindow();
+        inputWindow.Show();
         trackingTimer.Start();
     }
 
@@ -58,21 +58,12 @@ public sealed partial class WindowsColorPickerService :
     {
         trackingTimer.Stop();
         trackingTimer.Tick -= HandleTrackingTick;
+        inputWindow?.Dispose();
         cursorPreviewWindow?.Dispose();
     }
 
     private void HandleTrackingTick(DispatcherQueueTimer sender, object args)
     {
-        if (isWaitingForMouseRelease)
-        {
-            if (IsKeyPressed(LeftMouseButton))
-            {
-                return;
-            }
-
-            isWaitingForMouseRelease = false;
-        }
-
         if (IsKeyPressed(EscapeKey))
         {
             CompletePicking(null);
@@ -86,11 +77,6 @@ public sealed partial class WindowsColorPickerService :
             cursorPreviewWindow?.Show(preview.Color, preview.X, preview.Y);
             PreviewChanged?.Invoke(this, new ColorPickerEventArgs(preview.Color));
         }
-
-        if (IsKeyPressed(LeftMouseButton))
-        {
-            CompletePicking(sample?.Color);
-        }
     }
 
     private void CompletePicking(ColorValue? color)
@@ -102,6 +88,7 @@ public sealed partial class WindowsColorPickerService :
 
         isPicking = false;
         trackingTimer.Stop();
+        inputWindow?.Hide();
         cursorPreviewWindow?.Hide();
 
         if (color is ColorValue pickedColor)
@@ -113,6 +100,16 @@ public sealed partial class WindowsColorPickerService :
             PickingCancelled?.Invoke(this, EventArgs.Empty);
         }
     }
+
+    private ColorPickerInputWindow CreateInputWindow()
+    {
+        ColorPickerInputWindow window = new();
+        window.Picked += HandlePicked;
+        return window;
+    }
+
+    private void HandlePicked(object? sender, EventArgs args) =>
+        CompletePicking(ReadColorUnderPointer()?.Color);
 
     private static bool IsKeyPressed(int key) =>
         (NativeMethods.GetAsyncKeyState(key) & 0x8000) != 0;
