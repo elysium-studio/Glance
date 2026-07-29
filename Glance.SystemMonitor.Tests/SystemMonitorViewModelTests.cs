@@ -5,6 +5,14 @@ namespace Glance.SystemMonitor.Tests;
 public sealed class SystemMonitorViewModelTests
 {
     [Fact]
+    public void Settings_ShowPerformanceChartsByDefault()
+    {
+        SystemMonitorSettings settings = new();
+
+        Assert.True(settings.ShowPerformanceCharts);
+    }
+
+    [Fact]
     public void Constructor_UsesLocalizedMemoryPlaceholder()
     {
         SystemMonitorViewModel viewModel = new(new TestTextLocalizer());
@@ -27,6 +35,20 @@ public sealed class SystemMonitorViewModelTests
         Assert.Equal(67.8, viewModel.MemoryUsage);
         Assert.Equal("42%", viewModel.CpuText);
         Assert.Equal("68%", viewModel.MemoryText);
+    }
+
+    [Fact]
+    public void Update_RaisesOneMetricsUpdatedEventWithNumericNetworkValues()
+    {
+        SystemMonitorViewModel viewModel = CreateViewModel();
+        int updateCount = 0;
+        viewModel.MetricsUpdated += (_, _) => updateCount++;
+
+        viewModel.Update(42.4, 67.8, 0, 0, 2048, 1024);
+
+        Assert.Equal(1, updateCount);
+        Assert.Equal(2048, viewModel.DownloadBytesPerSecond);
+        Assert.Equal(1024, viewModel.UploadBytesPerSecond);
     }
 
     [Fact]

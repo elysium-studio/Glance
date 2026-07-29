@@ -34,4 +34,10 @@
   <data name="RefreshIntervalSettingCard.Description" xml:space="preserve">
     <value>How often system usage information is refreshed.</value>
   </data>
+  <data name="PerformanceChartsSettingCard.Header" xml:space="preserve">
+    <value>ï¼»!!! Performance charts !!!ï¼½</value>
+  </data>
+  <data name="PerformanceChartsSettingCard.Description" xml:space="preserve">
+    <value>ï¼»!!! Show live CPU, memory and network history. !!!ï¼½</value>
+  </data>
 </root>

@@ -16,6 +16,7 @@ public sealed partial class SystemMonitorComponent :
     private readonly SystemMetricsReader metricsReader = new();
     private readonly SystemMonitorViewModel viewModel;
     private readonly GlanceModuleOptions<SystemMonitorSettings> options;
+    private readonly SystemMonitorExpandedView expandedView;
 
     public SystemMonitorComponent(SystemMonitorViewModel viewModel,
         GlanceModuleOptions<SystemMonitorSettings> options,
@@ -27,7 +28,10 @@ public sealed partial class SystemMonitorComponent :
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
         SystemMonitorCompactView compactView = new(viewModel);
-        SystemMonitorExpandedView expandedView = new(viewModel, localizer);
+        expandedView = new(viewModel);
+        TimeSpan refreshInterval = GetRefreshInterval(options.Current);
+        expandedView.SetSampleInterval(refreshInterval);
+        expandedView.ShowPerformanceCharts = options.Current.ShowPerformanceCharts;
 
         CompactContent = compactView;
         ExpandedContent = expandedView;
@@ -35,7 +39,7 @@ public sealed partial class SystemMonitorComponent :
         ExpandedAnimationElement = expandedView.ConnectedAnimationElement;
 
         timer = dispatcherQueue.CreateTimer();
-        timer.Interval = GetRefreshInterval(options.Current);
+        timer.Interval = refreshInterval;
         timer.IsRepeating = true;
         timer.Tick += HandleTick;
         timer.Start();
@@ -69,8 +73,13 @@ public sealed partial class SystemMonitorComponent :
 
     private void HandleTick(DispatcherQueueTimer sender, object args) => UpdateMetrics();
 
-    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<SystemMonitorSettings> args) =>
-        dispatcherQueue.TryEnqueue(() => timer.Interval = GetRefreshInterval(args.Options));
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<SystemMonitorSettings> args) => dispatcherQueue.TryEnqueue(() =>
+    {
+        TimeSpan refreshInterval = GetRefreshInterval(args.Options);
+        timer.Interval = refreshInterval;
+        expandedView.SetSampleInterval(refreshInterval);
+        expandedView.ShowPerformanceCharts = args.Options.ShowPerformanceCharts;
+    });
 
     private static TimeSpan GetRefreshInterval(SystemMonitorSettings settings) =>
         TimeSpan.FromSeconds(Math.Clamp(settings.RefreshIntervalSeconds, 0.5, 10));

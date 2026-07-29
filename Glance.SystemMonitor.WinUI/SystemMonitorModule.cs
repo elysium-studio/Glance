@@ -16,6 +16,7 @@ public sealed class SystemMonitorModule :
         services.AddSingleton<ModuleResourceTextLocalizer<SystemMonitorModule>>();
         services.AddSingleton(provider => new SystemMonitorViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<SystemMonitorModule>>()));
         services.AddSingleton<IGlanceComponent, SystemMonitorComponent>();
+        services.AddViewFor<PerformanceChartsSettingView, IGlanceModuleSettingViewModel, PerformanceChartsSettingViewModel>(ServiceLifetime.Transient, provider => new PerformanceChartsSettingView(), provider => new PerformanceChartsSettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<SystemMonitorSettings>>().Current, provider.GetRequiredService<IWritableOptions<SystemMonitorSettings>>()));
         services.AddViewFor<RefreshIntervalSettingView, IGlanceModuleSettingViewModel, RefreshIntervalSettingViewModel>(ServiceLifetime.Transient, provider => new RefreshIntervalSettingView(), provider => new RefreshIntervalSettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<SystemMonitorSettings>>().Current, provider.GetRequiredService<IWritableOptions<SystemMonitorSettings>>()));
     }
 }
