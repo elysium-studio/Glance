@@ -22,6 +22,17 @@ public sealed class GlanceSettingsModule :
                     provider.GetRequiredService<IWritableOptions<GlanceSettings>>(),
                     config => (int)config.Placement,
                     (config, placement) => config.Placement = (GlancePlacement)placement))
+            .AddViewFor<ExpansionModeView, IGlanceViewModel, ExpansionModeViewModel>(ServiceLifetime.Transient,
+                provider => new ExpansionModeView(),
+                provider => new ExpansionModeViewModel(provider,
+                    provider.GetRequiredService<IServiceFactory>(),
+                    provider.GetRequiredService<IMessenger>(),
+                    provider.GetRequiredService<IDisposer>(),
+                    provider.GetRequiredService<IDispatcher>(),
+                    provider.GetRequiredService<GlanceSettings>(),
+                    provider.GetRequiredService<IWritableOptions<GlanceSettings>>(),
+                    config => (int)config.ExpansionMode,
+                    (config, mode) => config.ExpansionMode = (GlanceExpansionMode)mode))
             .AddViewFor<AutoHideView, IGlanceViewModel, AutoHideViewModel>(ServiceLifetime.Transient,
                 provider => new AutoHideView(),
                 provider => new AutoHideViewModel(provider,

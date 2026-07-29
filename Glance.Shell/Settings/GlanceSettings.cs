@@ -4,6 +4,8 @@ public sealed class GlanceSettings
 {
     public bool AutoHide { get; set; }
 
+    public GlanceExpansionMode ExpansionMode { get; set; }
+
     public List<GlanceModulePreference> Modules { get; set; } = [];
 
     public GlancePlacement Placement { get; set; } = GlancePlacement.Top;

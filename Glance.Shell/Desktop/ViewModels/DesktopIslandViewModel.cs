@@ -24,6 +24,10 @@ public sealed partial class DesktopIslandViewModel :
     private bool isExpanded;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsPinned))]
+    private GlanceExpansionMode expansionMode;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PlacementIndex))]
     private GlancePlacement placement;
 
@@ -35,6 +39,7 @@ public sealed partial class DesktopIslandViewModel :
     private readonly ILogger<DesktopIslandViewModel> logger;
     private readonly ModulePreferenceService modulePreferences;
     private readonly INavigator navigator;
+    private readonly IWritableOptions<GlanceSettings> settingsWriter;
 
     public DesktopIslandViewModel(IServiceProvider provider,
         IServiceFactory factory,
@@ -45,7 +50,8 @@ public sealed partial class DesktopIslandViewModel :
         IGlanceAttentionService attentionService,
         INavigator navigator,
         ILogger<DesktopIslandViewModel> logger,
-        GlanceSettings settings) :
+        GlanceSettings settings,
+        IWritableOptions<GlanceSettings> settingsWriter) :
         base(provider, factory, messenger, disposer)
     {
         this.dispatcher = dispatcher;
@@ -54,7 +60,9 @@ public sealed partial class DesktopIslandViewModel :
         this.attentionService = attentionService;
         this.navigator = navigator;
         this.logger = logger;
+        this.settingsWriter = settingsWriter;
         AutoHide = settings.AutoHide;
+        ExpansionMode = settings.ExpansionMode;
         Placement = settings.Placement;
         attentionService.AttentionRequested += HandleAttentionRequested;
         modulePreferences.ActiveComponentsChanged += HandleActiveComponentsChanged;
@@ -91,6 +99,8 @@ public sealed partial class DesktopIslandViewModel :
 
     public int ComponentCount => components.Count;
 
+    public bool IsPinned => ExpansionMode == GlanceExpansionMode.AlwaysExpanded;
+
     public int PlacementIndex => (int)Placement;
 
     public string PageText => components.Count == 0
@@ -104,6 +114,25 @@ public sealed partial class DesktopIslandViewModel :
     public void CompleteStartup() => attentionService.CompleteStartup();
 
     public async void NavigateToSettings() => await NavigateAsync("SettingsWindow");
+
+    public async void TogglePinned()
+    {
+        GlanceExpansionMode previousMode = ExpansionMode;
+        GlanceExpansionMode nextMode = IsPinned
+            ? GlanceExpansionMode.ExpandOnHover
+            : GlanceExpansionMode.AlwaysExpanded;
+        ExpansionMode = nextMode;
+
+        try
+        {
+            await settingsWriter.WriteAsync(settings => settings.ExpansionMode = nextMode);
+        }
+        catch (Exception exception)
+        {
+            ExpansionMode = previousMode;
+            logger.LogError(exception, "Failed to change the Glance expansion mode");
+        }
+    }
 
     public bool CanHandleContent(GlanceContentKind kind) =>
         FindContextComponentIndex(kind) >= 0;
@@ -123,7 +152,7 @@ public sealed partial class DesktopIslandViewModel :
         return true;
     }
 
-    public void EndContentPreview() => IsExpanded = false;
+    public void EndContentPreview() => IsExpanded = IsPinned;
 
     public async Task<bool> HandleContentAsync(GlanceContentContext context)
     {
@@ -165,6 +194,7 @@ public sealed partial class DesktopIslandViewModel :
         dispatcher.Dispatch(() =>
         {
             AutoHide = message.Options.AutoHide;
+            ExpansionMode = message.Options.ExpansionMode;
             Placement = message.Options.Placement;
         });
 

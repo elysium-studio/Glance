@@ -20,6 +20,14 @@
   <data name="BooleanToggle.OffContent" xml:space="preserve"><value>否</value></data>
   <data name="AutoHideCard.Header" xml:space="preserve"><value>自动隐藏</value></data>
   <data name="AutoHideCard.Description" xml:space="preserve"><value>空闲时隐藏 Glance，并在指针靠近屏幕边缘指示器时重新显示</value></data>
+  <data name="GlanceExpansionCard.Header" xml:space="preserve"><value>灵动岛展开方式</value></data>
+  <data name="GlanceExpansionCard.Description" xml:space="preserve"><value>选择 Glance 在指针悬停时展开或始终保持展开</value></data>
+  <data name="GlanceExpansionHoverOption.Content" xml:space="preserve"><value>悬停时展开</value></data>
+  <data name="GlanceExpansionPinnedOption.Content" xml:space="preserve"><value>始终展开</value></data>
+  <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>保持展开</value></data>
+  <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>让灵动岛保持展开</value></data>
+  <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>悬停时展开</value></data>
+  <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>停止保持灵动岛展开</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>允许提醒</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>当有内容需要你注意时，允许此模块自动显示</value></data>
 </root>
