@@ -19,7 +19,14 @@ public sealed partial class SystemMonitorExpandedView :
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
-    private void HandleMetricsUpdated(object? sender, EventArgs args) => DispatcherQueue.TryEnqueue(AddCurrentSample);
+    public void SetSampleInterval(TimeSpan interval)
+    {
+        CpuGraph.SampleInterval = interval;
+        MemoryGraph.SampleInterval = interval;
+        NetworkGraph.SampleInterval = interval;
+    }
+
+    private void HandleMetricsUpdated(object? sender, EventArgs args) => AddCurrentSample();
 
     private void AddCurrentSample()
     {

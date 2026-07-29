@@ -16,15 +16,18 @@ public sealed partial class SystemMetricGraph :
     private const int SampleCapacity = 48;
     private const int GridColumnCount = 6;
     private const int GridRowCount = 3;
-    private static readonly TimeSpan TransitionDuration = TimeSpan.FromMilliseconds(280);
     private readonly double[] primarySamples = new double[SampleCapacity];
     private readonly double[] secondarySamples = new double[SampleCapacity];
-    private readonly List<SpriteVisual> primarySegments = [];
-    private readonly List<SpriteVisual> secondarySegments = [];
-    private readonly List<SpriteVisual> gridLines = [];
+    private readonly List<CompositionLineGeometry> primaryLines = [];
+    private readonly List<CompositionLineGeometry> secondaryLines = [];
+    private readonly List<CompositionLineGeometry> gridLines = [];
+    private readonly List<CompositionSpriteShape> primaryShapes = [];
+    private readonly List<CompositionSpriteShape> secondaryShapes = [];
+    private readonly List<CompositionSpriteShape> gridShapes = [];
     private ContainerVisual? rootVisual;
-    private ContainerVisual? primaryVisual;
-    private ContainerVisual? secondaryVisual;
+    private ShapeVisual? primaryVisual;
+    private ShapeVisual? secondaryVisual;
+    private ShapeVisual? gridVisual;
     private CompositionColorBrush? primaryBrush;
     private CompositionColorBrush? secondaryBrush;
     private CompositionColorBrush? gridBrush;
@@ -71,6 +74,8 @@ public sealed partial class SystemMetricGraph :
         set => SetValue(GridStrokeProperty, value);
     }
 
+    public TimeSpan SampleInterval { get; set; } = TimeSpan.FromSeconds(1);
+
     public void AddSample(double primary, double? secondary = null)
     {
         double primaryValue = Math.Max(0, primary);
@@ -85,8 +90,8 @@ public sealed partial class SystemMetricGraph :
         if (IsLoaded && ActualWidth > 0 && ActualHeight > 0)
         {
             EnsureVisuals();
-            RenderNextSample(primarySamples, primaryValue, primarySegments, primaryVisual, 2);
-            RenderNextSample(secondarySamples, secondaryValue, secondarySegments, secondaryVisual, 1.5f);
+            RenderNextSample(primarySamples, primaryValue, primaryLines, primaryVisual);
+            RenderNextSample(secondarySamples, secondaryValue, secondaryLines, secondaryVisual);
         }
 
         ShiftSamples(primarySamples, primaryValue);
@@ -132,28 +137,43 @@ public sealed partial class SystemMetricGraph :
         compositor = ElementCompositionPreview.GetElementVisual(this).Compositor;
         rootVisual = compositor.CreateContainerVisual();
         rootVisual.Clip = compositor.CreateInsetClip();
-        primaryVisual = compositor.CreateContainerVisual();
-        secondaryVisual = compositor.CreateContainerVisual();
+        gridVisual = compositor.CreateShapeVisual();
+        primaryVisual = compositor.CreateShapeVisual();
+        secondaryVisual = compositor.CreateShapeVisual();
+        rootVisual.Children.InsertAtBottom(gridVisual);
         rootVisual.Children.InsertAtTop(primaryVisual);
         rootVisual.Children.InsertAtTop(secondaryVisual);
         ElementCompositionPreview.SetElementChildVisual(this, rootVisual);
 
         for (int index = 0; index < GridColumnCount - 1 + GridRowCount - 1; index++)
         {
-            SpriteVisual line = compositor.CreateSpriteVisual();
+            CompositionLineGeometry line = compositor.CreateLineGeometry();
+            CompositionSpriteShape shape = compositor.CreateSpriteShape(line);
+            shape.StrokeThickness = 1;
             gridLines.Add(line);
-            rootVisual.Children.InsertAtBottom(line);
+            gridShapes.Add(shape);
+            gridVisual.Shapes.Add(shape);
         }
 
         for (int index = 0; index < SampleCapacity; index++)
         {
-            SpriteVisual primarySegment = compositor.CreateSpriteVisual();
-            primarySegments.Add(primarySegment);
-            primaryVisual.Children.InsertAtTop(primarySegment);
+            CompositionLineGeometry primaryLine = compositor.CreateLineGeometry();
+            CompositionSpriteShape primaryShape = compositor.CreateSpriteShape(primaryLine);
+            primaryShape.StrokeThickness = 2;
+            primaryShape.StrokeStartCap = CompositionStrokeCap.Round;
+            primaryShape.StrokeEndCap = CompositionStrokeCap.Round;
+            primaryLines.Add(primaryLine);
+            primaryShapes.Add(primaryShape);
+            primaryVisual.Shapes.Add(primaryShape);
 
-            SpriteVisual secondarySegment = compositor.CreateSpriteVisual();
-            secondarySegments.Add(secondarySegment);
-            secondaryVisual.Children.InsertAtTop(secondarySegment);
+            CompositionLineGeometry secondaryLine = compositor.CreateLineGeometry();
+            CompositionSpriteShape secondaryShape = compositor.CreateSpriteShape(secondaryLine);
+            secondaryShape.StrokeThickness = 1.5f;
+            secondaryShape.StrokeStartCap = CompositionStrokeCap.Round;
+            secondaryShape.StrokeEndCap = CompositionStrokeCap.Round;
+            secondaryLines.Add(secondaryLine);
+            secondaryShapes.Add(secondaryShape);
+            secondaryVisual.Shapes.Add(secondaryShape);
         }
 
         UpdateBrushes();
@@ -173,20 +193,24 @@ public sealed partial class SystemMetricGraph :
         secondaryBrush = compositor.CreateColorBrush(GetColor(SecondaryStroke));
         gridBrush = compositor.CreateColorBrush(GetColor(GridStroke));
 
-        foreach (SpriteVisual segment in primarySegments)
+        foreach (CompositionSpriteShape shape in primaryShapes)
         {
-            segment.Brush = primaryBrush;
+            shape.StrokeBrush = primaryBrush;
         }
 
-        foreach (SpriteVisual segment in secondarySegments)
+        foreach (CompositionSpriteShape shape in secondaryShapes)
         {
-            segment.Brush = secondaryBrush;
-            segment.IsVisible = SecondaryStroke is not null;
+            shape.StrokeBrush = secondaryBrush;
         }
 
-        foreach (SpriteVisual line in gridLines)
+        foreach (CompositionSpriteShape shape in gridShapes)
         {
-            line.Brush = gridBrush;
+            shape.StrokeBrush = gridBrush;
+        }
+
+        if (secondaryVisual is not null)
+        {
+            secondaryVisual.IsVisible = SecondaryStroke is not null;
         }
     }
 
@@ -204,18 +228,18 @@ public sealed partial class SystemMetricGraph :
             return;
         }
 
-        float width = (float)ActualWidth;
-        float height = (float)ActualHeight;
-        rootVisual.Size = new Vector2(width, height);
-        primaryVisual!.Size = new Vector2(width, height);
-        secondaryVisual!.Size = new Vector2(width, height);
+        Vector2 size = new((float)ActualWidth, (float)ActualHeight);
+        rootVisual.Size = size;
+        gridVisual!.Size = size;
+        primaryVisual!.Size = size;
+        secondaryVisual!.Size = size;
         primaryVisual.StopAnimation(nameof(primaryVisual.Offset));
         secondaryVisual.StopAnimation(nameof(secondaryVisual.Offset));
         primaryVisual.Offset = Vector3.Zero;
         secondaryVisual.Offset = Vector3.Zero;
-        RenderGrid(width, height);
-        RenderSeries(primarySamples, primarySegments, width, height, 2);
-        RenderSeries(secondarySamples, secondarySegments, width, height, 1.5f);
+        RenderGrid(size.X, size.Y);
+        RenderSeries(primarySamples, primaryLines, size.X, size.Y);
+        RenderSeries(secondarySamples, secondaryLines, size.X, size.Y);
     }
 
     private void RenderGrid(float width, float height)
@@ -225,17 +249,17 @@ public sealed partial class SystemMetricGraph :
         for (int column = 1; column < GridColumnCount; column++)
         {
             float x = width * column / GridColumnCount;
-            SetLine(gridLines[lineIndex++], new Vector2(x, 0), new Vector2(x, height), 1);
+            SetLine(gridLines[lineIndex++], new Vector2(x, 0), new Vector2(x, height));
         }
 
         for (int row = 1; row < GridRowCount; row++)
         {
             float y = height * row / GridRowCount;
-            SetLine(gridLines[lineIndex++], new Vector2(0, y), new Vector2(width, y), 1);
+            SetLine(gridLines[lineIndex++], new Vector2(0, y), new Vector2(width, y));
         }
     }
 
-    private void RenderSeries(double[] samples, IReadOnlyList<SpriteVisual> segments, float width, float height, float thickness)
+    private void RenderSeries(double[] samples, IReadOnlyList<CompositionLineGeometry> lines, float width, float height)
     {
         double maximum = Maximum > 0 ? Maximum : dynamicMaximum;
         float horizontalStep = width / (SampleCapacity - 1);
@@ -244,14 +268,13 @@ public sealed partial class SystemMetricGraph :
         {
             Vector2 start = new(index * horizontalStep, GetY(samples[index], maximum, height));
             Vector2 end = new((index + 1) * horizontalStep, GetY(samples[index + 1], maximum, height));
-            SetLine(segments[index], start, end, thickness);
-            segments[index].IsVisible = true;
+            SetLine(lines[index], start, end);
         }
 
-        segments[^1].IsVisible = false;
+        SetLine(lines[^1], new Vector2(-2, -2), new Vector2(-2, -2));
     }
 
-    private void RenderNextSample(double[] samples, double nextSample, IReadOnlyList<SpriteVisual> segments, ContainerVisual? visual, float thickness)
+    private void RenderNextSample(double[] samples, double nextSample, IReadOnlyList<CompositionLineGeometry> lines, ShapeVisual? visual)
     {
         if (compositor is null || visual is null)
         {
@@ -271,28 +294,19 @@ public sealed partial class SystemMetricGraph :
             double endValue = index == SampleCapacity - 1 ? nextSample : samples[index + 1];
             Vector2 start = new(index * horizontalStep, GetY(samples[index], maximum, height));
             Vector2 end = new((index + 1) * horizontalStep, GetY(endValue, maximum, height));
-            SetLine(segments[index], start, end, thickness);
-            segments[index].IsVisible = true;
+            SetLine(lines[index], start, end);
         }
 
-        CubicBezierEasingFunction easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.2f, 0), new Vector2(0, 1));
         Vector3KeyFrameAnimation animation = compositor.CreateVector3KeyFrameAnimation();
-        animation.Duration = TransitionDuration;
-        animation.InsertKeyFrame(1, new Vector3(-horizontalStep, 0, 0), easing);
+        animation.Duration = SampleInterval;
+        animation.InsertKeyFrame(1, new Vector3(-horizontalStep, 0, 0));
         visual.StartAnimation(nameof(visual.Offset), animation);
     }
 
-    private static void SetLine(SpriteVisual visual, Vector2 start, Vector2 end, float thickness)
+    private static void SetLine(CompositionLineGeometry line, Vector2 start, Vector2 end)
     {
-        Vector2 delta = end - start;
-        float length = Math.Max(1, delta.Length());
-        float angle = MathF.Atan2(delta.Y, delta.X);
-        Vector3 offset = new(start.X, start.Y - thickness / 2, 0);
-        Vector2 size = new(length + 1, thickness);
-        visual.CenterPoint = new Vector3(0, thickness / 2, 0);
-        visual.RotationAngle = angle;
-        visual.Offset = offset;
-        visual.Size = size;
+        line.Start = start;
+        line.End = end;
     }
 
     private static double GetDynamicMaximum(double value)
