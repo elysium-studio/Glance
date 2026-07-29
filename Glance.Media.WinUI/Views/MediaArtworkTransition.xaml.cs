@@ -26,6 +26,7 @@ public sealed partial class MediaArtworkTransition :
     private CompositionEasingFunction? easing;
     private ImageSource? displayedSource;
     private int transitionGeneration;
+    private bool isPreparing;
     private bool isTransitioning;
 
     public MediaArtworkTransition()
@@ -69,6 +70,7 @@ public sealed partial class MediaArtworkTransition :
         currentVisual = null;
         nextVisual = null;
         easing = null;
+        isPreparing = false;
         isTransitioning = false;
     }
 
@@ -120,9 +122,12 @@ public sealed partial class MediaArtworkTransition :
         }
 
         int generation = ++transitionGeneration;
+        isPreparing = false;
+        StopAnimations();
 
         if (source is null)
         {
+            nextImage.Source = null;
             CompositionScopedBatch fadeOutBatch = currentVisual.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
             StartScalarAnimation(currentVisual, nameof(Visual.RotationAngleInDegrees), -90, OutgoingDurationMs);
             StartOutgoingOpacityAnimation(currentVisual);
@@ -152,10 +157,66 @@ public sealed partial class MediaArtworkTransition :
             return;
         }
 
-        nextImage.Source = source;
-        nextVisual.RotationAngleInDegrees = 90;
-        nextVisual.Opacity = 0;
-        nextVisual.Scale = new Vector3(0.94f, 0.94f, 1);
+        PrepareTransition(source, generation);
+    }
+
+    private void PrepareTransition(ImageSource source, int generation)
+    {
+        Image preparedImage = nextImage;
+        Visual preparedVisual = nextVisual!;
+        Visual visibleVisual = currentVisual!;
+        RoutedEventHandler openedHandler = null!;
+        ExceptionRoutedEventHandler failedHandler = null!;
+
+        void RemoveHandlers()
+        {
+            preparedImage.ImageOpened -= openedHandler;
+            preparedImage.ImageFailed -= failedHandler;
+        }
+
+        openedHandler = (_, _) =>
+        {
+            RemoveHandlers();
+
+            if (generation == transitionGeneration &&
+                ReferenceEquals(preparedImage, nextImage) &&
+                ReferenceEquals(preparedImage.Source, displayedSource))
+            {
+                BeginTransition(generation);
+            }
+        };
+        failedHandler = (_, _) =>
+        {
+            RemoveHandlers();
+
+            if (generation == transitionGeneration &&
+                ReferenceEquals(preparedImage, nextImage))
+            {
+                preparedImage.Source = null;
+                isPreparing = false;
+            }
+        };
+
+        isPreparing = true;
+        preparedVisual.RotationAngleInDegrees = 90;
+        preparedVisual.Opacity = 0;
+        preparedVisual.Scale = new Vector3(0.94f, 0.94f, 1);
+        visibleVisual.RotationAngleInDegrees = 0;
+        visibleVisual.Opacity = 1;
+        visibleVisual.Scale = Vector3.One;
+        preparedImage.ImageOpened += openedHandler;
+        preparedImage.ImageFailed += failedHandler;
+        preparedImage.Source = source;
+    }
+
+    private void BeginTransition(int generation)
+    {
+        if (!isPreparing || currentVisual is null || nextVisual is null)
+        {
+            return;
+        }
+
+        isPreparing = false;
         isTransitioning = true;
 
         CompositionScopedBatch flipBatch = currentVisual.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
@@ -189,6 +250,7 @@ public sealed partial class MediaArtworkTransition :
         nextVisual.Scale = Vector3.One;
         (currentImage, nextImage) = (nextImage, currentImage);
         (currentVisual, nextVisual) = (nextVisual, currentVisual);
+        isPreparing = false;
         isTransitioning = false;
     }
 

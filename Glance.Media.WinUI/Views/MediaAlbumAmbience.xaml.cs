@@ -29,6 +29,7 @@ public sealed partial class MediaAlbumAmbience :
     private ImplicitAnimationCollection? ambientImplicitAnimations;
     private ImageSource? currentArtwork;
     private int artworkTransitionGeneration;
+    private bool isArtworkPreparing;
     private bool isArtworkTransitioning;
     private bool isPanning;
 
@@ -109,6 +110,7 @@ public sealed partial class MediaAlbumAmbience :
         nextArtworkVisual = null;
         easing = null;
         artworkTransitionGeneration++;
+        isArtworkPreparing = false;
         isArtworkTransitioning = false;
     }
 
@@ -203,16 +205,16 @@ public sealed partial class MediaAlbumAmbience :
             FinishArtworkTransition();
         }
 
-        Visual currentVisual = currentArtworkVisual;
-        Visual nextVisual = nextArtworkVisual;
         int transitionGeneration = ++artworkTransitionGeneration;
-        currentVisual.StopAnimation(nameof(Visual.Opacity));
-        nextVisual.StopAnimation(nameof(Visual.Opacity));
+        isArtworkPreparing = false;
+        currentArtworkVisual.StopAnimation(nameof(Visual.Opacity));
+        nextArtworkVisual.StopAnimation(nameof(Visual.Opacity));
 
         if (artwork is null)
         {
-            CompositionScopedBatch fadeOutBatch = currentVisual.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
-            StartArtworkOpacityAnimation(currentVisual, 0, ArtworkTransitionDurationMs);
+            nextArtworkImage.Source = null;
+            CompositionScopedBatch fadeOutBatch = currentArtworkVisual.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+            StartArtworkOpacityAnimation(currentArtworkVisual, 0, ArtworkTransitionDurationMs);
             fadeOutBatch.Completed += (_, _) =>
             {
                 fadeOutBatch.Dispose();
@@ -220,7 +222,7 @@ public sealed partial class MediaAlbumAmbience :
                 if (transitionGeneration == artworkTransitionGeneration)
                 {
                     currentArtworkImage.Source = null;
-                    currentVisual.Opacity = 0;
+                    currentArtworkVisual.Opacity = 0;
                 }
             };
             fadeOutBatch.End();
@@ -230,18 +232,69 @@ public sealed partial class MediaAlbumAmbience :
         if (currentArtworkImage.Source is null)
         {
             currentArtworkImage.Source = artwork;
-            currentVisual.Opacity = 1;
-            nextVisual.Opacity = 0;
+            currentArtworkVisual.Opacity = 1;
+            nextArtworkVisual.Opacity = 0;
             return;
         }
 
-        nextArtworkImage.Source = artwork;
-        nextVisual.Opacity = 0;
-        currentVisual.Opacity = 1;
+        PrepareArtworkTransition(artwork, transitionGeneration);
+    }
+
+    private void PrepareArtworkTransition(ImageSource artwork, int transitionGeneration)
+    {
+        Image preparedImage = nextArtworkImage;
+        RoutedEventHandler openedHandler = null!;
+        ExceptionRoutedEventHandler failedHandler = null!;
+
+        void RemoveHandlers()
+        {
+            preparedImage.ImageOpened -= openedHandler;
+            preparedImage.ImageFailed -= failedHandler;
+        }
+
+        openedHandler = (_, _) =>
+        {
+            RemoveHandlers();
+
+            if (transitionGeneration == artworkTransitionGeneration &&
+                ReferenceEquals(preparedImage, nextArtworkImage) &&
+                ReferenceEquals(preparedImage.Source, currentArtwork))
+            {
+                BeginArtworkTransition(transitionGeneration);
+            }
+        };
+        failedHandler = (_, _) =>
+        {
+            RemoveHandlers();
+
+            if (transitionGeneration == artworkTransitionGeneration &&
+                ReferenceEquals(preparedImage, nextArtworkImage))
+            {
+                preparedImage.Source = null;
+                isArtworkPreparing = false;
+            }
+        };
+
+        isArtworkPreparing = true;
+        nextArtworkVisual!.Opacity = 0;
+        currentArtworkVisual!.Opacity = 1;
+        preparedImage.ImageOpened += openedHandler;
+        preparedImage.ImageFailed += failedHandler;
+        preparedImage.Source = artwork;
+    }
+
+    private void BeginArtworkTransition(int transitionGeneration)
+    {
+        if (!isArtworkPreparing || currentArtworkVisual is null || nextArtworkVisual is null)
+        {
+            return;
+        }
+
+        isArtworkPreparing = false;
         isArtworkTransitioning = true;
 
-        CompositionScopedBatch transition = nextVisual.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
-        StartArtworkOpacityAnimation(nextVisual, 1, ArtworkTransitionDurationMs);
+        CompositionScopedBatch transition = nextArtworkVisual.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+        StartArtworkOpacityAnimation(nextArtworkVisual, 1, ArtworkTransitionDurationMs);
         transition.Completed += (_, _) =>
         {
             transition.Dispose();
@@ -263,6 +316,7 @@ public sealed partial class MediaAlbumAmbience :
         nextArtworkVisual.Opacity = nextArtworkImage.Source is null ? 0 : 1;
         (currentArtworkImage, nextArtworkImage) = (nextArtworkImage, currentArtworkImage);
         (currentArtworkVisual, nextArtworkVisual) = (nextArtworkVisual, currentArtworkVisual);
+        isArtworkPreparing = false;
         isArtworkTransitioning = false;
     }
 
