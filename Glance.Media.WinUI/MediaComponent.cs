@@ -388,30 +388,57 @@ public sealed partial class MediaComponent :
                             {
                             }
 
-                            viewModel.Artwork = artwork;
-
-                            if (ambientArtwork is not null)
+                            bool artworkApplied = false;
+                            await RunOnDispatcherAsync(() =>
                             {
-                                viewModel.AmbientArtwork = ambientArtwork;
+                                if (generation != refreshGeneration || !ReferenceEquals(mediaSession, session))
+                                {
+                                    return Task.CompletedTask;
+                                }
+
+                                viewModel.Artwork = artwork;
+
+                                if (ambientArtwork is not null)
+                                {
+                                    viewModel.AmbientArtwork = ambientArtwork;
+                                }
+
+                                currentArtworkHash = artworkHash;
+                                artworkApplied = true;
+                                return Task.CompletedTask;
+                            });
+
+                            if (!artworkApplied)
+                            {
+                                ambientArtwork?.Dispose();
+                                return;
                             }
                         }
                         else
                         {
                             viewModel.Artwork = null;
                             viewModel.AmbientArtwork = null;
+                            currentArtworkHash = artworkHash;
                         }
-
-                        currentArtworkHash = artworkHash;
                     }
                 }
 
-                if (currentTitle is not null &&
-                    !string.Equals(currentTitle, title, StringComparison.Ordinal))
+                await RunOnDispatcherAsync(() =>
                 {
-                    attentionService.RequestAttention(Id, GlanceAttentionLevel.Passive, expand: false);
-                }
+                    if (generation != refreshGeneration || !ReferenceEquals(mediaSession, session))
+                    {
+                        return Task.CompletedTask;
+                    }
 
-                currentTitle = title;
+                    if (currentTitle is not null &&
+                        !string.Equals(currentTitle, title, StringComparison.Ordinal))
+                    {
+                        attentionService.RequestAttention(Id, GlanceAttentionLevel.Passive, expand: false);
+                    }
+
+                    currentTitle = title;
+                    return Task.CompletedTask;
+                });
             });
         }
         finally
