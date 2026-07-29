@@ -19,7 +19,11 @@
                 x:Name="ArtworkContainer"
                 Width="64"
                 Height="64"
-                CornerRadius="{StaticResource OverlayCornerRadius}">
+                CornerRadius="{StaticResource OverlayCornerRadius}"
+                Translation="0,0,8">
+                <Border.Shadow>
+                    <ThemeShadow />
+                </Border.Shadow>
                 <Grid>
                     <Border
                         Background="{ThemeResource ControlFillColorSecondaryBrush}"
