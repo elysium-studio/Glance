@@ -7,6 +7,8 @@ namespace Glance.SystemMonitor.WinUI;
 public sealed partial class SystemMonitorExpandedView :
     UserControl
 {
+    public static readonly DependencyProperty ShowPerformanceChartsProperty = DependencyProperty.Register(nameof(ShowPerformanceCharts), typeof(bool), typeof(SystemMonitorExpandedView), new PropertyMetadata(true));
+
     public SystemMonitorExpandedView(SystemMonitorViewModel viewModel)
     {
         ViewModel = viewModel;
@@ -18,6 +20,12 @@ public sealed partial class SystemMonitorExpandedView :
     public SystemMonitorViewModel ViewModel { get; }
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
+
+    public bool ShowPerformanceCharts
+    {
+        get => (bool)GetValue(ShowPerformanceChartsProperty);
+        set => SetValue(ShowPerformanceChartsProperty, value);
+    }
 
     public void SetSampleInterval(TimeSpan interval)
     {
@@ -34,4 +42,8 @@ public sealed partial class SystemMonitorExpandedView :
         MemoryGraph.AddSample(ViewModel.MemoryUsage);
         NetworkGraph.AddSample(ViewModel.DownloadBytesPerSecond, ViewModel.UploadBytesPerSecond);
     }
+
+    private Visibility WhenShowingCharts(bool value) => value ? Visibility.Visible : Visibility.Collapsed;
+
+    private Visibility WhenHidingCharts(bool value) => value ? Visibility.Collapsed : Visibility.Visible;
 }

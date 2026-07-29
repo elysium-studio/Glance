@@ -31,6 +31,7 @@ public sealed partial class SystemMonitorComponent :
         expandedView = new(viewModel);
         TimeSpan refreshInterval = GetRefreshInterval(options.Current);
         expandedView.SetSampleInterval(refreshInterval);
+        expandedView.ShowPerformanceCharts = options.Current.ShowPerformanceCharts;
 
         CompactContent = compactView;
         ExpandedContent = expandedView;
@@ -77,6 +78,7 @@ public sealed partial class SystemMonitorComponent :
         TimeSpan refreshInterval = GetRefreshInterval(args.Options);
         timer.Interval = refreshInterval;
         expandedView.SetSampleInterval(refreshInterval);
+        expandedView.ShowPerformanceCharts = args.Options.ShowPerformanceCharts;
     });
 
     private static TimeSpan GetRefreshInterval(SystemMonitorSettings settings) =>

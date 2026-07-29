@@ -159,7 +159,7 @@ public sealed partial class SystemMetricGraph :
         {
             CompositionLineGeometry primaryLine = compositor.CreateLineGeometry();
             CompositionSpriteShape primaryShape = compositor.CreateSpriteShape(primaryLine);
-            primaryShape.StrokeThickness = 2;
+            primaryShape.StrokeThickness = 1;
             primaryShape.StrokeStartCap = CompositionStrokeCap.Round;
             primaryShape.StrokeEndCap = CompositionStrokeCap.Round;
             primaryLines.Add(primaryLine);
@@ -168,7 +168,7 @@ public sealed partial class SystemMetricGraph :
 
             CompositionLineGeometry secondaryLine = compositor.CreateLineGeometry();
             CompositionSpriteShape secondaryShape = compositor.CreateSpriteShape(secondaryLine);
-            secondaryShape.StrokeThickness = 1.5f;
+            secondaryShape.StrokeThickness = 1;
             secondaryShape.StrokeStartCap = CompositionStrokeCap.Round;
             secondaryShape.StrokeEndCap = CompositionStrokeCap.Round;
             secondaryLines.Add(secondaryLine);

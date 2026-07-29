@@ -5,6 +5,14 @@ namespace Glance.SystemMonitor.Tests;
 public sealed class SystemMonitorViewModelTests
 {
     [Fact]
+    public void Settings_ShowPerformanceChartsByDefault()
+    {
+        SystemMonitorSettings settings = new();
+
+        Assert.True(settings.ShowPerformanceCharts);
+    }
+
+    [Fact]
     public void Constructor_UsesLocalizedMemoryPlaceholder()
     {
         SystemMonitorViewModel viewModel = new(new TestTextLocalizer());

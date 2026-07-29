@@ -41,8 +41,12 @@
                         x:Name="CpuGraph"
                         Margin="6,26,6,6"
                         GridStroke="{ThemeResource GlanceSystemGraphGridBrush}"
-                        PrimaryStroke="{ThemeResource GlanceSystemCpuGraphBrush}" />
-                    <StackPanel Margin="8,6" Spacing="1">
+                        PrimaryStroke="{ThemeResource GlanceSystemCpuGraphBrush}"
+                        Visibility="{x:Bind WhenShowingCharts(ShowPerformanceCharts), Mode=OneWay}" />
+                    <StackPanel
+                        Margin="8,6"
+                        Spacing="1"
+                        Visibility="{x:Bind WhenShowingCharts(ShowPerformanceCharts), Mode=OneWay}">
                         <TextBlock
                             x:Uid="ProcessorLabel"
                             FontWeight="SemiBold"
@@ -51,6 +55,25 @@
                         <TextBlock
                             Style="{StaticResource BodyStrongTextBlockStyle}"
                             Text="{x:Bind ViewModel.CpuText, Mode=OneWay}" />
+                    </StackPanel>
+                    <StackPanel
+                        Margin="8,6"
+                        VerticalAlignment="Center"
+                        Spacing="3"
+                        Visibility="{x:Bind WhenHidingCharts(ShowPerformanceCharts), Mode=OneWay}">
+                        <TextBlock
+                            x:Uid="ProcessorLabel"
+                            FontWeight="SemiBold"
+                            Foreground="{ThemeResource GlanceSystemCpuGraphBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}" />
+                        <TextBlock
+                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                            Text="{x:Bind ViewModel.CpuText, Mode=OneWay}" />
+                        <ProgressBar
+                            Height="3"
+                            Foreground="{ThemeResource GlanceSystemCpuGraphBrush}"
+                            Maximum="100"
+                            Value="{x:Bind ViewModel.CpuUsage, Mode=OneWay}" />
                     </StackPanel>
                 </Grid>
             </Border>
@@ -64,8 +87,12 @@
                         x:Name="MemoryGraph"
                         Margin="6,26,6,6"
                         GridStroke="{ThemeResource GlanceSystemGraphGridBrush}"
-                        PrimaryStroke="{ThemeResource GlanceSystemMemoryGraphBrush}" />
-                    <StackPanel Margin="8,6" Spacing="1">
+                        PrimaryStroke="{ThemeResource GlanceSystemMemoryGraphBrush}"
+                        Visibility="{x:Bind WhenShowingCharts(ShowPerformanceCharts), Mode=OneWay}" />
+                    <StackPanel
+                        Margin="8,6"
+                        Spacing="1"
+                        Visibility="{x:Bind WhenShowingCharts(ShowPerformanceCharts), Mode=OneWay}">
                         <TextBlock
                             x:Uid="MemoryLabel"
                             FontWeight="SemiBold"
@@ -74,6 +101,25 @@
                         <TextBlock
                             Style="{StaticResource BodyStrongTextBlockStyle}"
                             Text="{x:Bind ViewModel.MemoryText, Mode=OneWay}" />
+                    </StackPanel>
+                    <StackPanel
+                        Margin="8,6"
+                        VerticalAlignment="Center"
+                        Spacing="3"
+                        Visibility="{x:Bind WhenHidingCharts(ShowPerformanceCharts), Mode=OneWay}">
+                        <TextBlock
+                            x:Uid="MemoryLabel"
+                            FontWeight="SemiBold"
+                            Foreground="{ThemeResource GlanceSystemMemoryGraphBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}" />
+                        <TextBlock
+                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                            Text="{x:Bind ViewModel.MemoryText, Mode=OneWay}" />
+                        <ProgressBar
+                            Height="3"
+                            Foreground="{ThemeResource GlanceSystemMemoryGraphBrush}"
+                            Maximum="100"
+                            Value="{x:Bind ViewModel.MemoryUsage, Mode=OneWay}" />
                     </StackPanel>
                 </Grid>
             </Border>
@@ -89,8 +135,11 @@
                         GridStroke="{ThemeResource GlanceSystemGraphGridBrush}"
                         Maximum="0"
                         PrimaryStroke="{ThemeResource GlanceSystemNetworkDownloadGraphBrush}"
-                        SecondaryStroke="{ThemeResource GlanceSystemNetworkUploadGraphBrush}" />
-                    <Grid Margin="8,5">
+                        SecondaryStroke="{ThemeResource GlanceSystemNetworkUploadGraphBrush}"
+                        Visibility="{x:Bind WhenShowingCharts(ShowPerformanceCharts), Mode=OneWay}" />
+                    <Grid
+                        Margin="8,5"
+                        Visibility="{x:Bind WhenShowingCharts(ShowPerformanceCharts), Mode=OneWay}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
@@ -126,6 +175,41 @@
                                 Text="{x:Bind ViewModel.UploadText, Mode=OneWay}" />
                         </StackPanel>
                     </Grid>
+                    <StackPanel
+                        Margin="8,5"
+                        VerticalAlignment="Center"
+                        Spacing="1"
+                        Visibility="{x:Bind WhenHidingCharts(ShowPerformanceCharts), Mode=OneWay}">
+                        <TextBlock
+                            x:Uid="NetworkLabel"
+                            FontWeight="SemiBold"
+                            Foreground="{ThemeResource GlanceSystemNetworkDownloadGraphBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}" />
+                        <StackPanel Orientation="Horizontal" Spacing="3">
+                            <FontIcon
+                                Margin="0,1,0,0"
+                                VerticalAlignment="Center"
+                                FontSize="10"
+                                Foreground="{ThemeResource GlanceSystemNetworkDownloadGraphBrush}"
+                                Glyph="&#xE74B;" />
+                            <TextBlock
+                                FontWeight="SemiBold"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.DownloadText, Mode=OneWay}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="3">
+                            <FontIcon
+                                Margin="0,1,0,0"
+                                VerticalAlignment="Center"
+                                FontSize="10"
+                                Foreground="{ThemeResource GlanceSystemNetworkUploadGraphBrush}"
+                                Glyph="&#xE74A;" />
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.UploadText, Mode=OneWay}" />
+                        </StackPanel>
+                    </StackPanel>
                 </Grid>
             </Border>
         </Grid>

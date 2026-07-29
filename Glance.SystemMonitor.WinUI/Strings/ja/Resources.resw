@@ -34,4 +34,10 @@
   <data name="RefreshIntervalSettingCard.Description" xml:space="preserve">
     <value>How often system usage information is refreshed.</value>
   </data>
+  <data name="PerformanceChartsSettingCard.Header" xml:space="preserve">
+    <value>パフォーマンス チャート</value>
+  </data>
+  <data name="PerformanceChartsSettingCard.Description" xml:space="preserve">
+    <value>CPU、メモリ、ネットワークの履歴をリアルタイムで表示します。</value>
+  </data>
 </root>
