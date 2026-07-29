@@ -131,7 +131,7 @@ public sealed partial class MediaAlbumAmbience :
     {
         GaussianBlurEffect blur = new()
         {
-            BlurAmount = 110,
+            BlurAmount = 220,
             BorderMode = EffectBorderMode.Hard,
             Source = new CompositionEffectSourceParameter("artwork")
         };
@@ -205,7 +205,7 @@ public sealed partial class MediaAlbumAmbience :
         double bass = Average(args.Levels, 0, 2);
         double energy = Average(args.Levels, 0, args.Levels.Count);
 
-        float scale = (float)(1.24 + (bass * 0.04));
+        float scale = (float)(1.45 + (bass * 0.035));
         float opacity = (float)(0.4 + (energy * 0.05));
 
         ApplyResponse(scale, opacity);
@@ -235,11 +235,11 @@ public sealed partial class MediaAlbumAmbience :
 
         if (!CanAnimate)
         {
-            ApplyResponse(1.24f, opacity);
+            ApplyResponse(1.45f, opacity);
             return;
         }
 
-        ApplyResponse(1.24f, opacity);
+        ApplyResponse(1.45f, opacity);
     }
 
     private void ConfigureResponseAnimations(Compositor compositor)
