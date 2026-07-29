@@ -2,6 +2,7 @@ using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -30,7 +31,9 @@ public sealed partial class MediaAlbumAmbience :
     private MediaAmbientArtwork? desiredArtwork;
     private MediaAmbientArtwork? currentArtwork;
     private MediaAmbientArtwork? nextArtwork;
+    private EventHandler<object>? artworkPreparationRenderingHandler;
     private int artworkTransitionGeneration;
+    private bool isArtworkPreparing;
     private bool isArtworkTransitioning;
     private bool isPanning;
 
@@ -79,6 +82,7 @@ public sealed partial class MediaAlbumAmbience :
         Unsubscribe();
         StopPanning();
         artworkTransitionGeneration++;
+        CancelArtworkPreparation();
 
         if (motionVisual is not null)
         {
@@ -127,6 +131,7 @@ public sealed partial class MediaAlbumAmbience :
         ambientVisual = null;
         motionVisual = null;
         easing = null;
+        isArtworkPreparing = false;
         isArtworkTransitioning = false;
     }
 
@@ -229,7 +234,7 @@ public sealed partial class MediaAlbumAmbience :
             return;
         }
 
-        if (isArtworkTransitioning)
+        if (isArtworkPreparing || isArtworkTransitioning)
         {
             return;
         }
@@ -263,11 +268,36 @@ public sealed partial class MediaAlbumAmbience :
         nextArtworkVisual.Opacity = 0;
         artworkContainerVisual!.Children.Remove(nextArtworkVisual);
         artworkContainerVisual.Children.InsertAtTop(nextArtworkVisual);
-        isArtworkTransitioning = true;
+        isArtworkPreparing = true;
+        artworkPreparationRenderingHandler = (_, _) =>
+        {
+            CancelArtworkPreparationHandler();
 
+            if (transitionGeneration == artworkTransitionGeneration &&
+                ReferenceEquals(nextArtwork, artwork))
+            {
+                BeginArtworkTransition(transitionGeneration);
+            }
+        };
+        CompositionTarget.Rendering += artworkPreparationRenderingHandler;
+    }
+
+    private void BeginArtworkTransition(int transitionGeneration)
+    {
+        if (!isArtworkPreparing ||
+            currentArtworkVisual is null ||
+            nextArtworkVisual is null)
+        {
+            return;
+        }
+
+        isArtworkPreparing = false;
+        isArtworkTransitioning = true;
+        currentArtworkVisual.Opacity = 0;
+        nextArtworkVisual.Opacity = 1;
         CompositionScopedBatch batch = currentArtworkVisual.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
-        StartArtworkOpacityAnimation(currentArtworkVisual, 0);
-        StartArtworkOpacityAnimation(nextArtworkVisual, 1);
+        StartArtworkOpacityAnimation(currentArtworkVisual, 1, 0);
+        StartArtworkOpacityAnimation(nextArtworkVisual, 0, 1);
         batch.Completed += (_, _) =>
         {
             batch.Dispose();
@@ -298,8 +328,6 @@ public sealed partial class MediaAlbumAmbience :
 
         currentArtworkVisual.StopAnimation(nameof(Visual.Opacity));
         nextArtworkVisual.StopAnimation(nameof(Visual.Opacity));
-        currentArtworkVisual.Opacity = 0;
-        nextArtworkVisual.Opacity = 1;
         MediaAmbientArtwork? previousArtwork = currentArtwork;
         CompositionSurfaceBrush? previousBrush = currentSurfaceBrush;
         currentArtwork = nextArtwork;
@@ -321,6 +349,23 @@ public sealed partial class MediaAlbumAmbience :
         isArtworkTransitioning = false;
     }
 
+    private void CancelArtworkPreparation()
+    {
+        CancelArtworkPreparationHandler();
+        isArtworkPreparing = false;
+    }
+
+    private void CancelArtworkPreparationHandler()
+    {
+        if (artworkPreparationRenderingHandler is null)
+        {
+            return;
+        }
+
+        CompositionTarget.Rendering -= artworkPreparationRenderingHandler;
+        artworkPreparationRenderingHandler = null;
+    }
+
     private CompositionSurfaceBrush CreateSurfaceBrush(MediaAmbientArtwork artwork)
     {
         CompositionSurfaceBrush brush = currentArtworkVisual!.Compositor.CreateSurfaceBrush(artwork.Surface);
@@ -330,10 +375,11 @@ public sealed partial class MediaAlbumAmbience :
         return brush;
     }
 
-    private void StartArtworkOpacityAnimation(Visual visual, float opacity)
+    private void StartArtworkOpacityAnimation(Visual visual, float from, float to)
     {
         ScalarKeyFrameAnimation animation = visual.Compositor.CreateScalarKeyFrameAnimation();
-        animation.InsertKeyFrame(1, opacity, easing);
+        animation.InsertKeyFrame(0, from);
+        animation.InsertKeyFrame(1, to, easing);
         animation.Duration = TimeSpan.FromMilliseconds(ArtworkTransitionDurationMs);
         visual.StartAnimation(nameof(Visual.Opacity), animation);
     }
