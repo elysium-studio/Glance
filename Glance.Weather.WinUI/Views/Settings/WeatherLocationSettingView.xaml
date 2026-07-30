@@ -10,6 +10,6 @@
         <TextBox
             x:Uid="WeatherLocationTextBox"
             Width="240"
-            Text="{x:Bind ViewModel.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            Text="{x:Bind ViewModel.Value, Mode=TwoWay}" />
     </CommunityToolkit:SettingsCard>
 </UserControl>
