@@ -19,10 +19,14 @@ public sealed partial class WeatherScene :
     private readonly Random random = new();
     private WeatherViewModel? viewModel;
     private ContainerVisual? sceneVisual;
+    private ContainerVisual? activeSceneLayer;
+    private Canvas? activeCloudLayer;
+    private FrameworkElement? activeBackgroundLayer;
     private CompositionRoundedRectangleGeometry? clipGeometry;
     private CompositionGeometricClip? clip;
     private DispatcherQueueTimer? lightningTimer;
     private SpriteVisual? lightningFlash;
+    private bool rebuildQueued;
 
     public WeatherScene() => InitializeComponent();
 
@@ -52,19 +56,23 @@ public sealed partial class WeatherScene :
         clip = visual.Compositor.CreateGeometricClip(clipGeometry);
         visual.Clip = clip;
         Subscribe();
-        RebuildScene();
+        QueueSceneRebuild();
     }
 
     private void HandleUnloaded(object sender, RoutedEventArgs args)
     {
         Unsubscribe();
         ElementCompositionPreview.SetElementChildVisual(ParticleHost, null);
-        CloudHost.Children.Clear();
+        BackgroundHost.Children.Clear();
+        CloudLayerHost.Children.Clear();
         StopLightning();
         sceneVisual?.Dispose();
         clip?.Dispose();
         clipGeometry?.Dispose();
         sceneVisual = null;
+        activeSceneLayer = null;
+        activeCloudLayer = null;
+        activeBackgroundLayer = null;
         clip = null;
         clipGeometry = null;
     }
@@ -104,8 +112,23 @@ public sealed partial class WeatherScene :
             nameof(WeatherViewModel.WeatherEffect) or
             nameof(WeatherViewModel.WeatherTemperature))
         {
-            RebuildScene();
+            QueueSceneRebuild();
         }
+    }
+
+    private void QueueSceneRebuild()
+    {
+        if (rebuildQueued)
+        {
+            return;
+        }
+
+        rebuildQueued = true;
+        DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+        {
+            rebuildQueued = false;
+            RebuildScene();
+        });
     }
 
     private void RebuildScene()
@@ -115,21 +138,37 @@ public sealed partial class WeatherScene :
             return;
         }
 
-        ElementCompositionPreview.SetElementChildVisual(ParticleHost, null);
-        CloudHost.Children.Clear();
         StopLightning();
-        sceneVisual?.Dispose();
         Compositor compositor = ElementCompositionPreview.GetElementVisual(this).Compositor;
-        sceneVisual = compositor.CreateContainerVisual();
-        sceneVisual.RelativeSizeAdjustment = Vector2.One;
-        ElementCompositionPreview.SetElementChildVisual(ParticleHost, sceneVisual);
+
+        if (sceneVisual is null)
+        {
+            sceneVisual = compositor.CreateContainerVisual();
+            sceneVisual.RelativeSizeAdjustment = Vector2.One;
+            ElementCompositionPreview.SetElementChildVisual(ParticleHost, sceneVisual);
+        }
 
         WeatherTimeOfDay time = viewModel?.WeatherTime ?? WeatherTimeOfDay.Day;
         WeatherSky sky = viewModel?.WeatherSky ?? WeatherSky.Clear;
         WeatherCelestial celestial = viewModel?.WeatherCelestial ?? WeatherCelestial.Sun;
         WeatherEffect effect = viewModel?.WeatherEffect ?? WeatherEffect.None;
         WeatherTemperature temperature = viewModel?.WeatherTemperature ?? WeatherTemperature.Normal;
-        SceneRoot.Background = CreateBackground(time, sky, effect, temperature);
+        ContainerVisual? previousSceneLayer = activeSceneLayer;
+        Canvas? previousCloudLayer = activeCloudLayer;
+        FrameworkElement? previousBackgroundLayer = activeBackgroundLayer;
+        activeSceneLayer = compositor.CreateContainerVisual();
+        activeSceneLayer.RelativeSizeAdjustment = Vector2.One;
+        activeSceneLayer.Opacity = previousSceneLayer is null ? 1 : 0;
+        sceneVisual.Children.InsertAtTop(activeSceneLayer);
+        activeCloudLayer = new Canvas { Opacity = previousCloudLayer is null ? 1 : 0, IsHitTestVisible = false };
+        CloudLayerHost.Children.Add(activeCloudLayer);
+        activeBackgroundLayer = new Border
+        {
+            Background = CreateBackground(time, sky, effect, temperature),
+            Opacity = previousBackgroundLayer is null ? 1 : 0,
+            IsHitTestVisible = false
+        };
+        BackgroundHost.Children.Add(activeBackgroundLayer);
         if (celestial != WeatherCelestial.None)
         {
             AddCelestial(compositor, temperature == WeatherTemperature.Hot, celestial, time);
@@ -170,6 +209,53 @@ public sealed partial class WeatherScene :
                 AddFog(compositor);
                 break;
         }
+
+        if (previousSceneLayer is not null && previousCloudLayer is not null && previousBackgroundLayer is not null)
+        {
+            CrossFadeScene(compositor,
+                previousSceneLayer,
+                activeSceneLayer,
+                previousCloudLayer,
+                activeCloudLayer,
+                previousBackgroundLayer,
+                activeBackgroundLayer);
+        }
+    }
+
+    private void CrossFadeScene(Compositor compositor,
+        ContainerVisual previousScene,
+        ContainerVisual nextScene,
+        Canvas previousClouds,
+        Canvas nextClouds,
+        FrameworkElement previousBackground,
+        FrameworkElement nextBackground)
+    {
+        CubicBezierEasingFunction easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.22f, 1), new Vector2(0.36f, 1));
+        CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+        StartOpacityTransition(compositor, previousScene, 1, 0, easing);
+        StartOpacityTransition(compositor, nextScene, 0, 1, easing);
+        StartOpacityTransition(compositor, ElementCompositionPreview.GetElementVisual(previousClouds), 1, 0, easing);
+        StartOpacityTransition(compositor, ElementCompositionPreview.GetElementVisual(nextClouds), 0, 1, easing);
+        StartOpacityTransition(compositor, ElementCompositionPreview.GetElementVisual(previousBackground), 1, 0, easing);
+        StartOpacityTransition(compositor, ElementCompositionPreview.GetElementVisual(nextBackground), 0, 1, easing);
+        batch.End();
+        batch.Completed += (sender, args) => DispatcherQueue.TryEnqueue(() =>
+        {
+            sceneVisual?.Children.Remove(previousScene);
+            previousScene.Dispose();
+            CloudLayerHost.Children.Remove(previousClouds);
+            BackgroundHost.Children.Remove(previousBackground);
+            batch.Dispose();
+        });
+    }
+
+    private static void StartOpacityTransition(Compositor compositor, Visual visual, float from, float to, CompositionEasingFunction easing)
+    {
+        ScalarKeyFrameAnimation animation = compositor.CreateScalarKeyFrameAnimation();
+        animation.InsertKeyFrame(0, from);
+        animation.InsertKeyFrame(1, to, easing);
+        animation.Duration = TimeSpan.FromMilliseconds(420);
+        visual.StartAnimation("Opacity", animation);
     }
 
     private Brush CreateBackground(WeatherTimeOfDay time, WeatherSky sky, WeatherEffect effect, WeatherTemperature temperature)
@@ -270,7 +356,7 @@ public sealed partial class WeatherScene :
         scale.Duration = TimeSpan.FromSeconds(4);
         scale.IterationBehavior = AnimationIterationBehavior.Forever;
         celestial.StartAnimation("Scale", scale);
-        sceneVisual?.Children.InsertAtTop(celestial);
+        activeSceneLayer?.Children.InsertAtTop(celestial);
     }
 
     private void AddClouds(Compositor compositor, int count)
@@ -283,29 +369,23 @@ public sealed partial class WeatherScene :
             Path cloud = CreateCloud(width, height, alpha);
             Canvas.SetLeft(cloud, -width);
             Canvas.SetTop(cloud, 6 + index * 28);
-            CloudHost.Children.Add(cloud);
+            activeCloudLayer?.Children.Add(cloud);
             ElementCompositionPreview.SetIsTranslationEnabled(cloud, true);
             Visual cloudVisual = ElementCompositionPreview.GetElementVisual(cloud);
             float phase = (float)index / count;
-            float wrap = Math.Min(0.995f, 1 - phase + 0.002f);
             float travel = SceneWidth + width * 2;
             ScalarKeyFrameAnimation drift = compositor.CreateScalarKeyFrameAnimation();
-            drift.InsertKeyFrame(0, phase * travel);
-
-            if (index == 0)
-            {
-                drift.InsertKeyFrame(1, travel);
-            }
-            else
-            {
-                drift.InsertKeyFrame(1 - phase, travel);
-                drift.InsertKeyFrame(wrap, 0);
-                drift.InsertKeyFrame(1, phase * travel);
-            }
-
-            drift.Duration = TimeSpan.FromSeconds(30);
+            drift.InsertKeyFrame(0, 0);
+            drift.InsertKeyFrame(1, travel);
+            drift.Duration = TimeSpan.FromSeconds(42);
             drift.IterationBehavior = AnimationIterationBehavior.Forever;
             cloudVisual.StartAnimation("Translation.X", drift);
+            AnimationController? controller = cloudVisual.TryGetAnimationController("Translation.X");
+
+            if (controller is not null)
+            {
+                controller.Progress = phase;
+            }
         }
     }
 
@@ -324,7 +404,7 @@ public sealed partial class WeatherScene :
             twinkle.DelayTime = TimeSpan.FromSeconds(RandomBetween(0, 2));
             twinkle.IterationBehavior = AnimationIterationBehavior.Forever;
             star.StartAnimation("Opacity", twinkle);
-            sceneVisual?.Children.InsertAtTop(star);
+            activeSceneLayer?.Children.InsertAtTop(star);
         }
     }
 
@@ -379,7 +459,7 @@ public sealed partial class WeatherScene :
             fall.DelayTime = TimeSpan.FromSeconds(RandomBetween(0, 1));
             fall.IterationBehavior = AnimationIterationBehavior.Forever;
             drop.StartAnimation("Offset.Y", fall);
-            sceneVisual?.Children.InsertAtTop(drop);
+            activeSceneLayer?.Children.InsertAtTop(drop);
         }
     }
 
@@ -397,7 +477,7 @@ public sealed partial class WeatherScene :
             fall.DelayTime = TimeSpan.FromSeconds(RandomBetween(0, 2));
             fall.IterationBehavior = AnimationIterationBehavior.Forever;
             flake.StartAnimation("Offset.Y", fall);
-            sceneVisual?.Children.InsertAtTop(flake);
+            activeSceneLayer?.Children.InsertAtTop(flake);
         }
     }
 
@@ -407,7 +487,7 @@ public sealed partial class WeatherScene :
         lightningFlash.RelativeSizeAdjustment = Vector2.One;
         lightningFlash.Brush = compositor.CreateColorBrush(Color.FromArgb(255, 220, 229, 255));
         lightningFlash.Opacity = 0;
-        sceneVisual?.Children.InsertAtTop(lightningFlash);
+        activeSceneLayer?.Children.InsertAtTop(lightningFlash);
 
         lightningTimer = DispatcherQueue.GetForCurrentThread().CreateTimer();
         lightningTimer.IsRepeating = true;
@@ -432,28 +512,17 @@ public sealed partial class WeatherScene :
 
         LightningHost.Children.Clear();
         PathGeometry geometry = CreateLightningGeometry();
-        Path glow = new()
-        {
-            Data = geometry,
-            Stroke = new SolidColorBrush(Color.FromArgb(105, 178, 204, 255)),
-            StrokeThickness = 7,
-            StrokeLineJoin = PenLineJoin.Round,
-            IsHitTestVisible = false,
-            Opacity = 0
-        };
         Path core = new()
         {
             Data = geometry,
             Stroke = new SolidColorBrush(Color.FromArgb(245, 239, 245, 255)),
-            StrokeThickness = 2,
+            StrokeThickness = 2.5,
             StrokeLineJoin = PenLineJoin.Round,
             IsHitTestVisible = false,
             Opacity = 0
         };
-        LightningHost.Children.Add(glow);
         LightningHost.Children.Add(core);
         Compositor compositor = ElementCompositionPreview.GetElementVisual(this).Compositor;
-        StartStrikeAnimation(compositor, ElementCompositionPreview.GetElementVisual(glow), 0.62f);
         StartStrikeAnimation(compositor, ElementCompositionPreview.GetElementVisual(core), 1);
         StartStrikeAnimation(compositor, lightningFlash, 0.24f);
     }
@@ -543,7 +612,7 @@ public sealed partial class WeatherScene :
             drift.Duration = TimeSpan.FromSeconds(RandomBetween(12, 18));
             drift.IterationBehavior = AnimationIterationBehavior.Forever;
             band.StartAnimation("Offset.X", drift);
-            sceneVisual?.Children.InsertAtTop(band);
+            activeSceneLayer?.Children.InsertAtTop(band);
         }
     }
 
@@ -562,7 +631,7 @@ public sealed partial class WeatherScene :
             shimmer.Duration = TimeSpan.FromSeconds(2 + index * 0.3);
             shimmer.IterationBehavior = AnimationIterationBehavior.Forever;
             haze.StartAnimation("Opacity", shimmer);
-            sceneVisual?.Children.InsertAtTop(haze);
+            activeSceneLayer?.Children.InsertAtTop(haze);
         }
     }
 

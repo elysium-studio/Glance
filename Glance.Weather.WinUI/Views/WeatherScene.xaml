@@ -12,8 +12,9 @@
         Background="#FF1A2940"
         CornerRadius="28">
         <Grid>
+            <Grid x:Name="BackgroundHost" />
             <Grid x:Name="ParticleHost" />
-            <Canvas x:Name="CloudHost" />
+            <Grid x:Name="CloudLayerHost" />
             <Canvas x:Name="LightningHost" />
             <Rectangle Fill="#26071324" />
             <Rectangle Opacity="0.22" Fill="{ThemeResource AcrylicInAppFillColorDefaultBrush}" />
