@@ -1,16 +1,19 @@
 using Elysium.Platform.Windows;
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Shapes;
+using System.Numerics;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Graphics;
@@ -24,6 +27,7 @@ namespace Glance.ScreenLens.WinUI;
 
 internal sealed class LensSelectionWindow
 {
+    private const int IntentFlightDurationMs = 380;
     private static readonly TimeSpan MinimumRecognitionDuration = TimeSpan.FromSeconds(4);
     private readonly LensBitmap bitmap;
     private readonly TaskCompletionSource<bool> presentationCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -33,6 +37,8 @@ internal sealed class LensSelectionWindow
     private readonly TextBlock instruction;
     private readonly ITextLocalizer localizer;
     private readonly Func<string, Task<bool>> copyAsync;
+    private readonly Canvas flightCanvas;
+    private readonly IGlanceIntentService intentService;
     private readonly Rectangle recognitionProgress;
     private readonly Storyboard recognitionProgressStoryboard;
     private readonly Func<LensRectangle, Task<LensRecognitionResult>> recognizeAsync;
@@ -46,12 +52,14 @@ internal sealed class LensSelectionWindow
     private readonly List<LensSelectableWord> selectableWords = [];
     private readonly List<LensSelectionRow> selectionRows = [];
     private readonly List<Border> wordHighlights = [];
+    private readonly List<Button> intentButtons = [];
     private LensTextSelectionSurface? textSelectionSurface;
     private Border? recognitionToolbar;
     private Button? copySelectionButton;
     private LensRecognitionResult recognition = LensRecognitionResult.Empty;
     private ResizableRegionOverlay? regionAdjuster;
     private bool closed;
+    private bool flightInProgress;
     private bool isDragging;
     private bool isSelectingText;
     private int recognitionRequest;
@@ -62,11 +70,13 @@ internal sealed class LensSelectionWindow
 
     private LensSelectionWindow(LensBitmap bitmap,
         ITextLocalizer localizer,
+        IGlanceIntentService intentService,
         Func<LensRectangle, Task<LensRecognitionResult>> recognizeAsync,
         Func<string, Task<bool>> copyAsync)
     {
         this.bitmap = bitmap;
         this.localizer = localizer;
+        this.intentService = intentService;
         this.recognizeAsync = recognizeAsync;
         this.copyAsync = copyAsync;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
@@ -93,6 +103,7 @@ internal sealed class LensSelectionWindow
 
         selectionCanvas = new Canvas();
         selectionCanvas.Children.Add(highlight);
+        flightCanvas = new Canvas { IsHitTestVisible = false };
         recognitionProgress = new Rectangle
         {
             Stroke = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255)),
@@ -145,6 +156,7 @@ internal sealed class LensSelectionWindow
         root.Children.Add(smokeOverlay);
         root.Children.Add(selectionCanvas);
         root.Children.Add(instructionContainer);
+        root.Children.Add(flightCanvas);
         root.KeyDown += HandleKeyDown;
         root.PointerMoved += HandleSelectionPointerMoved;
         root.PointerPressed += HandleSelectionPointerPressed;
@@ -172,10 +184,11 @@ internal sealed class LensSelectionWindow
 
     public static Task RunAsync(LensBitmap bitmap,
         ITextLocalizer localizer,
+        IGlanceIntentService intentService,
         Func<LensRectangle, Task<LensRecognitionResult>> recognizeAsync,
         Func<string, Task<bool>> copyAsync)
     {
-        LensSelectionWindow selectionWindow = new(bitmap, localizer, recognizeAsync, copyAsync);
+        LensSelectionWindow selectionWindow = new(bitmap, localizer, intentService, recognizeAsync, copyAsync);
         selectionWindow.Show();
         return selectionWindow.presentationCompletion.Task;
     }
@@ -291,6 +304,14 @@ internal sealed class LensSelectionWindow
         copyAllButton.IsEnabled = recognition.Lines.Count > 0;
         actions.Children.Add(copyAllButton);
 
+        foreach (GlanceIntentDescriptor intent in intentService.GetIntents(GlanceContentKind.Text))
+        {
+            Button intentButton = CreateIconButton(intent.Glyph, intent.DisplayName, (_, _) => _ = InvokeIntentAsync(intent), intent.GlyphFontFamily);
+            intentButton.IsEnabled = false;
+            intentButtons.Add(intentButton);
+            actions.Children.Add(intentButton);
+        }
+
         Button closeButton = CreateIconButton("\uE711", localizer.GetText("Close"), (_, _) => Close());
         actions.Children.Add(closeButton);
 
@@ -387,7 +408,10 @@ internal sealed class LensSelectionWindow
         selectionCanvas.Children.Add(textSelectionSurface);
     }
 
-    private Button CreateIconButton(string glyph, string label, RoutedEventHandler handler)
+    private Button CreateIconButton(string glyph,
+        string label,
+        RoutedEventHandler handler,
+        string glyphFontFamily = "Segoe Fluent Icons")
     {
         Button button = new()
         {
@@ -395,7 +419,7 @@ internal sealed class LensSelectionWindow
             Height = 32,
             Padding = new Thickness(0),
             Content = glyph,
-            FontFamily = new FontFamily("Segoe Fluent Icons"),
+            FontFamily = new FontFamily(glyphFontFamily),
             FontSize = 14,
             Style = Microsoft.UI.Xaml.Application.Current.Resources["SubtleButtonStyle"] as Style
         };
@@ -426,6 +450,7 @@ internal sealed class LensSelectionWindow
         selectionAnchor = -1;
         selectionFocus = -1;
         copySelectionButton = null;
+        intentButtons.Clear();
         selectableWords.Clear();
         selectionRows.Clear();
         wordHighlights.Clear();
@@ -460,6 +485,22 @@ internal sealed class LensSelectionWindow
             .Select(row => string.Join(" ", row.Select(word => word.Word.Text))));
     }
 
+    private Rect GetSelectedTextBounds()
+    {
+        Rect regionBounds = ToLocal(selectedRegion);
+        LensSelectableWord[] words = [.. selectedWords.Select(index => selectableWords[index])];
+        double left = regionBounds.X + words.Min(word => word.Bounds.Left);
+        double top = regionBounds.Y + words.Min(word => word.Bounds.Top);
+        double right = regionBounds.X + words.Max(word => word.Bounds.Right);
+        double bottom = regionBounds.Y + words.Max(word => word.Bounds.Bottom);
+        const double padding = 6;
+        left = Math.Max(0, left - padding);
+        top = Math.Max(0, top - padding);
+        right = Math.Min(root.ActualWidth, right + padding);
+        bottom = Math.Min(root.ActualHeight, bottom + padding);
+        return new Rect(left, top, Math.Max(1, right - left), Math.Max(1, bottom - top));
+    }
+
     private async void CopyAll(object sender, RoutedEventArgs args)
     {
         if (await copyAsync(recognition.Text))
@@ -476,6 +517,179 @@ internal sealed class LensSelectionWindow
         {
             Close();
         }
+    }
+
+    private async Task InvokeIntentAsync(GlanceIntentDescriptor intent)
+    {
+        if (closed || flightInProgress)
+        {
+            return;
+        }
+
+        string text = ComposeSelection();
+
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return;
+        }
+
+        try
+        {
+            flightInProgress = true;
+
+            foreach (Button button in intentButtons)
+            {
+                button.IsEnabled = false;
+            }
+
+            GlanceScreenRectangle? target = intentService.GetPresentationTarget();
+
+            if (target is GlanceScreenRectangle targetBounds)
+            {
+                await PlayIntentFlightAsync(targetBounds);
+            }
+
+            await intentService.InvokeAsync(intent.Id, new GlanceContentContext(GlanceContentKind.Text, [], text));
+        }
+        catch
+        {
+        }
+        finally
+        {
+            Close();
+        }
+    }
+
+    private Task PlayIntentFlightAsync(GlanceScreenRectangle target)
+    {
+        Rect sourceBounds = GetSelectedTextBounds();
+        LensBitmap sourceBitmap = bitmap.Crop(ToScreen(sourceBounds));
+        WriteableBitmap source = CreateImageSource(sourceBitmap);
+        Rect targetBounds = ToLocal(target);
+        Image image = new() { Source = source, Stretch = Stretch.Fill };
+        Border flightSurface = new()
+        {
+            Width = Math.Max(1, sourceBounds.Width),
+            Height = Math.Max(1, sourceBounds.Height),
+            Background = new SolidColorBrush(Color.FromArgb(255, 16, 20, 28)),
+            CornerRadius = new CornerRadius(6),
+            Child = image,
+            Shadow = new ThemeShadow(),
+            Translation = new Vector3(0, 0, 40)
+        };
+        ElementCompositionPreview.SetIsTranslationEnabled(flightSurface, true);
+        Canvas.SetLeft(flightSurface, sourceBounds.X);
+        Canvas.SetTop(flightSurface, sourceBounds.Y);
+        flightCanvas.Children.Add(flightSurface);
+        if (regionAdjuster is not null)
+        {
+            regionAdjuster.Visibility = Visibility.Collapsed;
+        }
+        instructionContainer.Visibility = Visibility.Collapsed;
+        ClearRecognitionSurface();
+        smokeGeometry.Children.Clear();
+        smokeGeometry.Children.Add(smokeBounds);
+        root.UpdateLayout();
+
+        TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        CompositionScopedBatch? animationBatch = null;
+        DispatcherQueueTimer? fallbackTimer = null;
+        EventHandler<object>? renderingHandler = null;
+        bool finished = false;
+
+        void Finish()
+        {
+            if (finished)
+            {
+                return;
+            }
+
+            finished = true;
+
+            if (renderingHandler is not null)
+            {
+                CompositionTarget.Rendering -= renderingHandler;
+            }
+
+            if (fallbackTimer is not null)
+            {
+                fallbackTimer.Stop();
+            }
+
+            animationBatch?.Dispose();
+            flightCanvas.Children.Remove(flightSurface);
+            completion.TrySetResult();
+        }
+
+        int preparationFrames = 0;
+        renderingHandler = (_, _) =>
+        {
+            preparationFrames++;
+
+            if (preparationFrames < 2)
+            {
+                return;
+            }
+
+            CompositionTarget.Rendering -= renderingHandler;
+            renderingHandler = null;
+            animationBatch = StartIntentFlightAnimation(flightSurface, sourceBounds, targetBounds);
+            animationBatch.Completed += (_, _) => Finish();
+            fallbackTimer = dispatcherQueue.CreateTimer();
+            fallbackTimer.Interval = TimeSpan.FromMilliseconds(IntentFlightDurationMs + 120);
+            fallbackTimer.IsRepeating = false;
+            fallbackTimer.Tick += (_, _) => Finish();
+            fallbackTimer.Start();
+        };
+        CompositionTarget.Rendering += renderingHandler;
+        return completion.Task;
+    }
+
+    private static CompositionScopedBatch StartIntentFlightAnimation(Border surface,
+        Rect sourceBounds,
+        Rect targetBounds)
+    {
+        Visual visual = ElementCompositionPreview.GetElementVisual(surface);
+        Compositor compositor = visual.Compositor;
+        TimeSpan duration = TimeSpan.FromMilliseconds(IntentFlightDurationMs);
+        SineEasingFunction easing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.InOut);
+        SineEasingFunction flightEasing = CompositionEasingFunction.CreateSineEasingFunction(compositor, CompositionEasingFunctionMode.Out);
+        Vector3 sourceOffset = visual.Offset;
+        Vector3 sourceCenter = new((float)sourceBounds.Width / 2, (float)sourceBounds.Height / 2, 0);
+        Vector3 targetCenter = new((float)(targetBounds.X + (targetBounds.Width / 2)), (float)(targetBounds.Y + (targetBounds.Height / 2)), 0);
+        Vector3 targetOffset = targetCenter - sourceCenter;
+        float targetScale = Math.Min(1, Math.Min(64f / Math.Max(1, (float)sourceBounds.Width), 40f / Math.Max(1, (float)sourceBounds.Height)));
+        Vector3 finalScale = new(targetScale, targetScale, 1);
+        visual.CenterPoint = sourceCenter;
+
+        Vector3KeyFrameAnimation offsetAnimation = compositor.CreateVector3KeyFrameAnimation();
+        offsetAnimation.Duration = duration;
+        offsetAnimation.InsertKeyFrame(0, sourceOffset);
+        offsetAnimation.InsertKeyFrame(0.28f, sourceOffset);
+        offsetAnimation.InsertKeyFrame(1, targetOffset, flightEasing);
+
+        Vector3KeyFrameAnimation scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
+        scaleAnimation.Duration = duration;
+        scaleAnimation.InsertKeyFrame(0, Vector3.One);
+        scaleAnimation.InsertKeyFrame(0.18f, new Vector3(0.965f, 0.965f, 1), easing);
+        scaleAnimation.InsertKeyFrame(0.28f, new Vector3(0.965f, 0.965f, 1));
+        scaleAnimation.InsertKeyFrame(1, finalScale, flightEasing);
+
+        ScalarKeyFrameAnimation opacityAnimation = compositor.CreateScalarKeyFrameAnimation();
+        opacityAnimation.Duration = duration;
+        opacityAnimation.InsertKeyFrame(0, 1);
+        opacityAnimation.InsertKeyFrame(0.78f, 1);
+        opacityAnimation.InsertKeyFrame(1, 0, easing);
+
+        CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+        visual.Offset = targetOffset;
+        visual.Scale = finalScale;
+        visual.Opacity = 0;
+        visual.StartAnimation(nameof(Visual.Offset), offsetAnimation);
+        visual.StartAnimation(nameof(Visual.Scale), scaleAnimation);
+        visual.StartAnimation(nameof(Visual.Opacity), opacityAnimation);
+        batch.End();
+        return batch;
     }
 
     private async Task RecognizeSelectionAsync()
@@ -819,6 +1033,11 @@ internal sealed class LensSelectionWindow
         {
             copySelectionButton.IsEnabled = false;
         }
+
+        foreach (Button button in intentButtons)
+        {
+            button.IsEnabled = false;
+        }
     }
 
     private void UpdateTextSelection()
@@ -843,6 +1062,11 @@ internal sealed class LensSelectionWindow
         if (copySelectionButton is not null)
         {
             copySelectionButton.IsEnabled = selectedWords.Count > 0;
+        }
+
+        foreach (Button button in intentButtons)
+        {
+            button.IsEnabled = selectedWords.Count > 0;
         }
     }
 
@@ -875,6 +1099,16 @@ internal sealed class LensSelectionWindow
     }
 
     private Rect ToLocal(LensRectangle rectangle)
+    {
+        double scaleX = root.ActualWidth / bitmap.Width;
+        double scaleY = root.ActualHeight / bitmap.Height;
+        return new Rect((rectangle.X - bitmap.OriginX) * scaleX,
+            (rectangle.Y - bitmap.OriginY) * scaleY,
+            rectangle.Width * scaleX,
+            rectangle.Height * scaleY);
+    }
+
+    private Rect ToLocal(GlanceScreenRectangle rectangle)
     {
         double scaleX = root.ActualWidth / bitmap.Width;
         double scaleY = root.ActualHeight / bitmap.Height;

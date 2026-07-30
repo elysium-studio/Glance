@@ -7,6 +7,8 @@
   <data name="ModuleTitle" xml:space="preserve"><value>보관함</value></data>
   <data name="ModuleDisplayName" xml:space="preserve"><value>보관함</value></data>
   <data name="ModuleDescription" xml:space="preserve"><value>유용한 텍스트와 링크를 가까이에 보관합니다.</value></data>
+  <data name="ShareIntentDisplayName" xml:space="preserve"><value>보관함으로 보내기</value></data>
+  <data name="ShareIntentDescription" xml:space="preserve"><value>선택한 텍스트를 보관함에 저장합니다</value></data>
   <data name="EmptySummary" xml:space="preserve"><value>보관된 항목 없음</value></data>
   <data name="KindText" xml:space="preserve"><value>텍스트</value></data>
   <data name="KindLink" xml:space="preserve"><value>링크</value></data>

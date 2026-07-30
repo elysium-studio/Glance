@@ -15,6 +15,8 @@ public sealed class StashModule :
         services.AddSingleton<StashTextCopyService>();
         services.AddSingleton(new StashRepository(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "Stash", "stash.db")));
         services.AddSingleton(provider => new StashViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<StashModule>>()));
-        services.AddSingleton<IGlanceComponent, StashComponent>();
+        services.AddSingleton<StashComponent>();
+        services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<StashComponent>());
+        services.AddSingleton<IGlanceIntent>(provider => provider.GetRequiredService<StashComponent>());
     }
 }

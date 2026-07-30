@@ -7,6 +7,8 @@
   <data name="ModuleTitle" xml:space="preserve"><value>[Stäsh]</value></data>
   <data name="ModuleDisplayName" xml:space="preserve"><value>[Stäsh]</value></data>
   <data name="ModuleDescription" xml:space="preserve"><value>[Këëp üsëfül tëxt änd lïñks wïthïñ rëäçh.]</value></data>
+  <data name="ShareIntentDisplayName" xml:space="preserve"><value>[Šéñđ ţö Šţåšĥ]</value></data>
+  <data name="ShareIntentDescription" xml:space="preserve"><value>[Ķééþ ţĥé šéļéçţéđ ţéхţ îñ Šţåšĥ]</value></data>
   <data name="EmptySummary" xml:space="preserve"><value>[Ñøthïñg stäshëd]</value></data>
   <data name="KindText" xml:space="preserve"><value>[Tëxt]</value></data>
   <data name="KindLink" xml:space="preserve"><value>[Lïñk]</value></data>

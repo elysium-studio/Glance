@@ -82,6 +82,7 @@ public sealed partial class DesktopIslandView :
         previousIndex = ViewModel.SelectedIndex;
         ViewModel.PropertyChanged += HandleViewModelPropertyChanged;
         ViewModel.AttentionReceived += HandleAttentionReceived;
+        (ViewModel.IntentService as GlanceIntentService)?.SetPresentationTargetProvider(GetIntentPresentationTarget);
         Deactivated += HandleIslandDeactivated;
         DispatcherQueue.TryEnqueue(InitializeExpansionState);
         StartStartupAttentionTimer();
@@ -97,6 +98,7 @@ public sealed partial class DesktopIslandView :
     {
         ViewModel.PropertyChanged -= HandleViewModelPropertyChanged;
         ViewModel.AttentionReceived -= HandleAttentionReceived;
+        (ViewModel.IntentService as GlanceIntentService)?.SetPresentationTargetProvider(null);
         Deactivated -= HandleIslandDeactivated;
         ReleasePressedButton();
         ClearExpansionLockComponent();
@@ -147,6 +149,23 @@ public sealed partial class DesktopIslandView :
 
             FluentMotion.PlayPulse(presenter);
         });
+
+    private GlanceScreenRectangle? GetIntentPresentationTarget()
+    {
+        if (!GetWindowRect(Handle, out NativeRect windowBounds))
+        {
+            return null;
+        }
+
+        int width = Math.Max(1, windowBounds.Right - windowBounds.Left);
+        int height = Math.Max(1, windowBounds.Bottom - windowBounds.Top);
+        const int targetWidth = 64;
+        const int targetHeight = 40;
+        return new GlanceScreenRectangle(windowBounds.Left + ((width - targetWidth) / 2),
+            windowBounds.Top + ((height - targetHeight) / 2),
+            targetWidth,
+            targetHeight);
+    }
 
     private void StartAttentionExpansionTimer()
     {
@@ -764,5 +783,18 @@ public sealed partial class DesktopIslandView :
         {
             return null;
         }
+    }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetWindowRect(nint window, out NativeRect bounds);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativeRect
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
     }
 }

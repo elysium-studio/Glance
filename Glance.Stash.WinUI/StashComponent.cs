@@ -3,6 +3,7 @@ using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Glance.Stash.WinUI;
@@ -10,7 +11,8 @@ namespace Glance.Stash.WinUI;
 public sealed partial class StashComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
-    IGlanceContextAwareComponent
+    IGlanceContextAwareComponent,
+    IGlanceIntent
 {
     private readonly DispatcherQueue dispatcherQueue;
     private readonly ITextLocalizer localizer;
@@ -57,6 +59,12 @@ public sealed partial class StashComponent :
 
     public object ExpandedAnimationElement { get; }
 
+    public GlanceIntentDescriptor Descriptor => new("Stash.Share",
+        Id,
+        localizer.GetText("ShareIntentDisplayName"),
+        localizer.GetText("ShareIntentDescription"),
+        "\uE718");
+
     public bool CanHandle(GlanceContentKind kind) =>
         kind is GlanceContentKind.Text or GlanceContentKind.WebLink;
 
@@ -75,6 +83,10 @@ public sealed partial class StashComponent :
             repository.Save(item.ToEntry());
         }
     }
+
+    Task IGlanceIntent.InvokeAsync(GlanceContentContext context,
+        CancellationToken cancellationToken) =>
+        HandleAsync(context);
 
     private Task CopyAsync(StashItem item) =>
         copyService.CopyAsync(item.Content);

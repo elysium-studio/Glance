@@ -22,11 +22,14 @@ public sealed partial class WindowsScreenLensService :
     private const int ShowWindowHide = 0;
     private const int ShowWindowShowNoActivate = 4;
     private readonly DispatcherQueue dispatcherQueue;
+    private readonly IGlanceIntentService intentService;
     private readonly ITextLocalizer localizer;
 
-    public WindowsScreenLensService(ModuleResourceTextLocalizer<ScreenLensModule> localizer)
+    public WindowsScreenLensService(ModuleResourceTextLocalizer<ScreenLensModule> localizer,
+        IGlanceIntentService intentService)
     {
         this.localizer = localizer;
+        this.intentService = intentService;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     }
 
@@ -44,7 +47,7 @@ public sealed partial class WindowsScreenLensService :
             HideApplicationWindows(applicationWindows);
             _ = NativeMethods.DwmFlush();
             LensBitmap desktop = CaptureVirtualDesktop();
-            await LensSelectionWindow.RunAsync(desktop, localizer, rectangle => RecognizeAsync(desktop.Crop(rectangle)), CopyAsync);
+            await LensSelectionWindow.RunAsync(desktop, localizer, intentService, rectangle => RecognizeAsync(desktop.Crop(rectangle)), CopyAsync);
         }
         finally
         {

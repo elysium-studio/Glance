@@ -80,6 +80,7 @@ The module's WinUI project must:
 
 - Reference the matching `Glance.Application.Abstractions` contract and expose a public, parameterless `IGlanceModule` implementation.
 - Implement `IGlanceAttentionComponent` on any component that requests attention. Glance then exposes a per-module permission and blocks requests when the user turns it off.
+- Implement `IGlanceIntent` to advertise an action to other modules, then register that implementation with `services.AddSingleton<IGlanceIntent, YourIntent>()`. The descriptor supplies the target component, localized label, description, glyph, and glyph font; `CanHandle` declares the supported content kinds.
 - Set `UseWinUI` to `true`.
 - Set `DisableEmbeddedXbf` to `false` so compiled XAML is embedded in the module PRI.
 - Set `CopyLocalLockFileAssemblies` to `true`, or otherwise include every private runtime dependency in the module directory.
