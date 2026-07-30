@@ -263,6 +263,16 @@ public sealed partial class WeatherScene :
         batch.End();
         batch.Completed += (sender, args) => DispatcherQueue.TryEnqueue(() =>
         {
+            nextScene.StopAnimation("Opacity");
+            nextScene.Opacity = 1;
+            Visual nextCloudVisual = ElementCompositionPreview.GetElementVisual(nextClouds);
+            nextCloudVisual.StopAnimation("Opacity");
+            nextCloudVisual.Opacity = 1;
+            nextClouds.Opacity = 1;
+            Visual nextBackgroundVisual = ElementCompositionPreview.GetElementVisual(nextBackground);
+            nextBackgroundVisual.StopAnimation("Opacity");
+            nextBackgroundVisual.Opacity = 1;
+            nextBackground.Opacity = 1;
             sceneVisual?.Children.Remove(previousScene);
             previousScene.Dispose();
             CloudLayerHost.Children.Remove(previousClouds);

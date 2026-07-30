@@ -11,15 +11,20 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <FontIcon
+        <Grid
             x:Name="StatusIndicator"
             Width="28"
-            Height="28"
-            VerticalAlignment="Center"
-            FontFamily="Segoe UI Symbol"
-            FontSize="24"
-            Foreground="{ThemeResource GlanceWeatherAccentBrush}"
-            Glyph="{x:Bind ViewModel.Glyph, Mode=OneWay}" />
+            Height="28">
+            <FontIcon
+                Width="24"
+                Height="24"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="24"
+                Foreground="{ThemeResource GlanceWeatherAccentBrush}"
+                Glyph="{x:Bind ViewModel.Glyph, Mode=OneWay}" />
+        </Grid>
         <TextBlock
             Grid.Column="1"
             VerticalAlignment="Center"

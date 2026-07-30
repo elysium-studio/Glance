@@ -26,6 +26,8 @@
   <data name="WeatherUnitsSettingCard.Description" xml:space="preserve"><value>Choose how temperatures are displayed.</value></data>
   <data name="WeatherCelsiusOption.Content" xml:space="preserve"><value>Celsius</value></data>
   <data name="WeatherFahrenheitOption.Content" xml:space="preserve"><value>Fahrenheit</value></data>
+  <data name="WeatherDebugPreviewSettingCard.Header" xml:space="preserve"><value>Debug weather scene</value></data>
+  <data name="WeatherDebugPreviewSettingCard.Description" xml:space="preserve"><value>Replace live visuals with a custom scene for testing.</value></data>
   <data name="WeatherScenePreviewSettingCard.Header" xml:space="preserve"><value>Preview weather scene</value></data>
   <data name="WeatherScenePreviewSettingCard.Description" xml:space="preserve"><value>Override live conditions to test the animated background.</value></data>
   <data name="WeatherSceneLiveOption.Content" xml:space="preserve"><value>Live weather</value></data>

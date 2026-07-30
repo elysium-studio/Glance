@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="Glance.Weather.WinUI.WeatherDebugPreviewSettingView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:CommunityToolkit="using:CommunityToolkit.WinUI.Controls"
+    Loaded="{x:Bind ViewModel.Activate}"
+    Unloaded="{x:Bind ViewModel.Deactivate}">
+    <StackPanel Spacing="4">
+        <CommunityToolkit:SettingsCard x:Uid="WeatherDebugPreviewSettingCard">
+            <ToggleSwitch IsOn="{x:Bind ViewModel.Value, Mode=TwoWay}" />
+        </CommunityToolkit:SettingsCard>
+        <StackPanel
+            Spacing="4"
+            Visibility="{x:Bind When(ViewModel.Value), Mode=OneWay}">
+            <CommunityToolkit:SettingsCard x:Uid="WeatherTimePreviewSettingCard">
+                <ComboBox
+                    Width="240"
+                    SelectedIndex="{x:Bind ViewModel.PreviewTimeIndex, Mode=TwoWay}">
+                    <ComboBoxItem x:Uid="WeatherTimeDawnOption" />
+                    <ComboBoxItem x:Uid="WeatherTimeMorningOption" />
+                    <ComboBoxItem x:Uid="WeatherTimeAfternoonOption" />
+                    <ComboBoxItem x:Uid="WeatherTimeEveningOption" />
+                    <ComboBoxItem x:Uid="WeatherTimeDuskOption" />
+                    <ComboBoxItem x:Uid="WeatherTimeNightOption" />
+                </ComboBox>
+            </CommunityToolkit:SettingsCard>
+            <CommunityToolkit:SettingsCard x:Uid="WeatherSkyPreviewSettingCard">
+                <ComboBox
+                    Width="240"
+                    SelectedIndex="{x:Bind ViewModel.PreviewSkyIndex, Mode=TwoWay}">
+                    <ComboBoxItem x:Uid="WeatherSceneClearOption" />
+                    <ComboBoxItem x:Uid="WeatherScenePartlyCloudyOption" />
+                    <ComboBoxItem x:Uid="WeatherSceneCloudyOption" />
+                </ComboBox>
+            </CommunityToolkit:SettingsCard>
+            <CommunityToolkit:SettingsCard x:Uid="WeatherCelestialPreviewSettingCard">
+                <ComboBox
+                    Width="240"
+                    SelectedIndex="{x:Bind ViewModel.PreviewCelestialIndex, Mode=TwoWay}">
+                    <ComboBoxItem x:Uid="WeatherCelestialNoneOption" />
+                    <ComboBoxItem x:Uid="WeatherCelestialSunOption" />
+                    <ComboBoxItem x:Uid="WeatherCelestialMoonOption" />
+                </ComboBox>
+            </CommunityToolkit:SettingsCard>
+            <CommunityToolkit:SettingsCard x:Uid="WeatherEffectPreviewSettingCard">
+                <ComboBox
+                    Width="240"
+                    SelectedIndex="{x:Bind ViewModel.PreviewEffectIndex, Mode=TwoWay}">
+                    <ComboBoxItem x:Uid="WeatherEffectNoneOption" />
+                    <ComboBoxItem x:Uid="WeatherSceneRainOption" />
+                    <ComboBoxItem x:Uid="WeatherSceneSnowOption" />
+                    <ComboBoxItem x:Uid="WeatherSceneThunderstormOption" />
+                    <ComboBoxItem x:Uid="WeatherSceneFogOption" />
+                </ComboBox>
+            </CommunityToolkit:SettingsCard>
+            <CommunityToolkit:SettingsCard x:Uid="WeatherTemperaturePreviewSettingCard">
+                <ComboBox
+                    Width="240"
+                    SelectedIndex="{x:Bind ViewModel.PreviewTemperatureIndex, Mode=TwoWay}">
+                    <ComboBoxItem x:Uid="WeatherTemperatureNormalOption" />
+                    <ComboBoxItem x:Uid="WeatherSceneHotOption" />
+                </ComboBox>
+            </CommunityToolkit:SettingsCard>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

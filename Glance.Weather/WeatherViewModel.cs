@@ -152,14 +152,14 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     private static string GetGlyph(WeatherSceneKind scene, bool isDay) =>
         scene switch
         {
-            WeatherSceneKind.Clear => isDay ? "\u2600" : "\u263E",
-            WeatherSceneKind.Hot => "\u2600",
-            WeatherSceneKind.PartlyCloudy => "\u2601",
-            WeatherSceneKind.Cloudy => "\u2601",
-            WeatherSceneKind.Rain => "\u2602",
-            WeatherSceneKind.Snow => "\u2744",
-            WeatherSceneKind.Thunderstorm => "\u26A1",
-            WeatherSceneKind.Fog => "\u224B",
-            _ => "\u2600"
+            WeatherSceneKind.Clear => isDay ? "\uE706" : "\uE9C2",
+            WeatherSceneKind.Hot => "\uE706",
+            WeatherSceneKind.PartlyCloudy => isDay ? "\uE9C0" : "\uE9C1",
+            WeatherSceneKind.Cloudy => "\uE9BF",
+            WeatherSceneKind.Rain => "\uE9C4",
+            WeatherSceneKind.Snow => "\uE9C8",
+            WeatherSceneKind.Thunderstorm => "\uE9C6",
+            WeatherSceneKind.Fog => "\uE9CB",
+            _ => "\uE9C0"
         };
 }

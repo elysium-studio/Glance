@@ -41,6 +41,7 @@ public sealed class WeatherTests
         Assert.Equal("18° · Light rain", viewModel.CompactStatusText);
         Assert.Equal("London", viewModel.LocationText);
         Assert.Equal(WeatherSceneKind.Rain, viewModel.Scene);
+        Assert.Equal("\uE9C4", viewModel.Glyph);
         Assert.True(viewModel.HasWeatherData);
     }
 
@@ -50,13 +51,14 @@ public sealed class WeatherTests
         WeatherSettings settings = new();
 
         Assert.False(settings.UseFahrenheit);
+        Assert.False(settings.DebugPreviewEnabled);
         Assert.Empty(settings.ApiKey);
         Assert.Empty(settings.Location);
-        Assert.Equal(WeatherTimeOfDay.Live, settings.PreviewTime);
-        Assert.Equal(WeatherSky.Live, settings.PreviewSky);
-        Assert.Equal(WeatherCelestial.Live, settings.PreviewCelestial);
-        Assert.Equal(WeatherEffect.Live, settings.PreviewEffect);
-        Assert.Equal(WeatherTemperature.Live, settings.PreviewTemperature);
+        Assert.Equal(WeatherTimeOfDay.Afternoon, settings.PreviewTime);
+        Assert.Equal(WeatherSky.PartlyCloudy, settings.PreviewSky);
+        Assert.Equal(WeatherCelestial.Sun, settings.PreviewCelestial);
+        Assert.Equal(WeatherEffect.None, settings.PreviewEffect);
+        Assert.Equal(WeatherTemperature.Normal, settings.PreviewTemperature);
     }
 
     [Theory]

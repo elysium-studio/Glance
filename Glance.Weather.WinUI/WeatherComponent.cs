@@ -178,32 +178,15 @@ public sealed partial class WeatherComponent :
         WeatherSky sky = lastSnapshot?.Sky ?? WeatherSky.Clear;
         WeatherEffect effect = lastSnapshot?.Effect ?? WeatherEffect.None;
         WeatherTemperature temperature = lastSnapshot?.TemperatureState ?? WeatherTemperature.Normal;
-
-        if (settings.PreviewTime != WeatherTimeOfDay.Live)
-        {
-            time = settings.PreviewTime;
-        }
-
-        if (settings.PreviewSky != WeatherSky.Live)
-        {
-            sky = settings.PreviewSky;
-        }
-
         WeatherCelestial celestial = WeatherConditionMapper.MapCelestial(time, sky);
 
-        if (settings.PreviewCelestial != WeatherCelestial.Live)
+        if (settings.DebugPreviewEnabled)
         {
-            celestial = settings.PreviewCelestial;
-        }
-
-        if (settings.PreviewEffect != WeatherEffect.Live)
-        {
-            effect = settings.PreviewEffect;
-        }
-
-        if (settings.PreviewTemperature != WeatherTemperature.Live)
-        {
-            temperature = settings.PreviewTemperature;
+            time = settings.PreviewTime == WeatherTimeOfDay.Live ? WeatherTimeOfDay.Afternoon : settings.PreviewTime;
+            sky = settings.PreviewSky == WeatherSky.Live ? WeatherSky.PartlyCloudy : settings.PreviewSky;
+            celestial = settings.PreviewCelestial == WeatherCelestial.Live ? WeatherCelestial.Sun : settings.PreviewCelestial;
+            effect = settings.PreviewEffect == WeatherEffect.Live ? WeatherEffect.None : settings.PreviewEffect;
+            temperature = settings.PreviewTemperature == WeatherTemperature.Live ? WeatherTemperature.Normal : settings.PreviewTemperature;
         }
 
         viewModel.SetVisualState(time, sky, celestial, effect, temperature);

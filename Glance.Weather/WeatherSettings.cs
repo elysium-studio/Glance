@@ -8,13 +8,15 @@ public sealed class WeatherSettings
 
     public bool UseFahrenheit { get; set; }
 
-    public WeatherTimeOfDay PreviewTime { get; set; }
+    public bool DebugPreviewEnabled { get; set; }
 
-    public WeatherSky PreviewSky { get; set; }
+    public WeatherTimeOfDay PreviewTime { get; set; } = WeatherTimeOfDay.Afternoon;
 
-    public WeatherCelestial PreviewCelestial { get; set; }
+    public WeatherSky PreviewSky { get; set; } = WeatherSky.PartlyCloudy;
 
-    public WeatherEffect PreviewEffect { get; set; }
+    public WeatherCelestial PreviewCelestial { get; set; } = WeatherCelestial.Sun;
 
-    public WeatherTemperature PreviewTemperature { get; set; }
+    public WeatherEffect PreviewEffect { get; set; } = WeatherEffect.None;
+
+    public WeatherTemperature PreviewTemperature { get; set; } = WeatherTemperature.Normal;
 }
