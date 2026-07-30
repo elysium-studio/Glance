@@ -19,11 +19,11 @@
                 Height="24"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center">
-                <PathIcon
+                <Path
                     Width="24"
                     Height="24"
-                    Foreground="{ThemeResource GlanceScreenLensIconBrush}"
-                    Style="{StaticResource GlanceScreenLensPathIconStyle}" />
+                    Fill="{ThemeResource GlanceScreenLensIconBrush}"
+                    Style="{StaticResource GlanceScreenLensPathStyle}" />
             </Viewbox>
         </Grid>
         <TextBlock

@@ -21,11 +21,11 @@
                 Height="30"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center">
-                <PathIcon
+                <Path
                     Width="24"
                     Height="24"
-                    Foreground="{ThemeResource GlanceScreenLensIconBrush}"
-                    Style="{StaticResource GlanceScreenLensPathIconStyle}" />
+                    Fill="{ThemeResource GlanceScreenLensIconBrush}"
+                    Style="{StaticResource GlanceScreenLensPathStyle}" />
             </Viewbox>
         </Grid>
         <Grid
@@ -78,11 +78,11 @@
             <Viewbox
                 Width="16"
                 Height="16">
-                <PathIcon
+                <Path
                     Width="24"
                     Height="24"
-                    Foreground="{ThemeResource AccentButtonForeground}"
-                    Style="{StaticResource GlanceScreenLensPathIconStyle}" />
+                    Fill="{ThemeResource GlanceScreenLensAccentForegroundBrush}"
+                    Style="{StaticResource GlanceScreenLensPathStyle}" />
             </Viewbox>
         </Button>
     </Grid>
