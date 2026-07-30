@@ -77,6 +77,24 @@
                             </Button.Style>
                         </Button>
                         <Button
+                            x:Name="OpenInEditorButton"
+                            x:Uid="OpenInEditorButton"
+                            Click="{x:Bind OpenInEditor}"
+                            x:Load="{x:Bind CanOpenInEditor}">
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                                    <Setter Property="Width" Value="32" />
+                                    <Setter Property="Height" Value="32" />
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
+                                    <Setter Property="Content" Value="&#xE70F;" />
+                                    <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                                    <Setter Property="FontSize" Value="14" />
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <Button
                             x:Uid="RemoveButton"
                             Click="{x:Bind Remove}">
                             <Button.Style>

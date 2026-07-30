@@ -43,6 +43,20 @@ public sealed class StashViewModelTests
     }
 
     [Fact]
+    public void Add_OffersEditorOnlyForMultilineText()
+    {
+        StashViewModel viewModel = CreateViewModel();
+
+        StashItem multiline = viewModel.Add("First line\r\nSecond line", false)!;
+        StashItem singleLine = viewModel.Add("One line", false)!;
+        StashItem link = viewModel.Add("https://github.com", true)!;
+
+        Assert.True(multiline.CanOpenInEditor);
+        Assert.False(singleLine.CanOpenInEditor);
+        Assert.False(link.CanOpenInEditor);
+    }
+
+    [Fact]
     public void Add_PromotesDuplicateWithoutDuplicatingIt()
     {
         StashViewModel viewModel = CreateViewModel();
@@ -76,7 +90,7 @@ public sealed class StashViewModelTests
     {
         StashViewModel viewModel = CreateViewModel();
         StashItem item = viewModel.Add("Note", false)!;
-        viewModel.ConfigureActions(_ => Task.CompletedTask, _ => Task.CompletedTask, _ => Task.CompletedTask);
+        viewModel.ConfigureActions(_ => Task.CompletedTask, _ => Task.CompletedTask, _ => Task.CompletedTask, _ => Task.CompletedTask);
 
         await viewModel.RemoveAsync(item);
 
@@ -84,6 +98,22 @@ public sealed class StashViewModelTests
         Assert.Empty(viewModel.Items);
         Assert.Null(viewModel.SelectedItem);
         Assert.Equal("EmptySummary", viewModel.CompactText);
+    }
+
+    [Fact]
+    public void UpdateContent_ReplacesTheItemAndPreservesItsIdentity()
+    {
+        StashViewModel viewModel = CreateViewModel();
+        StashItem original = viewModel.Add("First line\r\nSecond line", false)!;
+
+        StashItem? updated = viewModel.UpdateContent(original.Id, "Edited first line\r\nSecond line");
+
+        Assert.NotNull(updated);
+        Assert.Equal(original.Id, updated.Id);
+        Assert.Equal(original.CreatedAt, updated.CreatedAt);
+        Assert.Equal("Edited first line\r\nSecond line", updated.Content);
+        Assert.Same(updated, viewModel.SelectedItem);
+        Assert.Equal("Edited first line Second line", viewModel.CompactText);
     }
 
     private static StashViewModel CreateViewModel() => new(new TestTextLocalizer());

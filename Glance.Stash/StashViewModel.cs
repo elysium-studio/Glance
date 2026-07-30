@@ -11,6 +11,7 @@ public sealed partial class StashViewModel(ITextLocalizer localizer) :
     private readonly ITextLocalizer localizer = localizer;
     private Func<StashItem, Task>? copyItem;
     private Func<StashItem, Task>? openItem;
+    private Func<StashItem, Task>? editItem;
     private Func<StashItem, Task>? removeItem;
 
     [ObservableProperty]
@@ -28,10 +29,12 @@ public sealed partial class StashViewModel(ITextLocalizer localizer) :
 
     public void ConfigureActions(Func<StashItem, Task> copy,
         Func<StashItem, Task> open,
+        Func<StashItem, Task> edit,
         Func<StashItem, Task> remove)
     {
         copyItem = copy;
         openItem = open;
+        editItem = edit;
         removeItem = remove;
     }
 
@@ -92,6 +95,42 @@ public sealed partial class StashViewModel(ITextLocalizer localizer) :
     public Task OpenAsync(StashItem item) =>
         openItem?.Invoke(item) ?? Task.CompletedTask;
 
+    public Task OpenInEditorAsync(StashItem item) =>
+        editItem?.Invoke(item) ?? Task.CompletedTask;
+
+    public StashItem? UpdateContent(string id,
+        string content)
+    {
+        StashItem? current = Items.FirstOrDefault(item => item.Id == id);
+
+        if (current is null ||
+            string.IsNullOrWhiteSpace(content))
+        {
+            return null;
+        }
+
+        int index = Items.IndexOf(current);
+
+        if (string.Equals(current.Content, content, StringComparison.Ordinal))
+        {
+            return current;
+        }
+
+        StashItem replacement = CreateItem(current.ToEntry() with
+        {
+            Content = content
+        });
+        Items[index] = replacement;
+
+        if (ReferenceEquals(SelectedItem, current))
+        {
+            SelectedItem = replacement;
+        }
+
+        UpdateState();
+        return replacement;
+    }
+
     public async Task RemoveAsync(StashItem item)
     {
         RemoveCore(item);
@@ -134,13 +173,16 @@ public sealed partial class StashViewModel(ITextLocalizer localizer) :
         (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
 
     private StashItem CreateItem(StashEntry entry) =>
-        new(entry, localizer, Copy, Open, Remove);
+        new(entry, localizer, Copy, Open, OpenInEditor, Remove);
 
     private async void Copy(StashItem item) =>
         await CopyAsync(item);
 
     private async void Open(StashItem item) =>
         await OpenAsync(item);
+
+    private async void OpenInEditor(StashItem item) =>
+        await OpenInEditorAsync(item);
 
     private async void Remove(StashItem item) =>
         await RemoveAsync(item);

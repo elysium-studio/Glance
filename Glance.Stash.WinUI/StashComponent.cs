@@ -18,15 +18,18 @@ public sealed partial class StashComponent :
     private readonly ITextLocalizer localizer;
     private readonly StashTextCopyService copyService;
     private readonly StashRepository repository;
+    private readonly StashTextEditorService textEditorService;
     private readonly StashViewModel viewModel;
 
     public StashComponent(StashViewModel viewModel,
         StashTextCopyService copyService,
+        StashTextEditorService textEditorService,
         StashRepository repository,
         ModuleResourceTextLocalizer<StashModule> localizer)
     {
         this.viewModel = viewModel;
         this.copyService = copyService;
+        this.textEditorService = textEditorService;
         this.repository = repository;
         this.localizer = localizer;
 
@@ -39,7 +42,7 @@ public sealed partial class StashComponent :
         CompactAnimationElement = compactView.ConnectedAnimationElement;
         ExpandedAnimationElement = expandedView.ConnectedAnimationElement;
 
-        viewModel.ConfigureActions(CopyAsync, OpenAsync, RemoveAsync);
+        viewModel.ConfigureActions(CopyAsync, OpenAsync, OpenInEditorAsync, RemoveAsync);
         viewModel.Restore(repository.Load());
     }
 
@@ -112,10 +115,61 @@ public sealed partial class StashComponent :
         return Task.CompletedTask;
     }
 
+    private async Task OpenInEditorAsync(StashItem item)
+    {
+        if (!item.CanOpenInEditor)
+        {
+            return;
+        }
+
+        try
+        {
+            await textEditorService.OpenAsync(item.Id, item.Content, content => UpdateContentAsync(item.Id, content));
+        }
+        catch (Exception)
+        {
+        }
+    }
+
     private Task RemoveAsync(StashItem item)
     {
+        textEditorService.Remove(item.Id);
         repository.Remove(item.Id);
         return Task.CompletedTask;
+    }
+
+    private Task UpdateContentAsync(string id,
+        string content)
+    {
+        if (dispatcherQueue.HasThreadAccess)
+        {
+            SaveUpdatedContent(id, content);
+            return Task.CompletedTask;
+        }
+
+        TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (!dispatcherQueue.TryEnqueue(() =>
+        {
+            SaveUpdatedContent(id, content);
+            completion.TrySetResult();
+        }))
+        {
+            completion.TrySetException(new InvalidOperationException("The Stash UI dispatcher is unavailable."));
+        }
+
+        return completion.Task;
+    }
+
+    private void SaveUpdatedContent(string id,
+        string content)
+    {
+        StashItem? item = viewModel.UpdateContent(id, content);
+
+        if (item is not null)
+        {
+            repository.Save(item.ToEntry());
+        }
     }
 
     private Task<StashItem?> AddAsync(string content,
