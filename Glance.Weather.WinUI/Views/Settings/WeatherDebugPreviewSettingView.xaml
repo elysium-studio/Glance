@@ -14,16 +14,26 @@
             Spacing="4"
             Visibility="{x:Bind When(ViewModel.Value), Mode=OneWay}">
             <CommunityToolkit:SettingsCard x:Uid="WeatherTimePreviewSettingCard">
-                <ComboBox
-                    Width="240"
-                    SelectedIndex="{x:Bind ViewModel.PreviewTimeIndex, Mode=TwoWay}">
-                    <ComboBoxItem x:Uid="WeatherTimeDawnOption" />
-                    <ComboBoxItem x:Uid="WeatherTimeMorningOption" />
-                    <ComboBoxItem x:Uid="WeatherTimeAfternoonOption" />
-                    <ComboBoxItem x:Uid="WeatherTimeEveningOption" />
-                    <ComboBoxItem x:Uid="WeatherTimeDuskOption" />
-                    <ComboBoxItem x:Uid="WeatherTimeNightOption" />
-                </ComboBox>
+                <Grid
+                    Width="300"
+                    ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="44" />
+                    </Grid.ColumnDefinitions>
+                    <Slider
+                        Maximum="24"
+                        Minimum="0"
+                        SmallChange="0.25"
+                        StepFrequency="0.25"
+                        Value="{x:Bind ViewModel.PreviewHour, Mode=TwoWay}" />
+                    <TextBlock
+                        Grid.Column="1"
+                        HorizontalAlignment="Right"
+                        Style="{StaticResource BodyTextBlockStyle}"
+                        Text="{x:Bind ViewModel.PreviewTimeText, Mode=OneWay}"
+                        VerticalAlignment="Center" />
+                </Grid>
             </CommunityToolkit:SettingsCard>
             <CommunityToolkit:SettingsCard x:Uid="WeatherSkyPreviewSettingCard">
                 <ComboBox
@@ -38,6 +48,7 @@
                 <ComboBox
                     Width="240"
                     SelectedIndex="{x:Bind ViewModel.PreviewCelestialIndex, Mode=TwoWay}">
+                    <ComboBoxItem x:Uid="WeatherCelestialAutomaticOption" />
                     <ComboBoxItem x:Uid="WeatherCelestialNoneOption" />
                     <ComboBoxItem x:Uid="WeatherCelestialSunOption" />
                     <ComboBoxItem x:Uid="WeatherCelestialMoonOption" />

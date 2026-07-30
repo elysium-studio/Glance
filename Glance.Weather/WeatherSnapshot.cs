@@ -12,4 +12,7 @@ public sealed record WeatherSnapshot(string Location,
     WeatherSky Sky,
     WeatherEffect Effect,
     WeatherTemperature TemperatureState,
-    DateTimeOffset UpdatedAt);
+    DateTimeOffset UpdatedAt,
+    long Sunrise,
+    long Sunset,
+    int TimeZoneOffset);

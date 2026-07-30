@@ -33,7 +33,10 @@ public sealed class WeatherTests
             WeatherSky.PartlyCloudy,
             WeatherEffect.Rain,
             WeatherTemperature.Normal,
-            DateTimeOffset.UtcNow);
+            DateTimeOffset.UtcNow,
+            21600,
+            68400,
+            0);
 
         viewModel.Update(snapshot, false);
 
@@ -41,7 +44,7 @@ public sealed class WeatherTests
         Assert.Equal("18° · Light rain", viewModel.CompactStatusText);
         Assert.Equal("London", viewModel.LocationText);
         Assert.Equal(WeatherSceneKind.Rain, viewModel.Scene);
-        Assert.Equal("\uE9C4", viewModel.Glyph);
+        Assert.Equal(WeatherIconPaths.Rain, viewModel.IconPath);
         Assert.True(viewModel.HasWeatherData);
     }
 
@@ -54,9 +57,9 @@ public sealed class WeatherTests
         Assert.False(settings.DebugPreviewEnabled);
         Assert.Empty(settings.ApiKey);
         Assert.Empty(settings.Location);
-        Assert.Equal(WeatherTimeOfDay.Afternoon, settings.PreviewTime);
+        Assert.Equal(14, settings.PreviewHour);
         Assert.Equal(WeatherSky.PartlyCloudy, settings.PreviewSky);
-        Assert.Equal(WeatherCelestial.Sun, settings.PreviewCelestial);
+        Assert.Equal(WeatherCelestial.Live, settings.PreviewCelestial);
         Assert.Equal(WeatherEffect.None, settings.PreviewEffect);
         Assert.Equal(WeatherTemperature.Normal, settings.PreviewTemperature);
     }
@@ -109,7 +112,10 @@ public sealed class WeatherTests
             WeatherSky.Cloudy,
             WeatherEffect.None,
             WeatherTemperature.Normal,
-            DateTimeOffset.UtcNow);
+            DateTimeOffset.UtcNow,
+            21600,
+            68400,
+            0);
 
         viewModel.Update(snapshot, false);
 
@@ -117,18 +123,43 @@ public sealed class WeatherTests
     }
 
     [Theory]
-    [InlineData(WeatherTimeOfDay.Afternoon, WeatherSky.Clear, WeatherEffect.None, "\uE706")]
-    [InlineData(WeatherTimeOfDay.Night, WeatherSky.Clear, WeatherEffect.None, "\uE9C2")]
-    [InlineData(WeatherTimeOfDay.Afternoon, WeatherSky.PartlyCloudy, WeatherEffect.None, "\uE9C0")]
-    [InlineData(WeatherTimeOfDay.Night, WeatherSky.PartlyCloudy, WeatherEffect.None, "\uE9C1")]
-    [InlineData(WeatherTimeOfDay.Night, WeatherSky.Clear, WeatherEffect.Snow, "\uE9C8")]
-    public void VisualState_UsesTimeAwareFluentGlyph(WeatherTimeOfDay time, WeatherSky sky, WeatherEffect effect, string expected)
+    [MemberData(nameof(WeatherIconCases))]
+    public void VisualState_UsesTimeAwareFluentIcon(WeatherTimeOfDay time, WeatherSky sky, WeatherEffect effect, string expected)
     {
         WeatherViewModel viewModel = new(new TestTextLocalizer());
 
-        viewModel.SetVisualState(time, sky, WeatherCelestial.None, effect, WeatherTemperature.Normal);
+        viewModel.SetVisualState(time, sky, WeatherCelestial.None, effect, WeatherTemperature.Normal, 14, 6, 19);
 
-        Assert.Equal(expected, viewModel.Glyph);
+        Assert.Equal(expected, viewModel.IconPath);
+    }
+
+    public static TheoryData<WeatherTimeOfDay, WeatherSky, WeatherEffect, string> WeatherIconCases =>
+        new()
+        {
+            { WeatherTimeOfDay.Afternoon, WeatherSky.Clear, WeatherEffect.None, WeatherIconPaths.Sunny },
+            { WeatherTimeOfDay.Night, WeatherSky.Clear, WeatherEffect.None, WeatherIconPaths.Moon },
+            { WeatherTimeOfDay.Afternoon, WeatherSky.PartlyCloudy, WeatherEffect.None, WeatherIconPaths.PartlyCloudyDay },
+            { WeatherTimeOfDay.Night, WeatherSky.PartlyCloudy, WeatherEffect.None, WeatherIconPaths.PartlyCloudyNight },
+            { WeatherTimeOfDay.Night, WeatherSky.Clear, WeatherEffect.Snow, WeatherIconPaths.Snow }
+        };
+
+    [Theory]
+    [InlineData(2, WeatherTimeOfDay.Night)]
+    [InlineData(6, WeatherTimeOfDay.Dawn)]
+    [InlineData(9, WeatherTimeOfDay.Morning)]
+    [InlineData(14, WeatherTimeOfDay.Afternoon)]
+    [InlineData(18, WeatherTimeOfDay.Evening)]
+    [InlineData(19.25, WeatherTimeOfDay.Dusk)]
+    [InlineData(22, WeatherTimeOfDay.Night)]
+    public void ConditionMapper_MapsPreviewHour(double hour, WeatherTimeOfDay expected) =>
+        Assert.Equal(expected, WeatherConditionMapper.MapTime(hour, 6, 19));
+
+    [Fact]
+    public void ConditionMapper_ConvertsTimestampToLocationHour()
+    {
+        long noonUtc = new DateTimeOffset(2026, 7, 30, 12, 0, 0, TimeSpan.Zero).ToUnixTimeSeconds();
+
+        Assert.Equal(13, WeatherConditionMapper.GetLocalHour(noonUtc, 3600));
     }
 
     private sealed class TestTextLocalizer :

@@ -20,8 +20,9 @@ public sealed partial class WeatherScene :
     private WeatherViewModel? viewModel;
     private ContainerVisual? sceneVisual;
     private ContainerVisual? activeSceneLayer;
+    private ContainerVisual? activeCelestial;
     private Canvas? activeCloudLayer;
-    private FrameworkElement? activeBackgroundLayer;
+    private Border? activeBackgroundLayer;
     private CompositionRoundedRectangleGeometry? clipGeometry;
     private CompositionGeometricClip? clip;
     private DispatcherQueueTimer? lightningTimer;
@@ -74,6 +75,7 @@ public sealed partial class WeatherScene :
         clipGeometry?.Dispose();
         sceneVisual = null;
         activeSceneLayer = null;
+        activeCelestial = null;
         activeCloudLayer = null;
         activeBackgroundLayer = null;
         activeState = null;
@@ -112,7 +114,13 @@ public sealed partial class WeatherScene :
 
     private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
-        if (args.PropertyName is nameof(WeatherViewModel.WeatherTime) or
+        if (args.PropertyName is nameof(WeatherViewModel.WeatherHour) or
+            nameof(WeatherViewModel.SunriseHour) or
+            nameof(WeatherViewModel.SunsetHour))
+        {
+            UpdateTimeline();
+        }
+        else if (args.PropertyName is nameof(WeatherViewModel.WeatherTime) or
             nameof(WeatherViewModel.WeatherSky) or
             nameof(WeatherViewModel.WeatherCelestial) or
             nameof(WeatherViewModel.WeatherEffect) or
@@ -158,7 +166,14 @@ public sealed partial class WeatherScene :
         WeatherCelestial celestial = viewModel?.WeatherCelestial ?? WeatherCelestial.Sun;
         WeatherEffect effect = viewModel?.WeatherEffect ?? WeatherEffect.None;
         WeatherTemperature temperature = viewModel?.WeatherTemperature ?? WeatherTemperature.Normal;
-        WeatherSceneState state = new(time, sky, celestial, effect, temperature);
+        double hour = viewModel?.WeatherHour ?? 14;
+        double sunrise = viewModel?.SunriseHour ?? 6;
+        double sunset = viewModel?.SunsetHour ?? 19;
+        WeatherSceneState state = new(time,
+            sky,
+            celestial,
+            effect,
+            temperature);
 
         if (transitionActive)
         {
@@ -174,8 +189,9 @@ public sealed partial class WeatherScene :
         StopLightning();
         ContainerVisual? previousSceneLayer = activeSceneLayer;
         Canvas? previousCloudLayer = activeCloudLayer;
-        FrameworkElement? previousBackgroundLayer = activeBackgroundLayer;
+        Border? previousBackgroundLayer = activeBackgroundLayer;
         activeSceneLayer = compositor.CreateContainerVisual();
+        activeCelestial = null;
         activeSceneLayer.RelativeSizeAdjustment = Vector2.One;
         activeSceneLayer.Opacity = previousSceneLayer is null ? 1 : 0;
         sceneVisual.Children.InsertAtTop(activeSceneLayer);
@@ -183,7 +199,7 @@ public sealed partial class WeatherScene :
         CloudLayerHost.Children.Add(activeCloudLayer);
         activeBackgroundLayer = new Border
         {
-            Background = CreateBackground(time, sky, effect, temperature),
+            Background = CreateBackground(time, hour, sunrise, sunset, sky, effect, temperature),
             IsHitTestVisible = false
         };
         BackgroundHost.Children.Add(activeBackgroundLayer);
@@ -193,7 +209,7 @@ public sealed partial class WeatherScene :
 
         if (celestial != WeatherCelestial.None)
         {
-            AddCelestial(compositor, temperature == WeatherTemperature.Hot, celestial, time);
+            AddCelestial(compositor, temperature == WeatherTemperature.Hot, celestial, time, hour, sunrise, sunset);
         }
 
         if (time == WeatherTimeOfDay.Night && sky != WeatherSky.Cloudy)
@@ -298,18 +314,15 @@ public sealed partial class WeatherScene :
         visual.StartAnimation("Opacity", animation);
     }
 
-    private Brush CreateBackground(WeatherTimeOfDay time, WeatherSky sky, WeatherEffect effect, WeatherTemperature temperature)
+    private Brush CreateBackground(WeatherTimeOfDay time,
+        double hour,
+        double sunrise,
+        double sunset,
+        WeatherSky sky,
+        WeatherEffect effect,
+        WeatherTemperature temperature)
     {
-        (Color start, Color end) = time switch
-        {
-            WeatherTimeOfDay.Dawn => (Color.FromArgb(255, 65, 72, 139), Color.FromArgb(255, 242, 151, 124)),
-            WeatherTimeOfDay.Morning => (Color.FromArgb(255, 48, 139, 214), Color.FromArgb(255, 150, 211, 239)),
-            WeatherTimeOfDay.Afternoon => (Color.FromArgb(255, 20, 105, 202), Color.FromArgb(255, 83, 182, 235)),
-            WeatherTimeOfDay.Evening => (Color.FromArgb(255, 31, 112, 190), Color.FromArgb(255, 245, 181, 105)),
-            WeatherTimeOfDay.Dusk => (Color.FromArgb(255, 50, 54, 112), Color.FromArgb(255, 204, 95, 133)),
-            WeatherTimeOfDay.Night => (Color.FromArgb(255, 7, 18, 50), Color.FromArgb(255, 32, 50, 101)),
-            _ => (Color.FromArgb(255, 20, 105, 202), Color.FromArgb(255, 83, 182, 235))
-        };
+        (Color start, Color end) = GetTimelineColors(GetTimelineHour(hour, sunrise, sunset));
 
         if (temperature == WeatherTemperature.Hot && time is not WeatherTimeOfDay.Night)
         {
@@ -361,15 +374,88 @@ public sealed partial class WeatherScene :
         };
     }
 
-    private void AddCelestial(Compositor compositor, bool hot, WeatherCelestial celestialKind, WeatherTimeOfDay time)
+    private void UpdateTimeline()
+    {
+        if (!IsLoaded || viewModel is null || activeBackgroundLayer is null)
+        {
+            return;
+        }
+
+        activeBackgroundLayer.Background = CreateBackground(viewModel.WeatherTime,
+            viewModel.WeatherHour,
+            viewModel.SunriseHour,
+            viewModel.SunsetHour,
+            viewModel.WeatherSky,
+            viewModel.WeatherEffect,
+            viewModel.WeatherTemperature);
+        UpdateCelestialPosition(activeCelestial,
+            viewModel.WeatherCelestial == WeatherCelestial.Moon,
+            viewModel.WeatherHour,
+            viewModel.SunriseHour,
+            viewModel.SunsetHour);
+    }
+
+    private static double GetTimelineHour(double hour, double sunrise, double sunset)
+    {
+        double solarNoon = sunrise + (sunset - sunrise) / 2;
+
+        if (hour >= sunrise && hour < solarNoon)
+        {
+            return 6 + (hour - sunrise) / Math.Max(1, solarNoon - sunrise) * 6.5;
+        }
+
+        if (hour >= solarNoon && hour < sunset)
+        {
+            return 12.5 + (hour - solarNoon) / Math.Max(1, sunset - solarNoon) * 6.5;
+        }
+
+        double nightDuration = 24 - sunset + sunrise;
+        double nightElapsed = hour >= sunset ? hour - sunset : 24 - sunset + hour;
+        return (19 + nightElapsed / Math.Max(1, nightDuration) * 11) % 24;
+    }
+
+    private static (Color Start, Color End) GetTimelineColors(double hour)
+    {
+        (Color Start, Color End) night = (Color.FromArgb(255, 7, 18, 50), Color.FromArgb(255, 32, 50, 101));
+        (Color Start, Color End) dawn = (Color.FromArgb(255, 65, 72, 139), Color.FromArgb(255, 242, 151, 124));
+        (Color Start, Color End) morning = (Color.FromArgb(255, 48, 139, 214), Color.FromArgb(255, 150, 211, 239));
+        (Color Start, Color End) afternoon = (Color.FromArgb(255, 20, 105, 202), Color.FromArgb(255, 83, 182, 235));
+        (Color Start, Color End) evening = (Color.FromArgb(255, 31, 112, 190), Color.FromArgb(255, 245, 181, 105));
+        (Color Start, Color End) dusk = (Color.FromArgb(255, 50, 54, 112), Color.FromArgb(255, 204, 95, 133));
+        double normalizedHour = (hour % 24 + 24) % 24;
+
+        return normalizedHour switch
+        {
+            < 5.25 => InterpolateTimeline(night, dawn, normalizedHour / 5.25),
+            < 8 => InterpolateTimeline(dawn, morning, (normalizedHour - 5.25) / 2.75),
+            < 12.5 => InterpolateTimeline(morning, afternoon, (normalizedHour - 8) / 4.5),
+            < 17 => InterpolateTimeline(afternoon, evening, (normalizedHour - 12.5) / 4.5),
+            < 19.5 => InterpolateTimeline(evening, dusk, (normalizedHour - 17) / 2.5),
+            < 21.5 => InterpolateTimeline(dusk, night, (normalizedHour - 19.5) / 2),
+            _ => night
+        };
+    }
+
+    private static (Color Start, Color End) InterpolateTimeline((Color Start, Color End) from, (Color Start, Color End) to, double amount)
+    {
+        float easedAmount = (float)(amount * amount * (3 - 2 * amount));
+        return (Blend(from.Start, to.Start, easedAmount), Blend(from.End, to.End, easedAmount));
+    }
+
+    private void AddCelestial(Compositor compositor,
+        bool hot,
+        WeatherCelestial celestialKind,
+        WeatherTimeOfDay time,
+        double hour,
+        double sunrise,
+        double sunset)
     {
         bool isMoon = celestialKind == WeatherCelestial.Moon;
         bool isTransition = time is WeatherTimeOfDay.Dawn or WeatherTimeOfDay.Evening or WeatherTimeOfDay.Dusk;
         float diameter = hot && !isMoon ? 100 : isMoon ? 58 : 76;
         ContainerVisual celestial = compositor.CreateContainerVisual();
         celestial.Size = new Vector2(diameter);
-        celestial.Offset = new Vector3(-diameter * 0.65f, -diameter * 0.25f, 0);
-        celestial.RelativeOffsetAdjustment = new Vector3(1, 0, 0);
+        UpdateCelestialPosition(celestial, isMoon, hour, sunrise, sunset);
         celestial.CenterPoint = new Vector3(diameter / 2, diameter / 2, 0);
 
         if (isMoon)
@@ -404,7 +490,34 @@ public sealed partial class WeatherScene :
         scale.Duration = TimeSpan.FromSeconds(4);
         scale.IterationBehavior = AnimationIterationBehavior.Forever;
         celestial.StartAnimation("Scale", scale);
+        activeCelestial = celestial;
         activeSceneLayer?.Children.InsertAtTop(celestial);
+    }
+
+    private void UpdateCelestialPosition(ContainerVisual? celestial, bool isMoon, double hour, double sunrise, double sunset)
+    {
+        if (celestial is null)
+        {
+            return;
+        }
+
+        double progress = GetCelestialProgress(isMoon, hour, sunrise, sunset);
+        float diameter = celestial.Size.X;
+        float horizontalPosition = (float)(progress * (SceneWidth + diameter) - diameter);
+        float verticalPosition = (float)(SceneHeight * 0.72 - Math.Sin(Math.PI * progress) * SceneHeight * 0.68 - diameter / 2);
+        celestial.Offset = new Vector3(horizontalPosition, verticalPosition, 0);
+    }
+
+    private static double GetCelestialProgress(bool isMoon, double hour, double sunrise, double sunset)
+    {
+        if (!isMoon)
+        {
+            return Math.Clamp((hour - sunrise) / Math.Max(1, sunset - sunrise), 0, 1);
+        }
+
+        double nightDuration = 24 - sunset + sunrise;
+        double elapsed = hour >= sunset ? hour - sunset : 24 - sunset + hour;
+        return Math.Clamp(elapsed / Math.Max(1, nightDuration), 0, 1);
     }
 
     private void AddClouds(Compositor compositor, int count)

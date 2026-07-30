@@ -82,4 +82,43 @@ public static class WeatherConditionMapper
             WeatherTimeOfDay.Afternoon :
             WeatherTimeOfDay.Evening;
     }
+
+    public static WeatherTimeOfDay MapTime(double hour, double sunrise, double sunset)
+    {
+        double dawnStart = NormalizeHour(sunrise - 0.75);
+        double dawnEnd = NormalizeHour(sunrise + 0.5);
+        double eveningStart = NormalizeHour(sunset - 1.25);
+        double duskEnd = NormalizeHour(sunset + 0.75);
+        double solarNoon = sunrise + (sunset - sunrise) / 2;
+
+        if (hour < dawnStart || hour >= duskEnd)
+        {
+            return WeatherTimeOfDay.Night;
+        }
+
+        if (hour < dawnEnd)
+        {
+            return WeatherTimeOfDay.Dawn;
+        }
+
+        if (hour < solarNoon)
+        {
+            return WeatherTimeOfDay.Morning;
+        }
+
+        if (hour < eveningStart)
+        {
+            return WeatherTimeOfDay.Afternoon;
+        }
+
+        return hour < sunset ? WeatherTimeOfDay.Evening : WeatherTimeOfDay.Dusk;
+    }
+
+    public static double GetLocalHour(long timestamp, int timeZoneOffset)
+    {
+        DateTimeOffset localTime = DateTimeOffset.FromUnixTimeSeconds(timestamp).ToOffset(TimeSpan.FromSeconds(timeZoneOffset));
+        return localTime.TimeOfDay.TotalHours;
+    }
+
+    private static double NormalizeHour(double hour) => (hour % 24 + 24) % 24;
 }

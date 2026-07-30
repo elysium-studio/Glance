@@ -10,6 +10,9 @@ internal sealed class OpenWeatherResponse
     [JsonPropertyName("dt")]
     public long Timestamp { get; set; }
 
+    [JsonPropertyName("timezone")]
+    public int TimeZoneOffset { get; set; }
+
     [JsonPropertyName("main")]
     public OpenWeatherMeasurements Main { get; set; } = new();
 

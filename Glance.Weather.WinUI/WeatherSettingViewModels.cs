@@ -33,7 +33,9 @@ public sealed partial class WeatherDebugPreviewSettingViewModel(IServiceProvider
     public partial int PreviewTemperatureIndex { get; set; }
 
     [ObservableProperty]
-    public partial int PreviewTimeIndex { get; set; }
+    public partial double PreviewHour { get; set; }
+
+    public string PreviewTimeText => TimeSpan.FromHours(PreviewHour % 24).ToString(@"hh\:mm");
 
     public override void Activated()
     {
@@ -43,7 +45,7 @@ public sealed partial class WeatherDebugPreviewSettingViewModel(IServiceProvider
 
     protected override void OptionsChanged(WeatherSettings options) => ReadPreview(options);
 
-    partial void OnPreviewCelestialIndexChanged(int value) => WritePreview(config => config.PreviewCelestial = (WeatherCelestial)(value + 1));
+    partial void OnPreviewCelestialIndexChanged(int value) => WritePreview(config => config.PreviewCelestial = (WeatherCelestial)value);
 
     partial void OnPreviewEffectIndexChanged(int value) => WritePreview(config => config.PreviewEffect = (WeatherEffect)(value + 1));
 
@@ -51,14 +53,18 @@ public sealed partial class WeatherDebugPreviewSettingViewModel(IServiceProvider
 
     partial void OnPreviewTemperatureIndexChanged(int value) => WritePreview(config => config.PreviewTemperature = (WeatherTemperature)(value + 1));
 
-    partial void OnPreviewTimeIndexChanged(int value) => WritePreview(config => config.PreviewTime = (WeatherTimeOfDay)(value + 1));
+    partial void OnPreviewHourChanged(double value)
+    {
+        OnPropertyChanged(nameof(PreviewTimeText));
+        WritePreview(config => config.PreviewHour = value);
+    }
 
     private void ReadPreview(WeatherSettings settings)
     {
         receivingPreview = true;
-        PreviewTimeIndex = Math.Max(0, (int)settings.PreviewTime - 1);
+        PreviewHour = Math.Clamp(settings.PreviewHour, 0, 24);
         PreviewSkyIndex = Math.Max(0, (int)settings.PreviewSky - 1);
-        PreviewCelestialIndex = Math.Max(0, (int)settings.PreviewCelestial - 1);
+        PreviewCelestialIndex = Math.Max(0, (int)settings.PreviewCelestial);
         PreviewEffectIndex = Math.Max(0, (int)settings.PreviewEffect - 1);
         PreviewTemperatureIndex = Math.Max(0, (int)settings.PreviewTemperature - 1);
         receivingPreview = false;
@@ -81,9 +87,7 @@ public sealed partial class WeatherDebugPreviewSettingViewModel(IServiceProvider
             return;
         }
 
-        settings.PreviewTime = settings.PreviewTime == WeatherTimeOfDay.Live ? WeatherTimeOfDay.Afternoon : settings.PreviewTime;
         settings.PreviewSky = settings.PreviewSky == WeatherSky.Live ? WeatherSky.PartlyCloudy : settings.PreviewSky;
-        settings.PreviewCelestial = settings.PreviewCelestial == WeatherCelestial.Live ? WeatherCelestial.Sun : settings.PreviewCelestial;
         settings.PreviewEffect = settings.PreviewEffect == WeatherEffect.Live ? WeatherEffect.None : settings.PreviewEffect;
         settings.PreviewTemperature = settings.PreviewTemperature == WeatherTemperature.Live ? WeatherTemperature.Normal : settings.PreviewTemperature;
     }

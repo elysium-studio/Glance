@@ -17,15 +17,13 @@
             Width="36"
             Height="36"
             VerticalAlignment="Center">
-            <FontIcon
+            <Path
                 Width="30"
                 Height="30"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="30"
-                Foreground="{ThemeResource GlanceWeatherAccentBrush}"
-                Glyph="{x:Bind ViewModel.Glyph, Mode=OneWay}" />
+                Data="{x:Bind ToGeometry(ViewModel.IconPath), Mode=OneWay}"
+                Style="{StaticResource GlanceWeatherIconPathStyle}" />
         </Grid>
         <Grid
             Grid.Column="1"

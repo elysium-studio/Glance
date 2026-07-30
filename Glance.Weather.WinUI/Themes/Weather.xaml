@@ -58,4 +58,8 @@
             <StaticResource x:Key="AccentButtonBorderBrushDisabled" ResourceKey="SystemControlDisabledTransparentBrush" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
+    <Style x:Key="GlanceWeatherIconPathStyle" TargetType="Path">
+        <Setter Property="Fill" Value="{ThemeResource GlanceWeatherAccentBrush}" />
+        <Setter Property="Stretch" Value="Uniform" />
+    </Style>
 </ResourceDictionary>

@@ -10,11 +10,11 @@ public sealed class WeatherSettings
 
     public bool DebugPreviewEnabled { get; set; }
 
-    public WeatherTimeOfDay PreviewTime { get; set; } = WeatherTimeOfDay.Afternoon;
+    public double PreviewHour { get; set; } = 14;
 
     public WeatherSky PreviewSky { get; set; } = WeatherSky.PartlyCloudy;
 
-    public WeatherCelestial PreviewCelestial { get; set; } = WeatherCelestial.Sun;
+    public WeatherCelestial PreviewCelestial { get; set; } = WeatherCelestial.Live;
 
     public WeatherEffect PreviewEffect { get; set; } = WeatherEffect.None;
 

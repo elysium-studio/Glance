@@ -19,7 +19,7 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     private string detailText = localizer.GetText("AddLocationAndApiKey");
 
     [ObservableProperty]
-    private string glyph = "\uE9C0";
+    private string iconPath = WeatherIconPaths.PartlyCloudyDay;
 
     [ObservableProperty]
     private bool hasWeatherData;
@@ -52,6 +52,15 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     private WeatherTimeOfDay weatherTime = WeatherTimeOfDay.Afternoon;
 
     [ObservableProperty]
+    private double weatherHour = 14;
+
+    [ObservableProperty]
+    private double sunriseHour = 6;
+
+    [ObservableProperty]
+    private double sunsetHour = 19;
+
+    [ObservableProperty]
     private string statisticsText = localizer.GetText("WeatherDetailsUnavailable");
 
     [ObservableProperty]
@@ -69,13 +78,16 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
         WeatherSky = WeatherSky.Clear;
         WeatherTemperature = WeatherTemperature.Normal;
         WeatherTime = WeatherTimeOfDay.Afternoon;
+        WeatherHour = 14;
+        SunriseHour = 6;
+        SunsetHour = 19;
         CompactStatusText = localizer.GetText("ConfigureWeather");
         ConditionText = localizer.GetText("ConfigureWeather");
         DetailText = localizer.GetText("AddLocationAndApiKey");
         LocationText = localizer.GetText("LocationNotSet");
         StatisticsText = localizer.GetText("WeatherDetailsUnavailable");
         TemperatureText = "--\u00B0";
-        Glyph = GetGlyph(WeatherTime, WeatherSky, WeatherEffect);
+        IconPath = GetIconPath(WeatherTime, WeatherSky, WeatherEffect);
     }
 
     public void SetLoading()
@@ -113,6 +125,9 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
         WeatherCelestial = WeatherConditionMapper.MapCelestial(snapshot.TimeOfDay, snapshot.Sky);
         WeatherTemperature = snapshot.TemperatureState;
         WeatherTime = snapshot.TimeOfDay;
+        WeatherHour = WeatherConditionMapper.GetLocalHour(snapshot.UpdatedAt.ToUnixTimeSeconds(), snapshot.TimeZoneOffset);
+        SunriseHour = WeatherConditionMapper.GetLocalHour(snapshot.Sunrise, snapshot.TimeZoneOffset);
+        SunsetHour = WeatherConditionMapper.GetLocalHour(snapshot.Sunset, snapshot.TimeZoneOffset);
         TemperatureText = $"{Math.Round(snapshot.Temperature):0}\u00B0";
         ConditionText = Capitalize(snapshot.Condition);
         LocationText = snapshot.Location;
@@ -122,18 +137,28 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
             Math.Round(snapshot.FeelsLike),
             snapshot.Humidity,
             FormatWind(snapshot.WindSpeed, useFahrenheit));
-        Glyph = GetGlyph(snapshot.TimeOfDay, snapshot.Sky, snapshot.Effect);
+        IconPath = GetIconPath(snapshot.TimeOfDay, snapshot.Sky, snapshot.Effect);
     }
 
-    public void SetVisualState(WeatherTimeOfDay time, WeatherSky sky, WeatherCelestial celestial, WeatherEffect effect, WeatherTemperature temperature)
+    public void SetVisualState(WeatherTimeOfDay time,
+        WeatherSky sky,
+        WeatherCelestial celestial,
+        WeatherEffect effect,
+        WeatherTemperature temperature,
+        double hour,
+        double sunrise,
+        double sunset)
     {
         IsDay = time is not WeatherTimeOfDay.Dusk and not WeatherTimeOfDay.Night;
         WeatherTime = time;
+        WeatherHour = hour;
+        SunriseHour = sunrise;
+        SunsetHour = sunset;
         WeatherSky = sky;
         WeatherCelestial = celestial;
         WeatherEffect = effect;
         WeatherTemperature = temperature;
-        Glyph = GetGlyph(time, sky, effect);
+        IconPath = GetIconPath(time, sky, effect);
     }
 
     private string Capitalize(string value)
@@ -151,18 +176,22 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     private static string FormatWind(double speed, bool useFahrenheit) =>
         useFahrenheit ? $"{speed:0} mph" : $"{speed:0} m/s";
 
-    private static string GetGlyph(WeatherTimeOfDay time, WeatherSky sky, WeatherEffect effect) =>
+    private static string GetIconPath(WeatherTimeOfDay time, WeatherSky sky, WeatherEffect effect) =>
         effect switch
         {
-            WeatherEffect.Rain => "\uE9C4",
-            WeatherEffect.Snow => "\uE9C8",
-            WeatherEffect.Thunderstorm => "\uE9C6",
-            WeatherEffect.Fog => "\uE9CB",
+            WeatherEffect.Rain => WeatherIconPaths.Rain,
+            WeatherEffect.Snow => WeatherIconPaths.Snow,
+            WeatherEffect.Thunderstorm => WeatherIconPaths.Thunderstorm,
+            WeatherEffect.Fog => WeatherIconPaths.Fog,
             _ => sky switch
             {
-                WeatherSky.Cloudy => "\uE9BF",
-                WeatherSky.PartlyCloudy => time is WeatherTimeOfDay.Dusk or WeatherTimeOfDay.Night ? "\uE9C1" : "\uE9C0",
-                _ => time is WeatherTimeOfDay.Dusk or WeatherTimeOfDay.Night ? "\uE9C2" : "\uE706"
+                WeatherSky.Cloudy => WeatherIconPaths.Cloudy,
+                WeatherSky.PartlyCloudy => time is WeatherTimeOfDay.Dusk or WeatherTimeOfDay.Night ?
+                    WeatherIconPaths.PartlyCloudyNight :
+                    WeatherIconPaths.PartlyCloudyDay,
+                _ => time is WeatherTimeOfDay.Dusk or WeatherTimeOfDay.Night ?
+                    WeatherIconPaths.Moon :
+                    WeatherIconPaths.Sunny
             }
         };
 }

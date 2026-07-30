@@ -15,6 +15,7 @@ public sealed partial class WeatherComponent :
 {
     private readonly DispatcherQueue dispatcherQueue;
     private readonly DispatcherQueueTimer refreshTimer;
+    private readonly DispatcherQueueTimer sceneClockTimer;
     private readonly DispatcherQueueTimer settingsTimer;
     private readonly GlanceModuleOptions<WeatherSettings> options;
     private readonly ITextLocalizer localizer;
@@ -54,6 +55,12 @@ public sealed partial class WeatherComponent :
         refreshTimer.Tick += HandleRefreshTimer;
         refreshTimer.Start();
 
+        sceneClockTimer = dispatcherQueue.CreateTimer();
+        sceneClockTimer.Interval = TimeSpan.FromSeconds(10);
+        sceneClockTimer.IsRepeating = true;
+        sceneClockTimer.Tick += HandleSceneClockTimer;
+        sceneClockTimer.Start();
+
         settingsTimer = dispatcherQueue.CreateTimer();
         settingsTimer.Interval = TimeSpan.FromMilliseconds(700);
         settingsTimer.IsRepeating = false;
@@ -85,6 +92,8 @@ public sealed partial class WeatherComponent :
     {
         refreshTimer.Stop();
         refreshTimer.Tick -= HandleRefreshTimer;
+        sceneClockTimer.Stop();
+        sceneClockTimer.Tick -= HandleSceneClockTimer;
         settingsTimer.Stop();
         settingsTimer.Tick -= HandleSettingsTimer;
         options.Changed -= HandleOptionsChanged;
@@ -93,6 +102,8 @@ public sealed partial class WeatherComponent :
     }
 
     private void HandleRefreshTimer(DispatcherQueueTimer sender, object args) => Refresh();
+
+    private void HandleSceneClockTimer(DispatcherQueueTimer sender, object args) => ApplySceneOverride();
 
     private void HandleSettingsTimer(DispatcherQueueTimer sender, object args) => Refresh();
 
@@ -172,24 +183,42 @@ public sealed partial class WeatherComponent :
 
     private void ApplySceneOverride()
     {
-#if DEBUG
         WeatherSettings settings = options.Current;
         WeatherTimeOfDay time = lastSnapshot?.TimeOfDay ?? WeatherTimeOfDay.Afternoon;
         WeatherSky sky = lastSnapshot?.Sky ?? WeatherSky.Clear;
         WeatherEffect effect = lastSnapshot?.Effect ?? WeatherEffect.None;
         WeatherTemperature temperature = lastSnapshot?.TemperatureState ?? WeatherTemperature.Normal;
+        double hour = 14;
+        double sunrise = 6;
+        double sunset = 19;
+
+        if (lastSnapshot is not null)
+        {
+            long timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            hour = WeatherConditionMapper.GetLocalHour(timestamp, lastSnapshot.TimeZoneOffset);
+            sunrise = WeatherConditionMapper.GetLocalHour(lastSnapshot.Sunrise, lastSnapshot.TimeZoneOffset);
+            sunset = WeatherConditionMapper.GetLocalHour(lastSnapshot.Sunset, lastSnapshot.TimeZoneOffset);
+            time = WeatherConditionMapper.MapTime(timestamp, lastSnapshot.Sunrise, lastSnapshot.Sunset);
+        }
+
         WeatherCelestial celestial = WeatherConditionMapper.MapCelestial(time, sky);
 
+#if DEBUG
         if (settings.DebugPreviewEnabled)
         {
-            time = settings.PreviewTime == WeatherTimeOfDay.Live ? WeatherTimeOfDay.Afternoon : settings.PreviewTime;
+            hour = Math.Clamp(settings.PreviewHour, 0, 24) % 24;
+            sunrise = 6;
+            sunset = 19;
+            time = WeatherConditionMapper.MapTime(hour, sunrise, sunset);
             sky = settings.PreviewSky == WeatherSky.Live ? WeatherSky.PartlyCloudy : settings.PreviewSky;
-            celestial = settings.PreviewCelestial == WeatherCelestial.Live ? WeatherCelestial.Sun : settings.PreviewCelestial;
+            celestial = settings.PreviewCelestial == WeatherCelestial.Live ?
+                WeatherConditionMapper.MapCelestial(time, sky) :
+                settings.PreviewCelestial;
             effect = settings.PreviewEffect == WeatherEffect.Live ? WeatherEffect.None : settings.PreviewEffect;
             temperature = settings.PreviewTemperature == WeatherTemperature.Live ? WeatherTemperature.Normal : settings.PreviewTemperature;
         }
-
-        viewModel.SetVisualState(time, sky, celestial, effect, temperature);
 #endif
+
+        viewModel.SetVisualState(time, sky, celestial, effect, temperature, hour, sunrise, sunset);
     }
 }

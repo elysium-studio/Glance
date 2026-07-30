@@ -15,15 +15,13 @@
             x:Name="StatusIndicator"
             Width="28"
             Height="28">
-            <FontIcon
+            <Path
                 Width="24"
                 Height="24"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="24"
-                Foreground="{ThemeResource GlanceWeatherAccentBrush}"
-                Glyph="{x:Bind ViewModel.Glyph, Mode=OneWay}" />
+                Data="{x:Bind ToGeometry(ViewModel.IconPath), Mode=OneWay}"
+                Style="{StaticResource GlanceWeatherIconPathStyle}" />
         </Grid>
         <TextBlock
             Grid.Column="1"

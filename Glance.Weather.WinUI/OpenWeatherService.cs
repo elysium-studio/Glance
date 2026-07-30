@@ -45,6 +45,9 @@ internal sealed class OpenWeatherService(HttpClient httpClient) :
             sky,
             effect,
             temperature,
-            DateTimeOffset.FromUnixTimeSeconds(weather.Timestamp));
+            DateTimeOffset.FromUnixTimeSeconds(weather.Timestamp),
+            weather.System.Sunrise,
+            weather.System.Sunset,
+            weather.TimeZoneOffset);
     }
 }

@@ -1,5 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Markup;
+using Microsoft.UI.Xaml.Media;
 using System.Globalization;
 
 namespace Glance.Weather.WinUI;
@@ -16,6 +18,8 @@ public sealed partial class WeatherExpandedView :
     public WeatherViewModel ViewModel { get; }
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
+
+    public Geometry ToGeometry(string data) => (Geometry)XamlBindingHelper.ConvertValue(typeof(Geometry), data);
 
     public string ToUpper(string value) => value.ToUpper(CultureInfo.CurrentCulture);
 
