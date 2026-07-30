@@ -77,10 +77,10 @@
                             </Button.Style>
                         </Button>
                         <Button
-                            x:Name="OpenInEditorButton"
-                            x:Uid="OpenInEditorButton"
-                            Click="{x:Bind OpenInEditor}"
-                            x:Load="{x:Bind CanOpenInEditor}">
+                            x:Name="ViewFullTextButton"
+                            x:Uid="ViewFullTextButton"
+                            Click="{x:Bind ViewFullText}"
+                            x:Load="{x:Bind CanViewFullText}">
                             <Button.Style>
                                 <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
                                     <Setter Property="Width" Value="32" />
@@ -88,7 +88,7 @@
                                     <Setter Property="Padding" Value="0" />
                                     <Setter Property="BorderThickness" Value="0" />
                                     <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
-                                    <Setter Property="Content" Value="&#xE70F;" />
+                                    <Setter Property="Content" Value="&#xE890;" />
                                     <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
                                     <Setter Property="FontSize" Value="14" />
                                 </Style>

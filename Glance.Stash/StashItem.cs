@@ -6,7 +6,7 @@ public sealed class StashItem(StashEntry entry,
     ITextLocalizer localizer,
     Action<StashItem> copy,
     Action<StashItem> open,
-    Action<StashItem> edit,
+    Action<StashItem> view,
     Action<StashItem> remove)
 {
     public string Id => entry.Id;
@@ -27,7 +27,7 @@ public sealed class StashItem(StashEntry entry,
 
     public bool CanOpen => entry.Kind == StashItemKind.Link;
 
-    public bool CanOpenInEditor =>
+    public bool CanViewFullText =>
         entry.Kind == StashItemKind.Text &&
         entry.Content.IndexOfAny(['\r', '\n']) >= 0;
 
@@ -35,7 +35,7 @@ public sealed class StashItem(StashEntry entry,
 
     public void Open() => open(this);
 
-    public void OpenInEditor() => edit(this);
+    public void ViewFullText() => view(this);
 
     public void Remove() => remove(this);
 
