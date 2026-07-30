@@ -179,15 +179,16 @@ public sealed partial class WeatherScene :
         activeSceneLayer.RelativeSizeAdjustment = Vector2.One;
         activeSceneLayer.Opacity = previousSceneLayer is null ? 1 : 0;
         sceneVisual.Children.InsertAtTop(activeSceneLayer);
-        activeCloudLayer = new Canvas { Opacity = previousCloudLayer is null ? 1 : 0, IsHitTestVisible = false };
+        activeCloudLayer = new Canvas { IsHitTestVisible = false };
         CloudLayerHost.Children.Add(activeCloudLayer);
         activeBackgroundLayer = new Border
         {
             Background = CreateBackground(time, sky, effect, temperature),
-            Opacity = previousBackgroundLayer is null ? 1 : 0,
             IsHitTestVisible = false
         };
         BackgroundHost.Children.Add(activeBackgroundLayer);
+        ElementCompositionPreview.GetElementVisual(activeCloudLayer).Opacity = previousCloudLayer is null ? 1 : 0;
+        ElementCompositionPreview.GetElementVisual(activeBackgroundLayer).Opacity = previousBackgroundLayer is null ? 1 : 0;
         activeState = state;
 
         if (celestial != WeatherCelestial.None)
@@ -251,28 +252,27 @@ public sealed partial class WeatherScene :
         FrameworkElement previousBackground,
         FrameworkElement nextBackground)
     {
-        CubicBezierEasingFunction easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.22f, 1), new Vector2(0.36f, 1));
+        Visual previousCloudVisual = ElementCompositionPreview.GetElementVisual(previousClouds);
+        Visual nextCloudVisual = ElementCompositionPreview.GetElementVisual(nextClouds);
+        Visual previousBackgroundVisual = ElementCompositionPreview.GetElementVisual(previousBackground);
+        Visual nextBackgroundVisual = ElementCompositionPreview.GetElementVisual(nextBackground);
+        CubicBezierEasingFunction easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.4f, 0), new Vector2(0.2f, 1));
         transitionActive = true;
         CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
         StartOpacityTransition(compositor, previousScene, 1, 0, easing);
         StartOpacityTransition(compositor, nextScene, 0, 1, easing);
-        StartOpacityTransition(compositor, ElementCompositionPreview.GetElementVisual(previousClouds), 1, 0, easing);
-        StartOpacityTransition(compositor, ElementCompositionPreview.GetElementVisual(nextClouds), 0, 1, easing);
-        StartOpacityTransition(compositor, ElementCompositionPreview.GetElementVisual(previousBackground), 1, 0, easing);
-        StartOpacityTransition(compositor, ElementCompositionPreview.GetElementVisual(nextBackground), 0, 1, easing);
-        batch.End();
+        StartOpacityTransition(compositor, previousCloudVisual, 1, 0, easing);
+        StartOpacityTransition(compositor, nextCloudVisual, 0, 1, easing);
+        StartOpacityTransition(compositor, previousBackgroundVisual, 1, 0, easing);
+        StartOpacityTransition(compositor, nextBackgroundVisual, 0, 1, easing);
         batch.Completed += (sender, args) => DispatcherQueue.TryEnqueue(() =>
         {
             nextScene.StopAnimation("Opacity");
             nextScene.Opacity = 1;
-            Visual nextCloudVisual = ElementCompositionPreview.GetElementVisual(nextClouds);
             nextCloudVisual.StopAnimation("Opacity");
             nextCloudVisual.Opacity = 1;
-            nextClouds.Opacity = 1;
-            Visual nextBackgroundVisual = ElementCompositionPreview.GetElementVisual(nextBackground);
             nextBackgroundVisual.StopAnimation("Opacity");
             nextBackgroundVisual.Opacity = 1;
-            nextBackground.Opacity = 1;
             sceneVisual?.Children.Remove(previousScene);
             previousScene.Dispose();
             CloudLayerHost.Children.Remove(previousClouds);
@@ -286,6 +286,7 @@ public sealed partial class WeatherScene :
                 QueueSceneRebuild();
             }
         });
+        batch.End();
     }
 
     private static void StartOpacityTransition(Compositor compositor, Visual visual, float from, float to, CompositionEasingFunction easing)
@@ -293,7 +294,7 @@ public sealed partial class WeatherScene :
         ScalarKeyFrameAnimation animation = compositor.CreateScalarKeyFrameAnimation();
         animation.InsertKeyFrame(0, from);
         animation.InsertKeyFrame(1, to, easing);
-        animation.Duration = TimeSpan.FromMilliseconds(420);
+        animation.Duration = TimeSpan.FromMilliseconds(480);
         visual.StartAnimation("Opacity", animation);
     }
 
