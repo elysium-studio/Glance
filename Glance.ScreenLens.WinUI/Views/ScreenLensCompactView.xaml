@@ -14,15 +14,13 @@
             x:Name="StatusIndicator"
             Width="28"
             Height="28">
-            <FontIcon
+            <PathIcon
                 Width="24"
                 Height="24"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="24"
                 Foreground="{ThemeResource GlanceScreenLensIconBrush}"
-                Glyph="&#xE8FE;" />
+                Style="{StaticResource GlanceScreenLensPathIconStyle}" />
         </Grid>
         <TextBlock
             Grid.Column="1"

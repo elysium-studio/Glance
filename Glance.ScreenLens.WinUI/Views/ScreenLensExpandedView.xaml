@@ -16,13 +16,13 @@
             Width="36"
             Height="36"
             VerticalAlignment="Center">
-            <FontIcon
+            <PathIcon
+                Width="30"
+                Height="30"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                FontFamily="Segoe Fluent Icons"
-                FontSize="30"
                 Foreground="{ThemeResource GlanceScreenLensIconBrush}"
-                Glyph="&#xE8FE;" />
+                Style="{StaticResource GlanceScreenLensPathIconStyle}" />
         </Grid>
         <Grid
             Grid.Column="1"
@@ -69,11 +69,12 @@
                     <Setter Property="Height" Value="36" />
                     <Setter Property="Padding" Value="0" />
                     <Setter Property="CornerRadius" Value="18" />
-                    <Setter Property="Content" Value="&#xE8FE;" />
-                    <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                    <Setter Property="FontSize" Value="16" />
                 </Style>
             </Button.Style>
+            <PathIcon
+                Width="16"
+                Height="16"
+                Style="{StaticResource GlanceScreenLensPathIconStyle}" />
         </Button>
     </Grid>
 </UserControl>
