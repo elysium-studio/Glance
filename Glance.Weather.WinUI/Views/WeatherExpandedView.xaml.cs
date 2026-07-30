@@ -24,4 +24,8 @@ public sealed partial class WeatherExpandedView :
     public void Refresh() => refresh();
 
     public string ToUpper(string value) => value.ToUpper(CultureInfo.CurrentCulture);
+
+    public Visibility WhenHasWeather(bool hasWeather) => hasWeather ? Visibility.Visible : Visibility.Collapsed;
+
+    public Visibility WhenMissingWeather(bool hasWeather) => hasWeather ? Visibility.Collapsed : Visibility.Visible;
 }

@@ -22,6 +22,9 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     private string glyph = "\uE706";
 
     [ObservableProperty]
+    private bool hasWeatherData;
+
+    [ObservableProperty]
     private bool isDay = true;
 
     [ObservableProperty]
@@ -37,7 +40,7 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     private string statisticsText = localizer.GetText("WeatherDetailsUnavailable");
 
     [ObservableProperty]
-    private string temperatureText = "--°";
+    private string temperatureText = "--\u00B0";
 
     public string Title => localizer.GetText("ModuleTitle");
 
@@ -46,13 +49,14 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     public void SetNeedsConfiguration()
     {
         IsLoading = false;
+        HasWeatherData = false;
         Scene = WeatherSceneKind.Unknown;
         CompactStatusText = localizer.GetText("ConfigureWeather");
-        ConditionText = localizer.GetText("WeatherUnavailable");
+        ConditionText = localizer.GetText("ConfigureWeather");
         DetailText = localizer.GetText("AddLocationAndApiKey");
         LocationText = localizer.GetText("LocationNotSet");
         StatisticsText = localizer.GetText("WeatherDetailsUnavailable");
-        TemperatureText = "--°";
+        TemperatureText = "--\u00B0";
         Glyph = GetGlyph(Scene, true);
     }
 
@@ -60,10 +64,11 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     {
         IsLoading = true;
 
-        if (TemperatureText == "--°")
+        if (!HasWeatherData)
         {
             CompactStatusText = localizer.GetText("UpdatingWeather");
             ConditionText = localizer.GetText("UpdatingWeather");
+            DetailText = string.Empty;
         }
     }
 
@@ -71,7 +76,7 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     {
         IsLoading = false;
 
-        if (TemperatureText == "--°")
+        if (!HasWeatherData)
         {
             CompactStatusText = localizer.GetText("WeatherUnavailable");
             ConditionText = localizer.GetText("WeatherUnavailable");
@@ -82,9 +87,10 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     public void Update(WeatherSnapshot snapshot, bool useFahrenheit)
     {
         IsLoading = false;
+        HasWeatherData = true;
         Scene = snapshot.Scene;
         IsDay = snapshot.IsDay;
-        TemperatureText = $"{Math.Round(snapshot.Temperature):0}°";
+        TemperatureText = $"{Math.Round(snapshot.Temperature):0}\u00B0";
         ConditionText = Capitalize(snapshot.Condition);
         LocationText = snapshot.Location;
         CompactStatusText = $"{TemperatureText} \u00B7 {ConditionText}";

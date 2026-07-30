@@ -29,6 +29,7 @@ public sealed class WeatherTests
         Assert.Equal("18° · Light rain", viewModel.CompactStatusText);
         Assert.Equal("London", viewModel.LocationText);
         Assert.Equal(WeatherSceneKind.Rain, viewModel.Scene);
+        Assert.True(viewModel.HasWeatherData);
     }
 
     [Fact]
