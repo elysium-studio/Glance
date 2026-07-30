@@ -94,7 +94,10 @@ public sealed partial class WeatherScene :
 
     private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
-        if (args.PropertyName is nameof(WeatherViewModel.Scene) or nameof(WeatherViewModel.IsDay))
+        if (args.PropertyName is nameof(WeatherViewModel.WeatherTime) or
+            nameof(WeatherViewModel.WeatherSky) or
+            nameof(WeatherViewModel.WeatherEffect) or
+            nameof(WeatherViewModel.WeatherTemperature))
         {
             RebuildScene();
         }
@@ -115,61 +118,92 @@ public sealed partial class WeatherScene :
         sceneVisual.RelativeSizeAdjustment = Vector2.One;
         ElementCompositionPreview.SetElementChildVisual(ParticleHost, sceneVisual);
 
-        WeatherSceneKind scene = viewModel?.Scene ?? WeatherSceneKind.Unknown;
-        bool isDay = viewModel?.IsDay ?? true;
-        SceneRoot.Background = CreateBackground(scene, isDay);
-        LightningBolt.Visibility = scene == WeatherSceneKind.Thunderstorm ? Visibility.Visible : Visibility.Collapsed;
+        WeatherTimeOfDay time = viewModel?.WeatherTime ?? WeatherTimeOfDay.Day;
+        WeatherSky sky = viewModel?.WeatherSky ?? WeatherSky.Clear;
+        WeatherEffect effect = viewModel?.WeatherEffect ?? WeatherEffect.None;
+        WeatherTemperature temperature = viewModel?.WeatherTemperature ?? WeatherTemperature.Normal;
+        SceneRoot.Background = CreateBackground(time, sky, effect, temperature);
+        LightningBolt.Visibility = effect == WeatherEffect.Thunderstorm ? Visibility.Visible : Visibility.Collapsed;
 
-        switch (scene)
+        if (sky != WeatherSky.Cloudy)
         {
-            case WeatherSceneKind.Clear:
-                AddCelestial(compositor, false, isDay);
-                break;
-            case WeatherSceneKind.Hot:
-                AddCelestial(compositor, true, true);
-                AddHaze(compositor);
-                break;
-            case WeatherSceneKind.PartlyCloudy:
-                AddCelestial(compositor, false, isDay);
-                AddClouds(compositor, 3);
-                break;
-            case WeatherSceneKind.Cloudy:
-                AddClouds(compositor, 6);
-                break;
-            case WeatherSceneKind.Rain:
-                AddClouds(compositor, 3);
+            AddCelestial(compositor, temperature == WeatherTemperature.Hot, time);
+        }
+
+        if (sky == WeatherSky.PartlyCloudy)
+        {
+            AddClouds(compositor, 2);
+        }
+        else if (sky == WeatherSky.Cloudy)
+        {
+            AddClouds(compositor, 3);
+        }
+
+        if (temperature == WeatherTemperature.Hot)
+        {
+            AddHaze(compositor);
+        }
+
+        switch (effect)
+        {
+            case WeatherEffect.Rain:
                 AddRain(compositor, 28);
                 break;
-            case WeatherSceneKind.Snow:
-                AddClouds(compositor, 3);
+            case WeatherEffect.Snow:
                 AddSnow(compositor, 26);
                 break;
-            case WeatherSceneKind.Thunderstorm:
-                AddClouds(compositor, 4);
+            case WeatherEffect.Thunderstorm:
                 AddRain(compositor, 34);
                 AddLightning(compositor);
                 break;
-            case WeatherSceneKind.Fog:
+            case WeatherEffect.Fog:
                 AddFog(compositor);
                 break;
         }
     }
 
-    private Brush CreateBackground(WeatherSceneKind scene, bool isDay)
+    private Brush CreateBackground(WeatherTimeOfDay time, WeatherSky sky, WeatherEffect effect, WeatherTemperature temperature)
     {
-        (Color start, Color end) = scene switch
+        (Color start, Color end) = time switch
         {
-            WeatherSceneKind.Clear when isDay => (Color.FromArgb(255, 21, 112, 211), Color.FromArgb(255, 84, 187, 240)),
-            WeatherSceneKind.Clear => (Color.FromArgb(255, 8, 20, 55), Color.FromArgb(255, 39, 58, 114)),
-            WeatherSceneKind.Hot => (Color.FromArgb(255, 186, 65, 24), Color.FromArgb(255, 251, 146, 60)),
-            WeatherSceneKind.PartlyCloudy => (Color.FromArgb(255, 39, 108, 162), Color.FromArgb(255, 113, 148, 175)),
-            WeatherSceneKind.Cloudy => (Color.FromArgb(255, 42, 57, 72), Color.FromArgb(255, 92, 110, 126)),
-            WeatherSceneKind.Rain => (Color.FromArgb(255, 16, 42, 67), Color.FromArgb(255, 45, 83, 112)),
-            WeatherSceneKind.Snow => (Color.FromArgb(255, 48, 85, 115), Color.FromArgb(255, 153, 185, 207)),
-            WeatherSceneKind.Thunderstorm => (Color.FromArgb(255, 21, 18, 45), Color.FromArgb(255, 51, 55, 88)),
-            WeatherSceneKind.Fog => (Color.FromArgb(255, 55, 67, 78), Color.FromArgb(255, 126, 139, 148)),
-            _ => (Color.FromArgb(255, 23, 43, 64), Color.FromArgb(255, 45, 67, 86))
+            WeatherTimeOfDay.Dawn => (Color.FromArgb(255, 72, 75, 145), Color.FromArgb(255, 246, 155, 120)),
+            WeatherTimeOfDay.Dusk => (Color.FromArgb(255, 42, 47, 111), Color.FromArgb(255, 218, 91, 112)),
+            WeatherTimeOfDay.Night => (Color.FromArgb(255, 8, 20, 55), Color.FromArgb(255, 39, 58, 114)),
+            _ when temperature == WeatherTemperature.Hot => (Color.FromArgb(255, 186, 65, 24), Color.FromArgb(255, 251, 146, 60)),
+            _ => (Color.FromArgb(255, 21, 112, 211), Color.FromArgb(255, 84, 187, 240))
         };
+
+        if (sky == WeatherSky.Cloudy)
+        {
+            start = Blend(start, Color.FromArgb(255, 42, 57, 72), 0.58f);
+            end = Blend(end, Color.FromArgb(255, 92, 110, 126), 0.58f);
+        }
+        else if (sky == WeatherSky.PartlyCloudy)
+        {
+            start = Blend(start, Color.FromArgb(255, 55, 80, 104), 0.25f);
+            end = Blend(end, Color.FromArgb(255, 124, 145, 161), 0.25f);
+        }
+
+        if (effect == WeatherEffect.Thunderstorm)
+        {
+            start = Blend(start, Color.FromArgb(255, 21, 18, 45), 0.72f);
+            end = Blend(end, Color.FromArgb(255, 51, 55, 88), 0.72f);
+        }
+        else if (effect == WeatherEffect.Rain)
+        {
+            start = Blend(start, Color.FromArgb(255, 16, 42, 67), 0.45f);
+            end = Blend(end, Color.FromArgb(255, 45, 83, 112), 0.45f);
+        }
+        else if (effect == WeatherEffect.Snow)
+        {
+            start = Blend(start, Color.FromArgb(255, 48, 85, 115), 0.28f);
+            end = Blend(end, Color.FromArgb(255, 153, 185, 207), 0.28f);
+        }
+        else if (effect == WeatherEffect.Fog)
+        {
+            start = Blend(start, Color.FromArgb(255, 55, 67, 78), 0.55f);
+            end = Blend(end, Color.FromArgb(255, 126, 139, 148), 0.55f);
+        }
 
         return new LinearGradientBrush
         {
@@ -183,9 +217,11 @@ public sealed partial class WeatherScene :
         };
     }
 
-    private void AddCelestial(Compositor compositor, bool hot, bool isDay)
+    private void AddCelestial(Compositor compositor, bool hot, WeatherTimeOfDay time)
     {
-        float diameter = hot ? 100 : isDay ? 76 : 58;
+        bool isNight = time == WeatherTimeOfDay.Night;
+        bool isTransition = time is WeatherTimeOfDay.Dawn or WeatherTimeOfDay.Dusk;
+        float diameter = hot ? 100 : isNight ? 58 : 76;
         ContainerVisual sun = compositor.CreateContainerVisual();
         sun.Size = new Vector2(diameter);
         sun.Offset = new Vector3(-diameter * 0.65f, -diameter * 0.25f, 0);
@@ -195,8 +231,8 @@ public sealed partial class WeatherScene :
         for (int index = 0; index < 3; index++)
         {
             float inset = index * 12;
-            Color color = isDay ?
-                Color.FromArgb((byte)(45 + index * 40), 255, (byte)(hot ? 142 : 220), 73) :
+            Color color = !isNight ?
+                Color.FromArgb((byte)(45 + index * 40), 255, (byte)(hot ? 142 : isTransition ? 181 : 220), (byte)(isTransition ? 105 : 73)) :
                 Color.FromArgb((byte)(45 + index * 40), 213, 229, 255);
             ShapeVisual disc = CreateDisc(compositor,
                 diameter - inset * 2,
@@ -219,23 +255,42 @@ public sealed partial class WeatherScene :
     {
         for (int index = 0; index < count; index++)
         {
-            float width = RandomBetween(60, 105);
+            float width = RandomBetween(68, 104);
             float height = width * 0.4f;
             byte alpha = (byte)RandomBetween(35, 95);
             Path cloud = CreateCloud(width, height, alpha);
-            Canvas.SetTop(cloud, RandomBetween(4, SceneHeight * 0.55f));
+            Canvas.SetLeft(cloud, -width);
+            Canvas.SetTop(cloud, 6 + index * 28);
             CloudHost.Children.Add(cloud);
             Visual cloudVisual = ElementCompositionPreview.GetElementVisual(cloud);
-            cloudVisual.RelativeOffsetAdjustment = new Vector3(-0.35f, 0, 0);
+            float phase = (float)index / count;
+            float wrap = Math.Min(0.995f, 1 - phase + 0.002f);
+            float travel = SceneWidth + width * 2;
+            ScalarKeyFrameAnimation drift = compositor.CreateScalarKeyFrameAnimation();
+            drift.InsertKeyFrame(0, phase * travel);
 
-            Vector3KeyFrameAnimation drift = compositor.CreateVector3KeyFrameAnimation();
-            drift.InsertKeyFrame(0, new Vector3(-0.35f, 0, 0));
-            drift.InsertKeyFrame(1, new Vector3(1.15f, 0, 0));
-            drift.Duration = TimeSpan.FromSeconds(RandomBetween(24, 34));
+            if (index == 0)
+            {
+                drift.InsertKeyFrame(1, travel);
+            }
+            else
+            {
+                drift.InsertKeyFrame(1 - phase, travel);
+                drift.InsertKeyFrame(wrap, 0);
+                drift.InsertKeyFrame(1, phase * travel);
+            }
+
+            drift.Duration = TimeSpan.FromSeconds(30);
             drift.IterationBehavior = AnimationIterationBehavior.Forever;
-            cloudVisual.StartAnimation("RelativeOffsetAdjustment", drift);
+            cloudVisual.StartAnimation("Offset.X", drift);
         }
     }
+
+    private static Color Blend(Color source, Color target, float amount) =>
+        Color.FromArgb(255,
+            (byte)(source.R + (target.R - source.R) * amount),
+            (byte)(source.G + (target.G - source.G) * amount),
+            (byte)(source.B + (target.B - source.B) * amount));
 
     private static Path CreateCloud(float width, float height, byte alpha)
     {
@@ -339,17 +394,16 @@ public sealed partial class WeatherScene :
 
     private void AddFog(Compositor compositor)
     {
-        for (int index = 0; index < 7; index++)
+        for (int index = 0; index < 4; index++)
         {
-            SpriteVisual band = compositor.CreateSpriteVisual();
-            band.Brush = compositor.CreateColorBrush(Color.FromArgb((byte)(30 + index * 7), 230, 238, 243));
-            band.Size = new Vector2(SceneWidth * RandomBetween(0.45f, 0.85f), 2);
-            band.Offset = new Vector3(RandomBetween(-30, 30), 12 + index * 14, 0);
+            Vector2 size = new(SceneWidth * RandomBetween(0.75f, 1.05f), RandomBetween(18, 30));
+            ShapeVisual band = CreateRoundedRectangle(compositor, size, Color.FromArgb((byte)(18 + index * 7), 230, 238, 243));
+            band.Offset = new Vector3(-SceneWidth * 0.15f, 8 + index * 25, 0);
             ScalarKeyFrameAnimation drift = compositor.CreateScalarKeyFrameAnimation();
-            drift.InsertKeyFrame(0, -24);
-            drift.InsertKeyFrame(0.5f, 24);
-            drift.InsertKeyFrame(1, -24);
-            drift.Duration = TimeSpan.FromSeconds(RandomBetween(5, 9));
+            drift.InsertKeyFrame(0, -SceneWidth * 0.12f);
+            drift.InsertKeyFrame(0.5f, SceneWidth * 0.08f);
+            drift.InsertKeyFrame(1, -SceneWidth * 0.12f);
+            drift.Duration = TimeSpan.FromSeconds(RandomBetween(12, 18));
             drift.IterationBehavior = AnimationIterationBehavior.Forever;
             band.StartAnimation("Offset.X", drift);
             sceneVisual?.Children.InsertAtTop(band);
@@ -382,6 +436,19 @@ public sealed partial class WeatherScene :
         CompositionEllipseGeometry geometry = compositor.CreateEllipseGeometry();
         geometry.Center = new Vector2(diameter / 2);
         geometry.Radius = new Vector2(diameter / 2);
+        CompositionSpriteShape shape = compositor.CreateSpriteShape(geometry);
+        shape.FillBrush = compositor.CreateColorBrush(color);
+        visual.Shapes.Add(shape);
+        return visual;
+    }
+
+    private static ShapeVisual CreateRoundedRectangle(Compositor compositor, Vector2 size, Color color)
+    {
+        ShapeVisual visual = compositor.CreateShapeVisual();
+        visual.Size = size;
+        CompositionRoundedRectangleGeometry geometry = compositor.CreateRoundedRectangleGeometry();
+        geometry.Size = size;
+        geometry.CornerRadius = new Vector2(size.Y / 2);
         CompositionSpriteShape shape = compositor.CreateSpriteShape(geometry);
         shape.FillBrush = compositor.CreateColorBrush(color);
         visual.Shapes.Add(shape);

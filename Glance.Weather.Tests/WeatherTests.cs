@@ -21,7 +21,19 @@ public sealed class WeatherTests
     public void Update_FormatsCurrentWeather()
     {
         WeatherViewModel viewModel = new(new TestTextLocalizer());
-        WeatherSnapshot snapshot = new("London", 18.4, 17.2, 70, 4.8, "light rain", WeatherSceneKind.Rain, true, DateTimeOffset.UtcNow);
+        WeatherSnapshot snapshot = new("London",
+            18.4,
+            17.2,
+            70,
+            4.8,
+            "light rain",
+            WeatherSceneKind.Rain,
+            true,
+            WeatherTimeOfDay.Day,
+            WeatherSky.PartlyCloudy,
+            WeatherEffect.Rain,
+            WeatherTemperature.Normal,
+            DateTimeOffset.UtcNow);
 
         viewModel.Update(snapshot, false);
 
@@ -40,7 +52,24 @@ public sealed class WeatherTests
         Assert.False(settings.UseFahrenheit);
         Assert.Empty(settings.ApiKey);
         Assert.Empty(settings.Location);
-        Assert.Equal(WeatherSceneKind.Unknown, settings.PreviewScene);
+        Assert.Equal(WeatherTimeOfDay.Live, settings.PreviewTime);
+        Assert.Equal(WeatherSky.Live, settings.PreviewSky);
+        Assert.Equal(WeatherEffect.Live, settings.PreviewEffect);
+        Assert.Equal(WeatherTemperature.Live, settings.PreviewTemperature);
+    }
+
+    [Theory]
+    [InlineData(0, WeatherSky.Clear)]
+    [InlineData(45, WeatherSky.PartlyCloudy)]
+    [InlineData(90, WeatherSky.Cloudy)]
+    public void ConditionMapper_MapsCloudCoverIndependently(int cloudCover, WeatherSky expected) =>
+        Assert.Equal(expected, WeatherConditionMapper.MapSky(cloudCover));
+
+    [Fact]
+    public void ConditionMapper_ComposesSnowWithClearSky()
+    {
+        Assert.Equal(WeatherSky.Clear, WeatherConditionMapper.MapSky(5));
+        Assert.Equal(WeatherEffect.Snow, WeatherConditionMapper.MapEffect(601));
     }
 
     private sealed class TestTextLocalizer :

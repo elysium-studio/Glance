@@ -21,6 +21,7 @@ public sealed partial class WeatherComponent :
     private readonly IWeatherService weatherService;
     private readonly WeatherViewModel viewModel;
     private CancellationTokenSource? refreshCancellation;
+    private WeatherSnapshot? lastSnapshot;
 
     public WeatherComponent(WeatherViewModel viewModel,
         IWeatherService weatherService,
@@ -34,7 +35,7 @@ public sealed partial class WeatherComponent :
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
         WeatherCompactView compactView = new(viewModel);
-        WeatherExpandedView expandedView = new(viewModel, Refresh);
+        WeatherExpandedView expandedView = new(viewModel);
         CompactContent = compactView;
         ExpandedContent = expandedView;
         CompactAnimationElement = compactView.ConnectedAnimationElement;
@@ -126,6 +127,7 @@ public sealed partial class WeatherComponent :
             {
                 dispatcherQueue.TryEnqueue(() =>
                 {
+                    lastSnapshot = snapshot;
                     viewModel.Update(snapshot, settings.UseFahrenheit);
                     ApplySceneOverride();
                 });
@@ -150,13 +152,33 @@ public sealed partial class WeatherComponent :
     private void ApplySceneOverride()
     {
 #if DEBUG
-        WeatherSceneKind scene = options.Current.PreviewScene;
+        WeatherSettings settings = options.Current;
+        WeatherTimeOfDay time = lastSnapshot?.TimeOfDay ?? WeatherTimeOfDay.Day;
+        WeatherSky sky = lastSnapshot?.Sky ?? WeatherSky.Clear;
+        WeatherEffect effect = lastSnapshot?.Effect ?? WeatherEffect.None;
+        WeatherTemperature temperature = lastSnapshot?.TemperatureState ?? WeatherTemperature.Normal;
 
-        if (scene != WeatherSceneKind.Unknown)
+        if (settings.PreviewTime != WeatherTimeOfDay.Live)
         {
-            viewModel.Scene = scene;
-            viewModel.IsDay = true;
+            time = settings.PreviewTime;
         }
+
+        if (settings.PreviewSky != WeatherSky.Live)
+        {
+            sky = settings.PreviewSky;
+        }
+
+        if (settings.PreviewEffect != WeatherEffect.Live)
+        {
+            effect = settings.PreviewEffect;
+        }
+
+        if (settings.PreviewTemperature != WeatherTemperature.Live)
+        {
+            temperature = settings.PreviewTemperature;
+        }
+
+        viewModel.SetVisualState(time, sky, effect, temperature);
 #endif
     }
 }

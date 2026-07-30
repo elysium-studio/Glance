@@ -8,4 +8,8 @@ public sealed record WeatherSnapshot(string Location,
     string Condition,
     WeatherSceneKind Scene,
     bool IsDay,
+    WeatherTimeOfDay TimeOfDay,
+    WeatherSky Sky,
+    WeatherEffect Effect,
+    WeatherTemperature TemperatureState,
     DateTimeOffset UpdatedAt);

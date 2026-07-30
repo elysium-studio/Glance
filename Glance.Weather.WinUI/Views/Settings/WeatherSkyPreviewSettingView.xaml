@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <UserControl
-    x:Class="Glance.Weather.WinUI.WeatherScenePreviewSettingView"
+    x:Class="Glance.Weather.WinUI.WeatherSkyPreviewSettingView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:CommunityToolkit="using:CommunityToolkit.WinUI.Controls"
     Loaded="{x:Bind ViewModel.Activate}"
     Unloaded="{x:Bind ViewModel.Deactivate}">
-    <CommunityToolkit:SettingsCard x:Uid="WeatherTimePreviewSettingCard">
+    <CommunityToolkit:SettingsCard x:Uid="WeatherSkyPreviewSettingCard">
         <ComboBox
             Width="240"
             SelectedIndex="{x:Bind ViewModel.Value, Mode=TwoWay}">
             <ComboBoxItem x:Uid="WeatherPreviewLiveOption" />
-            <ComboBoxItem x:Uid="WeatherTimeDawnOption" />
-            <ComboBoxItem x:Uid="WeatherTimeDayOption" />
-            <ComboBoxItem x:Uid="WeatherTimeDuskOption" />
-            <ComboBoxItem x:Uid="WeatherTimeNightOption" />
+            <ComboBoxItem x:Uid="WeatherSceneClearOption" />
+            <ComboBoxItem x:Uid="WeatherScenePartlyCloudyOption" />
+            <ComboBoxItem x:Uid="WeatherSceneCloudyOption" />
         </ComboBox>
     </CommunityToolkit:SettingsCard>
 </UserControl>

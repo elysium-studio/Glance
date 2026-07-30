@@ -8,5 +8,11 @@ public sealed class WeatherSettings
 
     public bool UseFahrenheit { get; set; }
 
-    public WeatherSceneKind PreviewScene { get; set; }
+    public WeatherTimeOfDay PreviewTime { get; set; }
+
+    public WeatherSky PreviewSky { get; set; }
+
+    public WeatherEffect PreviewEffect { get; set; }
+
+    public WeatherTemperature PreviewTemperature { get; set; }
 }

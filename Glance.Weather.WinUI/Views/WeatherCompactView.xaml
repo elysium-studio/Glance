@@ -16,7 +16,7 @@
             Width="28"
             Height="28"
             VerticalAlignment="Center"
-            FontFamily="Segoe Fluent Icons"
+            FontFamily="Segoe UI Symbol"
             FontSize="24"
             Foreground="{ThemeResource GlanceWeatherAccentBrush}"
             Glyph="{x:Bind ViewModel.Glyph, Mode=OneWay}" />

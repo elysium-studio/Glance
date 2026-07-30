@@ -19,7 +19,7 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     private string detailText = localizer.GetText("AddLocationAndApiKey");
 
     [ObservableProperty]
-    private string glyph = "\uE706";
+    private string glyph = "\u2600";
 
     [ObservableProperty]
     private bool hasWeatherData;
@@ -37,6 +37,18 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     private WeatherSceneKind scene = WeatherSceneKind.Unknown;
 
     [ObservableProperty]
+    private WeatherEffect weatherEffect = WeatherEffect.None;
+
+    [ObservableProperty]
+    private WeatherSky weatherSky = WeatherSky.Clear;
+
+    [ObservableProperty]
+    private WeatherTemperature weatherTemperature = WeatherTemperature.Normal;
+
+    [ObservableProperty]
+    private WeatherTimeOfDay weatherTime = WeatherTimeOfDay.Day;
+
+    [ObservableProperty]
     private string statisticsText = localizer.GetText("WeatherDetailsUnavailable");
 
     [ObservableProperty]
@@ -44,13 +56,15 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
 
     public string Title => localizer.GetText("ModuleTitle");
 
-    public string RefreshLabel => localizer.GetText("RefreshWeather");
-
     public void SetNeedsConfiguration()
     {
         IsLoading = false;
         HasWeatherData = false;
         Scene = WeatherSceneKind.Unknown;
+        WeatherEffect = WeatherEffect.None;
+        WeatherSky = WeatherSky.Clear;
+        WeatherTemperature = WeatherTemperature.Normal;
+        WeatherTime = WeatherTimeOfDay.Day;
         CompactStatusText = localizer.GetText("ConfigureWeather");
         ConditionText = localizer.GetText("ConfigureWeather");
         DetailText = localizer.GetText("AddLocationAndApiKey");
@@ -90,6 +104,10 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
         HasWeatherData = true;
         Scene = snapshot.Scene;
         IsDay = snapshot.IsDay;
+        WeatherEffect = snapshot.Effect;
+        WeatherSky = snapshot.Sky;
+        WeatherTemperature = snapshot.TemperatureState;
+        WeatherTime = snapshot.TimeOfDay;
         TemperatureText = $"{Math.Round(snapshot.Temperature):0}\u00B0";
         ConditionText = Capitalize(snapshot.Condition);
         LocationText = snapshot.Location;
@@ -100,6 +118,14 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
             snapshot.Humidity,
             FormatWind(snapshot.WindSpeed, useFahrenheit));
         Glyph = GetGlyph(Scene, snapshot.IsDay);
+    }
+
+    public void SetVisualState(WeatherTimeOfDay time, WeatherSky sky, WeatherEffect effect, WeatherTemperature temperature)
+    {
+        WeatherTime = time;
+        WeatherSky = sky;
+        WeatherEffect = effect;
+        WeatherTemperature = temperature;
     }
 
     private string Capitalize(string value)
@@ -120,14 +146,14 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     private static string GetGlyph(WeatherSceneKind scene, bool isDay) =>
         scene switch
         {
-            WeatherSceneKind.Clear => isDay ? "\uE706" : "\uE708",
-            WeatherSceneKind.Hot => "\uE706",
-            WeatherSceneKind.PartlyCloudy => "\uE9D7",
-            WeatherSceneKind.Cloudy => "\uE753",
-            WeatherSceneKind.Rain => "\uE9C4",
-            WeatherSceneKind.Snow => "\uE9C8",
-            WeatherSceneKind.Thunderstorm => "\uE9D2",
-            WeatherSceneKind.Fog => "\uE9CB",
-            _ => "\uE9CA"
+            WeatherSceneKind.Clear => isDay ? "\u2600" : "\u263E",
+            WeatherSceneKind.Hot => "\u2600",
+            WeatherSceneKind.PartlyCloudy => "\u2601",
+            WeatherSceneKind.Cloudy => "\u2601",
+            WeatherSceneKind.Rain => "\u2602",
+            WeatherSceneKind.Snow => "\u2744",
+            WeatherSceneKind.Thunderstorm => "\u26A1",
+            WeatherSceneKind.Fog => "\u224B",
+            _ => "\u2600"
         };
 }

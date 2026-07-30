@@ -19,8 +19,17 @@ internal sealed class OpenWeatherResponse
     [JsonPropertyName("wind")]
     public OpenWeatherWind Wind { get; set; } = new();
 
+    [JsonPropertyName("clouds")]
+    public OpenWeatherClouds Clouds { get; set; } = new();
+
     [JsonPropertyName("sys")]
     public OpenWeatherSunTimes System { get; set; } = new();
+}
+
+internal sealed class OpenWeatherClouds
+{
+    [JsonPropertyName("all")]
+    public int Cover { get; set; }
 }
 
 internal sealed class OpenWeatherMeasurements

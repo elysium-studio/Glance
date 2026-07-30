@@ -7,5 +7,5 @@ public sealed partial class WeatherScenePreviewSettingView :
 {
     public WeatherScenePreviewSettingView() => InitializeComponent();
 
-    public WeatherScenePreviewSettingViewModel ViewModel => (WeatherScenePreviewSettingViewModel)DataContext;
+    public WeatherTimePreviewSettingViewModel ViewModel => (WeatherTimePreviewSettingViewModel)DataContext;
 }

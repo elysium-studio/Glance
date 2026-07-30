@@ -28,6 +28,10 @@ internal sealed class OpenWeatherService(HttpClient httpClient) :
             throw new InvalidOperationException("OpenWeather returned no weather condition.");
         bool isDay = weather.Timestamp >= weather.System.Sunrise && weather.Timestamp < weather.System.Sunset;
         WeatherSceneKind scene = WeatherConditionMapper.Map(condition.Id, weather.Main.Temperature, settings.UseFahrenheit);
+        WeatherTimeOfDay timeOfDay = WeatherConditionMapper.MapTime(weather.Timestamp, weather.System.Sunrise, weather.System.Sunset);
+        WeatherSky sky = WeatherConditionMapper.MapSky(weather.Clouds.Cover);
+        WeatherEffect effect = WeatherConditionMapper.MapEffect(condition.Id);
+        WeatherTemperature temperature = WeatherConditionMapper.MapTemperature(weather.Main.Temperature, settings.UseFahrenheit);
 
         return new WeatherSnapshot(weather.Name,
             weather.Main.Temperature,
@@ -37,6 +41,10 @@ internal sealed class OpenWeatherService(HttpClient httpClient) :
             condition.Description,
             scene,
             isDay,
+            timeOfDay,
+            sky,
+            effect,
+            temperature,
             DateTimeOffset.FromUnixTimeSeconds(weather.Timestamp));
     }
 }

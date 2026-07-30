@@ -37,4 +37,19 @@
   <data name="WeatherSceneSnowOption.Content" xml:space="preserve"><value>Snow</value></data>
   <data name="WeatherSceneThunderstormOption.Content" xml:space="preserve"><value>Thunderstorm</value></data>
   <data name="WeatherSceneFogOption.Content" xml:space="preserve"><value>Fog</value></data>
+  <data name="WeatherTimePreviewSettingCard.Header" xml:space="preserve"><value>Preview time of day</value></data>
+  <data name="WeatherTimePreviewSettingCard.Description" xml:space="preserve"><value>Choose the lighting used by the animated background.</value></data>
+  <data name="WeatherSkyPreviewSettingCard.Header" xml:space="preserve"><value>Preview sky</value></data>
+  <data name="WeatherSkyPreviewSettingCard.Description" xml:space="preserve"><value>Choose the cloud cover independently of the weather.</value></data>
+  <data name="WeatherEffectPreviewSettingCard.Header" xml:space="preserve"><value>Preview weather</value></data>
+  <data name="WeatherEffectPreviewSettingCard.Description" xml:space="preserve"><value>Choose rain, snow, storms, or fog independently of the sky.</value></data>
+  <data name="WeatherTemperaturePreviewSettingCard.Header" xml:space="preserve"><value>Preview temperature</value></data>
+  <data name="WeatherTemperaturePreviewSettingCard.Description" xml:space="preserve"><value>Choose whether the scene uses the hot-weather treatment.</value></data>
+  <data name="WeatherPreviewLiveOption.Content" xml:space="preserve"><value>Live weather</value></data>
+  <data name="WeatherTimeDawnOption.Content" xml:space="preserve"><value>Dawn</value></data>
+  <data name="WeatherTimeDayOption.Content" xml:space="preserve"><value>Day</value></data>
+  <data name="WeatherTimeDuskOption.Content" xml:space="preserve"><value>Dusk</value></data>
+  <data name="WeatherTimeNightOption.Content" xml:space="preserve"><value>Night</value></data>
+  <data name="WeatherEffectNoneOption.Content" xml:space="preserve"><value>None</value></data>
+  <data name="WeatherTemperatureNormalOption.Content" xml:space="preserve"><value>Normal</value></data>
 </root>

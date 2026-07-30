@@ -15,4 +15,44 @@ public static class WeatherConditionMapper
             >= 803 and <= 804 => WeatherSceneKind.Cloudy,
             _ => WeatherSceneKind.Unknown
         };
+
+    public static WeatherSky MapSky(int cloudCover) =>
+        cloudCover switch
+        {
+            <= 10 => WeatherSky.Clear,
+            <= 60 => WeatherSky.PartlyCloudy,
+            _ => WeatherSky.Cloudy
+        };
+
+    public static WeatherEffect MapEffect(int conditionCode) =>
+        conditionCode switch
+        {
+            >= 200 and <= 232 => WeatherEffect.Thunderstorm,
+            >= 300 and <= 531 => WeatherEffect.Rain,
+            >= 600 and <= 622 => WeatherEffect.Snow,
+            >= 701 and <= 781 => WeatherEffect.Fog,
+            _ => WeatherEffect.None
+        };
+
+    public static WeatherTemperature MapTemperature(double temperature, bool useFahrenheit) =>
+        temperature >= (useFahrenheit ? 86 : 30) ? WeatherTemperature.Hot : WeatherTemperature.Normal;
+
+    public static WeatherTimeOfDay MapTime(long timestamp, long sunrise, long sunset)
+    {
+        const long transitionSeconds = 45 * 60;
+
+        if (timestamp >= sunrise - transitionSeconds && timestamp < sunrise + transitionSeconds)
+        {
+            return WeatherTimeOfDay.Dawn;
+        }
+
+        if (timestamp >= sunset - transitionSeconds && timestamp < sunset + transitionSeconds)
+        {
+            return WeatherTimeOfDay.Dusk;
+        }
+
+        return timestamp >= sunrise + transitionSeconds && timestamp < sunset - transitionSeconds ?
+            WeatherTimeOfDay.Day :
+            WeatherTimeOfDay.Night;
+    }
 }
