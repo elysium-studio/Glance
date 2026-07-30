@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve"><value>Screen Lens</value></data>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Screen Lens</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Extract text from anywhere on your screen.</value></data>
+  <data name="ReadyStatus" xml:space="preserve"><value>Ready to extract</value></data>
+  <data name="ReadyDetail" xml:space="preserve"><value>Select text anywhere on screen</value></data>
+  <data name="SelectingStatus" xml:space="preserve"><value>Select some text</value></data>
+  <data name="SelectingDetail" xml:space="preserve"><value>Drag over the area to read</value></data>
+  <data name="TextFoundStatus" xml:space="preserve"><value>Text extracted</value></data>
+  <data name="LineCountDetail" xml:space="preserve"><value>{0} lines detected</value></data>
+  <data name="UnavailableStatus" xml:space="preserve"><value>Text extraction unavailable</value></data>
+  <data name="UnavailableDetail" xml:space="preserve"><value>Windows could not read this area</value></data>
+  <data name="SelectionInstruction" xml:space="preserve"><value>Drag to extract text · Esc to cancel</value></data>
+  <data name="CopyButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Copy extracted text</value></data>
+  <data name="ExtractButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Extract text</value></data>
+</root>

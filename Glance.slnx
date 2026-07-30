@@ -147,6 +147,15 @@
   <Project Path="Glance.ScreenCapture.Tests/Glance.ScreenCapture.Tests.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.ScreenLens.WinUI/Glance.ScreenLens.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.ScreenLens/Glance.ScreenLens.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.ScreenLens.Tests/Glance.ScreenLens.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.SpeechToText.WinUI/Glance.SpeechToText.WinUI.csproj">
     <Platform Project="x64" />
   </Project>

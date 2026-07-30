@@ -20,6 +20,7 @@ The island remains at the top or bottom of the desktop in a compact state, expan
 - **Speech to Text** — transcribe a microphone, system playback, or both together in real time using the on-device Windows AI speech model.
 - **Colour Picker** — sample a screen colour, retain recent colours in SQLite, and copy HEX, RGB, or HSL values.
 - **Screen Capture** — capture a region, a window, one display, or all displays to the Captures folder with metadata indexed in SQLite.
+- **Screen Lens** — select any area of the screen and extract its text locally with Windows OCR.
 - **Privacy Controls** — monitor the default microphone state and mute or unmute it globally.
 - **Removable Devices** — view connected removable storage, inspect capacity, open it in Explorer, and request safe ejection. Multiple devices are presented as pages within the module.
 - **Bluetooth Devices** — see connected Bluetooth accessories and their available battery levels. Newly connected or newly low-battery devices can automatically request attention.
