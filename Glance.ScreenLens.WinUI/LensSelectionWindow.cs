@@ -40,6 +40,8 @@ internal sealed class LensSelectionWindow
     private readonly Window window;
     private readonly nint windowHandle;
     private readonly HashSet<int> selectedWords = [];
+    private readonly List<LensSelectableWord> selectableWords = [];
+    private readonly List<LensSelectionRow> selectionRows = [];
     private readonly List<Border> wordHighlights = [];
     private LensTextSelectionSurface? textSelectionSurface;
     private Border? recognitionToolbar;
@@ -180,6 +182,17 @@ internal sealed class LensSelectionWindow
     private static Rect CreateRectangle(Point start, Point end) =>
         new(Math.Min(start.X, end.X), Math.Min(start.Y, end.Y), Math.Abs(end.X - start.X), Math.Abs(end.Y - start.Y));
 
+    private static bool SharesVisualRow(IReadOnlyList<LensWordCandidate> row, LensWordCandidate candidate)
+    {
+        double rowTop = row.Min(word => word.Bounds.Top);
+        double rowBottom = row.Max(word => word.Bounds.Bottom);
+        double overlap = Math.Min(rowBottom, candidate.Bounds.Bottom) - Math.Max(rowTop, candidate.Bounds.Top);
+        double minimumHeight = Math.Min(rowBottom - rowTop, candidate.Bounds.Height);
+        double rowCenter = (rowTop + rowBottom) / 2;
+        double candidateCenter = candidate.Bounds.Top + (candidate.Bounds.Height / 2);
+        return overlap >= minimumHeight * 0.35 || Math.Abs(rowCenter - candidateCenter) <= Math.Max(3, minimumHeight * 0.45);
+    }
+
     private static PathGeometry CreateRoundedRectangleGeometry(Rect bounds)
     {
         double radius = Math.Min(bounds.Width / 2, bounds.Height / 2);
@@ -289,6 +302,39 @@ internal sealed class LensSelectionWindow
     private void BuildTextSelectionLayer()
     {
         Rect regionBounds = ToLocal(selectedRegion);
+        List<LensWordCandidate> candidates =
+        [
+            .. recognition.Words.Select(word =>
+            {
+                Rect bounds = ToLocal(new LensRectangle(selectedRegion.X + word.Bounds.X,
+                    selectedRegion.Y + word.Bounds.Y,
+                    word.Bounds.Width,
+                    word.Bounds.Height));
+                return new LensWordCandidate(word,
+                    new Rect(bounds.X - regionBounds.X, bounds.Y - regionBounds.Y, bounds.Width, bounds.Height));
+            }).OrderBy(candidate => candidate.Bounds.Top).ThenBy(candidate => candidate.Bounds.Left)
+        ];
+        List<List<LensWordCandidate>> visualRows = [];
+
+        foreach (LensWordCandidate candidate in candidates)
+        {
+            List<LensWordCandidate>? row = visualRows
+                .Where(existing => SharesVisualRow(existing, candidate))
+                .MinBy(existing => Math.Abs(existing.Average(word => word.Bounds.Top + (word.Bounds.Height / 2)) -
+                    (candidate.Bounds.Top + (candidate.Bounds.Height / 2))));
+
+            if (row is null)
+            {
+                row = [];
+                visualRows.Add(row);
+            }
+
+            row.Add(candidate);
+        }
+
+        visualRows = [.. visualRows
+            .OrderBy(row => row.Min(word => word.Bounds.Top))
+            .ThenBy(row => row.Min(word => word.Bounds.Left))];
         textSelectionSurface = new LensTextSelectionSurface
         {
             Width = regionBounds.Width,
@@ -301,24 +347,33 @@ internal sealed class LensSelectionWindow
         Canvas.SetTop(textSelectionSurface, regionBounds.Y);
         Canvas.SetZIndex(textSelectionSurface, 2);
 
-        foreach (LensRecognizedWord word in recognition.Words)
+        for (int rowIndex = 0; rowIndex < visualRows.Count; rowIndex++)
         {
-            Rect bounds = ToLocal(new LensRectangle(selectedRegion.X + word.Bounds.X,
-                selectedRegion.Y + word.Bounds.Y,
-                word.Bounds.Width,
-                word.Bounds.Height));
-            Border highlight = new()
+            List<LensWordCandidate> row = [.. visualRows[rowIndex].OrderBy(candidate => candidate.Bounds.Left)];
+            int rowStartIndex = selectableWords.Count;
+
+            foreach (LensWordCandidate candidate in row)
             {
-                Width = Math.Max(1, bounds.Width + 4),
-                Height = Math.Max(1, bounds.Height + 2),
-                Background = new SolidColorBrush(Color.FromArgb(0, 0, 120, 212)),
-                CornerRadius = new CornerRadius(Math.Max(1, (bounds.Height + 2) / 2)),
-                IsHitTestVisible = false
-            };
-            Canvas.SetLeft(highlight, bounds.X - regionBounds.X - 2);
-            Canvas.SetTop(highlight, bounds.Y - regionBounds.Y - 1);
-            wordHighlights.Add(highlight);
-            textSelectionSurface.Children.Add(highlight);
+                Rect bounds = candidate.Bounds;
+                Border highlight = new()
+                {
+                    Width = Math.Max(1, bounds.Width + 4),
+                    Height = Math.Max(1, bounds.Height + 2),
+                    Background = new SolidColorBrush(Color.FromArgb(0, 0, 120, 212)),
+                    CornerRadius = new CornerRadius(Math.Max(1, (bounds.Height + 2) / 2)),
+                    IsHitTestVisible = false
+                };
+                Canvas.SetLeft(highlight, bounds.X - 2);
+                Canvas.SetTop(highlight, bounds.Y - 1);
+                selectableWords.Add(new LensSelectableWord(candidate.Word, bounds, rowIndex));
+                wordHighlights.Add(highlight);
+                textSelectionSurface.Children.Add(highlight);
+            }
+
+            selectionRows.Add(new LensSelectionRow(rowStartIndex,
+                row.Count,
+                row.Min(candidate => candidate.Bounds.Top),
+                row.Max(candidate => candidate.Bounds.Bottom)));
         }
 
         selectionCanvas.Children.Add(textSelectionSurface);
@@ -357,6 +412,8 @@ internal sealed class LensSelectionWindow
         selectionAnchor = -1;
         selectionFocus = -1;
         copySelectionButton = null;
+        selectableWords.Clear();
+        selectionRows.Clear();
         wordHighlights.Clear();
 
         if (textSelectionSurface is not null)
@@ -377,16 +434,16 @@ internal sealed class LensSelectionWindow
 
     private string ComposeSelection()
     {
-        LensRecognizedWord[] words =
+        LensSelectableWord[] words =
         [
             .. selectedWords
-                .Select(index => recognition.Words[index])
-                .OrderBy(word => word.LineIndex)
-                .ThenBy(word => word.WordIndex)
+                .Select(index => selectableWords[index])
+                .OrderBy(word => word.RowIndex)
+                .ThenBy(word => word.Bounds.Left)
         ];
         return string.Join(Environment.NewLine, words
-            .GroupBy(word => word.LineIndex)
-            .Select(line => string.Join(" ", line.Select(word => word.Text))));
+            .GroupBy(word => word.RowIndex)
+            .Select(row => string.Join(" ", row.Select(word => word.Word.Text))));
     }
 
     private async void CopyAll(object sender, RoutedEventArgs args)
@@ -672,9 +729,6 @@ internal sealed class LensSelectionWindow
 
     private int FindWordIndex(Point point, bool useNearest)
     {
-        int nearestIndex = -1;
-        double nearestDistance = double.MaxValue;
-
         for (int index = 0; index < wordHighlights.Count; index++)
         {
             Border highlight = wordHighlights[index];
@@ -684,22 +738,40 @@ internal sealed class LensSelectionWindow
             {
                 return index;
             }
-
-            if (useNearest)
-            {
-                double centerX = bounds.X + (bounds.Width / 2);
-                double centerY = bounds.Y + (bounds.Height / 2);
-                double distance = Math.Pow(point.X - centerX, 2) + Math.Pow(point.Y - centerY, 2);
-
-                if (distance < nearestDistance)
-                {
-                    nearestIndex = index;
-                    nearestDistance = distance;
-                }
-            }
         }
 
-        return nearestIndex;
+        if (!useNearest || selectionRows.Count == 0)
+        {
+            return -1;
+        }
+
+        LensSelectionRow row = selectionRows.MinBy(candidate => point.Y < candidate.Top
+            ? candidate.Top - point.Y
+            : point.Y > candidate.Bottom
+                ? point.Y - candidate.Bottom
+                : 0)!;
+        int firstIndex = row.StartIndex;
+        int lastIndex = row.StartIndex + row.Count - 1;
+
+        if (point.X <= selectableWords[firstIndex].Bounds.Left)
+        {
+            return firstIndex;
+        }
+
+        if (point.X >= selectableWords[lastIndex].Bounds.Right)
+        {
+            return lastIndex;
+        }
+
+        return Enumerable.Range(firstIndex, row.Count).MinBy(index =>
+        {
+            Rect bounds = selectableWords[index].Bounds;
+            return point.X < bounds.Left
+                ? bounds.Left - point.X
+                : point.X > bounds.Right
+                    ? point.X - bounds.Right
+                    : 0;
+        });
     }
 
     private void ClearTextSelection()
@@ -809,4 +881,16 @@ internal sealed class LensSelectionWindow
             Rect = regionAdjuster.Bounds
         });
     }
+
+    private sealed record LensSelectableWord(LensRecognizedWord Word,
+        Rect Bounds,
+        int RowIndex);
+
+    private sealed record LensSelectionRow(int StartIndex,
+        int Count,
+        double Top,
+        double Bottom);
+
+    private sealed record LensWordCandidate(LensRecognizedWord Word,
+        Rect Bounds);
 }
