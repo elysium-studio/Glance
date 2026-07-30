@@ -16,7 +16,6 @@ internal sealed class LensRegionAdjuster :
     private const double MinimumSize = 48;
     private readonly Dictionary<ResizeMode, Thumb> handles;
     private readonly Dictionary<ResizeMode, Ellipse> handleVisuals;
-    private readonly Thumb moveThumb;
     private readonly Border selectionBorder;
     private readonly double surfaceHeight;
     private readonly double surfaceWidth;
@@ -41,7 +40,6 @@ internal sealed class LensRegionAdjuster :
             BorderThickness = new Thickness(1),
             IsHitTestVisible = false
         };
-        moveThumb = CreateThumb(ResizeMode.Move);
         handles = new Dictionary<ResizeMode, Thumb>
         {
             [ResizeMode.TopLeft] = CreateThumb(ResizeMode.TopLeft),
@@ -55,7 +53,6 @@ internal sealed class LensRegionAdjuster :
         };
         handleVisuals = handles.Keys.ToDictionary(mode => mode, _ => CreateHandleVisual());
 
-        Children.Add(moveThumb);
         Children.Add(selectionBorder);
 
         foreach (Thumb handle in handles.Values)
@@ -74,6 +71,10 @@ internal sealed class LensRegionAdjuster :
     public Rect Bounds => bounds;
 
     public event EventHandler? BoundsChanged;
+
+    public event EventHandler? InteractionCompleted;
+
+    public event EventHandler? InteractionStarted;
 
     private static Ellipse CreateHandleVisual() =>
         new()
@@ -97,20 +98,12 @@ internal sealed class LensRegionAdjuster :
         thumb.DragStarted += HandleDragStarted;
         thumb.DragDelta += HandleDragDelta;
         thumb.DragCompleted += HandleDragCompleted;
-        Canvas.SetZIndex(thumb, mode == ResizeMode.Move ? 1 : 3);
+        Canvas.SetZIndex(thumb, 3);
         return thumb;
     }
 
     private Rect CalculateBounds(Rect original, ResizeMode mode, double deltaX, double deltaY)
     {
-        if (mode == ResizeMode.Move)
-        {
-            return new Rect(Math.Clamp(original.X + deltaX, 0, surfaceWidth - original.Width),
-                Math.Clamp(original.Y + deltaY, 0, surfaceHeight - original.Height),
-                original.Width,
-                original.Height);
-        }
-
         double left = original.X;
         double top = original.Y;
         double right = original.Right;
@@ -149,8 +142,11 @@ internal sealed class LensRegionAdjuster :
             height);
     }
 
-    private void HandleDragCompleted(object sender, DragCompletedEventArgs args) =>
+    private void HandleDragCompleted(object sender, DragCompletedEventArgs args)
+    {
         dragMode = ResizeMode.None;
+        InteractionCompleted?.Invoke(this, EventArgs.Empty);
+    }
 
     private void HandleDragDelta(object sender, DragDeltaEventArgs args)
     {
@@ -172,6 +168,7 @@ internal sealed class LensRegionAdjuster :
         dragBounds = bounds;
         dragX = 0;
         dragY = 0;
+        InteractionStarted?.Invoke(this, EventArgs.Empty);
     }
 
     private void PositionHandle(ResizeMode mode, double x, double y)
@@ -192,7 +189,6 @@ internal sealed class LensRegionAdjuster :
 
     private void UpdateVisuals()
     {
-        SetBounds(moveThumb, bounds.X, bounds.Y, bounds.Width, bounds.Height);
         SetBounds(selectionBorder, bounds.X, bounds.Y, bounds.Width, bounds.Height);
         PositionHandle(ResizeMode.TopLeft, bounds.X, bounds.Y);
         PositionHandle(ResizeMode.Top, bounds.X + (bounds.Width / 2), bounds.Y);
@@ -207,7 +203,6 @@ internal sealed class LensRegionAdjuster :
     private enum ResizeMode
     {
         None,
-        Move,
         TopLeft,
         Top,
         TopRight,

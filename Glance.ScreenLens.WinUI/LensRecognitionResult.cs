@@ -10,6 +10,3 @@ internal sealed record LensRecognizedWord(string Text,
     LensRectangle Bounds,
     int LineIndex,
     int WordIndex);
-
-internal sealed record LensSelectionResult(LensRectangle Bounds,
-    LensSelectionWindow Overlay);

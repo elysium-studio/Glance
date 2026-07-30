@@ -43,26 +43,7 @@ public sealed partial class WindowsScreenLensService :
             HideApplicationWindows(applicationWindows);
             _ = NativeMethods.DwmFlush();
             LensBitmap desktop = CaptureVirtualDesktop();
-            LensSelectionResult? selection = await LensSelectionWindow.SelectAsync(desktop, localizer);
-
-            if (selection is null)
-            {
-                return;
-            }
-
-            LensBitmap region = desktop.Crop(selection.Bounds);
-            LensRecognitionResult recognition;
-
-            try
-            {
-                recognition = await RecognizeAsync(region);
-            }
-            catch
-            {
-                recognition = LensRecognitionResult.Empty;
-            }
-
-            await selection.Overlay.PresentAsync(recognition, selection.Bounds, CopyAsync);
+            await LensSelectionWindow.RunAsync(desktop, localizer, rectangle => RecognizeAsync(desktop.Crop(rectangle)), CopyAsync);
         }
         finally
         {

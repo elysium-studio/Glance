@@ -1,11 +1,15 @@
 using Elysium.Platform.Windows;
 using Glance.Application.Abstractions;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Media.Imaging;
+using Microsoft.UI.Xaml.Shapes;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Graphics;
@@ -20,12 +24,16 @@ namespace Glance.ScreenLens.WinUI;
 internal sealed class LensSelectionWindow
 {
     private readonly LensBitmap bitmap;
-    private readonly TaskCompletionSource<LensSelectionResult?> selectionCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly TaskCompletionSource<bool> presentationCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly DispatcherQueue dispatcherQueue;
     private readonly Border highlight;
     private readonly Border instructionContainer;
     private readonly TextBlock instruction;
     private readonly ITextLocalizer localizer;
+    private readonly Func<string, Task<bool>> copyAsync;
+    private readonly Rectangle recognitionProgress;
+    private readonly Storyboard recognitionProgressStoryboard;
+    private readonly Func<LensRectangle, Task<LensRecognitionResult>> recognizeAsync;
     private readonly Grid root;
     private readonly Canvas selectionCanvas;
     private readonly GeometryGroup smokeGeometry;
@@ -35,23 +43,28 @@ internal sealed class LensSelectionWindow
     private readonly HashSet<int> selectedWords = [];
     private readonly List<Border> wordHighlights = [];
     private Border? selectionMarquee;
-    private Border? adjustmentToolbar;
+    private Border? recognitionToolbar;
     private Button? copySelectionButton;
-    private Func<string, Task<bool>>? copyAsync;
     private LensRecognitionResult recognition = LensRecognitionResult.Empty;
     private LensRegionAdjuster? regionAdjuster;
     private bool closed;
     private bool isDragging;
     private bool isSelectingWords;
-    private bool selectionCompleted;
+    private int recognitionRequest;
     private LensRectangle selectedRegion;
     private Point selectionStart;
     private Point wordSelectionStart;
 
-    private LensSelectionWindow(LensBitmap bitmap, ITextLocalizer localizer)
+    private LensSelectionWindow(LensBitmap bitmap,
+        ITextLocalizer localizer,
+        Func<LensRectangle, Task<LensRecognitionResult>> recognizeAsync,
+        Func<string, Task<bool>> copyAsync)
     {
         this.bitmap = bitmap;
         this.localizer = localizer;
+        this.recognizeAsync = recognizeAsync;
+        this.copyAsync = copyAsync;
+        dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         smokeBounds = new RectangleGeometry();
         smokeGeometry = new GeometryGroup { FillRule = FillRule.EvenOdd };
         smokeGeometry.Children.Add(smokeBounds);
@@ -73,6 +86,26 @@ internal sealed class LensSelectionWindow
 
         selectionCanvas = new Canvas();
         selectionCanvas.Children.Add(highlight);
+        recognitionProgress = new Rectangle
+        {
+            Stroke = new SolidColorBrush(Color.FromArgb(255, 96, 205, 255)),
+            StrokeThickness = 2,
+            StrokeDashArray = [3, 2],
+            IsHitTestVisible = false,
+            Visibility = Visibility.Collapsed
+        };
+        selectionCanvas.Children.Add(recognitionProgress);
+        DoubleAnimation dashAnimation = new()
+        {
+            From = 0,
+            To = -10,
+            Duration = new Duration(TimeSpan.FromMilliseconds(650)),
+            RepeatBehavior = RepeatBehavior.Forever
+        };
+        Storyboard.SetTarget(dashAnimation, recognitionProgress);
+        Storyboard.SetTargetProperty(dashAnimation, "StrokeDashOffset");
+        recognitionProgressStoryboard = new Storyboard();
+        recognitionProgressStoryboard.Children.Add(dashAnimation);
         instruction = new TextBlock
         {
             FontSize = 14,
@@ -117,27 +150,14 @@ internal sealed class LensSelectionWindow
         windowHandle = WindowNative.GetWindowHandle(window);
     }
 
-    public static Task<LensSelectionResult?> SelectAsync(LensBitmap bitmap, ITextLocalizer localizer)
+    public static Task RunAsync(LensBitmap bitmap,
+        ITextLocalizer localizer,
+        Func<LensRectangle, Task<LensRecognitionResult>> recognizeAsync,
+        Func<string, Task<bool>> copyAsync)
     {
-        LensSelectionWindow selectionWindow = new(bitmap, localizer);
+        LensSelectionWindow selectionWindow = new(bitmap, localizer, recognizeAsync, copyAsync);
         selectionWindow.Show();
-        return selectionWindow.selectionCompletion.Task;
-    }
-
-    public Task PresentAsync(LensRecognitionResult result, LensRectangle region, Func<string, Task<bool>> copyTextAsync)
-    {
-        recognition = result;
-        selectedRegion = region;
-        copyAsync = copyTextAsync;
-        highlight.Visibility = Visibility.Collapsed;
-        BuildRecognitionMask();
-        BuildWordHighlights();
-        BuildToolbar();
-        instruction.Text = result.Words.Count == 0
-            ? localizer.GetText("NoTextInstruction")
-            : localizer.GetText("SelectionReadyInstruction");
-        AttachWordSelectionHandlers();
-        return presentationCompletion.Task;
+        return selectionWindow.presentationCompletion.Task;
     }
 
     private static WriteableBitmap CreateImageSource(LensBitmap bitmap)
@@ -155,13 +175,13 @@ internal sealed class LensSelectionWindow
     private static bool Intersects(Rect left, Rect right) =>
         left.X < right.Right && left.Right > right.X && left.Y < right.Bottom && left.Bottom > right.Y;
 
-    private static bool IsButtonInteraction(object source)
+    private static bool IsControlInteraction(object source)
     {
         DependencyObject? current = source as DependencyObject;
 
         while (current is not null)
         {
-            if (current is Button)
+            if (current is Button or Thumb)
             {
                 return true;
             }
@@ -197,30 +217,12 @@ internal sealed class LensSelectionWindow
         highlight.Visibility = Visibility.Collapsed;
         regionAdjuster = new LensRegionAdjuster(root.ActualWidth, root.ActualHeight, initialBounds);
         regionAdjuster.BoundsChanged += HandleAdjustmentBoundsChanged;
+        regionAdjuster.InteractionCompleted += HandleAdjustmentCompleted;
+        regionAdjuster.InteractionStarted += HandleAdjustmentStarted;
         selectionCanvas.Children.Add(regionAdjuster);
-        instruction.Text = localizer.GetText("AdjustInstruction");
+        instructionContainer.Visibility = Visibility.Collapsed;
         UpdateAdjustmentMask();
-
-        StackPanel actions = new()
-        {
-            Orientation = Orientation.Horizontal,
-            Spacing = 8
-        };
-        Button cancelButton = CreateTextButton(localizer.GetText("Cancel"), (_, _) => Close());
-        Button extractButton = CreateTextButton(localizer.GetText("Extract"), (_, _) => ConfirmAdjustment());
-        actions.Children.Add(cancelButton);
-        actions.Children.Add(extractButton);
-        adjustmentToolbar = new Border
-        {
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Top,
-            Margin = new Thickness(0, 68, 0, 0),
-            Padding = new Thickness(8),
-            Background = ResolveBrush("AcrylicInAppFillColorDefaultBrush", Color.FromArgb(235, 32, 32, 32)),
-            CornerRadius = new CornerRadius(10),
-            Child = actions
-        };
-        root.Children.Add(adjustmentToolbar);
+        _ = RecognizeSelectionAsync();
     }
 
     private void BuildRecognitionMask()
@@ -270,7 +272,7 @@ internal sealed class LensSelectionWindow
         ToolTipService.SetToolTip(closeButton, localizer.GetText("Close"));
         actions.Children.Add(closeButton);
 
-        Border toolbar = new()
+        recognitionToolbar = new Border
         {
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Top,
@@ -280,7 +282,7 @@ internal sealed class LensSelectionWindow
             CornerRadius = new CornerRadius(10),
             Child = actions
         };
-        root.Children.Add(toolbar);
+        root.Children.Add(recognitionToolbar);
     }
 
     private void BuildWordHighlights()
@@ -337,35 +339,36 @@ internal sealed class LensSelectionWindow
         }
 
         closed = true;
+        recognitionRequest++;
+        recognitionProgressStoryboard.Stop();
         root.ReleasePointerCaptures();
         presentationCompletion.TrySetResult(true);
-        selectionCompletion.TrySetResult(null);
         window.Close();
     }
 
-    private void CompleteSelection(LensRectangle rectangle)
+    private void ClearRecognitionSurface()
     {
-        if (selectionCompleted)
+        DetachWordSelectionHandlers();
+        selectedWords.Clear();
+        copySelectionButton = null;
+
+        foreach (Border wordHighlight in wordHighlights)
         {
-            return;
+            selectionCanvas.Children.Remove(wordHighlight);
         }
 
-        selectionCompleted = true;
-        selectedRegion = rectangle;
-        isDragging = false;
-        root.ReleasePointerCaptures();
-        DetachSelectionHandlers();
-        RemoveAdjustmentSurface();
-        ShowSelectionHighlight(ToLocal(rectangle));
-        instruction.Text = localizer.GetText("ReadingInstruction");
-        selectionCompletion.TrySetResult(new LensSelectionResult(rectangle, this));
-    }
+        wordHighlights.Clear();
 
-    private void ConfirmAdjustment()
-    {
-        if (regionAdjuster is not null)
+        if (selectionMarquee is not null)
         {
-            CompleteSelection(ToScreen(regionAdjuster.Bounds));
+            selectionCanvas.Children.Remove(selectionMarquee);
+            selectionMarquee = null;
+        }
+
+        if (recognitionToolbar is not null)
+        {
+            root.Children.Remove(recognitionToolbar);
+            recognitionToolbar = null;
         }
     }
 
@@ -386,7 +389,7 @@ internal sealed class LensSelectionWindow
 
     private async void CopyAll(object sender, RoutedEventArgs args)
     {
-        if (copyAsync is not null && await copyAsync(recognition.Text))
+        if (await copyAsync(recognition.Text))
         {
             Close();
         }
@@ -396,10 +399,100 @@ internal sealed class LensSelectionWindow
     {
         string text = ComposeSelection();
 
-        if (copyAsync is not null && !string.IsNullOrWhiteSpace(text) && await copyAsync(text))
+        if (!string.IsNullOrWhiteSpace(text) && await copyAsync(text))
         {
             Close();
         }
+    }
+
+    private async Task RecognizeSelectionAsync()
+    {
+        if (closed || regionAdjuster is null)
+        {
+            return;
+        }
+
+        int request = ++recognitionRequest;
+        Rect localBounds = regionAdjuster.Bounds;
+        LensRectangle region = ToScreen(localBounds);
+        selectedRegion = region;
+        ClearRecognitionSurface();
+        StartRecognitionProgress(localBounds);
+        LensRecognitionResult result;
+
+        try
+        {
+            result = await recognizeAsync(region);
+        }
+        catch
+        {
+            result = LensRecognitionResult.Empty;
+        }
+
+        await RunOnDispatcherAsync(() =>
+        {
+            if (closed || request != recognitionRequest)
+            {
+                return;
+            }
+
+            recognition = result;
+            StopRecognitionProgress();
+            BuildRecognitionMask();
+            BuildWordHighlights();
+            BuildToolbar();
+            instruction.Text = result.Words.Count == 0
+                ? localizer.GetText("NoTextInstruction")
+                : localizer.GetText("SelectionReadyInstruction");
+            instructionContainer.Visibility = Visibility.Visible;
+            AttachWordSelectionHandlers();
+        });
+    }
+
+    private Task RunOnDispatcherAsync(Action action)
+    {
+        if (dispatcherQueue.HasThreadAccess)
+        {
+            action();
+            return Task.CompletedTask;
+        }
+
+        TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (!dispatcherQueue.TryEnqueue(() =>
+        {
+            try
+            {
+                action();
+                completion.TrySetResult();
+            }
+            catch (Exception exception)
+            {
+                completion.TrySetException(exception);
+            }
+        }))
+        {
+            completion.TrySetCanceled();
+        }
+
+        return completion.Task;
+    }
+
+    private void StartRecognitionProgress(Rect bounds)
+    {
+        const double inset = 2;
+        Canvas.SetLeft(recognitionProgress, bounds.X - inset);
+        Canvas.SetTop(recognitionProgress, bounds.Y - inset);
+        recognitionProgress.Width = bounds.Width + (inset * 2);
+        recognitionProgress.Height = bounds.Height + (inset * 2);
+        recognitionProgress.Visibility = Visibility.Visible;
+        recognitionProgressStoryboard.Begin();
+    }
+
+    private void StopRecognitionProgress()
+    {
+        recognitionProgressStoryboard.Stop();
+        recognitionProgress.Visibility = Visibility.Collapsed;
     }
 
     private void DetachSelectionHandlers()
@@ -426,13 +519,26 @@ internal sealed class LensSelectionWindow
         if (!closed)
         {
             closed = true;
-            selectionCompletion.TrySetResult(null);
+            recognitionRequest++;
+            recognitionProgressStoryboard.Stop();
             presentationCompletion.TrySetResult(true);
         }
     }
 
     private void HandleAdjustmentBoundsChanged(object? sender, EventArgs args) =>
         UpdateAdjustmentMask();
+
+    private void HandleAdjustmentCompleted(object? sender, EventArgs args) =>
+        _ = RecognizeSelectionAsync();
+
+    private void HandleAdjustmentStarted(object? sender, EventArgs args)
+    {
+        recognitionRequest++;
+        StopRecognitionProgress();
+        ClearRecognitionSurface();
+        instructionContainer.Visibility = Visibility.Collapsed;
+        UpdateAdjustmentMask();
+    }
 
     private void HandleKeyDown(object sender, KeyRoutedEventArgs args)
     {
@@ -512,7 +618,7 @@ internal sealed class LensSelectionWindow
 
     private void HandleWordPointerPressed(object sender, PointerRoutedEventArgs args)
     {
-        if (IsButtonInteraction(args.OriginalSource))
+        if (IsControlInteraction(args.OriginalSource))
         {
             return;
         }
@@ -597,22 +703,6 @@ internal sealed class LensSelectionWindow
         highlight.Width = rectangle.Width;
         highlight.Height = rectangle.Height;
         highlight.Visibility = Visibility.Visible;
-    }
-
-    private void RemoveAdjustmentSurface()
-    {
-        if (regionAdjuster is not null)
-        {
-            regionAdjuster.BoundsChanged -= HandleAdjustmentBoundsChanged;
-            selectionCanvas.Children.Remove(regionAdjuster);
-            regionAdjuster = null;
-        }
-
-        if (adjustmentToolbar is not null)
-        {
-            root.Children.Remove(adjustmentToolbar);
-            adjustmentToolbar = null;
-        }
     }
 
     private void ShowWordSelectionMarquee(Rect rectangle)
