@@ -22,7 +22,7 @@
                 FontFamily="Segoe Fluent Icons"
                 FontSize="24"
                 Foreground="{ThemeResource GlanceScreenLensIconBrush}"
-                Glyph="&#xEA40;" />
+                Glyph="&#xE8FE;" />
         </Grid>
         <TextBlock
             Grid.Column="1"

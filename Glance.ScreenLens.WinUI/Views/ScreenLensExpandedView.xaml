@@ -22,7 +22,7 @@
                 FontFamily="Segoe Fluent Icons"
                 FontSize="30"
                 Foreground="{ThemeResource GlanceScreenLensIconBrush}"
-                Glyph="&#xEA40;" />
+                Glyph="&#xE8FE;" />
         </Grid>
         <Grid
             Grid.Column="1"
@@ -69,7 +69,7 @@
                     <Setter Property="Height" Value="36" />
                     <Setter Property="Padding" Value="0" />
                     <Setter Property="CornerRadius" Value="18" />
-                    <Setter Property="Content" Value="&#xEA40;" />
+                    <Setter Property="Content" Value="&#xE8FE;" />
                     <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
                     <Setter Property="FontSize" Value="16" />
                 </Style>

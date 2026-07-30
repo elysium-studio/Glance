@@ -4,6 +4,7 @@ using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
@@ -265,25 +266,15 @@ internal sealed class LensSelectionWindow
             Spacing = 8
         };
 
-        copySelectionButton = CreateTextButton(localizer.GetText("CopySelection"), CopySelection);
+        copySelectionButton = CreateIconButton("\uF683", localizer.GetText("CopySelection"), CopySelection);
         copySelectionButton.IsEnabled = false;
         actions.Children.Add(copySelectionButton);
 
-        Button copyAllButton = CreateTextButton(localizer.GetText("CopyAll"), CopyAll);
+        Button copyAllButton = CreateIconButton("\uE8C8", localizer.GetText("CopyAll"), CopyAll);
         copyAllButton.IsEnabled = recognition.Lines.Count > 0;
         actions.Children.Add(copyAllButton);
 
-        Button closeButton = new()
-        {
-            Width = 32,
-            Height = 32,
-            Padding = new Thickness(0),
-            FontFamily = new FontFamily("Segoe Fluent Icons"),
-            FontSize = 12,
-            Content = "\uE711"
-        };
-        closeButton.Click += (_, _) => Close();
-        ToolTipService.SetToolTip(closeButton, localizer.GetText("Close"));
+        Button closeButton = CreateIconButton("\uE711", localizer.GetText("Close"), (_, _) => Close());
         actions.Children.Add(closeButton);
 
         recognitionToolbar = new Border
@@ -376,15 +367,21 @@ internal sealed class LensSelectionWindow
         selectionCanvas.Children.Add(textSelectionSurface);
     }
 
-    private Button CreateTextButton(string text, RoutedEventHandler handler)
+    private Button CreateIconButton(string glyph, string label, RoutedEventHandler handler)
     {
         Button button = new()
         {
+            Width = 32,
             Height = 32,
-            Padding = new Thickness(12, 0, 12, 0),
-            Content = text
+            Padding = new Thickness(0),
+            Content = glyph,
+            FontFamily = new FontFamily("Segoe Fluent Icons"),
+            FontSize = 14,
+            Style = Microsoft.UI.Xaml.Application.Current.Resources["SubtleButtonStyle"] as Style
         };
         button.Click += handler;
+        AutomationProperties.SetName(button, label);
+        ToolTipService.SetToolTip(button, label);
         return button;
     }
 
