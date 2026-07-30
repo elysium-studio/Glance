@@ -24,10 +24,11 @@ namespace Glance.ScreenLens.WinUI;
 
 internal sealed class LensSelectionWindow
 {
+    private static readonly TimeSpan MinimumRecognitionDuration = TimeSpan.FromMilliseconds(700);
     private readonly LensBitmap bitmap;
     private readonly TaskCompletionSource<bool> presentationCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly DispatcherQueue dispatcherQueue;
-    private readonly Border highlight;
+    private readonly Rectangle highlight;
     private readonly Border instructionContainer;
     private readonly TextBlock instruction;
     private readonly ITextLocalizer localizer;
@@ -79,12 +80,14 @@ internal sealed class LensSelectionWindow
             Fill = ResolveBrush("SmokeFillColorDefaultBrush", Color.FromArgb(77, 0, 0, 0))
         };
 
-        highlight = new Border
+        highlight = new Rectangle
         {
-            Background = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0)),
-            BorderBrush = new SolidColorBrush(Color.FromArgb(255, 85, 214, 190)),
-            BorderThickness = new Thickness(2),
-            CornerRadius = new CornerRadius(4),
+            Fill = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0)),
+            Stroke = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255)),
+            StrokeThickness = 1,
+            StrokeDashArray = [5, 4],
+            RadiusX = 4,
+            RadiusY = 4,
             Visibility = Visibility.Collapsed
         };
 
@@ -92,9 +95,9 @@ internal sealed class LensSelectionWindow
         selectionCanvas.Children.Add(highlight);
         recognitionProgress = new Rectangle
         {
-            Stroke = new SolidColorBrush(Color.FromArgb(255, 96, 205, 255)),
-            StrokeThickness = 2,
-            StrokeDashArray = [3, 2],
+            Stroke = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255)),
+            StrokeThickness = 1,
+            StrokeDashArray = [5, 4],
             IsHitTestVisible = false,
             Visibility = Visibility.Collapsed
         };
@@ -103,8 +106,8 @@ internal sealed class LensSelectionWindow
         DoubleAnimation dashAnimation = new()
         {
             From = 0,
-            To = -10,
-            Duration = new Duration(TimeSpan.FromMilliseconds(650)),
+            To = -18,
+            Duration = new Duration(TimeSpan.FromMilliseconds(600)),
             RepeatBehavior = RepeatBehavior.Forever
         };
         Storyboard.SetTarget(dashAnimation, recognitionProgress);
@@ -236,7 +239,16 @@ internal sealed class LensSelectionWindow
         root.ReleasePointerCaptures();
         DetachSelectionHandlers();
         highlight.Visibility = Visibility.Collapsed;
-        regionAdjuster = new ResizableRegionOverlay(root.ActualWidth, root.ActualHeight, bitmap.Width, bitmap.Height, initialBounds, false, false);
+        regionAdjuster = new ResizableRegionOverlay(root.ActualWidth,
+            root.ActualHeight,
+            bitmap.Width,
+            bitmap.Height,
+            initialBounds,
+            false,
+            false,
+            false,
+            false,
+            true);
         regionAdjuster.BoundsChanged += HandleAdjustmentBoundsChanged;
         regionAdjuster.InteractionCompleted += HandleAdjustmentCompleted;
         regionAdjuster.InteractionStarted += HandleAdjustmentStarted;
@@ -477,6 +489,7 @@ internal sealed class LensSelectionWindow
         selectedRegion = region;
         ClearRecognitionSurface();
         StartRecognitionProgress(localBounds);
+        Task minimumDuration = Task.Delay(MinimumRecognitionDuration);
         LensRecognitionResult result;
 
         try
@@ -488,6 +501,7 @@ internal sealed class LensSelectionWindow
             result = LensRecognitionResult.Empty;
         }
 
+        await minimumDuration;
         await RunOnDispatcherAsync(() =>
         {
             if (closed || request != recognitionRequest)
@@ -538,7 +552,13 @@ internal sealed class LensSelectionWindow
 
     private void StartRecognitionProgress(Rect bounds)
     {
-        const double inset = 2;
+        const double inset = 0;
+
+        if (regionAdjuster is not null)
+        {
+            regionAdjuster.IsSelectionOutlineVisible = false;
+        }
+
         Canvas.SetLeft(recognitionProgress, bounds.X - inset);
         Canvas.SetTop(recognitionProgress, bounds.Y - inset);
         recognitionProgress.Width = bounds.Width + (inset * 2);
@@ -551,6 +571,11 @@ internal sealed class LensSelectionWindow
     {
         recognitionProgressStoryboard.Stop();
         recognitionProgress.Visibility = Visibility.Collapsed;
+
+        if (regionAdjuster is not null)
+        {
+            regionAdjuster.IsSelectionOutlineVisible = true;
+        }
     }
 
     private void DetachSelectionHandlers()

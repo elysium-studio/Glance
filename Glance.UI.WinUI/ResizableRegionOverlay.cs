@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Shapes;
 using System;
 using System.Collections.Generic;
 using Windows.Foundation;
@@ -27,7 +28,8 @@ public sealed partial class ResizableRegionOverlay :
     private readonly Border horizontalLineTwo;
     private readonly Border leftShade;
     private readonly Border rightShade;
-    private readonly Border selectionBorder;
+    private readonly Rectangle selectionBorder;
+    private readonly bool showGuides;
     private readonly Border sizeHint;
     private readonly TextBlock sizeHintText;
     private readonly int sourceHeight;
@@ -35,6 +37,7 @@ public sealed partial class ResizableRegionOverlay :
     private readonly double surfaceHeight;
     private readonly double surfaceWidth;
     private readonly bool showShade;
+    private readonly bool showSizeHint;
     private readonly Border topShade;
     private readonly Border verticalLineOne;
     private readonly Border verticalLineTwo;
@@ -51,10 +54,15 @@ public sealed partial class ResizableRegionOverlay :
         int sourceHeight,
         Rect? initialBounds = null,
         bool showShade = true,
-        bool allowMove = true)
+        bool allowMove = true,
+        bool showGuides = true,
+        bool showSizeHint = true,
+        bool dashedSelection = false)
     {
         SolidColorBrush foreground = new(Color.FromArgb(255, 255, 255, 255));
         this.allowMove = allowMove;
+        this.showGuides = showGuides;
+        this.showSizeHint = showSizeHint;
         this.sourceWidth = sourceWidth;
         this.sourceHeight = sourceHeight;
         this.showShade = showShade;
@@ -68,10 +76,11 @@ public sealed partial class ResizableRegionOverlay :
         bottomShade = CreateShade();
         leftShade = CreateShade();
         rightShade = CreateShade();
-        selectionBorder = new Border
+        selectionBorder = new Rectangle
         {
-            BorderBrush = foreground,
-            BorderThickness = new Thickness(1),
+            Stroke = foreground,
+            StrokeThickness = 1,
+            StrokeDashArray = dashedSelection ? [5, 4] : null,
             IsHitTestVisible = false
         };
         verticalLineOne = CreateGuide(foreground);
@@ -149,6 +158,12 @@ public sealed partial class ResizableRegionOverlay :
     }
 
     public Rect CropBounds => cropBounds;
+
+    public bool IsSelectionOutlineVisible
+    {
+        get => selectionBorder.Visibility == Visibility.Visible;
+        set => selectionBorder.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+    }
 
     public event EventHandler? BoundsChanged;
 
@@ -351,7 +366,12 @@ public sealed partial class ResizableRegionOverlay :
         SetBounds(verticalLineTwo, VisualPadding + verticalTwo, VisualPadding + cropBounds.Y, 1, cropBounds.Height);
         SetBounds(horizontalLineOne, VisualPadding + cropBounds.X, VisualPadding + horizontalOne, cropBounds.Width, 1);
         SetBounds(horizontalLineTwo, VisualPadding + cropBounds.X, VisualPadding + horizontalTwo, cropBounds.Width, 1);
-        UpdateSizeHint();
+        if (showSizeHint)
+        {
+            UpdateSizeHint();
+        }
+
+        sizeHint.Visibility = showSizeHint ? Visibility.Visible : Visibility.Collapsed;
 
         SetHandle(CropInteraction.TopLeft, cropBounds.X, cropBounds.Y);
         SetHandle(CropInteraction.Top, cropBounds.X + (cropBounds.Width / 2), cropBounds.Y);
@@ -379,7 +399,7 @@ public sealed partial class ResizableRegionOverlay :
 
     private void SetResizeFeedbackVisible(bool visible)
     {
-        Visibility visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+        Visibility visibility = visible && showGuides ? Visibility.Visible : Visibility.Collapsed;
         verticalLineOne.Visibility = visibility;
         verticalLineTwo.Visibility = visibility;
         horizontalLineOne.Visibility = visibility;
