@@ -16,13 +16,17 @@
             Width="36"
             Height="36"
             VerticalAlignment="Center">
-            <PathIcon
+            <Viewbox
                 Width="30"
                 Height="30"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Foreground="{ThemeResource GlanceScreenLensIconBrush}"
-                Style="{StaticResource GlanceScreenLensPathIconStyle}" />
+                VerticalAlignment="Center">
+                <PathIcon
+                    Width="24"
+                    Height="24"
+                    Foreground="{ThemeResource GlanceScreenLensIconBrush}"
+                    Style="{StaticResource GlanceScreenLensPathIconStyle}" />
+            </Viewbox>
         </Grid>
         <Grid
             Grid.Column="1"
@@ -58,6 +62,7 @@
                 TextWrapping="NoWrap" />
         </Grid>
         <Button
+            x:Name="ExtractButton"
             x:Uid="ExtractButton"
             Grid.Column="2"
             VerticalAlignment="Center"
@@ -71,10 +76,15 @@
                     <Setter Property="CornerRadius" Value="18" />
                 </Style>
             </Button.Style>
-            <PathIcon
+            <Viewbox
                 Width="16"
-                Height="16"
-                Style="{StaticResource GlanceScreenLensPathIconStyle}" />
+                Height="16">
+                <PathIcon
+                    Width="24"
+                    Height="24"
+                    Foreground="{x:Bind ExtractButton.Foreground, Mode=OneWay}"
+                    Style="{StaticResource GlanceScreenLensPathIconStyle}" />
+            </Viewbox>
         </Button>
     </Grid>
 </UserControl>
