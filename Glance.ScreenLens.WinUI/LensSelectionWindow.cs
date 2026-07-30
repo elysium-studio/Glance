@@ -139,7 +139,8 @@ internal sealed class LensSelectionWindow
         root = new Grid
         {
             Background = new ImageBrush { ImageSource = CreateImageSource(bitmap), Stretch = Stretch.Fill },
-            IsTabStop = true
+            IsTabStop = true,
+            KeyboardAcceleratorPlacementMode = KeyboardAcceleratorPlacementMode.Hidden
         };
         root.Children.Add(smokeOverlay);
         root.Children.Add(selectionCanvas);
