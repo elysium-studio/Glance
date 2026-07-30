@@ -61,23 +61,37 @@
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="NoWrap" />
         </Grid>
-        <Button
-            x:Uid="ExtractButton"
+        <Grid
             Grid.Column="2"
+            Width="36"
+            Height="36"
             VerticalAlignment="Center"
-            Click="{x:Bind ViewModel.Extract}"
-            IsEnabled="{x:Bind WhenIdle(ViewModel.IsExtracting), Mode=OneWay}">
-            <Button.Style>
-                <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
-                    <Setter Property="Width" Value="36" />
-                    <Setter Property="Height" Value="36" />
-                    <Setter Property="Padding" Value="0" />
-                    <Setter Property="CornerRadius" Value="18" />
-                    <Setter Property="Content" Value="&#xE8FE;" />
-                    <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                    <Setter Property="FontSize" Value="16" />
-                </Style>
-            </Button.Style>
-        </Button>
+            HorizontalAlignment="Center">
+            <Button
+                x:Uid="ExtractButton"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Click="{x:Bind ViewModel.Extract}"
+                IsEnabled="{x:Bind WhenIdle(ViewModel.IsExtracting), Mode=OneWay}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="CornerRadius" Value="18" />
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Viewbox
+                Width="16"
+                Height="16"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                IsHitTestVisible="False">
+                <Path
+                    Width="24"
+                    Height="24"
+                    Fill="{ThemeResource GlanceScreenLensAccentForegroundBrush}"
+                    Style="{StaticResource GlanceScreenLensPathStyle}" />
+            </Viewbox>
+        </Grid>
     </Grid>
 </UserControl>

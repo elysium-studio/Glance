@@ -2,6 +2,7 @@
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Default">
             <SolidColorBrush x:Key="GlanceScreenLensIconBrush" Color="#FF55D6BE" />
+            <SolidColorBrush x:Key="GlanceScreenLensAccentForegroundBrush" Color="#FF07251F" />
             <SolidColorBrush x:Key="AccentButtonBackground" Color="#FF55D6BE" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E655D6BE" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CC55D6BE" />
@@ -13,6 +14,7 @@
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="GlanceScreenLensIconBrush" Color="#FF087C69" />
+            <SolidColorBrush x:Key="GlanceScreenLensAccentForegroundBrush" Color="#FFFFFFFF" />
             <SolidColorBrush x:Key="AccentButtonBackground" Color="#FF087C69" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E6087C69" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CC087C69" />
@@ -24,6 +26,7 @@
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <StaticResource x:Key="GlanceScreenLensIconBrush" ResourceKey="SystemColorWindowTextColorBrush" />
+            <StaticResource x:Key="GlanceScreenLensAccentForegroundBrush" ResourceKey="SystemColorHighlightTextColorBrush" />
             <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemColorHighlightColorBrush" />
             <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="SystemColorHighlightColorBrush" />
             <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="SystemColorHighlightColorBrush" />
