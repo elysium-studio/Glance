@@ -16,34 +16,19 @@ public sealed class ScreenLensViewModelTests
 
         Assert.True(requested);
         Assert.True(viewModel.IsExtracting);
-        Assert.Equal("Select some text", viewModel.StatusText);
+        Assert.Equal("Extract text", viewModel.StatusText);
     }
 
     [Fact]
-    public void Complete_PublishesRecognizedTextAndLineCount()
+    public void Complete_RestoresLauncherState()
     {
         ScreenLensViewModel viewModel = CreateViewModel();
+        viewModel.Extract();
 
-        viewModel.Complete(new ScreenLensResult("Hello\r\nworld", 2, ScreenLensRecognitionEngine.WindowsAi));
+        viewModel.Complete();
 
-        Assert.True(viewModel.HasText);
-        Assert.Equal("Hello\r\nworld", viewModel.CompactStatusText);
-        Assert.Equal("2 lines detected", viewModel.DetailText);
         Assert.False(viewModel.IsExtracting);
-    }
-
-    [Fact]
-    public void Copy_OnlyRequestsCopyWhenTextExists()
-    {
-        ScreenLensViewModel viewModel = CreateViewModel();
-        int requests = 0;
-        viewModel.CopyRequested += (_, _) => requests++;
-
-        viewModel.Copy();
-        viewModel.Complete(new ScreenLensResult("Hello", 1, ScreenLensRecognitionEngine.WindowsOcr));
-        viewModel.Copy();
-
-        Assert.Equal(1, requests);
+        Assert.Equal("Extract text", viewModel.StatusText);
     }
 
     private static ScreenLensViewModel CreateViewModel() => new(new FakeLocalizer());
@@ -54,14 +39,7 @@ public sealed class ScreenLensViewModelTests
         private static readonly IReadOnlyDictionary<string, string> Values = new Dictionary<string, string>
         {
             ["ModuleTitle"] = "Screen Lens",
-            ["ReadyStatus"] = "Ready to extract",
-            ["ReadyDetail"] = "Select text anywhere on screen",
-            ["SelectingStatus"] = "Select some text",
-            ["SelectingDetail"] = "Drag over the area to read",
-            ["TextFoundStatus"] = "Text extracted",
-            ["LineCountDetail"] = "{0} lines detected",
-            ["UnavailableStatus"] = "Text extraction unavailable",
-            ["UnavailableDetail"] = "Windows could not read this area"
+            ["ReadyStatus"] = "Extract text"
         };
 
         public string GetText(string key, params object[] arguments) =>

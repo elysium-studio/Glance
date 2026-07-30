@@ -29,7 +29,7 @@ public sealed partial class WindowsScreenLensService :
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     }
 
-    public async Task<ScreenLensResult?> ExtractAsync()
+    public async Task ExtractAsync()
     {
         if (!dispatcherQueue.HasThreadAccess)
         {
@@ -43,15 +43,26 @@ public sealed partial class WindowsScreenLensService :
             HideApplicationWindows(applicationWindows);
             _ = NativeMethods.DwmFlush();
             LensBitmap desktop = CaptureVirtualDesktop();
-            LensRectangle? selection = await LensSelectionWindow.SelectAsync(desktop, localizer);
+            LensSelectionResult? selection = await LensSelectionWindow.SelectAsync(desktop, localizer);
 
             if (selection is null)
             {
-                return null;
+                return;
             }
 
-            LensBitmap region = desktop.Crop(selection.Value);
-            return await RecognizeAsync(region);
+            LensBitmap region = desktop.Crop(selection.Bounds);
+            LensRecognitionResult recognition;
+
+            try
+            {
+                recognition = await RecognizeAsync(region);
+            }
+            catch
+            {
+                recognition = LensRecognitionResult.Empty;
+            }
+
+            await selection.Overlay.PresentAsync(recognition, selection.Bounds, CopyAsync);
         }
         finally
         {
@@ -60,7 +71,7 @@ public sealed partial class WindowsScreenLensService :
         }
     }
 
-    public async Task<bool> CopyAsync(string text)
+    private static async Task<bool> CopyAsync(string text)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -184,21 +195,41 @@ public sealed partial class WindowsScreenLensService :
         return pixels;
     }
 
-    private static async Task<ScreenLensResult> RecognizeAsync(LensBitmap bitmap)
+    private static async Task<LensRecognitionResult> RecognizeAsync(LensBitmap bitmap)
     {
-        OcrEngine engine = OcrEngine.TryCreateFromUserProfileLanguages() ??
-            throw new InvalidOperationException("No Windows OCR language is installed.");
+        OcrEngine? engine = OcrEngine.TryCreateFromUserProfileLanguages();
+
+        if (engine is null)
+        {
+            return LensRecognitionResult.Empty;
+        }
+
         using SoftwareBitmap softwareBitmap = new(BitmapPixelFormat.Bgra8, bitmap.Width, bitmap.Height, BitmapAlphaMode.Ignore);
         softwareBitmap.CopyFromBuffer(bitmap.Pixels.AsBuffer());
         OcrResult result = await engine.RecognizeAsync(softwareBitmap);
         string text = string.Join(Environment.NewLine, result.Lines.Select(line => line.Text)).Trim();
+        List<LensRecognizedWord> words = [];
 
-        if (string.IsNullOrWhiteSpace(text))
+        for (int lineIndex = 0; lineIndex < result.Lines.Count; lineIndex++)
         {
-            throw new InvalidOperationException("No text was recognized in the selected area.");
+            OcrLine line = result.Lines[lineIndex];
+
+            for (int wordIndex = 0; wordIndex < line.Words.Count; wordIndex++)
+            {
+                OcrWord word = line.Words[wordIndex];
+                Windows.Foundation.Rect bounds = word.BoundingRect;
+                int left = Math.Clamp((int)Math.Floor(bounds.X), 0, bitmap.Width - 1);
+                int top = Math.Clamp((int)Math.Floor(bounds.Y), 0, bitmap.Height - 1);
+                int right = Math.Clamp((int)Math.Ceiling(bounds.Right), left + 1, bitmap.Width);
+                int bottom = Math.Clamp((int)Math.Ceiling(bounds.Bottom), top + 1, bitmap.Height);
+                words.Add(new LensRecognizedWord(word.Text,
+                    new LensRectangle(left, top, right - left, bottom - top),
+                    lineIndex,
+                    wordIndex));
+            }
         }
 
-        return new ScreenLensResult(text, result.Lines.Count, ScreenLensRecognitionEngine.WindowsOcr);
+        return new LensRecognitionResult(text, words);
     }
 
     private static void RestoreWindows(IEnumerable<ApplicationWindowState> windows)

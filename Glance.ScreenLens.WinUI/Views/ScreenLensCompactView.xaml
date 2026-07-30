@@ -29,7 +29,7 @@
             VerticalAlignment="Center"
             MaxLines="1"
             Style="{StaticResource BodyStrongTextBlockStyle}"
-            Text="{x:Bind ViewModel.CompactStatusText, Mode=OneWay}"
+            Text="{x:Bind ViewModel.Title}"
             TextTrimming="CharacterEllipsis"
             TextWrapping="NoWrap" />
     </Grid>

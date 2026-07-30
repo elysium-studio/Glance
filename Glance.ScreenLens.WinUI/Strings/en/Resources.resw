@@ -7,7 +7,7 @@
   <data name="ModuleTitle" xml:space="preserve"><value>Screen Lens</value></data>
   <data name="ModuleDisplayName" xml:space="preserve"><value>Screen Lens</value></data>
   <data name="ModuleDescription" xml:space="preserve"><value>Extract text from anywhere on your screen.</value></data>
-  <data name="ReadyStatus" xml:space="preserve"><value>Ready to extract</value></data>
+  <data name="ReadyStatus" xml:space="preserve"><value>Extract text</value></data>
   <data name="ReadyDetail" xml:space="preserve"><value>Select text anywhere on screen</value></data>
   <data name="SelectingStatus" xml:space="preserve"><value>Select some text</value></data>
   <data name="SelectingDetail" xml:space="preserve"><value>Drag over the area to read</value></data>
@@ -18,4 +18,14 @@
   <data name="SelectionInstruction" xml:space="preserve"><value>Drag to extract text · Esc to cancel</value></data>
   <data name="CopyButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Copy extracted text</value></data>
   <data name="ExtractButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Extract text</value></data>
+  <data name="LauncherDetail.Text" xml:space="preserve"><value>Select text anywhere on screen</value></data>
+  <data name="AdjustInstruction" xml:space="preserve"><value>Adjust the area, then extract the text</value></data>
+  <data name="ReadingInstruction" xml:space="preserve"><value>Finding text…</value></data>
+  <data name="SelectionReadyInstruction" xml:space="preserve"><value>Drag over recognised text to select it</value></data>
+  <data name="NoTextInstruction" xml:space="preserve"><value>No text was found in this area</value></data>
+  <data name="CopySelection" xml:space="preserve"><value>Copy selection</value></data>
+  <data name="CopyAll" xml:space="preserve"><value>Copy all</value></data>
+  <data name="Close" xml:space="preserve"><value>Close</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Extract" xml:space="preserve"><value>Extract</value></data>
 </root>

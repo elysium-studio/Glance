@@ -7,10 +7,8 @@ namespace Glance.ScreenLens.WinUI;
 public sealed partial class ScreenLensComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
-    IGlanceAttentionComponent,
     IDisposable
 {
-    private readonly IGlanceAttentionService attentionService;
     private readonly IScreenLensService screenLensService;
     private readonly ITextLocalizer localizer;
     private readonly ScreenLensViewModel viewModel;
@@ -18,12 +16,10 @@ public sealed partial class ScreenLensComponent :
 
     public ScreenLensComponent(ScreenLensViewModel viewModel,
         IScreenLensService screenLensService,
-        IGlanceAttentionService attentionService,
         ModuleResourceTextLocalizer<ScreenLensModule> localizer)
     {
         this.viewModel = viewModel;
         this.screenLensService = screenLensService;
-        this.attentionService = attentionService;
         this.localizer = localizer;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
@@ -35,7 +31,6 @@ public sealed partial class ScreenLensComponent :
         ExpandedAnimationElement = expandedView.ConnectedAnimationElement;
 
         viewModel.ExtractionRequested += HandleExtractionRequested;
-        viewModel.CopyRequested += HandleCopyRequested;
     }
 
     public string Id => "ScreenLens";
@@ -54,38 +49,22 @@ public sealed partial class ScreenLensComponent :
 
     public object ExpandedAnimationElement { get; }
 
-    public bool IsAttentionEnabledByDefault => true;
-
     public void Dispose()
     {
         viewModel.ExtractionRequested -= HandleExtractionRequested;
-        viewModel.CopyRequested -= HandleCopyRequested;
     }
 
     private async void HandleExtractionRequested(object? sender, EventArgs args)
     {
         try
         {
-            ScreenLensResult? result = await screenLensService.ExtractAsync();
-
-            if (result is null)
-            {
-                dispatcherQueue.TryEnqueue(viewModel.Cancel);
-                return;
-            }
-
-            dispatcherQueue.TryEnqueue(() =>
-            {
-                viewModel.Complete(result);
-                attentionService.RequestAttention(Id);
-            });
+            await screenLensService.ExtractAsync();
         }
         catch
+        { }
+        finally
         {
-            dispatcherQueue.TryEnqueue(viewModel.Fail);
+            dispatcherQueue.TryEnqueue(viewModel.Complete);
         }
     }
-
-    private async void HandleCopyRequested(object? sender, EventArgs args) =>
-        await screenLensService.CopyAsync(viewModel.ExtractedText);
 }

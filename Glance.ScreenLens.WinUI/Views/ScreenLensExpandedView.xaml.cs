@@ -16,13 +16,7 @@ public sealed partial class ScreenLensExpandedView :
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
-    private string DisplayText(bool hasText, string text, string status) =>
-        hasText ? text : status;
-
     private string ToUpper(string value) => value.ToUpperInvariant();
-
-    private Visibility WhenTextAvailable(bool hasText) =>
-        hasText ? Visibility.Visible : Visibility.Collapsed;
 
     private bool WhenIdle(bool isExtracting) => !isExtracting;
 }

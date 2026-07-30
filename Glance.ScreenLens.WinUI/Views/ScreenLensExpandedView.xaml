@@ -44,58 +44,36 @@
                 VerticalAlignment="Center"
                 MaxLines="1"
                 Style="{StaticResource BodyStrongTextBlockStyle}"
-                Text="{x:Bind DisplayText(ViewModel.HasText, ViewModel.ExtractedText, ViewModel.StatusText), Mode=OneWay}"
+                Text="{x:Bind ViewModel.StatusText}"
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="NoWrap" />
             <TextBlock
+                x:Uid="LauncherDetail"
                 Grid.Row="2"
                 VerticalAlignment="Center"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 MaxLines="1"
                 Style="{StaticResource CaptionTextBlockStyle}"
-                Text="{x:Bind ViewModel.DetailText, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="NoWrap" />
         </Grid>
-        <StackPanel
+        <Button
+            x:Uid="ExtractButton"
             Grid.Column="2"
             VerticalAlignment="Center"
-            Orientation="Horizontal"
-            Spacing="2">
-            <Button
-                x:Uid="CopyButton"
-                Click="{x:Bind ViewModel.Copy}"
-                IsEnabled="{x:Bind ViewModel.HasText, Mode=OneWay}"
-                Visibility="{x:Bind WhenTextAvailable(ViewModel.HasText), Mode=OneWay}">
-                <Button.Style>
-                    <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
-                        <Setter Property="Width" Value="32" />
-                        <Setter Property="Height" Value="32" />
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="BorderThickness" Value="0" />
-                        <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
-                        <Setter Property="Content" Value="&#xE8C8;" />
-                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                        <Setter Property="FontSize" Value="14" />
-                    </Style>
-                </Button.Style>
-            </Button>
-            <Button
-                x:Uid="ExtractButton"
-                Click="{x:Bind ViewModel.Extract}"
-                IsEnabled="{x:Bind WhenIdle(ViewModel.IsExtracting), Mode=OneWay}">
-                <Button.Style>
-                    <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
-                        <Setter Property="Width" Value="36" />
-                        <Setter Property="Height" Value="36" />
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="CornerRadius" Value="18" />
-                        <Setter Property="Content" Value="&#xEA40;" />
-                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                        <Setter Property="FontSize" Value="16" />
-                    </Style>
-                </Button.Style>
-            </Button>
-        </StackPanel>
+            Click="{x:Bind ViewModel.Extract}"
+            IsEnabled="{x:Bind WhenIdle(ViewModel.IsExtracting), Mode=OneWay}">
+            <Button.Style>
+                <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+                    <Setter Property="Width" Value="36" />
+                    <Setter Property="Height" Value="36" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="CornerRadius" Value="18" />
+                    <Setter Property="Content" Value="&#xEA40;" />
+                    <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                    <Setter Property="FontSize" Value="16" />
+                </Style>
+            </Button.Style>
+        </Button>
     </Grid>
 </UserControl>
