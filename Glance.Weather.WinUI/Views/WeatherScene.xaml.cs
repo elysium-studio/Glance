@@ -1,5 +1,4 @@
 using Microsoft.UI.Composition;
-using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
@@ -20,7 +19,6 @@ public sealed partial class WeatherScene :
     private ContainerVisual? sceneVisual;
     private CompositionRoundedRectangleGeometry? clipGeometry;
     private CompositionGeometricClip? clip;
-    private DispatcherQueueTimer? sizeTimer;
 
     public WeatherScene() => InitializeComponent();
 
@@ -49,10 +47,6 @@ public sealed partial class WeatherScene :
         clipGeometry.Size = new Vector2((float)ActualWidth, (float)ActualHeight);
         clip = visual.Compositor.CreateGeometricClip(clipGeometry);
         visual.Clip = clip;
-        sizeTimer = DispatcherQueue.CreateTimer();
-        sizeTimer.Interval = TimeSpan.FromMilliseconds(80);
-        sizeTimer.IsRepeating = false;
-        sizeTimer.Tick += HandleSizeTimer;
         Subscribe();
         RebuildScene();
     }
@@ -60,13 +54,6 @@ public sealed partial class WeatherScene :
     private void HandleUnloaded(object sender, RoutedEventArgs args)
     {
         Unsubscribe();
-        if (sizeTimer is not null)
-        {
-            sizeTimer.Stop();
-            sizeTimer.Tick -= HandleSizeTimer;
-            sizeTimer = null;
-        }
-
         ElementCompositionPreview.SetElementChildVisual(ParticleHost, null);
         sceneVisual?.Dispose();
         clip?.Dispose();
@@ -82,12 +69,7 @@ public sealed partial class WeatherScene :
         {
             clipGeometry.Size = new Vector2((float)args.NewSize.Width, (float)args.NewSize.Height);
         }
-
-        sizeTimer?.Stop();
-        sizeTimer?.Start();
     }
-
-    private void HandleSizeTimer(DispatcherQueueTimer sender, object args) => RebuildScene();
 
     private void Subscribe()
     {
@@ -203,7 +185,7 @@ public sealed partial class WeatherScene :
         float diameter = hot ? 100 : isDay ? 76 : 58;
         ContainerVisual sun = compositor.CreateContainerVisual();
         sun.Size = new Vector2(diameter);
-        sun.Offset = new Vector3((float)ActualWidth - diameter * 0.65f, -diameter * 0.25f, 0);
+        sun.Offset = new Vector3(SceneWidth - diameter * 0.65f, -diameter * 0.25f, 0);
         sun.CenterPoint = new Vector3(diameter / 2, diameter / 2, 0);
 
         for (int index = 0; index < 3; index++)
@@ -237,27 +219,49 @@ public sealed partial class WeatherScene :
             float height = width * 0.4f;
             ContainerVisual cloud = compositor.CreateContainerVisual();
             cloud.Size = new Vector2(width, height);
-            cloud.Offset = new Vector3(RandomBetween(-width, (float)ActualWidth), RandomBetween(4, (float)ActualHeight * 0.55f), 0);
+            cloud.Offset = new Vector3(RandomBetween(-width, SceneWidth), RandomBetween(4, SceneHeight * 0.55f), 0);
             byte alpha = (byte)RandomBetween(35, 95);
-
-            ShapeVisual left = CreateDisc(compositor, height * 0.8f, Color.FromArgb(alpha, 234, 242, 248));
-            left.Offset = new Vector3(0, height * 0.2f, 0);
-            ShapeVisual middle = CreateDisc(compositor, height, Color.FromArgb(alpha, 234, 242, 248));
-            middle.Offset = new Vector3(width * 0.28f, 0, 0);
-            ShapeVisual right = CreateDisc(compositor, height * 0.75f, Color.FromArgb(alpha, 234, 242, 248));
-            right.Offset = new Vector3(width * 0.62f, height * 0.25f, 0);
-            cloud.Children.InsertAtTop(left);
-            cloud.Children.InsertAtTop(middle);
-            cloud.Children.InsertAtTop(right);
+            cloud.Children.InsertAtTop(CreateCloud(compositor, width, height, alpha));
 
             ScalarKeyFrameAnimation drift = compositor.CreateScalarKeyFrameAnimation();
             drift.InsertKeyFrame(0, -width);
-            drift.InsertKeyFrame(1, (float)ActualWidth + width);
+            drift.InsertKeyFrame(1, SceneWidth + width);
             drift.Duration = TimeSpan.FromSeconds(RandomBetween(12, 22));
             drift.IterationBehavior = AnimationIterationBehavior.Forever;
             cloud.StartAnimation("Offset.X", drift);
             sceneVisual?.Children.InsertAtTop(cloud);
         }
+    }
+
+    private static ShapeVisual CreateCloud(Compositor compositor, float width, float height, byte alpha)
+    {
+        ShapeVisual visual = compositor.CreateShapeVisual();
+        visual.Size = new Vector2(width, height);
+        visual.Opacity = alpha / 255f;
+        CompositionColorBrush brush = compositor.CreateColorBrush(Color.FromArgb(255, 234, 242, 248));
+
+        CompositionRoundedRectangleGeometry baseGeometry = compositor.CreateRoundedRectangleGeometry();
+        baseGeometry.Offset = new Vector2(width * 0.08f, height * 0.48f);
+        baseGeometry.Size = new Vector2(width * 0.8f, height * 0.42f);
+        baseGeometry.CornerRadius = new Vector2(height * 0.21f);
+        CompositionSpriteShape baseShape = compositor.CreateSpriteShape(baseGeometry);
+        baseShape.FillBrush = brush;
+        visual.Shapes.Add(baseShape);
+
+        AddCloudLobe(compositor, visual, brush, new Vector2(width * 0.22f, height * 0.56f), height * 0.32f);
+        AddCloudLobe(compositor, visual, brush, new Vector2(width * 0.47f, height * 0.42f), height * 0.47f);
+        AddCloudLobe(compositor, visual, brush, new Vector2(width * 0.72f, height * 0.57f), height * 0.35f);
+        return visual;
+    }
+
+    private static void AddCloudLobe(Compositor compositor, ShapeVisual visual, CompositionBrush brush, Vector2 center, float radius)
+    {
+        CompositionEllipseGeometry geometry = compositor.CreateEllipseGeometry();
+        geometry.Center = center;
+        geometry.Radius = new Vector2(radius);
+        CompositionSpriteShape shape = compositor.CreateSpriteShape(geometry);
+        shape.FillBrush = brush;
+        visual.Shapes.Add(shape);
     }
 
     private void AddRain(Compositor compositor, int count)
@@ -267,10 +271,10 @@ public sealed partial class WeatherScene :
             SpriteVisual drop = compositor.CreateSpriteVisual();
             drop.Brush = compositor.CreateColorBrush(Color.FromArgb((byte)RandomBetween(75, 160), 158, 214, 255));
             drop.Size = new Vector2(1.2f, RandomBetween(8, 15));
-            drop.Offset = new Vector3(RandomBetween(0, (float)ActualWidth + 50), RandomBetween(-(float)ActualHeight, 0), 0);
+            drop.Offset = new Vector3(RandomBetween(0, SceneWidth + 50), RandomBetween(-SceneHeight, 0), 0);
             ScalarKeyFrameAnimation fall = compositor.CreateScalarKeyFrameAnimation();
-            fall.InsertKeyFrame(0, -(float)ActualHeight * 0.2f);
-            fall.InsertKeyFrame(1, (float)ActualHeight + 20);
+            fall.InsertKeyFrame(0, -SceneHeight * 0.2f);
+            fall.InsertKeyFrame(1, SceneHeight + 20);
             fall.Duration = TimeSpan.FromSeconds(RandomBetween(0.65f, 1.15f));
             fall.DelayTime = TimeSpan.FromSeconds(RandomBetween(0, 1));
             fall.IterationBehavior = AnimationIterationBehavior.Forever;
@@ -285,10 +289,10 @@ public sealed partial class WeatherScene :
         {
             float size = RandomBetween(2.5f, 6);
             ShapeVisual flake = CreateDisc(compositor, size, Color.FromArgb((byte)RandomBetween(100, 220), 248, 252, 255));
-            flake.Offset = new Vector3(RandomBetween(0, (float)ActualWidth), RandomBetween(-(float)ActualHeight, 0), 0);
+            flake.Offset = new Vector3(RandomBetween(0, SceneWidth), RandomBetween(-SceneHeight, 0), 0);
             ScalarKeyFrameAnimation fall = compositor.CreateScalarKeyFrameAnimation();
-            fall.InsertKeyFrame(0, -(float)ActualHeight * 0.15f);
-            fall.InsertKeyFrame(1, (float)ActualHeight + 10);
+            fall.InsertKeyFrame(0, -SceneHeight * 0.15f);
+            fall.InsertKeyFrame(1, SceneHeight + 10);
             fall.Duration = TimeSpan.FromSeconds(RandomBetween(3, 6));
             fall.DelayTime = TimeSpan.FromSeconds(RandomBetween(0, 2));
             fall.IterationBehavior = AnimationIterationBehavior.Forever;
@@ -336,7 +340,7 @@ public sealed partial class WeatherScene :
         {
             SpriteVisual band = compositor.CreateSpriteVisual();
             band.Brush = compositor.CreateColorBrush(Color.FromArgb((byte)(30 + index * 7), 230, 238, 243));
-            band.Size = new Vector2((float)ActualWidth * RandomBetween(0.45f, 0.85f), 2);
+            band.Size = new Vector2(SceneWidth * RandomBetween(0.45f, 0.85f), 2);
             band.Offset = new Vector3(RandomBetween(-30, 30), 12 + index * 14, 0);
             ScalarKeyFrameAnimation drift = compositor.CreateScalarKeyFrameAnimation();
             drift.InsertKeyFrame(0, -24);
@@ -355,8 +359,8 @@ public sealed partial class WeatherScene :
         {
             SpriteVisual haze = compositor.CreateSpriteVisual();
             haze.Brush = compositor.CreateColorBrush(Color.FromArgb(35, 255, 228, 150));
-            haze.Size = new Vector2((float)ActualWidth * 0.65f, 1.5f);
-            haze.Offset = new Vector3((float)ActualWidth * 0.15f, 34 + index * 13, 0);
+            haze.Size = new Vector2(SceneWidth * 0.65f, 1.5f);
+            haze.Offset = new Vector3(SceneWidth * 0.15f, 34 + index * 13, 0);
             ScalarKeyFrameAnimation shimmer = compositor.CreateScalarKeyFrameAnimation();
             shimmer.InsertKeyFrame(0, 0.15f);
             shimmer.InsertKeyFrame(0.5f, 0.7f);
@@ -383,4 +387,8 @@ public sealed partial class WeatherScene :
 
     private float RandomBetween(float minimum, float maximum) =>
         minimum + (float)random.NextDouble() * (maximum - minimum);
+
+    private float SceneWidth => Math.Max((float)ActualWidth, 380);
+
+    private float SceneHeight => Math.Max((float)ActualHeight, 120);
 }
