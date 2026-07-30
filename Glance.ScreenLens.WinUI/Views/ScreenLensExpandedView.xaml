@@ -62,7 +62,6 @@
                 TextWrapping="NoWrap" />
         </Grid>
         <Button
-            x:Name="ExtractButton"
             x:Uid="ExtractButton"
             Grid.Column="2"
             VerticalAlignment="Center"
@@ -82,7 +81,7 @@
                 <PathIcon
                     Width="24"
                     Height="24"
-                    Foreground="{x:Bind ExtractButton.Foreground, Mode=OneWay}"
+                    Foreground="{ThemeResource AccentButtonForeground}"
                     Style="{StaticResource GlanceScreenLensPathIconStyle}" />
             </Viewbox>
         </Button>
