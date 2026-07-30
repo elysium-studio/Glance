@@ -19,7 +19,7 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     private string detailText = localizer.GetText("AddLocationAndApiKey");
 
     [ObservableProperty]
-    private string glyph = "\u2600";
+    private string glyph = "\uE9C0";
 
     [ObservableProperty]
     private bool hasWeatherData;
@@ -75,7 +75,7 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
         LocationText = localizer.GetText("LocationNotSet");
         StatisticsText = localizer.GetText("WeatherDetailsUnavailable");
         TemperatureText = "--\u00B0";
-        Glyph = GetGlyph(Scene, true);
+        Glyph = GetGlyph(WeatherTime, WeatherSky, WeatherEffect);
     }
 
     public void SetLoading()
@@ -122,16 +122,18 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
             Math.Round(snapshot.FeelsLike),
             snapshot.Humidity,
             FormatWind(snapshot.WindSpeed, useFahrenheit));
-        Glyph = GetGlyph(Scene, snapshot.IsDay);
+        Glyph = GetGlyph(snapshot.TimeOfDay, snapshot.Sky, snapshot.Effect);
     }
 
     public void SetVisualState(WeatherTimeOfDay time, WeatherSky sky, WeatherCelestial celestial, WeatherEffect effect, WeatherTemperature temperature)
     {
+        IsDay = time is not WeatherTimeOfDay.Dusk and not WeatherTimeOfDay.Night;
         WeatherTime = time;
         WeatherSky = sky;
         WeatherCelestial = celestial;
         WeatherEffect = effect;
         WeatherTemperature = temperature;
+        Glyph = GetGlyph(time, sky, effect);
     }
 
     private string Capitalize(string value)
@@ -149,17 +151,18 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     private static string FormatWind(double speed, bool useFahrenheit) =>
         useFahrenheit ? $"{speed:0} mph" : $"{speed:0} m/s";
 
-    private static string GetGlyph(WeatherSceneKind scene, bool isDay) =>
-        scene switch
+    private static string GetGlyph(WeatherTimeOfDay time, WeatherSky sky, WeatherEffect effect) =>
+        effect switch
         {
-            WeatherSceneKind.Clear => isDay ? "\uE706" : "\uE9C2",
-            WeatherSceneKind.Hot => "\uE706",
-            WeatherSceneKind.PartlyCloudy => isDay ? "\uE9C0" : "\uE9C1",
-            WeatherSceneKind.Cloudy => "\uE9BF",
-            WeatherSceneKind.Rain => "\uE9C4",
-            WeatherSceneKind.Snow => "\uE9C8",
-            WeatherSceneKind.Thunderstorm => "\uE9C6",
-            WeatherSceneKind.Fog => "\uE9CB",
-            _ => "\uE9C0"
+            WeatherEffect.Rain => "\uE9C4",
+            WeatherEffect.Snow => "\uE9C8",
+            WeatherEffect.Thunderstorm => "\uE9C6",
+            WeatherEffect.Fog => "\uE9CB",
+            _ => sky switch
+            {
+                WeatherSky.Cloudy => "\uE9BF",
+                WeatherSky.PartlyCloudy => time is WeatherTimeOfDay.Dusk or WeatherTimeOfDay.Night ? "\uE9C1" : "\uE9C0",
+                _ => time is WeatherTimeOfDay.Dusk or WeatherTimeOfDay.Night ? "\uE9C2" : "\uE706"
+            }
         };
 }

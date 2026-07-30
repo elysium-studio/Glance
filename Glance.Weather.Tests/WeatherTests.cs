@@ -116,6 +116,21 @@ public sealed class WeatherTests
         Assert.Equal(WeatherCelestial.None, viewModel.WeatherCelestial);
     }
 
+    [Theory]
+    [InlineData(WeatherTimeOfDay.Afternoon, WeatherSky.Clear, WeatherEffect.None, "\uE706")]
+    [InlineData(WeatherTimeOfDay.Night, WeatherSky.Clear, WeatherEffect.None, "\uE9C2")]
+    [InlineData(WeatherTimeOfDay.Afternoon, WeatherSky.PartlyCloudy, WeatherEffect.None, "\uE9C0")]
+    [InlineData(WeatherTimeOfDay.Night, WeatherSky.PartlyCloudy, WeatherEffect.None, "\uE9C1")]
+    [InlineData(WeatherTimeOfDay.Night, WeatherSky.Clear, WeatherEffect.Snow, "\uE9C8")]
+    public void VisualState_UsesTimeAwareFluentGlyph(WeatherTimeOfDay time, WeatherSky sky, WeatherEffect effect, string expected)
+    {
+        WeatherViewModel viewModel = new(new TestTextLocalizer());
+
+        viewModel.SetVisualState(time, sky, WeatherCelestial.None, effect, WeatherTemperature.Normal);
+
+        Assert.Equal(expected, viewModel.Glyph);
+    }
+
     private sealed class TestTextLocalizer :
         ITextLocalizer
     {
