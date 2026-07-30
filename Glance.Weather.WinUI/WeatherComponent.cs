@@ -168,6 +168,15 @@ public sealed partial class WeatherComponent :
             sky = settings.PreviewSky;
         }
 
+        WeatherCelestial celestial = sky == WeatherSky.Cloudy ?
+            WeatherCelestial.None :
+            time == WeatherTimeOfDay.Night ? WeatherCelestial.Moon : WeatherCelestial.Sun;
+
+        if (settings.PreviewCelestial != WeatherCelestial.Live)
+        {
+            celestial = settings.PreviewCelestial;
+        }
+
         if (settings.PreviewEffect != WeatherEffect.Live)
         {
             effect = settings.PreviewEffect;
@@ -178,7 +187,7 @@ public sealed partial class WeatherComponent :
             temperature = settings.PreviewTemperature;
         }
 
-        viewModel.SetVisualState(time, sky, effect, temperature);
+        viewModel.SetVisualState(time, sky, celestial, effect, temperature);
 #endif
     }
 }

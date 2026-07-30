@@ -54,6 +54,7 @@ public sealed class WeatherTests
         Assert.Empty(settings.Location);
         Assert.Equal(WeatherTimeOfDay.Live, settings.PreviewTime);
         Assert.Equal(WeatherSky.Live, settings.PreviewSky);
+        Assert.Equal(WeatherCelestial.Live, settings.PreviewCelestial);
         Assert.Equal(WeatherEffect.Live, settings.PreviewEffect);
         Assert.Equal(WeatherTemperature.Live, settings.PreviewTemperature);
     }
@@ -70,6 +71,29 @@ public sealed class WeatherTests
     {
         Assert.Equal(WeatherSky.Clear, WeatherConditionMapper.MapSky(5));
         Assert.Equal(WeatherEffect.Snow, WeatherConditionMapper.MapEffect(601));
+    }
+
+    [Fact]
+    public void Update_HidesCelestialBodyUnderCloudySky()
+    {
+        WeatherViewModel viewModel = new(new TestTextLocalizer());
+        WeatherSnapshot snapshot = new("London",
+            10,
+            9,
+            80,
+            3,
+            "overcast clouds",
+            WeatherSceneKind.Cloudy,
+            false,
+            WeatherTimeOfDay.Night,
+            WeatherSky.Cloudy,
+            WeatherEffect.None,
+            WeatherTemperature.Normal,
+            DateTimeOffset.UtcNow);
+
+        viewModel.Update(snapshot, false);
+
+        Assert.Equal(WeatherCelestial.None, viewModel.WeatherCelestial);
     }
 
     private sealed class TestTextLocalizer :

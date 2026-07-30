@@ -14,18 +14,7 @@
         <Grid>
             <Grid x:Name="ParticleHost" />
             <Canvas x:Name="CloudHost" />
-            <Path
-                x:Name="LightningBolt"
-                Width="56"
-                Height="76"
-                Margin="0,4,66,0"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Data="M34,0 L8,42 L27,42 L18,76 L50,30 L31,30 Z"
-                Fill="#FFF8DD78"
-                Opacity="0"
-                Stretch="Fill"
-                Visibility="Collapsed" />
+            <Canvas x:Name="LightningHost" />
             <Rectangle Fill="#26071324" />
             <Rectangle Opacity="0.22" Fill="{ThemeResource AcrylicInAppFillColorDefaultBrush}" />
         </Grid>

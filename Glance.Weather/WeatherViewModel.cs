@@ -40,6 +40,9 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     private WeatherEffect weatherEffect = WeatherEffect.None;
 
     [ObservableProperty]
+    private WeatherCelestial weatherCelestial = WeatherCelestial.Sun;
+
+    [ObservableProperty]
     private WeatherSky weatherSky = WeatherSky.Clear;
 
     [ObservableProperty]
@@ -62,6 +65,7 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
         HasWeatherData = false;
         Scene = WeatherSceneKind.Unknown;
         WeatherEffect = WeatherEffect.None;
+        WeatherCelestial = WeatherCelestial.Sun;
         WeatherSky = WeatherSky.Clear;
         WeatherTemperature = WeatherTemperature.Normal;
         WeatherTime = WeatherTimeOfDay.Day;
@@ -106,6 +110,9 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
         IsDay = snapshot.IsDay;
         WeatherEffect = snapshot.Effect;
         WeatherSky = snapshot.Sky;
+        WeatherCelestial = snapshot.Sky == WeatherSky.Cloudy ?
+            WeatherCelestial.None :
+            snapshot.TimeOfDay == WeatherTimeOfDay.Night ? WeatherCelestial.Moon : WeatherCelestial.Sun;
         WeatherTemperature = snapshot.TemperatureState;
         WeatherTime = snapshot.TimeOfDay;
         TemperatureText = $"{Math.Round(snapshot.Temperature):0}\u00B0";
@@ -120,10 +127,11 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
         Glyph = GetGlyph(Scene, snapshot.IsDay);
     }
 
-    public void SetVisualState(WeatherTimeOfDay time, WeatherSky sky, WeatherEffect effect, WeatherTemperature temperature)
+    public void SetVisualState(WeatherTimeOfDay time, WeatherSky sky, WeatherCelestial celestial, WeatherEffect effect, WeatherTemperature temperature)
     {
         WeatherTime = time;
         WeatherSky = sky;
+        WeatherCelestial = celestial;
         WeatherEffect = effect;
         WeatherTemperature = temperature;
     }

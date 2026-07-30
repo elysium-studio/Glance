@@ -12,6 +12,8 @@ public sealed class WeatherSettings
 
     public WeatherSky PreviewSky { get; set; }
 
+    public WeatherCelestial PreviewCelestial { get; set; }
+
     public WeatherEffect PreviewEffect { get; set; }
 
     public WeatherTemperature PreviewTemperature { get; set; }

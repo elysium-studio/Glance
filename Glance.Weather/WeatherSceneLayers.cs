@@ -17,6 +17,14 @@ public enum WeatherSky
     Cloudy
 }
 
+public enum WeatherCelestial
+{
+    Live,
+    None,
+    Sun,
+    Moon
+}
+
 public enum WeatherEffect
 {
     Live,

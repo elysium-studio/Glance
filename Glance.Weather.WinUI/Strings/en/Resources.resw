@@ -52,4 +52,9 @@
   <data name="WeatherTimeNightOption.Content" xml:space="preserve"><value>Night</value></data>
   <data name="WeatherEffectNoneOption.Content" xml:space="preserve"><value>None</value></data>
   <data name="WeatherTemperatureNormalOption.Content" xml:space="preserve"><value>Normal</value></data>
+  <data name="WeatherCelestialPreviewSettingCard.Header" xml:space="preserve"><value>Preview sun or moon</value></data>
+  <data name="WeatherCelestialPreviewSettingCard.Description" xml:space="preserve"><value>Choose a celestial body independently of the sky and time.</value></data>
+  <data name="WeatherCelestialNoneOption.Content" xml:space="preserve"><value>None</value></data>
+  <data name="WeatherCelestialSunOption.Content" xml:space="preserve"><value>Sun</value></data>
+  <data name="WeatherCelestialMoonOption.Content" xml:space="preserve"><value>Moon</value></data>
 </root>

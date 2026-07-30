@@ -1,4 +1,5 @@
 using Microsoft.UI.Composition;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
@@ -20,6 +21,8 @@ public sealed partial class WeatherScene :
     private ContainerVisual? sceneVisual;
     private CompositionRoundedRectangleGeometry? clipGeometry;
     private CompositionGeometricClip? clip;
+    private DispatcherQueueTimer? lightningTimer;
+    private SpriteVisual? lightningFlash;
 
     public WeatherScene() => InitializeComponent();
 
@@ -57,6 +60,7 @@ public sealed partial class WeatherScene :
         Unsubscribe();
         ElementCompositionPreview.SetElementChildVisual(ParticleHost, null);
         CloudHost.Children.Clear();
+        StopLightning();
         sceneVisual?.Dispose();
         clip?.Dispose();
         clipGeometry?.Dispose();
@@ -96,6 +100,7 @@ public sealed partial class WeatherScene :
     {
         if (args.PropertyName is nameof(WeatherViewModel.WeatherTime) or
             nameof(WeatherViewModel.WeatherSky) or
+            nameof(WeatherViewModel.WeatherCelestial) or
             nameof(WeatherViewModel.WeatherEffect) or
             nameof(WeatherViewModel.WeatherTemperature))
         {
@@ -112,6 +117,7 @@ public sealed partial class WeatherScene :
 
         ElementCompositionPreview.SetElementChildVisual(ParticleHost, null);
         CloudHost.Children.Clear();
+        StopLightning();
         sceneVisual?.Dispose();
         Compositor compositor = ElementCompositionPreview.GetElementVisual(this).Compositor;
         sceneVisual = compositor.CreateContainerVisual();
@@ -120,14 +126,18 @@ public sealed partial class WeatherScene :
 
         WeatherTimeOfDay time = viewModel?.WeatherTime ?? WeatherTimeOfDay.Day;
         WeatherSky sky = viewModel?.WeatherSky ?? WeatherSky.Clear;
+        WeatherCelestial celestial = viewModel?.WeatherCelestial ?? WeatherCelestial.Sun;
         WeatherEffect effect = viewModel?.WeatherEffect ?? WeatherEffect.None;
         WeatherTemperature temperature = viewModel?.WeatherTemperature ?? WeatherTemperature.Normal;
         SceneRoot.Background = CreateBackground(time, sky, effect, temperature);
-        LightningBolt.Visibility = effect == WeatherEffect.Thunderstorm ? Visibility.Visible : Visibility.Collapsed;
-
-        if (sky != WeatherSky.Cloudy)
+        if (celestial != WeatherCelestial.None)
         {
-            AddCelestial(compositor, temperature == WeatherTemperature.Hot, time);
+            AddCelestial(compositor, temperature == WeatherTemperature.Hot, celestial, time);
+        }
+
+        if (time == WeatherTimeOfDay.Night && sky != WeatherSky.Cloudy)
+        {
+            AddStars(compositor);
         }
 
         if (sky == WeatherSky.PartlyCloudy)
@@ -217,28 +227,40 @@ public sealed partial class WeatherScene :
         };
     }
 
-    private void AddCelestial(Compositor compositor, bool hot, WeatherTimeOfDay time)
+    private void AddCelestial(Compositor compositor, bool hot, WeatherCelestial celestialKind, WeatherTimeOfDay time)
     {
-        bool isNight = time == WeatherTimeOfDay.Night;
+        bool isMoon = celestialKind == WeatherCelestial.Moon;
         bool isTransition = time is WeatherTimeOfDay.Dawn or WeatherTimeOfDay.Dusk;
-        float diameter = hot ? 100 : isNight ? 58 : 76;
-        ContainerVisual sun = compositor.CreateContainerVisual();
-        sun.Size = new Vector2(diameter);
-        sun.Offset = new Vector3(-diameter * 0.65f, -diameter * 0.25f, 0);
-        sun.RelativeOffsetAdjustment = new Vector3(1, 0, 0);
-        sun.CenterPoint = new Vector3(diameter / 2, diameter / 2, 0);
+        float diameter = hot && !isMoon ? 100 : isMoon ? 58 : 76;
+        ContainerVisual celestial = compositor.CreateContainerVisual();
+        celestial.Size = new Vector2(diameter);
+        celestial.Offset = new Vector3(-diameter * 0.65f, -diameter * 0.25f, 0);
+        celestial.RelativeOffsetAdjustment = new Vector3(1, 0, 0);
+        celestial.CenterPoint = new Vector3(diameter / 2, diameter / 2, 0);
 
-        for (int index = 0; index < 3; index++)
+        if (isMoon)
         {
-            float inset = index * 12;
-            Color color = !isNight ?
-                Color.FromArgb((byte)(45 + index * 40), 255, (byte)(hot ? 142 : isTransition ? 181 : 220), (byte)(isTransition ? 105 : 73)) :
-                Color.FromArgb((byte)(45 + index * 40), 213, 229, 255);
-            ShapeVisual disc = CreateDisc(compositor,
-                diameter - inset * 2,
-                color);
-            disc.Offset = new Vector3(inset, inset, 0);
-            sun.Children.InsertAtTop(disc);
+            ShapeVisual moon = CreateDisc(compositor, diameter, Color.FromArgb(190, 226, 235, 255));
+            celestial.Children.InsertAtTop(moon);
+
+            for (int index = 0; index < 3; index++)
+            {
+                float craterSize = 5 + index * 2;
+                ShapeVisual crater = CreateDisc(compositor, craterSize, Color.FromArgb(42, 94, 111, 151));
+                crater.Offset = new Vector3(14 + index * 11, 18 + index % 2 * 13, 0);
+                celestial.Children.InsertAtTop(crater);
+            }
+        }
+        else
+        {
+            for (int index = 0; index < 3; index++)
+            {
+                float inset = index * 12;
+                Color color = Color.FromArgb((byte)(45 + index * 40), 255, (byte)(hot ? 142 : isTransition ? 181 : 220), (byte)(isTransition ? 105 : 73));
+                ShapeVisual disc = CreateDisc(compositor, diameter - inset * 2, color);
+                disc.Offset = new Vector3(inset, inset, 0);
+                celestial.Children.InsertAtTop(disc);
+            }
         }
 
         Vector3KeyFrameAnimation scale = compositor.CreateVector3KeyFrameAnimation();
@@ -247,8 +269,8 @@ public sealed partial class WeatherScene :
         scale.InsertKeyFrame(1, Vector3.One);
         scale.Duration = TimeSpan.FromSeconds(4);
         scale.IterationBehavior = AnimationIterationBehavior.Forever;
-        sun.StartAnimation("Scale", scale);
-        sceneVisual?.Children.InsertAtTop(sun);
+        celestial.StartAnimation("Scale", scale);
+        sceneVisual?.Children.InsertAtTop(celestial);
     }
 
     private void AddClouds(Compositor compositor, int count)
@@ -257,11 +279,12 @@ public sealed partial class WeatherScene :
         {
             float width = RandomBetween(68, 104);
             float height = width * 0.4f;
-            byte alpha = (byte)RandomBetween(35, 95);
+            byte alpha = (byte)RandomBetween(80, 145);
             Path cloud = CreateCloud(width, height, alpha);
             Canvas.SetLeft(cloud, -width);
             Canvas.SetTop(cloud, 6 + index * 28);
             CloudHost.Children.Add(cloud);
+            ElementCompositionPreview.SetIsTranslationEnabled(cloud, true);
             Visual cloudVisual = ElementCompositionPreview.GetElementVisual(cloud);
             float phase = (float)index / count;
             float wrap = Math.Min(0.995f, 1 - phase + 0.002f);
@@ -282,7 +305,26 @@ public sealed partial class WeatherScene :
 
             drift.Duration = TimeSpan.FromSeconds(30);
             drift.IterationBehavior = AnimationIterationBehavior.Forever;
-            cloudVisual.StartAnimation("Offset.X", drift);
+            cloudVisual.StartAnimation("Translation.X", drift);
+        }
+    }
+
+    private void AddStars(Compositor compositor)
+    {
+        for (int index = 0; index < 10; index++)
+        {
+            float diameter = RandomBetween(1.2f, 2.8f);
+            ShapeVisual star = CreateDisc(compositor, diameter, Color.FromArgb((byte)RandomBetween(95, 190), 232, 240, 255));
+            star.Offset = new Vector3(RandomBetween(18, SceneWidth - 28), RandomBetween(8, SceneHeight * 0.65f), 0);
+            ScalarKeyFrameAnimation twinkle = compositor.CreateScalarKeyFrameAnimation();
+            twinkle.InsertKeyFrame(0, 0.35f);
+            twinkle.InsertKeyFrame(0.5f, 1);
+            twinkle.InsertKeyFrame(1, 0.35f);
+            twinkle.Duration = TimeSpan.FromSeconds(RandomBetween(2.5f, 5));
+            twinkle.DelayTime = TimeSpan.FromSeconds(RandomBetween(0, 2));
+            twinkle.IterationBehavior = AnimationIterationBehavior.Forever;
+            star.StartAnimation("Opacity", twinkle);
+            sceneVisual?.Children.InsertAtTop(star);
         }
     }
 
@@ -361,35 +403,130 @@ public sealed partial class WeatherScene :
 
     private void AddLightning(Compositor compositor)
     {
-        SpriteVisual flash = compositor.CreateSpriteVisual();
-        flash.RelativeSizeAdjustment = Vector2.One;
-        flash.Brush = compositor.CreateColorBrush(Color.FromArgb(255, 216, 219, 255));
-        flash.Opacity = 0;
+        lightningFlash = compositor.CreateSpriteVisual();
+        lightningFlash.RelativeSizeAdjustment = Vector2.One;
+        lightningFlash.Brush = compositor.CreateColorBrush(Color.FromArgb(255, 220, 229, 255));
+        lightningFlash.Opacity = 0;
+        sceneVisual?.Children.InsertAtTop(lightningFlash);
+
+        lightningTimer = DispatcherQueue.GetForCurrentThread().CreateTimer();
+        lightningTimer.IsRepeating = true;
+        lightningTimer.Tick += HandleLightningTimer;
+        ScheduleNextLightning();
+        lightningTimer.Start();
+        TriggerLightning();
+    }
+
+    private void HandleLightningTimer(DispatcherQueueTimer sender, object args)
+    {
+        TriggerLightning();
+        ScheduleNextLightning();
+    }
+
+    private void TriggerLightning()
+    {
+        if (!IsLoaded || lightningFlash is null)
+        {
+            return;
+        }
+
+        LightningHost.Children.Clear();
+        PathGeometry geometry = CreateLightningGeometry();
+        Path glow = new()
+        {
+            Data = geometry,
+            Stroke = new SolidColorBrush(Color.FromArgb(105, 178, 204, 255)),
+            StrokeThickness = 7,
+            StrokeLineJoin = PenLineJoin.Round,
+            IsHitTestVisible = false,
+            Opacity = 0
+        };
+        Path core = new()
+        {
+            Data = geometry,
+            Stroke = new SolidColorBrush(Color.FromArgb(245, 239, 245, 255)),
+            StrokeThickness = 2,
+            StrokeLineJoin = PenLineJoin.Round,
+            IsHitTestVisible = false,
+            Opacity = 0
+        };
+        LightningHost.Children.Add(glow);
+        LightningHost.Children.Add(core);
+        Compositor compositor = ElementCompositionPreview.GetElementVisual(this).Compositor;
+        StartStrikeAnimation(compositor, ElementCompositionPreview.GetElementVisual(glow), 0.62f);
+        StartStrikeAnimation(compositor, ElementCompositionPreview.GetElementVisual(core), 1);
+        StartStrikeAnimation(compositor, lightningFlash, 0.24f);
+    }
+
+    private PathGeometry CreateLightningGeometry()
+    {
+        double x = RandomBetween(SceneWidth * 0.16f, SceneWidth * 0.84f);
+        double y = -6;
+        double segmentHeight = RandomBetween(13, 21);
+        PathFigure main = new() { StartPoint = new Point(x, y) };
+        PathGeometry geometry = new();
+        geometry.Figures.Add(main);
+        int segments = random.Next(5, 8);
+
+        for (int index = 0; index < segments; index++)
+        {
+            x += RandomBetween(-16, 16);
+            y += segmentHeight * RandomBetween(0.8f, 1.2f);
+            Point point = new(x, y);
+            main.Segments.Add(new LineSegment { Point = point });
+
+            if (index > 1 && index < segments - 1 && random.NextDouble() < 0.42)
+            {
+                PathFigure branch = new() { StartPoint = point };
+                double branchX = x;
+                double branchY = y;
+
+                for (int branchIndex = 0; branchIndex < random.Next(2, 4); branchIndex++)
+                {
+                    branchX += RandomBetween(-22, 22);
+                    branchY += RandomBetween(8, 15);
+                    branch.Segments.Add(new LineSegment { Point = new Point(branchX, branchY) });
+                }
+
+                geometry.Figures.Add(branch);
+            }
+        }
+
+        return geometry;
+    }
+
+    private static void StartStrikeAnimation(Compositor compositor, Visual visual, float peakOpacity)
+    {
         ScalarKeyFrameAnimation pulse = compositor.CreateScalarKeyFrameAnimation();
         pulse.InsertKeyFrame(0, 0);
-        pulse.InsertKeyFrame(0.68f, 0);
-        pulse.InsertKeyFrame(0.7f, 0.7f);
-        pulse.InsertKeyFrame(0.73f, 0);
-        pulse.InsertKeyFrame(0.76f, 0.4f);
-        pulse.InsertKeyFrame(0.8f, 0);
+        pulse.InsertKeyFrame(0.08f, peakOpacity);
+        pulse.InsertKeyFrame(0.18f, peakOpacity * 0.08f);
+        pulse.InsertKeyFrame(0.28f, peakOpacity * 0.88f);
+        pulse.InsertKeyFrame(0.44f, 0);
         pulse.InsertKeyFrame(1, 0);
-        pulse.Duration = TimeSpan.FromSeconds(4.5);
-        pulse.IterationBehavior = AnimationIterationBehavior.Forever;
-        flash.StartAnimation("Opacity", pulse);
-        sceneVisual?.Children.InsertAtTop(flash);
+        pulse.Duration = TimeSpan.FromMilliseconds(720);
+        visual.StartAnimation("Opacity", pulse);
+    }
 
-        Visual bolt = ElementCompositionPreview.GetElementVisual(LightningBolt);
-        ScalarKeyFrameAnimation boltPulse = compositor.CreateScalarKeyFrameAnimation();
-        boltPulse.InsertKeyFrame(0, 0);
-        boltPulse.InsertKeyFrame(0.68f, 0);
-        boltPulse.InsertKeyFrame(0.7f, 1);
-        boltPulse.InsertKeyFrame(0.73f, 0);
-        boltPulse.InsertKeyFrame(0.76f, 0.85f);
-        boltPulse.InsertKeyFrame(0.8f, 0);
-        boltPulse.InsertKeyFrame(1, 0);
-        boltPulse.Duration = TimeSpan.FromSeconds(4.5);
-        boltPulse.IterationBehavior = AnimationIterationBehavior.Forever;
-        bolt.StartAnimation("Opacity", boltPulse);
+    private void ScheduleNextLightning()
+    {
+        if (lightningTimer is not null)
+        {
+            lightningTimer.Interval = TimeSpan.FromSeconds(RandomBetween(2.4f, 7.5f));
+        }
+    }
+
+    private void StopLightning()
+    {
+        if (lightningTimer is not null)
+        {
+            lightningTimer.Stop();
+            lightningTimer.Tick -= HandleLightningTimer;
+            lightningTimer = null;
+        }
+
+        LightningHost.Children.Clear();
+        lightningFlash = null;
     }
 
     private void AddFog(Compositor compositor)
