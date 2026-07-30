@@ -141,7 +141,7 @@ internal sealed partial class ColorPickerInputWindow :
         Grid,
         IDisposable
     {
-        private readonly InputCursor cursor = InputSystemCursor.Create(InputSystemCursorShape.Cross);
+        private readonly InputCursor cursor = EyedropperCursor.Create();
 
         public PickerInputSurface() =>
             ProtectedCursor = cursor;

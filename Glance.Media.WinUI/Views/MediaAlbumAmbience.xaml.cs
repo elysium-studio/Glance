@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Numerics;
-using System.Threading;
 
 namespace Glance.Media.WinUI;
 
@@ -16,9 +15,6 @@ public sealed partial class MediaAlbumAmbience :
 {
     private const int ArtworkTransitionDurationMs = 520;
 
-    private static int nextDiagnosticId;
-
-    private readonly int diagnosticId = Interlocked.Increment(ref nextDiagnosticId);
     private MediaViewModel? viewModel;
     private Visual? ambientVisual;
     private Visual? motionVisual;
@@ -63,7 +59,6 @@ public sealed partial class MediaAlbumAmbience :
 
     private void HandleLoaded(object sender, RoutedEventArgs args)
     {
-        MediaTransitionDiagnostics.Write(DiagnosticSource, $"Loaded Size={ActualWidth:F0}x{ActualHeight:F0} Desired={(viewModel?.AmbientArtwork as MediaAmbientArtwork)?.Id.ToString() ?? "null"}");
         Compositor compositor = ElementCompositionPreview.GetElementVisual(this).Compositor;
         ambientVisual = ElementCompositionPreview.GetElementVisual(this);
         motionVisual = ElementCompositionPreview.GetElementVisual(MotionLayer);
@@ -84,7 +79,6 @@ public sealed partial class MediaAlbumAmbience :
 
     private void HandleUnloaded(object sender, RoutedEventArgs args)
     {
-        MediaTransitionDiagnostics.Write(DiagnosticSource, $"Unloaded Current={currentArtwork?.Id.ToString() ?? "null"} Next={nextArtwork?.Id.ToString() ?? "null"} Desired={desiredArtwork?.Id.ToString() ?? "null"}");
         Unsubscribe();
         StopPanning();
         artworkTransitionGeneration++;
@@ -216,11 +210,9 @@ public sealed partial class MediaAlbumAmbience :
     {
         MediaAmbientArtwork? artwork = viewModel?.AmbientArtwork as MediaAmbientArtwork;
         desiredArtwork = artwork;
-        MediaTransitionDiagnostics.Write(DiagnosticSource, $"Update requested Desired={artwork?.Id.ToString() ?? "null"} Current={currentArtwork?.Id.ToString() ?? "null"} Next={nextArtwork?.Id.ToString() ?? "null"} Preparing={isArtworkPreparing} Transitioning={isArtworkTransitioning} Loaded={IsLoaded}");
 
         if (currentArtworkVisual is null || nextArtworkVisual is null)
         {
-            MediaTransitionDiagnostics.Write(DiagnosticSource, "Update deferred because visuals are unavailable");
             return;
         }
 
@@ -228,13 +220,11 @@ public sealed partial class MediaAlbumAmbience :
             ReferenceEquals(currentArtwork, artwork) ||
             ReferenceEquals(nextArtwork, artwork))
         {
-            MediaTransitionDiagnostics.Write(DiagnosticSource, "Update ignored because artwork is null or already staged");
             return;
         }
 
         if (isArtworkPreparing || isArtworkTransitioning)
         {
-            MediaTransitionDiagnostics.Write(DiagnosticSource, "Update queued as desired artwork during active transition");
             return;
         }
 
@@ -249,7 +239,6 @@ public sealed partial class MediaAlbumAmbience :
 
     private void SetCurrentArtwork(MediaAmbientArtwork artwork)
     {
-        MediaTransitionDiagnostics.Write(DiagnosticSource, $"Set current Artwork={artwork.Id}");
         currentArtwork = artwork.Retain();
         currentSurfaceBrush = CreateSurfaceBrush(artwork);
         currentArtworkVisual!.Brush = currentSurfaceBrush;
@@ -259,7 +248,6 @@ public sealed partial class MediaAlbumAmbience :
     private void StartArtworkTransition(MediaAmbientArtwork artwork)
     {
         int transitionGeneration = ++artworkTransitionGeneration;
-        MediaTransitionDiagnostics.Write(DiagnosticSource, $"Prepare transition Generation={transitionGeneration} From={currentArtwork?.Id.ToString() ?? "null"} To={artwork.Id}");
         nextArtwork = artwork.Retain();
         nextSurfaceBrush = CreateSurfaceBrush(artwork);
         nextArtworkVisual!.Brush = nextSurfaceBrush;
@@ -277,12 +265,7 @@ public sealed partial class MediaAlbumAmbience :
             if (transitionGeneration == artworkTransitionGeneration &&
                 ReferenceEquals(nextArtwork, artwork))
             {
-                MediaTransitionDiagnostics.Write(DiagnosticSource, $"Preparation frame ready Generation={transitionGeneration} To={artwork.Id}");
                 BeginArtworkTransition(transitionGeneration);
-            }
-            else
-            {
-                MediaTransitionDiagnostics.Write(DiagnosticSource, $"Preparation superseded Generation={transitionGeneration} CurrentGeneration={artworkTransitionGeneration}");
             }
         };
         CompositionTarget.Rendering += artworkPreparationRenderingHandler;
@@ -294,11 +277,9 @@ public sealed partial class MediaAlbumAmbience :
             currentArtworkVisual is null ||
             nextArtworkVisual is null)
         {
-            MediaTransitionDiagnostics.Write(DiagnosticSource, $"Transition rejected Generation={transitionGeneration} Preparing={isArtworkPreparing}");
             return;
         }
 
-        MediaTransitionDiagnostics.Write(DiagnosticSource, $"Transition begin Generation={transitionGeneration} From={currentArtwork?.Id.ToString() ?? "null"} To={nextArtwork?.Id.ToString() ?? "null"}");
         isArtworkPreparing = false;
         isArtworkTransitioning = true;
         currentArtworkVisual.Opacity = 1;
@@ -312,7 +293,6 @@ public sealed partial class MediaAlbumAmbience :
 
             if (transitionGeneration == artworkTransitionGeneration)
             {
-                MediaTransitionDiagnostics.Write(DiagnosticSource, $"Transition completed Generation={transitionGeneration}");
                 PromoteNextArtwork();
 
                 if (desiredArtwork is not null &&
@@ -320,10 +300,6 @@ public sealed partial class MediaAlbumAmbience :
                 {
                     StartArtworkTransition(desiredArtwork);
                 }
-            }
-            else
-            {
-                MediaTransitionDiagnostics.Write(DiagnosticSource, $"Transition completion superseded Generation={transitionGeneration} CurrentGeneration={artworkTransitionGeneration}");
             }
         };
         batch.End();
@@ -336,11 +312,9 @@ public sealed partial class MediaAlbumAmbience :
             currentArtworkVisual is null ||
             nextArtworkVisual is null)
         {
-            MediaTransitionDiagnostics.Write(DiagnosticSource, "Promotion rejected because transition state is incomplete");
             return;
         }
 
-        MediaTransitionDiagnostics.Write(DiagnosticSource, $"Promoting From={currentArtwork?.Id.ToString() ?? "null"} To={nextArtwork.Id}");
         currentArtworkVisual.StopAnimation(nameof(Visual.Opacity));
         nextArtworkVisual.StopAnimation(nameof(Visual.Opacity));
         MediaAmbientArtwork? previousArtwork = currentArtwork;
@@ -354,11 +328,9 @@ public sealed partial class MediaAlbumAmbience :
         nextArtworkVisual.Opacity = 0;
         previousBrush?.Dispose();
 
-        MediaTransitionDiagnostics.Write(DiagnosticSource, $"Releasing previous Artwork={previousArtwork?.Id.ToString() ?? "null"}");
         previousArtwork?.Dispose();
 
         isArtworkTransitioning = false;
-        MediaTransitionDiagnostics.Write(DiagnosticSource, $"Promotion complete Current={currentArtwork?.Id.ToString() ?? "null"}");
     }
 
     private void CancelArtworkPreparation()
@@ -534,6 +506,4 @@ public sealed partial class MediaAlbumAmbience :
 
         return total / (end - start);
     }
-
-    private string DiagnosticSource => $"Ambience#{diagnosticId}[{ActualWidth:F0}x{ActualHeight:F0}]";
 }

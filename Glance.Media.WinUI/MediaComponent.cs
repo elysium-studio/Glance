@@ -309,11 +309,9 @@ public sealed partial class MediaComponent :
     {
         int generation = ++refreshGeneration;
         GlobalSystemMediaTransportControlsSession? mediaSession = session;
-        MediaTransitionDiagnostics.Write("Component", $"Refresh begin Generation={generation} AllowClear={allowArtworkClear} Session={MediaTransitionDiagnostics.Identify(mediaSession)} CurrentHash={ShortHash(currentArtworkHash)}");
 
         if (mediaSession is null)
         {
-            MediaTransitionDiagnostics.Write("Component", $"Refresh empty Generation={generation}");
             await RunOnDispatcherAsync(() =>
             {
                 ShowEmptyState();
@@ -340,18 +338,12 @@ public sealed partial class MediaComponent :
             {
                 artworkStream = await properties.Thumbnail.OpenReadAsync();
                 artworkHash = await CalculateArtworkHash(artworkStream);
-                MediaTransitionDiagnostics.Write("Component", $"Thumbnail ready Generation={generation} Title={title} Hash={ShortHash(artworkHash)} Size={artworkStream.Size}");
             }
-            catch (Exception exception)
+            catch
             {
-                MediaTransitionDiagnostics.Write("Component", $"Thumbnail failed Generation={generation} Title={title} Error={exception.GetType().Name} HResult=0x{exception.HResult:X8}");
                 artworkStream?.Dispose();
                 artworkStream = null;
             }
-        }
-        else
-        {
-            MediaTransitionDiagnostics.Write("Component", $"Thumbnail missing Generation={generation} Title={title}");
         }
 
         if (artworkStream is not null &&
@@ -370,7 +362,6 @@ public sealed partial class MediaComponent :
         {
             if (generation != refreshGeneration || !ReferenceEquals(mediaSession, session))
             {
-                MediaTransitionDiagnostics.Write("Component", $"Refresh abandoned before dispatch Generation={generation} CurrentGeneration={refreshGeneration}");
                 return;
             }
 
@@ -378,7 +369,6 @@ public sealed partial class MediaComponent :
             {
                 if (generation != refreshGeneration || !ReferenceEquals(mediaSession, session))
                 {
-                    MediaTransitionDiagnostics.Write("Component", $"Refresh abandoned on dispatch Generation={generation} CurrentGeneration={refreshGeneration}");
                     return;
                 }
 
@@ -394,7 +384,6 @@ public sealed partial class MediaComponent :
 
                 if (preserveArtwork)
                 {
-                    MediaTransitionDiagnostics.Write("Component", $"Artwork preserved Generation={generation} Hash={ShortHash(currentArtworkHash)}");
                     ScheduleArtworkMissingCheck();
                 }
                 else
@@ -403,14 +392,11 @@ public sealed partial class MediaComponent :
 
                     if (!string.Equals(currentArtworkHash, artworkHash, StringComparison.Ordinal))
                     {
-                        MediaTransitionDiagnostics.Write("Component", $"Artwork change Generation={generation} PreviousHash={ShortHash(currentArtworkHash)} NextHash={ShortHash(artworkHash)}");
-
                         if (artworkStream is not null)
                         {
                             artworkStream.Seek(0);
                             BitmapImage artwork = new();
                             await artwork.SetSourceAsync(artworkStream);
-                            MediaTransitionDiagnostics.Write("Component", $"Foreground decoded Generation={generation} Artwork={MediaTransitionDiagnostics.Identify(artwork)}");
                             MediaAmbientArtwork? ambientArtwork = null;
 
                             try
@@ -420,9 +406,8 @@ public sealed partial class MediaComponent :
                                 artworkStream = null;
                                 ambientArtwork = await MediaAmbientArtwork.LoadAsync(ambientStream);
                             }
-                            catch (Exception exception)
+                            catch
                             {
-                                MediaTransitionDiagnostics.Write("Component", $"Ambient load failed Generation={generation} Error={exception.GetType().Name} HResult=0x{exception.HResult:X8}");
                             }
 
                             bool artworkApplied = false;
@@ -430,11 +415,9 @@ public sealed partial class MediaComponent :
                             {
                                 if (generation != refreshGeneration || !ReferenceEquals(mediaSession, session))
                                 {
-                                    MediaTransitionDiagnostics.Write("Component", $"Artwork apply abandoned Generation={generation} CurrentGeneration={refreshGeneration}");
                                     return Task.CompletedTask;
                                 }
 
-                                MediaTransitionDiagnostics.Write("Component", $"Artwork applying Generation={generation} Foreground={MediaTransitionDiagnostics.Identify(artwork)} Ambient={ambientArtwork?.Id.ToString() ?? "null"} Hash={ShortHash(artworkHash)}");
                                 viewModel.Artwork = artwork;
                                 viewModel.AccentColor = accentColor;
 
@@ -445,7 +428,6 @@ public sealed partial class MediaComponent :
 
                                 currentArtworkHash = artworkHash;
                                 artworkApplied = true;
-                                MediaTransitionDiagnostics.Write("Component", $"Artwork applied Generation={generation} AmbientViewModel={(viewModel.AmbientArtwork as MediaAmbientArtwork)?.Id.ToString() ?? "null"}");
                                 return Task.CompletedTask;
                             });
 
@@ -457,16 +439,11 @@ public sealed partial class MediaComponent :
                         }
                         else
                         {
-                            MediaTransitionDiagnostics.Write("Component", $"Artwork clearing Generation={generation} Hash={ShortHash(artworkHash)}");
                             viewModel.Artwork = null;
                             SetAmbientArtwork(null);
                             viewModel.AccentColor = MediaViewModel.DefaultAccentColor;
                             currentArtworkHash = artworkHash;
                         }
-                    }
-                    else
-                    {
-                        MediaTransitionDiagnostics.Write("Component", $"Artwork unchanged Generation={generation} Hash={ShortHash(artworkHash)}");
                     }
                 }
 
@@ -484,7 +461,6 @@ public sealed partial class MediaComponent :
                     }
 
                     currentTitle = title;
-                    MediaTransitionDiagnostics.Write("Component", $"Refresh complete Generation={generation} Title={title} Hash={ShortHash(currentArtworkHash)}");
                     return Task.CompletedTask;
                 });
             });
@@ -506,7 +482,6 @@ public sealed partial class MediaComponent :
 
     private void ShowEmptyState()
     {
-        MediaTransitionDiagnostics.Write("Component", $"Empty state PreviousHash={ShortHash(currentArtworkHash)} Ambient={(viewModel.AmbientArtwork as MediaAmbientArtwork)?.Id.ToString() ?? "null"}");
         artworkMissingTimer?.Stop();
         currentArtworkHash = null;
         currentTitle = null;
@@ -624,6 +599,4 @@ public sealed partial class MediaComponent :
 
         return source.Replace("exe", string.Empty, StringComparison.OrdinalIgnoreCase).TrimEnd('.');
     }
-
-    private static string ShortHash(string? hash) => hash is null ? "null" : hash[..Math.Min(10, hash.Length)];
 }

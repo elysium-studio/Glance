@@ -1,6 +1,6 @@
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Media;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Storage.Streams;
@@ -10,20 +10,16 @@ namespace Glance.Media.WinUI;
 internal sealed partial class MediaAmbientArtwork :
     IDisposable
 {
-    private static int nextId;
-
+    private readonly DispatcherQueue dispatcherQueue;
     private readonly object sync = new();
     private LoadedImageSurface? surface;
     private int referenceCount = 1;
 
-    private MediaAmbientArtwork(LoadedImageSurface surface)
+    private MediaAmbientArtwork(LoadedImageSurface surface, DispatcherQueue dispatcherQueue)
     {
-        Id = Interlocked.Increment(ref nextId);
         this.surface = surface;
-        MediaTransitionDiagnostics.Write("Surface", $"Created Artwork={Id}");
+        this.dispatcherQueue = dispatcherQueue;
     }
-
-    public int Id { get; }
 
     public LoadedImageSurface Surface
     {
@@ -42,43 +38,55 @@ internal sealed partial class MediaAmbientArtwork :
         {
             ObjectDisposedException.ThrowIf(surface is null, this);
             referenceCount++;
-            MediaTransitionDiagnostics.Write("Surface", $"Retain Artwork={Id} References={referenceCount}");
             return this;
         }
     }
 
     public static Task<MediaAmbientArtwork?> LoadAsync(IRandomAccessStream stream)
     {
+        DispatcherQueue dispatcherQueue = DispatcherQueue.GetForCurrentThread() ??
+            throw new InvalidOperationException("Ambient artwork must be created on a dispatcher thread.");
         TaskCompletionSource<MediaAmbientArtwork?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
         LoadedImageSurface surface;
-        MediaTransitionDiagnostics.Write("Surface", $"Load requested StreamSize={stream.Size}");
 
         try
         {
             surface = LoadedImageSurface.StartLoadFromStream(stream, new Size(3, 3));
         }
-        catch (Exception exception)
+        catch
         {
-            MediaTransitionDiagnostics.Write("Surface", $"Load start failed Error={exception.GetType().Name} HResult=0x{exception.HResult:X8}");
             stream.Dispose();
             throw;
         }
 
         TypedEventHandler<LoadedImageSurface, LoadedImageSourceLoadCompletedEventArgs> handler = null!;
-        handler = (sender, args) =>
+        handler = (_, args) =>
         {
-            sender.LoadCompleted -= handler;
-            stream.Dispose();
-            MediaTransitionDiagnostics.Write("Surface", $"Load completed Status={args.Status}");
+            LoadedImageSourceLoadStatus status = args.Status;
 
-            if (args.Status == LoadedImageSourceLoadStatus.Success)
+            void CompleteLoad()
             {
-                completion.TrySetResult(new MediaAmbientArtwork(surface));
+                surface.LoadCompleted -= handler;
+                stream.Dispose();
+
+                if (status == LoadedImageSourceLoadStatus.Success)
+                {
+                    completion.TrySetResult(new MediaAmbientArtwork(surface, dispatcherQueue));
+                }
+                else
+                {
+                    surface.Dispose();
+                    completion.TrySetResult(null);
+                }
             }
-            else
+
+            if (dispatcherQueue.HasThreadAccess)
             {
-                surface.Dispose();
-                completion.TrySetResult(null);
+                CompleteLoad();
+            }
+            else if (!dispatcherQueue.TryEnqueue(CompleteLoad))
+            {
+                completion.TrySetException(new InvalidOperationException("The media dispatcher rejected artwork load completion."));
             }
         };
         surface.LoadCompleted += handler;
@@ -93,12 +101,10 @@ internal sealed partial class MediaAmbientArtwork :
         {
             if (referenceCount == 0)
             {
-                MediaTransitionDiagnostics.Write("Surface", $"Release ignored Artwork={Id} References=0");
                 return;
             }
 
             referenceCount--;
-            MediaTransitionDiagnostics.Write("Surface", $"Release Artwork={Id} References={referenceCount}");
 
             if (referenceCount == 0)
             {
@@ -109,10 +115,21 @@ internal sealed partial class MediaAmbientArtwork :
 
         if (releasedSurface is not null)
         {
-            MediaTransitionDiagnostics.Write("Surface", $"Dispose Artwork={Id}");
-            releasedSurface.Dispose();
+            DisposeSurface(releasedSurface);
         }
 
         GC.SuppressFinalize(this);
+    }
+
+    private void DisposeSurface(LoadedImageSurface releasedSurface)
+    {
+        if (dispatcherQueue.HasThreadAccess)
+        {
+            releasedSurface.Dispose();
+        }
+        else
+        {
+            dispatcherQueue.TryEnqueue(releasedSurface.Dispose);
+        }
     }
 }

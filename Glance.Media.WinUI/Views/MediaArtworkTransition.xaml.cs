@@ -5,7 +5,6 @@ using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Numerics;
-using System.Threading;
 
 namespace Glance.Media.WinUI;
 
@@ -16,15 +15,12 @@ public sealed partial class MediaArtworkTransition :
     private const int IncomingDurationMs = 320;
     private const int OutgoingDurationMs = 260;
 
-    private static int nextDiagnosticId;
-
     public static readonly DependencyProperty SourceProperty =
         DependencyProperty.Register(nameof(Source), typeof(ImageSource),
             typeof(MediaArtworkTransition), new PropertyMetadata(null, HandleSourceChanged));
 
     private Image currentImage;
     private Image nextImage;
-    private readonly int diagnosticId = Interlocked.Increment(ref nextDiagnosticId);
     private Visual? currentVisual;
     private Visual? nextVisual;
     private CompositionEasingFunction? easing;
@@ -52,7 +48,6 @@ public sealed partial class MediaArtworkTransition :
 
     private void HandleLoaded(object sender, RoutedEventArgs args)
     {
-        MediaTransitionDiagnostics.Write(DiagnosticSource, $"Loaded Source={MediaTransitionDiagnostics.Identify(Source)}");
         Visual perspectiveVisual = ElementCompositionPreview.GetElementVisual(PerspectiveLayer);
         Compositor compositor = perspectiveVisual.Compositor;
         Matrix4x4 perspective = Matrix4x4.Identity;
@@ -71,7 +66,6 @@ public sealed partial class MediaArtworkTransition :
 
     private void HandleUnloaded(object sender, RoutedEventArgs args)
     {
-        MediaTransitionDiagnostics.Write(DiagnosticSource, $"Unloaded Displayed={MediaTransitionDiagnostics.Identify(displayedSource)} Transitioning={isTransitioning}");
         transitionGeneration++;
         CancelPreparation();
         StopAnimations();
@@ -111,11 +105,8 @@ public sealed partial class MediaArtworkTransition :
 
     private void UpdateSource(ImageSource? source)
     {
-        MediaTransitionDiagnostics.Write(DiagnosticSource, $"Source requested Source={MediaTransitionDiagnostics.Identify(source)} Displayed={MediaTransitionDiagnostics.Identify(displayedSource)} Preparing={isPreparing} Transitioning={isTransitioning}");
-
         if (ReferenceEquals(displayedSource, source))
         {
-            MediaTransitionDiagnostics.Write(DiagnosticSource, "Source ignored because it is already displayed");
             return;
         }
 
@@ -124,13 +115,11 @@ public sealed partial class MediaArtworkTransition :
         if (currentVisual is null || nextVisual is null || easing is null)
         {
             currentImage.Source = source;
-            MediaTransitionDiagnostics.Write(DiagnosticSource, "Source assigned before visuals loaded");
             return;
         }
 
         if (isTransitioning)
         {
-            MediaTransitionDiagnostics.Write(DiagnosticSource, $"Completing active transition before new source Generation={transitionGeneration}");
             FinishTransition();
         }
 
@@ -140,7 +129,6 @@ public sealed partial class MediaArtworkTransition :
 
         if (source is null)
         {
-            MediaTransitionDiagnostics.Write(DiagnosticSource, $"Fade out begin Generation={generation}");
             nextImage.Source = null;
             CompositionScopedBatch fadeOutBatch = currentVisual.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
             StartScalarAnimation(currentVisual, nameof(Visual.RotationAngleInDegrees), -90, OutgoingDurationMs);
@@ -156,7 +144,6 @@ public sealed partial class MediaArtworkTransition :
                     currentVisual.RotationAngleInDegrees = 0;
                     currentVisual.Opacity = 0;
                     currentVisual.Scale = Vector3.One;
-                    MediaTransitionDiagnostics.Write(DiagnosticSource, $"Fade out complete Generation={generation}");
                 }
             };
             fadeOutBatch.End();
@@ -169,7 +156,6 @@ public sealed partial class MediaArtworkTransition :
             currentVisual.RotationAngleInDegrees = 0;
             currentVisual.Opacity = 1;
             currentVisual.Scale = Vector3.One;
-            MediaTransitionDiagnostics.Write(DiagnosticSource, $"Initial source shown Generation={generation} Source={MediaTransitionDiagnostics.Identify(source)}");
             return;
         }
 
@@ -178,7 +164,6 @@ public sealed partial class MediaArtworkTransition :
 
     private void PrepareTransition(ImageSource source, int generation)
     {
-        MediaTransitionDiagnostics.Write(DiagnosticSource, $"Flip prepare Generation={generation} From={MediaTransitionDiagnostics.Identify(currentImage.Source)} To={MediaTransitionDiagnostics.Identify(source)}");
         Image preparedImage = nextImage;
         Visual preparedVisual = nextVisual!;
         Visual visibleVisual = currentVisual!;
@@ -201,12 +186,7 @@ public sealed partial class MediaArtworkTransition :
                 ReferenceEquals(preparedImage, nextImage) &&
                 ReferenceEquals(preparedImage.Source, displayedSource))
             {
-                MediaTransitionDiagnostics.Write(DiagnosticSource, $"Flip preparation frame ready Generation={generation}");
                 BeginTransition(generation);
-            }
-            else
-            {
-                MediaTransitionDiagnostics.Write(DiagnosticSource, $"Flip preparation superseded Generation={generation} CurrentGeneration={transitionGeneration}");
             }
         };
         CompositionTarget.Rendering += preparationRenderingHandler;
@@ -216,11 +196,9 @@ public sealed partial class MediaArtworkTransition :
     {
         if (!isPreparing || currentVisual is null || nextVisual is null)
         {
-            MediaTransitionDiagnostics.Write(DiagnosticSource, $"Flip rejected Generation={generation} Preparing={isPreparing}");
             return;
         }
 
-        MediaTransitionDiagnostics.Write(DiagnosticSource, $"Flip begin Generation={generation}");
         isPreparing = false;
         isTransitioning = true;
 
@@ -237,7 +215,6 @@ public sealed partial class MediaArtworkTransition :
 
             if (generation == transitionGeneration)
             {
-                MediaTransitionDiagnostics.Write(DiagnosticSource, $"Flip completed Generation={generation}");
                 FinishTransition();
             }
         };
@@ -246,7 +223,6 @@ public sealed partial class MediaArtworkTransition :
 
     private void FinishTransition()
     {
-        MediaTransitionDiagnostics.Write(DiagnosticSource, $"Flip promoting From={MediaTransitionDiagnostics.Identify(currentImage.Source)} To={MediaTransitionDiagnostics.Identify(nextImage.Source)}");
         StopAnimations();
         currentImage.Source = null;
         currentVisual!.RotationAngleInDegrees = 0;
@@ -259,7 +235,6 @@ public sealed partial class MediaArtworkTransition :
         (currentVisual, nextVisual) = (nextVisual, currentVisual);
         isPreparing = false;
         isTransitioning = false;
-        MediaTransitionDiagnostics.Write(DiagnosticSource, $"Flip promotion complete Displayed={MediaTransitionDiagnostics.Identify(currentImage.Source)}");
     }
 
     private void CancelPreparation()
@@ -326,6 +301,4 @@ public sealed partial class MediaArtworkTransition :
         animation.DelayTime = TimeSpan.FromMilliseconds(delayMs);
         visual.StartAnimation(property, animation);
     }
-
-    private string DiagnosticSource => $"ArtworkFlip#{diagnosticId}[{ActualWidth:F0}x{ActualHeight:F0}]";
 }

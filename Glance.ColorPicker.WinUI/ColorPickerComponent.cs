@@ -8,17 +8,24 @@ namespace Glance.ColorPicker.WinUI;
 public sealed partial class ColorPickerComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
+    IGlanceAttentionComponent,
     IDisposable
 {
+    private readonly IColorPickerService colorPickerService;
+    private readonly IGlanceAttentionService attentionService;
     private readonly ITextLocalizer localizer;
     private readonly ColorPickerViewModel viewModel;
     private readonly GlanceModuleOptions<ColorPickerSettings> options;
     private readonly DispatcherQueue dispatcherQueue;
 
     public ColorPickerComponent(ColorPickerViewModel viewModel,
+        IColorPickerService colorPickerService,
+        IGlanceAttentionService attentionService,
         GlanceModuleOptions<ColorPickerSettings> options,
         ModuleResourceTextLocalizer<ColorPickerModule> localizer)
     {
+        this.colorPickerService = colorPickerService;
+        this.attentionService = attentionService;
         this.viewModel = viewModel;
         this.options = options;
         this.localizer = localizer;
@@ -32,6 +39,7 @@ public sealed partial class ColorPickerComponent :
         CompactAnimationElement = compactView.ConnectedAnimationElement;
         ExpandedAnimationElement = expandedView.ConnectedAnimationElement;
 
+        colorPickerService.ColorPicked += HandleColorPicked;
         options.Changed += HandleOptionsChanged;
     }
 
@@ -51,11 +59,17 @@ public sealed partial class ColorPickerComponent :
 
     public object ExpandedAnimationElement { get; }
 
+    public bool IsAttentionEnabledByDefault => true;
+
     public void Dispose()
     {
+        colorPickerService.ColorPicked -= HandleColorPicked;
         options.Changed -= HandleOptionsChanged;
     }
 
     private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<ColorPickerSettings> args) =>
         dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
+
+    private void HandleColorPicked(object? sender, ColorPickerEventArgs args) =>
+        attentionService.RequestAttention(Id);
 }
