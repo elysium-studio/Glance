@@ -24,7 +24,7 @@ namespace Glance.ScreenLens.WinUI;
 
 internal sealed class LensSelectionWindow
 {
-    private static readonly TimeSpan MinimumRecognitionDuration = TimeSpan.FromMilliseconds(700);
+    private static readonly TimeSpan MinimumRecognitionDuration = TimeSpan.FromSeconds(4);
     private readonly LensBitmap bitmap;
     private readonly TaskCompletionSource<bool> presentationCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly DispatcherQueue dispatcherQueue;
@@ -108,6 +108,7 @@ internal sealed class LensSelectionWindow
             From = 0,
             To = -18,
             Duration = new Duration(TimeSpan.FromMilliseconds(600)),
+            EnableDependentAnimation = true,
             RepeatBehavior = RepeatBehavior.Forever
         };
         Storyboard.SetTarget(dashAnimation, recognitionProgress);
