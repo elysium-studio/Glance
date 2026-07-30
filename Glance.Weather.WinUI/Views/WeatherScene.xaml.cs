@@ -231,9 +231,7 @@ public sealed partial class WeatherScene :
             Vector3KeyFrameAnimation drift = compositor.CreateVector3KeyFrameAnimation();
             drift.InsertKeyFrame(0, new Vector3(-0.35f, 0, 0));
             drift.InsertKeyFrame(1, new Vector3(1.15f, 0, 0));
-            drift.Duration = TimeSpan.FromSeconds(RandomBetween(36, 58));
-            drift.DelayTime = TimeSpan.FromSeconds(RandomBetween(0, 12));
-            drift.DelayBehavior = AnimationDelayBehavior.SetInitialValueAfterDelay;
+            drift.Duration = TimeSpan.FromSeconds(RandomBetween(24, 34));
             drift.IterationBehavior = AnimationIterationBehavior.Forever;
             cloudVisual.StartAnimation("RelativeOffsetAdjustment", drift);
         }
