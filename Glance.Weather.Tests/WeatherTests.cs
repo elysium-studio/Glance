@@ -76,12 +76,20 @@ public sealed class WeatherTests
     [Theory]
     [InlineData(20000, 10000, 50000, WeatherTimeOfDay.Morning)]
     [InlineData(32000, 10000, 50000, WeatherTimeOfDay.Afternoon)]
-    [InlineData(44000, 10000, 50000, WeatherTimeOfDay.Evening)]
+    [InlineData(47000, 10000, 50000, WeatherTimeOfDay.Evening)]
     [InlineData(10000, 10000, 50000, WeatherTimeOfDay.Dawn)]
-    [InlineData(50000, 10000, 50000, WeatherTimeOfDay.Dusk)]
+    [InlineData(51000, 10000, 50000, WeatherTimeOfDay.Dusk)]
     [InlineData(60000, 10000, 50000, WeatherTimeOfDay.Night)]
     public void ConditionMapper_MapsTimeIndependently(long timestamp, long sunrise, long sunset, WeatherTimeOfDay expected) =>
         Assert.Equal(expected, WeatherConditionMapper.MapTime(timestamp, sunrise, sunset));
+
+    [Theory]
+    [InlineData(WeatherTimeOfDay.Afternoon, WeatherSky.PartlyCloudy, WeatherCelestial.Sun)]
+    [InlineData(WeatherTimeOfDay.Dusk, WeatherSky.Clear, WeatherCelestial.None)]
+    [InlineData(WeatherTimeOfDay.Night, WeatherSky.Clear, WeatherCelestial.Moon)]
+    [InlineData(WeatherTimeOfDay.Night, WeatherSky.Cloudy, WeatherCelestial.None)]
+    public void ConditionMapper_MapsLiveCelestialBody(WeatherTimeOfDay time, WeatherSky sky, WeatherCelestial expected) =>
+        Assert.Equal(expected, WeatherConditionMapper.MapCelestial(time, sky));
 
     [Fact]
     public void Update_HidesCelestialBodyUnderCloudySky()

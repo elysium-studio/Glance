@@ -37,24 +37,38 @@ public static class WeatherConditionMapper
     public static WeatherTemperature MapTemperature(double temperature, bool useFahrenheit) =>
         temperature >= (useFahrenheit ? 86 : 30) ? WeatherTemperature.Hot : WeatherTemperature.Normal;
 
+    public static WeatherCelestial MapCelestial(WeatherTimeOfDay time, WeatherSky sky) =>
+        sky == WeatherSky.Cloudy ?
+            WeatherCelestial.None :
+            time switch
+            {
+                WeatherTimeOfDay.Night => WeatherCelestial.Moon,
+                WeatherTimeOfDay.Dusk => WeatherCelestial.None,
+                _ => WeatherCelestial.Sun
+            };
+
     public static WeatherTimeOfDay MapTime(long timestamp, long sunrise, long sunset)
     {
-        const long transitionSeconds = 45 * 60;
-        const long eveningSeconds = 2 * 60 * 60;
+        const long dawnBeforeSunriseSeconds = 45 * 60;
+        const long dawnAfterSunriseSeconds = 30 * 60;
+        const long eveningSeconds = 75 * 60;
+        const long duskSeconds = 45 * 60;
 
-        if (timestamp >= sunrise - transitionSeconds && timestamp < sunrise + transitionSeconds)
+        if (timestamp < sunrise - dawnBeforeSunriseSeconds)
+        {
+            return WeatherTimeOfDay.Night;
+        }
+
+        if (timestamp < sunrise + dawnAfterSunriseSeconds)
         {
             return WeatherTimeOfDay.Dawn;
         }
 
-        if (timestamp >= sunset - transitionSeconds && timestamp < sunset + transitionSeconds)
+        if (timestamp >= sunset)
         {
-            return WeatherTimeOfDay.Dusk;
-        }
-
-        if (timestamp < sunrise - transitionSeconds || timestamp >= sunset + transitionSeconds)
-        {
-            return WeatherTimeOfDay.Night;
+            return timestamp < sunset + duskSeconds ?
+                WeatherTimeOfDay.Dusk :
+                WeatherTimeOfDay.Night;
         }
 
         long solarNoon = sunrise + (sunset - sunrise) / 2;

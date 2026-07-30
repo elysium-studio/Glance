@@ -2,10 +2,10 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.Weather.WinUI;
 
-public sealed partial class WeatherScenePreviewSettingView :
+public sealed partial class WeatherTimePreviewSettingView :
     UserControl
 {
-    public WeatherScenePreviewSettingView() => InitializeComponent();
+    public WeatherTimePreviewSettingView() => InitializeComponent();
 
     public WeatherTimePreviewSettingViewModel ViewModel => (WeatherTimePreviewSettingViewModel)DataContext;
 }

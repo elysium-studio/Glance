@@ -189,9 +189,7 @@ public sealed partial class WeatherComponent :
             sky = settings.PreviewSky;
         }
 
-        WeatherCelestial celestial = sky == WeatherSky.Cloudy ?
-            WeatherCelestial.None :
-            time == WeatherTimeOfDay.Night ? WeatherCelestial.Moon : WeatherCelestial.Sun;
+        WeatherCelestial celestial = WeatherConditionMapper.MapCelestial(time, sky);
 
         if (settings.PreviewCelestial != WeatherCelestial.Live)
         {

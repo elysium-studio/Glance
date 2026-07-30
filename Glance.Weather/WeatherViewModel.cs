@@ -110,9 +110,7 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
         IsDay = snapshot.IsDay;
         WeatherEffect = snapshot.Effect;
         WeatherSky = snapshot.Sky;
-        WeatherCelestial = snapshot.Sky == WeatherSky.Cloudy ?
-            WeatherCelestial.None :
-            snapshot.TimeOfDay == WeatherTimeOfDay.Night ? WeatherCelestial.Moon : WeatherCelestial.Sun;
+        WeatherCelestial = WeatherConditionMapper.MapCelestial(snapshot.TimeOfDay, snapshot.Sky);
         WeatherTemperature = snapshot.TemperatureState;
         WeatherTime = snapshot.TimeOfDay;
         TemperatureText = $"{Math.Round(snapshot.Temperature):0}\u00B0";
