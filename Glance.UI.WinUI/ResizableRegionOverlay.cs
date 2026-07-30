@@ -8,9 +8,9 @@ using System.Collections.Generic;
 using Windows.Foundation;
 using Windows.UI;
 
-namespace Glance.ScreenCapture.WinUI;
+namespace Glance.UI.WinUI;
 
-internal sealed class CaptureCropOverlay :
+public sealed partial class ResizableRegionOverlay :
     Canvas
 {
     private const double CornerHandleSize = 56;
@@ -18,7 +18,8 @@ internal sealed class CaptureCropOverlay :
     private const double HandleSize = 32;
     private const double HandleThickness = 3;
     private const double MinimumCropSize = 48;
-    internal const double VisualPadding = HandleSize / 2;
+    public const double VisualPadding = HandleSize / 2;
+    private readonly bool allowMove;
     private readonly Border bottomShade;
     private readonly Dictionary<CropInteraction, Thumb> handles;
     private readonly Dictionary<CropInteraction, FrameworkElement> handleVisuals;
@@ -33,6 +34,7 @@ internal sealed class CaptureCropOverlay :
     private readonly int sourceWidth;
     private readonly double surfaceHeight;
     private readonly double surfaceWidth;
+    private readonly bool showShade;
     private readonly Border topShade;
     private readonly Border verticalLineOne;
     private readonly Border verticalLineTwo;
@@ -43,16 +45,24 @@ internal sealed class CaptureCropOverlay :
     private double resizeDeltaX;
     private double resizeDeltaY;
 
-    public CaptureCropOverlay(double width, double height, int sourceWidth, int sourceHeight)
+    public ResizableRegionOverlay(double width,
+        double height,
+        int sourceWidth,
+        int sourceHeight,
+        Rect? initialBounds = null,
+        bool showShade = true,
+        bool allowMove = true)
     {
         SolidColorBrush foreground = new(Color.FromArgb(255, 255, 255, 255));
+        this.allowMove = allowMove;
         this.sourceWidth = sourceWidth;
         this.sourceHeight = sourceHeight;
+        this.showShade = showShade;
         surfaceWidth = width;
         surfaceHeight = height;
         Width = width + (VisualPadding * 2);
         Height = height + (VisualPadding * 2);
-        Background = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0));
+        Background = allowMove ? new SolidColorBrush(Color.FromArgb(1, 0, 0, 0)) : null;
 
         topShade = CreateShade();
         bottomShade = CreateShade();
@@ -129,7 +139,7 @@ internal sealed class CaptureCropOverlay :
             Children.Add(handleVisual);
         }
 
-        cropBounds = new Rect(0, 0, width, height);
+        cropBounds = Clamp(initialBounds ?? new Rect(0, 0, width, height));
         UpdateVisuals();
         PointerPressed += HandlePointerPressed;
         PointerMoved += HandlePointerMoved;
@@ -140,9 +150,15 @@ internal sealed class CaptureCropOverlay :
 
     public Rect CropBounds => cropBounds;
 
+    public event EventHandler? BoundsChanged;
+
+    public event EventHandler? InteractionCompleted;
+
+    public event EventHandler? InteractionStarted;
+
     private void HandlePointerPressed(object sender, PointerRoutedEventArgs args)
     {
-        if (IsResizeHandle(args.OriginalSource))
+        if (!allowMove || IsResizeHandle(args.OriginalSource))
         {
             return;
         }
@@ -156,6 +172,7 @@ internal sealed class CaptureCropOverlay :
         interaction = CropInteraction.Move;
         interactionPoint = point;
         interactionBounds = cropBounds;
+        InteractionStarted?.Invoke(this, EventArgs.Empty);
         args.Handled = true;
     }
 
@@ -171,6 +188,7 @@ internal sealed class CaptureCropOverlay :
         double deltaY = point.Y - interactionPoint.Y;
         cropBounds = CalculateBounds(interactionBounds, interaction, deltaX, deltaY);
         UpdateVisuals();
+        BoundsChanged?.Invoke(this, EventArgs.Empty);
         args.Handled = true;
     }
 
@@ -183,6 +201,7 @@ internal sealed class CaptureCropOverlay :
 
         interaction = CropInteraction.None;
         ReleasePointerCapture(args.Pointer);
+        InteractionCompleted?.Invoke(this, EventArgs.Empty);
         args.Handled = true;
     }
 
@@ -217,6 +236,7 @@ internal sealed class CaptureCropOverlay :
         resizeDeltaX = 0;
         resizeDeltaY = 0;
         SetResizeFeedbackVisible(true);
+        InteractionStarted?.Invoke(this, EventArgs.Empty);
     }
 
     private void HandleResizeDragDelta(object sender, DragDeltaEventArgs args)
@@ -230,6 +250,7 @@ internal sealed class CaptureCropOverlay :
         resizeDeltaY += args.VerticalChange;
         cropBounds = CalculateBounds(interactionBounds, interaction, resizeDeltaX, resizeDeltaY);
         UpdateVisuals();
+        BoundsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private void HandleResizeDragCompleted(object sender, DragCompletedEventArgs args)
@@ -238,6 +259,7 @@ internal sealed class CaptureCropOverlay :
         {
             interaction = CropInteraction.None;
             SetResizeFeedbackVisible(false);
+            InteractionCompleted?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -298,12 +320,27 @@ internal sealed class CaptureCropOverlay :
         return new Rect(left, top, right - left, bottom - top);
     }
 
+    private Rect Clamp(Rect value)
+    {
+        double width = Math.Clamp(value.Width, MinimumCropSize, surfaceWidth);
+        double height = Math.Clamp(value.Height, MinimumCropSize, surfaceHeight);
+        return new Rect(Math.Clamp(value.X, 0, surfaceWidth - width),
+            Math.Clamp(value.Y, 0, surfaceHeight - height),
+            width,
+            height);
+    }
+
     private void UpdateVisuals()
     {
         SetBounds(topShade, VisualPadding, VisualPadding, surfaceWidth, cropBounds.Y);
         SetBounds(bottomShade, VisualPadding, VisualPadding + cropBounds.Bottom, surfaceWidth, surfaceHeight - cropBounds.Bottom);
         SetBounds(leftShade, VisualPadding, VisualPadding + cropBounds.Y, cropBounds.X, cropBounds.Height);
         SetBounds(rightShade, VisualPadding + cropBounds.Right, VisualPadding + cropBounds.Y, surfaceWidth - cropBounds.Right, cropBounds.Height);
+        Visibility shadeVisibility = showShade ? Visibility.Visible : Visibility.Collapsed;
+        topShade.Visibility = shadeVisibility;
+        bottomShade.Visibility = shadeVisibility;
+        leftShade.Visibility = shadeVisibility;
+        rightShade.Visibility = shadeVisibility;
         SetBounds(selectionBorder, VisualPadding + cropBounds.X, VisualPadding + cropBounds.Y, cropBounds.Width, cropBounds.Height);
 
         double verticalOne = cropBounds.X + (cropBounds.Width / 3);

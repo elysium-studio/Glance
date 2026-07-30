@@ -1,5 +1,6 @@
 using Elysium.Platform.Windows;
 using Glance.Application.Abstractions;
+using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -47,7 +48,7 @@ internal sealed class LensSelectionWindow
     private Border? recognitionToolbar;
     private Button? copySelectionButton;
     private LensRecognitionResult recognition = LensRecognitionResult.Empty;
-    private LensRegionAdjuster? regionAdjuster;
+    private ResizableRegionOverlay? regionAdjuster;
     private bool closed;
     private bool isDragging;
     private bool isSelectingText;
@@ -231,10 +232,12 @@ internal sealed class LensSelectionWindow
         root.ReleasePointerCaptures();
         DetachSelectionHandlers();
         highlight.Visibility = Visibility.Collapsed;
-        regionAdjuster = new LensRegionAdjuster(root.ActualWidth, root.ActualHeight, initialBounds);
+        regionAdjuster = new ResizableRegionOverlay(root.ActualWidth, root.ActualHeight, bitmap.Width, bitmap.Height, initialBounds, false, false);
         regionAdjuster.BoundsChanged += HandleAdjustmentBoundsChanged;
         regionAdjuster.InteractionCompleted += HandleAdjustmentCompleted;
         regionAdjuster.InteractionStarted += HandleAdjustmentStarted;
+        Canvas.SetLeft(regionAdjuster, -ResizableRegionOverlay.VisualPadding);
+        Canvas.SetTop(regionAdjuster, -ResizableRegionOverlay.VisualPadding);
         Canvas.SetZIndex(regionAdjuster, 3);
         selectionCanvas.Children.Add(regionAdjuster);
         instructionContainer.Visibility = Visibility.Collapsed;
@@ -249,10 +252,7 @@ internal sealed class LensSelectionWindow
 
         foreach (LensRecognizedLine line in recognition.Lines)
         {
-            Rect bounds = ToLocal(new LensRectangle(selectedRegion.X + line.Bounds.X,
-                selectedRegion.Y + line.Bounds.Y,
-                line.Bounds.Width,
-                line.Bounds.Height));
+            Rect bounds = ToLocal(line.Bounds);
             smokeGeometry.Children.Add(CreateRoundedRectangleGeometry(new Rect(bounds.X - 5, bounds.Y - 2, bounds.Width + 10, bounds.Height + 4)));
         }
     }
@@ -288,15 +288,15 @@ internal sealed class LensSelectionWindow
 
         recognitionToolbar = new Border
         {
-            HorizontalAlignment = HorizontalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
-            Margin = new Thickness(0, 68, 0, 0),
             Padding = new Thickness(8),
             Background = ResolveBrush("AcrylicInAppFillColorDefaultBrush", Color.FromArgb(235, 32, 32, 32)),
             CornerRadius = new CornerRadius(10),
             Child = actions
         };
         root.Children.Add(recognitionToolbar);
+        PositionToolbar();
     }
 
     private void BuildTextSelectionLayer()
@@ -306,10 +306,7 @@ internal sealed class LensSelectionWindow
         [
             .. recognition.Words.Select(word =>
             {
-                Rect bounds = ToLocal(new LensRectangle(selectedRegion.X + word.Bounds.X,
-                    selectedRegion.Y + word.Bounds.Y,
-                    word.Bounds.Width,
-                    word.Bounds.Height));
+                Rect bounds = ToLocal(word.Bounds);
                 return new LensWordCandidate(word,
                     new Rect(bounds.X - regionBounds.X, bounds.Y - regionBounds.Y, bounds.Width, bounds.Height));
             }).OrderBy(candidate => candidate.Bounds.Top).ThenBy(candidate => candidate.Bounds.Left)
@@ -472,7 +469,7 @@ internal sealed class LensSelectionWindow
         }
 
         int request = ++recognitionRequest;
-        Rect localBounds = regionAdjuster.Bounds;
+        Rect localBounds = regionAdjuster.CropBounds;
         LensRectangle region = ToScreen(localBounds);
         selectedRegion = region;
         ClearRecognitionSurface();
@@ -664,8 +661,11 @@ internal sealed class LensSelectionWindow
         BeginAdjustment(local);
     }
 
-    private void HandleSizeChanged(object sender, SizeChangedEventArgs args) =>
+    private void HandleSizeChanged(object sender, SizeChangedEventArgs args)
+    {
         UpdateSmokeBounds();
+        PositionToolbar();
+    }
 
     private void HandleTextPointerMoved(object sender, PointerRoutedEventArgs args)
     {
@@ -867,6 +867,43 @@ internal sealed class LensSelectionWindow
     private void UpdateSmokeBounds() =>
         smokeBounds.Rect = new Rect(0, 0, root.ActualWidth, root.ActualHeight);
 
+    private void PositionToolbar()
+    {
+        if (recognitionToolbar is null || root.ActualWidth <= 0 || root.ActualHeight <= 0)
+        {
+            return;
+        }
+
+        const double edgePadding = 12;
+        const double regionGap = 12;
+        recognitionToolbar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        Size toolbarSize = recognitionToolbar.DesiredSize;
+        Rect regionBounds = ToLocal(selectedRegion);
+        double x = Math.Clamp(regionBounds.X + ((regionBounds.Width - toolbarSize.Width) / 2),
+            edgePadding,
+            Math.Max(edgePadding, root.ActualWidth - toolbarSize.Width - edgePadding));
+        double above = regionBounds.Y - toolbarSize.Height - regionGap;
+        double below = regionBounds.Bottom + regionGap;
+        double y;
+
+        if (above >= edgePadding)
+        {
+            y = above;
+        }
+        else if (below + toolbarSize.Height <= root.ActualHeight - edgePadding)
+        {
+            y = below;
+        }
+        else
+        {
+            y = Math.Clamp(regionBounds.Y + regionGap,
+                edgePadding,
+                Math.Max(edgePadding, root.ActualHeight - toolbarSize.Height - edgePadding));
+        }
+
+        recognitionToolbar.Margin = new Thickness(x, y, 0, 0);
+    }
+
     private void UpdateAdjustmentMask()
     {
         if (regionAdjuster is null)
@@ -878,7 +915,7 @@ internal sealed class LensSelectionWindow
         smokeGeometry.Children.Add(smokeBounds);
         smokeGeometry.Children.Add(new RectangleGeometry
         {
-            Rect = regionAdjuster.Bounds
+            Rect = regionAdjuster.CropBounds
         });
     }
 

@@ -1,4 +1,5 @@
 using Glance.Application.Abstractions;
+using Glance.UI.WinUI;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
@@ -24,7 +25,7 @@ internal sealed class CaptureReviewSurface
     private readonly double availableHeight;
     private readonly DesktopCaptureBitmap bitmap;
     private readonly TaskCompletionSource<DesktopCaptureBitmap?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    private readonly CaptureCropOverlay cropOverlay;
+    private readonly ResizableRegionOverlay cropOverlay;
     private readonly Border previewHost;
     private readonly Border reviewBackdrop;
     private readonly Grid reviewLayer;
@@ -55,15 +56,15 @@ internal sealed class CaptureReviewSurface
             Source = imageSource,
             Stretch = Stretch.Fill
         };
-        cropOverlay = new CaptureCropOverlay(previewWidth, previewHeight, bitmap.Width, bitmap.Height);
+        cropOverlay = new ResizableRegionOverlay(previewWidth, previewHeight, bitmap.Width, bitmap.Height);
         previewHost = CreatePreviewHost(previewImage, previewWidth, previewHeight);
         ElementCompositionPreview.SetIsTranslationEnabled(previewHost, true);
         previewHost.Translation = new Vector3(0, 0, 32);
 
         Canvas.SetLeft(previewHost, previewX);
         Canvas.SetTop(previewHost, previewY);
-        Canvas.SetLeft(cropOverlay, previewX - CaptureCropOverlay.VisualPadding);
-        Canvas.SetTop(cropOverlay, previewY - CaptureCropOverlay.VisualPadding);
+        Canvas.SetLeft(cropOverlay, previewX - ResizableRegionOverlay.VisualPadding);
+        Canvas.SetTop(cropOverlay, previewY - ResizableRegionOverlay.VisualPadding);
 
         animationPreview = CreatePreviewHost(new Image
         {

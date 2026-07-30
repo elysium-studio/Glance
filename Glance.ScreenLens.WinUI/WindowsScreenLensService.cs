@@ -209,8 +209,7 @@ public sealed partial class WindowsScreenLensService :
             int pixelTop = Math.Clamp((int)Math.Floor(top), 0, bitmap.Height - 1);
             int pixelRight = Math.Clamp((int)Math.Ceiling(right), pixelLeft + 1, bitmap.Width);
             int pixelBottom = Math.Clamp((int)Math.Ceiling(bottom), pixelTop + 1, bitmap.Height);
-            lines.Add(new LensRecognizedLine(line.Text,
-                new LensRectangle(pixelLeft, pixelTop, pixelRight - pixelLeft, pixelBottom - pixelTop)));
+            lines.Add(new LensRecognizedLine(line.Text, new LensRectangle(bitmap.OriginX + pixelLeft, bitmap.OriginY + pixelTop, pixelRight - pixelLeft, pixelBottom - pixelTop)));
 
             for (int wordIndex = 0; wordIndex < line.Words.Count; wordIndex++)
             {
@@ -220,8 +219,7 @@ public sealed partial class WindowsScreenLensService :
                 int wordTop = Math.Clamp((int)Math.Floor(wordBounds.Y), 0, bitmap.Height - 1);
                 int wordRight = Math.Clamp((int)Math.Ceiling(wordBounds.Right), wordLeft + 1, bitmap.Width);
                 int wordBottom = Math.Clamp((int)Math.Ceiling(wordBounds.Bottom), wordTop + 1, bitmap.Height);
-                words.Add(new LensRecognizedWord(word.Text,
-                    new LensRectangle(wordLeft, wordTop, wordRight - wordLeft, wordBottom - wordTop),
+                words.Add(new LensRecognizedWord(word.Text, new LensRectangle(bitmap.OriginX + wordLeft, bitmap.OriginY + wordTop, wordRight - wordLeft, wordBottom - wordTop),
                     lineIndex,
                     wordIndex));
             }
