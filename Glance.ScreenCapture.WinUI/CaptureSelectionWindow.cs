@@ -1,5 +1,6 @@
 using Elysium.Platform.Windows;
 using Glance.Application.Abstractions;
+using Glance.UI.WinUI;
 using Microsoft.UI;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Dispatching;
@@ -109,12 +110,15 @@ internal sealed class CaptureSelectionWindow
         {
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Top,
-            Margin = new Thickness(0, 24, 0, 0),
-            Padding = new Thickness(14, 8, 14, 8),
-            Background = new SolidColorBrush(Color.FromArgb(220, 24, 24, 24)),
+            Margin = new Thickness(0, 40, 0, 0),
+            Padding = new Thickness(18, 10, 18, 10),
+            Background = OverlayChrome.CreateAcrylicBrush(),
+            BorderBrush = ResolveBrush("SurfaceStrokeColorDefaultBrush", Color.FromArgb(48, 255, 255, 255)),
+            BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(8),
             Child = instruction
         };
+        OverlayChrome.Elevate(instructionContainer);
 
         selectionChrome = new Grid();
         selectionChrome.Children.Add(smokeOverlay);
@@ -282,6 +286,16 @@ internal sealed class CaptureSelectionWindow
         }
 
         return new SolidColorBrush(Color.FromArgb(77, 0, 0, 0));
+    }
+
+    private static Brush ResolveBrush(string key, Color fallback)
+    {
+        if (Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue(key, out object value) && value is Brush brush)
+        {
+            return brush;
+        }
+
+        return new SolidColorBrush(fallback);
     }
 
     [DllImport("user32.dll")]

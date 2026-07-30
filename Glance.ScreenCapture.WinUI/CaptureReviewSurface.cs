@@ -99,15 +99,13 @@ internal sealed class CaptureReviewSurface
             Padding = new Thickness(6),
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Top,
-            Background = ResolveMicaBrush(),
+            Background = OverlayChrome.CreateAcrylicBrush(),
             BorderBrush = ResolveBrush("SurfaceStrokeColorDefaultBrush", Windows.UI.Color.FromArgb(48, 255, 255, 255)),
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(24),
-            Child = toolbarContent,
-            Shadow = new ThemeShadow(),
-            Translation = new Vector3(0, 0, 48)
+            Child = toolbarContent
         };
-        ElementCompositionPreview.SetIsTranslationEnabled(toolbar, true);
+        OverlayChrome.Elevate(toolbar, 48);
         toolbar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
 
         double toolbarHeight = toolbar.DesiredSize.Height;
@@ -438,16 +436,6 @@ internal sealed class CaptureReviewSurface
         stream.Write(bitmap.Pixels);
         imageSource.Invalidate();
         return imageSource;
-    }
-
-    private static Brush ResolveMicaBrush()
-    {
-        if (Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("MicaBackgroundFillColorBaseAltBrush", out object micaValue) && micaValue is Brush micaBrush)
-        {
-            return micaBrush;
-        }
-
-        return ResolveBrush("LayerFillColorDefaultBrush", Windows.UI.Color.FromArgb(245, 32, 32, 32));
     }
 
     private static Brush ResolveBrush(string key, Windows.UI.Color fallback)

@@ -122,12 +122,15 @@ internal sealed class LensSelectionWindow
         {
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Top,
-            Margin = new Thickness(0, 24, 0, 0),
-            Padding = new Thickness(14, 8, 14, 8),
-            Background = ResolveBrush("AcrylicInAppFillColorDefaultBrush", Color.FromArgb(235, 32, 32, 32)),
+            Margin = new Thickness(0, 40, 0, 0),
+            Padding = new Thickness(18, 10, 18, 10),
+            Background = OverlayChrome.CreateAcrylicBrush(),
+            BorderBrush = ResolveBrush("SurfaceStrokeColorDefaultBrush", Color.FromArgb(48, 255, 255, 255)),
+            BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(8),
             Child = instruction
         };
+        OverlayChrome.Elevate(instructionContainer);
 
         root = new Grid
         {
@@ -282,10 +285,13 @@ internal sealed class LensSelectionWindow
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
             Padding = new Thickness(8),
-            Background = ResolveBrush("AcrylicInAppFillColorDefaultBrush", Color.FromArgb(235, 32, 32, 32)),
+            Background = OverlayChrome.CreateAcrylicBrush(),
+            BorderBrush = ResolveBrush("SurfaceStrokeColorDefaultBrush", Color.FromArgb(48, 255, 255, 255)),
+            BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(10),
             Child = actions
         };
+        OverlayChrome.Elevate(recognitionToolbar, 40);
         root.Children.Add(recognitionToolbar);
         PositionToolbar();
     }
