@@ -19,6 +19,8 @@ public sealed partial class WeatherExpandedView :
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
+    public Brush ToBrush(string color) => (Brush)XamlBindingHelper.ConvertValue(typeof(Brush), color);
+
     public Geometry ToGeometry(string data) => (Geometry)XamlBindingHelper.ConvertValue(typeof(Geometry), data);
 
     public string ToUpper(string value) => value.ToUpper(CultureInfo.CurrentCulture);

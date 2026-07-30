@@ -21,6 +21,7 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Data="{x:Bind ToGeometry(ViewModel.IconPath), Mode=OneWay}"
+                Fill="{x:Bind ToBrush(ViewModel.AccentColor), Mode=OneWay}"
                 Style="{StaticResource GlanceWeatherIconPathStyle}" />
         </Grid>
         <TextBlock

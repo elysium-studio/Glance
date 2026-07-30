@@ -13,6 +13,9 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     private string compactStatusText = localizer.GetText("ConfigureWeather");
 
     [ObservableProperty]
+    private string accentColor = "#FF7DD3FC";
+
+    [ObservableProperty]
     private string conditionText = localizer.GetText("WeatherUnavailable");
 
     [ObservableProperty]
@@ -88,6 +91,7 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
         StatisticsText = localizer.GetText("WeatherDetailsUnavailable");
         TemperatureText = "--\u00B0";
         IconPath = GetIconPath(WeatherTime, WeatherSky, WeatherEffect);
+        AccentColor = GetAccentColor(WeatherTime, WeatherSky, WeatherEffect, WeatherTemperature);
     }
 
     public void SetLoading()
@@ -138,6 +142,7 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
             snapshot.Humidity,
             FormatWind(snapshot.WindSpeed, useFahrenheit));
         IconPath = GetIconPath(snapshot.TimeOfDay, snapshot.Sky, snapshot.Effect);
+        AccentColor = GetAccentColor(snapshot.TimeOfDay, snapshot.Sky, snapshot.Effect, snapshot.TemperatureState);
     }
 
     public void SetVisualState(WeatherTimeOfDay time,
@@ -159,6 +164,7 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
         WeatherEffect = effect;
         WeatherTemperature = temperature;
         IconPath = GetIconPath(time, sky, effect);
+        AccentColor = GetAccentColor(time, sky, effect, temperature);
     }
 
     private string Capitalize(string value)
@@ -193,5 +199,22 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
                     WeatherIconPaths.Moon :
                     WeatherIconPaths.Sunny
             }
+        };
+
+    private static string GetAccentColor(WeatherTimeOfDay time,
+        WeatherSky sky,
+        WeatherEffect effect,
+        WeatherTemperature temperature) =>
+        effect switch
+        {
+            WeatherEffect.Rain => "#FF7DD3FC",
+            WeatherEffect.Snow => "#FFF0F9FF",
+            WeatherEffect.Thunderstorm => "#FFD8B4FE",
+            WeatherEffect.Fog => "#FFD1D9E6",
+            _ when temperature == WeatherTemperature.Hot => "#FFFFB45E",
+            _ when sky == WeatherSky.Cloudy => "#FFD1D9E6",
+            _ when time is WeatherTimeOfDay.Dusk or WeatherTimeOfDay.Night => "#FFB8C7FF",
+            _ when sky == WeatherSky.PartlyCloudy => "#FF8ED8FF",
+            _ => "#FFFFD166"
         };
 }

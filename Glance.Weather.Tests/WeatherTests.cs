@@ -144,6 +144,27 @@ public sealed class WeatherTests
         };
 
     [Theory]
+    [InlineData(WeatherTimeOfDay.Afternoon, WeatherSky.Clear, WeatherEffect.None, WeatherTemperature.Normal, "#FFFFD166")]
+    [InlineData(WeatherTimeOfDay.Night, WeatherSky.Clear, WeatherEffect.None, WeatherTemperature.Normal, "#FFB8C7FF")]
+    [InlineData(WeatherTimeOfDay.Afternoon, WeatherSky.Clear, WeatherEffect.Rain, WeatherTemperature.Normal, "#FF7DD3FC")]
+    [InlineData(WeatherTimeOfDay.Afternoon, WeatherSky.Clear, WeatherEffect.Snow, WeatherTemperature.Normal, "#FFF0F9FF")]
+    [InlineData(WeatherTimeOfDay.Afternoon, WeatherSky.Clear, WeatherEffect.Thunderstorm, WeatherTemperature.Normal, "#FFD8B4FE")]
+    [InlineData(WeatherTimeOfDay.Afternoon, WeatherSky.Cloudy, WeatherEffect.None, WeatherTemperature.Normal, "#FFD1D9E6")]
+    [InlineData(WeatherTimeOfDay.Afternoon, WeatherSky.Clear, WeatherEffect.None, WeatherTemperature.Hot, "#FFFFB45E")]
+    public void VisualState_UsesConditionAccent(WeatherTimeOfDay time,
+        WeatherSky sky,
+        WeatherEffect effect,
+        WeatherTemperature temperature,
+        string expected)
+    {
+        WeatherViewModel viewModel = new(new TestTextLocalizer());
+
+        viewModel.SetVisualState(time, sky, WeatherCelestial.None, effect, temperature, 14, 6, 19);
+
+        Assert.Equal(expected, viewModel.AccentColor);
+    }
+
+    [Theory]
     [InlineData(2, WeatherTimeOfDay.Night)]
     [InlineData(6, WeatherTimeOfDay.Dawn)]
     [InlineData(9, WeatherTimeOfDay.Morning)]
