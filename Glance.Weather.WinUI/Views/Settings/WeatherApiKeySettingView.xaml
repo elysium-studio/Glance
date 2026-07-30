@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="Glance.Weather.WinUI.WeatherApiKeySettingView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:CommunityToolkit="using:CommunityToolkit.WinUI.Controls"
+    Loaded="{x:Bind ViewModel.Activate}"
+    Unloaded="{x:Bind ViewModel.Deactivate}">
+    <CommunityToolkit:SettingsCard x:Uid="WeatherApiKeySettingCard">
+        <PasswordBox
+            MinWidth="240"
+            Password="{x:Bind ViewModel.Value, Mode=TwoWay}"
+            PasswordRevealMode="Peek" />
+    </CommunityToolkit:SettingsCard>
+</UserControl>

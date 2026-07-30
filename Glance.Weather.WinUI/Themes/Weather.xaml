@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Default">
+            <SolidColorBrush x:Key="GlanceWeatherAccentBrush" Color="#FF60A5FA" />
+            <SolidColorBrush x:Key="GlanceWeatherAccentPointerOverBrush" Color="#FF7DB7FB" />
+            <SolidColorBrush x:Key="GlanceWeatherAccentPressedBrush" Color="#FF438CDF" />
+            <SolidColorBrush x:Key="GlanceWeatherOnAccentBrush" Color="#FF07182E" />
+            <StaticResource x:Key="AccentButtonBackground" ResourceKey="GlanceWeatherAccentBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="GlanceWeatherAccentPointerOverBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="GlanceWeatherAccentPressedBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundDisabled" ResourceKey="AccentFillColorDisabledBrush" />
+            <StaticResource x:Key="AccentButtonForeground" ResourceKey="GlanceWeatherOnAccentBrush" />
+            <StaticResource x:Key="AccentButtonForegroundPointerOver" ResourceKey="GlanceWeatherOnAccentBrush" />
+            <StaticResource x:Key="AccentButtonForegroundPressed" ResourceKey="GlanceWeatherOnAccentBrush" />
+            <StaticResource x:Key="AccentButtonForegroundDisabled" ResourceKey="TextOnAccentFillColorDisabled" />
+            <StaticResource x:Key="AccentButtonBorderBrush" ResourceKey="AccentControlElevationBorderBrush" />
+            <StaticResource x:Key="AccentButtonBorderBrushPointerOver" ResourceKey="AccentControlElevationBorderBrush" />
+            <StaticResource x:Key="AccentButtonBorderBrushPressed" ResourceKey="ControlFillColorTransparentBrush" />
+            <StaticResource x:Key="AccentButtonBorderBrushDisabled" ResourceKey="ControlFillColorTransparentBrush" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="GlanceWeatherAccentBrush" Color="#FF2563A8" />
+            <SolidColorBrush x:Key="GlanceWeatherAccentPointerOverBrush" Color="#FF3475BC" />
+            <SolidColorBrush x:Key="GlanceWeatherAccentPressedBrush" Color="#FF174C86" />
+            <SolidColorBrush x:Key="GlanceWeatherOnAccentBrush" Color="#FFFFFFFF" />
+            <StaticResource x:Key="AccentButtonBackground" ResourceKey="GlanceWeatherAccentBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="GlanceWeatherAccentPointerOverBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="GlanceWeatherAccentPressedBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundDisabled" ResourceKey="AccentFillColorDisabledBrush" />
+            <StaticResource x:Key="AccentButtonForeground" ResourceKey="GlanceWeatherOnAccentBrush" />
+            <StaticResource x:Key="AccentButtonForegroundPointerOver" ResourceKey="GlanceWeatherOnAccentBrush" />
+            <StaticResource x:Key="AccentButtonForegroundPressed" ResourceKey="GlanceWeatherOnAccentBrush" />
+            <StaticResource x:Key="AccentButtonForegroundDisabled" ResourceKey="TextOnAccentFillColorDisabled" />
+            <StaticResource x:Key="AccentButtonBorderBrush" ResourceKey="AccentControlElevationBorderBrush" />
+            <StaticResource x:Key="AccentButtonBorderBrushPointerOver" ResourceKey="AccentControlElevationBorderBrush" />
+            <StaticResource x:Key="AccentButtonBorderBrushPressed" ResourceKey="ControlFillColorTransparentBrush" />
+            <StaticResource x:Key="AccentButtonBorderBrushDisabled" ResourceKey="ControlFillColorTransparentBrush" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="HighContrast">
+            <StaticResource x:Key="GlanceWeatherAccentBrush" ResourceKey="SystemControlHighlightAccentBrush" />
+            <StaticResource x:Key="GlanceWeatherAccentPointerOverBrush" ResourceKey="SystemControlForegroundAccentBrush" />
+            <StaticResource x:Key="GlanceWeatherAccentPressedBrush" ResourceKey="SystemControlBackgroundBaseMediumLowBrush" />
+            <StaticResource x:Key="GlanceWeatherOnAccentBrush" ResourceKey="SystemControlHighlightAltAccentBrush" />
+            <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemControlHighlightAccentBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="SystemControlForegroundAccentBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="SystemControlBackgroundBaseMediumLowBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundDisabled" ResourceKey="SystemControlBackgroundBaseLowBrush" />
+            <StaticResource x:Key="AccentButtonForeground" ResourceKey="SystemControlHighlightAltAccentBrush" />
+            <StaticResource x:Key="AccentButtonForegroundPointerOver" ResourceKey="SystemControlBackgroundChromeWhiteBrush" />
+            <StaticResource x:Key="AccentButtonForegroundPressed" ResourceKey="SystemControlHighlightBaseHighBrush" />
+            <StaticResource x:Key="AccentButtonForegroundDisabled" ResourceKey="SystemControlDisabledBaseMediumLowBrush" />
+            <StaticResource x:Key="AccentButtonBorderBrush" ResourceKey="SystemControlHighlightAccentBrush" />
+            <StaticResource x:Key="AccentButtonBorderBrushPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowBrush" />
+            <StaticResource x:Key="AccentButtonBorderBrushPressed" ResourceKey="SystemControlHighlightTransparentBrush" />
+            <StaticResource x:Key="AccentButtonBorderBrushDisabled" ResourceKey="SystemControlDisabledTransparentBrush" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

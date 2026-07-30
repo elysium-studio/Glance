@@ -28,6 +28,7 @@ The island remains at the top or bottom of the desktop in a compact state, expan
 - **Magnifier** — view the current Windows Magnifier zoom level and control magnification from the expanded island.
 - **Presence** — maintain an active session by sending an F15 input pulse only after four minutes of genuine inactivity.
 - **Theme Switcher** — switch Windows between light and dark themes manually, or follow local sunrise and sunset with an animated radial transition.
+- **Weather** — view current OpenWeather conditions against composition-driven sun, cloud, rain, snow, fog, heat, and thunderstorm scenes.
 
 ## Architecture
 

@@ -228,4 +228,13 @@
   <Project Path="Glance.VoiceNotes.Tests/Glance.VoiceNotes.Tests.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.Weather.WinUI/Glance.Weather.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Weather/Glance.Weather.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Weather.Tests/Glance.Weather.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
 </Solution>

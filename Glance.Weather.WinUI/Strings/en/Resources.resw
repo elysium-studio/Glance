@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve"><value>Weather</value></data>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Weather</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>See current conditions with a live weather scene.</value></data>
+  <data name="ConfigureWeather" xml:space="preserve"><value>Set up weather</value></data>
+  <data name="WeatherUnavailable" xml:space="preserve"><value>Weather unavailable</value></data>
+  <data name="AddLocationAndApiKey" xml:space="preserve"><value>Add a location and OpenWeather API key in settings</value></data>
+  <data name="LocationNotSet" xml:space="preserve"><value>Location not set</value></data>
+  <data name="WeatherDetailsUnavailable" xml:space="preserve"><value>Weather details unavailable</value></data>
+  <data name="UpdatingWeather" xml:space="preserve"><value>Updating weather</value></data>
+  <data name="CheckWeatherSettings" xml:space="preserve"><value>Check the location, API key, and connection</value></data>
+  <data name="WeatherSourceDetail" xml:space="preserve"><value>{0} · OpenWeather</value></data>
+  <data name="WeatherStatistics" xml:space="preserve"><value>Feels {0}° · {1}% humidity · {2}</value></data>
+  <data name="RefreshWeather" xml:space="preserve"><value>Refresh weather</value></data>
+  <data name="WeatherApiKeySettingCard.Header" xml:space="preserve"><value>OpenWeather API key</value></data>
+  <data name="WeatherApiKeySettingCard.Description" xml:space="preserve"><value>Use your free OpenWeather API key to retrieve current conditions.</value></data>
+  <data name="WeatherLocationSettingCard.Header" xml:space="preserve"><value>Location</value></data>
+  <data name="WeatherLocationSettingCard.Description" xml:space="preserve"><value>Enter a city, optionally followed by a country code.</value></data>
+  <data name="WeatherLocationTextBox.PlaceholderText" xml:space="preserve"><value>London, GB</value></data>
+  <data name="WeatherUnitsSettingCard.Header" xml:space="preserve"><value>Use Fahrenheit</value></data>
+  <data name="WeatherUnitsSettingCard.Description" xml:space="preserve"><value>Show temperatures in Fahrenheit instead of Celsius.</value></data>
+</root>
