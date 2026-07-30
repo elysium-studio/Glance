@@ -65,8 +65,8 @@
             Grid.Column="2"
             Width="36"
             Height="36"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center">
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
             <Button
                 x:Uid="ExtractButton"
                 HorizontalAlignment="Stretch"
@@ -77,21 +77,12 @@
                     <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
                         <Setter Property="Padding" Value="0" />
                         <Setter Property="CornerRadius" Value="18" />
+                        <Setter Property="Content" Value="&#xE768;" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="14" />
                     </Style>
                 </Button.Style>
             </Button>
-            <Viewbox
-                Width="16"
-                Height="16"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                IsHitTestVisible="False">
-                <Path
-                    Width="24"
-                    Height="24"
-                    Fill="{ThemeResource GlanceScreenLensAccentForegroundBrush}"
-                    Style="{StaticResource GlanceScreenLensPathStyle}" />
-            </Viewbox>
         </Grid>
     </Grid>
 </UserControl>
