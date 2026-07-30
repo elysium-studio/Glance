@@ -14,6 +14,7 @@ using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Shapes;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Graphics;
@@ -25,9 +26,10 @@ using PlatformWindowExtensions = Elysium.Platform.Windows.WindowExtensions;
 
 namespace Glance.ScreenLens.WinUI;
 
-internal sealed class LensSelectionWindow
+internal sealed partial class LensSelectionWindow
 {
     private const int IntentFlightDurationMs = 380;
+    private const int ShowWindowHide = 0;
     private static readonly TimeSpan MinimumRecognitionDuration = TimeSpan.FromSeconds(4);
     private readonly LensBitmap bitmap;
     private readonly TaskCompletionSource<bool> presentationCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -438,10 +440,35 @@ internal sealed class LensSelectionWindow
 
         closed = true;
         recognitionRequest++;
-        recognitionProgressStoryboard.Stop();
-        root.ReleasePointerCaptures();
+
+        try
+        {
+            recognitionProgressStoryboard.Stop();
+            root.ReleasePointerCaptures();
+        }
+        catch (Exception)
+        {
+        }
+
+        try
+        {
+            PlatformWindowExtensions.viSetOpacity(windowHandle, 0);
+            window.AppWindow.Hide();
+        }
+        catch (Exception)
+        {
+        }
+
+        _ = NativeMethods.ShowWindow(windowHandle, ShowWindowHide);
         presentationCompletion.TrySetResult(true);
-        window.Close();
+
+        try
+        {
+            window.Close();
+        }
+        catch (Exception)
+        {
+        }
     }
 
     private void ClearRecognitionSurface()
@@ -549,7 +576,9 @@ internal sealed class LensSelectionWindow
                 await PlayIntentFlightAsync(targetBounds);
             }
 
-            await intentService.InvokeAsync(intent.Id, new GlanceContentContext(GlanceContentKind.Text, [], text));
+            Close();
+            using CancellationTokenSource timeout = new(TimeSpan.FromSeconds(3));
+            await intentService.InvokeAsync(intent.Id, new GlanceContentContext(GlanceContentKind.Text, [], text), timeout.Token).WaitAsync(timeout.Token);
         }
         catch
         {
@@ -593,7 +622,7 @@ internal sealed class LensSelectionWindow
 
         TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
         CompositionScopedBatch? animationBatch = null;
-        DispatcherQueueTimer? fallbackTimer = null;
+        DispatcherQueueTimer fallbackTimer = dispatcherQueue.CreateTimer();
         EventHandler<object>? renderingHandler = null;
         bool finished = false;
 
@@ -605,21 +634,29 @@ internal sealed class LensSelectionWindow
             }
 
             finished = true;
+            completion.TrySetResult();
 
             if (renderingHandler is not null)
             {
                 CompositionTarget.Rendering -= renderingHandler;
             }
 
-            if (fallbackTimer is not null)
-            {
-                fallbackTimer.Stop();
-            }
+            fallbackTimer.Stop();
 
-            animationBatch?.Dispose();
-            flightCanvas.Children.Remove(flightSurface);
-            completion.TrySetResult();
+            try
+            {
+                animationBatch?.Dispose();
+                flightCanvas.Children.Remove(flightSurface);
+            }
+            catch (Exception)
+            {
+            }
         }
+
+        fallbackTimer.Interval = TimeSpan.FromMilliseconds(IntentFlightDurationMs + 250);
+        fallbackTimer.IsRepeating = false;
+        fallbackTimer.Tick += (_, _) => Finish();
+        fallbackTimer.Start();
 
         int preparationFrames = 0;
         renderingHandler = (_, _) =>
@@ -633,13 +670,16 @@ internal sealed class LensSelectionWindow
 
             CompositionTarget.Rendering -= renderingHandler;
             renderingHandler = null;
-            animationBatch = StartIntentFlightAnimation(flightSurface, sourceBounds, targetBounds);
-            animationBatch.Completed += (_, _) => Finish();
-            fallbackTimer = dispatcherQueue.CreateTimer();
-            fallbackTimer.Interval = TimeSpan.FromMilliseconds(IntentFlightDurationMs + 120);
-            fallbackTimer.IsRepeating = false;
-            fallbackTimer.Tick += (_, _) => Finish();
-            fallbackTimer.Start();
+
+            try
+            {
+                animationBatch = StartIntentFlightAnimation(flightSurface, sourceBounds, targetBounds);
+                animationBatch.Completed += (_, _) => dispatcherQueue.TryEnqueue(Finish);
+            }
+            catch (Exception)
+            {
+                Finish();
+            }
         };
         CompositionTarget.Rendering += renderingHandler;
         return completion.Task;
@@ -1194,4 +1234,11 @@ internal sealed class LensSelectionWindow
 
     private sealed record LensWordCandidate(LensRecognizedWord Word,
         Rect Bounds);
+
+    private static partial class NativeMethods
+    {
+        [LibraryImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static partial bool ShowWindow(nint window, int command);
+    }
 }
