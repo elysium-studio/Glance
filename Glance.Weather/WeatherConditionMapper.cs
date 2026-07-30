@@ -40,6 +40,7 @@ public static class WeatherConditionMapper
     public static WeatherTimeOfDay MapTime(long timestamp, long sunrise, long sunset)
     {
         const long transitionSeconds = 45 * 60;
+        const long eveningSeconds = 2 * 60 * 60;
 
         if (timestamp >= sunrise - transitionSeconds && timestamp < sunrise + transitionSeconds)
         {
@@ -51,8 +52,20 @@ public static class WeatherConditionMapper
             return WeatherTimeOfDay.Dusk;
         }
 
-        return timestamp >= sunrise + transitionSeconds && timestamp < sunset - transitionSeconds ?
-            WeatherTimeOfDay.Day :
-            WeatherTimeOfDay.Night;
+        if (timestamp < sunrise - transitionSeconds || timestamp >= sunset + transitionSeconds)
+        {
+            return WeatherTimeOfDay.Night;
+        }
+
+        long solarNoon = sunrise + (sunset - sunrise) / 2;
+
+        if (timestamp < solarNoon)
+        {
+            return WeatherTimeOfDay.Morning;
+        }
+
+        return timestamp < sunset - eveningSeconds ?
+            WeatherTimeOfDay.Afternoon :
+            WeatherTimeOfDay.Evening;
     }
 }

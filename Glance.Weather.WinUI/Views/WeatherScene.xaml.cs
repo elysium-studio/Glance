@@ -26,6 +26,7 @@ public sealed partial class WeatherScene :
     private CompositionGeometricClip? clip;
     private DispatcherQueueTimer? lightningTimer;
     private SpriteVisual? lightningFlash;
+    private WeatherSceneState? activeState;
     private bool rebuildQueued;
 
     public WeatherScene() => InitializeComponent();
@@ -73,6 +74,7 @@ public sealed partial class WeatherScene :
         activeSceneLayer = null;
         activeCloudLayer = null;
         activeBackgroundLayer = null;
+        activeState = null;
         clip = null;
         clipGeometry = null;
     }
@@ -138,7 +140,6 @@ public sealed partial class WeatherScene :
             return;
         }
 
-        StopLightning();
         Compositor compositor = ElementCompositionPreview.GetElementVisual(this).Compositor;
 
         if (sceneVisual is null)
@@ -148,11 +149,20 @@ public sealed partial class WeatherScene :
             ElementCompositionPreview.SetElementChildVisual(ParticleHost, sceneVisual);
         }
 
-        WeatherTimeOfDay time = viewModel?.WeatherTime ?? WeatherTimeOfDay.Day;
+        WeatherTimeOfDay time = viewModel?.WeatherTime ?? WeatherTimeOfDay.Afternoon;
         WeatherSky sky = viewModel?.WeatherSky ?? WeatherSky.Clear;
         WeatherCelestial celestial = viewModel?.WeatherCelestial ?? WeatherCelestial.Sun;
         WeatherEffect effect = viewModel?.WeatherEffect ?? WeatherEffect.None;
         WeatherTemperature temperature = viewModel?.WeatherTemperature ?? WeatherTemperature.Normal;
+        WeatherSceneState state = new(time, sky, celestial, effect, temperature);
+
+        if (activeState == state)
+        {
+            return;
+        }
+
+        StopLightning();
+        NormalizeActiveLayers();
         ContainerVisual? previousSceneLayer = activeSceneLayer;
         Canvas? previousCloudLayer = activeCloudLayer;
         FrameworkElement? previousBackgroundLayer = activeBackgroundLayer;
@@ -169,6 +179,8 @@ public sealed partial class WeatherScene :
             IsHitTestVisible = false
         };
         BackgroundHost.Children.Add(activeBackgroundLayer);
+        activeState = state;
+
         if (celestial != WeatherCelestial.None)
         {
             AddCelestial(compositor, temperature == WeatherTemperature.Hot, celestial, time);
@@ -222,6 +234,43 @@ public sealed partial class WeatherScene :
         }
     }
 
+    private void NormalizeActiveLayers()
+    {
+        if (sceneVisual is not null)
+        {
+            sceneVisual.Children.RemoveAll();
+
+            if (activeSceneLayer is not null)
+            {
+                activeSceneLayer.StopAnimation("Opacity");
+                activeSceneLayer.Opacity = 1;
+                sceneVisual.Children.InsertAtTop(activeSceneLayer);
+            }
+        }
+
+        CloudLayerHost.Children.Clear();
+
+        if (activeCloudLayer is not null)
+        {
+            Visual visual = ElementCompositionPreview.GetElementVisual(activeCloudLayer);
+            visual.StopAnimation("Opacity");
+            visual.Opacity = 1;
+            activeCloudLayer.Opacity = 1;
+            CloudLayerHost.Children.Add(activeCloudLayer);
+        }
+
+        BackgroundHost.Children.Clear();
+
+        if (activeBackgroundLayer is not null)
+        {
+            Visual visual = ElementCompositionPreview.GetElementVisual(activeBackgroundLayer);
+            visual.StopAnimation("Opacity");
+            visual.Opacity = 1;
+            activeBackgroundLayer.Opacity = 1;
+            BackgroundHost.Children.Add(activeBackgroundLayer);
+        }
+    }
+
     private void CrossFadeScene(Compositor compositor,
         ContainerVisual previousScene,
         ContainerVisual nextScene,
@@ -262,12 +311,20 @@ public sealed partial class WeatherScene :
     {
         (Color start, Color end) = time switch
         {
-            WeatherTimeOfDay.Dawn => (Color.FromArgb(255, 72, 75, 145), Color.FromArgb(255, 246, 155, 120)),
-            WeatherTimeOfDay.Dusk => (Color.FromArgb(255, 42, 47, 111), Color.FromArgb(255, 218, 91, 112)),
-            WeatherTimeOfDay.Night => (Color.FromArgb(255, 8, 20, 55), Color.FromArgb(255, 39, 58, 114)),
-            _ when temperature == WeatherTemperature.Hot => (Color.FromArgb(255, 186, 65, 24), Color.FromArgb(255, 251, 146, 60)),
-            _ => (Color.FromArgb(255, 21, 112, 211), Color.FromArgb(255, 84, 187, 240))
+            WeatherTimeOfDay.Dawn => (Color.FromArgb(255, 65, 72, 139), Color.FromArgb(255, 242, 151, 124)),
+            WeatherTimeOfDay.Morning => (Color.FromArgb(255, 48, 139, 214), Color.FromArgb(255, 150, 211, 239)),
+            WeatherTimeOfDay.Afternoon => (Color.FromArgb(255, 20, 105, 202), Color.FromArgb(255, 83, 182, 235)),
+            WeatherTimeOfDay.Evening => (Color.FromArgb(255, 44, 92, 173), Color.FromArgb(255, 239, 157, 99)),
+            WeatherTimeOfDay.Dusk => (Color.FromArgb(255, 43, 43, 105), Color.FromArgb(255, 204, 85, 126)),
+            WeatherTimeOfDay.Night => (Color.FromArgb(255, 7, 18, 50), Color.FromArgb(255, 32, 50, 101)),
+            _ => (Color.FromArgb(255, 20, 105, 202), Color.FromArgb(255, 83, 182, 235))
         };
+
+        if (temperature == WeatherTemperature.Hot && time is not WeatherTimeOfDay.Night)
+        {
+            start = Blend(start, Color.FromArgb(255, 184, 65, 26), 0.44f);
+            end = Blend(end, Color.FromArgb(255, 250, 153, 61), 0.44f);
+        }
 
         if (sky == WeatherSky.Cloudy)
         {
@@ -316,7 +373,7 @@ public sealed partial class WeatherScene :
     private void AddCelestial(Compositor compositor, bool hot, WeatherCelestial celestialKind, WeatherTimeOfDay time)
     {
         bool isMoon = celestialKind == WeatherCelestial.Moon;
-        bool isTransition = time is WeatherTimeOfDay.Dawn or WeatherTimeOfDay.Dusk;
+        bool isTransition = time is WeatherTimeOfDay.Dawn or WeatherTimeOfDay.Evening or WeatherTimeOfDay.Dusk;
         float diameter = hot && !isMoon ? 100 : isMoon ? 58 : 76;
         ContainerVisual celestial = compositor.CreateContainerVisual();
         celestial.Size = new Vector2(diameter);
@@ -667,4 +724,10 @@ public sealed partial class WeatherScene :
     private float SceneWidth => Math.Max((float)ActualWidth, 380);
 
     private float SceneHeight => Math.Max((float)ActualHeight, 120);
+
+    private readonly record struct WeatherSceneState(WeatherTimeOfDay Time,
+        WeatherSky Sky,
+        WeatherCelestial Celestial,
+        WeatherEffect Effect,
+        WeatherTemperature Temperature);
 }

@@ -4,7 +4,9 @@ public enum WeatherTimeOfDay
 {
     Live,
     Dawn,
-    Day,
+    Morning,
+    Afternoon,
+    Evening,
     Dusk,
     Night
 }

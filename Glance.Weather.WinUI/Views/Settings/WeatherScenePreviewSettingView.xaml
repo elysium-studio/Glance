@@ -12,7 +12,9 @@
             SelectedIndex="{x:Bind ViewModel.Value, Mode=TwoWay}">
             <ComboBoxItem x:Uid="WeatherPreviewLiveOption" />
             <ComboBoxItem x:Uid="WeatherTimeDawnOption" />
-            <ComboBoxItem x:Uid="WeatherTimeDayOption" />
+            <ComboBoxItem x:Uid="WeatherTimeMorningOption" />
+            <ComboBoxItem x:Uid="WeatherTimeAfternoonOption" />
+            <ComboBoxItem x:Uid="WeatherTimeEveningOption" />
             <ComboBoxItem x:Uid="WeatherTimeDuskOption" />
             <ComboBoxItem x:Uid="WeatherTimeNightOption" />
         </ComboBox>

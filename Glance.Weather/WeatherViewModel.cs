@@ -49,7 +49,7 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
     private WeatherTemperature weatherTemperature = WeatherTemperature.Normal;
 
     [ObservableProperty]
-    private WeatherTimeOfDay weatherTime = WeatherTimeOfDay.Day;
+    private WeatherTimeOfDay weatherTime = WeatherTimeOfDay.Afternoon;
 
     [ObservableProperty]
     private string statisticsText = localizer.GetText("WeatherDetailsUnavailable");
@@ -68,7 +68,7 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
         WeatherCelestial = WeatherCelestial.Sun;
         WeatherSky = WeatherSky.Clear;
         WeatherTemperature = WeatherTemperature.Normal;
-        WeatherTime = WeatherTimeOfDay.Day;
+        WeatherTime = WeatherTimeOfDay.Afternoon;
         CompactStatusText = localizer.GetText("ConfigureWeather");
         ConditionText = localizer.GetText("ConfigureWeather");
         DetailText = localizer.GetText("AddLocationAndApiKey");

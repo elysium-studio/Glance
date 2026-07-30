@@ -22,6 +22,9 @@ public sealed partial class WeatherComponent :
     private readonly WeatherViewModel viewModel;
     private CancellationTokenSource? refreshCancellation;
     private WeatherSnapshot? lastSnapshot;
+    private string refreshApiKey;
+    private string refreshLocation;
+    private bool refreshUseFahrenheit;
 
     public WeatherComponent(WeatherViewModel viewModel,
         IWeatherService weatherService,
@@ -33,6 +36,9 @@ public sealed partial class WeatherComponent :
         this.options = options;
         this.localizer = localizer;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        refreshApiKey = options.Current.ApiKey;
+        refreshLocation = options.Current.Location;
+        refreshUseFahrenheit = options.Current.UseFahrenheit;
 
         WeatherCompactView compactView = new(viewModel);
         WeatherExpandedView expandedView = new(viewModel);
@@ -94,9 +100,24 @@ public sealed partial class WeatherComponent :
         dispatcherQueue.TryEnqueue(() =>
         {
             ApplySceneOverride();
-            settingsTimer.Stop();
-            settingsTimer.Start();
+
+            if (RequiresRefresh(args.Options))
+            {
+                settingsTimer.Stop();
+                settingsTimer.Start();
+            }
         });
+
+    private bool RequiresRefresh(WeatherSettings settings)
+    {
+        bool changed = !string.Equals(refreshApiKey, settings.ApiKey, StringComparison.Ordinal) ||
+            !string.Equals(refreshLocation, settings.Location, StringComparison.Ordinal) ||
+            refreshUseFahrenheit != settings.UseFahrenheit;
+        refreshApiKey = settings.ApiKey;
+        refreshLocation = settings.Location;
+        refreshUseFahrenheit = settings.UseFahrenheit;
+        return changed;
+    }
 
     private void Refresh() => _ = RefreshAsync();
 
@@ -153,7 +174,7 @@ public sealed partial class WeatherComponent :
     {
 #if DEBUG
         WeatherSettings settings = options.Current;
-        WeatherTimeOfDay time = lastSnapshot?.TimeOfDay ?? WeatherTimeOfDay.Day;
+        WeatherTimeOfDay time = lastSnapshot?.TimeOfDay ?? WeatherTimeOfDay.Afternoon;
         WeatherSky sky = lastSnapshot?.Sky ?? WeatherSky.Clear;
         WeatherEffect effect = lastSnapshot?.Effect ?? WeatherEffect.None;
         WeatherTemperature temperature = lastSnapshot?.TemperatureState ?? WeatherTemperature.Normal;

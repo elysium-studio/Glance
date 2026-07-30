@@ -47,7 +47,9 @@
   <data name="WeatherTemperaturePreviewSettingCard.Description" xml:space="preserve"><value>Choose whether the scene uses the hot-weather treatment.</value></data>
   <data name="WeatherPreviewLiveOption.Content" xml:space="preserve"><value>Live weather</value></data>
   <data name="WeatherTimeDawnOption.Content" xml:space="preserve"><value>Dawn</value></data>
-  <data name="WeatherTimeDayOption.Content" xml:space="preserve"><value>Day</value></data>
+  <data name="WeatherTimeMorningOption.Content" xml:space="preserve"><value>Morning</value></data>
+  <data name="WeatherTimeAfternoonOption.Content" xml:space="preserve"><value>Afternoon</value></data>
+  <data name="WeatherTimeEveningOption.Content" xml:space="preserve"><value>Evening</value></data>
   <data name="WeatherTimeDuskOption.Content" xml:space="preserve"><value>Dusk</value></data>
   <data name="WeatherTimeNightOption.Content" xml:space="preserve"><value>Night</value></data>
   <data name="WeatherEffectNoneOption.Content" xml:space="preserve"><value>None</value></data>

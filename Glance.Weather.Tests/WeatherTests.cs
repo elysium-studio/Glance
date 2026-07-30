@@ -29,7 +29,7 @@ public sealed class WeatherTests
             "light rain",
             WeatherSceneKind.Rain,
             true,
-            WeatherTimeOfDay.Day,
+            WeatherTimeOfDay.Afternoon,
             WeatherSky.PartlyCloudy,
             WeatherEffect.Rain,
             WeatherTemperature.Normal,
@@ -72,6 +72,16 @@ public sealed class WeatherTests
         Assert.Equal(WeatherSky.Clear, WeatherConditionMapper.MapSky(5));
         Assert.Equal(WeatherEffect.Snow, WeatherConditionMapper.MapEffect(601));
     }
+
+    [Theory]
+    [InlineData(20000, 10000, 50000, WeatherTimeOfDay.Morning)]
+    [InlineData(32000, 10000, 50000, WeatherTimeOfDay.Afternoon)]
+    [InlineData(44000, 10000, 50000, WeatherTimeOfDay.Evening)]
+    [InlineData(10000, 10000, 50000, WeatherTimeOfDay.Dawn)]
+    [InlineData(50000, 10000, 50000, WeatherTimeOfDay.Dusk)]
+    [InlineData(60000, 10000, 50000, WeatherTimeOfDay.Night)]
+    public void ConditionMapper_MapsTimeIndependently(long timestamp, long sunrise, long sunset, WeatherTimeOfDay expected) =>
+        Assert.Equal(expected, WeatherConditionMapper.MapTime(timestamp, sunrise, sunset));
 
     [Fact]
     public void Update_HidesCelestialBodyUnderCloudySky()
