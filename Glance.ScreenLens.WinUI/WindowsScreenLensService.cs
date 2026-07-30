@@ -203,9 +203,12 @@ public sealed partial class WindowsScreenLensService :
             : await RecognizePassAsync(engine, bitmap, scaledPixels, recognitionWidth, recognitionHeight);
         byte[] enhancedPixels = EnhanceTextContrast(scaledPixels);
         IReadOnlyList<LensRecognizedWord> enhancedWords = await RecognizePassAsync(engine, bitmap, enhancedPixels, recognitionWidth, recognitionHeight);
+        byte[] adaptivePixels = EnhanceLocalTextContrast(scaledPixels, recognitionWidth, recognitionHeight);
+        IReadOnlyList<LensRecognizedWord> adaptiveWords = await RecognizePassAsync(engine, bitmap, adaptivePixels, recognitionWidth, recognitionHeight);
         List<LensRecognizedWord> mergedWords = [.. initialWords];
         MergeUniqueWords(mergedWords, originalWords);
         MergeUniqueWords(mergedWords, enhancedWords);
+        MergeUniqueWords(mergedWords, adaptiveWords);
         return BuildRecognitionResult(mergedWords);
     }
 
@@ -221,12 +224,49 @@ public sealed partial class WindowsScreenLensService :
     {
         foreach (LensRecognizedWord word in candidates)
         {
-            if (!mergedWords.Any(existing => RepresentsSameWord(existing.Bounds, word.Bounds)))
+            int[] matchingIndices =
+            [
+                .. mergedWords
+                    .Select((existing, index) => (existing, index))
+                    .Where(item => RepresentsSameWord(item.existing.Bounds, word.Bounds))
+                    .Select(item => item.index)
+            ];
+
+            if (matchingIndices.Length == 0)
             {
                 mergedWords.Add(word);
+                continue;
+            }
+
+            if (matchingIndices.Length > 1)
+            {
+                continue;
+            }
+
+            int existingIndex = matchingIndices[0];
+
+            if (GetRecognitionQuality(word.Text) >= GetRecognitionQuality(mergedWords[existingIndex].Text))
+            {
+                mergedWords[existingIndex] = word;
             }
         }
     }
+
+    private static int GetRecognitionQuality(string text) =>
+        text.Sum(character =>
+        {
+            if (char.IsLetterOrDigit(character))
+            {
+                return 3;
+            }
+
+            if ("<>[]{}()\"'=:/\\.-_&#;,+*!?".Contains(character))
+            {
+                return 1;
+            }
+
+            return char.IsWhiteSpace(character) ? 0 : -4;
+        });
 
     private static LensRecognitionResult BuildRecognitionResult(IReadOnlyList<LensRecognizedWord> words)
     {
@@ -324,6 +364,51 @@ public sealed partial class WindowsScreenLensService :
         return enhanced;
     }
 
+    private static byte[] EnhanceLocalTextContrast(byte[] pixels, int width, int height)
+    {
+        int stride = width + 1;
+        int[] integral = new int[(width + 1) * (height + 1)];
+
+        for (int y = 0; y < height; y++)
+        {
+            int rowTotal = 0;
+
+            for (int x = 0; x < width; x++)
+            {
+                int pixelIndex = ((y * width) + x) * 4;
+                rowTotal += Math.Max(pixels[pixelIndex], Math.Max(pixels[pixelIndex + 1], pixels[pixelIndex + 2]));
+                integral[((y + 1) * stride) + x + 1] = integral[(y * stride) + x + 1] + rowTotal;
+            }
+        }
+
+        byte[] enhanced = new byte[pixels.Length];
+        const int contrast = 10;
+        const int radius = 18;
+
+        for (int y = 0; y < height; y++)
+        {
+            int top = Math.Max(0, y - radius);
+            int bottom = Math.Min(height, y + radius + 1);
+
+            for (int x = 0; x < width; x++)
+            {
+                int left = Math.Max(0, x - radius);
+                int right = Math.Min(width, x + radius + 1);
+                int total = integral[(bottom * stride) + right] - integral[(top * stride) + right] - integral[(bottom * stride) + left] + integral[(top * stride) + left];
+                int mean = total / ((right - left) * (bottom - top));
+                int pixelIndex = ((y * width) + x) * 4;
+                int value = Math.Max(pixels[pixelIndex], Math.Max(pixels[pixelIndex + 1], pixels[pixelIndex + 2]));
+                byte output = value >= mean + contrast ? byte.MinValue : byte.MaxValue;
+                enhanced[pixelIndex] = output;
+                enhanced[pixelIndex + 1] = output;
+                enhanced[pixelIndex + 2] = output;
+                enhanced[pixelIndex + 3] = byte.MaxValue;
+            }
+        }
+
+        return enhanced;
+    }
+
     private static int FindPercentile(IReadOnlyList<int> histogram, int total, double percentile)
     {
         int target = Math.Max(1, (int)Math.Ceiling(total * percentile));
@@ -402,19 +487,35 @@ public sealed partial class WindowsScreenLensService :
         }
 
         byte[] scaled = new byte[scaledWidth * scaledHeight * 4];
+        double scaleX = width / (double)scaledWidth;
+        double scaleY = height / (double)scaledHeight;
 
         for (int y = 0; y < scaledHeight; y++)
         {
-            int sourceY = Math.Min(height - 1, (int)((long)y * height / scaledHeight));
+            double sourceY = ((y + 0.5) * scaleY) - 0.5;
+            int top = Math.Clamp((int)Math.Floor(sourceY), 0, height - 1);
+            int bottom = Math.Min(height - 1, top + 1);
+            double verticalWeight = Math.Clamp(sourceY - top, 0, 1);
 
             for (int x = 0; x < scaledWidth; x++)
             {
-                int sourceX = Math.Min(width - 1, (int)((long)x * width / scaledWidth));
-                int sourceIndex = ((sourceY * width) + sourceX) * 4;
+                double sourceX = ((x + 0.5) * scaleX) - 0.5;
+                int left = Math.Clamp((int)Math.Floor(sourceX), 0, width - 1);
+                int right = Math.Min(width - 1, left + 1);
+                double horizontalWeight = Math.Clamp(sourceX - left, 0, 1);
+                int topLeft = ((top * width) + left) * 4;
+                int topRight = ((top * width) + right) * 4;
+                int bottomLeft = ((bottom * width) + left) * 4;
+                int bottomRight = ((bottom * width) + right) * 4;
                 int destinationIndex = ((y * scaledWidth) + x) * 4;
-                scaled[destinationIndex] = pixels[sourceIndex];
-                scaled[destinationIndex + 1] = pixels[sourceIndex + 1];
-                scaled[destinationIndex + 2] = pixels[sourceIndex + 2];
+
+                for (int channel = 0; channel < 3; channel++)
+                {
+                    double topValue = pixels[topLeft + channel] + ((pixels[topRight + channel] - pixels[topLeft + channel]) * horizontalWeight);
+                    double bottomValue = pixels[bottomLeft + channel] + ((pixels[bottomRight + channel] - pixels[bottomLeft + channel]) * horizontalWeight);
+                    scaled[destinationIndex + channel] = (byte)Math.Clamp((int)Math.Round(topValue + ((bottomValue - topValue) * verticalWeight)), 0, 255);
+                }
+
                 scaled[destinationIndex + 3] = byte.MaxValue;
             }
         }
