@@ -13,6 +13,7 @@ public sealed partial class WindowsScreenLensService :
     IScreenLensService
 {
     private const uint CaptureBlt = 0x40000000;
+    private const double IdealOcrWordHeight = 40;
     private const int SmVirtualScreenHeight = 79;
     private const int SmVirtualScreenWidth = 78;
     private const int SmVirtualScreenX = 76;
@@ -185,24 +186,43 @@ public sealed partial class WindowsScreenLensService :
             return LensRecognitionResult.Empty;
         }
 
-        double scale = Math.Min(2, OcrEngine.MaxImageDimension / (double)Math.Max(bitmap.Width, bitmap.Height));
+        double initialScale = Math.Min(1, OcrEngine.MaxImageDimension / (double)Math.Max(bitmap.Width, bitmap.Height));
+        int initialWidth = Math.Max(1, (int)Math.Floor(bitmap.Width * initialScale));
+        int initialHeight = Math.Max(1, (int)Math.Floor(bitmap.Height * initialScale));
+        byte[] initialPixels = ScalePixels(bitmap.Pixels, bitmap.Width, bitmap.Height, initialWidth, initialHeight);
+        IReadOnlyList<LensRecognizedWord> initialWords = await RecognizePassAsync(engine, bitmap, initialPixels, initialWidth, initialHeight);
+        double scale = GetIdealOcrScale(bitmap, initialWords);
         int recognitionWidth = Math.Max(1, (int)Math.Floor(bitmap.Width * scale));
         int recognitionHeight = Math.Max(1, (int)Math.Floor(bitmap.Height * scale));
         byte[] scaledPixels = ScalePixels(bitmap.Pixels, bitmap.Width, bitmap.Height, recognitionWidth, recognitionHeight);
-        IReadOnlyList<LensRecognizedWord> originalWords = await RecognizePassAsync(engine, bitmap, scaledPixels, recognitionWidth, recognitionHeight);
+        IReadOnlyList<LensRecognizedWord> originalWords = recognitionWidth == initialWidth && recognitionHeight == initialHeight
+            ? initialWords
+            : await RecognizePassAsync(engine, bitmap, scaledPixels, recognitionWidth, recognitionHeight);
         byte[] enhancedPixels = EnhanceTextContrast(scaledPixels);
         IReadOnlyList<LensRecognizedWord> enhancedWords = await RecognizePassAsync(engine, bitmap, enhancedPixels, recognitionWidth, recognitionHeight);
-        List<LensRecognizedWord> mergedWords = [.. originalWords];
+        List<LensRecognizedWord> mergedWords = [.. initialWords];
+        MergeUniqueWords(mergedWords, originalWords);
+        MergeUniqueWords(mergedWords, enhancedWords);
+        return BuildRecognitionResult(mergedWords);
+    }
 
-        foreach (LensRecognizedWord word in enhancedWords)
+    private static double GetIdealOcrScale(LensBitmap bitmap, IReadOnlyList<LensRecognizedWord> words)
+    {
+        double averageWordHeight = words.Count == 0 ? 10 : words.Average(word => (double)word.Bounds.Height);
+        double idealScale = IdealOcrWordHeight / averageWordHeight;
+        double maximumScale = OcrEngine.MaxImageDimension / (double)Math.Max(bitmap.Width, bitmap.Height);
+        return Math.Min(idealScale, maximumScale);
+    }
+
+    private static void MergeUniqueWords(List<LensRecognizedWord> mergedWords, IEnumerable<LensRecognizedWord> candidates)
+    {
+        foreach (LensRecognizedWord word in candidates)
         {
             if (!mergedWords.Any(existing => RepresentsSameWord(existing.Bounds, word.Bounds)))
             {
                 mergedWords.Add(word);
             }
         }
-
-        return BuildRecognitionResult(mergedWords);
     }
 
     private static LensRecognitionResult BuildRecognitionResult(IReadOnlyList<LensRecognizedWord> words)
