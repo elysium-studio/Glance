@@ -4,7 +4,6 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
@@ -42,18 +41,19 @@ internal sealed class LensSelectionWindow
     private readonly nint windowHandle;
     private readonly HashSet<int> selectedWords = [];
     private readonly List<Border> wordHighlights = [];
-    private Border? selectionMarquee;
+    private LensTextSelectionSurface? textSelectionSurface;
     private Border? recognitionToolbar;
     private Button? copySelectionButton;
     private LensRecognitionResult recognition = LensRecognitionResult.Empty;
     private LensRegionAdjuster? regionAdjuster;
     private bool closed;
     private bool isDragging;
-    private bool isSelectingWords;
+    private bool isSelectingText;
     private int recognitionRequest;
+    private int selectionAnchor = -1;
+    private int selectionFocus = -1;
     private LensRectangle selectedRegion;
     private Point selectionStart;
-    private Point wordSelectionStart;
 
     private LensSelectionWindow(LensBitmap bitmap,
         ITextLocalizer localizer,
@@ -94,6 +94,7 @@ internal sealed class LensSelectionWindow
             IsHitTestVisible = false,
             Visibility = Visibility.Collapsed
         };
+        Canvas.SetZIndex(recognitionProgress, 5);
         selectionCanvas.Children.Add(recognitionProgress);
         DoubleAnimation dashAnimation = new()
         {
@@ -138,6 +139,13 @@ internal sealed class LensSelectionWindow
         root.PointerReleased += HandleSelectionPointerReleased;
         root.Loaded += HandleLoaded;
         root.SizeChanged += HandleSizeChanged;
+        KeyboardAccelerator copyAccelerator = new()
+        {
+            Key = Windows.System.VirtualKey.C,
+            Modifiers = Windows.System.VirtualKeyModifiers.Control
+        };
+        copyAccelerator.Invoked += HandleCopyAccelerator;
+        root.KeyboardAccelerators.Add(copyAccelerator);
 
         window = new Window
         {
@@ -172,24 +180,26 @@ internal sealed class LensSelectionWindow
     private static Rect CreateRectangle(Point start, Point end) =>
         new(Math.Min(start.X, end.X), Math.Min(start.Y, end.Y), Math.Abs(end.X - start.X), Math.Abs(end.Y - start.Y));
 
-    private static bool Intersects(Rect left, Rect right) =>
-        left.X < right.Right && left.Right > right.X && left.Y < right.Bottom && left.Bottom > right.Y;
-
-    private static bool IsControlInteraction(object source)
+    private static PathGeometry CreateRoundedRectangleGeometry(Rect bounds)
     {
-        DependencyObject? current = source as DependencyObject;
-
-        while (current is not null)
+        double radius = Math.Min(bounds.Width / 2, bounds.Height / 2);
+        PathFigure figure = new()
         {
-            if (current is Button or Thumb)
-            {
-                return true;
-            }
-
-            current = VisualTreeHelper.GetParent(current);
-        }
-
-        return false;
+            StartPoint = new Point(bounds.X + radius, bounds.Y),
+            IsClosed = true,
+            Segments =
+            [
+                new LineSegment { Point = new Point(bounds.Right - radius, bounds.Y) },
+                new ArcSegment { Point = new Point(bounds.Right, bounds.Y + radius), Size = new Size(radius, radius), SweepDirection = SweepDirection.Clockwise },
+                new LineSegment { Point = new Point(bounds.Right, bounds.Bottom - radius) },
+                new ArcSegment { Point = new Point(bounds.Right - radius, bounds.Bottom), Size = new Size(radius, radius), SweepDirection = SweepDirection.Clockwise },
+                new LineSegment { Point = new Point(bounds.X + radius, bounds.Bottom) },
+                new ArcSegment { Point = new Point(bounds.X, bounds.Bottom - radius), Size = new Size(radius, radius), SweepDirection = SweepDirection.Clockwise },
+                new LineSegment { Point = new Point(bounds.X, bounds.Y + radius) },
+                new ArcSegment { Point = new Point(bounds.X + radius, bounds.Y), Size = new Size(radius, radius), SweepDirection = SweepDirection.Clockwise }
+            ]
+        };
+        return new PathGeometry { Figures = [figure] };
     }
 
     private static Brush ResolveBrush(string key, Color fallback)
@@ -202,13 +212,6 @@ internal sealed class LensSelectionWindow
         return new SolidColorBrush(fallback);
     }
 
-    private void AttachWordSelectionHandlers()
-    {
-        root.PointerMoved += HandleWordPointerMoved;
-        root.PointerPressed += HandleWordPointerPressed;
-        root.PointerReleased += HandleWordPointerReleased;
-    }
-
     private void BeginAdjustment(Rect initialBounds)
     {
         isDragging = false;
@@ -219,6 +222,7 @@ internal sealed class LensSelectionWindow
         regionAdjuster.BoundsChanged += HandleAdjustmentBoundsChanged;
         regionAdjuster.InteractionCompleted += HandleAdjustmentCompleted;
         regionAdjuster.InteractionStarted += HandleAdjustmentStarted;
+        Canvas.SetZIndex(regionAdjuster, 3);
         selectionCanvas.Children.Add(regionAdjuster);
         instructionContainer.Visibility = Visibility.Collapsed;
         UpdateAdjustmentMask();
@@ -230,16 +234,13 @@ internal sealed class LensSelectionWindow
         smokeGeometry.Children.Clear();
         smokeGeometry.Children.Add(smokeBounds);
 
-        foreach (LensRecognizedWord word in recognition.Words)
+        foreach (LensRecognizedLine line in recognition.Lines)
         {
-            Rect bounds = ToLocal(new LensRectangle(selectedRegion.X + word.Bounds.X,
-                selectedRegion.Y + word.Bounds.Y,
-                word.Bounds.Width,
-                word.Bounds.Height));
-            smokeGeometry.Children.Add(new RectangleGeometry
-            {
-                Rect = new Rect(bounds.X - 2, bounds.Y - 1, bounds.Width + 4, bounds.Height + 2)
-            });
+            Rect bounds = ToLocal(new LensRectangle(selectedRegion.X + line.Bounds.X,
+                selectedRegion.Y + line.Bounds.Y,
+                line.Bounds.Width,
+                line.Bounds.Height));
+            smokeGeometry.Children.Add(CreateRoundedRectangleGeometry(new Rect(bounds.X - 5, bounds.Y - 2, bounds.Width + 10, bounds.Height + 4)));
         }
     }
 
@@ -256,7 +257,7 @@ internal sealed class LensSelectionWindow
         actions.Children.Add(copySelectionButton);
 
         Button copyAllButton = CreateTextButton(localizer.GetText("CopyAll"), CopyAll);
-        copyAllButton.IsEnabled = recognition.Words.Count > 0;
+        copyAllButton.IsEnabled = recognition.Lines.Count > 0;
         actions.Children.Add(copyAllButton);
 
         Button closeButton = new()
@@ -285,38 +286,42 @@ internal sealed class LensSelectionWindow
         root.Children.Add(recognitionToolbar);
     }
 
-    private void BuildWordHighlights()
+    private void BuildTextSelectionLayer()
     {
+        Rect regionBounds = ToLocal(selectedRegion);
+        textSelectionSurface = new LensTextSelectionSurface
+        {
+            Width = regionBounds.Width,
+            Height = regionBounds.Height
+        };
+        textSelectionSurface.PointerMoved += HandleTextPointerMoved;
+        textSelectionSurface.PointerPressed += HandleTextPointerPressed;
+        textSelectionSurface.PointerReleased += HandleTextPointerReleased;
+        Canvas.SetLeft(textSelectionSurface, regionBounds.X);
+        Canvas.SetTop(textSelectionSurface, regionBounds.Y);
+        Canvas.SetZIndex(textSelectionSurface, 2);
+
         foreach (LensRecognizedWord word in recognition.Words)
         {
             Rect bounds = ToLocal(new LensRectangle(selectedRegion.X + word.Bounds.X,
                 selectedRegion.Y + word.Bounds.Y,
                 word.Bounds.Width,
                 word.Bounds.Height));
-            Border selection = new()
+            Border highlight = new()
             {
                 Width = Math.Max(1, bounds.Width + 4),
                 Height = Math.Max(1, bounds.Height + 2),
                 Background = new SolidColorBrush(Color.FromArgb(0, 0, 120, 212)),
-                CornerRadius = new CornerRadius(2),
+                CornerRadius = new CornerRadius(Math.Max(1, (bounds.Height + 2) / 2)),
                 IsHitTestVisible = false
             };
-            Canvas.SetLeft(selection, bounds.X - 2);
-            Canvas.SetTop(selection, bounds.Y - 1);
-            wordHighlights.Add(selection);
-            selectionCanvas.Children.Add(selection);
+            Canvas.SetLeft(highlight, bounds.X - regionBounds.X - 2);
+            Canvas.SetTop(highlight, bounds.Y - regionBounds.Y - 1);
+            wordHighlights.Add(highlight);
+            textSelectionSurface.Children.Add(highlight);
         }
 
-        selectionMarquee = new Border
-        {
-            Background = new SolidColorBrush(Color.FromArgb(28, 0, 120, 212)),
-            BorderBrush = new SolidColorBrush(Color.FromArgb(220, 96, 205, 255)),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(2),
-            IsHitTestVisible = false,
-            Visibility = Visibility.Collapsed
-        };
-        selectionCanvas.Children.Add(selectionMarquee);
+        selectionCanvas.Children.Add(textSelectionSurface);
     }
 
     private Button CreateTextButton(string text, RoutedEventHandler handler)
@@ -348,21 +353,19 @@ internal sealed class LensSelectionWindow
 
     private void ClearRecognitionSurface()
     {
-        DetachWordSelectionHandlers();
         selectedWords.Clear();
+        selectionAnchor = -1;
+        selectionFocus = -1;
         copySelectionButton = null;
-
-        foreach (Border wordHighlight in wordHighlights)
-        {
-            selectionCanvas.Children.Remove(wordHighlight);
-        }
-
         wordHighlights.Clear();
 
-        if (selectionMarquee is not null)
+        if (textSelectionSurface is not null)
         {
-            selectionCanvas.Children.Remove(selectionMarquee);
-            selectionMarquee = null;
+            textSelectionSurface.PointerMoved -= HandleTextPointerMoved;
+            textSelectionSurface.PointerPressed -= HandleTextPointerPressed;
+            textSelectionSurface.PointerReleased -= HandleTextPointerReleased;
+            selectionCanvas.Children.Remove(textSelectionSurface);
+            textSelectionSurface = null;
         }
 
         if (recognitionToolbar is not null)
@@ -381,7 +384,6 @@ internal sealed class LensSelectionWindow
                 .OrderBy(word => word.LineIndex)
                 .ThenBy(word => word.WordIndex)
         ];
-
         return string.Join(Environment.NewLine, words
             .GroupBy(word => word.LineIndex)
             .Select(line => string.Join(" ", line.Select(word => word.Text))));
@@ -439,13 +441,12 @@ internal sealed class LensSelectionWindow
             recognition = result;
             StopRecognitionProgress();
             BuildRecognitionMask();
-            BuildWordHighlights();
+            BuildTextSelectionLayer();
             BuildToolbar();
-            instruction.Text = result.Words.Count == 0
+            instruction.Text = result.Lines.Count == 0
                 ? localizer.GetText("NoTextInstruction")
                 : localizer.GetText("SelectionReadyInstruction");
             instructionContainer.Visibility = Visibility.Visible;
-            AttachWordSelectionHandlers();
         });
     }
 
@@ -502,17 +503,9 @@ internal sealed class LensSelectionWindow
         root.PointerReleased -= HandleSelectionPointerReleased;
     }
 
-    private void DetachWordSelectionHandlers()
-    {
-        root.PointerMoved -= HandleWordPointerMoved;
-        root.PointerPressed -= HandleWordPointerPressed;
-        root.PointerReleased -= HandleWordPointerReleased;
-    }
-
     private void HandleClosed(object sender, WindowEventArgs args)
     {
         DetachSelectionHandlers();
-        DetachWordSelectionHandlers();
         root.KeyDown -= HandleKeyDown;
         root.SizeChanged -= HandleSizeChanged;
 
@@ -538,6 +531,17 @@ internal sealed class LensSelectionWindow
         ClearRecognitionSurface();
         instructionContainer.Visibility = Visibility.Collapsed;
         UpdateAdjustmentMask();
+    }
+
+    private async void HandleCopyAccelerator(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        string text = ComposeSelection();
+
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            args.Handled = true;
+            await copyAsync(text);
+        }
     }
 
     private void HandleKeyDown(object sender, KeyRoutedEventArgs args)
@@ -606,61 +610,126 @@ internal sealed class LensSelectionWindow
     private void HandleSizeChanged(object sender, SizeChangedEventArgs args) =>
         UpdateSmokeBounds();
 
-    private void HandleWordPointerMoved(object sender, PointerRoutedEventArgs args)
+    private void HandleTextPointerMoved(object sender, PointerRoutedEventArgs args)
     {
-        if (!isSelectingWords || selectionMarquee is null)
+        if (!isSelectingText || textSelectionSurface is null)
         {
             return;
         }
 
-        ShowWordSelectionMarquee(CreateRectangle(wordSelectionStart, args.GetCurrentPoint(root).Position));
+        int index = FindWordIndex(args.GetCurrentPoint(textSelectionSurface).Position, true);
+
+        if (index >= 0 && index != selectionFocus)
+        {
+            selectionFocus = index;
+            UpdateTextSelection();
+        }
+
+        args.Handled = true;
     }
 
-    private void HandleWordPointerPressed(object sender, PointerRoutedEventArgs args)
+    private void HandleTextPointerPressed(object sender, PointerRoutedEventArgs args)
     {
-        if (IsControlInteraction(args.OriginalSource))
+        if (textSelectionSurface is null)
         {
             return;
         }
 
-        Microsoft.UI.Input.PointerPoint point = args.GetCurrentPoint(root);
+        Microsoft.UI.Input.PointerPoint point = args.GetCurrentPoint(textSelectionSurface);
 
         if (!point.Properties.IsLeftButtonPressed)
         {
             return;
         }
 
-        wordSelectionStart = point.Position;
-        isSelectingWords = true;
-        root.CapturePointer(args.Pointer);
-        ShowWordSelectionMarquee(CreateRectangle(wordSelectionStart, wordSelectionStart));
+        int index = FindWordIndex(point.Position, false);
+
+        if (index < 0)
+        {
+            ClearTextSelection();
+            return;
+        }
+
+        selectionAnchor = index;
+        selectionFocus = index;
+        isSelectingText = true;
+        textSelectionSurface.CapturePointer(args.Pointer);
+        UpdateTextSelection();
         args.Handled = true;
     }
 
-    private void HandleWordPointerReleased(object sender, PointerRoutedEventArgs args)
+    private void HandleTextPointerReleased(object sender, PointerRoutedEventArgs args)
     {
-        if (!isSelectingWords || selectionMarquee is null)
+        if (!isSelectingText || textSelectionSurface is null)
         {
             return;
         }
 
-        isSelectingWords = false;
-        root.ReleasePointerCapture(args.Pointer);
-        Point end = args.GetCurrentPoint(root).Position;
-        Rect selection = CreateRectangle(wordSelectionStart, end);
-        selectionMarquee.Visibility = Visibility.Collapsed;
+        isSelectingText = false;
+        textSelectionSurface.ReleasePointerCapture(args.Pointer);
+        args.Handled = true;
+    }
+
+    private int FindWordIndex(Point point, bool useNearest)
+    {
+        int nearestIndex = -1;
+        double nearestDistance = double.MaxValue;
+
+        for (int index = 0; index < wordHighlights.Count; index++)
+        {
+            Border highlight = wordHighlights[index];
+            Rect bounds = new(Canvas.GetLeft(highlight), Canvas.GetTop(highlight), highlight.Width, highlight.Height);
+
+            if (bounds.Contains(point))
+            {
+                return index;
+            }
+
+            if (useNearest)
+            {
+                double centerX = bounds.X + (bounds.Width / 2);
+                double centerY = bounds.Y + (bounds.Height / 2);
+                double distance = Math.Pow(point.X - centerX, 2) + Math.Pow(point.Y - centerY, 2);
+
+                if (distance < nearestDistance)
+                {
+                    nearestIndex = index;
+                    nearestDistance = distance;
+                }
+            }
+        }
+
+        return nearestIndex;
+    }
+
+    private void ClearTextSelection()
+    {
+        selectedWords.Clear();
+        selectionAnchor = -1;
+        selectionFocus = -1;
+
+        foreach (Border highlight in wordHighlights)
+        {
+            highlight.Background = new SolidColorBrush(Color.FromArgb(0, 0, 120, 212));
+        }
+
+        if (copySelectionButton is not null)
+        {
+            copySelectionButton.IsEnabled = false;
+        }
+    }
+
+    private void UpdateTextSelection()
+    {
+        int first = Math.Min(selectionAnchor, selectionFocus);
+        int last = Math.Max(selectionAnchor, selectionFocus);
         selectedWords.Clear();
 
         for (int index = 0; index < wordHighlights.Count; index++)
         {
-            Border wordHighlight = wordHighlights[index];
-            Rect bounds = new(Canvas.GetLeft(wordHighlight), Canvas.GetTop(wordHighlight), wordHighlight.Width, wordHighlight.Height);
-            bool selected = selection.Width < 4 && selection.Height < 4
-                ? bounds.Contains(end)
-                : Intersects(bounds, selection);
-
-            wordHighlight.Background = new SolidColorBrush(selected
-                ? Color.FromArgb(96, 0, 120, 212)
+            bool selected = index >= first && index <= last;
+            wordHighlights[index].Background = new SolidColorBrush(selected
+                ? Color.FromArgb(112, 0, 120, 212)
                 : Color.FromArgb(0, 0, 120, 212));
 
             if (selected)
@@ -673,8 +742,6 @@ internal sealed class LensSelectionWindow
         {
             copySelectionButton.IsEnabled = selectedWords.Count > 0;
         }
-
-        args.Handled = true;
     }
 
     private void Show()
@@ -703,20 +770,6 @@ internal sealed class LensSelectionWindow
         highlight.Width = rectangle.Width;
         highlight.Height = rectangle.Height;
         highlight.Visibility = Visibility.Visible;
-    }
-
-    private void ShowWordSelectionMarquee(Rect rectangle)
-    {
-        if (selectionMarquee is null)
-        {
-            return;
-        }
-
-        Canvas.SetLeft(selectionMarquee, rectangle.X);
-        Canvas.SetTop(selectionMarquee, rectangle.Y);
-        selectionMarquee.Width = rectangle.Width;
-        selectionMarquee.Height = rectangle.Height;
-        selectionMarquee.Visibility = Visibility.Visible;
     }
 
     private Rect ToLocal(LensRectangle rectangle)

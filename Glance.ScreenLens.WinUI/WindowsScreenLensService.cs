@@ -189,28 +189,45 @@ public sealed partial class WindowsScreenLensService :
         softwareBitmap.CopyFromBuffer(bitmap.Pixels.AsBuffer());
         OcrResult result = await engine.RecognizeAsync(softwareBitmap);
         string text = string.Join(Environment.NewLine, result.Lines.Select(line => line.Text)).Trim();
+        List<LensRecognizedLine> lines = [];
         List<LensRecognizedWord> words = [];
 
         for (int lineIndex = 0; lineIndex < result.Lines.Count; lineIndex++)
         {
             OcrLine line = result.Lines[lineIndex];
 
+            if (line.Words.Count == 0)
+            {
+                continue;
+            }
+
+            double left = line.Words.Min(word => word.BoundingRect.X);
+            double top = line.Words.Min(word => word.BoundingRect.Y);
+            double right = line.Words.Max(word => word.BoundingRect.Right);
+            double bottom = line.Words.Max(word => word.BoundingRect.Bottom);
+            int pixelLeft = Math.Clamp((int)Math.Floor(left), 0, bitmap.Width - 1);
+            int pixelTop = Math.Clamp((int)Math.Floor(top), 0, bitmap.Height - 1);
+            int pixelRight = Math.Clamp((int)Math.Ceiling(right), pixelLeft + 1, bitmap.Width);
+            int pixelBottom = Math.Clamp((int)Math.Ceiling(bottom), pixelTop + 1, bitmap.Height);
+            lines.Add(new LensRecognizedLine(line.Text,
+                new LensRectangle(pixelLeft, pixelTop, pixelRight - pixelLeft, pixelBottom - pixelTop)));
+
             for (int wordIndex = 0; wordIndex < line.Words.Count; wordIndex++)
             {
                 OcrWord word = line.Words[wordIndex];
-                Windows.Foundation.Rect bounds = word.BoundingRect;
-                int left = Math.Clamp((int)Math.Floor(bounds.X), 0, bitmap.Width - 1);
-                int top = Math.Clamp((int)Math.Floor(bounds.Y), 0, bitmap.Height - 1);
-                int right = Math.Clamp((int)Math.Ceiling(bounds.Right), left + 1, bitmap.Width);
-                int bottom = Math.Clamp((int)Math.Ceiling(bounds.Bottom), top + 1, bitmap.Height);
+                Windows.Foundation.Rect wordBounds = word.BoundingRect;
+                int wordLeft = Math.Clamp((int)Math.Floor(wordBounds.X), 0, bitmap.Width - 1);
+                int wordTop = Math.Clamp((int)Math.Floor(wordBounds.Y), 0, bitmap.Height - 1);
+                int wordRight = Math.Clamp((int)Math.Ceiling(wordBounds.Right), wordLeft + 1, bitmap.Width);
+                int wordBottom = Math.Clamp((int)Math.Ceiling(wordBounds.Bottom), wordTop + 1, bitmap.Height);
                 words.Add(new LensRecognizedWord(word.Text,
-                    new LensRectangle(left, top, right - left, bottom - top),
+                    new LensRectangle(wordLeft, wordTop, wordRight - wordLeft, wordBottom - wordTop),
                     lineIndex,
                     wordIndex));
             }
         }
 
-        return new LensRecognitionResult(text, words);
+        return new LensRecognitionResult(text, lines, words);
     }
 
     private static void RestoreWindows(IEnumerable<ApplicationWindowState> windows)

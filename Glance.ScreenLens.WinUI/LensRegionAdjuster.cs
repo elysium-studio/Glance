@@ -31,7 +31,6 @@ internal sealed class LensRegionAdjuster :
         this.surfaceHeight = surfaceHeight;
         Width = surfaceWidth;
         Height = surfaceHeight;
-        Background = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0));
         bounds = Clamp(initialBounds);
 
         selectionBorder = new Border
