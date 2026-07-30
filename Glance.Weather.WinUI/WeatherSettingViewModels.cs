@@ -13,3 +13,6 @@ public sealed partial class WeatherLocationSettingViewModel(IServiceProvider pro
 
 public sealed partial class WeatherUnitsSettingViewModel(IServiceProvider provider, IServiceFactory factory, IMessenger messenger, IDisposer disposer, IDispatcher dispatcher, WeatherSettings settings, IWritableOptions<WeatherSettings> writer) :
     ModuleSettingViewModel<WeatherSettings, int>(provider, factory, messenger, disposer, dispatcher, settings, writer, "Weather", 30, config => config.UseFahrenheit ? 1 : 0, (config, value) => config.UseFahrenheit = value == 1);
+
+public sealed partial class WeatherScenePreviewSettingViewModel(IServiceProvider provider, IServiceFactory factory, IMessenger messenger, IDisposer disposer, IDispatcher dispatcher, WeatherSettings settings, IWritableOptions<WeatherSettings> writer) :
+    ModuleSettingViewModel<WeatherSettings, int>(provider, factory, messenger, disposer, dispatcher, settings, writer, "Weather", 40, config => (int)config.PreviewScene, (config, value) => config.PreviewScene = Enum.IsDefined(typeof(WeatherSceneKind), value) ? (WeatherSceneKind)value : WeatherSceneKind.Unknown);

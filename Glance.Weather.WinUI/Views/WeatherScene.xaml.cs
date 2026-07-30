@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Shapes;
 using System;
 using System.ComponentModel;
 using System.Numerics;
@@ -55,6 +56,7 @@ public sealed partial class WeatherScene :
     {
         Unsubscribe();
         ElementCompositionPreview.SetElementChildVisual(ParticleHost, null);
+        CloudHost.Children.Clear();
         sceneVisual?.Dispose();
         clip?.Dispose();
         clipGeometry?.Dispose();
@@ -106,6 +108,7 @@ public sealed partial class WeatherScene :
         }
 
         ElementCompositionPreview.SetElementChildVisual(ParticleHost, null);
+        CloudHost.Children.Clear();
         sceneVisual?.Dispose();
         Compositor compositor = ElementCompositionPreview.GetElementVisual(this).Compositor;
         sceneVisual = compositor.CreateContainerVisual();
@@ -185,7 +188,8 @@ public sealed partial class WeatherScene :
         float diameter = hot ? 100 : isDay ? 76 : 58;
         ContainerVisual sun = compositor.CreateContainerVisual();
         sun.Size = new Vector2(diameter);
-        sun.Offset = new Vector3(SceneWidth - diameter * 0.65f, -diameter * 0.25f, 0);
+        sun.Offset = new Vector3(-diameter * 0.65f, -diameter * 0.25f, 0);
+        sun.RelativeOffsetAdjustment = new Vector3(1, 0, 0);
         sun.CenterPoint = new Vector3(diameter / 2, diameter / 2, 0);
 
         for (int index = 0; index < 3; index++)
@@ -217,51 +221,52 @@ public sealed partial class WeatherScene :
         {
             float width = RandomBetween(60, 105);
             float height = width * 0.4f;
-            ContainerVisual cloud = compositor.CreateContainerVisual();
-            cloud.Size = new Vector2(width, height);
-            cloud.Offset = new Vector3(RandomBetween(-width, SceneWidth), RandomBetween(4, SceneHeight * 0.55f), 0);
             byte alpha = (byte)RandomBetween(35, 95);
-            cloud.Children.InsertAtTop(CreateCloud(compositor, width, height, alpha));
+            Path cloud = CreateCloud(width, height, alpha);
+            Canvas.SetTop(cloud, RandomBetween(4, SceneHeight * 0.55f));
+            CloudHost.Children.Add(cloud);
+            Visual cloudVisual = ElementCompositionPreview.GetElementVisual(cloud);
+            cloudVisual.RelativeOffsetAdjustment = new Vector3(-0.35f, 0, 0);
 
-            ScalarKeyFrameAnimation drift = compositor.CreateScalarKeyFrameAnimation();
-            drift.InsertKeyFrame(0, -width);
-            drift.InsertKeyFrame(1, SceneWidth + width);
-            drift.Duration = TimeSpan.FromSeconds(RandomBetween(12, 22));
+            Vector3KeyFrameAnimation drift = compositor.CreateVector3KeyFrameAnimation();
+            drift.InsertKeyFrame(0, new Vector3(-0.35f, 0, 0));
+            drift.InsertKeyFrame(1, new Vector3(1.15f, 0, 0));
+            drift.Duration = TimeSpan.FromSeconds(RandomBetween(36, 58));
+            drift.DelayTime = TimeSpan.FromSeconds(RandomBetween(0, 12));
+            drift.DelayBehavior = AnimationDelayBehavior.SetInitialValueAfterDelay;
             drift.IterationBehavior = AnimationIterationBehavior.Forever;
-            cloud.StartAnimation("Offset.X", drift);
-            sceneVisual?.Children.InsertAtTop(cloud);
+            cloudVisual.StartAnimation("RelativeOffsetAdjustment", drift);
         }
     }
 
-    private static ShapeVisual CreateCloud(Compositor compositor, float width, float height, byte alpha)
+    private static Path CreateCloud(float width, float height, byte alpha)
     {
-        ShapeVisual visual = compositor.CreateShapeVisual();
-        visual.Size = new Vector2(width, height);
-        visual.Opacity = alpha / 255f;
-        CompositionColorBrush brush = compositor.CreateColorBrush(Color.FromArgb(255, 234, 242, 248));
-
-        CompositionRoundedRectangleGeometry baseGeometry = compositor.CreateRoundedRectangleGeometry();
-        baseGeometry.Offset = new Vector2(width * 0.08f, height * 0.48f);
-        baseGeometry.Size = new Vector2(width * 0.8f, height * 0.42f);
-        baseGeometry.CornerRadius = new Vector2(height * 0.21f);
-        CompositionSpriteShape baseShape = compositor.CreateSpriteShape(baseGeometry);
-        baseShape.FillBrush = brush;
-        visual.Shapes.Add(baseShape);
-
-        AddCloudLobe(compositor, visual, brush, new Vector2(width * 0.22f, height * 0.56f), height * 0.32f);
-        AddCloudLobe(compositor, visual, brush, new Vector2(width * 0.47f, height * 0.42f), height * 0.47f);
-        AddCloudLobe(compositor, visual, brush, new Vector2(width * 0.72f, height * 0.57f), height * 0.35f);
-        return visual;
-    }
-
-    private static void AddCloudLobe(Compositor compositor, ShapeVisual visual, CompositionBrush brush, Vector2 center, float radius)
-    {
-        CompositionEllipseGeometry geometry = compositor.CreateEllipseGeometry();
-        geometry.Center = center;
-        geometry.Radius = new Vector2(radius);
-        CompositionSpriteShape shape = compositor.CreateSpriteShape(geometry);
-        shape.FillBrush = brush;
-        visual.Shapes.Add(shape);
+        PathFigure figure = new()
+        {
+            StartPoint = new Point(14, 84),
+            IsClosed = true,
+            IsFilled = true,
+            Segments =
+            {
+                new BezierSegment { Point1 = new Point(6, 84), Point2 = new Point(0, 76), Point3 = new Point(0, 63) },
+                new BezierSegment { Point1 = new Point(0, 49), Point2 = new Point(10, 37), Point3 = new Point(24, 36) },
+                new BezierSegment { Point1 = new Point(29, 15), Point2 = new Point(45, 4), Point3 = new Point(61, 12) },
+                new BezierSegment { Point1 = new Point(71, 17), Point2 = new Point(77, 28), Point3 = new Point(79, 40) },
+                new BezierSegment { Point1 = new Point(91, 40), Point2 = new Point(100, 50), Point3 = new Point(100, 64) },
+                new BezierSegment { Point1 = new Point(100, 78), Point2 = new Point(90, 84), Point3 = new Point(77, 84) }
+            }
+        };
+        PathGeometry geometry = new();
+        geometry.Figures.Add(figure);
+        return new Path
+        {
+            Width = width,
+            Height = height,
+            Data = geometry,
+            Fill = new SolidColorBrush(Color.FromArgb(alpha, 234, 242, 248)),
+            Stretch = Stretch.Fill,
+            IsHitTestVisible = false
+        };
     }
 
     private void AddRain(Compositor compositor, int count)

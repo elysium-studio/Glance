@@ -92,6 +92,7 @@ public sealed partial class WeatherComponent :
     private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<WeatherSettings> args) =>
         dispatcherQueue.TryEnqueue(() =>
         {
+            ApplySceneOverride();
             settingsTimer.Stop();
             settingsTimer.Start();
         });
@@ -106,6 +107,7 @@ public sealed partial class WeatherComponent :
         {
             refreshCancellation?.Cancel();
             viewModel.SetNeedsConfiguration();
+            ApplySceneOverride();
             return;
         }
 
@@ -114,6 +116,7 @@ public sealed partial class WeatherComponent :
         refreshCancellation = new CancellationTokenSource();
         CancellationToken cancellationToken = refreshCancellation.Token;
         viewModel.SetLoading();
+        ApplySceneOverride();
 
         try
         {
@@ -121,7 +124,11 @@ public sealed partial class WeatherComponent :
 
             if (!cancellationToken.IsCancellationRequested)
             {
-                dispatcherQueue.TryEnqueue(() => viewModel.Update(snapshot, settings.UseFahrenheit));
+                dispatcherQueue.TryEnqueue(() =>
+                {
+                    viewModel.Update(snapshot, settings.UseFahrenheit);
+                    ApplySceneOverride();
+                });
             }
         }
         catch (OperationCanceledException)
@@ -131,8 +138,25 @@ public sealed partial class WeatherComponent :
         {
             if (!cancellationToken.IsCancellationRequested)
             {
-                dispatcherQueue.TryEnqueue(viewModel.SetError);
+                dispatcherQueue.TryEnqueue(() =>
+                {
+                    viewModel.SetError();
+                    ApplySceneOverride();
+                });
             }
         }
+    }
+
+    private void ApplySceneOverride()
+    {
+#if DEBUG
+        WeatherSceneKind scene = options.Current.PreviewScene;
+
+        if (scene != WeatherSceneKind.Unknown)
+        {
+            viewModel.Scene = scene;
+            viewModel.IsDay = true;
+        }
+#endif
     }
 }

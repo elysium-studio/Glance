@@ -40,6 +40,7 @@ public sealed class WeatherTests
         Assert.False(settings.UseFahrenheit);
         Assert.Empty(settings.ApiKey);
         Assert.Empty(settings.Location);
+        Assert.Equal(WeatherSceneKind.Unknown, settings.PreviewScene);
     }
 
     private sealed class TestTextLocalizer :

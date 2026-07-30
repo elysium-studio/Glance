@@ -13,6 +13,7 @@
         CornerRadius="28">
         <Grid>
             <Grid x:Name="ParticleHost" />
+            <Canvas x:Name="CloudHost" />
             <Path
                 x:Name="LightningBolt"
                 Width="56"

@@ -26,4 +26,15 @@
   <data name="WeatherUnitsSettingCard.Description" xml:space="preserve"><value>Choose how temperatures are displayed.</value></data>
   <data name="WeatherCelsiusOption.Content" xml:space="preserve"><value>Celsius</value></data>
   <data name="WeatherFahrenheitOption.Content" xml:space="preserve"><value>Fahrenheit</value></data>
+  <data name="WeatherScenePreviewSettingCard.Header" xml:space="preserve"><value>Preview weather scene</value></data>
+  <data name="WeatherScenePreviewSettingCard.Description" xml:space="preserve"><value>Override live conditions to test the animated background.</value></data>
+  <data name="WeatherSceneLiveOption.Content" xml:space="preserve"><value>Live weather</value></data>
+  <data name="WeatherSceneClearOption.Content" xml:space="preserve"><value>Clear</value></data>
+  <data name="WeatherSceneHotOption.Content" xml:space="preserve"><value>Hot</value></data>
+  <data name="WeatherScenePartlyCloudyOption.Content" xml:space="preserve"><value>Partly cloudy</value></data>
+  <data name="WeatherSceneCloudyOption.Content" xml:space="preserve"><value>Cloudy</value></data>
+  <data name="WeatherSceneRainOption.Content" xml:space="preserve"><value>Rain</value></data>
+  <data name="WeatherSceneSnowOption.Content" xml:space="preserve"><value>Snow</value></data>
+  <data name="WeatherSceneThunderstormOption.Content" xml:space="preserve"><value>Thunderstorm</value></data>
+  <data name="WeatherSceneFogOption.Content" xml:space="preserve"><value>Fog</value></data>
 </root>

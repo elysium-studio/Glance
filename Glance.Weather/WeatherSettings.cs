@@ -7,4 +7,6 @@ public sealed class WeatherSettings
     public string Location { get; set; } = string.Empty;
 
     public bool UseFahrenheit { get; set; }
+
+    public WeatherSceneKind PreviewScene { get; set; }
 }
