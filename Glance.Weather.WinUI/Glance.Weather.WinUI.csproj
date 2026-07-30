@@ -6,6 +6,7 @@
     <UseWinUI>true</UseWinUI>
     <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
     <Nullable>enable</Nullable>
+    <EnablePreviewFeatures>true</EnablePreviewFeatures>
     <Platforms>AnyCPU;x64</Platforms>
     <DefaultLanguage>en</DefaultLanguage>
   </PropertyGroup>
@@ -16,6 +17,7 @@
     <None Remove="Themes\Weather.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Elysium.UI.Controls.WinUI" Version="$(ElysiumVersion)" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
   </ItemGroup>

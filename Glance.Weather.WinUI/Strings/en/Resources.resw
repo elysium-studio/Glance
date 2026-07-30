@@ -22,6 +22,8 @@
   <data name="WeatherLocationSettingCard.Header" xml:space="preserve"><value>Location</value></data>
   <data name="WeatherLocationSettingCard.Description" xml:space="preserve"><value>Enter a city, optionally followed by a country code.</value></data>
   <data name="WeatherLocationTextBox.PlaceholderText" xml:space="preserve"><value>London, GB</value></data>
-  <data name="WeatherUnitsSettingCard.Header" xml:space="preserve"><value>Use Fahrenheit</value></data>
-  <data name="WeatherUnitsSettingCard.Description" xml:space="preserve"><value>Show temperatures in Fahrenheit instead of Celsius.</value></data>
+  <data name="WeatherUnitsSettingCard.Header" xml:space="preserve"><value>Temperature unit</value></data>
+  <data name="WeatherUnitsSettingCard.Description" xml:space="preserve"><value>Choose how temperatures are displayed.</value></data>
+  <data name="WeatherCelsiusOption.Content" xml:space="preserve"><value>Celsius</value></data>
+  <data name="WeatherFahrenheitOption.Content" xml:space="preserve"><value>Fahrenheit</value></data>
 </root>

@@ -2,64 +2,98 @@
 <UserControl
     x:Class="Glance.Weather.WinUI.WeatherExpandedView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Controls="using:Elysium.UI.Controls.WinUI">
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Weather.xaml" />
     </UserControl.Resources>
-    <Grid Padding="20,10,20,26" ColumnSpacing="18">
+    <Grid Padding="20,12,20,26" ColumnSpacing="18">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        <FontIcon
+        <Grid
             x:Name="StatusIndicator"
             Width="36"
             Height="36"
+            VerticalAlignment="Center">
+            <FontIcon
+                Width="30"
+                Height="30"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="30"
+                Foreground="{ThemeResource GlanceWeatherAccentBrush}"
+                Glyph="{x:Bind ViewModel.Glyph, Mode=OneWay}" />
+        </Grid>
+        <Grid
+            Grid.Column="1"
+            Height="58"
             VerticalAlignment="Center"
-            FontFamily="Segoe Fluent Icons"
-            FontSize="32"
-            Foreground="{ThemeResource GlanceWeatherAccentBrush}"
-            Glyph="{x:Bind ViewModel.Glyph, Mode=OneWay}" />
-        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+            RowSpacing="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="14" />
+                <RowDefinition Height="22" />
+                <RowDefinition Height="18" />
+            </Grid.RowDefinitions>
             <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="SemiBold"
                 Foreground="{ThemeResource GlanceWeatherAccentBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ToUpper(ViewModel.Title)}" />
-            <StackPanel
-                Orientation="Horizontal"
-                Spacing="8"
+            <Grid
+                Grid.Row="1"
+                ColumnSpacing="8"
                 ToolTipService.ToolTip="{x:Bind ViewModel.StatisticsText, Mode=OneWay}"
                 Visibility="{x:Bind WhenHasWeather(ViewModel.HasWeatherData), Mode=OneWay}">
-                <TextBlock
-                    Style="{StaticResource SubtitleTextBlockStyle}"
-                    Text="{x:Bind ViewModel.TemperatureText, Mode=OneWay}" />
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
                 <TextBlock
                     VerticalAlignment="Center"
-                    Style="{StaticResource BodyStrongTextBlockStyle}"
+                    Style="{StaticResource SubtitleTextBlockStyle}"
+                    Text="{x:Bind ViewModel.TemperatureText, Mode=OneWay}" />
+                <Controls:MarqueeTextBlock
+                    Grid.Column="1"
+                    Height="20"
+                    VerticalAlignment="Center"
+                    FontSize="14"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                     Text="{x:Bind ViewModel.ConditionText, Mode=OneWay}"
-                    TextTrimming="CharacterEllipsis" />
-            </StackPanel>
-            <TextBlock
+                    ToolTipService.ToolTip="{x:Bind ViewModel.ConditionText, Mode=OneWay}" />
+            </Grid>
+            <Controls:MarqueeTextBlock
+                Grid.Row="2"
+                Height="16"
+                VerticalAlignment="Center"
+                FontSize="12"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ViewModel.LocationText, Mode=OneWay}"
-                TextTrimming="CharacterEllipsis"
+                ToolTipService.ToolTip="{x:Bind ViewModel.LocationText, Mode=OneWay}"
                 Visibility="{x:Bind WhenHasWeather(ViewModel.HasWeatherData), Mode=OneWay}" />
             <TextBlock
+                Grid.Row="1"
+                VerticalAlignment="Center"
                 Style="{StaticResource BodyStrongTextBlockStyle}"
                 Text="{x:Bind ViewModel.ConditionText, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap"
                 Visibility="{x:Bind WhenMissingWeather(ViewModel.HasWeatherData), Mode=OneWay}" />
-            <TextBlock
-                MaxWidth="220"
+            <Controls:MarqueeTextBlock
+                Grid.Row="2"
+                Height="16"
+                VerticalAlignment="Center"
+                FontSize="12"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ViewModel.DetailText, Mode=OneWay}"
-                TextTrimming="CharacterEllipsis"
-                TextWrapping="Wrap"
+                ToolTipService.ToolTip="{x:Bind ViewModel.DetailText, Mode=OneWay}"
                 Visibility="{x:Bind WhenMissingWeather(ViewModel.HasWeatherData), Mode=OneWay}" />
-        </StackPanel>
+        </Grid>
         <Button
             Grid.Column="2"
             AutomationProperties.Name="{x:Bind ViewModel.RefreshLabel}"

@@ -8,7 +8,7 @@
     Unloaded="{x:Bind ViewModel.Deactivate}">
     <CommunityToolkit:SettingsCard x:Uid="WeatherApiKeySettingCard">
         <PasswordBox
-            MinWidth="240"
+            Width="240"
             Password="{x:Bind ViewModel.Value, Mode=TwoWay}"
             PasswordRevealMode="Peek" />
     </CommunityToolkit:SettingsCard>

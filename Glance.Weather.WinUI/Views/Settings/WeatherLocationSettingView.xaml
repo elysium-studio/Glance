@@ -9,7 +9,7 @@
     <CommunityToolkit:SettingsCard x:Uid="WeatherLocationSettingCard">
         <TextBox
             x:Uid="WeatherLocationTextBox"
-            MinWidth="240"
+            Width="240"
             Text="{x:Bind ViewModel.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
     </CommunityToolkit:SettingsCard>
 </UserControl>
