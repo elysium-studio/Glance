@@ -19,8 +19,10 @@ public sealed partial class SettingsWindow :
     private readonly IApplicationLifetime applicationLifetime;
     private readonly ITextLocalizer localizer;
     private readonly IMessenger messenger;
+    private bool isClosing;
     private bool isQuitDialogOpen;
     private ModuleSettingsItemViewModel? currentModule;
+    private SettingsViewModel? viewModel;
 
     public SettingsWindow(IMessenger messenger,
         ITextLocalizer localizer,
@@ -51,11 +53,12 @@ public sealed partial class SettingsWindow :
 
     public ObservableCollection<string> BreadcrumbItems { get; } = [];
 
-    public SettingsViewModel ViewModel => (SettingsViewModel)((FrameworkElement)Content).DataContext;
+    public SettingsViewModel ViewModel => viewModel ??= (SettingsViewModel)((FrameworkElement)Content).DataContext;
 
     public void Receive(ModuleSettingsNavigationRequestedEventArgs message)
     {
-        if (!message.Module.CanExpand ||
+        if (isClosing ||
+            !message.Module.CanExpand ||
             ReferenceEquals(currentModule, message.Module))
         {
             return;
@@ -66,12 +69,22 @@ public sealed partial class SettingsWindow :
     }
 
     private void HandleLoaded(object sender,
-        RoutedEventArgs args) =>
-        UpdateNavigation(ViewModel.SelectedItem);
+        RoutedEventArgs args)
+    {
+        if (!isClosing)
+        {
+            UpdateNavigation(ViewModel.SelectedItem);
+        }
+    }
 
     private void HandleNavigationSelectionChanged(NavigationView sender,
         NavigationViewSelectionChangedEventArgs args)
     {
+        if (isClosing)
+        {
+            return;
+        }
+
         currentModule = null;
         UpdateNavigation(args.SelectedItem as ISettingViewModel);
     }
@@ -100,7 +113,9 @@ public sealed partial class SettingsWindow :
 
             if (await dialog.ShowAsync() == ContentDialogResult.Primary)
             {
+                isClosing = true;
                 QuitGlanceNavigationItem.IsEnabled = false;
+                Close();
                 await applicationLifetime.ExitAsync();
             }
         }
@@ -127,6 +142,7 @@ public sealed partial class SettingsWindow :
     private void HandleClosed(object sender,
         WindowEventArgs args)
     {
+        isClosing = true;
         messenger.UnregisterAll(this);
         currentModule = null;
         Closed -= HandleClosed;
@@ -145,6 +161,11 @@ public sealed partial class SettingsWindow :
 
     private void UpdateNavigation(ISettingViewModel? selectedItem)
     {
+        if (isClosing)
+        {
+            return;
+        }
+
         string pageTitle = selectedItem switch
         {
             GlanceViewModel => localizer.GetText("GlanceSectionTitle/Text"),
