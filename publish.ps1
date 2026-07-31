@@ -25,7 +25,8 @@ param(
     [switch]$MicrosoftStoreDraft,
     [switch]$MicrosoftStorePackageOnly,
     [string]$MicrosoftStoreFlightId = "",
-    [switch]$GitReleaseOnly
+    [switch]$GitReleaseOnly,
+    [switch]$Local
 )
 
 $ErrorActionPreference = "Stop"
@@ -93,6 +94,9 @@ $MicrosoftStoreFlightId = Resolve-PublishSetting $MicrosoftStoreFlightId "GLANCE
 
 $GitRemoteName = "origin"
 $GitTagPrefix = "v"
+$VelopackPackId = "ElysiumStudio.Glance"
+$VelopackInstallerName = "$VelopackPackId-win-Setup.exe"
+$PublicInstallerName = "Glance-win-Setup.exe"
 
 function Get-WinScpPath
 {
@@ -190,7 +194,7 @@ function Send-SftpRelease
             "mkdir $(Format-WinScpValue $sftpFeedsPath)"
             "mkdir $(Format-WinScpValue $sftpFeedPath)"
             "option batch abort"
-            "synchronize remote $(Format-WinScpValue $FeedPath) $(Format-WinScpValue $sftpFeedPath)"
+            "synchronize remote -delete $(Format-WinScpValue $FeedPath) $(Format-WinScpValue $sftpFeedPath)"
             "put $(Format-WinScpValue $ReleaseLogPath) $(Format-WinScpValue $sftpReleaseLogPath)"
             "exit"
         ) | Set-Content $winScpScriptPath -Encoding UTF8
@@ -712,7 +716,7 @@ if ($GitReleaseOnly)
         exit 1
     }
 
-    $InstallerPath = "$FeedPath\Glance-win-Setup.exe"
+    $InstallerPath = "$FeedPath\$PublicInstallerName"
 
     if (-not (Test-Path $InstallerPath))
     {
@@ -794,40 +798,53 @@ if ($Version -notmatch '^\d+\.\d+\.\d+(\.\d+)?(-[a-zA-Z0-9]+(\.\d+)?)?$')
     exit 1
 }
 
-if ($releases | Where-Object { $_.version -eq $Version })
+if (-not $Local -and
+    ($releases | Where-Object { $_.version -eq $Version }))
 {
     Write-Host "Version $Version already exists in releases.json" -ForegroundColor Red
     exit 1
 }
 
 $dotnetVersion = $Version -replace '-.*$', ''
-
-Write-Host ""
-Write-Host "Enter release notes (empty line to finish):" -ForegroundColor Cyan
-
 $releaseNotes = @()
 
-while ($true)
+if (-not $Local)
 {
-    $line = Read-Host "  >"
+    Write-Host ""
+    Write-Host "Enter release notes (empty line to finish):" -ForegroundColor Cyan
 
-    if ($line -eq "")
+    while ($true)
     {
-        break
+        $line = Read-Host "  >"
+
+        if ($line -eq "")
+        {
+            break
+        }
+
+        $releaseNotes += $line
     }
-
-    $releaseNotes += $line
 }
 
-$OutputPath = "$PSScriptRoot\Publish\$Version\Assets"
-$InstallerPath = "$FeedPath\Glance-win-Setup.exe"
-
-if (Test-Path "$PSScriptRoot\Publish\$Version")
+$OutputPath = if ($Local)
 {
-    Remove-Item "$PSScriptRoot\Publish\$Version" -Recurse -Force
+    "$PSScriptRoot\Publish\Local\$Version\Assets"
+}
+else
+{
+    "$PSScriptRoot\Publish\$Version\Assets"
+}
+$InstallerPath = "$FeedPath\$PublicInstallerName"
+$VelopackInstallerPath = "$FeedPath\$VelopackInstallerName"
+$publishRootPath = Split-Path $OutputPath -Parent
+
+if (Test-Path $publishRootPath)
+{
+    Remove-Item $publishRootPath -Recurse -Force
 }
 
-if (-not $SkipSigning)
+if (-not $Local -and
+    -not $SkipSigning)
 {
     Write-Host ""
     Write-Host "Checking Azure signing authentication..." -ForegroundColor Cyan
@@ -841,7 +858,6 @@ if (-not $SkipSigning)
 
 Write-Host ""
 Write-Host "Publishing Glance v$Version" -ForegroundColor Cyan
-
 & dotnet publish $ProjectPath -c Release -r win-x64 -o $OutputPath `
     "-p:Platform=x64" `
     "-p:SelfContained=true" `
@@ -870,11 +886,20 @@ if ($exePath)
     Write-Host "Size       : $fileSize MB" -ForegroundColor Green
 }
 
+if ($Local)
+{
+    Write-Host ""
+    Write-Host "Local publish completed. Packaging and uploads were skipped." -ForegroundColor Green
+    Write-Host "Output     : $OutputPath" -ForegroundColor Green
+    return
+}
+
 Write-Host "Packaging with Velopack..." -ForegroundColor Cyan
 
 $vpkArgs = @(
     "pack"
-    "--packId", "Glance"
+    "--packId", $VelopackPackId
+    "--packTitle", "Glance"
     "--packVersion", $Version
     "--packDir", $OutputPath
     "--outputDir", $FeedPath
@@ -894,11 +919,13 @@ if ($LASTEXITCODE -ne 0)
     exit $LASTEXITCODE
 }
 
-if (-not (Test-Path $InstallerPath))
+if (-not (Test-Path $VelopackInstallerPath))
 {
-    Write-Host "Installer was not found: $InstallerPath" -ForegroundColor Red
+    Write-Host "Installer was not found: $VelopackInstallerPath" -ForegroundColor Red
     exit 1
 }
+
+Copy-Item $VelopackInstallerPath $InstallerPath -Force
 
 if (-not $SkipMicrosoftStore)
 {
