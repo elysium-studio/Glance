@@ -15,7 +15,8 @@ public sealed class SettingsModule :
         services
             .AddViewFor(ServiceLifetime.Transient,
                 provider => new SettingsWindow(provider.GetRequiredService<IMessenger>(),
-                    provider.GetRequiredService<ITextLocalizer>()),
+                    provider.GetRequiredService<ITextLocalizer>(),
+                    provider.GetRequiredService<IApplicationLifetime>()),
                 provider => new SettingsViewModel(provider,
                     provider.GetRequiredService<IServiceFactory>(),
                     provider.GetRequiredService<IMessenger>(),

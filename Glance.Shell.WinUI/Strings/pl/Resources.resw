@@ -30,4 +30,9 @@
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Nie pozostawiaj wyspy rozwiniętej</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>Zezwalaj na alerty</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>Pozwól temu modułowi pojawić się, gdy coś wymaga Twojej uwagi</value></data>
+  <data name="QuitGlanceNavigationItem.Content" xml:space="preserve"><value>Zakończ Glance</value></data>
+  <data name="QuitDialogTitle" xml:space="preserve"><value>Zakończyć Glance?</value></data>
+  <data name="QuitDialogMessage" xml:space="preserve"><value>Glance zostanie zamknięty. Aktywne minutniki, nagrania i inne działające moduły zostaną zatrzymane.</value></data>
+  <data name="QuitDialogPrimaryButton" xml:space="preserve"><value>Zakończ</value></data>
+  <data name="QuitDialogCloseButton" xml:space="preserve"><value>Anuluj</value></data>
 </root>

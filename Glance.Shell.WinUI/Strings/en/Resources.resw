@@ -30,4 +30,9 @@
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Stop keeping island expanded</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>Allow attention</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>Let this module bring itself into view when something needs your attention</value></data>
+  <data name="QuitGlanceNavigationItem.Content" xml:space="preserve"><value>Quit Glance</value></data>
+  <data name="QuitDialogTitle" xml:space="preserve"><value>Quit Glance?</value></data>
+  <data name="QuitDialogMessage" xml:space="preserve"><value>Glance will close. Active timers, recordings, and other running modules will stop.</value></data>
+  <data name="QuitDialogPrimaryButton" xml:space="preserve"><value>Quit</value></data>
+  <data name="QuitDialogCloseButton" xml:space="preserve"><value>Cancel</value></data>
 </root>

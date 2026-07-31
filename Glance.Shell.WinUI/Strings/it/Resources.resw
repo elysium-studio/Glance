@@ -30,4 +30,9 @@
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Non mantenere più l’isola espansa</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>Consenti avvisi</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>Consenti al modulo di mostrarsi quando qualcosa richiede la tua attenzione</value></data>
+  <data name="QuitGlanceNavigationItem.Content" xml:space="preserve"><value>Esci da Glance</value></data>
+  <data name="QuitDialogTitle" xml:space="preserve"><value>Uscire da Glance?</value></data>
+  <data name="QuitDialogMessage" xml:space="preserve"><value>Glance verrà chiuso. I timer, le registrazioni e gli altri moduli attivi verranno interrotti.</value></data>
+  <data name="QuitDialogPrimaryButton" xml:space="preserve"><value>Esci</value></data>
+  <data name="QuitDialogCloseButton" xml:space="preserve"><value>Annulla</value></data>
 </root>
