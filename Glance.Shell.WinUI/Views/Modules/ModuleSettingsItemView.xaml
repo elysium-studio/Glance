@@ -10,13 +10,19 @@
             Description="{x:Bind ViewModel.Description}"
             Header="{x:Bind ViewModel.DisplayName}"
             IsClickEnabled="{x:Bind ViewModel.CanExpand, Mode=OneWay}">
+            <CommunityToolkit:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xEC8F;" />
+            </CommunityToolkit:SettingsCard.HeaderIcon>
             <ToggleSwitch AutomationProperties.Name="{x:Bind ViewModel.DisplayName}" IsOn="{x:Bind ViewModel.IsEnabled, Mode=TwoWay}" />
         </CommunityToolkit:SettingsCard>
         <Border
-            Width="100"
-            Height="100"
-            HorizontalAlignment="Right"
-            Background="Red" />
+            Width="40"
+            Height="40"
+            Margin="12,0,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Background="Transparent"
+            Canvas.ZIndex="1"
+            IsHitTestVisible="True" />
     </Grid>
-
 </UserControl>
