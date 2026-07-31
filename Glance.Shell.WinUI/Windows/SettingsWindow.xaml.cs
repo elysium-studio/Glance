@@ -89,6 +89,15 @@ public sealed partial class SettingsWindow :
         UpdateNavigation(args.SelectedItem as ISettingViewModel);
     }
 
+    private async void HandleSettingItemsReordered(ListViewBase sender,
+        DragItemsCompletedEventArgs args)
+    {
+        if (sender.ItemsSource is ModulesViewModel modules)
+        {
+            await modules.SaveOrderAsync();
+        }
+    }
+
     private async void HandleQuitTapped(object sender,
         Microsoft.UI.Xaml.Input.TappedRoutedEventArgs args)
     {

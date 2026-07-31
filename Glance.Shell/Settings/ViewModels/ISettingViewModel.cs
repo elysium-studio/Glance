@@ -8,5 +8,7 @@ public interface ISettingViewModel :
     IDisposable,
     INotifyPropertyChanged
 {
+    bool CanReorder => false;
+
     string? Description => null;
 }

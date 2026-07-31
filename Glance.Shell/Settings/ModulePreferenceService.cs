@@ -142,6 +142,23 @@ public sealed class ModulePreferenceService
         await SaveAsync();
     }
 
+    public async Task SetOrderAsync(IEnumerable<string> orderedIds)
+    {
+        string[] ids = [.. orderedIds.Where(id => !string.IsNullOrWhiteSpace(id)).Distinct(StringComparer.OrdinalIgnoreCase)];
+        Dictionary<string, GlanceModulePreference> preferences = settings.Modules.ToDictionary(item => item.Id, StringComparer.OrdinalIgnoreCase);
+        Queue<GlanceModulePreference> ordered = new(ids.Where(preferences.ContainsKey).Select(id => preferences[id]));
+        HashSet<string> reorderedIds = [.. ordered.Select(item => item.Id)];
+        List<GlanceModulePreference> modules = [.. settings.Modules.Select(item => reorderedIds.Contains(item.Id) ? ordered.Dequeue() : item)];
+
+        if (modules.Select(item => item.Id).SequenceEqual(settings.Modules.Select(item => item.Id), StringComparer.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        settings.Modules = modules;
+        await SaveAsync();
+    }
+
     private void Normalize()
     {
         Dictionary<string, GlanceModulePreference> saved = settings.Modules

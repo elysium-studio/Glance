@@ -35,7 +35,12 @@ public sealed partial class ModulesViewModel :
         preferences.ComponentsAdded += HandleComponentsAdded;
     }
 
+    public bool CanReorder => true;
+
     public string Description { get; }
+
+    public async Task SaveOrderAsync() =>
+        await preferences.SetOrderAsync(this.OfType<ModuleSettingsItemViewModel>().Select(item => item.Id));
 
     public override void Dispose()
     {
