@@ -13,7 +13,10 @@
             <CommunityToolkit:SettingsCard.HeaderIcon>
                 <FontIcon Glyph="&#xEC8F;" />
             </CommunityToolkit:SettingsCard.HeaderIcon>
-            <ToggleSwitch AutomationProperties.Name="{x:Bind ViewModel.DisplayName}" IsOn="{x:Bind ViewModel.IsEnabled, Mode=TwoWay}" />
+            <ToggleSwitch
+                AutomationProperties.Name="{x:Bind ViewModel.DisplayName}"
+                IsOn="{x:Bind ViewModel.IsEnabled, Mode=TwoWay}"
+                Margin="{x:Bind GetToggleMargin(ViewModel.CanExpand), Mode=OneWay}" />
         </CommunityToolkit:SettingsCard>
         <Border
             Width="40"
