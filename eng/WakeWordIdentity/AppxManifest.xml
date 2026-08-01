@@ -1,66 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
-  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   xmlns:systemai="http://schemas.microsoft.com/appx/manifest/systemai/windows10"
-  IgnorableNamespaces="desktop uap uap10 rescap systemai">
+  IgnorableNamespaces="uap uap10 rescap systemai">
   <Identity
-    Name="ElysiumStudio.Glance.Debug"
+    Name="ElysiumStudio.Glance.WakeWordTest"
     Publisher="CN=Elysium Studio"
     Version="1.0.0.0" />
   <Properties>
-    <DisplayName>Glance</DisplayName>
+    <DisplayName>Glance wake-word test</DisplayName>
     <PublisherDisplayName>Elysium Studio</PublisherDisplayName>
     <Logo>Assets\Glance.png</Logo>
+    <uap10:AllowExternalContent>true</uap10:AllowExternalContent>
   </Properties>
   <Resources>
-    <Resource Language="x-generate" />
+    <Resource Language="en" />
   </Resources>
   <Dependencies>
     <TargetDeviceFamily
       Name="Windows.Universal"
-      MinVersion="10.0.17763.0"
+      MinVersion="10.0.26100.0"
       MaxVersionTested="10.0.26226.0" />
     <TargetDeviceFamily
       Name="Windows.Desktop"
-      MinVersion="10.0.17763.0"
+      MinVersion="10.0.26100.0"
       MaxVersionTested="10.0.26226.0" />
   </Dependencies>
   <Applications>
     <Application
-      Id="Glance"
+      Id="WakeWordTest"
       Executable="Glance.exe"
-      EntryPoint="Windows.FullTrustApplication"
-      uap10:RuntimeBehavior="packagedClassicApp"
+      uap10:RuntimeBehavior="win32App"
       uap10:TrustLevel="mediumIL">
       <uap:VisualElements
-        DisplayName="Glance"
-        Description="Glance"
+        AppListEntry="none"
         BackgroundColor="transparent"
+        Description="Tests local Microsoft speech recognition for Glance"
+        DisplayName="Glance wake-word test"
         Square150x150Logo="Assets\Glance.png"
-        Square44x44Logo="Assets\Glance.png">
-        <uap:DefaultTile />
-      </uap:VisualElements>
-      <Extensions>
-        <desktop:Extension
-          Category="windows.startupTask"
-          Executable="Glance.exe"
-          EntryPoint="Windows.FullTrustApplication">
-          <desktop:StartupTask
-            TaskId="GlanceDesktop"
-            Enabled="false"
-            DisplayName="Glance" />
-        </desktop:Extension>
-      </Extensions>
+        Square44x44Logo="Assets\Glance.png" />
     </Application>
   </Applications>
   <Capabilities>
-    <systemai:Capability Name="systemAIModels" />
     <rescap:Capability Name="runFullTrust" />
-    <DeviceCapability Name="location" />
-    <DeviceCapability Name="microphone" />
+    <rescap:Capability Name="unvirtualizedResources" />
+    <systemai:Capability Name="systemAIModels" />
   </Capabilities>
 </Package>

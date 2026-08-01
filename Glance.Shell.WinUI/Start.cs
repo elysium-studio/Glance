@@ -9,7 +9,7 @@ public static class Start
     [STAThread]
     public static void Main()
     {
-        using SingleInstanceGuard? instanceGuard = SingleInstanceGuard.TryAcquire($"{Environment.UserName}.Glance");
+        using SingleInstanceGuard? instanceGuard = SingleInstanceGuard.TryAcquire($"{Environment.UserName}.Glance.WakeWordTest");
 
         if (instanceGuard is null)
         {

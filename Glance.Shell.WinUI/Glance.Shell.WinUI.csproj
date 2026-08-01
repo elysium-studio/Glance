@@ -22,6 +22,7 @@
     <StartupObject>Glance.Shell.WinUI.Start</StartupObject>
     <DefaultLanguage>en</DefaultLanguage>
     <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3842</MSBuildWarningsAsMessages>
+    <NoWarn>$(NoWarn);CS8305</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'DebugPackaged'">
     <EnableMsixTooling>true</EnableMsixTooling>
@@ -62,6 +63,7 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
     <PackageReference Include="Microsoft.WindowsAppSDK.AI" Version="2.2.6-experimental" />
     <PackageReference Include="Microsoft.WindowsAppSDK.Runtime" Version="2.2.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="NAudio" Version="2.3.0" />
     <PackageReference Include="Velopack" Version="1.2.0" />
     <PackageReference Include="WinUIEx" Version="2.9.1" />
   </ItemGroup>

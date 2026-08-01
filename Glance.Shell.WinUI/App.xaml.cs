@@ -43,5 +43,6 @@ public sealed partial class App
 
         _ = host.Services.GetRequiredKeyedService<DesktopIslandView>("DesktopIslandView");
         moduleManager.StartWatching();
+        WakeWordTestWindow.Open();
     }
 }
