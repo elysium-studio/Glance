@@ -2,11 +2,15 @@ using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Glance.AudioSwitcher.WinUI;
 
 public sealed partial class AudioSwitcherComponent :
     IGlanceComponent,
+    IGlanceActionProvider,
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
@@ -50,6 +54,26 @@ public sealed partial class AudioSwitcherComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
+    [
+        new GlanceActionDescriptor("AudioSwitcher.SelectOutput",
+            Id,
+            "Switch audio output",
+            "Select the default audio output device.",
+            [new GlanceActionParameterDescriptor("device", GlanceActionParameterType.String, "Part or all of the output device name.")])
+    ];
+
+    public bool IsAvailable(string actionId) => viewModel.HasDevices;
+
+    public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        string? device = request.GetString("device");
+        return Task.FromResult(device is not null && viewModel.SelectDevice(device)
+            ? GlanceActionResult.Success($"Using {viewModel.CurrentDeviceName}.")
+            : GlanceActionResult.InvalidArguments("The requested audio output is not available."));
+    }
 
     public void Dispose() =>
         audioDeviceService.DevicesChanged -= HandleDevicesChanged;

@@ -12,6 +12,8 @@ public sealed class PrivacyControlsModule :
         services.AddSingleton<ModuleResourceTextLocalizer<PrivacyControlsModule>>();
         services.AddSingleton<IMicrophoneService, WindowsMicrophoneService>();
         services.AddSingleton(provider => new PrivacyControlsViewModel(provider.GetRequiredService<IMicrophoneService>(), provider.GetRequiredService<ModuleResourceTextLocalizer<PrivacyControlsModule>>()));
-        services.AddSingleton<IGlanceComponent, PrivacyControlsComponent>();
+        services.AddSingleton<PrivacyControlsComponent>();
+        services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<PrivacyControlsComponent>());
+        services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<PrivacyControlsComponent>());
     }
 }

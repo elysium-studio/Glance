@@ -3,8 +3,10 @@ using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Media;
 using Windows.Media.Control;
@@ -14,6 +16,7 @@ namespace Glance.Media.WinUI;
 
 public sealed partial class MediaComponent :
     IGlanceComponent,
+    IGlanceActionProvider,
     IGlanceBackgroundComponent,
     IGlanceConnectedAnimationComponent,
     IGlanceAttentionComponent,
@@ -87,6 +90,43 @@ public sealed partial class MediaComponent :
     public object ExpandedAnimationElement { get; }
 
     public bool IsAttentionEnabledByDefault => false;
+
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
+    [
+        new GlanceActionDescriptor("Media.Previous", Id, "Previous track", "Play the previous media track."),
+        new GlanceActionDescriptor("Media.TogglePlayback", Id, "Play or pause media", "Toggle media playback."),
+        new GlanceActionDescriptor("Media.Next", Id, "Next track", "Skip to the next media track.")
+    ];
+
+    public bool IsAvailable(string actionId) =>
+        actionId switch
+        {
+            "Media.Previous" => viewModel.CanSkipPrevious,
+            "Media.TogglePlayback" => viewModel.CanTogglePlayback,
+            "Media.Next" => viewModel.CanSkipNext,
+            _ => false
+        };
+
+    public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        switch (request.ActionId)
+        {
+            case "Media.Previous":
+                viewModel.Previous();
+                break;
+            case "Media.TogglePlayback":
+                viewModel.TogglePlayback();
+                break;
+            case "Media.Next":
+                viewModel.Next();
+                break;
+            default:
+                return Task.FromResult(GlanceActionResult.Unavailable());
+        }
+
+        return Task.FromResult(GlanceActionResult.Success());
+    }
 
     public void Dispose()
     {

@@ -6,6 +6,7 @@ namespace Glance.SpeechToText.WinUI;
 
 public sealed partial class SpeechToTextComponent :
     IGlanceComponent,
+    IGlanceActionProvider,
     IGlanceConnectedAnimationComponent,
     IGlanceAvailabilityComponent,
     IAsyncDisposable
@@ -67,6 +68,50 @@ public sealed partial class SpeechToTextComponent :
 
     public event EventHandler? AvailabilityChanged;
 
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
+    [
+        new GlanceActionDescriptor("SpeechToText.Start",
+            Id,
+            "Start transcription",
+            "Start transcribing microphone, system, or meeting audio.",
+            [new GlanceActionParameterDescriptor("source", GlanceActionParameterType.String, "The audio source to transcribe.", false, ["microphone", "systemAudio", "meeting"])],
+            Presentation: GlanceActionPresentation.Expanded),
+        new GlanceActionDescriptor("SpeechToText.Stop", Id, "Stop transcription", "Stop the active transcription.")
+    ];
+
+    bool IGlanceActionProvider.IsAvailable(string actionId) => actionId switch
+    {
+        "SpeechToText.Start" => recognitionService.Availability == SpeechRecognitionAvailability.Ready && !recognitionService.IsListening,
+        "SpeechToText.Stop" => recognitionService.IsListening,
+        _ => false
+    };
+
+    public async Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        switch (request.ActionId)
+        {
+            case "SpeechToText.Start":
+                SpeechAudioSource source = request.GetString("source") switch
+                {
+                    "microphone" => SpeechAudioSource.Microphone,
+                    "systemAudio" => SpeechAudioSource.SystemAudio,
+                    _ => SpeechAudioSource.Meeting
+                };
+                viewModel.SelectedAudioSource = source;
+                return await SetListeningAsync(true)
+                    ? GlanceActionResult.Success()
+                    : GlanceActionResult.Unavailable("Speech recognition could not be started.");
+
+            case "SpeechToText.Stop":
+                await SetListeningAsync(false);
+                return GlanceActionResult.Success();
+
+            default:
+                return GlanceActionResult.Unavailable();
+        }
+    }
+
     public async ValueTask DisposeAsync()
     {
         viewModel.ToggleListeningRequested -= HandleToggleListeningRequested;
@@ -87,17 +132,23 @@ public sealed partial class SpeechToTextComponent :
 
     private async void HandleToggleListeningRequested(object? sender, EventArgs args)
     {
+        await SetListeningAsync(!recognitionService.IsListening);
+    }
+
+    private async Task<bool> SetListeningAsync(bool listen)
+    {
         viewModel.BeginPreparing();
 
-        if (recognitionService.IsListening)
+        if (!listen)
         {
             await recognitionService.StopAsync();
             dispatcherQueue.TryEnqueue(viewModel.StopListening);
-            return;
+            return true;
         }
 
         bool started = await recognitionService.StartAsync(viewModel.SelectedAudioSource);
         dispatcherQueue.TryEnqueue(started ? viewModel.BeginListening : viewModel.ShowUnavailable);
+        return started;
     }
 
     private async void HandleEnsureModelRequested(object? sender, EventArgs args)

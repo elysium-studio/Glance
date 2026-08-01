@@ -3,12 +3,15 @@ using Glance.UI.WinUI;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Glance.ScreenCapture.WinUI;
 
 public sealed partial class ScreenCaptureComponent :
     IGlanceComponent,
+    IGlanceActionProvider,
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
@@ -68,6 +71,47 @@ public sealed partial class ScreenCaptureComponent :
 
     public object ExpandedAnimationElement { get; }
 
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
+    [
+        new GlanceActionDescriptor("ScreenCapture.Region", Id, "Capture a region", "Select and capture a region of the screen.", GlanceActionPresentation.Expanded),
+        new GlanceActionDescriptor("ScreenCapture.Window",
+            Id,
+            "Capture a window",
+            "Capture a window, optionally selecting it by title.",
+            [new GlanceActionParameterDescriptor("window", GlanceActionParameterType.String, "Part or all of the window title.", IsRequired: false)],
+            Presentation: GlanceActionPresentation.Expanded),
+        new GlanceActionDescriptor("ScreenCapture.Display", Id, "Capture a display", "Select and capture a display.", GlanceActionPresentation.Expanded),
+        new GlanceActionDescriptor("ScreenCapture.AllDisplays", Id, "Capture all displays", "Capture the complete desktop across all displays.", GlanceActionPresentation.Expanded)
+    ];
+
+    public bool IsAvailable(string actionId) => !viewModel.IsCapturing;
+
+    public async Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ScreenCaptureMode mode = request.ActionId switch
+        {
+            "ScreenCapture.Region" => ScreenCaptureMode.Region,
+            "ScreenCapture.Window" => ScreenCaptureMode.Window,
+            "ScreenCapture.Display" => ScreenCaptureMode.Display,
+            "ScreenCapture.AllDisplays" => ScreenCaptureMode.AllDisplays,
+            _ => (ScreenCaptureMode)(-1)
+        };
+
+        if ((int)mode < 0)
+        {
+            return GlanceActionResult.Unavailable();
+        }
+
+        expandedView.SetCaptureInProgress(true);
+        viewModel.IsCapturing = true;
+        viewModel.StatusText = localizer.GetText("SelectingCapture");
+        bool captured = await CaptureAsync(mode, request.GetString("window"));
+        return captured
+            ? GlanceActionResult.Success()
+            : GlanceActionResult.Failed("The capture was cancelled or the requested window could not be found.");
+    }
+
     public void Dispose()
     {
         viewModel.CaptureRequested -= HandleCaptureRequested;
@@ -95,11 +139,13 @@ public sealed partial class ScreenCaptureComponent :
         }
     }
 
-    private async Task CaptureAsync(ScreenCaptureMode mode)
+    private async Task<bool> CaptureAsync(ScreenCaptureMode mode, string? windowName = null)
     {
         try
         {
-            ScreenCaptureItem? capture = await screenCaptureService.CaptureAsync(mode);
+            ScreenCaptureItem? capture = mode == ScreenCaptureMode.Window && !string.IsNullOrWhiteSpace(windowName)
+                ? await screenCaptureService.CaptureWindowAsync(windowName)
+                : await screenCaptureService.CaptureAsync(mode);
 
             if (capture is null)
             {
@@ -109,7 +155,7 @@ public sealed partial class ScreenCaptureComponent :
                     expandedView.SetCaptureInProgress(false);
                     ApplyPendingCaptureRefresh();
                 });
-                return;
+                return false;
             }
 
             Task<bool>? automaticCopyTask = options.Current.CopyToClipboardAutomatically
@@ -163,6 +209,8 @@ public sealed partial class ScreenCaptureComponent :
             {
                 logger.LogWarning("The completed screen capture could not be copied to the clipboard automatically");
             }
+
+            return true;
         }
         catch (Exception exception)
         {
@@ -173,6 +221,7 @@ public sealed partial class ScreenCaptureComponent :
                 viewModel.ShowCaptureError();
                 ApplyPendingCaptureRefresh();
             });
+            return false;
         }
     }
 

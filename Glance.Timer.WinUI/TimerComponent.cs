@@ -3,13 +3,16 @@ using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Glance.Timer.WinUI;
 
 public sealed partial class TimerComponent :
     IGlanceComponent,
+    IGlanceActionProvider,
     IGlanceConnectedAnimationComponent,
     IGlanceAttentionComponent,
     IDisposable
@@ -77,6 +80,50 @@ public sealed partial class TimerComponent :
     public object ExpandedAnimationElement { get; }
 
     public bool IsAttentionEnabledByDefault => true;
+
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
+    [
+        new GlanceActionDescriptor("Timer.Start",
+            Id,
+            "Start timer",
+            "Start a timer for a specified number of minutes.",
+            [new GlanceActionParameterDescriptor("minutes", GlanceActionParameterType.Number, "The timer duration in minutes.", Minimum: 0.1, Maximum: 1440)]),
+        new GlanceActionDescriptor("Timer.Pause", Id, "Pause timer", "Pause the running timer."),
+        new GlanceActionDescriptor("Timer.Resume", Id, "Resume timer", "Resume the paused timer."),
+        new GlanceActionDescriptor("Timer.Reset", Id, "Reset timer", "Reset the timer to its configured duration.")
+    ];
+
+    public bool IsAvailable(string actionId) =>
+        actionId switch
+        {
+            "Timer.Pause" => viewModel.IsRunning,
+            "Timer.Resume" => !viewModel.IsRunning,
+            _ => true
+        };
+
+    public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        switch (request.ActionId)
+        {
+            case "Timer.Start":
+                viewModel.Start(TimeSpan.FromMinutes(request.GetNumber("minutes")!.Value));
+                break;
+            case "Timer.Pause":
+                viewModel.Pause();
+                break;
+            case "Timer.Resume":
+                viewModel.Resume();
+                break;
+            case "Timer.Reset":
+                viewModel.Reset();
+                break;
+            default:
+                return Task.FromResult(GlanceActionResult.Unavailable());
+        }
+
+        return Task.FromResult(GlanceActionResult.Success());
+    }
 
     public void Dispose()
     {

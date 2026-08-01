@@ -18,7 +18,9 @@ public sealed class WorldClockModule :
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<ModuleResourceTextLocalizer<WorldClockModule>>();
         services.AddSingleton(CreateViewModel);
-        services.AddSingleton<IGlanceComponent, WorldClockComponent>();
+        services.AddSingleton<WorldClockComponent>();
+        services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<WorldClockComponent>());
+        services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<WorldClockComponent>());
         services.AddViewFor<WorldClockTimeFormatSettingView, IGlanceModuleSettingViewModel, WorldClockTimeFormatSettingViewModel>(ServiceLifetime.Transient, provider => new WorldClockTimeFormatSettingView(), provider => new WorldClockTimeFormatSettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<WorldClockSettings>>().Current, provider.GetRequiredService<IWritableOptions<WorldClockSettings>>()));
     }
 

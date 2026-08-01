@@ -20,7 +20,9 @@ public sealed class ColorPickerModule :
         services.AddSingleton<IColorPickerService, WindowsColorPickerService>();
         services.AddSingleton<ITextCopyService, WindowsTextCopyService>();
         services.AddSingleton(provider => new ColorPickerViewModel(provider.GetRequiredService<IColorPickerService>(), provider.GetRequiredService<ITextCopyService>(), provider.GetRequiredService<GlanceModuleOptions<ColorPickerSettings>>().Current, provider.GetRequiredService<ColorHistoryRepository>()));
-        services.AddSingleton<IGlanceComponent, ColorPickerComponent>();
+        services.AddSingleton<ColorPickerComponent>();
+        services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<ColorPickerComponent>());
+        services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<ColorPickerComponent>());
         services.AddViewFor<RecentColorLimitSettingView, IGlanceModuleSettingViewModel, RecentColorLimitSettingViewModel>(ServiceLifetime.Transient, provider => new RecentColorLimitSettingView(), provider => new RecentColorLimitSettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<ColorPickerSettings>>().Current, provider.GetRequiredService<IWritableOptions<ColorPickerSettings>>()));
     }
 }

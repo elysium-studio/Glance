@@ -52,6 +52,23 @@ public sealed class WorldClockViewModelTests
         Assert.Equal("18:05", viewModel.SelectedClock.TimeText);
     }
 
+    [Fact]
+    public void SelectClockFindsAClockByCityName()
+    {
+        TimeZoneInfo localTimeZone = TimeZoneInfo.CreateCustomTimeZone("Local", TimeSpan.Zero, "Local", "Local");
+        TimeZoneInfo remoteTimeZone = TimeZoneInfo.CreateCustomTimeZone("Eastern Standard Time", TimeSpan.FromHours(-5), "New York", "New York");
+        WorldClockViewModel viewModel = new([
+            new WorldClockDefinition("Local", "Local time", localTimeZone),
+            new WorldClockDefinition("Eastern Standard Time", "New York", remoteTimeZone)
+        ]);
+        viewModel.Initialize();
+
+        bool selected = viewModel.SelectClock("New York");
+
+        Assert.True(selected);
+        Assert.Equal("New York", viewModel.SelectedClock?.DisplayName);
+    }
+
     private static WorldClockViewModel CreateViewModel(TimeSpan offset)
     {
         TimeZoneInfo timeZone = TimeZoneInfo.CreateCustomTimeZone("Test", offset, "Test", "Test");

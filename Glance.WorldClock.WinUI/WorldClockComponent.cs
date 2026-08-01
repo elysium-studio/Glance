@@ -2,11 +2,15 @@ using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Glance.WorldClock.WinUI;
 
 public sealed partial class WorldClockComponent :
     IGlanceComponent,
+    IGlanceActionProvider,
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
@@ -59,6 +63,26 @@ public sealed partial class WorldClockComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
+    [
+        new GlanceActionDescriptor("WorldClock.ShowTime",
+            Id,
+            "Show time in a city",
+            "Select a world clock and bring it into view.",
+            [new GlanceActionParameterDescriptor("city", GlanceActionParameterType.String, "The city or time zone to display.")],
+            Presentation: GlanceActionPresentation.Expanded)
+    ];
+
+    public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        string? city = request.GetString("city");
+
+        return Task.FromResult(city is not null && viewModel.SelectClock(city)
+            ? GlanceActionResult.Success($"Showing the time for {viewModel.SelectedClock?.DisplayName}.")
+            : GlanceActionResult.InvalidArguments("The requested city is not available in World Clock."));
+    }
 
     public void Dispose()
     {

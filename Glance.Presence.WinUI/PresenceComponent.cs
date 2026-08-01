@@ -2,12 +2,15 @@ using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Glance.Presence.WinUI;
 
 public sealed partial class PresenceComponent :
     IGlanceComponent,
+    IGlanceActionProvider,
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
@@ -51,6 +54,32 @@ public sealed partial class PresenceComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
+    [
+        new GlanceActionDescriptor("Presence.Start", Id, "Stay available", "Keep your presence available while you are away."),
+        new GlanceActionDescriptor("Presence.Stop", Id, "Stop staying available", "Stop keeping your presence available.")
+    ];
+
+    public bool IsAvailable(string actionId) =>
+        actionId switch
+        {
+            "Presence.Start" => !viewModel.IsActive,
+            "Presence.Stop" => viewModel.IsActive,
+            _ => false
+        };
+
+    public async Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (request.ActionId is not ("Presence.Start" or "Presence.Stop"))
+        {
+            return GlanceActionResult.Unavailable();
+        }
+
+        await viewModel.ToggleAsync();
+        return GlanceActionResult.Success();
+    }
 
     public void Dispose()
     {

@@ -12,6 +12,8 @@ public sealed class ScreenLensModule :
         services.AddSingleton<ModuleResourceTextLocalizer<ScreenLensModule>>();
         services.AddSingleton<IScreenLensService, WindowsScreenLensService>();
         services.AddSingleton(provider => new ScreenLensViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<ScreenLensModule>>()));
-        services.AddSingleton<IGlanceComponent, ScreenLensComponent>();
+        services.AddSingleton<ScreenLensComponent>();
+        services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<ScreenLensComponent>());
+        services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<ScreenLensComponent>());
     }
 }

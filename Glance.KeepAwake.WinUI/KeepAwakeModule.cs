@@ -16,7 +16,9 @@ public sealed class KeepAwakeModule :
         services.AddSingleton<ModuleResourceTextLocalizer<KeepAwakeModule>>();
         services.AddSingleton<IKeepAwakeService, WindowsKeepAwakeService>();
         services.AddSingleton(provider => new KeepAwakeViewModel(provider.GetRequiredService<IKeepAwakeService>(), provider.GetRequiredService<ModuleResourceTextLocalizer<KeepAwakeModule>>(), provider.GetRequiredService<IDispatcher>()));
-        services.AddSingleton<IGlanceComponent, KeepAwakeComponent>();
+        services.AddSingleton<KeepAwakeComponent>();
+        services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<KeepAwakeComponent>());
+        services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<KeepAwakeComponent>());
         services.AddViewFor<KeepAwakeResumeAutomaticallySettingView, IGlanceModuleSettingViewModel, KeepAwakeResumeAutomaticallySettingViewModel>(ServiceLifetime.Transient, provider => new KeepAwakeResumeAutomaticallySettingView(), provider => new KeepAwakeResumeAutomaticallySettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<KeepAwakeSettings>>().Current, provider.GetRequiredService<IWritableOptions<KeepAwakeSettings>>()));
     }
 }

@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Graphics.Imaging;
@@ -58,7 +59,11 @@ public sealed partial class WindowsScreenCaptureService :
 
     public event EventHandler? CapturesChanged;
 
-    public async Task<ScreenCaptureItem?> CaptureAsync(ScreenCaptureMode mode)
+    public Task<ScreenCaptureItem?> CaptureAsync(ScreenCaptureMode mode) => CaptureAsync(mode, null);
+
+    public Task<ScreenCaptureItem?> CaptureWindowAsync(string windowName) => CaptureAsync(ScreenCaptureMode.Window, windowName);
+
+    private async Task<ScreenCaptureItem?> CaptureAsync(ScreenCaptureMode mode, string? windowName)
     {
         if (!dispatcherQueue.HasThreadAccess)
         {
@@ -74,6 +79,14 @@ public sealed partial class WindowsScreenCaptureService :
             _ => []
         };
         IReadOnlyList<ApplicationWindowState> applicationWindows = GetVisibleApplicationWindows();
+        CaptureSelectionCandidate? automaticCandidate = string.IsNullOrWhiteSpace(windowName)
+            ? null
+            : FindWindowCandidate(candidates, windowName);
+
+        if (!string.IsNullOrWhiteSpace(windowName) && automaticCandidate is null)
+        {
+            return null;
+        }
 
         CaptureSelectionWindow? overlay = null;
 
@@ -83,7 +96,7 @@ public sealed partial class WindowsScreenCaptureService :
             _ = NativeMethods.DwmFlush();
 
             DesktopCaptureBitmap desktop = CaptureVirtualDesktop();
-            CaptureSelectionResult? selectionResult = await CaptureSelectionWindow.SelectAsync(desktop, mode, candidates, localizer, dispatcherQueue);
+            CaptureSelectionResult? selectionResult = await CaptureSelectionWindow.SelectAsync(desktop, mode, candidates, localizer, dispatcherQueue, automaticCandidate);
 
             if (selectionResult is null)
             {
@@ -501,13 +514,23 @@ public sealed partial class WindowsScreenCaptureService :
 
             if (width >= 80 && height >= 60)
             {
-                candidates.Add(new CaptureSelectionCandidate(new NativeRectangle(rectangle.Left, rectangle.Top, width, height), window));
+                int titleLength = NativeMethods.GetWindowTextLength(window);
+                StringBuilder title = new(Math.Max(1, titleLength + 1));
+                _ = NativeMethods.GetWindowText(window, title, title.Capacity);
+                candidates.Add(new CaptureSelectionCandidate(new NativeRectangle(rectangle.Left, rectangle.Top, width, height), window, title.ToString()));
             }
 
             return true;
         }, nint.Zero);
         return candidates;
     }
+
+    private static CaptureSelectionCandidate? FindWindowCandidate(IReadOnlyList<CaptureSelectionCandidate> candidates, string query) =>
+        candidates.FirstOrDefault(candidate => string.Equals(candidate.WindowTitle, query, StringComparison.OrdinalIgnoreCase)) is CaptureSelectionCandidate exact && exact.WindowHandle != 0
+            ? exact
+            : candidates.FirstOrDefault(candidate => candidate.WindowTitle?.Contains(query, StringComparison.OrdinalIgnoreCase) == true) is CaptureSelectionCandidate partial && partial.WindowHandle != 0
+                ? partial
+                : null;
 
     private static IReadOnlyList<CaptureSelectionCandidate> EnumerateDisplayCandidates()
     {
@@ -625,6 +648,12 @@ public sealed partial class WindowsScreenCaptureService :
         [LibraryImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static partial bool IsIconic(nint window);
+
+        [LibraryImport("user32.dll", EntryPoint = "GetWindowTextLengthW")]
+        public static partial int GetWindowTextLength(nint window);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode, EntryPoint = "GetWindowTextW")]
+        public static extern int GetWindowText(nint window, StringBuilder text, int maximumCount);
 
         [LibraryImport("user32.dll")]
         public static partial uint GetWindowThreadProcessId(nint window, out uint processId);

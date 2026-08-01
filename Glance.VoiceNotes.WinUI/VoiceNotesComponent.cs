@@ -2,12 +2,16 @@ using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Glance.VoiceNotes.WinUI;
 
 public sealed partial class VoiceNotesComponent :
     IGlanceComponent,
+    IGlanceActionProvider,
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
@@ -70,6 +74,32 @@ public sealed partial class VoiceNotesComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
+    [
+        new GlanceActionDescriptor("VoiceNotes.Start", Id, "Start voice note", "Start recording a new voice note."),
+        new GlanceActionDescriptor("VoiceNotes.Stop", Id, "Stop voice note", "Stop and save the current voice note.")
+    ];
+
+    public bool IsAvailable(string actionId) =>
+        actionId switch
+        {
+            "VoiceNotes.Start" => !recordingService.IsRecording,
+            "VoiceNotes.Stop" => recordingService.IsRecording,
+            _ => false
+        };
+
+    public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (request.ActionId is not ("VoiceNotes.Start" or "VoiceNotes.Stop"))
+        {
+            return Task.FromResult(GlanceActionResult.Unavailable());
+        }
+
+        viewModel.ToggleRecording();
+        return Task.FromResult(GlanceActionResult.Success());
+    }
 
     public void Dispose()
     {

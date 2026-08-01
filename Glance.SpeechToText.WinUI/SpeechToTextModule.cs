@@ -13,6 +13,8 @@ public sealed class SpeechToTextModule :
         services.AddSingleton<ISpeechRecognitionService, WindowsSpeechRecognitionService>();
         services.AddSingleton<ITextCopyService, WindowsTextCopyService>();
         services.AddSingleton(provider => new SpeechToTextViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<SpeechToTextModule>>()));
-        services.AddSingleton<IGlanceComponent, SpeechToTextComponent>();
+        services.AddSingleton<SpeechToTextComponent>();
+        services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<SpeechToTextComponent>());
+        services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<SpeechToTextComponent>());
     }
 }

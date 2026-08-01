@@ -20,7 +20,9 @@ public sealed class VoiceNotesModule :
         services.AddSingleton<IVoiceRecordingService>(provider =>
             new WindowsVoiceRecordingService(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "VoiceNotes"), provider.GetRequiredService<VoiceNoteRepository>()));
         services.AddSingleton(provider => new VoiceNotesViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<VoiceNotesModule>>(), provider.GetRequiredService<GlanceModuleOptions<VoiceNotesSettings>>().Current));
-        services.AddSingleton<IGlanceComponent, VoiceNotesComponent>();
+        services.AddSingleton<VoiceNotesComponent>();
+        services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<VoiceNotesComponent>());
+        services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<VoiceNotesComponent>());
         services.AddViewFor<RecentRecordingLimitSettingView, IGlanceModuleSettingViewModel, RecentRecordingLimitSettingViewModel>(ServiceLifetime.Transient, provider => new RecentRecordingLimitSettingView(), provider => new RecentRecordingLimitSettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<VoiceNotesSettings>>().Current, provider.GetRequiredService<IWritableOptions<VoiceNotesSettings>>()));
     }
 }

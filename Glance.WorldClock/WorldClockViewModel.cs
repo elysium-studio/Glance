@@ -15,6 +15,28 @@ public sealed partial class WorldClockViewModel(IEnumerable<WorldClockDefinition
 
     public void Initialize() => SelectedClock = LocalClock;
 
+    public bool SelectClock(string query)
+    {
+        WorldClockItemViewModel? clock = Clocks.FirstOrDefault(clock =>
+            string.Equals(clock.Id, query, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(clock.DisplayName, query, StringComparison.OrdinalIgnoreCase));
+
+        if (clock is null)
+        {
+            clock = Clocks.FirstOrDefault(clock =>
+                clock.DisplayName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                query.Contains(clock.DisplayName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (clock is null)
+        {
+            return false;
+        }
+
+        SelectedClock = clock;
+        return true;
+    }
+
     public void Refresh(DateTimeOffset utcNow, bool use24HourTime)
     {
         foreach (WorldClockItemViewModel clock in Clocks)

@@ -2,11 +2,15 @@ using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Glance.PrivacyControls.WinUI;
 
 public sealed partial class PrivacyControlsComponent :
     IGlanceComponent,
+    IGlanceActionProvider,
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
@@ -50,6 +54,32 @@ public sealed partial class PrivacyControlsComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
+    [
+        new GlanceActionDescriptor("PrivacyControls.MuteMicrophone", Id, "Mute microphone", "Mute the current microphone."),
+        new GlanceActionDescriptor("PrivacyControls.UnmuteMicrophone", Id, "Unmute microphone", "Unmute the current microphone.")
+    ];
+
+    public bool IsAvailable(string actionId) =>
+        viewModel.IsAvailable && actionId switch
+        {
+            "PrivacyControls.MuteMicrophone" => !viewModel.IsMuted,
+            "PrivacyControls.UnmuteMicrophone" => viewModel.IsMuted,
+            _ => false
+        };
+
+    public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (request.ActionId is not ("PrivacyControls.MuteMicrophone" or "PrivacyControls.UnmuteMicrophone"))
+        {
+            return Task.FromResult(GlanceActionResult.Unavailable());
+        }
+
+        viewModel.ToggleMute();
+        return Task.FromResult(GlanceActionResult.Success());
+    }
 
     public void Dispose()
     {

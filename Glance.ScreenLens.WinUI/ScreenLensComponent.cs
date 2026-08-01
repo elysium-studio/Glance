@@ -1,11 +1,15 @@
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Glance.ScreenLens.WinUI;
 
 public sealed partial class ScreenLensComponent :
     IGlanceComponent,
+    IGlanceActionProvider,
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
@@ -48,6 +52,34 @@ public sealed partial class ScreenLensComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
+    [
+        new GlanceActionDescriptor("ScreenLens.Extract", Id, "Extract text from the screen", "Select a region and extract its text.")
+    ];
+
+    public bool IsAvailable(string actionId) => !viewModel.IsExtracting;
+
+    public async Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (request.ActionId != "ScreenLens.Extract")
+        {
+            return GlanceActionResult.Unavailable();
+        }
+
+        viewModel.IsExtracting = true;
+
+        try
+        {
+            await screenLensService.ExtractAsync();
+            return GlanceActionResult.Success();
+        }
+        finally
+        {
+            viewModel.Complete();
+        }
+    }
 
     public void Dispose()
     {

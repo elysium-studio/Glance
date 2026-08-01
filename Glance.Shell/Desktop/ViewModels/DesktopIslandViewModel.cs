@@ -35,6 +35,7 @@ public sealed partial class DesktopIslandViewModel :
 
     private IReadOnlyList<IGlanceComponent> components;
     private readonly IGlanceAttentionService attentionService;
+    private readonly IGlanceActionService actionService;
     private readonly IDispatcher dispatcher;
     private readonly IGlanceIntentService intentService;
     private readonly ILogger<DesktopIslandViewModel> logger;
@@ -49,6 +50,7 @@ public sealed partial class DesktopIslandViewModel :
         IDispatcher dispatcher,
         ModulePreferenceService modulePreferences,
         IGlanceAttentionService attentionService,
+        IGlanceActionService actionService,
         IGlanceIntentService intentService,
         INavigator navigator,
         ILogger<DesktopIslandViewModel> logger,
@@ -60,6 +62,7 @@ public sealed partial class DesktopIslandViewModel :
         this.modulePreferences = modulePreferences;
         components = modulePreferences.GetActiveComponents();
         this.attentionService = attentionService;
+        this.actionService = actionService;
         this.intentService = intentService;
         this.navigator = navigator;
         this.logger = logger;
@@ -68,6 +71,7 @@ public sealed partial class DesktopIslandViewModel :
         ExpansionMode = settings.ExpansionMode;
         Placement = settings.Placement;
         attentionService.AttentionRequested += HandleAttentionRequested;
+        actionService.PresentationRequested += HandleActionPresentationRequested;
         intentService.IntentInvoked += HandleIntentInvoked;
         modulePreferences.ActiveComponentsChanged += HandleActiveComponentsChanged;
         modulePreferences.ComponentsAdded += HandleComponentsAdded;
@@ -190,6 +194,7 @@ public sealed partial class DesktopIslandViewModel :
     public override void Dispose()
     {
         attentionService.AttentionRequested -= HandleAttentionRequested;
+        actionService.PresentationRequested -= HandleActionPresentationRequested;
         intentService.IntentInvoked -= HandleIntentInvoked;
         modulePreferences.ActiveComponentsChanged -= HandleActiveComponentsChanged;
         modulePreferences.ComponentsAdded -= HandleComponentsAdded;
@@ -314,6 +319,26 @@ public sealed partial class DesktopIslandViewModel :
             IsOpen = true;
             IsExpanded = true;
             AttentionReceived?.Invoke(this, new GlanceAttentionRequest(args.TargetComponentId));
+        });
+
+    private void HandleActionPresentationRequested(object? sender, GlanceActionPresentationRequestedEventArgs args) =>
+        dispatcher.Dispatch(() =>
+        {
+            int componentIndex = components
+                .Select((component, index) => (component, index))
+                .Where(item => string.Equals(item.component.Id, args.TargetComponentId, StringComparison.OrdinalIgnoreCase))
+                .Select(item => item.index)
+                .DefaultIfEmpty(-1).First();
+
+            if (componentIndex < 0)
+            {
+                return;
+            }
+
+            SelectedIndex = componentIndex;
+            IsOpen = true;
+            IsExpanded = args.Presentation == GlanceActionPresentation.Expanded || IsPinned;
+            AttentionReceived?.Invoke(this, new GlanceAttentionRequest(args.TargetComponentId, Expand: IsExpanded));
         });
 
     private int FindContextComponentIndex(GlanceContentKind kind) =>

@@ -18,6 +18,7 @@ public sealed class StashModule :
         services.AddSingleton(provider => new StashViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<StashModule>>()));
         services.AddSingleton<StashComponent>();
         services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<StashComponent>());
+        services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<StashComponent>());
         services.AddSingleton<IGlanceIntent>(provider => provider.GetRequiredService<StashComponent>());
     }
 }

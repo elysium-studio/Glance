@@ -63,6 +63,39 @@ public sealed partial class TimerViewModel :
 
     public event EventHandler? SessionStateChanged;
 
+    public void Start(TimeSpan value)
+    {
+        if (value <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(value));
+        }
+
+        IsRunning = false;
+        duration = value;
+        remaining = value;
+        lastTimestamp = Stopwatch.GetTimestamp();
+        UpdateText();
+        OnPropertyChanged(nameof(CanDecreaseMinute));
+        IsRunning = true;
+        SessionStateChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void Pause()
+    {
+        if (IsRunning)
+        {
+            Toggle();
+        }
+    }
+
+    public void Resume()
+    {
+        if (!IsRunning)
+        {
+            Toggle();
+        }
+    }
+
     public void Toggle()
     {
         if (IsRunning)

@@ -45,6 +45,7 @@ internal sealed class CaptureSelectionWindow
     private readonly Border highlight;
     private readonly ITextLocalizer localizer;
     private readonly ScreenCaptureMode mode;
+    private readonly CaptureSelectionCandidate? automaticCandidate;
     private readonly Grid root;
     private readonly Grid selectionChrome;
     private readonly RectangleGeometry smokeBounds;
@@ -61,12 +62,13 @@ internal sealed class CaptureSelectionWindow
     private bool selectionCompleted;
     private Point selectionStart;
 
-    private CaptureSelectionWindow(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<CaptureSelectionCandidate> candidates, ITextLocalizer localizer, ImageSource imageSource)
+    private CaptureSelectionWindow(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<CaptureSelectionCandidate> candidates, ITextLocalizer localizer, ImageSource imageSource, CaptureSelectionCandidate? automaticCandidate)
     {
         this.bitmap = bitmap;
         this.mode = mode;
         this.candidates = candidates;
         this.localizer = localizer;
+        this.automaticCandidate = automaticCandidate;
 
         smokeBounds = new RectangleGeometry();
         smokeCutout = new RectangleGeometry();
@@ -140,7 +142,7 @@ internal sealed class CaptureSelectionWindow
         root.Loaded += HandleRootLoaded;
         root.SizeChanged += HandleRootSizeChanged;
 
-        if (mode == ScreenCaptureMode.AllDisplays)
+        if (mode == ScreenCaptureMode.AllDisplays || automaticCandidate is not null)
         {
             selectionChrome.Visibility = Visibility.Collapsed;
         }
@@ -157,8 +159,8 @@ internal sealed class CaptureSelectionWindow
         windowHandle = WindowNative.GetWindowHandle(window);
     }
 
-    public static Task<CaptureSelectionResult?> SelectAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<CaptureSelectionCandidate> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue) =>
-        ShowOnDispatcherAsync(bitmap, mode, candidates, localizer, dispatcherQueue);
+    public static Task<CaptureSelectionResult?> SelectAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<CaptureSelectionCandidate> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue, CaptureSelectionCandidate? automaticCandidate = null) =>
+        ShowOnDispatcherAsync(bitmap, mode, candidates, localizer, dispatcherQueue, automaticCandidate);
 
     public void Close()
     {
@@ -305,7 +307,7 @@ internal sealed class CaptureSelectionWindow
     [DllImport("user32.dll")]
     private static extern int SetWindowLong(nint window, int index, int newValue);
 
-    private static Task<CaptureSelectionResult?> ShowOnDispatcherAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<CaptureSelectionCandidate> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue)
+    private static Task<CaptureSelectionResult?> ShowOnDispatcherAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<CaptureSelectionCandidate> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue, CaptureSelectionCandidate? automaticCandidate)
     {
         TaskCompletionSource<CaptureSelectionResult?> result = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -314,7 +316,7 @@ internal sealed class CaptureSelectionWindow
             try
             {
                 WriteableBitmap imageSource = CreateImageSource(bitmap);
-                CaptureSelectionWindow selectionWindow = new(bitmap, mode, candidates, localizer, imageSource);
+                CaptureSelectionWindow selectionWindow = new(bitmap, mode, candidates, localizer, imageSource, automaticCandidate);
                 _ = CompleteSelectionAsync(selectionWindow.ShowAsync(), result);
             }
             catch (Exception exception)
@@ -564,7 +566,11 @@ internal sealed class CaptureSelectionWindow
         PlatformWindowExtensions.viSetOpacity(windowHandle, 255);
         isShown = true;
 
-        if (mode == ScreenCaptureMode.AllDisplays)
+        if (automaticCandidate is CaptureSelectionCandidate candidate)
+        {
+            CompleteSelection(candidate);
+        }
+        else if (mode == ScreenCaptureMode.AllDisplays)
         {
             CompleteSelection(new CaptureSelectionCandidate(bitmap.Bounds));
         }
