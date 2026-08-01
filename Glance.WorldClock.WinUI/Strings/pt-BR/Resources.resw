@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Relógio mundial</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Veja a hora local e a hora nas principais cidades do mundo.</value></data>
+  <data name="LocalClock" xml:space="preserve"><value>Local</value></data>
+  <data name="LondonClock" xml:space="preserve"><value>Londres</value></data>
+  <data name="NewYorkClock" xml:space="preserve"><value>Nova York</value></data>
+  <data name="TokyoClock" xml:space="preserve"><value>Tóquio</value></data>
+  <data name="SydneyClock" xml:space="preserve"><value>Sydney</value></data>
+  <data name="WorldClockTimeFormatSettingCard.Header" xml:space="preserve"><value>Formato da hora</value></data>
+  <data name="WorldClockTimeFormatSettingCard.Description" xml:space="preserve"><value>Escolha o formato de 12 ou 24 horas.</value></data>
+  <data name="WorldClockTwentyFourHourOption.Content" xml:space="preserve"><value>24 horas</value></data>
+  <data name="WorldClockTwelveHourOption.Content" xml:space="preserve"><value>12 horas</value></data>
+</root>
