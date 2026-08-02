@@ -36,6 +36,12 @@
     <GenerateAppInstallerFile>false</GenerateAppInstallerFile>
     <Optimize>false</Optimize>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <ApplicationManifest>app.external.debug.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <ApplicationManifest>app.external.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Content Include="Assets\**\*">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
@@ -209,6 +215,9 @@
     <RemoveDir Directories="@(GlanceModuleStagingDirectory)" />
     <Delete Files="@(GlanceModuleBuildRootFile)" />
     <RemoveDir Directories="@(GlanceModuleRootXbfDirectory)" />
+  </Target>
+  <Target Name="RegisterDebugExternalPackage" AfterTargets="ArrangeGlanceModulesInBuildOutput" Condition="'$(Configuration)' == 'Debug' and '$(DesignTimeBuild)' != 'true'">
+    <Exec Command="powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\ExternalLocation\Register-DebugPackage.ps1&quot; -ManifestPath &quot;$(MSBuildProjectDirectory)\..\ExternalLocation\Debug\AppxManifest.xml&quot; -ExecutablePath &quot;$(TargetDir)$(AssemblyName).exe&quot;" />
   </Target>
   <Target Name="IncludeGlanceModulesInPackage" BeforeTargets="_ComputeAppxPackagePayload" DependsOnTargets="ArrangeGlanceModulesInBuildOutput" Condition="'$(EnableMsixTooling)' == 'true'">
     <PropertyGroup>

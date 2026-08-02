@@ -189,13 +189,18 @@ public sealed partial class DesktopIslandView :
 
     private void HandleAssistantPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
-        if (args.PropertyName != nameof(IGlanceAssistantService.IsOverlayVisible) || ViewModel.Assistant.IsOverlayVisible)
+        if (args.PropertyName != nameof(IGlanceAssistantService.IsOverlayVisible))
         {
             return;
         }
 
         DispatcherQueue.TryEnqueue(() =>
         {
+            if (ViewModel.Assistant.IsOverlayVisible)
+            {
+                return;
+            }
+
             if (assistantExpandedIsland && !isPointerOverIsland && !ViewModel.IsPinned)
             {
                 ViewModel.IsExpanded = false;

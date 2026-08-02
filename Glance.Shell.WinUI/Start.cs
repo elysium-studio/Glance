@@ -16,9 +16,11 @@ public static class Start
             return;
         }
 
-        if (!PackageIdentity.IsPackaged)
+        if (!PackageIdentity.IsFullPackage)
         {
             VelopackApp.Build()
+                .OnAfterInstallFastCallback(ExternalPackageIdentity.Register)
+                .OnAfterUpdateFastCallback(ExternalPackageIdentity.Register)
                 .OnBeforeUninstallFastCallback(UninstallCleanup.Run)
                 .Run();
         }

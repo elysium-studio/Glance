@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  IgnorableNamespaces="uap uap10 desktop rescap systemai"
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  xmlns:systemai="http://schemas.microsoft.com/appx/manifest/systemai/windows10">
+  <Identity
+    Name="ElysiumStudio.Glance.Debug.External"
+    Publisher="CN=Elysium Studio, OID.2.25.50822823652057306338962385037728967745=1"
+    Version="1.0.0.0"
+    ProcessorArchitecture="neutral" />
+  <Properties>
+    <DisplayName>Glance</DisplayName>
+    <PublisherDisplayName>Elysium Studio</PublisherDisplayName>
+    <Logo>Assets\Glance.png</Logo>
+    <uap10:AllowExternalContent>true</uap10:AllowExternalContent>
+  </Properties>
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+    <rescap:Capability Name="unvirtualizedResources" />
+    <systemai:Capability Name="systemAIModels" />
+    <DeviceCapability Name="location" />
+    <DeviceCapability Name="microphone" />
+  </Capabilities>
+  <Applications>
+    <Application Id="Glance" Executable="Glance.exe" uap10:TrustLevel="mediumIL" uap10:RuntimeBehavior="win32App">
+      <uap:VisualElements
+        AppListEntry="none"
+        DisplayName="Glance"
+        Description="Glance"
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Glance.png"
+        Square44x44Logo="Assets\Glance.png" />
+      <Extensions>
+        <desktop:Extension Category="windows.startupTask" Executable="Glance.exe" EntryPoint="Windows.FullTrustApplication">
+          <desktop:StartupTask TaskId="GlanceDesktop" Enabled="false" DisplayName="Glance" />
+        </desktop:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+</Package>

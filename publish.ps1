@@ -31,6 +31,11 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+if (-not $Local -and $SkipSigning)
+{
+    throw "Package-with-external-location releases must be signed. Use -Local for an unsigned local validation build."
+}
+
 if ([string]::IsNullOrWhiteSpace($ConfigurationPath))
 {
     $ConfigurationPath = Join-Path $PSScriptRoot "publish.local.json"
@@ -430,6 +435,100 @@ function Get-MakeAppxPath
     }
 
     return $path
+}
+
+function Get-SignToolPath
+{
+    $windowsKitsPath = "${env:ProgramFiles(x86)}\Windows Kits\10\bin"
+    $path = Get-ChildItem $windowsKitsPath -Directory |
+        Where-Object { $_.Name -match '^\d+\.\d+\.\d+\.\d+$' } |
+        Sort-Object { [version]$_.Name } -Descending |
+        ForEach-Object { Join-Path $_.FullName "x64\signtool.exe" } |
+        Where-Object { Test-Path $_ } |
+        Select-Object -First 1
+
+    if (-not $path)
+    {
+        throw "SignTool.exe was not found in the Windows SDK"
+    }
+
+    return $path
+}
+
+function Get-AzureCodeSigningDlibPath
+{
+    $toolStorePath = Join-Path $env:USERPROFILE ".dotnet\tools\.store\vpk"
+    $path = Get-ChildItem $toolStorePath -Filter "Azure.CodeSigning.Dlib.dll" -File -Recurse -ErrorAction SilentlyContinue |
+        Sort-Object FullName -Descending |
+        Select-Object -ExpandProperty FullName -First 1
+
+    if (-not $path)
+    {
+        throw "Azure.CodeSigning.Dlib.dll was not found in the Velopack tool installation"
+    }
+
+    return $path
+}
+
+function New-ExternalIdentityPackage
+{
+    param(
+        [string]$Version,
+        [string]$OutputDirectory,
+        [string]$MetadataPath,
+        [switch]$Sign
+    )
+
+    $numericVersion = $Version -replace '-.*$', ''
+
+    if ($numericVersion -notmatch '^\d+\.\d+\.\d+$')
+    {
+        throw "External identity version must use major.minor.patch format"
+    }
+
+    $packageVersion = "$numericVersion.0"
+    $identityRoot = Join-Path (Split-Path $OutputDirectory -Parent) "ExternalIdentity"
+    $stagingPath = Join-Path $identityRoot "Staging"
+    $packagePath = Join-Path $OutputDirectory "Glance.Identity.msix"
+    $manifestTemplatePath = Join-Path $PSScriptRoot "ExternalLocation\Package.appxmanifest.template"
+
+    if (Test-Path $identityRoot)
+    {
+        Remove-Item $identityRoot -Recurse -Force
+    }
+
+    New-Item $stagingPath -ItemType Directory -Force | Out-Null
+    $manifest = (Get-Content $manifestTemplatePath -Raw).Replace("__VERSION__", $packageVersion)
+    [System.IO.File]::WriteAllText((Join-Path $stagingPath "AppxManifest.xml"), $manifest, [System.Text.UTF8Encoding]::new($false))
+
+    $makeAppxPath = Get-MakeAppxPath
+    & $makeAppxPath pack /o /d $stagingPath /nv /p $packagePath
+
+    if ($LASTEXITCODE -ne 0)
+    {
+        throw "External identity package creation failed with exit code $LASTEXITCODE"
+    }
+
+    if ($Sign)
+    {
+        $signToolPath = Get-SignToolPath
+        $dlibPath = Get-AzureCodeSigningDlibPath
+        & $signToolPath sign /v /fd SHA256 /tr "http://timestamp.acs.microsoft.com" /td SHA256 /dlib $dlibPath /dmdf $MetadataPath $packagePath
+
+        if ($LASTEXITCODE -ne 0)
+        {
+            throw "External identity package signing failed with exit code $LASTEXITCODE"
+        }
+
+        & $signToolPath verify /pa /v $packagePath
+
+        if ($LASTEXITCODE -ne 0)
+        {
+            throw "External identity package signature verification failed with exit code $LASTEXITCODE"
+        }
+    }
+
+    Write-Host "External identity package created: $packagePath" -ForegroundColor Green
 }
 
 function Convert-ToXmlValue
@@ -875,6 +974,8 @@ if ($LASTEXITCODE -ne 0)
     Write-Host "Build failed with exit code $LASTEXITCODE" -ForegroundColor Red
     exit $LASTEXITCODE
 }
+
+New-ExternalIdentityPackage -Version $Version -OutputDirectory $OutputPath -MetadataPath $SigningMetadataPath -Sign:(-not $Local -and -not $SkipSigning)
 
 $exePath = Get-ChildItem -Path $OutputPath -Filter "*.exe" | Select-Object -First 1
 

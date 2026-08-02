@@ -17,7 +17,7 @@ public sealed class DesktopModule :
             .AddSingleton<IGlanceAttentionService, GlanceAttentionService>()
             .AddSingleton<GlanceAssistantCommandService>()
             .AddSingleton<IGlanceAssistantCommandService>(provider => provider.GetRequiredService<GlanceAssistantCommandService>())
-            .AddSingleton<GlanceAssistantService>()
+            .AddSingleton(provider => new GlanceAssistantService(provider.GetRequiredService<GlanceSettings>(), provider.GetRequiredService<IWritableOptions<GlanceSettings>>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<ILogger<GlanceAssistantService>>()))
             .AddSingleton<IGlanceAssistantService>(provider => provider.GetRequiredService<GlanceAssistantService>())
             .AddSingleton<IGlanceAssistantCommandHandler, ShowComponentAssistantCommandHandler>()
             .AddSingleton<ModulePreferenceService>()

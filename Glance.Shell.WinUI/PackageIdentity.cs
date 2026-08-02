@@ -1,5 +1,7 @@
+using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using Windows.ApplicationModel;
 
 namespace Glance.Shell.WinUI;
 
@@ -23,6 +25,10 @@ internal static partial class PackageIdentity
             };
         }
     }
+
+    public static bool IsExternalLocation => IsPackaged && OperatingSystem.IsWindowsVersionAtLeast(10, 0, 19041) && !string.IsNullOrWhiteSpace(Package.Current.EffectiveExternalPath);
+
+    public static bool IsFullPackage => IsPackaged && !IsExternalLocation;
 
     [LibraryImport("kernel32.dll")]
     private static partial int GetCurrentPackageFullName(ref uint packageFullNameLength, nint packageFullName);

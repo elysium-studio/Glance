@@ -8,6 +8,8 @@ public static class UninstallCleanup
 {
     public static void Run(SemanticVersion version)
     {
+        ExternalPackageIdentity.Unregister();
+
         try
         {
             string applicationDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance");

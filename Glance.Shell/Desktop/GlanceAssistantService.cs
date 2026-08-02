@@ -14,6 +14,7 @@ public sealed class GlanceAssistantService :
 {
     private readonly ILogger<GlanceAssistantService> logger;
     private readonly List<IGlanceAssistantProvider> providers = [];
+    private readonly IDispatcher dispatcher;
     private readonly GlanceSettings settings;
     private readonly IWritableOptions<GlanceSettings> settingsWriter;
     private IGlanceAssistantProvider? activeProvider;
@@ -22,10 +23,12 @@ public sealed class GlanceAssistantService :
     public GlanceAssistantService(GlanceSettings settings,
         IWritableOptions<GlanceSettings> settingsWriter,
         IMessenger messenger,
+        IDispatcher dispatcher,
         ILogger<GlanceAssistantService> logger)
     {
         this.settings = settings;
         this.settingsWriter = settingsWriter;
+        this.dispatcher = dispatcher;
         this.logger = logger;
         isEnabled = settings.IsAssistantEnabled;
         messenger.Register(this);
@@ -148,12 +151,17 @@ public sealed class GlanceAssistantService :
 
     public void Receive(OptionsChangedEventArgs<GlanceSettings> message)
     {
-        if (IsEnabled == message.Options.IsAssistantEnabled)
+        dispatcher.Dispatch(() => ApplySettings(message.Options));
+    }
+
+    private void ApplySettings(GlanceSettings options)
+    {
+        if (IsEnabled == options.IsAssistantEnabled)
         {
             return;
         }
 
-        IsEnabled = message.Options.IsAssistantEnabled;
+        IsEnabled = options.IsAssistantEnabled;
 
         if (ActiveProvider is not null)
         {
