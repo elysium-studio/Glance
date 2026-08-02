@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
 using Microsoft.AI.Foundry.Local;
 using Microsoft.AI.Foundry.Local.OpenAI;
@@ -22,7 +23,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
     private const int UtteranceSilenceMilliseconds = 1800;
     private const string ModelAlias = "nemotron-speech-streaming-en-0.6b";
     private readonly IGlanceAssistantCommandService commandService;
-    private readonly SynchronizationContext synchronizationContext;
+    private readonly IDispatcher dispatcher;
     private readonly ILogger<MicrosoftOfflineAssistantProvider> logger;
     private readonly SemaphoreSlim lifecycleGate = new(1, 1);
     private readonly StringBuilder pendingUtterance = new();
@@ -52,11 +53,12 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
 
     public MicrosoftOfflineAssistantProvider(IGlanceAssistantCommandService commandService,
         IAssistantViewFactory viewFactory,
+        IDispatcher dispatcher,
         ILogger<MicrosoftOfflineAssistantProvider> logger)
     {
         this.commandService = commandService;
+        this.dispatcher = dispatcher;
         this.logger = logger;
-        synchronizationContext = SynchronizationContext.Current ?? throw new InvalidOperationException("The assistant provider must be created on the application thread.");
         CompactIndicatorContent = viewFactory.CreateCompactIndicator(this);
         ExpandedIndicatorContent = viewFactory.CreateExpandedIndicator(this);
         OverlayContent = viewFactory.CreateOverlay(this);
@@ -488,18 +490,15 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
 
     private void SetPresentation(GlanceAssistantState state, string transcript, string status)
     {
-        if (SynchronizationContext.Current != synchronizationContext)
+        dispatcher.Dispatch(() =>
         {
-            Dispatch(() => SetPresentation(state, transcript, status));
-            return;
-        }
-
-        State = state;
-        Transcript = transcript;
-        StatusText = status;
+            State = state;
+            Transcript = transcript;
+            StatusText = status;
+        });
     }
 
-    private void Dispatch(Action action) => synchronizationContext.Post(_ => action(), null);
+    private void Dispatch(Action action) => dispatcher.Dispatch(action);
 
     private static bool HasPackageIdentity()
     {
