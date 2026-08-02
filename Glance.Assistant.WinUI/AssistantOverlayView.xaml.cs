@@ -1,15 +1,16 @@
 using Microsoft.UI.Xaml.Controls;
+using Glance.Application.Abstractions;
 
 namespace Glance.Assistant.WinUI;
 
 public sealed partial class AssistantOverlayView :
     UserControl
 {
-    public AssistantOverlayView(MicrosoftOfflineAssistantProvider provider)
+    public AssistantOverlayView(IGlanceAssistantProvider provider)
     {
         Provider = provider;
         InitializeComponent();
     }
 
-    public MicrosoftOfflineAssistantProvider Provider { get; }
+    public IGlanceAssistantProvider Provider { get; }
 }

@@ -12,10 +12,10 @@ public sealed partial class AssistantIndicatorView :
     UserControl
 {
     private readonly IGlanceAssistantService assistant;
-    private readonly MicrosoftOfflineAssistantProvider provider;
+    private readonly IGlanceAssistantProvider provider;
     private bool isPulseRunning;
 
-    public AssistantIndicatorView(MicrosoftOfflineAssistantProvider provider,
+    public AssistantIndicatorView(IGlanceAssistantProvider provider,
         IGlanceAssistantService assistant)
     {
         this.provider = provider;

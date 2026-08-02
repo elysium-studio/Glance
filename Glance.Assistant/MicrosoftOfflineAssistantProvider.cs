@@ -3,7 +3,6 @@ using Glance.Application.Abstractions;
 using Microsoft.AI.Foundry.Local;
 using Microsoft.AI.Foundry.Local.OpenAI;
 using Microsoft.Extensions.Logging;
-using Microsoft.UI.Dispatching;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
@@ -12,7 +11,7 @@ using Windows.ApplicationModel;
 using Windows.Media.SpeechRecognition;
 using Windows.Security.Authorization.AppCapabilityAccess;
 
-namespace Glance.Assistant.WinUI;
+namespace Glance.Assistant;
 
 public sealed partial class MicrosoftOfflineAssistantProvider :
     ObservableObject,
@@ -23,7 +22,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
     private const int UtteranceSilenceMilliseconds = 1800;
     private const string ModelAlias = "nemotron-speech-streaming-en-0.6b";
     private readonly IGlanceAssistantCommandService commandService;
-    private readonly DispatcherQueue dispatcherQueue;
+    private readonly SynchronizationContext synchronizationContext;
     private readonly ILogger<MicrosoftOfflineAssistantProvider> logger;
     private readonly SemaphoreSlim lifecycleGate = new(1, 1);
     private readonly StringBuilder pendingUtterance = new();
@@ -52,15 +51,15 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
     public partial string Transcript { get; set; } = "Say “Glance” or “Hey Glance”";
 
     public MicrosoftOfflineAssistantProvider(IGlanceAssistantCommandService commandService,
-        IGlanceAssistantService assistantService,
+        IAssistantViewFactory viewFactory,
         ILogger<MicrosoftOfflineAssistantProvider> logger)
     {
         this.commandService = commandService;
         this.logger = logger;
-        dispatcherQueue = DispatcherQueue.GetForCurrentThread();
-        CompactIndicatorContent = new AssistantIndicatorView(this, assistantService);
-        ExpandedIndicatorContent = new AssistantIndicatorView(this, assistantService);
-        OverlayContent = new AssistantOverlayView(this);
+        synchronizationContext = SynchronizationContext.Current ?? throw new InvalidOperationException("The assistant provider must be created on the application thread.");
+        CompactIndicatorContent = viewFactory.CreateCompactIndicator(this);
+        ExpandedIndicatorContent = viewFactory.CreateExpandedIndicator(this);
+        OverlayContent = viewFactory.CreateOverlay(this);
     }
 
     public string Id => "MicrosoftOffline";
@@ -269,7 +268,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         }
 
         long wakeBoundary = audioCapture?.CreateCheckpoint() ?? 0;
-        dispatcherQueue.TryEnqueue(() => _ = SwitchToCommandRecognitionAsync(args.Result.Text, wakeBoundary));
+        Dispatch(() => _ = SwitchToCommandRecognitionAsync(args.Result.Text, wakeBoundary));
     }
 
     private async Task SwitchToCommandRecognitionAsync(string wakePhrase, long wakeBoundary)
@@ -317,7 +316,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
 
             if (!string.IsNullOrWhiteSpace(text))
             {
-                dispatcherQueue.TryEnqueue(() => ProcessRecognizedText(text));
+                Dispatch(() => ProcessRecognizedText(text));
             }
         }
     }
@@ -343,7 +342,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         try
         {
             await Task.Delay(UtteranceSilenceMilliseconds, cancellationToken);
-            dispatcherQueue.TryEnqueue(() => CompleteUtterance(session));
+            Dispatch(() => CompleteUtterance(session));
         }
         catch (OperationCanceledException)
         {
@@ -379,7 +378,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         try
         {
             await Task.Delay(CommandStartTimeoutMilliseconds, cancellationToken);
-            dispatcherQueue.TryEnqueue(() =>
+            Dispatch(() =>
             {
                 if (session == commandSession && State == GlanceAssistantState.ListeningForCommand)
                 {
@@ -489,9 +488,9 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
 
     private void SetPresentation(GlanceAssistantState state, string transcript, string status)
     {
-        if (!dispatcherQueue.HasThreadAccess)
+        if (SynchronizationContext.Current != synchronizationContext)
         {
-            dispatcherQueue.TryEnqueue(() => SetPresentation(state, transcript, status));
+            Dispatch(() => SetPresentation(state, transcript, status));
             return;
         }
 
@@ -499,6 +498,8 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         Transcript = transcript;
         StatusText = status;
     }
+
+    private void Dispatch(Action action) => synchronizationContext.Post(_ => action(), null);
 
     private static bool HasPackageIdentity()
     {
