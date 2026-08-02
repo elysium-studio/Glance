@@ -5,12 +5,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     IsHitTestVisible="False"
     Loaded="{x:Bind HandleLoaded}"
-    SizeChanged="{x:Bind HandleSizeChanged}"
+    Opacity="0"
     Unloaded="{x:Bind HandleUnloaded}">
     <Border
         x:Name="SceneRoot"
-        Background="#FF1A2940"
-        CornerRadius="28">
+        Background="#FF1A2940">
         <Grid>
             <Grid x:Name="BackgroundHost" />
             <Grid x:Name="ParticleHost" />

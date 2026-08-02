@@ -10,7 +10,7 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Media.xaml" />
     </UserControl.Resources>
-    <Border Background="Transparent" CornerRadius="28">
+    <Border Background="Transparent">
         <Grid>
             <Grid x:Name="MotionLayer">
                 <Grid x:Name="ArtworkHost" />

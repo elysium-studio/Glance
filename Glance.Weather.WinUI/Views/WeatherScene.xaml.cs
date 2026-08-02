@@ -23,11 +23,11 @@ public sealed partial class WeatherScene :
     private ContainerVisual? activeCelestial;
     private Canvas? activeCloudLayer;
     private Border? activeBackgroundLayer;
-    private CompositionRoundedRectangleGeometry? clipGeometry;
-    private CompositionGeometricClip? clip;
     private DispatcherQueueTimer? lightningTimer;
     private SpriteVisual? lightningFlash;
     private WeatherSceneState? activeState;
+    private EventHandler<object>? entranceRenderingHandler;
+    private Visual? rootVisual;
     private bool rebuildAfterTransition;
     private bool rebuildQueued;
     private bool transitionActive;
@@ -53,12 +53,8 @@ public sealed partial class WeatherScene :
 
     private void HandleLoaded(object sender, RoutedEventArgs args)
     {
-        Visual visual = ElementCompositionPreview.GetElementVisual(this);
-        clipGeometry = visual.Compositor.CreateRoundedRectangleGeometry();
-        clipGeometry.CornerRadius = new Vector2(28);
-        clipGeometry.Size = new Vector2((float)ActualWidth, (float)ActualHeight);
-        clip = visual.Compositor.CreateGeometricClip(clipGeometry);
-        visual.Clip = clip;
+        rootVisual = ElementCompositionPreview.GetElementVisual(this);
+        rootVisual.Opacity = 0;
         Subscribe();
         QueueSceneRebuild();
     }
@@ -70,9 +66,8 @@ public sealed partial class WeatherScene :
         BackgroundHost.Children.Clear();
         CloudLayerHost.Children.Clear();
         StopLightning();
+        CancelEntranceAnimation();
         sceneVisual?.Dispose();
-        clip?.Dispose();
-        clipGeometry?.Dispose();
         sceneVisual = null;
         activeSceneLayer = null;
         activeCelestial = null;
@@ -81,16 +76,7 @@ public sealed partial class WeatherScene :
         activeState = null;
         rebuildAfterTransition = false;
         transitionActive = false;
-        clip = null;
-        clipGeometry = null;
-    }
-
-    private void HandleSizeChanged(object sender, SizeChangedEventArgs args)
-    {
-        if (clipGeometry is not null)
-        {
-            clipGeometry.Size = new Vector2((float)args.NewSize.Width, (float)args.NewSize.Height);
-        }
+        rootVisual = null;
     }
 
     private void Subscribe()
@@ -197,11 +183,7 @@ public sealed partial class WeatherScene :
         sceneVisual.Children.InsertAtTop(activeSceneLayer);
         activeCloudLayer = new Canvas { IsHitTestVisible = false };
         CloudLayerHost.Children.Add(activeCloudLayer);
-        activeBackgroundLayer = new Border
-        {
-            Background = CreateBackground(time, hour, sunrise, sunset, sky, effect, temperature),
-            IsHitTestVisible = false
-        };
+        activeBackgroundLayer = new Border { Background = WeatherScenePalette.CreateBackground(viewModel!), IsHitTestVisible = false };
         BackgroundHost.Children.Add(activeBackgroundLayer);
         ElementCompositionPreview.GetElementVisual(activeCloudLayer).Opacity = previousCloudLayer is null ? 1 : 0;
         ElementCompositionPreview.GetElementVisual(activeBackgroundLayer).Opacity = previousBackgroundLayer is null ? 1 : 0;
@@ -258,6 +240,43 @@ public sealed partial class WeatherScene :
                 previousBackgroundLayer,
                 activeBackgroundLayer);
         }
+        else
+        {
+            QueueEntranceAnimation(compositor);
+        }
+    }
+
+    private void QueueEntranceAnimation(Compositor compositor)
+    {
+        CancelEntranceAnimation();
+        entranceRenderingHandler = (sender, args) =>
+        {
+            CancelEntranceAnimation();
+
+            if (!IsLoaded || rootVisual is null)
+            {
+                return;
+            }
+
+            CubicBezierEasingFunction easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.22f, 0.72f), new Vector2(0.18f, 1));
+            ScalarKeyFrameAnimation animation = compositor.CreateScalarKeyFrameAnimation();
+            animation.InsertKeyFrame(0, 0);
+            animation.InsertKeyFrame(1, 1, easing);
+            animation.Duration = TimeSpan.FromMilliseconds(280);
+            rootVisual.StartAnimation("Opacity", animation);
+        };
+        CompositionTarget.Rendering += entranceRenderingHandler;
+    }
+
+    private void CancelEntranceAnimation()
+    {
+        if (entranceRenderingHandler is null)
+        {
+            return;
+        }
+
+        CompositionTarget.Rendering -= entranceRenderingHandler;
+        entranceRenderingHandler = null;
     }
 
     private void CrossFadeScene(Compositor compositor,
@@ -314,66 +333,6 @@ public sealed partial class WeatherScene :
         visual.StartAnimation("Opacity", animation);
     }
 
-    private Brush CreateBackground(WeatherTimeOfDay time,
-        double hour,
-        double sunrise,
-        double sunset,
-        WeatherSky sky,
-        WeatherEffect effect,
-        WeatherTemperature temperature)
-    {
-        (Color start, Color end) = GetTimelineColors(GetTimelineHour(hour, sunrise, sunset));
-
-        if (temperature == WeatherTemperature.Hot && time is not WeatherTimeOfDay.Night)
-        {
-            start = Blend(start, Color.FromArgb(255, 184, 65, 26), 0.44f);
-            end = Blend(end, Color.FromArgb(255, 250, 153, 61), 0.44f);
-        }
-
-        if (sky == WeatherSky.Cloudy)
-        {
-            start = Blend(start, Color.FromArgb(255, 42, 57, 72), 0.58f);
-            end = Blend(end, Color.FromArgb(255, 92, 110, 126), 0.58f);
-        }
-        else if (sky == WeatherSky.PartlyCloudy)
-        {
-            start = Blend(start, Color.FromArgb(255, 55, 80, 104), 0.25f);
-            end = Blend(end, Color.FromArgb(255, 124, 145, 161), 0.25f);
-        }
-
-        if (effect == WeatherEffect.Thunderstorm)
-        {
-            start = Blend(start, Color.FromArgb(255, 21, 18, 45), 0.72f);
-            end = Blend(end, Color.FromArgb(255, 51, 55, 88), 0.72f);
-        }
-        else if (effect == WeatherEffect.Rain)
-        {
-            start = Blend(start, Color.FromArgb(255, 16, 42, 67), 0.45f);
-            end = Blend(end, Color.FromArgb(255, 45, 83, 112), 0.45f);
-        }
-        else if (effect == WeatherEffect.Snow)
-        {
-            start = Blend(start, Color.FromArgb(255, 48, 85, 115), 0.28f);
-            end = Blend(end, Color.FromArgb(255, 153, 185, 207), 0.28f);
-        }
-        else if (effect == WeatherEffect.Fog)
-        {
-            start = Blend(start, Color.FromArgb(255, 55, 67, 78), 0.55f);
-            end = Blend(end, Color.FromArgb(255, 126, 139, 148), 0.55f);
-        }
-
-        return new LinearGradientBrush
-        {
-            StartPoint = new Point(0, 0),
-            EndPoint = new Point(1, 1),
-            GradientStops =
-            {
-                new GradientStop { Color = start, Offset = 0 },
-                new GradientStop { Color = end, Offset = 1 }
-            }
-        };
-    }
-
     private void UpdateTimeline()
     {
         if (!IsLoaded || viewModel is null || activeBackgroundLayer is null)
@@ -381,65 +340,12 @@ public sealed partial class WeatherScene :
             return;
         }
 
-        activeBackgroundLayer.Background = CreateBackground(viewModel.WeatherTime,
-            viewModel.WeatherHour,
-            viewModel.SunriseHour,
-            viewModel.SunsetHour,
-            viewModel.WeatherSky,
-            viewModel.WeatherEffect,
-            viewModel.WeatherTemperature);
+        activeBackgroundLayer.Background = WeatherScenePalette.CreateBackground(viewModel);
         UpdateCelestialPosition(activeCelestial,
             viewModel.WeatherCelestial == WeatherCelestial.Moon,
             viewModel.WeatherHour,
             viewModel.SunriseHour,
             viewModel.SunsetHour);
-    }
-
-    private static double GetTimelineHour(double hour, double sunrise, double sunset)
-    {
-        double solarNoon = sunrise + (sunset - sunrise) / 2;
-
-        if (hour >= sunrise && hour < solarNoon)
-        {
-            return 6 + (hour - sunrise) / Math.Max(1, solarNoon - sunrise) * 6.5;
-        }
-
-        if (hour >= solarNoon && hour < sunset)
-        {
-            return 12.5 + (hour - solarNoon) / Math.Max(1, sunset - solarNoon) * 6.5;
-        }
-
-        double nightDuration = 24 - sunset + sunrise;
-        double nightElapsed = hour >= sunset ? hour - sunset : 24 - sunset + hour;
-        return (19 + nightElapsed / Math.Max(1, nightDuration) * 11) % 24;
-    }
-
-    private static (Color Start, Color End) GetTimelineColors(double hour)
-    {
-        (Color Start, Color End) night = (Color.FromArgb(255, 7, 18, 50), Color.FromArgb(255, 32, 50, 101));
-        (Color Start, Color End) dawn = (Color.FromArgb(255, 65, 72, 139), Color.FromArgb(255, 242, 151, 124));
-        (Color Start, Color End) morning = (Color.FromArgb(255, 48, 139, 214), Color.FromArgb(255, 150, 211, 239));
-        (Color Start, Color End) afternoon = (Color.FromArgb(255, 20, 105, 202), Color.FromArgb(255, 83, 182, 235));
-        (Color Start, Color End) evening = (Color.FromArgb(255, 31, 112, 190), Color.FromArgb(255, 245, 181, 105));
-        (Color Start, Color End) dusk = (Color.FromArgb(255, 50, 54, 112), Color.FromArgb(255, 204, 95, 133));
-        double normalizedHour = (hour % 24 + 24) % 24;
-
-        return normalizedHour switch
-        {
-            < 5.25 => InterpolateTimeline(night, dawn, normalizedHour / 5.25),
-            < 8 => InterpolateTimeline(dawn, morning, (normalizedHour - 5.25) / 2.75),
-            < 12.5 => InterpolateTimeline(morning, afternoon, (normalizedHour - 8) / 4.5),
-            < 17 => InterpolateTimeline(afternoon, evening, (normalizedHour - 12.5) / 4.5),
-            < 19.5 => InterpolateTimeline(evening, dusk, (normalizedHour - 17) / 2.5),
-            < 21.5 => InterpolateTimeline(dusk, night, (normalizedHour - 19.5) / 2),
-            _ => night
-        };
-    }
-
-    private static (Color Start, Color End) InterpolateTimeline((Color Start, Color End) from, (Color Start, Color End) to, double amount)
-    {
-        float easedAmount = (float)(amount * amount * (3 - 2 * amount));
-        return (Blend(from.Start, to.Start, easedAmount), Blend(from.End, to.End, easedAmount));
     }
 
     private void AddCelestial(Compositor compositor,
@@ -585,12 +491,6 @@ public sealed partial class WeatherScene :
             activeSceneLayer?.Children.InsertAtTop(star);
         }
     }
-
-    private static Color Blend(Color source, Color target, float amount) =>
-        Color.FromArgb(255,
-            (byte)(source.R + (target.R - source.R) * amount),
-            (byte)(source.G + (target.G - source.G) * amount),
-            (byte)(source.B + (target.B - source.B) * amount));
 
     private static Path CreateCloud(float width, float height, byte alpha)
     {

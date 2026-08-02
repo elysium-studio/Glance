@@ -3,7 +3,9 @@
     x:Class="Glance.Weather.WinUI.WeatherExpandedView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:Controls="using:Elysium.UI.Controls.WinUI">
+    xmlns:Controls="using:Elysium.UI.Controls.WinUI"
+    Loaded="{x:Bind HandleLoaded}"
+    Unloaded="{x:Bind HandleUnloaded}">
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Weather.xaml" />
     </UserControl.Resources>
@@ -39,7 +41,7 @@
             <TextBlock
                 VerticalAlignment="Center"
                 FontWeight="SemiBold"
-                Foreground="{x:Bind ToBrush(ViewModel.AccentColor), Mode=OneWay}"
+                Foreground="{x:Bind PrimaryForegroundBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ToUpper(ViewModel.Title)}" />
             <Grid
@@ -53,6 +55,7 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock
                     VerticalAlignment="Center"
+                    Foreground="{x:Bind PrimaryForegroundBrush}"
                     Style="{StaticResource SubtitleTextBlockStyle}"
                     Text="{x:Bind ViewModel.TemperatureText, Mode=OneWay}" />
                 <Controls:MarqueeTextBlock
@@ -61,7 +64,7 @@
                     VerticalAlignment="Center"
                     FontSize="14"
                     FontWeight="SemiBold"
-                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                    Foreground="{x:Bind PrimaryForegroundBrush}"
                     Text="{x:Bind ViewModel.ConditionText, Mode=OneWay}"
                     ToolTipService.ToolTip="{x:Bind ViewModel.ConditionText, Mode=OneWay}" />
             </Grid>
@@ -70,13 +73,14 @@
                 Height="16"
                 VerticalAlignment="Center"
                 FontSize="12"
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Foreground="{x:Bind SecondaryForegroundBrush}"
                 Text="{x:Bind ViewModel.LocationText, Mode=OneWay}"
                 ToolTipService.ToolTip="{x:Bind ViewModel.LocationText, Mode=OneWay}"
                 Visibility="{x:Bind WhenHasWeather(ViewModel.HasWeatherData), Mode=OneWay}" />
             <TextBlock
                 Grid.Row="1"
                 VerticalAlignment="Center"
+                Foreground="{x:Bind PrimaryForegroundBrush}"
                 Style="{StaticResource BodyStrongTextBlockStyle}"
                 Text="{x:Bind ViewModel.ConditionText, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
@@ -87,7 +91,7 @@
                 Height="16"
                 VerticalAlignment="Center"
                 FontSize="12"
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Foreground="{x:Bind SecondaryForegroundBrush}"
                 Text="{x:Bind ViewModel.DetailText, Mode=OneWay}"
                 ToolTipService.ToolTip="{x:Bind ViewModel.DetailText, Mode=OneWay}"
                 Visibility="{x:Bind WhenMissingWeather(ViewModel.HasWeatherData), Mode=OneWay}" />

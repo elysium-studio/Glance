@@ -23,8 +23,6 @@ public sealed partial class MediaAlbumAmbience :
     private SpriteVisual? nextArtworkVisual;
     private CompositionSurfaceBrush? currentSurfaceBrush;
     private CompositionSurfaceBrush? nextSurfaceBrush;
-    private CompositionRoundedRectangleGeometry? clipGeometry;
-    private CompositionGeometricClip? roundedClip;
     private CompositionEasingFunction? easing;
     private ImplicitAnimationCollection? motionImplicitAnimations;
     private ImplicitAnimationCollection? ambientImplicitAnimations;
@@ -63,11 +61,6 @@ public sealed partial class MediaAlbumAmbience :
         ambientVisual = ElementCompositionPreview.GetElementVisual(this);
         motionVisual = ElementCompositionPreview.GetElementVisual(MotionLayer);
         ambientVisual.Opacity = 0;
-        clipGeometry = compositor.CreateRoundedRectangleGeometry();
-        clipGeometry.CornerRadius = new Vector2(28);
-        clipGeometry.Size = new Vector2((float)ActualWidth, (float)ActualHeight);
-        roundedClip = compositor.CreateGeometricClip(clipGeometry);
-        ambientVisual.Clip = roundedClip;
         motionVisual.CenterPoint = new Vector3((float)ActualWidth / 2, (float)ActualHeight / 2, 0);
         easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.22f, 0.72f), new Vector2(0.18f, 1));
         CreateArtworkVisual(compositor);
@@ -105,8 +98,6 @@ public sealed partial class MediaAlbumAmbience :
         artworkContainerVisual?.Dispose();
         motionImplicitAnimations?.Dispose();
         ambientImplicitAnimations?.Dispose();
-        roundedClip?.Dispose();
-        clipGeometry?.Dispose();
         currentSurfaceBrush = null;
         nextSurfaceBrush = null;
         currentArtworkVisual = null;
@@ -115,8 +106,6 @@ public sealed partial class MediaAlbumAmbience :
         currentArtwork = null;
         nextArtwork = null;
         desiredArtwork = null;
-        roundedClip = null;
-        clipGeometry = null;
         motionImplicitAnimations = null;
         ambientImplicitAnimations = null;
         ambientVisual = null;
@@ -131,11 +120,6 @@ public sealed partial class MediaAlbumAmbience :
         if (motionVisual is not null)
         {
             motionVisual.CenterPoint = new Vector3((float)args.NewSize.Width / 2, (float)args.NewSize.Height / 2, 0);
-        }
-
-        if (clipGeometry is not null)
-        {
-            clipGeometry.Size = new Vector2((float)args.NewSize.Width, (float)args.NewSize.Height);
         }
     }
 
