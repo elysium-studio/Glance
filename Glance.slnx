@@ -8,6 +8,9 @@
   <Project Path="Glance.Application.Abstractions/Glance.Application.Abstractions.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.Assistant.WinUI/Glance.Assistant.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.AudioSwitcher.WinUI/Glance.AudioSwitcher.WinUI.csproj">
     <Platform Project="x64" />
   </Project>

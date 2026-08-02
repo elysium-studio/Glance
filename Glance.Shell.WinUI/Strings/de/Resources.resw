@@ -30,4 +30,13 @@
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Insel nicht mehr erweitert lassen</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>Aufmerksamkeit zulassen</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>Diesem Modul erlauben, sich einzublenden, wenn etwas deine Aufmerksamkeit erfordert</value></data>
+  <data name="QuitGlanceNavigationItem.Content" xml:space="preserve"><value>Glance beenden</value></data>
+  <data name="QuitDialogTitle" xml:space="preserve"><value>Glance beenden?</value></data>
+  <data name="QuitDialogMessage" xml:space="preserve"><value>Glance wird geschlossen. Aktive Timer, Aufnahmen und andere laufende Module werden beendet.</value></data>
+  <data name="QuitDialogPrimaryButton" xml:space="preserve"><value>Beenden</value></data>
+  <data name="QuitDialogCloseButton" xml:space="preserve"><value>Abbrechen</value></data>
+  <data name="AssistantEnabledCard.Header" xml:space="preserve"><value>Sprachassistent</value></data>
+  <data name="AssistantEnabledCard.Description" xml:space="preserve"><value>Hören Sie auf „Glance“ oder „Hey Glance“, um Glance mit Sprachbefehlen zu steuern</value></data>
+  <data name="AssistantProviderCard.Header" xml:space="preserve"><value>Spracherkennungsanbieter</value></data>
+  <data name="AssistantProviderCard.Description" xml:space="preserve"><value>Wählen Sie den Anbieter für Aktivierungswort- und Befehlserkennung</value></data>
 </root>

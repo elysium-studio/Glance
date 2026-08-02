@@ -1,8 +1,10 @@
 using CommunityToolkit.Mvvm.Messaging;
+using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
 using System.Collections.ObjectModel;
 using Windows.Graphics;
 
@@ -14,15 +16,19 @@ public sealed partial class SettingsWindow :
 {
     private const int WindowWidth = 1100;
     private const int WindowHeight = 680;
+    private readonly IApplicationLifetime applicationLifetime;
     private readonly ITextLocalizer localizer;
     private readonly IMessenger messenger;
+    private bool isQuitDialogOpen;
     private ModuleSettingsItemViewModel? currentModule;
 
     public SettingsWindow(IMessenger messenger,
-        ITextLocalizer localizer)
+        ITextLocalizer localizer,
+        IApplicationLifetime applicationLifetime)
     {
         this.messenger = messenger;
         this.localizer = localizer;
+        this.applicationLifetime = applicationLifetime;
         InitializeComponent();
 
         messenger.Register<ModuleSettingsNavigationRequestedEventArgs>(this);
@@ -68,6 +74,40 @@ public sealed partial class SettingsWindow :
     {
         currentModule = null;
         UpdateNavigation(args.SelectedItem as ISettingViewModel);
+    }
+
+    private async void HandleQuitTapped(object sender,
+        Microsoft.UI.Xaml.Input.TappedRoutedEventArgs args)
+    {
+        if (isQuitDialogOpen)
+        {
+            return;
+        }
+
+        isQuitDialogOpen = true;
+
+        try
+        {
+            ContentDialog dialog = new()
+            {
+                XamlRoot = ((FrameworkElement)Content).XamlRoot,
+                Title = localizer.GetText("QuitDialogTitle"),
+                Content = localizer.GetText("QuitDialogMessage"),
+                PrimaryButtonText = localizer.GetText("QuitDialogPrimaryButton"),
+                CloseButtonText = localizer.GetText("QuitDialogCloseButton"),
+                DefaultButton = ContentDialogButton.Close
+            };
+
+            if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+            {
+                QuitGlanceNavigationItem.IsEnabled = false;
+                await applicationLifetime.ExitAsync();
+            }
+        }
+        finally
+        {
+            isQuitDialogOpen = false;
+        }
     }
 
     private void HandleBackRequested(TitleBar sender,

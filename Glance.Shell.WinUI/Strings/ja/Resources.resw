@@ -30,4 +30,13 @@
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>アイランドの固定展開を解除</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>注意喚起を許可</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>注意が必要なときに、このモジュールを自動的に表示します</value></data>
+  <data name="QuitGlanceNavigationItem.Content" xml:space="preserve"><value>Glance を終了</value></data>
+  <data name="QuitDialogTitle" xml:space="preserve"><value>Glance を終了しますか?</value></data>
+  <data name="QuitDialogMessage" xml:space="preserve"><value>Glance が閉じられます。実行中のタイマー、録音、その他のモジュールは停止します。</value></data>
+  <data name="QuitDialogPrimaryButton" xml:space="preserve"><value>終了</value></data>
+  <data name="QuitDialogCloseButton" xml:space="preserve"><value>キャンセル</value></data>
+  <data name="AssistantEnabledCard.Header" xml:space="preserve"><value>音声アシスタント</value></data>
+  <data name="AssistantEnabledCard.Description" xml:space="preserve"><value>「Glance」または「Hey Glance」を待ち受けて音声コマンドで Glance を操作します</value></data>
+  <data name="AssistantProviderCard.Header" xml:space="preserve"><value>音声プロバイダー</value></data>
+  <data name="AssistantProviderCard.Description" xml:space="preserve"><value>ウェイクワードとコマンドの認識に使用するプロバイダーを選択します</value></data>
 </root>

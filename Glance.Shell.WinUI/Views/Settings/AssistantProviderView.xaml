@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="Glance.Shell.WinUI.AssistantProviderView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:CommunityToolkit="using:CommunityToolkit.WinUI.Controls"
+    xmlns:Shell="using:Glance.Shell">
+    <CommunityToolkit:SettingsCard x:Uid="AssistantProviderCard">
+        <ComboBox
+            Width="240"
+            DisplayMemberPath="DisplayName"
+            ItemsSource="{x:Bind ViewModel.Providers, Mode=OneWay}"
+            SelectedIndex="{x:Bind ViewModel.SelectedIndex, Mode=TwoWay}" />
+    </CommunityToolkit:SettingsCard>
+</UserControl>

@@ -30,4 +30,13 @@
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Stop keeping island expanded</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>Allow attention</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>Let this module bring itself into view when something needs your attention</value></data>
+  <data name="QuitGlanceNavigationItem.Content" xml:space="preserve"><value>Quit Glance</value></data>
+  <data name="QuitDialogTitle" xml:space="preserve"><value>Quit Glance?</value></data>
+  <data name="QuitDialogMessage" xml:space="preserve"><value>Glance will close. Active timers, recordings, and other running modules will stop.</value></data>
+  <data name="QuitDialogPrimaryButton" xml:space="preserve"><value>Quit</value></data>
+  <data name="QuitDialogCloseButton" xml:space="preserve"><value>Cancel</value></data>
+  <data name="AssistantEnabledCard.Header" xml:space="preserve"><value>Voice assistant</value></data>
+  <data name="AssistantEnabledCard.Description" xml:space="preserve"><value>Listen for “Glance” or “Hey Glance” to control Glance with voice commands</value></data>
+  <data name="AssistantProviderCard.Header" xml:space="preserve"><value>Speech provider</value></data>
+  <data name="AssistantProviderCard.Description" xml:space="preserve"><value>Choose the provider used for wake-word and command recognition</value></data>
 </root>

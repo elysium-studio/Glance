@@ -28,6 +28,18 @@
             PaneDisplayMode="Left"
             SelectedItem="{x:Bind ViewModel.SelectedItem, Mode=TwoWay}"
             SelectionChanged="HandleNavigationSelectionChanged">
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem
+                    x:Name="QuitGlanceNavigationItem"
+                    x:Uid="QuitGlanceNavigationItem"
+                    Margin="8,0,0,0"
+                    SelectsOnInvoked="False"
+                    Tapped="{x:Bind HandleQuitTapped}">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7E8;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.FooterMenuItems>
             <NavigationView.Resources>
                 <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
                 <SolidColorBrush x:Key="NavigationViewContentGridBorderBrush" Color="Transparent" />

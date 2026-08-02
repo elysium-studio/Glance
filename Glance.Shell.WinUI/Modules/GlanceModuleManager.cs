@@ -22,6 +22,8 @@ internal sealed class GlanceModuleManager :
     private readonly HashSet<string> knownPackages = [with(StringComparer.OrdinalIgnoreCase)];
     private readonly ILogger<GlanceModuleManager> logger;
     private readonly GlanceBridgeRouter bridgeRouter;
+    private readonly GlanceAssistantCommandService assistantCommandService;
+    private readonly GlanceAssistantService assistantService;
     private readonly GlanceIntentService intentService;
     private readonly List<GlanceModuleRuntime> runtimes = [];
     private readonly ModulePreferenceService preferences;
@@ -37,6 +39,8 @@ internal sealed class GlanceModuleManager :
         this.logger = logger;
         preferences = applicationServices.GetRequiredService<ModulePreferenceService>();
         bridgeRouter = applicationServices.GetRequiredService<GlanceBridgeRouter>();
+        assistantCommandService = applicationServices.GetRequiredService<GlanceAssistantCommandService>();
+        assistantService = applicationServices.GetRequiredService<GlanceAssistantService>();
         intentService = applicationServices.GetRequiredService<GlanceIntentService>();
 
         Directory.CreateDirectory(GlanceModuleLoader.UserModulesDirectory);
@@ -107,10 +111,12 @@ internal sealed class GlanceModuleManager :
         {
             runtime = await GlanceModuleRuntime.CreateAsync(applicationServices, result.Modules);
             IReadOnlyList<IGlanceComponent> components = (IGlanceComponent[])[.. runtime.Services.GetServices<IGlanceComponent>()];
+            IReadOnlyList<IGlanceAssistantProvider> assistantProviders = (IGlanceAssistantProvider[])[.. runtime.Services.GetServices<IGlanceAssistantProvider>()];
+            IReadOnlyList<IGlanceAssistantCommandHandler> assistantCommandHandlers = (IGlanceAssistantCommandHandler[])[.. runtime.Services.GetServices<IGlanceAssistantCommandHandler>()];
 
-            if (components.Count == 0)
+            if (components.Count == 0 && assistantProviders.Count == 0 && assistantCommandHandlers.Count == 0)
             {
-                throw new InvalidOperationException("The package did not register a Glance component.");
+                throw new InvalidOperationException("The package did not register a Glance component or background capability.");
             }
 
             if (components.Any(component => preferences.GetComponent(component.Id) is not null))
@@ -120,9 +126,16 @@ internal sealed class GlanceModuleManager :
 
             IServiceProvider moduleServices = runtime.Services;
             runtimeServices.AddModuleProvider(moduleServices);
-            await preferences.RegisterComponentsAsync(components, () => (IGlanceModuleSettingViewModel[])[.. moduleServices.GetServices<IGlanceModuleSettingViewModel>()]);
+
+            if (components.Count > 0)
+            {
+                await preferences.RegisterComponentsAsync(components, () => (IGlanceModuleSettingViewModel[])[.. moduleServices.GetServices<IGlanceModuleSettingViewModel>()]);
+            }
+
             bridgeRouter.AddHandlers(moduleServices.GetServices<IGlanceApplicationMessageHandler>());
             intentService.Register(moduleServices.GetServices<IGlanceIntent>());
+            assistantCommandService.Register(assistantCommandHandlers);
+            assistantService.Register(assistantProviders);
             runtimes.Add(runtime);
             runtime = null;
 
@@ -131,7 +144,7 @@ internal sealed class GlanceModuleManager :
                 knownPackages.Add(result.SourcePath);
             }
 
-            logger.LogInformation("Loaded Glance module package {ModulePackage} with {ComponentCount} component(s)", result.SourcePath, components.Count);
+            logger.LogInformation("Loaded Glance module package {ModulePackage} with {ComponentCount} component(s) and {AssistantProviderCount} assistant provider(s)", result.SourcePath, components.Count, assistantProviders.Count);
         }
         catch (Exception exception)
         {

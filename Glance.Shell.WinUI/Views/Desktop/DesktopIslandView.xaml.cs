@@ -38,6 +38,7 @@ public sealed partial class DesktopIslandView :
     private IGlanceExpansionLockComponent? expansionLockComponent;
     private IGlanceInteractionAwareComponent? interactionComponent;
     private bool isPointerOverIsland;
+    private bool assistantExpandedIsland;
     private int previousIndex;
     private bool skipNextConnectedExpansion;
 
@@ -74,6 +75,12 @@ public sealed partial class DesktopIslandView :
     public Visibility WhenNotPinned(bool isPinned) =>
         isPinned ? Visibility.Collapsed : Visibility.Visible;
 
+    public Visibility WhenAvailable(bool isAvailable) =>
+        isAvailable ? Visibility.Visible : Visibility.Collapsed;
+
+    public double ToCompactWidth(bool isAssistantAvailable) =>
+        isAssistantAvailable ? 264 : 228;
+
     public object? ToBackgroundContent(IGlanceComponent? component) =>
         (component as IGlanceBackgroundComponent)?.BackgroundContent;
 
@@ -82,6 +89,8 @@ public sealed partial class DesktopIslandView :
         previousIndex = ViewModel.SelectedIndex;
         ViewModel.PropertyChanged += HandleViewModelPropertyChanged;
         ViewModel.AttentionReceived += HandleAttentionReceived;
+        ViewModel.Assistant.PropertyChanged += HandleAssistantPropertyChanged;
+        ViewModel.Assistant.WakeWordDetected += HandleWakeWordDetected;
         (ViewModel.IntentService as GlanceIntentService)?.SetPresentationTargetProvider(GetIntentPresentationTarget);
         Deactivated += HandleIslandDeactivated;
         DispatcherQueue.TryEnqueue(InitializeExpansionState);
@@ -98,6 +107,8 @@ public sealed partial class DesktopIslandView :
     {
         ViewModel.PropertyChanged -= HandleViewModelPropertyChanged;
         ViewModel.AttentionReceived -= HandleAttentionReceived;
+        ViewModel.Assistant.PropertyChanged -= HandleAssistantPropertyChanged;
+        ViewModel.Assistant.WakeWordDetected -= HandleWakeWordDetected;
         (ViewModel.IntentService as GlanceIntentService)?.SetPresentationTargetProvider(null);
         Deactivated -= HandleIslandDeactivated;
         ReleasePressedButton();
@@ -149,6 +160,50 @@ public sealed partial class DesktopIslandView :
 
             FluentMotion.PlayPulse(presenter);
         });
+
+    private void HandleWakeWordDetected(object? sender, EventArgs args) =>
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            Reveal();
+            assistantExpandedIsland = !ViewModel.IsExpanded;
+            ViewModel.IsExpanded = true;
+            DispatcherQueue.TryEnqueue(PlayAssistantOverlayEntrance);
+        });
+
+    private void PlayAssistantOverlayEntrance()
+    {
+        if (!AssistantOverlayPresenter.IsLoaded ||
+            AssistantOverlayPresenter.ActualWidth <= 0 ||
+            AssistantOverlayPresenter.ActualHeight <= 0)
+        {
+            return;
+        }
+
+        GeneralTransform transform = ExpandedAssistantIndicator.TransformToVisual(AssistantOverlayPresenter);
+        Windows.Foundation.Point indicatorOrigin = transform.TransformPoint(new Windows.Foundation.Point(ExpandedAssistantIndicator.ActualWidth / 2,
+            ExpandedAssistantIndicator.ActualHeight / 2));
+        float originX = (float)Math.Clamp(indicatorOrigin.X / AssistantOverlayPresenter.ActualWidth, 0, 1);
+        float originY = (float)Math.Clamp(indicatorOrigin.Y / AssistantOverlayPresenter.ActualHeight, 0, 1);
+        FluentMotion.PlayZoomEntrance(AssistantOverlayPresenter, 0.08f, originX, originY);
+    }
+
+    private void HandleAssistantPropertyChanged(object? sender, PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName != nameof(IGlanceAssistantService.IsOverlayVisible) || ViewModel.Assistant.IsOverlayVisible)
+        {
+            return;
+        }
+
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            if (assistantExpandedIsland && !isPointerOverIsland && !ViewModel.IsPinned)
+            {
+                ViewModel.IsExpanded = false;
+            }
+
+            assistantExpandedIsland = false;
+        });
+    }
 
     private GlanceScreenRectangle? GetIntentPresentationTarget()
     {

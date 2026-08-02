@@ -5,7 +5,7 @@
     xmlns:Controls="using:Elysium.UI.Controls.WinUI"
     xmlns:WinUI="using:Elysium.UI.WinUI"
     CompactHeight="52"
-    CompactWidth="228"
+    CompactWidth="{x:Bind ToCompactWidth(ViewModel.Assistant.IsAvailable), Mode=OneWay}"
     AllowDrop="True"
     BackgroundContent="{x:Bind ToBackgroundContent(ViewModel.SelectedComponent), Mode=OneWay}"
     DataContext="{WinUI:ViewModel Key=DesktopIslandView}"
@@ -22,9 +22,22 @@
     PointerExited="{x:Bind HandleIslandPointerExited}"
     PointerWheelChanged="{x:Bind HandlePointerWheelChanged}">
     <Controls:DesktopIsland.CompactContent>
-        <ContentPresenter
-            x:Name="CompactPresenter"
-            Content="{x:Bind ViewModel.SelectedComponent.CompactContent, Mode=OneWay}" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="228" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <ContentPresenter
+                x:Name="CompactPresenter"
+                Content="{x:Bind ViewModel.SelectedComponent.CompactContent, Mode=OneWay}" />
+            <ContentControl
+                x:Name="CompactAssistantIndicator"
+                Grid.Column="1"
+                Margin="4,0,4,0"
+                VerticalAlignment="Center"
+                Content="{x:Bind ViewModel.Assistant.CompactIndicatorContent, Mode=OneWay}"
+                Visibility="{x:Bind WhenAvailable(ViewModel.Assistant.IsAvailable), Mode=OneWay}" />
+        </Grid>
     </Controls:DesktopIsland.CompactContent>
     <Controls:DesktopIsland.ExpandedContent>
         <Grid>
@@ -70,6 +83,13 @@
                         </Style>
                     </Button.Style>
                 </Button>
+                <ContentControl
+                    x:Name="ExpandedAssistantIndicator"
+                    Width="32"
+                    Height="32"
+                    VerticalAlignment="Center"
+                    Content="{x:Bind ViewModel.Assistant.ExpandedIndicatorContent, Mode=OneWay}"
+                    Visibility="{x:Bind WhenAvailable(ViewModel.Assistant.IsAvailable), Mode=OneWay}" />
                 <Button
                     x:Uid="UnpinIslandButton"
                     VerticalAlignment="Center"
@@ -110,6 +130,12 @@
                     </Button.Style>
                 </Button>
             </StackPanel>
+            <ContentControl
+                x:Name="AssistantOverlayPresenter"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                Content="{x:Bind ViewModel.Assistant.OverlayContent, Mode=OneWay}"
+                Visibility="{x:Bind WhenAvailable(ViewModel.Assistant.IsOverlayVisible), Mode=OneWay}" />
         </Grid>
     </Controls:DesktopIsland.ExpandedContent>
 </Controls:DesktopIsland>

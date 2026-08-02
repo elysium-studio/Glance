@@ -30,4 +30,13 @@
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>[Stop keeping island expanded]</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>[Ålløw åtténtïøn]</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>[Lét thïs módülé brïng ïtsélf ïntø vïéw whén søméthïng nééds yøür åtténtïøn]</value></data>
+  <data name="QuitGlanceNavigationItem.Content" xml:space="preserve"><value>[Qüït Glance]</value></data>
+  <data name="QuitDialogTitle" xml:space="preserve"><value>[Qüït Glance?]</value></data>
+  <data name="QuitDialogMessage" xml:space="preserve"><value>[Glance wïll clösé. Åctïvé tïmérs, récördïngs, ånd öthér rünnïng mödülés wïll stöp.]</value></data>
+  <data name="QuitDialogPrimaryButton" xml:space="preserve"><value>[Qüït]</value></data>
+  <data name="QuitDialogCloseButton" xml:space="preserve"><value>[Cåncél]</value></data>
+  <data name="AssistantEnabledCard.Header" xml:space="preserve"><value>[Vôïçé àssïstànt]</value></data>
+  <data name="AssistantEnabledCard.Description" xml:space="preserve"><value>[Lïstén fôr “Glance” ôr “Hey Glance” tô çôntrôl Glance wïth vôïçé çômmànds]</value></data>
+  <data name="AssistantProviderCard.Header" xml:space="preserve"><value>[Spééçh prôvïdér]</value></data>
+  <data name="AssistantProviderCard.Description" xml:space="preserve"><value>[Çhôôsé thé prôvïdér ûséd fôr wàké-wôrd ànd çômmànd réçôgnïtïôn]</value></data>
 </root>

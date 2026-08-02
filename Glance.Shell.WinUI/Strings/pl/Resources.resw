@@ -30,4 +30,13 @@
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Nie pozostawiaj wyspy rozwiniętej</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>Zezwalaj na alerty</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>Pozwól temu modułowi pojawić się, gdy coś wymaga Twojej uwagi</value></data>
+  <data name="QuitGlanceNavigationItem.Content" xml:space="preserve"><value>Zakończ Glance</value></data>
+  <data name="QuitDialogTitle" xml:space="preserve"><value>Zakończyć Glance?</value></data>
+  <data name="QuitDialogMessage" xml:space="preserve"><value>Glance zostanie zamknięty. Aktywne minutniki, nagrania i inne działające moduły zostaną zatrzymane.</value></data>
+  <data name="QuitDialogPrimaryButton" xml:space="preserve"><value>Zakończ</value></data>
+  <data name="QuitDialogCloseButton" xml:space="preserve"><value>Anuluj</value></data>
+  <data name="AssistantEnabledCard.Header" xml:space="preserve"><value>Asystent głosowy</value></data>
+  <data name="AssistantEnabledCard.Description" xml:space="preserve"><value>Nasłuchuj „Glance” lub „Hey Glance”, aby sterować aplikacją za pomocą poleceń głosowych</value></data>
+  <data name="AssistantProviderCard.Header" xml:space="preserve"><value>Dostawca mowy</value></data>
+  <data name="AssistantProviderCard.Description" xml:space="preserve"><value>Wybierz dostawcę rozpoznawania słowa aktywacyjnego i poleceń</value></data>
 </root>

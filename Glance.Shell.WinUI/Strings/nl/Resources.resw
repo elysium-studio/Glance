@@ -30,4 +30,13 @@
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Eiland niet meer uitgevouwen houden</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>Aandacht toestaan</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>Sta toe dat deze module in beeld komt wanneer iets je aandacht nodig heeft</value></data>
+  <data name="QuitGlanceNavigationItem.Content" xml:space="preserve"><value>Glance afsluiten</value></data>
+  <data name="QuitDialogTitle" xml:space="preserve"><value>Glance afsluiten?</value></data>
+  <data name="QuitDialogMessage" xml:space="preserve"><value>Glance wordt gesloten. Actieve timers, opnamen en andere actieve modules worden gestopt.</value></data>
+  <data name="QuitDialogPrimaryButton" xml:space="preserve"><value>Afsluiten</value></data>
+  <data name="QuitDialogCloseButton" xml:space="preserve"><value>Annuleren</value></data>
+  <data name="AssistantEnabledCard.Header" xml:space="preserve"><value>Spraakassistent</value></data>
+  <data name="AssistantEnabledCard.Description" xml:space="preserve"><value>Luister naar ‘Glance’ of ‘Hey Glance’ om Glance met spraakopdrachten te bedienen</value></data>
+  <data name="AssistantProviderCard.Header" xml:space="preserve"><value>Spraakprovider</value></data>
+  <data name="AssistantProviderCard.Description" xml:space="preserve"><value>Kies de provider voor herkenning van het activeringswoord en opdrachten</value></data>
 </root>

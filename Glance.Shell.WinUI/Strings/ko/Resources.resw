@@ -30,4 +30,13 @@
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>아일랜드 펼침 고정 해제</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>주의 알림 허용</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>주의가 필요할 때 이 모듈이 자동으로 표시되도록 허용합니다</value></data>
+  <data name="QuitGlanceNavigationItem.Content" xml:space="preserve"><value>Glance 종료</value></data>
+  <data name="QuitDialogTitle" xml:space="preserve"><value>Glance를 종료할까요?</value></data>
+  <data name="QuitDialogMessage" xml:space="preserve"><value>Glance가 닫힙니다. 실행 중인 타이머, 녹음 및 기타 모듈이 중지됩니다.</value></data>
+  <data name="QuitDialogPrimaryButton" xml:space="preserve"><value>종료</value></data>
+  <data name="QuitDialogCloseButton" xml:space="preserve"><value>취소</value></data>
+  <data name="AssistantEnabledCard.Header" xml:space="preserve"><value>음성 도우미</value></data>
+  <data name="AssistantEnabledCard.Description" xml:space="preserve"><value>“Glance” 또는 “Hey Glance”를 듣고 음성 명령으로 Glance를 제어합니다</value></data>
+  <data name="AssistantProviderCard.Header" xml:space="preserve"><value>음성 공급자</value></data>
+  <data name="AssistantProviderCard.Description" xml:space="preserve"><value>호출어 및 명령 인식에 사용할 공급자를 선택합니다</value></data>
 </root>

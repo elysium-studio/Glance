@@ -59,6 +59,31 @@ public static class FluentMotion
         visual.StartAnimation(nameof(Visual.Scale), animation);
     }
 
+    public static void PlayZoomEntrance(FrameworkElement element,
+        float initialScale = 0.1f,
+        float originX = 0.5f,
+        float originY = 0.5f)
+    {
+        Visual visual = ElementCompositionPreview.GetElementVisual(element);
+        Compositor compositor = visual.Compositor;
+        CubicBezierEasingFunction easing = CreateEasing(compositor);
+        visual.CenterPoint = new Vector3((float)element.ActualWidth * originX, (float)element.ActualHeight * originY, 0);
+
+        Vector3KeyFrameAnimation scale = compositor.CreateVector3KeyFrameAnimation();
+        scale.InsertKeyFrame(0, new Vector3(initialScale, initialScale, 1));
+        scale.InsertKeyFrame(1, Vector3.One, easing);
+        scale.Duration = TimeSpan.FromMilliseconds(280);
+
+        ScalarKeyFrameAnimation opacity = compositor.CreateScalarKeyFrameAnimation();
+        opacity.InsertKeyFrame(0, 0f);
+        opacity.InsertKeyFrame(0.35f, 0.85f, easing);
+        opacity.InsertKeyFrame(1, 1f, easing);
+        opacity.Duration = TimeSpan.FromMilliseconds(220);
+
+        visual.StartAnimation(nameof(Visual.Scale), scale);
+        visual.StartAnimation(nameof(Visual.Opacity), opacity);
+    }
+
     public static void PlayHorizontalPageTransition(FrameworkElement element, int direction)
     {
         ElementCompositionPreview.SetIsTranslationEnabled(element, true);

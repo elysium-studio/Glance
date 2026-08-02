@@ -30,4 +30,13 @@
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>停止保持灵动岛展开</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>允许提醒</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>当有内容需要你注意时，允许此模块自动显示</value></data>
+  <data name="QuitGlanceNavigationItem.Content" xml:space="preserve"><value>退出 Glance</value></data>
+  <data name="QuitDialogTitle" xml:space="preserve"><value>退出 Glance？</value></data>
+  <data name="QuitDialogMessage" xml:space="preserve"><value>Glance 将关闭。正在运行的计时器、录音和其他模块将停止。</value></data>
+  <data name="QuitDialogPrimaryButton" xml:space="preserve"><value>退出</value></data>
+  <data name="QuitDialogCloseButton" xml:space="preserve"><value>取消</value></data>
+  <data name="AssistantEnabledCard.Header" xml:space="preserve"><value>语音助手</value></data>
+  <data name="AssistantEnabledCard.Description" xml:space="preserve"><value>监听“Glance”或“Hey Glance”，通过语音命令控制 Glance</value></data>
+  <data name="AssistantProviderCard.Header" xml:space="preserve"><value>语音提供程序</value></data>
+  <data name="AssistantProviderCard.Description" xml:space="preserve"><value>选择用于唤醒词和命令识别的提供程序</value></data>
 </root>

@@ -35,6 +35,7 @@ public sealed partial class DesktopIslandViewModel :
 
     private IReadOnlyList<IGlanceComponent> components;
     private readonly IGlanceAttentionService attentionService;
+    private readonly IGlanceAssistantService assistant;
     private readonly IDispatcher dispatcher;
     private readonly IGlanceIntentService intentService;
     private readonly ILogger<DesktopIslandViewModel> logger;
@@ -49,6 +50,7 @@ public sealed partial class DesktopIslandViewModel :
         IDispatcher dispatcher,
         ModulePreferenceService modulePreferences,
         IGlanceAttentionService attentionService,
+        IGlanceAssistantService assistant,
         IGlanceIntentService intentService,
         INavigator navigator,
         ILogger<DesktopIslandViewModel> logger,
@@ -60,6 +62,7 @@ public sealed partial class DesktopIslandViewModel :
         this.modulePreferences = modulePreferences;
         components = modulePreferences.GetActiveComponents();
         this.attentionService = attentionService;
+        this.assistant = assistant;
         this.intentService = intentService;
         this.navigator = navigator;
         this.logger = logger;
@@ -78,6 +81,8 @@ public sealed partial class DesktopIslandViewModel :
     public event EventHandler<GlanceAttentionRequest>? AttentionReceived;
 
     public IGlanceIntentService IntentService => intentService;
+
+    public IGlanceAssistantService Assistant => assistant;
 
     public int SelectedIndex
     {
@@ -116,6 +121,24 @@ public sealed partial class DesktopIslandViewModel :
     public void MoveNext() => Move(1);
 
     public void MovePrevious() => Move(-1);
+
+    public void ShowComponent(string componentId)
+    {
+        int componentIndex = components
+            .Select((component, index) => (component, index))
+            .Where(item => string.Equals(item.component.Id, componentId, StringComparison.OrdinalIgnoreCase))
+            .Select(item => item.index)
+            .DefaultIfEmpty(-1).First();
+
+        if (componentIndex < 0)
+        {
+            return;
+        }
+
+        SelectedIndex = componentIndex;
+        IsOpen = true;
+        IsExpanded = true;
+    }
 
     public void CompleteStartup() => attentionService.CompleteStartup();
 

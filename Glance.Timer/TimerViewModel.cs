@@ -87,6 +87,19 @@ public sealed partial class TimerViewModel :
         SessionStateChanged?.Invoke(this, EventArgs.Empty);
     }
 
+    public void Start(TimeSpan newDuration)
+    {
+        duration = newDuration < TimeSpan.FromSeconds(1)
+            ? TimeSpan.FromSeconds(1)
+            : newDuration;
+        remaining = duration;
+        lastTimestamp = Stopwatch.GetTimestamp();
+        IsRunning = true;
+        UpdateText();
+        OnPropertyChanged(nameof(CanDecreaseMinute));
+        SessionStateChanged?.Invoke(this, EventArgs.Empty);
+    }
+
     public void AddMinute()
     {
         RefreshIfRunning();

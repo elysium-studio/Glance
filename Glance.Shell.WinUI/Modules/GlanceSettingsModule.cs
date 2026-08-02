@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
+using Glance.Application.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Glance.Shell.WinUI;
@@ -11,6 +12,20 @@ public sealed class GlanceSettingsModule :
     public void Register(IServiceCollection services)
     {
         services
+            .AddViewFor<AssistantEnabledView, IGlanceViewModel, AssistantEnabledViewModel>(ServiceLifetime.Transient,
+                provider => new AssistantEnabledView(),
+                provider => new AssistantEnabledViewModel(provider,
+                    provider.GetRequiredService<IServiceFactory>(),
+                    provider.GetRequiredService<IMessenger>(),
+                    provider.GetRequiredService<IDisposer>(),
+                    provider.GetRequiredService<IDispatcher>(),
+                    provider.GetRequiredService<GlanceSettings>(),
+                    provider.GetRequiredService<IWritableOptions<GlanceSettings>>(),
+                    config => config.IsAssistantEnabled,
+                    (config, enabled) => config.IsAssistantEnabled = enabled))
+            .AddViewFor<AssistantProviderView, IGlanceViewModel, AssistantProviderViewModel>(ServiceLifetime.Transient,
+                provider => new AssistantProviderView(),
+                provider => new AssistantProviderViewModel(provider.GetRequiredService<IGlanceAssistantService>()))
             .AddViewFor<PlacementView, IGlanceViewModel, PlacementViewModel>(ServiceLifetime.Transient,
                 provider => new PlacementView(),
                 provider => new PlacementViewModel(provider,
