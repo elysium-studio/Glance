@@ -4,7 +4,8 @@ using Glance.Application.Abstractions;
 namespace Glance.Assistant.WinUI;
 
 public sealed partial class AssistantOverlayView :
-    UserControl
+    UserControl,
+    IGlanceAssistantConnectedAnimationView
 {
     public AssistantOverlayView(IGlanceAssistantProvider provider)
     {
@@ -13,4 +14,6 @@ public sealed partial class AssistantOverlayView :
     }
 
     public IGlanceAssistantProvider Provider { get; }
+
+    public object ConnectedAnimationElement => AssistantGlyphSurface;
 }

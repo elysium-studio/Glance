@@ -15,4 +15,11 @@
   <data name="WorldClockTimeFormatSettingCard.Description" xml:space="preserve"><value>[Choose 12-hour or 24-hour time.]</value></data>
   <data name="WorldClockTwentyFourHourOption.Content" xml:space="preserve"><value>[24-hour]</value></data>
   <data name="WorldClockTwelveHourOption.Content" xml:space="preserve"><value>[12-hour]</value></data>
+  <data name="WorldClockLocationsSettingCard.Header" xml:space="preserve"><value>[Clocks]</value></data>
+  <data name="WorldClockLocationsSettingCard.Description" xml:space="preserve"><value>[Add, remove, and reorder the world clocks shown after your local time.]</value></data>
+  <data name="WorldClockTimeZonePicker.PlaceholderText" xml:space="preserve"><value>[Choose a time zone]</value></data>
+  <data name="WorldClockAddButton.AutomationProperties.Name" xml:space="preserve"><value>[Add clock]</value></data>
+  <data name="WorldClockAddButton.ToolTipService.ToolTip" xml:space="preserve"><value>[Add clock]</value></data>
+  <data name="WorldClockRemoveButton.AutomationProperties.Name" xml:space="preserve"><value>[Remove clock]</value></data>
+  <data name="WorldClockRemoveButton.ToolTipService.ToolTip" xml:space="preserve"><value>[Remove clock]</value></data>
 </root>

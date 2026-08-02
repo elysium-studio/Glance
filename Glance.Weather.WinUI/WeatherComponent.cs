@@ -11,6 +11,7 @@ public sealed partial class WeatherComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IGlanceBackgroundComponent,
+    IGlanceFooterAppearanceComponent,
     IDisposable
 {
     private readonly DispatcherQueue dispatcherQueue;
@@ -87,6 +88,14 @@ public sealed partial class WeatherComponent :
     public object ExpandedAnimationElement { get; }
 
     public object BackgroundContent { get; }
+
+    public uint? FooterForegroundColor => 0xFFF8FAFC;
+
+    public event EventHandler? FooterAppearanceChanged
+    {
+        add { }
+        remove { }
+    }
 
     public void Dispose()
     {

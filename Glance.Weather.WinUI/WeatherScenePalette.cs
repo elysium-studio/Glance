@@ -1,4 +1,3 @@
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using System;
 using Windows.Foundation;
@@ -22,20 +21,6 @@ internal static class WeatherScenePalette
                 new GradientStop { Color = end, Offset = 1 }
             }
         };
-    }
-
-    public static (Color Primary, Color Secondary) GetForegroundColors(WeatherViewModel viewModel, ElementTheme theme)
-    {
-        (Color start, Color end) = GetBackgroundColors(viewModel);
-        Color background = Blend(start, end, 0.46f);
-        background = Blend(background, Color.FromArgb(255, 7, 19, 36), 0.15f);
-        background = Blend(background,
-            theme == ElementTheme.Light ? Color.FromArgb(255, 250, 250, 250) : Color.FromArgb(255, 28, 28, 28),
-            0.22f);
-        Color dark = Color.FromArgb(255, 14, 20, 29);
-        Color light = Color.FromArgb(255, 248, 250, 252);
-        Color primary = ContrastRatio(background, dark) >= ContrastRatio(background, light) ? dark : light;
-        return (primary, Color.FromArgb(204, primary.R, primary.G, primary.B));
     }
 
     private static (Color Start, Color End) GetBackgroundColors(WeatherViewModel viewModel)
@@ -139,18 +124,4 @@ internal static class WeatherScenePalette
         (byte)(source.G + (target.G - source.G) * amount),
         (byte)(source.B + (target.B - source.B) * amount));
 
-    private static double ContrastRatio(Color first, Color second)
-    {
-        double firstLuminance = RelativeLuminance(first);
-        double secondLuminance = RelativeLuminance(second);
-        return (Math.Max(firstLuminance, secondLuminance) + 0.05) / (Math.Min(firstLuminance, secondLuminance) + 0.05);
-    }
-
-    private static double RelativeLuminance(Color color) => 0.2126 * Linearize(color.R) + 0.7152 * Linearize(color.G) + 0.0722 * Linearize(color.B);
-
-    private static double Linearize(byte channel)
-    {
-        double value = channel / 255d;
-        return value <= 0.04045 ? value / 12.92 : Math.Pow((value + 0.055) / 1.055, 2.4);
-    }
 }

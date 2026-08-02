@@ -78,10 +78,25 @@ public sealed partial class WorldClockComponent :
         CancellationToken cancellationToken = default)
     {
         string? city = request.GetString("city");
+        return Task.FromResult(city is null
+            ? GlanceActionResult.InvalidArguments("A city or time zone is required.")
+            : ShowTime(city));
+    }
 
-        return Task.FromResult(city is not null && viewModel.SelectClock(city)
-            ? GlanceActionResult.Success($"Showing the time for {viewModel.SelectedClock?.DisplayName}.")
-            : GlanceActionResult.InvalidArguments("The requested city is not available in World Clock."));
+    public GlanceActionResult ShowTime(string city)
+    {
+        if (!viewModel.SelectClock(city))
+        {
+            if (!WorldClockTimeZoneCatalog.TryCreateDefinition(city, out WorldClockDefinition? definition) || definition is null)
+            {
+                return GlanceActionResult.InvalidArguments($"I couldn't find a time zone for {city}.");
+            }
+
+            viewModel.ShowClock(definition);
+        }
+
+        Refresh();
+        return GlanceActionResult.Success($"Showing the time for {viewModel.SelectedClock?.DisplayName}.");
     }
 
     public void Dispose()
@@ -94,7 +109,11 @@ public sealed partial class WorldClockComponent :
     private void HandleTick(DispatcherQueueTimer sender, object args) => Refresh();
 
     private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<WorldClockSettings> args) =>
-        dispatcherQueue.TryEnqueue(Refresh);
+        dispatcherQueue.TryEnqueue(() =>
+        {
+            viewModel.SetClocks(WorldClockTimeZoneCatalog.CreateDefinitions(args.Options, localizer));
+            Refresh();
+        });
 
     private void Refresh() => viewModel.Refresh(timeProvider.GetUtcNow(), options.Current.Use24HourTime);
 }

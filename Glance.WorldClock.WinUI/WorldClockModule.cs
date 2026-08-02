@@ -5,7 +5,6 @@ using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 
 namespace Glance.WorldClock.WinUI;
 
@@ -21,51 +20,17 @@ public sealed class WorldClockModule :
         services.AddSingleton<WorldClockComponent>();
         services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<WorldClockComponent>());
         services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<WorldClockComponent>());
+        services.AddSingleton<IGlanceAssistantCommandHandler, WorldClockAssistantCommandHandler>();
         services.AddViewFor<WorldClockTimeFormatSettingView, IGlanceModuleSettingViewModel, WorldClockTimeFormatSettingViewModel>(ServiceLifetime.Transient, provider => new WorldClockTimeFormatSettingView(), provider => new WorldClockTimeFormatSettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<WorldClockSettings>>().Current, provider.GetRequiredService<IWritableOptions<WorldClockSettings>>()));
+        services.AddViewFor<WorldClockLocationsSettingView, IGlanceModuleSettingViewModel, WorldClockLocationsSettingViewModel>(ServiceLifetime.Transient, provider => new WorldClockLocationsSettingView(), provider => new WorldClockLocationsSettingViewModel(provider.GetRequiredService<GlanceModuleOptions<WorldClockSettings>>().Current, provider.GetRequiredService<IWritableOptions<WorldClockSettings>>()));
     }
 
     private static WorldClockViewModel CreateViewModel(IServiceProvider provider)
     {
         ModuleResourceTextLocalizer<WorldClockModule> localizer = provider.GetRequiredService<ModuleResourceTextLocalizer<WorldClockModule>>();
-        WorldClockViewModel viewModel = new(CreateClocks(localizer));
+        WorldClockSettings settings = provider.GetRequiredService<GlanceModuleOptions<WorldClockSettings>>().Current;
+        WorldClockViewModel viewModel = new(WorldClockTimeZoneCatalog.CreateDefinitions(settings, localizer));
         viewModel.Initialize();
         return viewModel;
-    }
-
-    private static IEnumerable<WorldClockDefinition> CreateClocks(ITextLocalizer localizer)
-    {
-        yield return new WorldClockDefinition("Local", localizer.GetText("LocalClock"), TimeZoneInfo.Local);
-
-        foreach ((string id, string resourceKey) in new[]
-        {
-            ("GMT Standard Time", "LondonClock"),
-            ("Eastern Standard Time", "NewYorkClock"),
-            ("Tokyo Standard Time", "TokyoClock"),
-            ("AUS Eastern Standard Time", "SydneyClock")
-        })
-        {
-            TimeZoneInfo? timeZone = FindTimeZone(id);
-
-            if (timeZone is not null && !string.Equals(timeZone.Id, TimeZoneInfo.Local.Id, StringComparison.OrdinalIgnoreCase))
-            {
-                yield return new WorldClockDefinition(id, localizer.GetText(resourceKey), timeZone);
-            }
-        }
-    }
-
-    private static TimeZoneInfo? FindTimeZone(string id)
-    {
-        try
-        {
-            return TimeZoneInfo.FindSystemTimeZoneById(id);
-        }
-        catch (TimeZoneNotFoundException)
-        {
-            return null;
-        }
-        catch (InvalidTimeZoneException)
-        {
-            return null;
-        }
     }
 }

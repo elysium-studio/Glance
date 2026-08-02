@@ -10,6 +10,7 @@ public static class FluentMotion
 {
     private static readonly TimeSpan ButtonPressDuration = TimeSpan.FromMilliseconds(90);
     private static readonly TimeSpan ButtonReleaseDuration = TimeSpan.FromMilliseconds(160);
+    private static readonly TimeSpan ContentTransitionDuration = TimeSpan.FromMilliseconds(240);
     private static readonly TimeSpan EntranceDuration = TimeSpan.FromMilliseconds(240);
     private static readonly TimeSpan PulseDuration = TimeSpan.FromMilliseconds(320);
 
@@ -104,6 +105,71 @@ public static class FluentMotion
 
         visual.StartAnimation("Translation.X", translation);
         visual.StartAnimation(nameof(Visual.Opacity), opacity);
+    }
+
+    public static void PlayConnectedContentTransition(FrameworkElement outgoing,
+        FrameworkElement incoming,
+        FrameworkElement? background,
+        bool enteringAssistant,
+        Action completed)
+    {
+        Visual outgoingVisual = ElementCompositionPreview.GetElementVisual(outgoing);
+        Visual incomingVisual = ElementCompositionPreview.GetElementVisual(incoming);
+        Compositor compositor = outgoingVisual.Compositor;
+        CubicBezierEasingFunction entranceEasing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.1f, 0.9f), new Vector2(0.2f, 1f));
+        CubicBezierEasingFunction exitEasing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.7f, 0f), new Vector2(1f, 0.5f));
+
+        incomingVisual.Opacity = 0;
+
+        CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+
+        ScalarKeyFrameAnimation outgoingOpacity = compositor.CreateScalarKeyFrameAnimation();
+        outgoingOpacity.InsertKeyFrame(0, 1);
+        outgoingOpacity.InsertKeyFrame(1, 0, exitEasing);
+        outgoingOpacity.Duration = ContentTransitionDuration;
+
+        ScalarKeyFrameAnimation incomingOpacity = compositor.CreateScalarKeyFrameAnimation();
+        incomingOpacity.InsertKeyFrame(0, 0);
+        incomingOpacity.InsertKeyFrame(0.22f, 0);
+        incomingOpacity.InsertKeyFrame(1, 1, entranceEasing);
+        incomingOpacity.Duration = ContentTransitionDuration;
+
+        outgoingVisual.StartAnimation(nameof(Visual.Opacity), outgoingOpacity);
+        incomingVisual.StartAnimation(nameof(Visual.Opacity), incomingOpacity);
+
+        if (background is not null)
+        {
+            Visual backgroundVisual = ElementCompositionPreview.GetElementVisual(background);
+            ScalarKeyFrameAnimation backgroundOpacity = compositor.CreateScalarKeyFrameAnimation();
+            backgroundOpacity.InsertKeyFrame(0, enteringAssistant ? 1 : 0);
+            backgroundOpacity.InsertKeyFrame(1, enteringAssistant ? 0 : 1);
+            backgroundOpacity.Duration = ContentTransitionDuration;
+            backgroundVisual.StartAnimation(nameof(Visual.Opacity), backgroundOpacity);
+        }
+
+        batch.Completed += (_, _) => incoming.DispatcherQueue.TryEnqueue(() => completed());
+        batch.End();
+    }
+
+    public static void SetContentPresentationState(FrameworkElement element, bool isVisible)
+    {
+        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
+        Visual visual = ElementCompositionPreview.GetElementVisual(element);
+        visual.StopAnimation(nameof(Visual.Opacity));
+        visual.StopAnimation(nameof(Visual.Scale));
+        visual.StopAnimation("Translation.X");
+        visual.StopAnimation("Translation.Y");
+        visual.Opacity = isVisible ? 1 : 0;
+        visual.Scale = Vector3.One;
+        visual.Properties.InsertVector3("Translation", Vector3.Zero);
+        element.IsHitTestVisible = isVisible;
+    }
+
+    public static void SetOpacity(FrameworkElement element, float opacity)
+    {
+        Visual visual = ElementCompositionPreview.GetElementVisual(element);
+        visual.StopAnimation(nameof(Visual.Opacity));
+        visual.Opacity = opacity;
     }
 
     private static void PlayScale(FrameworkElement element, float scale, TimeSpan duration)

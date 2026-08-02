@@ -62,4 +62,6 @@
         <Setter Property="Fill" Value="{ThemeResource GlanceWeatherAccentBrush}" />
         <Setter Property="Stretch" Value="Uniform" />
     </Style>
+    <SolidColorBrush x:Key="GlanceWeatherForegroundBrush" Color="#FFF8FAFC" />
+    <SolidColorBrush x:Key="GlanceWeatherSecondaryForegroundBrush" Color="#CCF8FAFC" />
 </ResourceDictionary>

@@ -69,6 +69,70 @@ public sealed class WorldClockViewModelTests
         Assert.Equal("New York", viewModel.SelectedClock?.DisplayName);
     }
 
+    [Fact]
+    public void SetClocksPreservesASelectedClockThatStillExists()
+    {
+        TimeZoneInfo localTimeZone = TimeZoneInfo.CreateCustomTimeZone("Local", TimeSpan.Zero, "Local", "Local");
+        TimeZoneInfo remoteTimeZone = TimeZoneInfo.CreateCustomTimeZone("Remote", TimeSpan.FromHours(5), "Remote", "Remote");
+        WorldClockViewModel viewModel = new([
+            new WorldClockDefinition("Local", "Local", localTimeZone),
+            new WorldClockDefinition("Remote", "Remote", remoteTimeZone)
+        ]);
+        viewModel.Initialize();
+        viewModel.SelectedClock = viewModel.Clocks[1];
+
+        viewModel.SetClocks([
+            new WorldClockDefinition("Local", "Local", localTimeZone),
+            new WorldClockDefinition("Remote", "Remote", remoteTimeZone)
+        ]);
+
+        Assert.Equal("Remote", viewModel.SelectedClock?.Id);
+    }
+
+    [Fact]
+    public void SetClocksFallsBackToLocalWhenTheSelectionWasRemoved()
+    {
+        TimeZoneInfo localTimeZone = TimeZoneInfo.CreateCustomTimeZone("Local", TimeSpan.Zero, "Local", "Local");
+        TimeZoneInfo remoteTimeZone = TimeZoneInfo.CreateCustomTimeZone("Remote", TimeSpan.FromHours(5), "Remote", "Remote");
+        WorldClockViewModel viewModel = new([
+            new WorldClockDefinition("Local", "Local", localTimeZone),
+            new WorldClockDefinition("Remote", "Remote", remoteTimeZone)
+        ]);
+        viewModel.Initialize();
+        viewModel.SelectedClock = viewModel.Clocks[1];
+
+        viewModel.SetClocks([new WorldClockDefinition("Local", "Local", localTimeZone)]);
+
+        Assert.Same(viewModel.LocalClock, viewModel.SelectedClock);
+    }
+
+    [Theory]
+    [InlineData("What time is it in Greenland?", "Greenland")]
+    [InlineData("Can you show me the time for New York", "New York")]
+    [InlineData("Tell me the current time at Tokyo.", "Tokyo")]
+    public void ParsesNaturalTimeQueries(string command,
+        string expectedLocation)
+    {
+        bool parsed = WorldClockCommandParser.TryGetLocation(command, out string location);
+
+        Assert.True(parsed);
+        Assert.Equal(expectedLocation, location);
+    }
+
+    [Fact]
+    public void ShowClockAddsAndSelectsATemporaryClock()
+    {
+        TimeZoneInfo localTimeZone = TimeZoneInfo.CreateCustomTimeZone("Local", TimeSpan.Zero, "Local", "Local");
+        TimeZoneInfo remoteTimeZone = TimeZoneInfo.CreateCustomTimeZone("Greenland Standard Time", TimeSpan.FromHours(-2), "Greenland", "Greenland");
+        WorldClockViewModel viewModel = new([new WorldClockDefinition("Local", "Local", localTimeZone)]);
+        viewModel.Initialize();
+
+        viewModel.ShowClock(new WorldClockDefinition(remoteTimeZone.Id, "Greenland", remoteTimeZone));
+
+        Assert.Equal("Greenland", viewModel.SelectedClock?.DisplayName);
+        Assert.Equal(2, viewModel.Clocks.Count);
+    }
+
     private static WorldClockViewModel CreateViewModel(TimeSpan offset)
     {
         TimeZoneInfo timeZone = TimeZoneInfo.CreateCustomTimeZone("Test", offset, "Test", "Test");

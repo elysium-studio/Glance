@@ -17,6 +17,8 @@ public interface IGlanceAssistantService :
 
     bool IsOverlayVisible { get; }
 
+    bool IsResultPresentationActive { get; }
+
     object? CompactIndicatorContent { get; }
 
     object? ExpandedIndicatorContent { get; }

@@ -1,6 +1,8 @@
 using Glance.Application.Abstractions;
+using Glance.UI.WinUI;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
 using System.ComponentModel;
@@ -9,26 +11,43 @@ using System.Numerics;
 namespace Glance.Assistant.WinUI;
 
 public sealed partial class AssistantIndicatorView :
-    UserControl
+    UserControl,
+    IGlanceAssistantConnectedAnimationView
 {
     private readonly IGlanceAssistantService assistant;
     private readonly IGlanceAssistantProvider provider;
-    private bool isPulseRunning;
+    private readonly bool isCompact;
+    private readonly CompositionActivityPulse? activityPulse;
+    private bool isPreparingAnimationRunning;
 
     public AssistantIndicatorView(IGlanceAssistantProvider provider,
-        IGlanceAssistantService assistant)
+        IGlanceAssistantService assistant,
+        bool isCompact)
     {
         this.provider = provider;
         this.assistant = assistant;
+        this.isCompact = isCompact;
         InitializeComponent();
+        Width = isCompact ? 28 : 24;
+        Height = isCompact ? 28 : 24;
+        CompactSurface.Visibility = isCompact ? Visibility.Visible : Visibility.Collapsed;
+        ExpandedToggleButton.Visibility = isCompact ? Visibility.Collapsed : Visibility.Visible;
+        activityPulse = isCompact ? new(this,
+            PulseRing,
+            provider,
+            nameof(IGlanceAssistantProvider.State),
+            IsAssistantActive) : null;
         Loaded += HandleLoaded;
         Unloaded += HandleUnloaded;
         UpdateState();
     }
 
+    public object ConnectedAnimationElement => isCompact ? CompactToggleButton : ExpandedToggleButton;
+
     private void HandleClick(object sender, RoutedEventArgs args)
     {
-        ToggleButton.IsEnabled = false;
+        CompactToggleButton.IsEnabled = false;
+        ExpandedToggleButton.IsEnabled = false;
         _ = ToggleAssistantAsync();
     }
 
@@ -43,7 +62,11 @@ public sealed partial class AssistantIndicatorView :
         }
         finally
         {
-            DispatcherQueue.TryEnqueue(() => ToggleButton.IsEnabled = true);
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                CompactToggleButton.IsEnabled = true;
+                ExpandedToggleButton.IsEnabled = true;
+            });
         }
     }
 
@@ -56,7 +79,7 @@ public sealed partial class AssistantIndicatorView :
     private void HandleUnloaded(object sender, RoutedEventArgs args)
     {
         provider.PropertyChanged -= HandleProviderPropertyChanged;
-        StopPulse();
+        StopPreparingAnimation();
     }
 
     private void HandleProviderPropertyChanged(object? sender, PropertyChangedEventArgs args) =>
@@ -64,55 +87,70 @@ public sealed partial class AssistantIndicatorView :
 
     private void UpdateState()
     {
-        ToggleButton.Content = provider.State == GlanceAssistantState.Disabled ? "\uE198" : "\uE720";
-        ToggleButton.Opacity = provider.State == GlanceAssistantState.Disabled ? 0.55 : 1;
-
-        if (provider.State is GlanceAssistantState.Preparing or GlanceAssistantState.ListeningForWakeWord or GlanceAssistantState.ListeningForCommand or GlanceAssistantState.ProcessingCommand)
+        (string glyph, string label) = provider.State switch
         {
-            StartPulse();
+            GlanceAssistantState.Disabled => ("\uEC54", "Voice assistant is off"),
+            GlanceAssistantState.Preparing => ("\uE895", "Preparing voice assistant"),
+            GlanceAssistantState.ListeningForWakeWord => ("\uE720", "Voice assistant is ready — say “Hey Glance”"),
+            GlanceAssistantState.ListeningForCommand => ("\uE720", "Listening for your command"),
+            GlanceAssistantState.ProcessingCommand => ("\uE720", "Processing your command"),
+            GlanceAssistantState.Error => ("\uE783", "Voice assistant is unavailable"),
+            _ => ("\uEC54", "Voice assistant is off")
+        };
+        CompactGlyph.Glyph = glyph;
+        CompactToggleButton.Opacity = 1;
+        ExpandedGlyph.Glyph = glyph;
+        ExpandedToggleButton.Opacity = 1;
+        AutomationProperties.SetName(CompactToggleButton, label);
+        AutomationProperties.SetName(ExpandedToggleButton, label);
+        ToolTipService.SetToolTip(CompactToggleButton, label);
+        ToolTipService.SetToolTip(ExpandedToggleButton, label);
+
+        if (provider.State == GlanceAssistantState.Preparing)
+        {
+            StartPreparingAnimation();
         }
         else
         {
-            StopPulse();
+            StopPreparingAnimation();
         }
+
+        activityPulse?.Refresh();
     }
 
-    private void StartPulse()
+    private void StartPreparingAnimation()
     {
-        if (isPulseRunning || !ListeningRing.IsLoaded)
+        FontIcon glyph = isCompact ? CompactGlyph : ExpandedGlyph;
+
+        if (isPreparingAnimationRunning || !glyph.IsLoaded)
         {
             return;
         }
 
-        isPulseRunning = true;
-        Visual visual = ElementCompositionPreview.GetElementVisual(ListeningRing);
-        Compositor compositor = visual.Compositor;
-        visual.CenterPoint = new Vector3(16, 16, 0);
-
-        ScalarKeyFrameAnimation opacity = compositor.CreateScalarKeyFrameAnimation();
-        opacity.InsertKeyFrame(0, 0.7f);
-        opacity.InsertKeyFrame(0.7f, 0.12f);
-        opacity.InsertKeyFrame(1, 0f);
-        opacity.Duration = TimeSpan.FromMilliseconds(1600);
-        opacity.IterationBehavior = AnimationIterationBehavior.Forever;
-
-        Vector3KeyFrameAnimation scale = compositor.CreateVector3KeyFrameAnimation();
-        scale.InsertKeyFrame(0, new Vector3(0.72f, 0.72f, 1));
-        scale.InsertKeyFrame(1, new Vector3(1.18f, 1.18f, 1));
-        scale.Duration = opacity.Duration;
-        scale.IterationBehavior = AnimationIterationBehavior.Forever;
-
-        visual.StartAnimation(nameof(Visual.Opacity), opacity);
-        visual.StartAnimation(nameof(Visual.Scale), scale);
+        isPreparingAnimationRunning = true;
+        Visual visual = ElementCompositionPreview.GetElementVisual(glyph);
+        visual.CenterPoint = new Vector3((float)glyph.ActualWidth / 2, (float)glyph.ActualHeight / 2, 0);
+        ScalarKeyFrameAnimation rotation = visual.Compositor.CreateScalarKeyFrameAnimation();
+        rotation.InsertKeyFrame(0, 0);
+        rotation.InsertKeyFrame(1, 360);
+        rotation.Duration = TimeSpan.FromMilliseconds(1000);
+        rotation.IterationBehavior = AnimationIterationBehavior.Forever;
+        visual.StartAnimation(nameof(Visual.RotationAngleInDegrees), rotation);
     }
 
-    private void StopPulse()
+    private void StopPreparingAnimation()
     {
-        isPulseRunning = false;
-        Visual visual = ElementCompositionPreview.GetElementVisual(ListeningRing);
-        visual.StopAnimation(nameof(Visual.Opacity));
-        visual.StopAnimation(nameof(Visual.Scale));
-        visual.Opacity = 0;
-        visual.Scale = Vector3.One;
+        isPreparingAnimationRunning = false;
+        Visual compactVisual = ElementCompositionPreview.GetElementVisual(CompactGlyph);
+        compactVisual.StopAnimation(nameof(Visual.RotationAngleInDegrees));
+        compactVisual.RotationAngleInDegrees = 0;
+        Visual expandedVisual = ElementCompositionPreview.GetElementVisual(ExpandedGlyph);
+        expandedVisual.StopAnimation(nameof(Visual.RotationAngleInDegrees));
+        expandedVisual.RotationAngleInDegrees = 0;
     }
+
+    private bool IsAssistantActive() =>
+        provider.State is GlanceAssistantState.ListeningForWakeWord or
+            GlanceAssistantState.ListeningForCommand or
+            GlanceAssistantState.ProcessingCommand;
 }

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using System.Runtime.InteropServices;
 using System.Text;
 using Windows.ApplicationModel;
 using Windows.Media.SpeechRecognition;
@@ -20,8 +21,13 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
     IAsyncDisposable
 {
     private const int CommandStartTimeoutMilliseconds = 10000;
+    private const int RuntimeStartupAttempts = 3;
+    private const int WakeRecognitionRestartAttempts = 3;
     private const int UtteranceSilenceMilliseconds = 1800;
     private const string ModelAlias = "nemotron-speech-streaming-en-0.6b";
+    private static readonly object nativeLibraryGate = new();
+    private static readonly List<nint> nativeLibraryHandles = [];
+    private static bool nativeLibrariesLoaded;
     private readonly IGlanceAssistantCommandService commandService;
     private readonly IDispatcher dispatcher;
     private readonly ILogger<MicrosoftOfflineAssistantProvider> logger;
@@ -36,11 +42,15 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
     private OpenAIAudioClient? audioClient;
     private RollingAudioCapture? audioCapture;
     private SpeechRecognizer? wakeRecognizer;
+    private SpeechContinuousRecognitionSession? wakeRecognitionSession;
+    private Task? modelPreparationTask;
     private Task? transcriptionTask;
+    private Task? wakeHealthTask;
+    private bool isStarted;
     private int commandSession;
+    private int isReturningToWakeRecognition;
+    private int isSwitchingToCommandRecognition;
     private int utteranceSession;
-    private long pendingWakeBoundary;
-    private string? pendingWakePhrase;
 
     [ObservableProperty]
     public partial GlanceAssistantState State { get; set; } = GlanceAssistantState.Disabled;
@@ -82,11 +92,24 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         {
             if (isEnabled)
             {
-                if (State is not GlanceAssistantState.Disabled and not GlanceAssistantState.Error)
+                if (State == GlanceAssistantState.Error)
                 {
-                    return;
+                    await StopAsync();
                 }
 
+                if (isStarted)
+                {
+                    if (providerCancellationTokenSource?.IsCancellationRequested == false &&
+                        wakeHealthTask?.IsCompleted == false)
+                    {
+                        return;
+                    }
+
+                    logger.LogWarning("The assistant runtime stopped without being disabled and will be started again");
+                    await StopAsync();
+                }
+
+                isStarted = true;
                 await StartAsync(cancellationToken);
             }
             else
@@ -132,6 +155,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
     {
         if (!HasPackageIdentity())
         {
+            isStarted = false;
             SetPresentation(GlanceAssistantState.Error, "Voice assistant unavailable", "Microsoft offline wake recognition requires packaged Glance");
             return;
         }
@@ -145,11 +169,17 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
                 throw new UnauthorizedAccessException($"Microphone access is {microphoneAccess}");
             }
 
-            providerCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            audioCapture = new RollingAudioCapture(providerCancellationTokenSource.Token);
-            audioCapture.Start();
-            await StartWakeRecognitionAsync();
-            _ = PrepareModelAsync(providerCancellationTokenSource.Token);
+            cancellationToken.ThrowIfCancellationRequested();
+            providerCancellationTokenSource = new CancellationTokenSource();
+            await StartAudioCaptureWithRetryAsync(providerCancellationTokenSource.Token);
+            await StartWakeRecognitionWithRetryAsync();
+            wakeHealthTask = MonitorWakeRecognitionAsync(providerCancellationTokenSource.Token);
+
+            if (audioClient is null)
+            {
+                SetPresentation(GlanceAssistantState.Preparing, "Getting voice commands ready", "Loading the command model");
+                modelPreparationTask = PrepareModelAsync(providerCancellationTokenSource.Token);
+            }
         }
         catch (Exception exception)
         {
@@ -161,32 +191,24 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
 
     private async Task PrepareModelAsync(CancellationToken cancellationToken)
     {
-        if (audioClient is not null)
-        {
-            return;
-        }
-
         try
         {
-            SetPresentation(GlanceAssistantState.Preparing, "Getting voice commands ready", "Wake-word listening is already active");
+            EnsureNativeLibrariesLoaded();
             await FoundryLocalManager.CreateAsync(new Configuration { AppName = "Glance" }, logger);
-            await FoundryLocalManager.Instance.DownloadAndRegisterEpsAsync(cancellationToken);
             ICatalog catalog = await FoundryLocalManager.Instance.GetCatalogAsync();
             model = await catalog.GetModelAsync(ModelAlias) ?? throw new InvalidOperationException("The Microsoft streaming speech model is unavailable");
             await model.DownloadAsync(_ => { }, cancellationToken);
             await model.LoadAsync(cancellationToken);
             audioClient = await model.GetAudioClientAsync();
+            cancellationToken.ThrowIfCancellationRequested();
 
-            if (pendingWakePhrase is not null)
+            if (State != GlanceAssistantState.Preparing ||
+                Volatile.Read(ref isSwitchingToCommandRecognition) != 0 ||
+                Volatile.Read(ref isReturningToWakeRecognition) != 0)
             {
-                string wakePhrase = pendingWakePhrase;
-                pendingWakePhrase = null;
-                await SwitchToCommandRecognitionAsync(wakePhrase, pendingWakeBoundary);
+                return;
             }
-            else
-            {
-                SetPresentation(GlanceAssistantState.ListeningForWakeWord, "Say “Glance” or “Hey Glance”", "Listening");
-            }
+            SetPresentation(GlanceAssistantState.ListeningForWakeWord, "Say “Glance” or “Hey Glance”", "Listening");
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -194,12 +216,15 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         catch (Exception exception)
         {
             logger.LogError(exception, "Failed to prepare the Microsoft offline speech model");
+            await RunOnDispatcherAsync(StopWakeRecognitionAsync);
             SetPresentation(GlanceAssistantState.Error, "Voice assistant unavailable", exception.Message);
         }
     }
 
     private async Task StopAsync()
     {
+        isStarted = false;
+        Interlocked.Exchange(ref isSwitchingToCommandRecognition, 0);
         CancelPendingUtterance();
 
         if (providerCancellationTokenSource is not null)
@@ -207,8 +232,34 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             await providerCancellationTokenSource.CancelAsync();
         }
 
-        await StopWakeRecognitionAsync();
+        await RunOnDispatcherAsync(StopWakeRecognitionAsync);
         await StopCommandRecognitionAsync();
+
+        if (wakeHealthTask is not null)
+        {
+            try
+            {
+                await wakeHealthTask;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+
+            wakeHealthTask = null;
+        }
+
+        if (modelPreparationTask is not null)
+        {
+            try
+            {
+                await modelPreparationTask;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+
+            modelPreparationTask = null;
+        }
 
         if (audioCapture is not null)
         {
@@ -218,11 +269,15 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
 
         providerCancellationTokenSource?.Dispose();
         providerCancellationTokenSource = null;
-        pendingWakePhrase = null;
     }
 
     private async Task StartWakeRecognitionAsync()
     {
+        if (wakeRecognizer is not null)
+        {
+            return;
+        }
+
         SpeechRecognizer recognizer = new(SpeechRecognizer.SystemSpeechLanguage);
         recognizer.Constraints.Add(new SpeechRecognitionListConstraint((string[])["Glance", "Hey Glance"], "GlanceWakePhrase"));
         SpeechRecognitionCompilationResult compilation = await recognizer.CompileConstraintsAsync();
@@ -233,27 +288,49 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             throw new InvalidOperationException($"Windows could not compile the wake phrase: {compilation.Status}");
         }
 
-        recognizer.ContinuousRecognitionSession.ResultGenerated += HandleWakeResultGenerated;
-        await recognizer.ContinuousRecognitionSession.StartAsync();
+        SpeechContinuousRecognitionSession session = recognizer.ContinuousRecognitionSession;
+        session.ResultGenerated += HandleWakeResultGenerated;
+        session.Completed += HandleWakeRecognitionCompleted;
         wakeRecognizer = recognizer;
-        SetPresentation(GlanceAssistantState.ListeningForWakeWord, "Say “Glance” or “Hey Glance”", audioClient is null ? "Listening while the command model gets ready" : "Listening");
+        wakeRecognitionSession = session;
+
+        try
+        {
+            await session.StartAsync();
+        }
+        catch
+        {
+            wakeRecognizer = null;
+            wakeRecognitionSession = null;
+            session.ResultGenerated -= HandleWakeResultGenerated;
+            session.Completed -= HandleWakeRecognitionCompleted;
+            recognizer.Dispose();
+            throw;
+        }
+
+        SetPresentation(audioClient is null ? GlanceAssistantState.Preparing : GlanceAssistantState.ListeningForWakeWord,
+            "Say “Glance” or “Hey Glance”",
+            audioClient is null ? "Loading the command model" : "Listening");
     }
 
     private async Task StopWakeRecognitionAsync()
     {
         SpeechRecognizer? recognizer = wakeRecognizer;
+        SpeechContinuousRecognitionSession? session = wakeRecognitionSession;
         wakeRecognizer = null;
+        wakeRecognitionSession = null;
 
-        if (recognizer is null)
+        if (recognizer is null || session is null)
         {
             return;
         }
 
-        recognizer.ContinuousRecognitionSession.ResultGenerated -= HandleWakeResultGenerated;
+        session.ResultGenerated -= HandleWakeResultGenerated;
+        session.Completed -= HandleWakeRecognitionCompleted;
 
         try
         {
-            await recognizer.ContinuousRecognitionSession.CancelAsync();
+            await session.CancelAsync();
         }
         catch (Exception)
         {
@@ -264,7 +341,19 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
 
     private void HandleWakeResultGenerated(SpeechContinuousRecognitionSession sender, SpeechContinuousRecognitionResultGeneratedEventArgs args)
     {
+        if (!ReferenceEquals(sender, wakeRecognitionSession))
+        {
+            return;
+        }
+
+        logger.LogInformation("Wake recognition heard {WakeText} with {WakeConfidence} confidence", args.Result.Text, args.Result.Confidence);
+
         if (args.Result.Confidence == SpeechRecognitionConfidence.Rejected)
+        {
+            return;
+        }
+
+        if (Interlocked.CompareExchange(ref isSwitchingToCommandRecognition, 1, 0) != 0)
         {
             return;
         }
@@ -273,27 +362,226 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         Dispatch(() => _ = SwitchToCommandRecognitionAsync(args.Result.Text, wakeBoundary));
     }
 
-    private async Task SwitchToCommandRecognitionAsync(string wakePhrase, long wakeBoundary)
+    private void HandleWakeRecognitionCompleted(SpeechContinuousRecognitionSession sender, SpeechContinuousRecognitionCompletedEventArgs args)
     {
-        if (wakeRecognizer is null || audioCapture is null)
+        if (!ReferenceEquals(sender, wakeRecognitionSession))
         {
             return;
         }
 
-        if (audioClient is null)
+        logger.LogWarning("Wake recognition completed unexpectedly with {WakeStatus}", args.Status);
+        Dispatch(() => _ = RecoverWakeRecognitionAsync());
+    }
+
+    private async Task RecoverWakeRecognitionAsync()
+    {
+        if (providerCancellationTokenSource?.IsCancellationRequested != false ||
+            Volatile.Read(ref isSwitchingToCommandRecognition) != 0 ||
+            Interlocked.CompareExchange(ref isReturningToWakeRecognition, 1, 0) != 0)
         {
-            pendingWakePhrase = wakePhrase;
-            pendingWakeBoundary = wakeBoundary;
-            SetPresentation(GlanceAssistantState.ListeningForCommand, "I heard you", "Finishing command recognition setup");
             return;
         }
 
         try
         {
-            await StopWakeRecognitionAsync();
+            await Task.Delay(250, providerCancellationTokenSource.Token);
+            await StartWakeRecognitionWithRetryAsync();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Failed to restart wake recognition");
+            SetPresentation(GlanceAssistantState.Preparing, "Voice assistant is recovering", "Restarting wake recognition");
+        }
+        finally
+        {
+            Interlocked.Exchange(ref isReturningToWakeRecognition, 0);
+        }
+    }
+
+    private async Task MonitorWakeRecognitionAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
+
+                if (State is not (GlanceAssistantState.Preparing or GlanceAssistantState.ListeningForWakeWord) ||
+                    Volatile.Read(ref isSwitchingToCommandRecognition) != 0 ||
+                    Volatile.Read(ref isReturningToWakeRecognition) != 0)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    if (audioCapture?.IsHealthy != true)
+                    {
+                        logger.LogWarning(audioCapture?.Failure, "Assistant audio capture stopped unexpectedly and will be restarted");
+                        await RestartAudioCaptureAsync(cancellationToken);
+                    }
+
+                    bool restartRequired = false;
+                    SpeechRecognizerState? recognizerState = null;
+                    await RunOnDispatcherAsync(() =>
+                    {
+                        recognizerState = wakeRecognizer?.State;
+                        restartRequired = wakeRecognizer is null ||
+                            wakeRecognitionSession is null ||
+                            recognizerState is SpeechRecognizerState.Idle or SpeechRecognizerState.Paused or SpeechRecognizerState.Processing;
+                        return Task.CompletedTask;
+                    });
+
+                    if (restartRequired)
+                    {
+                        logger.LogWarning("Wake recognition became inactive in state {WakeRecognizerState} and will be restarted", recognizerState);
+                        await RecoverWakeRecognitionAsync();
+                    }
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                catch (Exception exception)
+                {
+                    logger.LogWarning(exception, "The assistant health check failed and will retry");
+                }
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+        }
+    }
+
+    private async Task RestartAudioCaptureAsync(CancellationToken cancellationToken)
+    {
+        RollingAudioCapture? previousCapture = audioCapture;
+        audioCapture = null;
+
+        if (previousCapture is not null)
+        {
+            await previousCapture.DisposeAsync();
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+        RollingAudioCapture nextCapture = new(cancellationToken);
+        nextCapture.Start();
+        audioCapture = nextCapture;
+    }
+
+    private async Task StartAudioCaptureWithRetryAsync(CancellationToken cancellationToken)
+    {
+        Exception? failure = null;
+
+        for (int attempt = 1; attempt <= RuntimeStartupAttempts; attempt++)
+        {
+            try
+            {
+                await RestartAudioCaptureAsync(cancellationToken);
+                return;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                failure = exception;
+                logger.LogWarning(exception, "Assistant audio capture startup attempt {AudioCaptureAttempt} failed", attempt);
+
+                if (attempt < RuntimeStartupAttempts)
+                {
+                    await Task.Delay(attempt * 250, cancellationToken);
+                }
+            }
+        }
+
+        throw new InvalidOperationException("Windows audio capture could not be started", failure);
+    }
+
+    private static void EnsureNativeLibrariesLoaded()
+    {
+        lock (nativeLibraryGate)
+        {
+            if (nativeLibrariesLoaded)
+            {
+                return;
+            }
+
+            string directory = Path.GetDirectoryName(typeof(MicrosoftOfflineAssistantProvider).Assembly.Location) ?? AppContext.BaseDirectory;
+            string currentPath = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+
+            if (!currentPath.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries).Contains(directory, StringComparer.OrdinalIgnoreCase))
+            {
+                Environment.SetEnvironmentVariable("PATH", $"{directory}{Path.PathSeparator}{currentPath}");
+            }
+
+            foreach (string fileName in (string[])["onnxruntime_providers_shared.dll", "onnxruntime.dll", "onnxruntime-genai.dll"])
+            {
+                string path = Path.Combine(directory, fileName);
+
+                if (!File.Exists(path))
+                {
+                    throw new FileNotFoundException($"The assistant runtime dependency {fileName} was not found", path);
+                }
+
+                nint handle = LoadLibraryEx(path, 0, 0x00000100 | 0x00001000);
+
+                if (handle == 0)
+                {
+                    throw new DllNotFoundException($"Unable to load {fileName} from the assistant package. Windows error {Marshal.GetLastWin32Error()}");
+                }
+
+                nativeLibraryHandles.Add(handle);
+            }
+
+            nativeLibrariesLoaded = true;
+        }
+    }
+
+    [LibraryImport("kernel32.dll", EntryPoint = "LoadLibraryExW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    private static partial nint LoadLibraryEx(string fileName, nint file, uint flags);
+
+    private async Task SwitchToCommandRecognitionAsync(string wakePhrase, long wakeBoundary)
+    {
+        try
+        {
+            if (audioCapture is null)
+            {
+                logger.LogWarning("Wake phrase {WakePhrase} was accepted without an active audio capture", wakePhrase);
+                return;
+            }
+
+            if (wakeRecognizer is null)
+            {
+                logger.LogWarning("Wake phrase {WakePhrase} was accepted after its recognition session had already ended", wakePhrase);
+                await ReturnToWakeRecognitionAsync("Listening");
+                return;
+            }
+
+            OpenAIAudioClient? client = audioClient;
+
+            if (client is null)
+            {
+                SetPresentation(GlanceAssistantState.ListeningForCommand, "I heard you", "Voice commands are still getting ready");
+                await Task.Delay(900, providerCancellationTokenSource!.Token);
+
+                if (audioClient is null)
+                {
+                    SetPresentation(GlanceAssistantState.Preparing, "Say “Glance” or “Hey Glance”", "Loading the command model");
+                    return;
+                }
+
+                client = audioClient;
+            }
+
+            await RunOnDispatcherAsync(StopWakeRecognitionAsync);
             listeningCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(providerCancellationTokenSource!.Token);
             CancellationToken cancellationToken = listeningCancellationTokenSource.Token;
-            transcriptionSession = audioClient.CreateLiveTranscriptionSession();
+            transcriptionSession = client.CreateLiveTranscriptionSession();
             transcriptionSession.Settings.SampleRate = 16000;
             transcriptionSession.Settings.Channels = 1;
             transcriptionSession.Settings.Language = "en";
@@ -306,7 +594,15 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         {
             logger.LogError(exception, "Failed to start assistant command recognition");
             await StopCommandRecognitionAsync();
-            SetPresentation(GlanceAssistantState.Error, "Command recognition stopped", exception.Message);
+
+            if (providerCancellationTokenSource?.IsCancellationRequested == false)
+            {
+                await ReturnToWakeRecognitionAsync("Listening");
+            }
+        }
+        finally
+        {
+            Interlocked.Exchange(ref isSwitchingToCommandRecognition, 0);
         }
     }
 
@@ -325,6 +621,13 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
 
     private void ProcessRecognizedText(string text)
     {
+        if (State != GlanceAssistantState.ListeningForCommand)
+        {
+            return;
+        }
+
+        commandStartCancellationTokenSource?.Cancel();
+
         if (pendingUtterance.Length > 0 && !char.IsWhiteSpace(pendingUtterance[^1]) && !char.IsPunctuation(text[0]))
         {
             pendingUtterance.Append(' ');
@@ -365,13 +668,19 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         _ = CompleteCommandAsync(command);
     }
 
-    private void BeginCommandWindow()
+    private void BeginCommandWindow(string transcript = "What can I help with?",
+        string status = "Listening for your command")
     {
+        pendingUtterance.Clear();
+        utteranceCompletionCancellationTokenSource?.Cancel();
+        utteranceCompletionCancellationTokenSource?.Dispose();
+        utteranceCompletionCancellationTokenSource = null;
+        utteranceSession++;
         commandStartCancellationTokenSource?.Cancel();
         commandStartCancellationTokenSource?.Dispose();
         commandStartCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(providerCancellationTokenSource!.Token);
         int session = ++commandSession;
-        SetPresentation(GlanceAssistantState.ListeningForCommand, "What can I help with?", "Listening for your command");
+        SetPresentation(GlanceAssistantState.ListeningForCommand, transcript, status);
         _ = CancelCommandWindowAfterTimeoutAsync(session, commandStartCancellationTokenSource.Token);
     }
 
@@ -402,13 +711,17 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             SetPresentation(GlanceAssistantState.ProcessingCommand, command, "Working on it");
             GlanceAssistantCommandResult result = await commandService.ExecuteAsync(command, cancellationToken);
 
-            if (!string.IsNullOrWhiteSpace(result.Response))
+            if (!result.Handled)
             {
-                SetPresentation(GlanceAssistantState.ProcessingCommand, result.Response, result.Handled ? "Done" : "Command not recognised");
+                await PromptForAnotherCommandAsync(cancellationToken);
+                return;
             }
 
-            await Task.Delay(result.Handled ? 700 : 1300, cancellationToken);
-            await ReturnToWakeRecognitionAsync(result.Handled ? "Listening" : "Try another command");
+            SetPresentation(GlanceAssistantState.ProcessingCommand,
+                string.IsNullOrWhiteSpace(result.Response) ? command : result.Response,
+                "Done");
+            await Task.Delay(700, cancellationToken);
+            await ReturnToWakeRecognitionAsync("Listening");
         }
         catch (OperationCanceledException)
         {
@@ -416,25 +729,95 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         catch (Exception exception)
         {
             logger.LogError(exception, "Failed to execute assistant command {AssistantCommand}", command);
-            SetPresentation(GlanceAssistantState.Error, "Command recognition stopped", exception.Message);
+
+            if (providerCancellationTokenSource?.IsCancellationRequested == false)
+            {
+                await PromptForAnotherCommandAsync(providerCancellationTokenSource.Token);
+            }
         }
+    }
+
+    private async Task PromptForAnotherCommandAsync(CancellationToken cancellationToken)
+    {
+        if (transcriptionSession is not null && listeningCancellationTokenSource?.IsCancellationRequested == false)
+        {
+            BeginCommandWindow("I didn't understand that, try again", "Listening for command");
+            return;
+        }
+
+        await ReturnToWakeRecognitionAsync("Listening");
     }
 
     private async Task ReturnToWakeRecognitionAsync(string status)
     {
-        await StopCommandRecognitionAsync();
-
-        if (providerCancellationTokenSource?.IsCancellationRequested != false)
+        if (Interlocked.CompareExchange(ref isReturningToWakeRecognition, 1, 0) != 0)
         {
             return;
         }
 
-        await StartWakeRecognitionAsync();
-        SetPresentation(GlanceAssistantState.ListeningForWakeWord, "Say “Glance” or “Hey Glance”", status);
+        try
+        {
+            await StopCommandRecognitionAsync();
+
+            if (providerCancellationTokenSource?.IsCancellationRequested != false)
+            {
+                return;
+            }
+
+            await StartWakeRecognitionWithRetryAsync();
+            SetPresentation(GlanceAssistantState.ListeningForWakeWord, "Say “Glance” or “Hey Glance”", status);
+        }
+        catch (OperationCanceledException) when (providerCancellationTokenSource?.IsCancellationRequested != false)
+        {
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Failed to return to wake recognition");
+            SetPresentation(GlanceAssistantState.Preparing, "Voice assistant is recovering", "Restarting wake recognition");
+        }
+        finally
+        {
+            Interlocked.Exchange(ref isReturningToWakeRecognition, 0);
+        }
+    }
+
+    private async Task StartWakeRecognitionWithRetryAsync()
+    {
+        Exception? failure = null;
+
+        for (int attempt = 1; attempt <= WakeRecognitionRestartAttempts; attempt++)
+        {
+            try
+            {
+                await RunOnDispatcherAsync(async () =>
+                {
+                    await StopWakeRecognitionAsync();
+                    await StartWakeRecognitionAsync();
+                });
+                return;
+            }
+            catch (OperationCanceledException) when (providerCancellationTokenSource?.IsCancellationRequested != false)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                failure = exception;
+                logger.LogWarning(exception, "Wake recognition restart attempt {WakeRecognitionAttempt} failed", attempt);
+
+                if (attempt < WakeRecognitionRestartAttempts)
+                {
+                    await Task.Delay(attempt * 250, providerCancellationTokenSource?.Token ?? CancellationToken.None);
+                }
+            }
+        }
+
+        throw new InvalidOperationException("Windows wake recognition could not be restarted", failure);
     }
 
     private async Task StopCommandRecognitionAsync()
     {
+        CancelPendingUtterance();
         CancellationTokenSource? cancellationTokenSource = listeningCancellationTokenSource;
         listeningCancellationTokenSource = null;
         LiveAudioTranscriptionSession? session = transcriptionSession;
@@ -500,6 +883,24 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
 
     private void Dispatch(Action action) => dispatcher.Dispatch(action);
 
+    private Task RunOnDispatcherAsync(Func<Task> action)
+    {
+        TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        dispatcher.Dispatch(async () =>
+        {
+            try
+            {
+                await action();
+                completion.TrySetResult();
+            }
+            catch (Exception exception)
+            {
+                completion.TrySetException(exception);
+            }
+        });
+        return completion.Task;
+    }
+
     private static bool HasPackageIdentity()
     {
         try
@@ -525,7 +926,13 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         private WasapiCapture? capture;
         private Task? capturePumpTask;
         private bool isAttaching;
+        private Exception? recordingFailure;
+        private int isRecording;
         private BufferedWaveProvider? sourceBuffer;
+
+        public Exception? Failure => recordingFailure ?? capturePumpTask?.Exception?.GetBaseException();
+
+        public bool IsHealthy => Volatile.Read(ref isRecording) != 0 && capturePumpTask?.IsCompleted == false;
 
         public long CreateCheckpoint()
         {
@@ -544,8 +951,19 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             sampleProvider = sampleProvider.WaveFormat.SampleRate == 16000 ? sampleProvider : new WdlResamplingSampleProvider(sampleProvider, 16000);
             IWaveProvider waveProvider = new SampleToWaveProvider16(sampleProvider);
             capture.DataAvailable += HandleDataAvailable;
+            capture.RecordingStopped += HandleRecordingStopped;
             capturePumpTask = Task.Run(() => PumpCaptureAsync(waveProvider, captureCancellationTokenSource.Token), captureCancellationTokenSource.Token);
-            capture.StartRecording();
+            Volatile.Write(ref isRecording, 1);
+
+            try
+            {
+                capture.StartRecording();
+            }
+            catch
+            {
+                Volatile.Write(ref isRecording, 0);
+                throw;
+            }
         }
 
         public async Task AttachAsync(LiveAudioTranscriptionSession session, long wakeBoundary, CancellationToken cancellationToken)
@@ -556,28 +974,45 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             }
 
             long replayedSequence = wakeBoundary;
+            bool attached = false;
+            using CancellationTokenSource attachmentCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            attachmentCancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(5));
 
-            while (true)
+            try
             {
-                BufferedAudioChunk[] snapshot;
-
-                lock (gate)
+                while (true)
                 {
-                    snapshot = [.. bufferedAudio.Where(chunk => chunk.Sequence > replayedSequence)];
+                    BufferedAudioChunk[] snapshot;
 
-                    if (snapshot.Length == 0)
+                    lock (gate)
                     {
-                        activeSession = session;
-                        activeSessionCancellationToken = cancellationToken;
-                        isAttaching = false;
-                        return;
+                        snapshot = [.. bufferedAudio.Where(chunk => chunk.Sequence > replayedSequence)];
+
+                        if (snapshot.Length == 0)
+                        {
+                            activeSession = session;
+                            activeSessionCancellationToken = cancellationToken;
+                            isAttaching = false;
+                            attached = true;
+                            return;
+                        }
+                    }
+
+                    foreach (BufferedAudioChunk chunk in snapshot)
+                    {
+                        await session.AppendAsync(chunk.Audio, attachmentCancellationTokenSource.Token);
+                        replayedSequence = chunk.Sequence;
                     }
                 }
-
-                foreach (BufferedAudioChunk chunk in snapshot)
+            }
+            finally
+            {
+                if (!attached)
                 {
-                    await session.AppendAsync(chunk.Audio, cancellationToken);
-                    replayedSequence = chunk.Sequence;
+                    lock (gate)
+                    {
+                        isAttaching = false;
+                    }
                 }
             }
         }
@@ -599,6 +1034,8 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             if (capture is not null)
             {
                 capture.DataAvailable -= HandleDataAvailable;
+                capture.RecordingStopped -= HandleRecordingStopped;
+                Volatile.Write(ref isRecording, 0);
 
                 try
                 {
@@ -615,7 +1052,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
                 {
                     await capturePumpTask;
                 }
-                catch (OperationCanceledException)
+                catch (Exception)
                 {
                 }
             }
@@ -630,6 +1067,12 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             {
                 sourceBuffer?.AddSamples(args.Buffer, 0, args.BytesRecorded);
             }
+        }
+
+        private void HandleRecordingStopped(object? sender, StoppedEventArgs args)
+        {
+            recordingFailure = args.Exception ?? new InvalidOperationException("Windows stopped assistant audio capture");
+            Volatile.Write(ref isRecording, 0);
         }
 
         private async Task PumpCaptureAsync(IWaveProvider waveProvider, CancellationToken cancellationToken)
@@ -677,6 +1120,17 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
                 }
                 catch (OperationCanceledException) when (sessionCancellationToken.IsCancellationRequested)
                 {
+                }
+                catch (Exception)
+                {
+                    lock (gate)
+                    {
+                        if (ReferenceEquals(activeSession, session))
+                        {
+                            activeSession = null;
+                            activeSessionCancellationToken = default;
+                        }
+                    }
                 }
             }
         }

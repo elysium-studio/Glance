@@ -15,8 +15,6 @@
             <Grid x:Name="ParticleHost" />
             <Grid x:Name="CloudLayerHost" />
             <Canvas x:Name="LightningHost" />
-            <Rectangle Fill="#26071324" />
-            <Rectangle Opacity="0.22" Fill="{ThemeResource AcrylicInAppFillColorDefaultBrush}" />
         </Grid>
     </Border>
 </UserControl>

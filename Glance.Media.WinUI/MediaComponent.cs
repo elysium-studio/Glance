@@ -18,6 +18,7 @@ public sealed partial class MediaComponent :
     IGlanceComponent,
     IGlanceActionProvider,
     IGlanceBackgroundComponent,
+    IGlanceFooterAppearanceComponent,
     IGlanceConnectedAnimationComponent,
     IGlanceAttentionComponent,
     IDisposable
@@ -85,11 +86,30 @@ public sealed partial class MediaComponent :
 
     public object ExpandedContent { get; }
 
+    public uint? FooterForegroundColor
+    {
+        get
+        {
+            if (!viewModel.HasSession || viewModel.AmbientArtwork is null)
+            {
+                return null;
+            }
+
+            Windows.UI.Color foreground = MediaAccentPalette.GetForeground(viewModel.AccentColor);
+            return ((uint)foreground.A << 24) |
+                ((uint)foreground.R << 16) |
+                ((uint)foreground.G << 8) |
+                foreground.B;
+        }
+    }
+
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
 
     public bool IsAttentionEnabledByDefault => false;
+
+    public event EventHandler? FooterAppearanceChanged;
 
     public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
     [
@@ -320,6 +340,13 @@ public sealed partial class MediaComponent :
         if (args.PropertyName == nameof(MediaViewModel.ShowAudioVisualization))
         {
             UpdateAudioCaptureState();
+        }
+
+        if (args.PropertyName is nameof(MediaViewModel.AccentColor) or
+            nameof(MediaViewModel.AmbientArtwork) or
+            nameof(MediaViewModel.HasSession))
+        {
+            FooterAppearanceChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 

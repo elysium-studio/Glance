@@ -15,6 +15,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.UI;
 using Windows.Storage;
 
 namespace Glance.Shell.WinUI;
@@ -22,6 +23,7 @@ namespace Glance.Shell.WinUI;
 public sealed partial class DesktopIslandView :
     DesktopIsland
 {
+    private const string AssistantContinuumAnimationKey = "DesktopIsland.Assistant.Continuum";
     private const int AttentionExpansionDurationMs = 4000;
     private const int ContextualDragExitDelayMs = 160;
     private const int InteractionExitDelayMs = 240;
@@ -37,8 +39,12 @@ public sealed partial class DesktopIslandView :
     private int contextualDragSession;
     private IGlanceExpansionLockComponent? expansionLockComponent;
     private IGlanceInteractionAwareComponent? interactionComponent;
+    private IGlanceFooterAppearanceComponent? footerAppearanceComponent;
     private bool isPointerOverIsland;
     private bool assistantExpandedIsland;
+    private bool isAssistantExpansionLockActive;
+    private bool isAssistantPresentationRequested;
+    private int assistantPresentationTransition;
     private int previousIndex;
     private bool skipNextConnectedExpansion;
 
@@ -79,7 +85,7 @@ public sealed partial class DesktopIslandView :
         isAvailable ? Visibility.Visible : Visibility.Collapsed;
 
     public double ToCompactWidth(bool isAssistantAvailable) =>
-        isAssistantAvailable ? 264 : 228;
+        isAssistantAvailable ? 268 : 228;
 
     public object? ToBackgroundContent(IGlanceComponent? component) =>
         (component as IGlanceBackgroundComponent)?.BackgroundContent;
@@ -91,9 +97,12 @@ public sealed partial class DesktopIslandView :
         ViewModel.AttentionReceived += HandleAttentionReceived;
         ViewModel.Assistant.PropertyChanged += HandleAssistantPropertyChanged;
         ViewModel.Assistant.WakeWordDetected += HandleWakeWordDetected;
+        ActualThemeChanged += HandleActualThemeChanged;
         (ViewModel.IntentService as GlanceIntentService)?.SetPresentationTargetProvider(GetIntentPresentationTarget);
         Deactivated += HandleIslandDeactivated;
         DispatcherQueue.TryEnqueue(InitializeExpansionState);
+        UpdateFooterAppearanceComponent();
+        ApplyAssistantPresentation(ViewModel.Assistant.IsOverlayVisible);
         StartStartupAttentionTimer();
     }
 
@@ -109,15 +118,19 @@ public sealed partial class DesktopIslandView :
         ViewModel.AttentionReceived -= HandleAttentionReceived;
         ViewModel.Assistant.PropertyChanged -= HandleAssistantPropertyChanged;
         ViewModel.Assistant.WakeWordDetected -= HandleWakeWordDetected;
+        ActualThemeChanged -= HandleActualThemeChanged;
         (ViewModel.IntentService as GlanceIntentService)?.SetPresentationTargetProvider(null);
         Deactivated -= HandleIslandDeactivated;
         ReleasePressedButton();
         ClearExpansionLockComponent();
+        ClearFooterAppearanceComponent();
         EndComponentInteraction();
         StopAttentionExpansionTimer();
         StopContextualDragExitTimer();
         StopInteractionExitTimer();
         StopStartupAttentionTimer();
+        isAssistantExpansionLockActive = false;
+        assistantPresentationTransition++;
     }
 
     private void StartStartupAttentionTimer()
@@ -162,30 +175,7 @@ public sealed partial class DesktopIslandView :
         });
 
     private void HandleWakeWordDetected(object? sender, EventArgs args) =>
-        DispatcherQueue.TryEnqueue(() =>
-        {
-            Reveal();
-            assistantExpandedIsland = !ViewModel.IsExpanded;
-            ViewModel.IsExpanded = true;
-            DispatcherQueue.TryEnqueue(PlayAssistantOverlayEntrance);
-        });
-
-    private void PlayAssistantOverlayEntrance()
-    {
-        if (!AssistantOverlayPresenter.IsLoaded ||
-            AssistantOverlayPresenter.ActualWidth <= 0 ||
-            AssistantOverlayPresenter.ActualHeight <= 0)
-        {
-            return;
-        }
-
-        GeneralTransform transform = ExpandedAssistantIndicator.TransformToVisual(AssistantOverlayPresenter);
-        Windows.Foundation.Point indicatorOrigin = transform.TransformPoint(new Windows.Foundation.Point(ExpandedAssistantIndicator.ActualWidth / 2,
-            ExpandedAssistantIndicator.ActualHeight / 2));
-        float originX = (float)Math.Clamp(indicatorOrigin.X / AssistantOverlayPresenter.ActualWidth, 0, 1);
-        float originY = (float)Math.Clamp(indicatorOrigin.Y / AssistantOverlayPresenter.ActualHeight, 0, 1);
-        FluentMotion.PlayZoomEntrance(AssistantOverlayPresenter, 0.08f, originX, originY);
-    }
+        DispatcherQueue.TryEnqueue(ShowAssistantPresentation);
 
     private void HandleAssistantPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
@@ -198,17 +188,212 @@ public sealed partial class DesktopIslandView :
         {
             if (ViewModel.Assistant.IsOverlayVisible)
             {
+                ShowAssistantPresentation();
                 return;
             }
 
-            if (assistantExpandedIsland && !isPointerOverIsland && !ViewModel.IsPinned)
-            {
-                ViewModel.IsExpanded = false;
-            }
-
-            assistantExpandedIsland = false;
+            HideAssistantPresentation();
         });
     }
+
+    private void ShowAssistantPresentation()
+    {
+        if (isAssistantPresentationRequested || !ViewModel.Assistant.IsOverlayVisible)
+        {
+            return;
+        }
+
+        isAssistantPresentationRequested = true;
+        assistantExpandedIsland = !ViewModel.IsExpanded;
+        PrepareAssistantContinuumAnimation(true);
+        isAssistantExpansionLockActive = true;
+        ApplyExpansionLock();
+        Reveal();
+        ViewModel.IsExpanded = true;
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            if (isAssistantPresentationRequested)
+            {
+                TransitionAssistantPresentation(true);
+            }
+        });
+    }
+
+    private void HideAssistantPresentation()
+    {
+        if (!isAssistantPresentationRequested)
+        {
+            return;
+        }
+
+        PrepareAssistantContinuumAnimation(false);
+        isAssistantPresentationRequested = false;
+        TransitionAssistantPresentation(false);
+    }
+
+    private void TransitionAssistantPresentation(bool showAssistant, bool allowLayoutRetry = true)
+    {
+        if (showAssistant != isAssistantPresentationRequested)
+        {
+            return;
+        }
+
+        int transition = ++assistantPresentationTransition;
+        FrameworkElement outgoing = showAssistant ? ExpandedModuleSurface : AssistantOverlayPresenter;
+        FrameworkElement incoming = showAssistant ? AssistantOverlayPresenter : ExpandedModuleSurface;
+        outgoing.Visibility = Visibility.Visible;
+        incoming.Visibility = Visibility.Visible;
+        UpdateLayout();
+
+        if (!showAssistant)
+        {
+            BackgroundContent = ToBackgroundContent(ViewModel.SelectedComponent);
+        }
+
+        if (!IsInElementTree(outgoing) ||
+            !IsInElementTree(incoming) ||
+            outgoing.ActualWidth <= 0 ||
+            outgoing.ActualHeight <= 0 ||
+            incoming.ActualWidth <= 0 ||
+            incoming.ActualHeight <= 0)
+        {
+            if (allowLayoutRetry)
+            {
+                DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+                {
+                    if (showAssistant == isAssistantPresentationRequested)
+                    {
+                        TransitionAssistantPresentation(showAssistant, false);
+                    }
+                });
+                return;
+            }
+
+            ApplyAssistantPresentation(showAssistant);
+
+            if (!showAssistant)
+            {
+                CompleteAssistantPresentationExit();
+            }
+
+            return;
+        }
+
+        outgoing.IsHitTestVisible = false;
+        incoming.IsHitTestVisible = false;
+        StartAssistantContinuumAnimation(showAssistant);
+        FrameworkElement? background = GetTemplateChild("PART_BackgroundContent") as FrameworkElement;
+        FluentMotion.PlayConnectedContentTransition(outgoing,
+            incoming,
+            background,
+            showAssistant,
+            () =>
+        {
+            if (transition != assistantPresentationTransition)
+            {
+                return;
+            }
+
+            ApplyAssistantPresentation(showAssistant);
+            if (background is not null)
+            {
+                FluentMotion.SetOpacity(background, 1);
+            }
+
+            if (!showAssistant)
+            {
+                CompleteAssistantPresentationExit();
+            }
+        });
+    }
+
+    private void ApplyAssistantPresentation(bool showAssistant)
+    {
+        isAssistantPresentationRequested = showAssistant;
+
+        if (showAssistant)
+        {
+            isAssistantExpansionLockActive = true;
+            ApplyExpansionLock();
+        }
+
+        FluentMotion.SetContentPresentationState(ExpandedModuleSurface, !showAssistant);
+        FluentMotion.SetContentPresentationState(AssistantOverlayPresenter, showAssistant);
+        ExpandedModuleSurface.Visibility = showAssistant ? Visibility.Collapsed : Visibility.Visible;
+        AssistantOverlayPresenter.Visibility = showAssistant ? Visibility.Visible : Visibility.Collapsed;
+        BackgroundContent = showAssistant ? null : ToBackgroundContent(ViewModel.SelectedComponent);
+    }
+
+    private void CompleteAssistantPresentationExit()
+    {
+        bool shouldCollapse = assistantExpandedIsland &&
+            !ViewModel.Assistant.IsResultPresentationActive &&
+            !isPointerOverIsland &&
+            !ViewModel.IsPinned;
+
+        isAssistantExpansionLockActive = false;
+        ApplyExpansionLock();
+
+        if (shouldCollapse)
+        {
+            ViewModel.IsExpanded = false;
+        }
+
+        assistantExpandedIsland = false;
+    }
+
+    private void PrepareAssistantContinuumAnimation(bool showAssistant)
+    {
+        FrameworkElement? source = showAssistant ? GetAssistantIndicatorAnimationElement() : GetAssistantOverlayAnimationElement();
+
+        if (source is null || !IsInElementTree(source))
+        {
+            return;
+        }
+
+        ConnectedAnimationService animationService = ConnectedAnimationService.GetForCurrentView();
+
+        try
+        {
+            ConnectedAnimation animation = animationService.PrepareToAnimate(AssistantContinuumAnimationKey, source);
+            animation.Configuration = showAssistant ?
+                new GravityConnectedAnimationConfiguration() :
+                new DirectConnectedAnimationConfiguration();
+        }
+        catch (ArgumentException)
+        {
+        }
+    }
+
+    private void StartAssistantContinuumAnimation(bool showAssistant)
+    {
+        FrameworkElement? destination = showAssistant ? GetAssistantOverlayAnimationElement() : GetAssistantIndicatorAnimationElement();
+        ConnectedAnimation? animation = ConnectedAnimationService.GetForCurrentView().GetAnimation(AssistantContinuumAnimationKey);
+
+        if (animation is null || destination is null || !IsInElementTree(destination))
+        {
+            animation?.Cancel();
+            return;
+        }
+
+        try
+        {
+            animation.TryStart(destination);
+        }
+        catch (ArgumentException)
+        {
+            animation.Cancel();
+        }
+    }
+
+    private FrameworkElement? GetAssistantIndicatorAnimationElement()
+    {
+        ContentControl indicator = ViewModel.IsExpanded ? ExpandedAssistantIndicator : CompactAssistantIndicator;
+        return (indicator.Content as IGlanceAssistantConnectedAnimationView)?.ConnectedAnimationElement as FrameworkElement;
+    }
+
+    private FrameworkElement? GetAssistantOverlayAnimationElement() =>
+        (AssistantOverlayPresenter.Content as IGlanceAssistantConnectedAnimationView)?.ConnectedAnimationElement as FrameworkElement;
 
     private GlanceScreenRectangle? GetIntentPresentationTarget()
     {
@@ -273,6 +458,13 @@ public sealed partial class DesktopIslandView :
         {
             UpdateExpansionLockComponent();
             UpdateComponentInteraction();
+            UpdateFooterAppearanceComponent();
+
+            if (isAssistantPresentationRequested)
+            {
+                BackgroundContent = null;
+            }
+
             return;
         }
 
@@ -320,6 +512,70 @@ public sealed partial class DesktopIslandView :
             FluentMotion.PlayHorizontalPageTransition(CompactPresenter, direction);
             FluentMotion.PlayHorizontalPageTransition(ExpandedPresenter, direction);
         });
+    }
+
+    private void HandleActualThemeChanged(FrameworkElement sender, object args) =>
+        ApplyFooterAppearance();
+
+    private void UpdateFooterAppearanceComponent()
+    {
+        IGlanceFooterAppearanceComponent? selectedComponent =
+            ViewModel.SelectedComponent as IGlanceFooterAppearanceComponent;
+
+        if (ReferenceEquals(footerAppearanceComponent, selectedComponent))
+        {
+            ApplyFooterAppearance();
+            return;
+        }
+
+        ClearFooterAppearanceComponent();
+        footerAppearanceComponent = selectedComponent;
+
+        if (footerAppearanceComponent is not null)
+        {
+            footerAppearanceComponent.FooterAppearanceChanged += HandleFooterAppearanceChanged;
+        }
+
+        ApplyFooterAppearance();
+    }
+
+    private void ClearFooterAppearanceComponent()
+    {
+        if (footerAppearanceComponent is not null)
+        {
+            footerAppearanceComponent.FooterAppearanceChanged -= HandleFooterAppearanceChanged;
+            footerAppearanceComponent = null;
+        }
+    }
+
+    private void HandleFooterAppearanceChanged(object? sender, EventArgs args) =>
+        DispatcherQueue.TryEnqueue(ApplyFooterAppearance);
+
+    private void ApplyFooterAppearance()
+    {
+        uint value = footerAppearanceComponent?.FooterForegroundColor ??
+            (ActualTheme == ElementTheme.Light ? 0xC5000000u : 0xC5FFFFFFu);
+        Color color = Color.FromArgb((byte)(value >> 24),
+            (byte)(value >> 16),
+            (byte)(value >> 8),
+            (byte)value);
+
+        SolidColorBrush? foregroundBrush = Resources["GlanceFooterForegroundBrush"] as SolidColorBrush;
+
+        if (foregroundBrush is not null)
+        {
+            foregroundBrush.Color = color;
+        }
+
+        CompactAssistantIndicator.Foreground = footerAppearanceComponent?.FooterForegroundColor is not null &&
+            foregroundBrush is not null ?
+            foregroundBrush :
+            (Brush)Resources["GlanceDefaultAssistantIndicatorForegroundBrush"];
+
+        if (Resources["GlanceFooterDividerBrush"] is SolidColorBrush dividerBrush)
+        {
+            dividerBrush.Color = Color.FromArgb(52, color.R, color.G, color.B);
+        }
     }
 
     private void HandleIslandPointerEntered(object sender, PointerRoutedEventArgs args)
@@ -483,14 +739,16 @@ public sealed partial class DesktopIslandView :
             expansionLockComponent = null;
         }
 
-        IsExpansionLocked = ViewModel.IsPinned;
+        ApplyExpansionLock();
     }
 
     private void HandleExpansionLockChanged(object? sender, EventArgs args) =>
         DispatcherQueue.TryEnqueue(ApplyExpansionLock);
 
     private void ApplyExpansionLock() =>
-        IsExpansionLocked = ViewModel.IsPinned || expansionLockComponent?.IsExpansionLocked == true;
+        IsExpansionLocked = ViewModel.IsPinned ||
+            isAssistantExpansionLockActive ||
+            expansionLockComponent?.IsExpansionLocked == true;
 
     private void HandleIslandDeactivated(object? sender, EventArgs args)
     {

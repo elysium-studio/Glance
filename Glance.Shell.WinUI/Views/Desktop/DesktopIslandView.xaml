@@ -21,6 +21,11 @@
     PointerEntered="{x:Bind HandleIslandPointerEntered}"
     PointerExited="{x:Bind HandleIslandPointerExited}"
     PointerWheelChanged="{x:Bind HandlePointerWheelChanged}">
+    <Controls:DesktopIsland.Resources>
+        <StaticResource x:Key="GlanceDefaultAssistantIndicatorForegroundBrush" ResourceKey="AccentTextFillColorPrimaryBrush" />
+        <SolidColorBrush x:Key="GlanceFooterDividerBrush" Color="#33FFFFFF" />
+        <SolidColorBrush x:Key="GlanceFooterForegroundBrush" Color="#FFF8FAFC" />
+    </Controls:DesktopIsland.Resources>
     <Controls:DesktopIsland.CompactContent>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -33,109 +38,130 @@
             <ContentControl
                 x:Name="CompactAssistantIndicator"
                 Grid.Column="1"
-                Margin="4,0,4,0"
+                Margin="4,0,8,0"
                 VerticalAlignment="Center"
                 Content="{x:Bind ViewModel.Assistant.CompactIndicatorContent, Mode=OneWay}"
+                Foreground="{StaticResource GlanceDefaultAssistantIndicatorForegroundBrush}"
                 Visibility="{x:Bind WhenAvailable(ViewModel.Assistant.IsAvailable), Mode=OneWay}" />
         </Grid>
     </Controls:DesktopIsland.CompactContent>
     <Controls:DesktopIsland.ExpandedContent>
         <Grid>
-            <ContentPresenter
-                x:Name="ExpandedPresenter"
-                Content="{x:Bind ViewModel.SelectedComponent.ExpandedContent, Mode=OneWay}" />
-            <StackPanel
-                Margin="0,0,0,4"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Bottom"
-                Orientation="Horizontal"
-                Spacing="6">
-                <PipsPager
+            <Grid x:Name="ExpandedModuleSurface">
+                <ContentPresenter
+                    x:Name="ExpandedPresenter"
+                    Content="{x:Bind ViewModel.SelectedComponent.ExpandedContent, Mode=OneWay}" />
+                <StackPanel
+                    x:Name="Footer"
                     Height="24"
-                    IsEnabled="{x:Bind ViewModel.HasMultipleComponents, Mode=OneWay}"
-                    MaxVisiblePips="5"
-                    NextButtonVisibility="VisibleOnPointerOver"
-                    NumberOfPages="{x:Bind ViewModel.ComponentCount, Mode=OneWay}"
-                    PreviousButtonVisibility="VisibleOnPointerOver"
-                    SelectedPageIndex="{x:Bind ViewModel.SelectedIndex, Mode=TwoWay}" />
-                <Border
-                    Width="1"
-                    Height="12"
-                    VerticalAlignment="Center"
-                    Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
-                <Button
-                    x:Uid="PinIslandButton"
-                    VerticalAlignment="Center"
-                    Click="{x:Bind ViewModel.TogglePinned}"
-                    Visibility="{x:Bind WhenNotPinned(ViewModel.IsPinned), Mode=OneWay}">
-                    <Button.Style>
-                        <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
-                            <Setter Property="Width" Value="24" />
-                            <Setter Property="Height" Value="24" />
-                            <Setter Property="Padding" Value="0" />
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="BorderThickness" Value="0" />
-                            <Setter Property="Content" Value="&#xE718;" />
-                            <Setter Property="CornerRadius" Value="6" />
-                            <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                            <Setter Property="FontSize" Value="12" />
-                            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
-                        </Style>
-                    </Button.Style>
-                </Button>
-                <ContentControl
-                    x:Name="ExpandedAssistantIndicator"
-                    Width="32"
-                    Height="32"
-                    VerticalAlignment="Center"
-                    Content="{x:Bind ViewModel.Assistant.ExpandedIndicatorContent, Mode=OneWay}"
-                    Visibility="{x:Bind WhenAvailable(ViewModel.Assistant.IsAvailable), Mode=OneWay}" />
-                <Button
-                    x:Uid="UnpinIslandButton"
-                    VerticalAlignment="Center"
-                    Click="{x:Bind ViewModel.TogglePinned}"
-                    Visibility="{x:Bind WhenPinned(ViewModel.IsPinned), Mode=OneWay}">
-                    <Button.Style>
-                        <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
-                            <Setter Property="Width" Value="24" />
-                            <Setter Property="Height" Value="24" />
-                            <Setter Property="Padding" Value="0" />
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="BorderThickness" Value="0" />
-                            <Setter Property="Content" Value="&#xE77A;" />
-                            <Setter Property="CornerRadius" Value="6" />
-                            <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                            <Setter Property="FontSize" Value="12" />
-                            <Setter Property="Foreground" Value="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                        </Style>
-                    </Button.Style>
-                </Button>
-                <Button
-                    x:Uid="SettingsButton"
-                    VerticalAlignment="Center"
-                    Click="{x:Bind ViewModel.NavigateToSettings}">
-                    <Button.Style>
-                        <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
-                            <Setter Property="Width" Value="24" />
-                            <Setter Property="Height" Value="24" />
-                            <Setter Property="Padding" Value="0" />
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="BorderThickness" Value="0" />
-                            <Setter Property="Content" Value="&#xE713;" />
-                            <Setter Property="CornerRadius" Value="6" />
-                            <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                            <Setter Property="FontSize" Value="12" />
-                            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
-                        </Style>
-                    </Button.Style>
-                </Button>
-            </StackPanel>
+                    Margin="0,0,0,4"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Orientation="Horizontal"
+                    Spacing="6">
+                    <PipsPager
+                        x:Name="ComponentPager"
+                        Height="24"
+                        Foreground="{StaticResource GlanceFooterForegroundBrush}"
+                        IsEnabled="{x:Bind ViewModel.HasMultipleComponents, Mode=OneWay}"
+                        MaxVisiblePips="5"
+                        NextButtonVisibility="VisibleOnPointerOver"
+                        NumberOfPages="{x:Bind ViewModel.ComponentCount, Mode=OneWay}"
+                        PreviousButtonVisibility="VisibleOnPointerOver"
+                        SelectedPageIndex="{x:Bind ViewModel.SelectedIndex, Mode=TwoWay}">
+                        <PipsPager.Resources>
+                            <StaticResource x:Key="PipsPagerNavigationButtonForeground" ResourceKey="GlanceFooterForegroundBrush" />
+                            <StaticResource x:Key="PipsPagerNavigationButtonForegroundDisabled" ResourceKey="GlanceFooterForegroundBrush" />
+                            <StaticResource x:Key="PipsPagerNavigationButtonForegroundPointerOver" ResourceKey="GlanceFooterForegroundBrush" />
+                            <StaticResource x:Key="PipsPagerNavigationButtonForegroundPressed" ResourceKey="GlanceFooterForegroundBrush" />
+                            <StaticResource x:Key="PipsPagerSelectionIndicatorForeground" ResourceKey="GlanceFooterForegroundBrush" />
+                            <StaticResource x:Key="PipsPagerSelectionIndicatorForegroundDisabled" ResourceKey="GlanceFooterForegroundBrush" />
+                            <StaticResource x:Key="PipsPagerSelectionIndicatorForegroundPointerOver" ResourceKey="GlanceFooterForegroundBrush" />
+                            <StaticResource x:Key="PipsPagerSelectionIndicatorForegroundPressed" ResourceKey="GlanceFooterForegroundBrush" />
+                            <StaticResource x:Key="PipsPagerSelectionIndicatorForegroundSelected" ResourceKey="GlanceFooterForegroundBrush" />
+                        </PipsPager.Resources>
+                    </PipsPager>
+                    <Border
+                        Width="1"
+                        Height="12"
+                        VerticalAlignment="Center"
+                        Background="{StaticResource GlanceFooterDividerBrush}" />
+                    <Button
+                        x:Uid="PinIslandButton"
+                        VerticalAlignment="Center"
+                        Click="{x:Bind ViewModel.TogglePinned}"
+                        Visibility="{x:Bind WhenNotPinned(ViewModel.IsPinned), Mode=OneWay}">
+                        <Button.Style>
+                            <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                                <Setter Property="Width" Value="24" />
+                                <Setter Property="Height" Value="24" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Content" Value="&#xE718;" />
+                                <Setter Property="CornerRadius" Value="6" />
+                                <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                                <Setter Property="FontSize" Value="12" />
+                                <Setter Property="Foreground" Value="{StaticResource GlanceFooterForegroundBrush}" />
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <ContentControl
+                        x:Name="ExpandedAssistantIndicator"
+                        Width="24"
+                        Height="24"
+                        VerticalAlignment="Center"
+                        Content="{x:Bind ViewModel.Assistant.ExpandedIndicatorContent, Mode=OneWay}"
+                        Foreground="{StaticResource GlanceFooterForegroundBrush}"
+                        Visibility="{x:Bind WhenAvailable(ViewModel.Assistant.IsAvailable), Mode=OneWay}" />
+                    <Button
+                        x:Uid="UnpinIslandButton"
+                        VerticalAlignment="Center"
+                        Click="{x:Bind ViewModel.TogglePinned}"
+                        Visibility="{x:Bind WhenPinned(ViewModel.IsPinned), Mode=OneWay}">
+                        <Button.Style>
+                            <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                                <Setter Property="Width" Value="24" />
+                                <Setter Property="Height" Value="24" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Content" Value="&#xE77A;" />
+                                <Setter Property="CornerRadius" Value="6" />
+                                <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                                <Setter Property="FontSize" Value="12" />
+                                <Setter Property="Foreground" Value="{StaticResource GlanceFooterForegroundBrush}" />
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button
+                        x:Uid="SettingsButton"
+                        VerticalAlignment="Center"
+                        Click="{x:Bind ViewModel.NavigateToSettings}">
+                        <Button.Style>
+                            <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                                <Setter Property="Width" Value="24" />
+                                <Setter Property="Height" Value="24" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Content" Value="&#xE713;" />
+                                <Setter Property="CornerRadius" Value="6" />
+                                <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                                <Setter Property="FontSize" Value="12" />
+                                <Setter Property="Foreground" Value="{StaticResource GlanceFooterForegroundBrush}" />
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+            </Grid>
             <ContentControl
                 x:Name="AssistantOverlayPresenter"
                 HorizontalContentAlignment="Stretch"
+                IsHitTestVisible="False"
                 VerticalContentAlignment="Stretch"
                 Content="{x:Bind ViewModel.Assistant.OverlayContent, Mode=OneWay}"
-                Visibility="{x:Bind WhenAvailable(ViewModel.Assistant.IsOverlayVisible), Mode=OneWay}" />
+                Visibility="Collapsed" />
         </Grid>
     </Controls:DesktopIsland.ExpandedContent>
 </Controls:DesktopIsland>
