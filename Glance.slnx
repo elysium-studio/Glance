@@ -240,4 +240,13 @@
   <Project Path="Glance.Weather.Tests/Glance.Weather.Tests.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.WorldClock.WinUI/Glance.WorldClock.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.WorldClock/Glance.WorldClock.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.WorldClock.Tests/Glance.WorldClock.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
 </Solution>

@@ -123,6 +123,44 @@ public sealed class ModulePreferenceServiceTests
         Assert.False(service.IsAttentionEnabled(component.Id));
     }
 
+    [Fact]
+    public async Task ModuleOrderIsPersistedAndUsedForActiveComponents()
+    {
+        GlanceSettings settings = new();
+        TestWritableOptions writer = new(settings);
+        TestComponent clipboard = new("Clipboard");
+        TestComponent media = new("Media");
+        TestComponent weather = new("Weather");
+        ModulePreferenceService service = new([clipboard, media, weather], settings, writer);
+
+        await service.SetOrderAsync([weather.Id, clipboard.Id, media.Id]);
+
+        Assert.Equal([weather.Id, clipboard.Id, media.Id], service.GetPreferences().Select(item => item.Id));
+        Assert.Equal([weather, clipboard, media], service.GetActiveComponents());
+        Assert.Equal(1, writer.WriteCount);
+    }
+
+    [Fact]
+    public async Task ReorderingLoadedModulesPreservesAnUnloadedModulesPosition()
+    {
+        GlanceSettings settings = new()
+        {
+            Modules =
+            [
+                new GlanceModulePreference { Id = "Clipboard" },
+                new GlanceModulePreference { Id = "ThirdParty" },
+                new GlanceModulePreference { Id = "Weather" }
+            ]
+        };
+        TestWritableOptions writer = new(settings);
+        ModulePreferenceService service = new([new TestComponent("Clipboard"), new TestComponent("Weather")], settings, writer);
+
+        await service.SetOrderAsync(["Weather", "Clipboard"]);
+
+        Assert.Equal(["Weather", "ThirdParty", "Clipboard"], settings.Modules.Select(item => item.Id));
+        Assert.Equal(1, writer.WriteCount);
+    }
+
     private sealed class TestComponent(string id) :
         IGlanceComponent
     {

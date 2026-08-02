@@ -3,13 +3,16 @@ using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Glance.Stopwatch.WinUI;
 
 public sealed partial class StopwatchComponent :
     IGlanceComponent,
+    IGlanceActionProvider,
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
@@ -65,6 +68,40 @@ public sealed partial class StopwatchComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
+    [
+        new GlanceActionDescriptor("Stopwatch.Start", Id, "Start stopwatch", "Start or resume the stopwatch."),
+        new GlanceActionDescriptor("Stopwatch.Pause", Id, "Pause stopwatch", "Pause the running stopwatch."),
+        new GlanceActionDescriptor("Stopwatch.Reset", Id, "Reset stopwatch", "Reset the stopwatch to zero.")
+    ];
+
+    public bool IsAvailable(string actionId) =>
+        actionId switch
+        {
+            "Stopwatch.Start" => !viewModel.IsRunning,
+            "Stopwatch.Pause" => viewModel.IsRunning,
+            _ => true
+        };
+
+    public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (request.ActionId is "Stopwatch.Start" or "Stopwatch.Pause")
+        {
+            viewModel.Toggle();
+        }
+        else if (request.ActionId == "Stopwatch.Reset")
+        {
+            viewModel.Reset();
+        }
+        else
+        {
+            return Task.FromResult(GlanceActionResult.Unavailable());
+        }
+
+        return Task.FromResult(GlanceActionResult.Success());
+    }
 
     public void Dispose()
     {

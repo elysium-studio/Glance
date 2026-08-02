@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>世界时钟</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>查看本地时间和世界主要城市的时间。</value></data>
+  <data name="LocalClock" xml:space="preserve"><value>本地</value></data>
+  <data name="LondonClock" xml:space="preserve"><value>伦敦</value></data>
+  <data name="NewYorkClock" xml:space="preserve"><value>纽约</value></data>
+  <data name="TokyoClock" xml:space="preserve"><value>东京</value></data>
+  <data name="SydneyClock" xml:space="preserve"><value>悉尼</value></data>
+  <data name="WorldClockTimeFormatSettingCard.Header" xml:space="preserve"><value>时间格式</value></data>
+  <data name="WorldClockTimeFormatSettingCard.Description" xml:space="preserve"><value>选择 12 小时制或 24 小时制。</value></data>
+  <data name="WorldClockTwentyFourHourOption.Content" xml:space="preserve"><value>24 小时制</value></data>
+  <data name="WorldClockTwelveHourOption.Content" xml:space="preserve"><value>12 小时制</value></data>
+</root>

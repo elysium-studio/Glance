@@ -12,6 +12,8 @@ public sealed class AudioSwitcherModule :
         services.AddSingleton<ModuleResourceTextLocalizer<AudioSwitcherModule>>();
         services.AddSingleton<IAudioDeviceService, WindowsAudioDeviceService>();
         services.AddSingleton(provider => new AudioSwitcherViewModel(provider.GetRequiredService<IAudioDeviceService>(), provider.GetRequiredService<ModuleResourceTextLocalizer<AudioSwitcherModule>>()));
-        services.AddSingleton<IGlanceComponent, AudioSwitcherComponent>();
+        services.AddSingleton<AudioSwitcherComponent>();
+        services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<AudioSwitcherComponent>());
+        services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<AudioSwitcherComponent>());
     }
 }

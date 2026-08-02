@@ -29,6 +29,7 @@ The island remains at the top or bottom of the desktop in a compact state, expan
 - **Presence** — maintain an active session by sending an F15 input pulse only after four minutes of genuine inactivity.
 - **Theme Switcher** — switch Windows between light and dark themes manually, or follow local sunrise and sunset with an animated radial transition.
 - **Weather** — view current OpenWeather conditions against composition-driven sun, cloud, rain, snow, fog, heat, and thunderstorm scenes.
+- **World Clock** — view local time and page through London, New York, Tokyo, and Sydney in 12-hour or 24-hour format.
 
 ## Architecture
 
@@ -82,6 +83,7 @@ The module's WinUI project must:
 - Reference the matching `Glance.Application.Abstractions` contract and expose a public, parameterless `IGlanceModule` implementation.
 - Implement `IGlanceAttentionComponent` on any component that requests attention. Glance then exposes a per-module permission and blocks requests when the user turns it off.
 - Implement `IGlanceIntent` to advertise an action to other modules, then register that implementation with `services.AddSingleton<IGlanceIntent, YourIntent>()`. The descriptor supplies the target component, localized label, description, glyph, and glyph font; `CanHandle` declares the supported content kinds.
+- Implement `IGlanceActionProvider` to advertise assistant-ready commands, typed parameters, confirmation requirements, availability, and whether a successful command should present the module in compact or expanded mode. Register the same component or a dedicated provider as `IGlanceActionProvider`. Glance automatically advertises `<ComponentId>.Show` for every enabled module, so an assistant can always bring a module into view even when it exposes no specialised commands.
 - Set `UseWinUI` to `true`.
 - Set `DisableEmbeddedXbf` to `false` so compiled XAML is embedded in the module PRI.
 - Set `CopyLocalLockFileAssemblies` to `true`, or otherwise include every private runtime dependency in the module directory.
@@ -89,6 +91,8 @@ The module's WinUI project must:
 - Keep shared Glance, Elysium, WinUI, and Microsoft Extensions contract assemblies out of the module bundle so the host-provided versions are used.
 
 Modules run with the same trust as Glance itself. Service isolation controls module lifetimes and registration collisions; it is not a security sandbox. Only install modules from sources you trust.
+
+The application-level `IGlanceActionService` is the provider-neutral boundary for a future voice or AI assistant. An assistant reads the currently available `GlanceActionDescriptor` values, chooses an action, supplies a JSON argument object, and invokes it through the service. Glance validates the request and confirmation state before dispatching it to the owning module on the UI thread. This keeps speech recognition, model selection, credentials, and natural-language interpretation outside the module contract.
 
 ## Settings
 

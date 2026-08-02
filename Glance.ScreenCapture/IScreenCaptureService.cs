@@ -6,6 +6,8 @@ public interface IScreenCaptureService
 
     Task<ScreenCaptureItem?> CaptureAsync(ScreenCaptureMode mode);
 
+    Task<ScreenCaptureItem?> CaptureWindowAsync(string windowName);
+
     IReadOnlyList<ScreenCaptureItem> GetRecentCaptures(int maximumCount);
 
     bool TryOpen(ScreenCaptureItem capture);

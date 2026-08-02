@@ -17,6 +17,8 @@ public sealed class ThemeSwitcherModule :
         services.AddSingleton<WindowsLocationService>();
         services.AddSingleton<IThemeController, WindowsThemeController>();
         services.AddSingleton(provider => new ThemeSwitcherViewModel(provider.GetRequiredService<IThemeController>(), provider.GetRequiredService<GlanceModuleOptions<ThemeSwitcherSettings>>().Current, provider.GetRequiredService<ModuleResourceTextLocalizer<ThemeSwitcherModule>>(), provider.GetRequiredService<IDispatcher>()));
-        services.AddSingleton<IGlanceComponent, ThemeSwitcherComponent>();
+        services.AddSingleton<ThemeSwitcherComponent>();
+        services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<ThemeSwitcherComponent>());
+        services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<ThemeSwitcherComponent>());
     }
 }

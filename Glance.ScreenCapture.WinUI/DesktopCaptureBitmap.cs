@@ -58,4 +58,4 @@ internal readonly record struct NativeRectangle(int X, int Y, int Width, int Hei
     }
 }
 
-internal readonly record struct CaptureSelectionCandidate(NativeRectangle Bounds, nint WindowHandle = 0);
+internal readonly record struct CaptureSelectionCandidate(NativeRectangle Bounds, nint WindowHandle = 0, string? WindowTitle = null);

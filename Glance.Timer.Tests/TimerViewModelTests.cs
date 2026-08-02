@@ -101,6 +101,17 @@ public sealed class TimerViewModelTests
     }
 
     [Fact]
+    public void StartReplacesTheDurationAndRunsTimer()
+    {
+        TimerViewModel viewModel = new();
+
+        viewModel.Start(TimeSpan.FromMinutes(24));
+
+        Assert.True(viewModel.IsRunning);
+        Assert.Equal("24:00", viewModel.RemainingText);
+    }
+
+    [Fact]
     public void Refresh_ReturnsFalseAndLeavesTextWhenStopped()
     {
         TimerViewModel viewModel = new();

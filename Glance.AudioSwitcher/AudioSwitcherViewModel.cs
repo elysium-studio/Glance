@@ -33,6 +33,22 @@ public sealed partial class AudioSwitcherViewModel :
 
     public ObservableCollection<AudioOutputDeviceItemViewModel> Devices { get; } = [];
 
+    public bool SelectDevice(string query)
+    {
+        AudioOutputDeviceItemViewModel? device = Devices.FirstOrDefault(device =>
+            string.Equals(device.Id, query, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(device.Name, query, StringComparison.OrdinalIgnoreCase)) ??
+            Devices.FirstOrDefault(device => device.Name.Contains(query, StringComparison.OrdinalIgnoreCase));
+
+        if (device is null)
+        {
+            return false;
+        }
+
+        SelectedDevice = device;
+        return string.Equals(selectedDeviceId, device.Id, StringComparison.OrdinalIgnoreCase);
+    }
+
     public void Refresh()
     {
         IReadOnlyList<AudioOutputDevice> devices = audioDeviceService.GetOutputDevices();

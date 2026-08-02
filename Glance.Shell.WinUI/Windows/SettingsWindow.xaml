@@ -28,7 +28,7 @@
             PaneDisplayMode="Left"
             SelectedItem="{x:Bind ViewModel.SelectedItem, Mode=TwoWay}"
             SelectionChanged="HandleNavigationSelectionChanged">
-            <NavigationView.FooterMenuItems>
+            <NavigationView.PaneFooter>
                 <NavigationViewItem
                     x:Name="QuitGlanceNavigationItem"
                     x:Uid="QuitGlanceNavigationItem"
@@ -39,7 +39,7 @@
                         <FontIcon Glyph="&#xE7E8;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-            </NavigationView.FooterMenuItems>
+            </NavigationView.PaneFooter>
             <NavigationView.Resources>
                 <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
                 <SolidColorBrush x:Key="NavigationViewContentGridBorderBrush" Color="Transparent" />
@@ -101,7 +101,11 @@
                         <DataTemplate x:DataType="Shell:ISettingViewModel">
                             <ListView
                                 Margin="36,0,36,36"
+                                AllowDrop="{x:Bind CanReorder}"
+                                CanDragItems="{x:Bind CanReorder}"
                                 ItemsSource="{x:Bind}"
+                                CanReorderItems="{x:Bind CanReorder}"
+                                DragItemsCompleted="HandleSettingItemsReordered"
                                 SelectionMode="None">
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">

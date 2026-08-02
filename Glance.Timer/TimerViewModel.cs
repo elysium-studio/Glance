@@ -63,6 +63,22 @@ public sealed partial class TimerViewModel :
 
     public event EventHandler? SessionStateChanged;
 
+    public void Pause()
+    {
+        if (IsRunning)
+        {
+            Toggle();
+        }
+    }
+
+    public void Resume()
+    {
+        if (!IsRunning)
+        {
+            Toggle();
+        }
+    }
+
     public void Toggle()
     {
         if (IsRunning)

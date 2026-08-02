@@ -3,12 +3,15 @@ using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Glance.ThemeSwitcher.WinUI;
 
 public sealed partial class ThemeSwitcherComponent :
     IGlanceComponent,
+    IGlanceActionProvider,
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
@@ -64,6 +67,33 @@ public sealed partial class ThemeSwitcherComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
+    [
+        new GlanceActionDescriptor("ThemeSwitcher.Light", Id, "Use light theme", "Switch Windows to the light theme."),
+        new GlanceActionDescriptor("ThemeSwitcher.Dark", Id, "Use dark theme", "Switch Windows to the dark theme."),
+        new GlanceActionDescriptor("ThemeSwitcher.Sunset", Id, "Use sunset theme schedule", "Switch automatically between light and dark themes around sunrise and sunset.")
+    ];
+
+    public async Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Task operation = request.ActionId switch
+        {
+            "ThemeSwitcher.Light" => viewModel.SelectLightAsync(),
+            "ThemeSwitcher.Dark" => viewModel.SelectDarkAsync(),
+            "ThemeSwitcher.Sunset" => viewModel.SelectSunsetAsync(),
+            _ => Task.CompletedTask
+        };
+
+        if (request.ActionId is not ("ThemeSwitcher.Light" or "ThemeSwitcher.Dark" or "ThemeSwitcher.Sunset"))
+        {
+            return GlanceActionResult.Unavailable();
+        }
+
+        await operation;
+        return GlanceActionResult.Success();
+    }
 
     public void Dispose()
     {

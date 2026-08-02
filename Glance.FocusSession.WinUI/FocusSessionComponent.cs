@@ -3,13 +3,16 @@ using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Glance.FocusSession.WinUI;
 
 public sealed partial class FocusSessionComponent :
     IGlanceComponent,
+    IGlanceActionProvider,
     IGlanceConnectedAnimationComponent,
     IGlanceAttentionComponent,
     IDisposable
@@ -77,6 +80,43 @@ public sealed partial class FocusSessionComponent :
     public object ExpandedAnimationElement { get; }
 
     public bool IsAttentionEnabledByDefault => true;
+
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
+    [
+        new GlanceActionDescriptor("FocusSession.Start", Id, "Start focus session", "Start or resume the focus session."),
+        new GlanceActionDescriptor("FocusSession.Pause", Id, "Pause focus session", "Pause the current focus session."),
+        new GlanceActionDescriptor("FocusSession.Skip", Id, "Skip focus interval", "Skip to the next focus or break interval."),
+        new GlanceActionDescriptor("FocusSession.Reset", Id, "Reset focus session", "Reset the focus session.")
+    ];
+
+    public bool IsAvailable(string actionId) =>
+        actionId switch
+        {
+            "FocusSession.Start" => !viewModel.IsRunning,
+            "FocusSession.Pause" => viewModel.IsRunning,
+            _ => true
+        };
+
+    public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        switch (request.ActionId)
+        {
+            case "FocusSession.Start" or "FocusSession.Pause":
+                viewModel.Toggle();
+                break;
+            case "FocusSession.Skip":
+                viewModel.Skip();
+                break;
+            case "FocusSession.Reset":
+                viewModel.Reset();
+                break;
+            default:
+                return Task.FromResult(GlanceActionResult.Unavailable());
+        }
+
+        return Task.FromResult(GlanceActionResult.Success());
+    }
 
     public void Dispose()
     {

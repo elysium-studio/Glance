@@ -2,11 +2,15 @@ using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Glance.ColorPicker.WinUI;
 
 public sealed partial class ColorPickerComponent :
     IGlanceComponent,
+    IGlanceActionProvider,
     IGlanceConnectedAnimationComponent,
     IGlanceAttentionComponent,
     IDisposable
@@ -60,6 +64,32 @@ public sealed partial class ColorPickerComponent :
     public object ExpandedAnimationElement { get; }
 
     public bool IsAttentionEnabledByDefault => true;
+
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
+    [
+        new GlanceActionDescriptor("ColorPicker.Start", Id, "Pick a colour", "Start the on-screen colour picker."),
+        new GlanceActionDescriptor("ColorPicker.Cancel", Id, "Cancel colour picker", "Cancel the active colour picker.")
+    ];
+
+    public bool IsAvailable(string actionId) =>
+        actionId switch
+        {
+            "ColorPicker.Start" => !viewModel.IsPicking,
+            "ColorPicker.Cancel" => viewModel.IsPicking,
+            _ => false
+        };
+
+    public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (request.ActionId is not ("ColorPicker.Start" or "ColorPicker.Cancel"))
+        {
+            return Task.FromResult(GlanceActionResult.Unavailable());
+        }
+
+        viewModel.Pick();
+        return Task.FromResult(GlanceActionResult.Success());
+    }
 
     public void Dispose()
     {

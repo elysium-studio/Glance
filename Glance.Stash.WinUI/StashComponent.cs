@@ -2,6 +2,7 @@ using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ namespace Glance.Stash.WinUI;
 
 public sealed partial class StashComponent :
     IGlanceComponent,
+    IGlanceActionProvider,
     IGlanceConnectedAnimationComponent,
     IGlanceContextAwareComponent,
     IGlanceIntent
@@ -61,6 +63,38 @@ public sealed partial class StashComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
+    [
+        new GlanceActionDescriptor("Stash.Add",
+            Id,
+            "Add to Stash",
+            "Save text or a web link in Stash.",
+            [
+                new GlanceActionParameterDescriptor("content", GlanceActionParameterType.String, "The text or web link to save."),
+                new GlanceActionParameterDescriptor("isLink", GlanceActionParameterType.Boolean, "Whether the content should be treated as a web link.", IsRequired: false)
+            ],
+            Presentation: GlanceActionPresentation.Expanded)
+    ];
+
+    public async Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (request.ActionId != "Stash.Add" || request.GetString("content") is not string content)
+        {
+            return GlanceActionResult.InvalidArguments();
+        }
+
+        StashItem? item = await AddAsync(content, request.GetBoolean("isLink") == true);
+
+        if (item is null)
+        {
+            return GlanceActionResult.InvalidArguments("The content is empty.");
+        }
+
+        repository.Save(item.ToEntry());
+        return GlanceActionResult.Success();
+    }
 
     public GlanceIntentDescriptor Descriptor => new("Stash.Share",
         Id,

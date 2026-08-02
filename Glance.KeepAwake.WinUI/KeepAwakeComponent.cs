@@ -2,12 +2,15 @@ using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Glance.KeepAwake.WinUI;
 
 public sealed partial class KeepAwakeComponent :
     IGlanceComponent,
+    IGlanceActionProvider,
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
@@ -51,6 +54,32 @@ public sealed partial class KeepAwakeComponent :
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
+    [
+        new GlanceActionDescriptor("KeepAwake.Start", Id, "Keep this PC awake", "Prevent Windows from sleeping."),
+        new GlanceActionDescriptor("KeepAwake.Stop", Id, "Allow this PC to sleep", "Stop keeping Windows awake.")
+    ];
+
+    public bool IsAvailable(string actionId) =>
+        actionId switch
+        {
+            "KeepAwake.Start" => !viewModel.IsActive,
+            "KeepAwake.Stop" => viewModel.IsActive,
+            _ => false
+        };
+
+    public async Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (request.ActionId is not ("KeepAwake.Start" or "KeepAwake.Stop"))
+        {
+            return GlanceActionResult.Unavailable();
+        }
+
+        await viewModel.ToggleAsync();
+        return GlanceActionResult.Success();
+    }
 
     public void Dispose()
     {

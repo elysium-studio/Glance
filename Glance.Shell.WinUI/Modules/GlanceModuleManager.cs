@@ -24,6 +24,7 @@ internal sealed class GlanceModuleManager :
     private readonly GlanceBridgeRouter bridgeRouter;
     private readonly GlanceAssistantCommandService assistantCommandService;
     private readonly GlanceAssistantService assistantService;
+    private readonly GlanceActionService actionService;
     private readonly GlanceIntentService intentService;
     private readonly List<GlanceModuleRuntime> runtimes = [];
     private readonly ModulePreferenceService preferences;
@@ -41,6 +42,7 @@ internal sealed class GlanceModuleManager :
         bridgeRouter = applicationServices.GetRequiredService<GlanceBridgeRouter>();
         assistantCommandService = applicationServices.GetRequiredService<GlanceAssistantCommandService>();
         assistantService = applicationServices.GetRequiredService<GlanceAssistantService>();
+        actionService = applicationServices.GetRequiredService<GlanceActionService>();
         intentService = applicationServices.GetRequiredService<GlanceIntentService>();
 
         Directory.CreateDirectory(GlanceModuleLoader.UserModulesDirectory);
@@ -133,6 +135,7 @@ internal sealed class GlanceModuleManager :
             }
 
             bridgeRouter.AddHandlers(moduleServices.GetServices<IGlanceApplicationMessageHandler>());
+            actionService.Register(moduleServices.GetServices<IGlanceActionProvider>());
             intentService.Register(moduleServices.GetServices<IGlanceIntent>());
             assistantCommandService.Register(assistantCommandHandlers);
             assistantService.Register(assistantProviders);
