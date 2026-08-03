@@ -12,6 +12,7 @@ namespace Glance.ScreenCapture.WinUI;
 public sealed partial class ScreenCaptureComponent :
     IGlanceComponent,
     IGlanceActionProvider,
+    IGlanceActionValidator,
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
@@ -73,18 +74,59 @@ public sealed partial class ScreenCaptureComponent :
 
     public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
     [
-        new GlanceActionDescriptor("ScreenCapture.Region", Id, "Capture a region", "Select and capture a region of the screen.", GlanceActionPresentation.Expanded),
+        new GlanceActionDescriptor("ScreenCapture.Region", Id, "Capture a region", "Select and capture a region of the screen.", GlanceActionPresentation.Expanded)
+        {
+            SemanticTags = ["screenshot", "screen shot", "screen capture", "snip", "region", "area", "selection"],
+            ExampleUtterances = ["take a screenshot of an area", "capture a region of my screen", "let me select an area to capture"]
+        },
         new GlanceActionDescriptor("ScreenCapture.Window",
             Id,
             "Capture a window",
-            "Capture a window, optionally selecting it by title.",
+            "Take a screenshot using the window picker, optionally selecting a window by title. Use this for a generic screenshot request when no region, display, or all-displays mode was requested.",
             [new GlanceActionParameterDescriptor("window", GlanceActionParameterType.String, "Part or all of the window title.", IsRequired: false)],
-            Presentation: GlanceActionPresentation.Expanded),
-        new GlanceActionDescriptor("ScreenCapture.Display", Id, "Capture a display", "Select and capture a display.", GlanceActionPresentation.Expanded),
+            Presentation: GlanceActionPresentation.Expanded)
+        {
+            SemanticTags = ["screenshot", "screen shot", "screens hot", "screen capture", "capture", "window", "app"],
+            ExampleUtterances = ["take a screenshot for me", "take a screen shot", "capture a window", "take a screenshot of Visual Studio"]
+        },
+        new GlanceActionDescriptor("ScreenCapture.Display", Id, "Capture a display", "Select and capture a display.", GlanceActionPresentation.Expanded)
+        {
+            SemanticTags = ["screenshot", "screen shot", "screen capture", "full screen", "display", "monitor"],
+            ExampleUtterances = ["take a full screen screenshot", "capture this display", "take a screenshot of my monitor"]
+        },
         new GlanceActionDescriptor("ScreenCapture.AllDisplays", Id, "Capture all displays", "Capture the complete desktop across all displays.", GlanceActionPresentation.Expanded)
+        {
+            SemanticTags = ["screenshot", "screen shot", "screen capture", "all displays", "all monitors", "entire desktop"],
+            ExampleUtterances = ["capture all displays", "take a screenshot of every monitor", "capture my entire desktop"]
+        }
     ];
 
     public bool IsAvailable(string actionId) => !viewModel.IsCapturing;
+
+    public Task<GlanceActionResult?> ValidateAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (!string.Equals(request.ActionId, "ScreenCapture.Window", StringComparison.OrdinalIgnoreCase))
+        {
+            return Task.FromResult<GlanceActionResult?>(null);
+        }
+
+        string? windowName = request.GetString("window");
+
+        if (string.IsNullOrWhiteSpace(windowName))
+        {
+            return Task.FromResult<GlanceActionResult?>(null);
+        }
+
+        int matches = screenCaptureService.CountMatchingWindows(windowName);
+
+        return Task.FromResult<GlanceActionResult?>(matches switch
+        {
+            0 => GlanceActionResult.InvalidArguments($"I couldn't find “{windowName}”.", "Try another window name."),
+            > 1 => GlanceActionResult.InvalidArguments($"Several windows match “{windowName}”.", "Try a more specific window name."),
+            _ => null
+        });
+    }
 
     public async Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
         CancellationToken cancellationToken = default)

@@ -71,9 +71,21 @@ public sealed partial class StopwatchComponent :
 
     public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
     [
-        new GlanceActionDescriptor("Stopwatch.Start", Id, "Start stopwatch", "Start or resume the stopwatch."),
-        new GlanceActionDescriptor("Stopwatch.Pause", Id, "Pause stopwatch", "Pause the running stopwatch."),
-        new GlanceActionDescriptor("Stopwatch.Reset", Id, "Reset stopwatch", "Reset the stopwatch to zero.")
+        new GlanceActionDescriptor("Stopwatch.Start", Id, "Start stopwatch", "Start or resume counting elapsed time without a countdown.")
+        {
+            SemanticTags = ["stopwatch", "elapsed time", "start timing", "count up", "resume"],
+            ExampleUtterances = ["start the stopwatch", "time me", "resume the stopwatch"]
+        },
+        new GlanceActionDescriptor("Stopwatch.Pause", Id, "Pause stopwatch", "Pause counting elapsed time.")
+        {
+            SemanticTags = ["stopwatch", "elapsed time", "pause", "stop timing"],
+            ExampleUtterances = ["pause the stopwatch", "stop timing me"]
+        },
+        new GlanceActionDescriptor("Stopwatch.Reset", Id, "Reset stopwatch", "Reset elapsed time to zero.")
+        {
+            SemanticTags = ["stopwatch", "elapsed time", "reset", "clear", "zero"],
+            ExampleUtterances = ["reset the stopwatch", "clear the elapsed time", "set the stopwatch back to zero"]
+        }
     ];
 
     public bool IsAvailable(string actionId) =>

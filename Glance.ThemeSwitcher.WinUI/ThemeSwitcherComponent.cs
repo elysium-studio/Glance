@@ -70,9 +70,21 @@ public sealed partial class ThemeSwitcherComponent :
 
     public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
     [
-        new GlanceActionDescriptor("ThemeSwitcher.Light", Id, "Use light theme", "Switch Windows to the light theme."),
-        new GlanceActionDescriptor("ThemeSwitcher.Dark", Id, "Use dark theme", "Switch Windows to the dark theme."),
-        new GlanceActionDescriptor("ThemeSwitcher.Sunset", Id, "Use sunset theme schedule", "Switch automatically between light and dark themes around sunrise and sunset.")
+        new GlanceActionDescriptor("ThemeSwitcher.Light", Id, "Use light theme", "Switch Windows apps and system surfaces to light appearance.")
+        {
+            SemanticTags = ["theme", "appearance", "light", "light mode", "bright", "Windows theme"],
+            ExampleUtterances = ["switch to light mode", "make Windows use the light theme", "turn dark mode off"]
+        },
+        new GlanceActionDescriptor("ThemeSwitcher.Dark", Id, "Use dark theme", "Switch Windows apps and system surfaces to dark appearance.")
+        {
+            SemanticTags = ["theme", "appearance", "dark", "dark mode", "night", "Windows theme"],
+            ExampleUtterances = ["switch to dark mode", "make Windows dark", "turn dark theme on"]
+        },
+        new GlanceActionDescriptor("ThemeSwitcher.Sunset", Id, "Use sunset theme schedule", "Automatically use light appearance during the day and dark appearance after sunset.")
+        {
+            SemanticTags = ["theme", "appearance", "automatic", "schedule", "sunset", "sunrise", "day", "night"],
+            ExampleUtterances = ["change theme automatically at sunset", "use light by day and dark at night", "turn on the sunset theme schedule"]
+        }
     ];
 
     public async Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,

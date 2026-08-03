@@ -115,8 +115,9 @@ internal sealed class GlanceModuleManager :
             IReadOnlyList<IGlanceComponent> components = (IGlanceComponent[])[.. runtime.Services.GetServices<IGlanceComponent>()];
             IReadOnlyList<IGlanceAssistantProvider> assistantProviders = (IGlanceAssistantProvider[])[.. runtime.Services.GetServices<IGlanceAssistantProvider>()];
             IReadOnlyList<IGlanceAssistantCommandHandler> assistantCommandHandlers = (IGlanceAssistantCommandHandler[])[.. runtime.Services.GetServices<IGlanceAssistantCommandHandler>()];
+            IReadOnlyList<IGlanceAssistantSemanticResolver> assistantSemanticResolvers = (IGlanceAssistantSemanticResolver[])[.. runtime.Services.GetServices<IGlanceAssistantSemanticResolver>()];
 
-            if (components.Count == 0 && assistantProviders.Count == 0 && assistantCommandHandlers.Count == 0)
+            if (components.Count == 0 && assistantProviders.Count == 0 && assistantCommandHandlers.Count == 0 && assistantSemanticResolvers.Count == 0)
             {
                 throw new InvalidOperationException("The package did not register a Glance component or background capability.");
             }
@@ -138,6 +139,7 @@ internal sealed class GlanceModuleManager :
             actionService.Register(moduleServices.GetServices<IGlanceActionProvider>());
             intentService.Register(moduleServices.GetServices<IGlanceIntent>());
             assistantCommandService.Register(assistantCommandHandlers);
+            applicationServices.GetRequiredService<GlanceAssistantSemanticResolverService>().Register(assistantSemanticResolvers);
             assistantService.Register(assistantProviders);
             runtimes.Add(runtime);
             runtime = null;

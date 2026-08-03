@@ -39,4 +39,6 @@
   <data name="AssistantEnabledCard.Description" xml:space="preserve"><value>「Glance」または「Hey Glance」を待ち受けて音声コマンドで Glance を操作します</value></data>
   <data name="AssistantProviderCard.Header" xml:space="preserve"><value>音声プロバイダー</value></data>
   <data name="AssistantProviderCard.Description" xml:space="preserve"><value>ウェイクワードとコマンドの認識に使用するプロバイダーを選択します</value></data>
+  <data name="AssistantSemanticResolverCard.Header" xml:space="preserve"><value>コマンドの理解</value></data>
+  <data name="AssistantSemanticResolverCard.Description" xml:space="preserve"><value>要求を理解して Glance のアクションを選択するローカル AI を選びます</value></data>
 </root>

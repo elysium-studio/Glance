@@ -55,7 +55,11 @@ public sealed partial class ScreenLensComponent :
 
     public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
     [
-        new GlanceActionDescriptor("ScreenLens.Extract", Id, "Extract text from the screen", "Select a region and extract its text.")
+        new GlanceActionDescriptor("ScreenLens.Extract", Id, "Extract text from the screen", "Select a screen region, recognise visible text with OCR, and let the user copy or share it.")
+        {
+            SemanticTags = ["screen lens", "text extractor", "extract text", "copy text", "OCR", "recognise text", "read screen"],
+            ExampleUtterances = ["extract text from my screen", "copy some text I can see", "start screen lens", "recognise the text in this area"]
+        }
     ];
 
     public bool IsAvailable(string actionId) => !viewModel.IsExtracting;

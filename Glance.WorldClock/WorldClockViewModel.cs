@@ -37,6 +37,21 @@ public sealed partial class WorldClockViewModel(IEnumerable<WorldClockDefinition
 
     public bool SelectClock(string query)
     {
+        WorldClockItemViewModel? clock = FindClock(query);
+
+        if (clock is null)
+        {
+            return false;
+        }
+
+        SelectedClock = clock;
+        return true;
+    }
+
+    public bool CanSelectClock(string query) => FindClock(query) is not null;
+
+    private WorldClockItemViewModel? FindClock(string query)
+    {
         WorldClockItemViewModel? clock = Clocks.FirstOrDefault(clock =>
             string.Equals(clock.Id, query, StringComparison.OrdinalIgnoreCase) ||
             string.Equals(clock.DisplayName, query, StringComparison.OrdinalIgnoreCase));
@@ -48,13 +63,7 @@ public sealed partial class WorldClockViewModel(IEnumerable<WorldClockDefinition
                 query.Contains(clock.DisplayName, StringComparison.OrdinalIgnoreCase));
         }
 
-        if (clock is null)
-        {
-            return false;
-        }
-
-        SelectedClock = clock;
-        return true;
+        return clock;
     }
 
     public void ShowClock(WorldClockDefinition definition)

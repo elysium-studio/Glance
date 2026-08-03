@@ -49,21 +49,38 @@ internal static class WorldClockTimeZoneCatalog
     }
 
     public static bool TryCreateDefinition(string query,
+        out WorldClockDefinition? definition) =>
+        ResolveDefinition(query, out definition) == WorldClockDefinitionResolution.Resolved;
+
+    public static WorldClockDefinitionResolution ResolveDefinition(string query,
         out WorldClockDefinition? definition)
     {
         string normalizedQuery = Normalize(query);
-        TimeZoneInfo? timeZone = SystemTimeZones
+        var candidates = SystemTimeZones
             .Select(timeZone => (TimeZone: timeZone, Score: GetMatchScore(timeZone, normalizedQuery)))
             .Where(candidate => candidate.Score > 0)
             .OrderByDescending(candidate => candidate.Score)
             .ThenBy(candidate => candidate.TimeZone.DisplayName.Length)
-            .Select(candidate => candidate.TimeZone)
-            .FirstOrDefault();
+            .ToArray();
 
-        definition = timeZone is null
-            ? null
-            : new WorldClockDefinition(timeZone.Id, GetFriendlyName(timeZone), timeZone);
-        return definition is not null;
+        if (candidates.Length == 0)
+        {
+            definition = null;
+            return WorldClockDefinitionResolution.NotFound;
+        }
+
+        int bestScore = candidates[0].Score;
+        TimeZoneInfo[] bestMatches = [.. candidates.Where(candidate => candidate.Score == bestScore).Select(candidate => candidate.TimeZone)];
+
+        if (bestMatches.Length != 1)
+        {
+            definition = null;
+            return WorldClockDefinitionResolution.Ambiguous;
+        }
+
+        TimeZoneInfo timeZone = bestMatches[0];
+        definition = new WorldClockDefinition(timeZone.Id, GetFriendlyName(timeZone), timeZone);
+        return WorldClockDefinitionResolution.Resolved;
     }
 
     private static int GetMatchScore(TimeZoneInfo timeZone,
@@ -126,4 +143,11 @@ internal static class WorldClockTimeZoneCatalog
             return null;
         }
     }
+}
+
+internal enum WorldClockDefinitionResolution
+{
+    Resolved,
+    NotFound,
+    Ambiguous
 }

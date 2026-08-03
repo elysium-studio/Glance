@@ -67,8 +67,16 @@ public sealed partial class ColorPickerComponent :
 
     public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
     [
-        new GlanceActionDescriptor("ColorPicker.Start", Id, "Pick a colour", "Start the on-screen colour picker."),
-        new GlanceActionDescriptor("ColorPicker.Cancel", Id, "Cancel colour picker", "Cancel the active colour picker.")
+        new GlanceActionDescriptor("ColorPicker.Start", Id, "Pick a colour", "Start the on-screen eyedropper to sample a colour beneath the pointer.")
+        {
+            SemanticTags = ["colour", "color", "picker", "eyedropper", "dropper", "sample", "pixel", "hex", "rgb", "hsl"],
+            ExampleUtterances = ["pick a colour from my screen", "start the eyedropper", "tell me the colour of this pixel"]
+        },
+        new GlanceActionDescriptor("ColorPicker.Cancel", Id, "Cancel colour picker", "Cancel the active on-screen colour selection.")
+        {
+            SemanticTags = ["colour", "color", "picker", "eyedropper", "cancel", "stop"],
+            ExampleUtterances = ["cancel the colour picker", "stop picking a colour", "close the eyedropper"]
+        }
     ];
 
     public bool IsAvailable(string actionId) =>

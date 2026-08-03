@@ -39,4 +39,6 @@
   <data name="AssistantEnabledCard.Description" xml:space="preserve"><value>[Lïstén fôr “Glance” ôr “Hey Glance” tô çôntrôl Glance wïth vôïçé çômmànds]</value></data>
   <data name="AssistantProviderCard.Header" xml:space="preserve"><value>[Spééçh prôvïdér]</value></data>
   <data name="AssistantProviderCard.Description" xml:space="preserve"><value>[Çhôôsé thé prôvïdér ûséd fôr wàké-wôrd ànd çômmànd réçôgnïtïôn]</value></data>
+  <data name="AssistantSemanticResolverCard.Header" xml:space="preserve"><value>[Çômmànd ûndérstàndïng]</value></data>
+  <data name="AssistantSemanticResolverCard.Description" xml:space="preserve"><value>[Çhôôsé thé lôçàl ÀÏ ûséd tô ûndérstànd réqûésts ànd séléçt Glance àçtïôns]</value></data>
 </root>

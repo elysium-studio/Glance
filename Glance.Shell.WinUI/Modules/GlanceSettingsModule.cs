@@ -26,6 +26,9 @@ public sealed class GlanceSettingsModule :
             .AddViewFor<AssistantProviderView, IGlanceViewModel, AssistantProviderViewModel>(ServiceLifetime.Transient,
                 provider => new AssistantProviderView(),
                 provider => new AssistantProviderViewModel(provider.GetRequiredService<IGlanceAssistantService>()))
+            .AddViewFor<AssistantSemanticResolverView, IGlanceViewModel, AssistantSemanticResolverViewModel>(ServiceLifetime.Transient,
+                provider => new AssistantSemanticResolverView(),
+                provider => new AssistantSemanticResolverViewModel(provider.GetRequiredService<IGlanceAssistantSemanticResolverService>()))
             .AddViewFor<PlacementView, IGlanceViewModel, PlacementViewModel>(ServiceLifetime.Transient,
                 provider => new PlacementView(),
                 provider => new PlacementViewModel(provider,

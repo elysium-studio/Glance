@@ -52,7 +52,9 @@ public sealed class ScreenCaptureAssistantCommandHandler(IGlanceActionService ac
 
         await Task.Delay(AcknowledgementDurationMilliseconds, cancellationToken);
         GlanceActionResult result = await actionService.InvokeAsync(request, cancellationToken);
-        return new GlanceAssistantCommandResult(true, result.Succeeded ? response : result.Message ?? "The capture was cancelled");
+        return new GlanceAssistantCommandResult(result.Status is not GlanceActionStatus.InvalidArguments and not GlanceActionStatus.Unavailable,
+            result.Succeeded ? response : result.Message ?? "The capture was cancelled",
+            result.Guidance);
     }
 
     private static string? TryGetWindowName(string command)

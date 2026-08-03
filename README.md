@@ -13,6 +13,7 @@ The island remains at the top or bottom of the desktop in a compact state, expan
 - **Power** — view AC or battery state and battery percentage where available.
 - **Clipboard** — browse recent clipboard entries stored in a module-owned SQLite database and copy, remove, or send an entry to the focused application.
 - **Stash** — drag in text or links for later, browse saved items, copy them back, or open saved links. Its history is stored in a module-owned SQLite database.
+- **Reminders** — create, edit, prioritise, and page through reminders stored in SQLite, with timely attention as due dates approach.
 - **Drop Shelf** — temporarily collect files and folders, then drag them together to another location.
 - **Focus Session** — run a focused work session with a clear remaining-time display.
 - **Audio Switcher** — move quickly between available playback devices.
@@ -84,6 +85,7 @@ The module's WinUI project must:
 - Implement `IGlanceAttentionComponent` on any component that requests attention. Glance then exposes a per-module permission and blocks requests when the user turns it off.
 - Implement `IGlanceIntent` to advertise an action to other modules, then register that implementation with `services.AddSingleton<IGlanceIntent, YourIntent>()`. The descriptor supplies the target component, localized label, description, glyph, and glyph font; `CanHandle` declares the supported content kinds.
 - Implement `IGlanceActionProvider` to advertise assistant-ready commands, typed parameters, confirmation requirements, availability, and whether a successful command should present the module in compact or expanded mode. Register the same component or a dedicated provider as `IGlanceActionProvider`. Glance automatically advertises `<ComponentId>.Show` for every enabled module, so an assistant can always bring a module into view even when it exposes no specialised commands.
+- Implement `IGlanceAssistantSemanticResolver` to supply an alternative command-understanding engine. A resolver receives the user's transcript and the live action catalog, then returns an action identifier and JSON arguments. It can be shipped as a background-only `.glance` package with no component or XAML view. Register it with `services.AddSingleton<IGlanceAssistantSemanticResolver, YourResolver>()`; users can then select it under **Command understanding** in Glance settings.
 - Set `UseWinUI` to `true`.
 - Set `DisableEmbeddedXbf` to `false` so compiled XAML is embedded in the module PRI.
 - Set `CopyLocalLockFileAssemblies` to `true`, or otherwise include every private runtime dependency in the module directory.
@@ -92,7 +94,7 @@ The module's WinUI project must:
 
 Modules run with the same trust as Glance itself. Service isolation controls module lifetimes and registration collisions; it is not a security sandbox. Only install modules from sources you trust.
 
-The application-level `IGlanceActionService` is the provider-neutral boundary for a future voice or AI assistant. An assistant reads the currently available `GlanceActionDescriptor` values, chooses an action, supplies a JSON argument object, and invokes it through the service. Glance validates the request and confirmation state before dispatching it to the owning module on the UI thread. This keeps speech recognition, model selection, credentials, and natural-language interpretation outside the module contract.
+The application-level `IGlanceActionService` is the provider-neutral boundary for voice and AI assistants. The selected `IGlanceAssistantSemanticResolver` reads the currently available `GlanceActionDescriptor` values, chooses an action, and supplies a JSON argument object. Glance validates and invokes that selection through the action service. Speech recognition and command understanding are separately selectable, so a resolver package can use another local model, a remote service, or a future Windows AI API without changing any feature module.
 
 ## Settings
 

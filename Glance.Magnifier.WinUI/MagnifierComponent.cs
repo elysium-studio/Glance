@@ -61,10 +61,26 @@ public sealed partial class MagnifierComponent :
 
     public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
     [
-        new GlanceActionDescriptor("Magnifier.Start", Id, "Start Magnifier", "Start Windows Magnifier."),
-        new GlanceActionDescriptor("Magnifier.ZoomIn", Id, "Zoom in", "Increase the Magnifier zoom level."),
-        new GlanceActionDescriptor("Magnifier.ZoomOut", Id, "Zoom out", "Decrease the Magnifier zoom level."),
-        new GlanceActionDescriptor("Magnifier.Stop", Id, "Stop Magnifier", "Close Windows Magnifier.")
+        new GlanceActionDescriptor("Magnifier.Start", Id, "Start Magnifier", "Start the Windows screen Magnifier accessibility tool.")
+        {
+            SemanticTags = ["magnifier", "magnify", "screen zoom", "accessibility", "enlarge", "make bigger"],
+            ExampleUtterances = ["start the magnifier", "magnify my screen", "make the screen easier to see"]
+        },
+        new GlanceActionDescriptor("Magnifier.ZoomIn", Id, "Zoom in", "Increase the Windows Magnifier screen zoom level.")
+        {
+            SemanticTags = ["magnifier", "magnify", "zoom in", "enlarge", "bigger"],
+            ExampleUtterances = ["zoom the magnifier in", "make the screen bigger", "increase magnification"]
+        },
+        new GlanceActionDescriptor("Magnifier.ZoomOut", Id, "Zoom out", "Decrease the Windows Magnifier screen zoom level.")
+        {
+            SemanticTags = ["magnifier", "magnify", "zoom out", "smaller", "decrease"],
+            ExampleUtterances = ["zoom the magnifier out", "make the screen smaller", "decrease magnification"]
+        },
+        new GlanceActionDescriptor("Magnifier.Stop", Id, "Stop Magnifier", "Close the Windows screen Magnifier.")
+        {
+            SemanticTags = ["magnifier", "magnify", "close", "stop", "turn off"],
+            ExampleUtterances = ["close the magnifier", "turn off screen magnification", "stop magnifying"]
+        }
     ];
 
     public bool IsAvailable(string actionId) =>

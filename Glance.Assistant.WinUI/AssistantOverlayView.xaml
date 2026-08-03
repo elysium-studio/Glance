@@ -37,10 +37,10 @@
                     FontWeight="SemiBold"
                     Text="GLANCE" />
                 <TextBlock
-                    MaxLines="2"
+                    MaxLines="3"
                     Style="{StaticResource BodyStrongTextBlockStyle}"
                     Text="{x:Bind Provider.Transcript, Mode=OneWay}"
-                    TextTrimming="CharacterEllipsis"
+                    TextTrimming="WordEllipsis"
                     TextWrapping="Wrap" />
                 <TextBlock
                     Style="{StaticResource CaptionTextBlockStyle}"

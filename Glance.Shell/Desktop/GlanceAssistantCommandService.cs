@@ -2,11 +2,24 @@ using Glance.Application.Abstractions;
 
 namespace Glance.Shell;
 
-public sealed class GlanceAssistantCommandService(IEnumerable<IGlanceAssistantCommandHandler> handlers) :
+public sealed class GlanceAssistantCommandService :
     IGlanceAssistantCommandService
 {
-    private readonly List<IGlanceAssistantCommandHandler> handlers = [.. handlers];
+    private readonly List<IGlanceAssistantCommandHandler> handlers;
+    private readonly IGlanceAssistantSemanticResolverService? semanticResolvers;
     private readonly object synchronization = new();
+
+    public GlanceAssistantCommandService(IEnumerable<IGlanceAssistantCommandHandler> handlers,
+        IGlanceAssistantSemanticResolverService semanticResolvers)
+    {
+        this.handlers = [.. handlers];
+        this.semanticResolvers = semanticResolvers;
+    }
+
+    public GlanceAssistantCommandService(IEnumerable<IGlanceAssistantCommandHandler> handlers)
+    {
+        this.handlers = [.. handlers];
+    }
 
     public void Register(IEnumerable<IGlanceAssistantCommandHandler> registrations)
     {
@@ -24,6 +37,16 @@ public sealed class GlanceAssistantCommandService(IEnumerable<IGlanceAssistantCo
 
     public async Task<GlanceAssistantCommandResult> ExecuteAsync(string command, CancellationToken cancellationToken = default)
     {
+        if (semanticResolvers is not null)
+        {
+            GlanceAssistantCommandResult semanticResult = await semanticResolvers.TryExecuteAsync(command, cancellationToken);
+
+            if (semanticResult.Handled || !string.IsNullOrWhiteSpace(semanticResult.Response))
+            {
+                return semanticResult;
+            }
+        }
+
         IGlanceAssistantCommandHandler[] snapshot;
 
         lock (synchronization)

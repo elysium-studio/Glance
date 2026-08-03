@@ -35,10 +35,8 @@ public sealed partial class AudioSwitcherViewModel :
 
     public bool SelectDevice(string query)
     {
-        AudioOutputDeviceItemViewModel? device = Devices.FirstOrDefault(device =>
-            string.Equals(device.Id, query, StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(device.Name, query, StringComparison.OrdinalIgnoreCase)) ??
-            Devices.FirstOrDefault(device => device.Name.Contains(query, StringComparison.OrdinalIgnoreCase));
+        IReadOnlyList<AudioOutputDeviceItemViewModel> matches = FindDevices(query);
+        AudioOutputDeviceItemViewModel? device = matches.Count == 1 ? matches[0] : null;
 
         if (device is null)
         {
@@ -47,6 +45,19 @@ public sealed partial class AudioSwitcherViewModel :
 
         SelectedDevice = device;
         return string.Equals(selectedDeviceId, device.Id, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public int CountMatchingDevices(string query) => FindDevices(query).Count;
+
+    private IReadOnlyList<AudioOutputDeviceItemViewModel> FindDevices(string query)
+    {
+        AudioOutputDeviceItemViewModel[] exactMatches = [.. Devices.Where(device =>
+            string.Equals(device.Id, query, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(device.Name, query, StringComparison.OrdinalIgnoreCase))];
+
+        return exactMatches.Length > 0
+            ? exactMatches
+            : [.. Devices.Where(device => device.Name.Contains(query, StringComparison.OrdinalIgnoreCase))];
     }
 
     public void Refresh()

@@ -11,6 +11,7 @@ namespace Glance.WorldClock.WinUI;
 public sealed partial class WorldClockComponent :
     IGlanceComponent,
     IGlanceActionProvider,
+    IGlanceActionValidator,
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
@@ -69,9 +70,13 @@ public sealed partial class WorldClockComponent :
         new GlanceActionDescriptor("WorldClock.ShowTime",
             Id,
             "Show time in a city",
-            "Select a world clock and bring it into view.",
-            [new GlanceActionParameterDescriptor("city", GlanceActionParameterType.String, "The city or time zone to display.")],
+            "Resolve a spoken city, country, region, or time-zone name and show its current local time.",
+            [new GlanceActionParameterDescriptor("city", GlanceActionParameterType.String, "The spoken city, country, region, or time-zone name to resolve.")],
             Presentation: GlanceActionPresentation.Expanded)
+        {
+            SemanticTags = ["world clock", "clock", "time", "time zone", "city", "country", "local time", "what time"],
+            ExampleUtterances = ["what time is it in New York", "show me the time in Greenland", "what's the local time in Tokyo", "open the clock for Pacific time"]
+        }
     ];
 
     public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
@@ -81,6 +86,35 @@ public sealed partial class WorldClockComponent :
         return Task.FromResult(city is null
             ? GlanceActionResult.InvalidArguments("A city or time zone is required.")
             : ShowTime(city));
+    }
+
+    public Task<GlanceActionResult?> ValidateAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (!string.Equals(request.ActionId, "WorldClock.ShowTime", StringComparison.OrdinalIgnoreCase))
+        {
+            return Task.FromResult<GlanceActionResult?>(null);
+        }
+
+        string? city = request.GetString("city");
+
+        if (string.IsNullOrWhiteSpace(city))
+        {
+            return Task.FromResult<GlanceActionResult?>(GlanceActionResult.InvalidArguments("Which place do you mean?", "Say a city or time zone."));
+        }
+
+        if (viewModel.CanSelectClock(city))
+        {
+            return Task.FromResult<GlanceActionResult?>(null);
+        }
+
+        WorldClockDefinitionResolution resolution = WorldClockTimeZoneCatalog.ResolveDefinition(city, out _);
+        return Task.FromResult<GlanceActionResult?>(resolution switch
+        {
+            WorldClockDefinitionResolution.Resolved => null,
+            WorldClockDefinitionResolution.Ambiguous => GlanceActionResult.InvalidArguments($"Several places match “{city}”.", "Try a city or more specific time zone."),
+            _ => GlanceActionResult.InvalidArguments($"I couldn't find “{city}”.", "Try another city or time zone.")
+        });
     }
 
     public GlanceActionResult ShowTime(string city)

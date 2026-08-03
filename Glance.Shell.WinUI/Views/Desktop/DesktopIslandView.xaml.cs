@@ -44,6 +44,7 @@ public sealed partial class DesktopIslandView :
     private bool assistantExpandedIsland;
     private bool isAssistantExpansionLockActive;
     private bool isAssistantPresentationRequested;
+    private bool shouldRetainAssistantExpansion;
     private int assistantPresentationTransition;
     private int previousIndex;
     private bool skipNextConnectedExpansion;
@@ -130,6 +131,7 @@ public sealed partial class DesktopIslandView :
         StopInteractionExitTimer();
         StopStartupAttentionTimer();
         isAssistantExpansionLockActive = false;
+        shouldRetainAssistantExpansion = false;
         assistantPresentationTransition++;
     }
 
@@ -205,6 +207,7 @@ public sealed partial class DesktopIslandView :
 
         isAssistantPresentationRequested = true;
         assistantExpandedIsland = !ViewModel.IsExpanded;
+        shouldRetainAssistantExpansion = false;
         PrepareAssistantContinuumAnimation(true);
         isAssistantExpansionLockActive = true;
         ApplyExpansionLock();
@@ -226,6 +229,7 @@ public sealed partial class DesktopIslandView :
             return;
         }
 
+        shouldRetainAssistantExpansion |= ViewModel.Assistant.IsResultPresentationActive;
         PrepareAssistantContinuumAnimation(false);
         isAssistantPresentationRequested = false;
         TransitionAssistantPresentation(false);
@@ -327,7 +331,7 @@ public sealed partial class DesktopIslandView :
     private void CompleteAssistantPresentationExit()
     {
         bool shouldCollapse = assistantExpandedIsland &&
-            !ViewModel.Assistant.IsResultPresentationActive &&
+            !shouldRetainAssistantExpansion &&
             !isPointerOverIsland &&
             !ViewModel.IsPinned;
 
@@ -340,6 +344,7 @@ public sealed partial class DesktopIslandView :
         }
 
         assistantExpandedIsland = false;
+        shouldRetainAssistantExpansion = false;
     }
 
     private void PrepareAssistantContinuumAnimation(bool showAssistant)

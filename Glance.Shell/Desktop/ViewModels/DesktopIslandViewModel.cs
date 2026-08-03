@@ -360,8 +360,8 @@ public sealed partial class DesktopIslandViewModel :
 
             SelectedIndex = componentIndex;
             IsOpen = true;
-            IsExpanded = args.Presentation == GlanceActionPresentation.Expanded || IsPinned;
-            AttentionReceived?.Invoke(this, new GlanceAttentionRequest(args.TargetComponentId, Expand: IsExpanded));
+            IsExpanded = IsExpanded || args.Presentation == GlanceActionPresentation.Expanded || IsPinned;
+            AttentionReceived?.Invoke(this, new GlanceAttentionRequest(args.TargetComponentId));
         });
 
     private int FindContextComponentIndex(GlanceContentKind kind) =>

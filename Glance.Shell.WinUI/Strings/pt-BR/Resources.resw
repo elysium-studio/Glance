@@ -39,4 +39,6 @@
   <data name="AssistantEnabledCard.Description" xml:space="preserve"><value>Ouça “Glance” ou “Hey Glance” para controlar o Glance com comandos de voz</value></data>
   <data name="AssistantProviderCard.Header" xml:space="preserve"><value>Provedor de voz</value></data>
   <data name="AssistantProviderCard.Description" xml:space="preserve"><value>Escolha o provedor usado para reconhecer a palavra de ativação e os comandos</value></data>
+  <data name="AssistantSemanticResolverCard.Header" xml:space="preserve"><value>Compreensão de comandos</value></data>
+  <data name="AssistantSemanticResolverCard.Description" xml:space="preserve"><value>Escolha a IA local que entende solicitações e seleciona ações do Glance</value></data>
 </root>

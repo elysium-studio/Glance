@@ -13,6 +13,7 @@ namespace Glance.Timer.WinUI;
 public sealed partial class TimerComponent :
     IGlanceComponent,
     IGlanceActionProvider,
+    IGlanceActionValidator,
     IGlanceConnectedAnimationComponent,
     IGlanceAttentionComponent,
     IDisposable
@@ -86,11 +87,27 @@ public sealed partial class TimerComponent :
         new GlanceActionDescriptor("Timer.Start",
             Id,
             "Start timer",
-            "Start a timer for a specified number of minutes.",
-            [new GlanceActionParameterDescriptor("minutes", GlanceActionParameterType.Number, "The timer duration in minutes.", Minimum: 0.1, Maximum: 1440)]),
-        new GlanceActionDescriptor("Timer.Pause", Id, "Pause timer", "Pause the running timer."),
-        new GlanceActionDescriptor("Timer.Resume", Id, "Resume timer", "Resume the paused timer."),
-        new GlanceActionDescriptor("Timer.Reset", Id, "Reset timer", "Reset the timer to its configured duration.")
+            "Start a countdown for a duration expressed as minutes. Convert hours or seconds into minutes.",
+            [new GlanceActionParameterDescriptor("minutes", GlanceActionParameterType.Number, "Countdown duration in minutes. Convert spoken hours or seconds to minutes.", Minimum: 1d / 60, Maximum: 1440)])
+        {
+            SemanticTags = ["timer", "countdown", "alarm", "remind", "minutes", "seconds", "hours"],
+            ExampleUtterances = ["set a timer for twenty four minutes", "start a ninety second countdown", "give me a timer for half an hour"]
+        },
+        new GlanceActionDescriptor("Timer.Pause", Id, "Pause timer", "Pause the running countdown.")
+        {
+            SemanticTags = ["timer", "countdown", "pause", "hold"],
+            ExampleUtterances = ["pause the timer", "hold my countdown"]
+        },
+        new GlanceActionDescriptor("Timer.Resume", Id, "Resume timer", "Continue the paused countdown.")
+        {
+            SemanticTags = ["timer", "countdown", "resume", "continue"],
+            ExampleUtterances = ["resume the timer", "continue my countdown"]
+        },
+        new GlanceActionDescriptor("Timer.Reset", Id, "Reset timer", "Reset the countdown to its configured duration.")
+        {
+            SemanticTags = ["timer", "countdown", "reset", "restart"],
+            ExampleUtterances = ["reset the timer", "restart my countdown"]
+        }
     ];
 
     public bool IsAvailable(string actionId) =>
@@ -100,6 +117,26 @@ public sealed partial class TimerComponent :
             "Timer.Resume" => !viewModel.IsRunning,
             _ => true
         };
+
+    public Task<GlanceActionResult?> ValidateAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (!string.Equals(request.ActionId, "Timer.Start", StringComparison.OrdinalIgnoreCase))
+        {
+            return Task.FromResult<GlanceActionResult?>(null);
+        }
+
+        double? minutes = request.GetNumber("minutes");
+
+        if (minutes is null)
+        {
+            return Task.FromResult<GlanceActionResult?>(GlanceActionResult.InvalidArguments("How long should the timer run?", "Say a duration such as 24 minutes."));
+        }
+
+        return Task.FromResult<GlanceActionResult?>(minutes is >= 1d / 60 and <= 1440
+            ? null
+            : GlanceActionResult.InvalidArguments("That timer duration isn't supported.", "Choose between one second and 24 hours."));
+    }
 
     public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
         CancellationToken cancellationToken = default)

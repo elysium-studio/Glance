@@ -144,6 +144,15 @@
   <Project Path="Glance.RemovableDevices.Tests/Glance.RemovableDevices.Tests.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.Reminders.WinUI/Glance.Reminders.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Reminders/Glance.Reminders.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Reminders.Tests/Glance.Reminders.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.ScreenCapture.WinUI/Glance.ScreenCapture.WinUI.csproj">
     <Platform Project="x64" />
   </Project>

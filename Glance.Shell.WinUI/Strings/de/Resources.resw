@@ -39,4 +39,6 @@
   <data name="AssistantEnabledCard.Description" xml:space="preserve"><value>Hören Sie auf „Glance“ oder „Hey Glance“, um Glance mit Sprachbefehlen zu steuern</value></data>
   <data name="AssistantProviderCard.Header" xml:space="preserve"><value>Spracherkennungsanbieter</value></data>
   <data name="AssistantProviderCard.Description" xml:space="preserve"><value>Wählen Sie den Anbieter für Aktivierungswort- und Befehlserkennung</value></data>
+  <data name="AssistantSemanticResolverCard.Header" xml:space="preserve"><value>Befehlsverständnis</value></data>
+  <data name="AssistantSemanticResolverCard.Description" xml:space="preserve"><value>Wählen Sie die lokale KI aus, die Anfragen versteht und Glance-Aktionen auswählt</value></data>
 </root>

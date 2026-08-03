@@ -7,6 +7,21 @@ namespace Glance.Tests;
 public sealed class GlanceAssistantCommandServiceTests
 {
     [Fact]
+    public async Task ExecuteAsyncUsesSemanticResolutionBeforeLegacyHandlers()
+    {
+        TestHandler handler = new(20, new GlanceAssistantCommandResult(true, "legacy"));
+        TestSemanticResolverService semanticResolver = new(new GlanceAssistantCommandResult(true, "semantic"));
+        GlanceAssistantCommandService service = new([handler], semanticResolver);
+
+        GlanceAssistantCommandResult result = await service.ExecuteAsync("set a time for twenty four minutes");
+
+        Assert.True(result.Handled);
+        Assert.Equal("semantic", result.Response);
+        Assert.Equal(1, semanticResolver.InvocationCount);
+        Assert.Equal(0, handler.InvocationCount);
+    }
+
+    [Fact]
     public async Task ExecuteAsyncUsesTheHighestPriorityHandler()
     {
         TestHandler lowerPriority = new(10, new GlanceAssistantCommandResult(true, "lower"));
@@ -57,6 +72,31 @@ public sealed class GlanceAssistantCommandServiceTests
         public int InvocationCount { get; private set; }
 
         public Task<GlanceAssistantCommandResult> TryHandleAsync(string command, CancellationToken cancellationToken = default)
+        {
+            InvocationCount++;
+            return Task.FromResult(result);
+        }
+    }
+
+    private sealed class TestSemanticResolverService(GlanceAssistantCommandResult result) :
+        IGlanceAssistantSemanticResolverService
+    {
+        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged
+        {
+            add { }
+            remove { }
+        }
+
+        public IReadOnlyList<IGlanceAssistantSemanticResolver> Resolvers => [];
+
+        public IGlanceAssistantSemanticResolver? ActiveResolver => null;
+
+        public int InvocationCount { get; private set; }
+
+        public Task SetActiveResolverAsync(string resolverId, CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
+
+        public Task<GlanceAssistantCommandResult> TryExecuteAsync(string command, CancellationToken cancellationToken = default)
         {
             InvocationCount++;
             return Task.FromResult(result);

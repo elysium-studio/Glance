@@ -113,16 +113,34 @@ public sealed partial class MediaComponent :
 
     public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
     [
-        new GlanceActionDescriptor("Media.Previous", Id, "Previous track", "Play the previous media track."),
-        new GlanceActionDescriptor("Media.TogglePlayback", Id, "Play or pause media", "Toggle media playback."),
-        new GlanceActionDescriptor("Media.Next", Id, "Next track", "Skip to the next media track.")
+        new GlanceActionDescriptor("Media.Previous", Id, "Previous track", "Return to the previous song, track, episode, or media item.")
+        {
+            SemanticTags = ["media", "music", "song", "track", "previous", "back", "last"],
+            ExampleUtterances = ["play the previous track", "go back one song", "put the last track back on"]
+        },
+        new GlanceActionDescriptor("Media.Play", Id, "Play media", "Start or resume the current song, track, episode, or media item.")
+        {
+            SemanticTags = ["media", "music", "song", "track", "play", "resume", "continue"],
+            ExampleUtterances = ["play the music", "resume playback", "continue the song"]
+        },
+        new GlanceActionDescriptor("Media.Pause", Id, "Pause media", "Pause the current song, track, episode, or media item.")
+        {
+            SemanticTags = ["media", "music", "song", "track", "pause", "stop playback"],
+            ExampleUtterances = ["pause the music", "pause this track", "stop playback for now"]
+        },
+        new GlanceActionDescriptor("Media.Next", Id, "Next track", "Skip to the next song, track, episode, or media item.")
+        {
+            SemanticTags = ["media", "music", "song", "track", "next", "skip", "forward"],
+            ExampleUtterances = ["skip this track", "play the next song", "move to the next episode"]
+        }
     ];
 
     public bool IsAvailable(string actionId) =>
         actionId switch
         {
             "Media.Previous" => viewModel.CanSkipPrevious,
-            "Media.TogglePlayback" => viewModel.CanTogglePlayback,
+            "Media.Play" => viewModel.CanTogglePlayback && !viewModel.IsPlaying,
+            "Media.Pause" => viewModel.CanTogglePlayback && viewModel.IsPlaying,
             "Media.Next" => viewModel.CanSkipNext,
             _ => false
         };
@@ -135,7 +153,7 @@ public sealed partial class MediaComponent :
             case "Media.Previous":
                 viewModel.Previous();
                 break;
-            case "Media.TogglePlayback":
+            case "Media.Play" or "Media.Pause":
                 viewModel.TogglePlayback();
                 break;
             case "Media.Next":

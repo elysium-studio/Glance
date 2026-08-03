@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Reminders</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Keep upcoming reminders close and receive attention when they are due.</value></data>
+  <data name="ModuleTitle" xml:space="preserve"><value>Reminders</value></data>
+  <data name="EmptySummary" xml:space="preserve"><value>No reminders</value></data>
+  <data name="EmptyDetail" xml:space="preserve"><value>Add one for something you do not want to miss</value></data>
+  <data name="PriorityLow" xml:space="preserve"><value>Low priority</value></data>
+  <data name="PriorityNormal" xml:space="preserve"><value>Normal priority</value></data>
+  <data name="PriorityHigh" xml:space="preserve"><value>High priority</value></data>
+  <data name="AddReminder" xml:space="preserve"><value>Add reminder</value></data>
+  <data name="EditReminder" xml:space="preserve"><value>Edit reminder</value></data>
+  <data name="DeleteReminder" xml:space="preserve"><value>Delete reminder</value></data>
+  <data name="ReminderText" xml:space="preserve"><value>Reminder</value></data>
+  <data name="Date" xml:space="preserve"><value>Date</value></data>
+  <data name="Time" xml:space="preserve"><value>Time</value></data>
+  <data name="Priority" xml:space="preserve"><value>Priority</value></data>
+  <data name="Add" xml:space="preserve"><value>Add</value></data>
+  <data name="Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="ReminderRequired" xml:space="preserve"><value>Enter what you want to be reminded about.</value></data>
+  <data name="FutureTimeRequired" xml:space="preserve"><value>Choose a time in the future.</value></data>
+</root>

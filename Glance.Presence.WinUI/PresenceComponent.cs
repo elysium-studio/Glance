@@ -57,8 +57,16 @@ public sealed partial class PresenceComponent :
 
     public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
     [
-        new GlanceActionDescriptor("Presence.Start", Id, "Stay available", "Keep your presence available while you are away."),
-        new GlanceActionDescriptor("Presence.Stop", Id, "Stop staying available", "Stop keeping your presence available.")
+        new GlanceActionDescriptor("Presence.Start", Id, "Stay available", "Simulate occasional user activity so communication apps continue to show you as available.")
+        {
+            SemanticTags = ["presence", "available", "active", "away", "online", "status", "Teams", "activity"],
+            ExampleUtterances = ["keep me available", "stop me appearing away", "keep my status active"]
+        },
+        new GlanceActionDescriptor("Presence.Stop", Id, "Stop staying available", "Stop simulating activity and allow presence status to update normally.")
+        {
+            SemanticTags = ["presence", "available", "active", "away", "status", "stop"],
+            ExampleUtterances = ["stop keeping me available", "let my status go away", "turn off presence"]
+        }
     ];
 
     public bool IsAvailable(string actionId) =>

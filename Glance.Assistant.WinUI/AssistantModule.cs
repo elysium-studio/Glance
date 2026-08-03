@@ -9,5 +9,6 @@ public sealed class AssistantModule :
 {
     public void Register(IServiceCollection services) => services
         .AddSingleton<IAssistantViewFactory, AssistantViewFactory>()
-        .AddSingleton<IGlanceAssistantProvider, MicrosoftOfflineAssistantProvider>();
+        .AddSingleton<IGlanceAssistantProvider, MicrosoftOfflineAssistantProvider>()
+        .AddSingleton<IGlanceAssistantSemanticResolver, FoundryLocalSemanticResolver>();
 }

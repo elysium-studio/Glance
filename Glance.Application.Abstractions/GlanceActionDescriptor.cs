@@ -8,6 +8,10 @@ public sealed record GlanceActionDescriptor(string Id,
     GlanceActionConfirmation Confirmation = GlanceActionConfirmation.None,
     GlanceActionPresentation Presentation = GlanceActionPresentation.Compact)
 {
+    public IReadOnlyList<string> SemanticTags { get; init; } = [];
+
+    public IReadOnlyList<string> ExampleUtterances { get; init; } = [];
+
     public GlanceActionDescriptor(string id,
         string targetComponentId,
         string displayName,

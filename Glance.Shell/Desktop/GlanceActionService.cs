@@ -26,7 +26,6 @@ public sealed class GlanceActionService(ModulePreferenceService modulePreference
         lock (synchronization)
         {
             advertisedActions = [.. actions.Values
-                .Where(IsRegistrationAvailable)
                 .Select(registration => registration.Descriptor)
                 .Where(descriptor => activeComponentIds.Contains(descriptor.TargetComponentId))];
         }
@@ -59,28 +58,15 @@ public sealed class GlanceActionService(ModulePreferenceService modulePreference
             return new GlanceActionResult(GlanceActionStatus.ConfirmationRequired, "The action requires confirmation before it can run.");
         }
 
-        GlanceActionResult? validationResult = ValidateArguments(descriptor, request.Arguments);
-
-        if (validationResult is not null)
-        {
-            return validationResult;
-        }
-
-        if (descriptor.Presentation != GlanceActionPresentation.None)
-        {
-            PresentationRequested?.Invoke(this, new GlanceActionPresentationRequestedEventArgs(descriptor.TargetComponentId, descriptor.Presentation));
-        }
-
-        GlanceActionResult result;
+        ActionRegistration? registration = null;
+        GlanceActionResult? validationResult;
 
         if (IsShowAction(descriptor))
         {
-            result = GlanceActionResult.Success();
+            registration = null;
         }
         else
         {
-            ActionRegistration? registration;
-
             lock (synchronization)
             {
                 actions.TryGetValue(descriptor.Id, out registration);
@@ -91,6 +77,53 @@ public sealed class GlanceActionService(ModulePreferenceService modulePreference
                 return GlanceActionResult.Unavailable("The action provider is no longer available.");
             }
 
+            if (registration.Provider is IGlanceActionValidator validator)
+            {
+                try
+                {
+                    validationResult = await DispatchAsync(() => validator.ValidateAsync(request, cancellationToken));
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    return new GlanceActionResult(GlanceActionStatus.Cancelled);
+                }
+                catch (Exception exception)
+                {
+                    return GlanceActionResult.Failed(exception.Message);
+                }
+
+                if (validationResult is not null)
+                {
+                    return validationResult;
+                }
+            }
+        }
+
+        validationResult = ValidateArguments(descriptor, request.Arguments);
+
+        if (validationResult is not null)
+        {
+            return validationResult;
+        }
+
+        if (registration is not null && !IsProviderAvailable(registration))
+        {
+            return GlanceActionResult.Unavailable("That action is not available in the module's current state.");
+        }
+
+        if (descriptor.Presentation != GlanceActionPresentation.None)
+        {
+            PresentationRequested?.Invoke(this, new GlanceActionPresentationRequestedEventArgs(descriptor.TargetComponentId, descriptor.Presentation));
+        }
+
+        GlanceActionResult result;
+
+        if (registration is null)
+        {
+            result = GlanceActionResult.Success();
+        }
+        else
+        {
             try
             {
                 result = await DispatchAsync(() => registration.Provider.InvokeAsync(request, cancellationToken));
@@ -143,9 +176,9 @@ public sealed class GlanceActionService(ModulePreferenceService modulePreference
         }
     }
 
-    private Task<GlanceActionResult> DispatchAsync(Func<Task<GlanceActionResult>> action)
+    private Task<T> DispatchAsync<T>(Func<Task<T>> action)
     {
-        TaskCompletionSource<GlanceActionResult> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        TaskCompletionSource<T> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         dispatcher.Dispatch(async () =>
         {
@@ -172,7 +205,7 @@ public sealed class GlanceActionService(ModulePreferenceService modulePreference
     private static bool IsShowAction(GlanceActionDescriptor descriptor) =>
         descriptor.Id.EndsWith(".Show", StringComparison.OrdinalIgnoreCase) && descriptor.Parameters.Count == 0;
 
-    private static bool IsRegistrationAvailable(ActionRegistration registration)
+    private static bool IsProviderAvailable(ActionRegistration registration)
     {
         try
         {

@@ -57,8 +57,16 @@ public sealed partial class PrivacyControlsComponent :
 
     public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
     [
-        new GlanceActionDescriptor("PrivacyControls.MuteMicrophone", Id, "Mute microphone", "Mute the current microphone."),
-        new GlanceActionDescriptor("PrivacyControls.UnmuteMicrophone", Id, "Unmute microphone", "Unmute the current microphone.")
+        new GlanceActionDescriptor("PrivacyControls.MuteMicrophone", Id, "Mute microphone", "Mute the current default microphone input.")
+        {
+            SemanticTags = ["microphone", "mic", "mute", "silence", "input", "privacy"],
+            ExampleUtterances = ["mute my microphone", "turn my mic off", "silence the microphone"]
+        },
+        new GlanceActionDescriptor("PrivacyControls.UnmuteMicrophone", Id, "Unmute microphone", "Unmute the current default microphone input.")
+        {
+            SemanticTags = ["microphone", "mic", "unmute", "input", "privacy", "turn on"],
+            ExampleUtterances = ["unmute my microphone", "turn my mic back on", "enable the microphone"]
+        }
     ];
 
     public bool IsAvailable(string actionId) =>

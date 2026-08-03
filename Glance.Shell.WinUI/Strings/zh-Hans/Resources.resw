@@ -39,4 +39,6 @@
   <data name="AssistantEnabledCard.Description" xml:space="preserve"><value>监听“Glance”或“Hey Glance”，通过语音命令控制 Glance</value></data>
   <data name="AssistantProviderCard.Header" xml:space="preserve"><value>语音提供程序</value></data>
   <data name="AssistantProviderCard.Description" xml:space="preserve"><value>选择用于唤醒词和命令识别的提供程序</value></data>
+  <data name="AssistantSemanticResolverCard.Header" xml:space="preserve"><value>命令理解</value></data>
+  <data name="AssistantSemanticResolverCard.Description" xml:space="preserve"><value>选择用于理解请求并选择 Glance 操作的本地 AI</value></data>
 </root>

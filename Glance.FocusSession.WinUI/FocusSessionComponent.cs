@@ -83,10 +83,26 @@ public sealed partial class FocusSessionComponent :
 
     public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
     [
-        new GlanceActionDescriptor("FocusSession.Start", Id, "Start focus session", "Start or resume the focus session."),
-        new GlanceActionDescriptor("FocusSession.Pause", Id, "Pause focus session", "Pause the current focus session."),
-        new GlanceActionDescriptor("FocusSession.Skip", Id, "Skip focus interval", "Skip to the next focus or break interval."),
-        new GlanceActionDescriptor("FocusSession.Reset", Id, "Reset focus session", "Reset the focus session.")
+        new GlanceActionDescriptor("FocusSession.Start", Id, "Start focus session", "Start or resume the Pomodoro-style focus session.")
+        {
+            SemanticTags = ["focus", "focus session", "pomodoro", "productivity", "concentrate", "resume"],
+            ExampleUtterances = ["start a focus session", "begin focusing", "resume my Pomodoro"]
+        },
+        new GlanceActionDescriptor("FocusSession.Pause", Id, "Pause focus session", "Pause the current focus or break interval.")
+        {
+            SemanticTags = ["focus", "focus session", "pomodoro", "pause", "hold"],
+            ExampleUtterances = ["pause my focus session", "hold the Pomodoro"]
+        },
+        new GlanceActionDescriptor("FocusSession.Skip", Id, "Skip focus interval", "Skip to the next focus or break interval.")
+        {
+            SemanticTags = ["focus", "focus session", "pomodoro", "skip", "next interval", "break"],
+            ExampleUtterances = ["skip this focus interval", "go to my break", "move to the next Pomodoro interval"]
+        },
+        new GlanceActionDescriptor("FocusSession.Reset", Id, "Reset focus session", "Reset the complete focus session.")
+        {
+            SemanticTags = ["focus", "focus session", "pomodoro", "reset", "restart"],
+            ExampleUtterances = ["reset my focus session", "restart the Pomodoro"]
+        }
     ];
 
     public bool IsAvailable(string actionId) =>

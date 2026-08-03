@@ -20,7 +20,9 @@ public sealed class WorldClockAssistantCommandHandler(IGlanceActionService actio
         }
 
         GlanceActionResult result = await actionService.InvokeAsync(CreateRequest(location), cancellationToken);
-        return new GlanceAssistantCommandResult(true, result.Message);
+        return new GlanceAssistantCommandResult(result.Status is not GlanceActionStatus.InvalidArguments and not GlanceActionStatus.Unavailable,
+            result.Message,
+            result.Guidance);
     }
 
     private static GlanceActionRequest CreateRequest(string location)

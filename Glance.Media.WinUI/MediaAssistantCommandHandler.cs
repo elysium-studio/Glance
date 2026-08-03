@@ -37,15 +37,26 @@ public sealed class MediaAssistantCommandHandler(MediaViewModel viewModel) :
             return Handled("The current media app cannot go back a track");
         }
 
-        if (ContainsAny(normalizedCommand, "pause music", "pause media", "pause track", "play music", "play media", "resume music", "resume media"))
+        if (ContainsAny(normalizedCommand, "pause music", "pause media", "pause track", "stop playback"))
         {
-            if (viewModel.HasSession && viewModel.CanTogglePlayback)
+            if (viewModel.HasSession && viewModel.CanTogglePlayback && viewModel.IsPlaying)
             {
                 viewModel.TogglePlayback();
-                return Handled(viewModel.IsPlaying ? "Pausing playback" : "Resuming playback");
+                return Handled("Pausing playback");
             }
 
-            return Handled("There is no controllable media playing");
+            return Handled(viewModel.HasSession ? "Playback is already paused" : "There is no controllable media playing");
+        }
+
+        if (ContainsAny(normalizedCommand, "play music", "play media", "resume music", "resume media", "continue playback"))
+        {
+            if (viewModel.HasSession && viewModel.CanTogglePlayback && !viewModel.IsPlaying)
+            {
+                viewModel.TogglePlayback();
+                return Handled("Resuming playback");
+            }
+
+            return Handled(viewModel.HasSession ? "Playback is already running" : "There is no controllable media playing");
         }
 
         return Task.FromResult(GlanceAssistantCommandResult.NotHandled);

@@ -63,6 +63,9 @@ public sealed partial class WindowsScreenCaptureService :
 
     public Task<ScreenCaptureItem?> CaptureWindowAsync(string windowName) => CaptureAsync(ScreenCaptureMode.Window, windowName);
 
+    public int CountMatchingWindows(string windowName) =>
+        string.IsNullOrWhiteSpace(windowName) ? 0 : FindWindowCandidates(EnumerateWindowCandidates(), windowName).Count;
+
     private async Task<ScreenCaptureItem?> CaptureAsync(ScreenCaptureMode mode, string? windowName)
     {
         if (!dispatcherQueue.HasThreadAccess)
@@ -525,12 +528,25 @@ public sealed partial class WindowsScreenCaptureService :
         return candidates;
     }
 
-    private static CaptureSelectionCandidate? FindWindowCandidate(IReadOnlyList<CaptureSelectionCandidate> candidates, string query) =>
-        candidates.FirstOrDefault(candidate => string.Equals(candidate.WindowTitle, query, StringComparison.OrdinalIgnoreCase)) is CaptureSelectionCandidate exact && exact.WindowHandle != 0
-            ? exact
-            : candidates.FirstOrDefault(candidate => candidate.WindowTitle?.Contains(query, StringComparison.OrdinalIgnoreCase) == true) is CaptureSelectionCandidate partial && partial.WindowHandle != 0
-                ? partial
-                : null;
+    private static CaptureSelectionCandidate? FindWindowCandidate(IReadOnlyList<CaptureSelectionCandidate> candidates, string query)
+    {
+        IReadOnlyList<CaptureSelectionCandidate> matches = FindWindowCandidates(candidates, query);
+        return matches.Count == 1 ? matches[0] : null;
+    }
+
+    private static IReadOnlyList<CaptureSelectionCandidate> FindWindowCandidates(IReadOnlyList<CaptureSelectionCandidate> candidates,
+        string query)
+    {
+        CaptureSelectionCandidate[] exactMatches = [.. candidates.Where(candidate =>
+            candidate.WindowHandle != 0 &&
+            string.Equals(candidate.WindowTitle, query, StringComparison.OrdinalIgnoreCase))];
+
+        return exactMatches.Length > 0
+            ? exactMatches
+            : [.. candidates.Where(candidate =>
+                candidate.WindowHandle != 0 &&
+                candidate.WindowTitle?.Contains(query, StringComparison.OrdinalIgnoreCase) == true)];
+    }
 
     private static IReadOnlyList<CaptureSelectionCandidate> EnumerateDisplayCandidates()
     {

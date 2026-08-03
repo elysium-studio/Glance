@@ -12,6 +12,7 @@ namespace Glance.Stash.WinUI;
 public sealed partial class StashComponent :
     IGlanceComponent,
     IGlanceActionProvider,
+    IGlanceActionValidator,
     IGlanceConnectedAnimationComponent,
     IGlanceContextAwareComponent,
     IGlanceIntent
@@ -75,7 +76,35 @@ public sealed partial class StashComponent :
                 new GlanceActionParameterDescriptor("isLink", GlanceActionParameterType.Boolean, "Whether the content should be treated as a web link.", IsRequired: false)
             ],
             Presentation: GlanceActionPresentation.Expanded)
+        {
+            SemanticTags = ["stash", "save", "keep", "remember", "store", "text", "note", "link", "url", "website"],
+            ExampleUtterances = ["stash this text", "save this link in my stash", "remember this for later"]
+        }
     ];
+
+    public Task<GlanceActionResult?> ValidateAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (!string.Equals(request.ActionId, "Stash.Add", StringComparison.OrdinalIgnoreCase))
+        {
+            return Task.FromResult<GlanceActionResult?>(null);
+        }
+
+        string? content = request.GetString("content");
+
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return Task.FromResult<GlanceActionResult?>(GlanceActionResult.InvalidArguments("What should I add to Stash?", "Say the text or link you want to keep."));
+        }
+
+        if (request.GetBoolean("isLink") == true &&
+            (!Uri.TryCreate(content, UriKind.Absolute, out Uri? uri) || uri.Scheme is not ("http" or "https")))
+        {
+            return Task.FromResult<GlanceActionResult?>(GlanceActionResult.InvalidArguments("That doesn't look like a complete link.", "Try saying or sharing the link again."));
+        }
+
+        return Task.FromResult<GlanceActionResult?>(null);
+    }
 
     public async Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
         CancellationToken cancellationToken = default)

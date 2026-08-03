@@ -53,6 +53,20 @@ public sealed class AudioSwitcherViewModelTests
     }
 
     [Fact]
+    public void PartialDeviceNameMustIdentifyOneOutput()
+    {
+        FakeAudioDeviceService service = new(new AudioOutputDevice("desk", "Desk Speakers", true), new AudioOutputDevice("bedroom", "Bedroom Speakers", false));
+        AudioSwitcherViewModel viewModel = new(service, new FakeLocalizer());
+
+        int matches = viewModel.CountMatchingDevices("Speakers");
+        bool selected = viewModel.SelectDevice("Speakers");
+
+        Assert.Equal(2, matches);
+        Assert.False(selected);
+        Assert.Null(service.LastSelectedId);
+    }
+
+    [Fact]
     public void FailedSwitch_KeepsCurrentOutput()
     {
         FakeAudioDeviceService service = new(new AudioOutputDevice("speakers", "Speakers", true), new AudioOutputDevice("headphones", "Headphones", false))

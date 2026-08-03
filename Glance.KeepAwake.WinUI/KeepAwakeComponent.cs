@@ -57,8 +57,16 @@ public sealed partial class KeepAwakeComponent :
 
     public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
     [
-        new GlanceActionDescriptor("KeepAwake.Start", Id, "Keep this PC awake", "Prevent Windows from sleeping."),
-        new GlanceActionDescriptor("KeepAwake.Stop", Id, "Allow this PC to sleep", "Stop keeping Windows awake.")
+        new GlanceActionDescriptor("KeepAwake.Start", Id, "Keep this PC awake", "Prevent Windows from sleeping or turning the display off. This does not simulate user presence.")
+        {
+            SemanticTags = ["keep awake", "stay awake", "prevent sleep", "do not sleep", "screen on", "display on", "power"],
+            ExampleUtterances = ["keep my computer awake", "don't let Windows sleep", "keep the screen on"]
+        },
+        new GlanceActionDescriptor("KeepAwake.Stop", Id, "Allow this PC to sleep", "Return Windows to its normal sleep and display power behaviour.")
+        {
+            SemanticTags = ["keep awake", "allow sleep", "stop keeping awake", "power", "sleep normally"],
+            ExampleUtterances = ["stop keeping my computer awake", "let Windows sleep normally", "turn off keep awake"]
+        }
     ];
 
     public bool IsAvailable(string actionId) =>

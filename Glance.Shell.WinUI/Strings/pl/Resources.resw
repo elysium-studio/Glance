@@ -39,4 +39,6 @@
   <data name="AssistantEnabledCard.Description" xml:space="preserve"><value>Nasłuchuj „Glance” lub „Hey Glance”, aby sterować aplikacją za pomocą poleceń głosowych</value></data>
   <data name="AssistantProviderCard.Header" xml:space="preserve"><value>Dostawca mowy</value></data>
   <data name="AssistantProviderCard.Description" xml:space="preserve"><value>Wybierz dostawcę rozpoznawania słowa aktywacyjnego i poleceń</value></data>
+  <data name="AssistantSemanticResolverCard.Header" xml:space="preserve"><value>Rozumienie poleceń</value></data>
+  <data name="AssistantSemanticResolverCard.Description" xml:space="preserve"><value>Wybierz lokalną sztuczną inteligencję, która rozumie prośby i wybiera akcje Glance</value></data>
 </root>

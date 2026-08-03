@@ -7,6 +7,7 @@ namespace Glance.SpeechToText.WinUI;
 public sealed partial class SpeechToTextComponent :
     IGlanceComponent,
     IGlanceActionProvider,
+    IGlanceActionValidator,
     IGlanceConnectedAnimationComponent,
     IGlanceAvailabilityComponent,
     IAsyncDisposable
@@ -75,8 +76,16 @@ public sealed partial class SpeechToTextComponent :
             "Start transcription",
             "Start transcribing microphone, system, or meeting audio.",
             [new GlanceActionParameterDescriptor("source", GlanceActionParameterType.String, "The audio source to transcribe.", false, ["microphone", "systemAudio", "meeting"])],
-            Presentation: GlanceActionPresentation.Expanded),
-        new GlanceActionDescriptor("SpeechToText.Stop", Id, "Stop transcription", "Stop the active transcription.")
+            Presentation: GlanceActionPresentation.Expanded)
+        {
+            SemanticTags = ["transcribe", "transcription", "speech to text", "dictation", "captions", "microphone", "system audio", "meeting"],
+            ExampleUtterances = ["transcribe my microphone", "start dictation", "listen to system audio", "transcribe this meeting"]
+        },
+        new GlanceActionDescriptor("SpeechToText.Stop", Id, "Stop transcription", "Stop listening and transcribing audio.")
+        {
+            SemanticTags = ["transcribe", "transcription", "dictation", "captions", "stop listening"],
+            ExampleUtterances = ["stop transcription", "stop transcribing", "end dictation"]
+        }
     ];
 
     bool IGlanceActionProvider.IsAvailable(string actionId) => actionId switch
@@ -85,6 +94,26 @@ public sealed partial class SpeechToTextComponent :
         "SpeechToText.Stop" => recognitionService.IsListening,
         _ => false
     };
+
+    public Task<GlanceActionResult?> ValidateAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (!string.Equals(request.ActionId, "SpeechToText.Start", StringComparison.OrdinalIgnoreCase))
+        {
+            return Task.FromResult<GlanceActionResult?>(null);
+        }
+
+        string? source = request.GetString("source");
+
+        if (string.IsNullOrWhiteSpace(source))
+        {
+            return Task.FromResult<GlanceActionResult?>(GlanceActionResult.InvalidArguments("What should I transcribe?", "Say microphone, system audio, or meeting."));
+        }
+
+        return Task.FromResult<GlanceActionResult?>(source is "microphone" or "systemAudio" or "meeting"
+            ? null
+            : GlanceActionResult.InvalidArguments($"I don't recognise “{source}”.", "Say microphone, system audio, or meeting."));
+    }
 
     public async Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
         CancellationToken cancellationToken = default)

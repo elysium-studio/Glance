@@ -11,6 +11,7 @@ namespace Glance.AudioSwitcher.WinUI;
 public sealed partial class AudioSwitcherComponent :
     IGlanceComponent,
     IGlanceActionProvider,
+    IGlanceActionValidator,
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
@@ -60,11 +61,40 @@ public sealed partial class AudioSwitcherComponent :
         new GlanceActionDescriptor("AudioSwitcher.SelectOutput",
             Id,
             "Switch audio output",
-            "Select the default audio output device.",
+            "Switch sound playback to a named speaker, headset, headphones, monitor, or other output device.",
             [new GlanceActionParameterDescriptor("device", GlanceActionParameterType.String, "Part or all of the output device name.")])
+        {
+            SemanticTags = ["audio output", "sound output", "speaker", "speakers", "headset", "headphones", "playback device"],
+            ExampleUtterances = ["switch audio to my headphones", "use the living room speakers", "change sound output to my monitor"]
+        }
     ];
 
     public bool IsAvailable(string actionId) => viewModel.HasDevices;
+
+    public Task<GlanceActionResult?> ValidateAsync(GlanceActionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (!string.Equals(request.ActionId, "AudioSwitcher.SelectOutput", StringComparison.OrdinalIgnoreCase))
+        {
+            return Task.FromResult<GlanceActionResult?>(null);
+        }
+
+        string? device = request.GetString("device");
+
+        if (string.IsNullOrWhiteSpace(device))
+        {
+            return Task.FromResult<GlanceActionResult?>(GlanceActionResult.InvalidArguments("Which output do you mean?", "Say the speaker or headset name."));
+        }
+
+        int matches = viewModel.CountMatchingDevices(device);
+
+        return Task.FromResult<GlanceActionResult?>(matches switch
+        {
+            0 => GlanceActionResult.InvalidArguments($"I couldn't find “{device}”.", "Try another output device name."),
+            > 1 => GlanceActionResult.InvalidArguments($"Several outputs match “{device}”.", "Try a more specific device name."),
+            _ => null
+        });
+    }
 
     public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
         CancellationToken cancellationToken = default)

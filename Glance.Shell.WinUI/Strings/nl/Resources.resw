@@ -39,4 +39,6 @@
   <data name="AssistantEnabledCard.Description" xml:space="preserve"><value>Luister naar ‘Glance’ of ‘Hey Glance’ om Glance met spraakopdrachten te bedienen</value></data>
   <data name="AssistantProviderCard.Header" xml:space="preserve"><value>Spraakprovider</value></data>
   <data name="AssistantProviderCard.Description" xml:space="preserve"><value>Kies de provider voor herkenning van het activeringswoord en opdrachten</value></data>
+  <data name="AssistantSemanticResolverCard.Header" xml:space="preserve"><value>Opdrachten begrijpen</value></data>
+  <data name="AssistantSemanticResolverCard.Description" xml:space="preserve"><value>Kies de lokale AI die verzoeken begrijpt en Glance-acties selecteert</value></data>
 </root>

@@ -77,8 +77,16 @@ public sealed partial class VoiceNotesComponent :
 
     public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
     [
-        new GlanceActionDescriptor("VoiceNotes.Start", Id, "Start voice note", "Start recording a new voice note."),
-        new GlanceActionDescriptor("VoiceNotes.Stop", Id, "Stop voice note", "Stop and save the current voice note.")
+        new GlanceActionDescriptor("VoiceNotes.Start", Id, "Start voice note", "Record microphone audio as a saved voice note. This does not transcribe speech into text.")
+        {
+            SemanticTags = ["voice note", "audio note", "record", "recording", "memo", "microphone", "save audio"],
+            ExampleUtterances = ["record a voice note", "start an audio memo", "make a voice recording"]
+        },
+        new GlanceActionDescriptor("VoiceNotes.Stop", Id, "Stop voice note", "Stop and save the current voice-note recording.")
+        {
+            SemanticTags = ["voice note", "audio note", "record", "recording", "memo", "stop", "save"],
+            ExampleUtterances = ["stop the voice note", "finish recording my memo", "save this voice recording"]
+        }
     ];
 
     public bool IsAvailable(string actionId) =>

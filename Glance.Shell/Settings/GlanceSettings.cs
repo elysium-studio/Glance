@@ -4,6 +4,8 @@ public sealed class GlanceSettings
 {
     public string? AssistantProviderId { get; set; }
 
+    public string? AssistantSemanticResolverId { get; set; }
+
     public bool AutoHide { get; set; }
 
     public GlanceExpansionMode ExpansionMode { get; set; }
