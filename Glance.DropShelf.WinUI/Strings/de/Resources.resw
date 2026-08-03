@@ -13,6 +13,8 @@
   <data name="ModuleDescription" xml:space="preserve">
     <value>Dateien und Ordner ablegen und anschließend gemeinsam an einen anderen Ort ziehen.</value>
   </data>
+  <data name="ShareIntentDisplayName" xml:space="preserve"><value>Dateiregal</value></data>
+  <data name="ShareIntentDescription" xml:space="preserve"><value>Diese Dateien oder Ordner im Regal aufbewahren</value></data>
   <data name="EmptySummary" xml:space="preserve">
     <value>Dateien hier ablegen</value>
   </data>

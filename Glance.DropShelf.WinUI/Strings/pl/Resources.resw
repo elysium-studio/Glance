@@ -13,6 +13,8 @@
   <data name="ModuleDescription" xml:space="preserve">
     <value>Odłóż pliki i foldery, a następnie przeciągnij je razem do innej lokalizacji.</value>
   </data>
+  <data name="ShareIntentDisplayName" xml:space="preserve"><value>Półka plików</value></data>
+  <data name="ShareIntentDescription" xml:space="preserve"><value>Zachowaj te pliki lub foldery na półce</value></data>
   <data name="EmptySummary" xml:space="preserve">
     <value>Upuść pliki tutaj</value>
   </data>

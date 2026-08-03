@@ -31,9 +31,16 @@ public sealed partial class DesktopIslandViewModel :
     [NotifyPropertyChangedFor(nameof(PlacementIndex))]
     private GlancePlacement placement;
 
-    private int selectedIndex;
-
+    private GlanceIntentDescriptor? activeContentRoute;
     private IReadOnlyList<IGlanceComponent> components;
+    private IReadOnlyList<GlanceIntentDescriptor> contentRoutes = [];
+    private GlanceContentKind contentRoutingKind;
+    private int contentRoutingPreviousIndex;
+    private bool contentRoutingPreviousExpanded;
+    private bool contentRoutingPreviousOpen;
+    private bool isContentRoutePickerVisible;
+    private bool isContentRouting;
+    private int selectedIndex;
     private readonly IGlanceAttentionService attentionService;
     private readonly IGlanceAssistantService assistant;
     private readonly IGlanceActionService actionService;
@@ -87,6 +94,10 @@ public sealed partial class DesktopIslandViewModel :
     public IGlanceIntentService IntentService => intentService;
 
     public IGlanceAssistantService Assistant => assistant;
+
+    public IReadOnlyList<GlanceIntentDescriptor> ContentRoutes => contentRoutes;
+
+    public bool IsContentRoutePickerVisible => isContentRoutePickerVisible;
 
     public int SelectedIndex
     {
@@ -168,28 +179,105 @@ public sealed partial class DesktopIslandViewModel :
     }
 
     public bool CanHandleContent(GlanceContentKind kind) =>
-        FindContextComponentIndex(kind) >= 0;
+        GetContentRoutes(kind).Count > 0;
 
     public bool TryActivateContent(GlanceContentKind kind)
     {
-        int componentIndex = FindContextComponentIndex(kind);
+        IReadOnlyList<GlanceIntentDescriptor> routes = GetContentRoutes(kind);
 
-        if (componentIndex < 0)
+        if (routes.Count == 0)
         {
             return false;
         }
 
-        SelectedIndex = componentIndex;
+        if (!isContentRouting)
+        {
+            isContentRouting = true;
+            contentRoutingKind = kind;
+            contentRoutingPreviousIndex = SelectedIndex;
+            contentRoutingPreviousExpanded = IsExpanded;
+            contentRoutingPreviousOpen = IsOpen;
+        }
+        else if (contentRoutingKind == kind)
+        {
+            return true;
+        }
+
+        SetContentRoutes(routes);
+        GlanceIntentDescriptor? currentRoute = routes.FirstOrDefault(route =>
+            string.Equals(route.TargetComponentId, SelectedComponent?.Id, StringComparison.OrdinalIgnoreCase));
+
+        if (currentRoute is not null)
+        {
+            ActivateContentRoute(currentRoute);
+            return true;
+        }
+
         IsOpen = true;
         IsExpanded = true;
+
+        if (routes.Count == 1)
+        {
+            ActivateContentRoute(routes[0]);
+            return true;
+        }
+
+        activeContentRoute = null;
+        SetContentRoutePickerVisible(true);
         return true;
     }
 
-    public void EndContentPreview() => IsExpanded = IsPinned;
+    public bool TryActivateContentRoute(string intentId)
+    {
+        GlanceIntentDescriptor? route = contentRoutes.FirstOrDefault(candidate =>
+            string.Equals(candidate.Id, intentId, StringComparison.OrdinalIgnoreCase));
+
+        if (!isContentRouting || route is null)
+        {
+            return false;
+        }
+
+        ActivateContentRoute(route);
+        return true;
+    }
+
+    public void EndContentPreview() => CompleteContentRouting(false);
+
+    public void CompleteContentRouting(bool contentHandled)
+    {
+        if (!isContentRouting)
+        {
+            IsExpanded = contentHandled || IsPinned;
+            return;
+        }
+
+        isContentRouting = false;
+        activeContentRoute = null;
+        SetContentRoutePickerVisible(false);
+        SetContentRoutes([]);
+
+        if (contentHandled)
+        {
+            IsOpen = true;
+            IsExpanded = true;
+            return;
+        }
+
+        SelectedIndex = contentRoutingPreviousIndex;
+        IsOpen = contentRoutingPreviousOpen;
+        IsExpanded = contentRoutingPreviousExpanded || IsPinned;
+    }
 
     public async Task<bool> HandleContentAsync(GlanceContentContext context)
     {
-        int componentIndex = FindContextComponentIndex(context.Kind);
+        if (isContentRouting && activeContentRoute is null)
+        {
+            return false;
+        }
+
+        int componentIndex = activeContentRoute is null
+            ? FindContextComponentIndex(context.Kind)
+            : FindComponentIndex(activeContentRoute.TargetComponentId);
 
         if (componentIndex < 0 ||
             components[componentIndex] is not IGlanceContextAwareComponent component)
@@ -372,6 +460,65 @@ public sealed partial class DesktopIslandViewModel :
                 contextAware.CanHandle(kind))
             .Select(item => item.index)
             .DefaultIfEmpty(-1).First();
+
+    private int FindComponentIndex(string componentId) =>
+        components
+            .Select((component, index) => (component, index))
+            .Where(item => string.Equals(item.component.Id, componentId, StringComparison.OrdinalIgnoreCase))
+            .Select(item => item.index)
+            .DefaultIfEmpty(-1).First();
+
+    private IReadOnlyList<GlanceIntentDescriptor> GetContentRoutes(GlanceContentKind kind)
+    {
+        HashSet<string> compatibleComponents =
+        [
+            with(StringComparer.OrdinalIgnoreCase),
+            .. components
+                .Where(component => component is IGlanceContextAwareComponent contextAware && contextAware.CanHandle(kind))
+                .Select(component => component.Id)
+        ];
+        return
+        [
+            .. intentService.GetIntents(kind)
+                .Where(intent => compatibleComponents.Contains(intent.TargetComponentId))
+                .GroupBy(intent => intent.TargetComponentId, StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.First())
+                .OrderBy(intent => FindComponentIndex(intent.TargetComponentId))
+        ];
+    }
+
+    private void ActivateContentRoute(GlanceIntentDescriptor route)
+    {
+        int componentIndex = FindComponentIndex(route.TargetComponentId);
+
+        if (componentIndex < 0)
+        {
+            return;
+        }
+
+        activeContentRoute = route;
+        SelectedIndex = componentIndex;
+        IsOpen = true;
+        IsExpanded = true;
+        SetContentRoutePickerVisible(false);
+    }
+
+    private void SetContentRoutes(IReadOnlyList<GlanceIntentDescriptor> routes)
+    {
+        contentRoutes = routes;
+        OnPropertyChanged(nameof(ContentRoutes));
+    }
+
+    private void SetContentRoutePickerVisible(bool value)
+    {
+        if (isContentRoutePickerVisible == value)
+        {
+            return;
+        }
+
+        isContentRoutePickerVisible = value;
+        OnPropertyChanged(nameof(IsContentRoutePickerVisible));
+    }
 
     private async Task NavigateAsync(string key)
     {

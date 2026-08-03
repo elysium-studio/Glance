@@ -82,6 +82,12 @@ public sealed partial class DesktopIslandView :
     public Visibility WhenAvailable(bool isAvailable) =>
         isAvailable ? Visibility.Visible : Visibility.Collapsed;
 
+    public Visibility WhenRoutePickerVisible(bool isVisible) =>
+        isVisible ? Visibility.Visible : Visibility.Collapsed;
+
+    public Visibility WhenRoutePickerHidden(bool isVisible) =>
+        isVisible ? Visibility.Collapsed : Visibility.Visible;
+
     public double ToCompactWidth(bool isAssistantAvailable) =>
         isAssistantAvailable ? 268 : 228;
 
@@ -864,6 +870,28 @@ public sealed partial class DesktopIslandView :
         args.AcceptedOperation = DataPackageOperation.Copy;
     }
 
+    private void HandleContentRouteDragEnter(object sender, DragEventArgs args)
+    {
+        if (sender is not FrameworkElement element ||
+            element.DataContext is not GlanceIntentDescriptor route ||
+            !ViewModel.TryActivateContentRoute(route.Id))
+        {
+            args.AcceptedOperation = DataPackageOperation.None;
+            return;
+        }
+
+        StopContextualDragExitTimer();
+        args.AcceptedOperation = DataPackageOperation.Copy;
+        args.Handled = true;
+    }
+
+    private void HandleContentRouteDragOver(object sender, DragEventArgs args)
+    {
+        StopContextualDragExitTimer();
+        args.AcceptedOperation = DataPackageOperation.Copy;
+        args.Handled = true;
+    }
+
     private void HandleDragLeave(object sender, DragEventArgs args) =>
         ScheduleContextualDragExit();
 
@@ -991,6 +1019,7 @@ public sealed partial class DesktopIslandView :
 
         if (contentHandled)
         {
+            ViewModel.CompleteContentRouting(true);
             Reveal();
             return;
         }

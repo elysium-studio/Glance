@@ -13,6 +13,8 @@
   <data name="ModuleDescription" xml:space="preserve">
     <value>[Šţåğë ƒïļëš åñð ƒöļðëřš, ţĥëñ ðřåğ ţĥëɱ ţöğëţĥëř ţö åñöţĥëř ļöçåţïöñ.]</value>
   </data>
+  <data name="ShareIntentDisplayName" xml:space="preserve"><value>[Ƒïļë šĥëļƒ]</value></data>
+  <data name="ShareIntentDescription" xml:space="preserve"><value>[Ķëëþ ţĥëšë ƒïļëš öř ƒöļðëřš öñ ţĥë šĥëļƒ]</value></data>
   <data name="EmptySummary" xml:space="preserve">
     <value>[Ðřöþ ƒïļëš ĥëřë]</value>
   </data>

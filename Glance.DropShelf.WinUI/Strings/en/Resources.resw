@@ -13,6 +13,12 @@
   <data name="ModuleDescription" xml:space="preserve">
     <value>Stage files and folders, then drag them together to another location.</value>
   </data>
+  <data name="ShareIntentDisplayName" xml:space="preserve">
+    <value>File shelf</value>
+  </data>
+  <data name="ShareIntentDescription" xml:space="preserve">
+    <value>Keep these files or folders on the shelf</value>
+  </data>
   <data name="EmptySummary" xml:space="preserve">
     <value>Drop files or folders</value>
   </data>

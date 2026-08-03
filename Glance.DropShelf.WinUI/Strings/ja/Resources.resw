@@ -13,6 +13,8 @@
   <data name="ModuleDescription" xml:space="preserve">
     <value>ファイルやフォルダーを一時的に置き、まとめて別の場所へドラッグできます。</value>
   </data>
+  <data name="ShareIntentDisplayName" xml:space="preserve"><value>ファイルシェルフ</value></data>
+  <data name="ShareIntentDescription" xml:space="preserve"><value>これらのファイルまたはフォルダーをシェルフに保管します</value></data>
   <data name="EmptySummary" xml:space="preserve">
     <value>ここにファイルをドロップ</value>
   </data>

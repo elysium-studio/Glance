@@ -13,6 +13,8 @@
   <data name="ModuleDescription" xml:space="preserve">
     <value>Verzamel bestanden en mappen en sleep ze daarna samen naar een andere locatie.</value>
   </data>
+  <data name="ShareIntentDisplayName" xml:space="preserve"><value>Bestandenplank</value></data>
+  <data name="ShareIntentDescription" xml:space="preserve"><value>Bewaar deze bestanden of mappen op de plank</value></data>
   <data name="EmptySummary" xml:space="preserve">
     <value>Zet bestanden hier neer</value>
   </data>

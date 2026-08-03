@@ -4,6 +4,7 @@ using Microsoft.UI.Dispatching;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Glance.DropShelf.WinUI;
@@ -12,6 +13,7 @@ public sealed partial class DropShelfComponent :
     IGlanceComponent,
     IGlanceConnectedAnimationComponent,
     IGlanceContextAwareComponent,
+    IGlanceIntent,
     IDisposable
 {
     private readonly DispatcherQueue dispatcherQueue;
@@ -59,6 +61,12 @@ public sealed partial class DropShelfComponent :
 
     public object ExpandedAnimationElement { get; }
 
+    public GlanceIntentDescriptor Descriptor => new("DropShelf.Share",
+        Id,
+        localizer.GetText("ShareIntentDisplayName"),
+        localizer.GetText("ShareIntentDescription"),
+        "\uE8B7");
+
     public void Dispose() => options.Changed -= HandleOptionsChanged;
 
     public bool CanHandle(GlanceContentKind kind) =>
@@ -77,6 +85,10 @@ public sealed partial class DropShelfComponent :
             await transferStore.StageAsync(items);
         await AddItemsAsync(stagedItems);
     }
+
+    Task IGlanceIntent.InvokeAsync(GlanceContentContext context,
+        CancellationToken cancellationToken) =>
+        HandleAsync(context);
 
     private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<DropShelfSettings> args) =>
         dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));

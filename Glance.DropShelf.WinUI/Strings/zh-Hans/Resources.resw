@@ -13,6 +13,8 @@
   <data name="ModuleDescription" xml:space="preserve">
     <value>暂存文件和文件夹，然后将它们一起拖到其他位置。</value>
   </data>
+  <data name="ShareIntentDisplayName" xml:space="preserve"><value>文件架</value></data>
+  <data name="ShareIntentDescription" xml:space="preserve"><value>将这些文件或文件夹保留在文件架上</value></data>
   <data name="EmptySummary" xml:space="preserve">
     <value>将文件拖放到此处</value>
   </data>

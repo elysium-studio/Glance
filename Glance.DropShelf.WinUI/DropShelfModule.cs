@@ -16,7 +16,9 @@ public sealed class DropShelfModule :
         services.AddSingleton<ModuleResourceTextLocalizer<DropShelfModule>>();
         services.AddSingleton<DropShelfTransferStore>();
         services.AddSingleton(provider => new DropShelfViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<DropShelfModule>>(), provider.GetRequiredService<GlanceModuleOptions<DropShelfSettings>>().Current));
-        services.AddSingleton<IGlanceComponent, DropShelfComponent>();
+        services.AddSingleton<DropShelfComponent>();
+        services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<DropShelfComponent>());
+        services.AddSingleton<IGlanceIntent>(provider => provider.GetRequiredService<DropShelfComponent>());
         services.AddViewFor<ItemLimitSettingView, IGlanceModuleSettingViewModel, ItemLimitSettingViewModel>(ServiceLifetime.Transient, provider => new ItemLimitSettingView(), provider => new ItemLimitSettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<DropShelfSettings>>().Current, provider.GetRequiredService<IWritableOptions<DropShelfSettings>>()));
     }
 }

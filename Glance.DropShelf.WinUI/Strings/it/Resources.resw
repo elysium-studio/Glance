@@ -13,6 +13,8 @@
   <data name="ModuleDescription" xml:space="preserve">
     <value>Raccogli file e cartelle, quindi trascinali insieme in un'altra posizione.</value>
   </data>
+  <data name="ShareIntentDisplayName" xml:space="preserve"><value>Raccolta file</value></data>
+  <data name="ShareIntentDescription" xml:space="preserve"><value>Conserva questi file o cartelle nella raccolta</value></data>
   <data name="EmptySummary" xml:space="preserve">
     <value>Trascina qui i file</value>
   </data>
