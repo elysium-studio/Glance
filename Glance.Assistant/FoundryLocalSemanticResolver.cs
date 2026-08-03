@@ -14,7 +14,9 @@ public sealed class FoundryLocalSemanticResolver(ILogger<FoundryLocalSemanticRes
     IAsyncDisposable
 {
     private const string ModelAlias = "qwen2.5-0.5b";
+    private const string ConfirmSelectionToolName = "glance_confirm_selection";
     private const string NotUnderstoodToolName = "glance_not_understood";
+    private const string RejectSelectionToolName = "glance_reject_selection";
     private readonly SemaphoreSlim modelGate = new(1, 1);
     private readonly SemaphoreSlim resolutionGate = new(1, 1);
     private OpenAIChatClient? chatClient;
@@ -73,6 +75,13 @@ public sealed class FoundryLocalSemanticResolver(ILogger<FoundryLocalSemanticRes
             {
                 logger.LogWarning("Foundry Local selected unknown Glance tool {AssistantTool}", call.Name);
                 AssistantWakeDiagnostics.Write("Semantic.Resolve.UnknownTool", $"Command={command}; Tool={call.Name}");
+                return null;
+            }
+
+            if (RequiresVerification(command, action, candidates) &&
+                !await VerifySelectionAsync(client, command, action, candidates, cancellationToken))
+            {
+                AssistantWakeDiagnostics.Write("Semantic.Resolve.Rejected", $"Command={command}; Action={action.Id}; Reason=Verification");
                 return null;
             }
 
@@ -138,6 +147,73 @@ public sealed class FoundryLocalSemanticResolver(ILogger<FoundryLocalSemanticRes
         {
             modelGate.Release();
         }
+    }
+
+    private static async Task<bool> VerifySelectionAsync(OpenAIChatClient client,
+        string command,
+        GlanceActionDescriptor action,
+        IReadOnlyList<GlanceActionDescriptor> candidates,
+        CancellationToken cancellationToken)
+    {
+        string alternatives = string.Join("; ", candidates
+            .Where(candidate => !string.Equals(candidate.Id, action.Id, StringComparison.OrdinalIgnoreCase))
+            .Select(candidate => $"{candidate.Id}: {candidate.DisplayName}"));
+        List<ChatMessage> messages =
+        [
+            new()
+            {
+                Role = "system",
+                Content = "Verify a proposed Glance action before it is allowed to run. Confirm only when the spoken request clearly asks for both the proposed operation and its subject. Account for ordinary speech-recognition mistakes, but do not invent missing intent or reinterpret an unrelated request. Reject vague, ambiguous, incomplete, or merely similar-sounding requests. Call exactly one verification tool."
+            },
+            new()
+            {
+                Role = "user",
+                Content = $"Spoken request: '{command}'\nProposed action: {action.Id}: {action.DisplayName}. {action.Description}\nOther plausible actions: {(string.IsNullOrWhiteSpace(alternatives) ? "none" : alternatives)}"
+            }
+        ];
+        List<ToolDefinition> tools =
+        [
+            CreateDecisionTool(ConfirmSelectionToolName, "Confirm that the spoken request clearly and unambiguously asks for the proposed action."),
+            CreateDecisionTool(RejectSelectionToolName, "Reject when the request is ambiguous, incomplete, unrelated, or better matches another action.")
+        ];
+        ChatCompletionCreateResponse completion = await client.CompleteChatAsync(messages, tools, cancellationToken);
+        string? selectedTool = completion.Choices?.FirstOrDefault()?.Message.ToolCalls?.FirstOrDefault()?.FunctionCall?.Name;
+        bool confirmed = string.Equals(selectedTool, ConfirmSelectionToolName, StringComparison.Ordinal);
+        AssistantWakeDiagnostics.Write("Semantic.Resolve.Verification", $"Command={command}; Action={action.Id}; Tool={selectedTool ?? "<none>"}; Confirmed={confirmed}");
+        return confirmed;
+    }
+
+    private static ToolDefinition CreateDecisionTool(string name,
+        string description) =>
+        new()
+        {
+            Type = "function",
+            Function = new FunctionDefinition
+            {
+                Name = name,
+                Description = description,
+                Parameters = new PropertyDefinition
+                {
+                    Type = "object",
+                    Properties = new Dictionary<string, PropertyDefinition>(),
+                    Required = [],
+                    AdditionalProperties = false
+                }
+            }
+        };
+
+    private static bool RequiresVerification(string command,
+        GlanceActionDescriptor action,
+        IReadOnlyList<GlanceActionDescriptor> candidates)
+    {
+        string[] commandTerms = [.. Tokenize(command).Where(term => !IgnoredTerms.Contains(term))];
+        int selectedScore = Score(commandTerms, GetActionSemanticText(action));
+        int competingScore = candidates
+            .Where(candidate => !string.Equals(candidate.Id, action.Id, StringComparison.OrdinalIgnoreCase))
+            .Select(candidate => Score(commandTerms, GetActionSemanticText(candidate)))
+            .DefaultIfEmpty(0)
+            .Max();
+        return selectedScore < 8 || competingScore >= selectedScore - 2;
     }
 
     private static List<ToolDefinition> CreateTools(IReadOnlyList<GlanceActionDescriptor> actions,

@@ -90,7 +90,7 @@ public sealed partial class TimerComponent :
             "Start a countdown for a duration expressed as minutes. Convert hours or seconds into minutes.",
             [new GlanceActionParameterDescriptor("minutes", GlanceActionParameterType.Number, "Countdown duration in minutes. Convert spoken hours or seconds to minutes.", Minimum: 1d / 60, Maximum: 1440)])
         {
-            SemanticTags = ["timer", "countdown", "alarm", "remind", "minutes", "seconds", "hours"],
+            SemanticTags = ["timer", "countdown", "duration", "minutes", "seconds", "hours"],
             ExampleUtterances = ["set a timer for twenty four minutes", "start a ninety second countdown", "give me a timer for half an hour"]
         },
         new GlanceActionDescriptor("Timer.Pause", Id, "Pause timer", "Pause the running countdown.")
