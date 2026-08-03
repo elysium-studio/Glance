@@ -43,6 +43,8 @@ public sealed partial class ScreenLensComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.MediaAndCapture;
+
     public int Order => 210;
 
     public object CompactContent { get; }

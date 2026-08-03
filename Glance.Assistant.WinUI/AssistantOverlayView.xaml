@@ -2,52 +2,196 @@
 <UserControl
     x:Class="Glance.Assistant.WinUI.AssistantOverlayView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Loaded="{x:Bind HandleLoaded}"
+    Unloaded="{x:Bind HandleUnloaded}">
     <Border
         Background="Transparent"
         CornerRadius="28">
         <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Border
-                x:Name="AssistantGlyphSurface"
-                Width="48"
-                Height="48"
-                Margin="24,0,16,0"
-                VerticalAlignment="Center"
-                Background="{ThemeResource AccentFillColorDefaultBrush}"
-                CornerRadius="24">
-                <FontIcon
+            <Grid
+                x:Name="AssistantAmbience"
+                IsHitTestVisible="False"
+                Opacity="0.64">
+                <Rectangle>
+                    <Rectangle.Fill>
+                        <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                            <GradientStop Offset="0" Color="#7345C8FF" />
+                            <GradientStop Offset="0.28" Color="#46716BFF" />
+                            <GradientStop Offset="0.62" Color="#20D946EF" />
+                            <GradientStop Offset="1" Color="#00D946EF" />
+                        </LinearGradientBrush>
+                    </Rectangle.Fill>
+                </Rectangle>
+                <Rectangle>
+                    <Rectangle.Fill>
+                        <LinearGradientBrush StartPoint="0,1" EndPoint="0.9,0">
+                            <GradientStop Offset="0" Color="#4D235BFF" />
+                            <GradientStop Offset="0.32" Color="#287C3CFF" />
+                            <GradientStop Offset="0.7" Color="#14FF5FB7" />
+                            <GradientStop Offset="1" Color="#00FF5FB7" />
+                        </LinearGradientBrush>
+                    </Rectangle.Fill>
+                </Rectangle>
+            </Grid>
+            <Rectangle
+                IsHitTestVisible="False"
+                Opacity="0.14"
+                Fill="{ThemeResource AcrylicInAppFillColorDefaultBrush}" />
+            <Grid Padding="18,10,22,10" ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="72" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid
+                    x:Name="AssistantEnergyField"
+                    Width="68"
+                    Height="68"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    FontSize="20"
-                    Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
-                    Glyph="&#xE720;" />
-            </Border>
-            <StackPanel
-                Grid.Column="1"
-                Margin="0,0,28,0"
-                VerticalAlignment="Center"
-                Spacing="3">
-                <TextBlock
-                    Style="{StaticResource CaptionTextBlockStyle}"
-                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                    FontWeight="SemiBold"
-                    Text="GLANCE" />
-                <TextBlock
-                    MaxLines="3"
-                    Style="{StaticResource BodyStrongTextBlockStyle}"
-                    Text="{x:Bind Provider.Transcript, Mode=OneWay}"
-                    TextTrimming="WordEllipsis"
-                    TextWrapping="Wrap" />
-                <TextBlock
-                    Style="{StaticResource CaptionTextBlockStyle}"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{x:Bind Provider.StatusText, Mode=OneWay}"
-                    TextTrimming="CharacterEllipsis" />
-            </StackPanel>
+                    IsHitTestVisible="False">
+                    <Ellipse
+                        x:Name="OuterHalo"
+                        Width="62"
+                        Height="62"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Stroke="#6645C8FF"
+                        StrokeThickness="1.5" />
+                    <Ellipse
+                        x:Name="PulseHalo"
+                        Width="52"
+                        Height="52"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Stroke="#99D946EF"
+                        StrokeThickness="2" />
+                    <Grid
+                        x:Name="Orbit"
+                        Width="64"
+                        Height="64"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                        <Ellipse
+                            Width="5"
+                            Height="5"
+                            Margin="7,5,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Fill="#FF45C8FF" />
+                        <Ellipse
+                            Width="4"
+                            Height="4"
+                            Margin="0,0,5,10"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Fill="#FFD946EF" />
+                    </Grid>
+                    <Border
+                        x:Name="AssistantGlyphSurface"
+                        Width="48"
+                        Height="48"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        CornerRadius="24">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Offset="0" Color="#FF45C8FF" />
+                                <GradientStop Offset="0.52" Color="#FF716BFF" />
+                                <GradientStop Offset="1" Color="#FFD946EF" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Grid>
+                            <Ellipse
+                                x:Name="OrbHighlight"
+                                Margin="5,4,18,19"
+                                Fill="#66FFFFFF" />
+                            <FontIcon
+                                x:Name="AssistantGlyph"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontSize="19"
+                                Foreground="White"
+                                Glyph="&#xE720;" />
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <Grid
+                    x:Name="TextSurface"
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    RowSpacing="3">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                        FontWeight="SemiBold"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="GLANCE" />
+                    <TextBlock
+                        Grid.Row="1"
+                        MaxLines="2"
+                        Style="{StaticResource BodyStrongTextBlockStyle}"
+                        Text="{x:Bind Provider.Transcript, Mode=OneWay}"
+                        TextTrimming="WordEllipsis"
+                        TextWrapping="Wrap" />
+                    <Grid
+                        Grid.Row="2"
+                        ColumnSpacing="9">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            MaxWidth="214"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Text="{x:Bind Provider.StatusText, Mode=OneWay}"
+                            TextTrimming="CharacterEllipsis" />
+                        <StackPanel
+                            x:Name="EnergyBars"
+                            Grid.Column="1"
+                            Height="12"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal"
+                            Spacing="2">
+                            <Border
+                                x:Name="EnergyBar1"
+                                Width="2"
+                                Height="7"
+                                VerticalAlignment="Bottom"
+                                Background="#FF45C8FF"
+                                CornerRadius="1" />
+                            <Border
+                                x:Name="EnergyBar2"
+                                Width="2"
+                                Height="11"
+                                VerticalAlignment="Bottom"
+                                Background="#FF716BFF"
+                                CornerRadius="1" />
+                            <Border
+                                x:Name="EnergyBar3"
+                                Width="2"
+                                Height="8"
+                                VerticalAlignment="Bottom"
+                                Background="#FFD946EF"
+                                CornerRadius="1" />
+                            <Border
+                                x:Name="EnergyBar4"
+                                Width="2"
+                                Height="5"
+                                VerticalAlignment="Bottom"
+                                Background="#FFFF6B9E"
+                                CornerRadius="1" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Grid>
         </Grid>
     </Border>
 </UserControl>

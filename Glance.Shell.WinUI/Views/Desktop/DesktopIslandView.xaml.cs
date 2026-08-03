@@ -41,10 +41,7 @@ public sealed partial class DesktopIslandView :
     private IGlanceInteractionAwareComponent? interactionComponent;
     private IGlanceFooterAppearanceComponent? footerAppearanceComponent;
     private bool isPointerOverIsland;
-    private bool assistantExpandedIsland;
-    private bool isAssistantExpansionLockActive;
     private bool isAssistantPresentationRequested;
-    private bool shouldRetainAssistantExpansion;
     private int assistantPresentationTransition;
     private int previousIndex;
     private bool skipNextConnectedExpansion;
@@ -130,8 +127,8 @@ public sealed partial class DesktopIslandView :
         StopContextualDragExitTimer();
         StopInteractionExitTimer();
         StopStartupAttentionTimer();
-        isAssistantExpansionLockActive = false;
-        shouldRetainAssistantExpansion = false;
+        StaysExpanded = false;
+        DismissesOnOutsideClick = false;
         assistantPresentationTransition++;
     }
 
@@ -181,6 +178,12 @@ public sealed partial class DesktopIslandView :
 
     private void HandleAssistantPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
+        if (args.PropertyName == nameof(IGlanceAssistantService.IsResultPresentationActive))
+        {
+            DispatcherQueue.TryEnqueue(UpdateAssistantDismissalState);
+            return;
+        }
+
         if (args.PropertyName != nameof(IGlanceAssistantService.IsOverlayVisible))
         {
             return;
@@ -188,6 +191,8 @@ public sealed partial class DesktopIslandView :
 
         DispatcherQueue.TryEnqueue(() =>
         {
+            UpdateAssistantDismissalState();
+
             if (ViewModel.Assistant.IsOverlayVisible)
             {
                 ShowAssistantPresentation();
@@ -206,10 +211,9 @@ public sealed partial class DesktopIslandView :
         }
 
         isAssistantPresentationRequested = true;
-        assistantExpandedIsland = !ViewModel.IsExpanded;
-        shouldRetainAssistantExpansion = false;
         PrepareAssistantContinuumAnimation(true);
-        isAssistantExpansionLockActive = true;
+        StaysExpanded = true;
+        UpdateAssistantDismissalState();
         ApplyExpansionLock();
         Reveal();
         ViewModel.IsExpanded = true;
@@ -229,7 +233,6 @@ public sealed partial class DesktopIslandView :
             return;
         }
 
-        shouldRetainAssistantExpansion |= ViewModel.Assistant.IsResultPresentationActive;
         PrepareAssistantContinuumAnimation(false);
         isAssistantPresentationRequested = false;
         TransitionAssistantPresentation(false);
@@ -317,7 +320,8 @@ public sealed partial class DesktopIslandView :
 
         if (showAssistant)
         {
-            isAssistantExpansionLockActive = true;
+            StaysExpanded = true;
+            UpdateAssistantDismissalState();
             ApplyExpansionLock();
         }
 
@@ -330,21 +334,8 @@ public sealed partial class DesktopIslandView :
 
     private void CompleteAssistantPresentationExit()
     {
-        bool shouldCollapse = assistantExpandedIsland &&
-            !shouldRetainAssistantExpansion &&
-            !isPointerOverIsland &&
-            !ViewModel.IsPinned;
-
-        isAssistantExpansionLockActive = false;
+        ViewModel.IsExpanded = true;
         ApplyExpansionLock();
-
-        if (shouldCollapse)
-        {
-            ViewModel.IsExpanded = false;
-        }
-
-        assistantExpandedIsland = false;
-        shouldRetainAssistantExpansion = false;
     }
 
     private void PrepareAssistantContinuumAnimation(bool showAssistant)
@@ -434,6 +425,11 @@ public sealed partial class DesktopIslandView :
     }
 
     private void StopAttentionExpansionTimer() => attentionExpansionTimer?.Stop();
+
+    private void UpdateAssistantDismissalState() =>
+        DismissesOnOutsideClick = StaysExpanded &&
+            !ViewModel.Assistant.IsOverlayVisible &&
+            !ViewModel.Assistant.IsResultPresentationActive;
 
     private void HandleAttentionExpansionTimerTick(DispatcherQueueTimer sender, object args)
     {
@@ -752,7 +748,6 @@ public sealed partial class DesktopIslandView :
 
     private void ApplyExpansionLock() =>
         IsExpansionLocked = ViewModel.IsPinned ||
-            isAssistantExpansionLockActive ||
             expansionLockComponent?.IsExpansionLocked == true;
 
     private void HandleIslandDeactivated(object? sender, EventArgs args)

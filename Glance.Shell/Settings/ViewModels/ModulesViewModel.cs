@@ -6,9 +6,20 @@ using Glance.Application.Abstractions;
 namespace Glance.Shell;
 
 public sealed partial class ModulesViewModel :
-    ObservableCollectionViewModel<IModulesViewModel>,
+    ObservableCollectionViewModel<ISettingViewModel>,
     ISettingViewModel
 {
+    private static readonly string[] CategoryOrder =
+    [
+        GlanceModuleCategories.Information,
+        GlanceModuleCategories.Productivity,
+        GlanceModuleCategories.MediaAndCapture,
+        GlanceModuleCategories.DevicesAndSystem,
+        GlanceModuleCategories.Integrations,
+        GlanceModuleCategories.Other
+    ];
+    private readonly Dictionary<string, SettingsCategoryViewModel> categories = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ITextLocalizer localizer;
     private readonly ModulePreferenceService preferences;
 
     public ModulesViewModel(IServiceProvider provider,
@@ -21,7 +32,8 @@ public sealed partial class ModulesViewModel :
         base(provider, factory, messenger, disposer)
     {
         this.preferences = preferences;
-        Description = localizer.GetText("ModulesDescription/Text");
+        this.localizer = localizer;
+        Title = localizer.GetText("ModulesSectionTitle/Text");
         ILookup<string, IGlanceModuleSettingViewModel> settingsByModule = settings
             .Concat(preferences.CreateRuntimeSettings())
             .OrderBy(setting => setting.Order)
@@ -29,18 +41,19 @@ public sealed partial class ModulesViewModel :
 
         foreach (GlanceModulePreference preference in preferences.GetPreferences())
         {
-            Add(CreateItem(preference, settingsByModule[preference.Id]));
+            IGlanceComponent? component = preferences.GetComponent(preference.Id);
+            SettingsCategoryViewModel category = GetOrCreateCategory(component?.SettingsCategory ?? GlanceModuleCategories.Other);
+            category.Add(CreateItem(preference, settingsByModule[preference.Id]));
         }
 
         preferences.ComponentsAdded += HandleComponentsAdded;
     }
 
-    public bool CanReorder => true;
+    public IReadOnlyList<ISettingViewModel> Children => [.. this];
 
-    public string Description { get; }
+    public string Glyph => "\uE74C";
 
-    public async Task SaveOrderAsync() =>
-        await preferences.SetOrderAsync(this.OfType<ModuleSettingsItemViewModel>().Select(item => item.Id));
+    public string Title { get; }
 
     public override void Dispose()
     {
@@ -68,8 +81,33 @@ public sealed partial class ModulesViewModel :
             description,
             preference.IsEnabled,
             availableSettings.OrderBy(setting => setting.Order),
-            module => Messenger.Send(new ModuleSettingsNavigationRequestedEventArgs(module)),
+            NavigateToModule,
             (_, enabled) => preferences.SetEnabledAsync(preference.Id, enabled));
+    }
+
+    private SettingsCategoryViewModel GetOrCreateCategory(string id)
+    {
+        if (categories.TryGetValue(id, out SettingsCategoryViewModel? category))
+        {
+            return category;
+        }
+
+        category = new SettingsCategoryViewModel(id,
+            ResolveCategoryTitle(id),
+            ResolveCategoryGlyph(id),
+            [],
+            items => preferences.SetOrderAsync(items.OfType<ModuleSettingsItemViewModel>().Select(item => item.Id)));
+        categories.Add(id, category);
+        int categoryOrder = GetCategoryOrder(id);
+        int index = this.TakeWhile(item => item is SettingsCategoryViewModel existing && GetCategoryOrder(existing.Id) <= categoryOrder).Count();
+        Insert(index, category);
+        return category;
+    }
+
+    private int GetCategoryOrder(string id)
+    {
+        int index = Array.FindIndex(CategoryOrder, category => string.Equals(category, id, StringComparison.OrdinalIgnoreCase));
+        return index < 0 ? CategoryOrder.Length : index;
     }
 
     private void HandleComponentsAdded(object? sender,
@@ -83,11 +121,42 @@ public sealed partial class ModulesViewModel :
         foreach (IGlanceComponent component in args.Components)
         {
             GlanceModulePreference preference = orderedPreferences.First(item => string.Equals(item.Id, component.Id, StringComparison.OrdinalIgnoreCase));
+            SettingsCategoryViewModel category = GetOrCreateCategory(component.SettingsCategory);
             int index = orderedPreferences
-                .Select(item => item.Id)
-                .TakeWhile(id => !string.Equals(id, component.Id, StringComparison.OrdinalIgnoreCase))
-                .Count();
-            Insert(Math.Min(index, Count), CreateItem(preference, settingsByModule[component.Id]));
+                .TakeWhile(item => !string.Equals(item.Id, component.Id, StringComparison.OrdinalIgnoreCase))
+                .Count(item => string.Equals(preferences.GetComponent(item.Id)?.SettingsCategory, component.SettingsCategory, StringComparison.OrdinalIgnoreCase));
+            category.Insert(Math.Min(index, category.Count), CreateItem(preference, settingsByModule[component.Id]));
         }
     }
+
+    private void NavigateToModule(ModuleSettingsItemViewModel module)
+    {
+        SettingsCategoryViewModel? category = categories.Values.FirstOrDefault(category => category.Contains(module));
+
+        if (category is not null)
+        {
+            Messenger.Send(new SettingsNavigationRequestedEventArgs(category, module.Settings));
+        }
+    }
+
+    private string ResolveCategoryGlyph(string id) => id switch
+    {
+        GlanceModuleCategories.Information => "\uE946",
+        GlanceModuleCategories.Productivity => "\uE8FD",
+        GlanceModuleCategories.MediaAndCapture => "\uE8B9",
+        GlanceModuleCategories.DevicesAndSystem => "\uE772",
+        GlanceModuleCategories.Integrations => "\uE71B",
+        _ => "\uE8B7"
+    };
+
+    private string ResolveCategoryTitle(string id) => id switch
+    {
+        GlanceModuleCategories.Information => localizer.GetText("InformationModulesTitle"),
+        GlanceModuleCategories.Productivity => localizer.GetText("ProductivityModulesTitle"),
+        GlanceModuleCategories.MediaAndCapture => localizer.GetText("MediaAndCaptureModulesTitle"),
+        GlanceModuleCategories.DevicesAndSystem => localizer.GetText("DevicesAndSystemModulesTitle"),
+        GlanceModuleCategories.Integrations => localizer.GetText("IntegrationsModulesTitle"),
+        GlanceModuleCategories.Other => localizer.GetText("OtherModulesTitle"),
+        _ => id
+    };
 }

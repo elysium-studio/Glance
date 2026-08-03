@@ -58,6 +58,8 @@ public sealed partial class ThemeSwitcherComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.DevicesAndSystem;
+
     public int Order => 190;
 
     public object CompactContent { get; }

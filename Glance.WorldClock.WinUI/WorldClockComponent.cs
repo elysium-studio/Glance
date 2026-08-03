@@ -55,6 +55,8 @@ public sealed partial class WorldClockComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.Information;
+
     public int Order => 15;
 
     public object CompactContent { get; }

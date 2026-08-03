@@ -1,13 +1,26 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
 using Elysium.Presentation;
+using Glance.Application.Abstractions;
 
 namespace Glance.Shell;
 
-public sealed partial class WindowsViewModel(IServiceProvider provider,
-    IServiceFactory factory,
-    IMessenger messenger,
-    IDisposer disposer,
-    IEnumerable<IWindowsViewModel> items) :
-    ObservableCollectionViewModel<IWindowsViewModel>(provider, factory, messenger, disposer, items),
-    ISettingViewModel;
+public sealed partial class WindowsViewModel :
+    ObservableCollectionViewModel<IWindowsViewModel>,
+    ISettingViewModel
+{
+    public WindowsViewModel(IServiceProvider provider,
+        IServiceFactory factory,
+        IMessenger messenger,
+        IDisposer disposer,
+        ITextLocalizer localizer,
+        IEnumerable<IWindowsViewModel> items) :
+        base(provider, factory, messenger, disposer, items)
+    {
+        Title = localizer.GetText("WindowsSectionTitle/Text");
+    }
+
+    public string Glyph => "\uE737";
+
+    public string Title { get; }
+}

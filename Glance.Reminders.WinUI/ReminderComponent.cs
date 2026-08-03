@@ -60,6 +60,8 @@ public sealed partial class ReminderComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.Productivity;
+
     public int Order => 12;
 
     public object CompactContent { get; }

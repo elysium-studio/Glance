@@ -21,6 +21,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
     IAsyncDisposable
 {
     private const int CommandStartTimeoutMilliseconds = 10000;
+    private const int CommandAudioPreRollChunks = 20;
     private const int RuntimeStartupAttempts = 3;
     private const int WakeRecognitionRestartAttempts = 3;
     private const int WakeSessionOperationTimeoutMilliseconds = 5000;
@@ -60,6 +61,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
     private long wakeLastStateChangeTicks;
     private long wakeLastActivityTicks;
     private long wakeResultCount;
+    private long commandWakeBoundary;
 
     [ObservableProperty]
     public partial GlanceAssistantState State { get; set; } = GlanceAssistantState.Disabled;
@@ -384,11 +386,13 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             State == GlanceAssistantState.ListeningForCommand &&
             args.State == SpeechRecognizerState.SoundStarted)
         {
-            long boundary = audioCapture?.CreateCheckpoint() ?? 0;
+            long speechBoundary = audioCapture?.CreateCheckpoint() ?? 0;
+            long wakeBoundary = Interlocked.Read(ref commandWakeBoundary);
+            long replayBoundary = Math.Max(wakeBoundary, speechBoundary - CommandAudioPreRollChunks);
 
-            if (commandSpeechBoundaryCompletion?.TrySetResult(boundary) == true)
+            if (commandSpeechBoundaryCompletion?.TrySetResult(replayBoundary) == true)
             {
-                TraceWake("Command.SpeechStarted", $"AudioBoundary={boundary}; {GetWakeSnapshot()}");
+                TraceWake("Command.SpeechStarted", $"SpeechBoundary={speechBoundary}; ReplayBoundary={replayBoundary}; WakeBoundary={wakeBoundary}; {GetWakeSnapshot()}");
             }
         }
         TraceWake("Wake.StateChanged", $"Generation={Volatile.Read(ref wakeGeneration)}; Ownership={ownership}; State={args.State}; ProviderState={State}");
@@ -434,10 +438,11 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         }
 
         string wakeText = args.Result.Text;
-        Dispatch(() => _ = BeginCommandRecognitionAsync(wakeText));
+        long wakeBoundary = audioCapture?.CreateCheckpoint() ?? 0;
+        Dispatch(() => _ = BeginCommandRecognitionAsync(wakeText, wakeBoundary));
     }
 
-    private async Task BeginCommandRecognitionAsync(string wakeText)
+    private async Task BeginCommandRecognitionAsync(string wakeText, long wakeBoundary)
     {
         try
         {
@@ -447,6 +452,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             }
 
             TraceWake("Wake.ConstrainedDetected", $"Text={wakeText}; {GetWakeSnapshot()}");
+            Interlocked.Exchange(ref commandWakeBoundary, wakeBoundary);
             BeginCommandWindow();
             await StartCommandRecognitionAsync(providerCancellationTokenSource.Token);
             TraceWake("Command.Start.Ready", GetWakeSnapshot());
@@ -1134,6 +1140,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         commandStartCancellationTokenSource = null;
         commandSpeechBoundaryCompletion?.TrySetCanceled();
         commandSpeechBoundaryCompletion = null;
+        Interlocked.Exchange(ref commandWakeBoundary, 0);
         utteranceCompletionCancellationTokenSource?.Cancel();
         utteranceCompletionCancellationTokenSource?.Dispose();
         utteranceCompletionCancellationTokenSource = null;

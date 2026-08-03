@@ -77,6 +77,8 @@ public sealed partial class WeatherComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.Information;
+
     public int Order => 25;
 
     public object CompactContent { get; }

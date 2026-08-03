@@ -19,14 +19,13 @@
             IsBackButtonEnabled="False"
             IsBackButtonVisible="False" />
         <NavigationView
+            x:Name="SettingsNavigation"
             Grid.Row="1"
             Margin="0,8,0,0"
             IsBackButtonVisible="Collapsed"
             IsPaneToggleButtonVisible="False"
             IsSettingsVisible="False"
-            MenuItemsSource="{x:Bind ViewModel, Mode=OneWay}"
             PaneDisplayMode="Left"
-            SelectedItem="{x:Bind ViewModel.SelectedItem, Mode=TwoWay}"
             SelectionChanged="HandleNavigationSelectionChanged">
             <NavigationView.PaneFooter>
                 <NavigationViewItem
@@ -45,25 +44,14 @@
                 <SolidColorBrush x:Key="NavigationViewContentGridBorderBrush" Color="Transparent" />
                 <Thickness x:Key="NavigationViewContentGridBorderThickness">0</Thickness>
             </NavigationView.Resources>
-            <NavigationView.MenuItemTemplate>
-                <DataTemplate x:DataType="Shell:ISettingViewModel">
-                    <NavigationViewItem Margin="8,0,0,0">
-                        <ContentControl
-                            HorizontalContentAlignment="Stretch"
-                            Content="{x:Bind}"
-                            ContentTemplateSelector="{WinUI:ViewTemplateSelector}" />
-                    </NavigationViewItem>
-                </DataTemplate>
-            </NavigationView.MenuItemTemplate>
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <BreadcrumbBar
                     Grid.Row="0"
-                    Margin="36,0,36,16"
+                    Margin="36,0,36,8"
                     ItemClicked="HandleBreadcrumbItemClicked"
                     ItemsSource="{x:Bind BreadcrumbItems}">
                     <BreadcrumbBar.Resources>
@@ -80,15 +68,8 @@
                         </DataTemplate>
                     </BreadcrumbBar.ItemTemplate>
                 </BreadcrumbBar>
-                <Grid Grid.Row="1" Margin="36,0,36,12">
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="{x:Bind ViewModel.CurrentView.Description, Mode=OneWay}"
-                        TextWrapping="Wrap" />
-                </Grid>
                 <ContentControl
-                    Grid.Row="2"
+                    Grid.Row="1"
                     HorizontalContentAlignment="Stretch"
                     VerticalContentAlignment="Stretch"
                     Content="{x:Bind ViewModel.CurrentView, Mode=OneWay}">

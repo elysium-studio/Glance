@@ -61,6 +61,8 @@ public sealed partial class RemovableDevicesComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.DevicesAndSystem;
+
     public int Order => 130;
 
     public object CompactContent { get; }

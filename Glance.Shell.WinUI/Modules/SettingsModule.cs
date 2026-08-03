@@ -28,6 +28,7 @@ public sealed class SettingsModule :
                     provider.GetRequiredService<IServiceFactory>(),
                     provider.GetRequiredService<IMessenger>(),
                     provider.GetRequiredService<IDisposer>(),
+                    provider.GetRequiredService<ITextLocalizer>(),
                     provider.GetRequiredService<IEnumerable<IGlanceViewModel>>()))
             .AddViewFor<ModulesView, ISettingViewModel, ModulesViewModel>(ServiceLifetime.Transient,
                 provider => new ModulesView(),
@@ -44,6 +45,7 @@ public sealed class SettingsModule :
                     provider.GetRequiredService<IServiceFactory>(),
                     provider.GetRequiredService<IMessenger>(),
                     provider.GetRequiredService<IDisposer>(),
+                    provider.GetRequiredService<ITextLocalizer>(),
                     provider.GetRequiredService<IEnumerable<IWindowsViewModel>>()));
     }
 }

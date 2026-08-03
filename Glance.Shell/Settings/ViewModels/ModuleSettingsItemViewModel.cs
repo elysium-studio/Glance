@@ -21,7 +21,7 @@ public sealed partial class ModuleSettingsItemViewModel :
         Id = id;
         DisplayName = displayName;
         Description = description;
-        Settings = new ModuleSettingsViewModel(settings);
+        Settings = new ModuleSettingsViewModel(displayName, settings);
         this.navigate = navigate;
         this.isEnabled = isEnabled;
         SetEnabled = setEnabled;

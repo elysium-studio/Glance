@@ -5,23 +5,29 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Windows.Graphics;
 
 namespace Glance.Shell.WinUI;
 
 public sealed partial class SettingsWindow :
     Window,
-    IRecipient<ModuleSettingsNavigationRequestedEventArgs>
+    IRecipient<SettingsNavigationRequestedEventArgs>
 {
     private const int WindowWidth = 1100;
     private const int WindowHeight = 680;
     private readonly IApplicationLifetime applicationLifetime;
     private readonly ITextLocalizer localizer;
     private readonly IMessenger messenger;
+    private readonly Dictionary<ISettingViewModel, NavigationViewItem> navigationItems = [];
+    private readonly List<ISettingViewModel> navigationPath = [];
+    private readonly List<INotifyCollectionChanged> observedNavigationCollections = [];
+    private bool isBuildingNavigation;
     private bool isClosing;
     private bool isQuitDialogOpen;
-    private ModuleSettingsItemViewModel? currentModule;
     private SettingsViewModel? viewModel;
 
     public SettingsWindow(IMessenger messenger,
@@ -33,7 +39,7 @@ public sealed partial class SettingsWindow :
         this.applicationLifetime = applicationLifetime;
         InitializeComponent();
 
-        messenger.Register<ModuleSettingsNavigationRequestedEventArgs>(this);
+        messenger.Register<SettingsNavigationRequestedEventArgs>(this);
         Closed += HandleClosed;
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
@@ -55,17 +61,20 @@ public sealed partial class SettingsWindow :
 
     public SettingsViewModel ViewModel => viewModel ??= (SettingsViewModel)((FrameworkElement)Content).DataContext;
 
-    public void Receive(ModuleSettingsNavigationRequestedEventArgs message)
+    public void Receive(SettingsNavigationRequestedEventArgs message)
     {
-        if (isClosing ||
-            !message.Module.CanExpand ||
-            ReferenceEquals(currentModule, message.Module))
+        if (isClosing)
         {
             return;
         }
 
-        currentModule = message.Module;
-        UpdateNavigation(ViewModel.SelectedItem);
+        List<ISettingViewModel>? path = FindNavigationPath(message.Parent);
+
+        if (path is not null)
+        {
+            path.Add(message.Target);
+            Navigate(path);
+        }
     }
 
     private void HandleLoaded(object sender,
@@ -73,7 +82,7 @@ public sealed partial class SettingsWindow :
     {
         if (!isClosing)
         {
-            UpdateNavigation(ViewModel.SelectedItem);
+            BuildNavigation();
         }
     }
 
@@ -85,16 +94,34 @@ public sealed partial class SettingsWindow :
             return;
         }
 
-        currentModule = null;
-        UpdateNavigation(args.SelectedItem as ISettingViewModel);
+        if (args.SelectedItem is not NavigationViewItem item ||
+            item.Tag is not ISettingViewModel selectedItem)
+        {
+            return;
+        }
+
+        List<ISettingViewModel>? path = FindNavigationPath(selectedItem);
+
+        if (path is null)
+        {
+            return;
+        }
+
+        if (selectedItem.Children.Count > 0)
+        {
+            path.Add(selectedItem.Children[0]);
+            SettingsNavigation.SelectedItem = navigationItems[selectedItem.Children[0]];
+        }
+
+        Navigate(path);
     }
 
     private async void HandleSettingItemsReordered(ListViewBase sender,
         DragItemsCompletedEventArgs args)
     {
-        if (sender.ItemsSource is ModulesViewModel modules)
+        if (sender.ItemsSource is ISettingViewModel viewModel)
         {
-            await modules.SaveOrderAsync();
+            await viewModel.SaveOrderAsync();
         }
     }
 
@@ -141,11 +168,27 @@ public sealed partial class SettingsWindow :
     private void HandleBreadcrumbItemClicked(BreadcrumbBar sender,
         BreadcrumbBarItemClickedEventArgs args)
     {
-        if (args.Index == 0 &&
-            BreadcrumbItems.Count > 1)
+        if (args.Index < 0 ||
+            args.Index >= navigationPath.Count - 1)
         {
-            GoBack();
+            return;
         }
+
+        List<ISettingViewModel> path = [.. navigationPath.Take(args.Index + 1)];
+        ISettingViewModel target = path[^1];
+
+        if (target.Children.Count > 0)
+        {
+            target = target.Children[0];
+            path.Add(target);
+        }
+
+        if (navigationItems.TryGetValue(target, out NavigationViewItem? item))
+        {
+            SettingsNavigation.SelectedItem = item;
+        }
+
+        Navigate(path);
     }
 
     private void HandleClosed(object sender,
@@ -153,54 +196,210 @@ public sealed partial class SettingsWindow :
     {
         isClosing = true;
         messenger.UnregisterAll(this);
-        currentModule = null;
+        StopObservingNavigationChanges();
+        navigationItems.Clear();
+        navigationPath.Clear();
         Closed -= HandleClosed;
     }
 
     private void GoBack()
     {
-        if (currentModule is null)
+        if (navigationPath.Count < 2)
         {
             return;
         }
 
-        currentModule = null;
-        UpdateNavigation(ViewModel.SelectedItem);
+        List<ISettingViewModel> path = [.. navigationPath.Take(navigationPath.Count - 1)];
+        ISettingViewModel target = path[^1];
+
+        if (navigationItems.TryGetValue(target, out NavigationViewItem? item))
+        {
+            SettingsNavigation.SelectedItem = item;
+        }
+
+        Navigate(path);
     }
 
-    private void UpdateNavigation(ISettingViewModel? selectedItem)
+    private void BuildNavigation()
     {
-        if (isClosing)
+        if (isBuildingNavigation || isClosing)
         {
             return;
         }
 
-        string pageTitle = selectedItem switch
+        isBuildingNavigation = true;
+
+        try
         {
-            GlanceViewModel => localizer.GetText("GlanceSectionTitle/Text"),
-            ModulesViewModel => localizer.GetText("ModulesSectionTitle/Text"),
-            WindowsViewModel => localizer.GetText("WindowsSectionTitle/Text"),
-            _ => string.Empty
+            ISettingViewModel[] previousPath = [.. navigationPath];
+            StopObservingNavigationChanges();
+            SettingsNavigation.MenuItems.Clear();
+            navigationItems.Clear();
+
+            foreach (ISettingViewModel root in ViewModel)
+            {
+                SettingsNavigation.MenuItems.Add(CreateNavigationItem(root));
+
+                if (root is INotifyCollectionChanged observable)
+                {
+                    observable.CollectionChanged += HandleNavigationCollectionChanged;
+                    observedNavigationCollections.Add(observable);
+                }
+            }
+
+            List<ISettingViewModel>? path = RestoreNavigationPath(previousPath);
+
+            if (path is null)
+            {
+                ISettingViewModel? initial = ViewModel.FirstOrDefault();
+
+                if (initial is null)
+                {
+                    return;
+                }
+
+                path = [initial];
+
+                if (initial.Children.Count > 0)
+                {
+                    path.Add(initial.Children[0]);
+                }
+            }
+
+            ISettingViewModel selectedItem = path.Last(navigationItems.ContainsKey);
+            SettingsNavigation.SelectedItem = navigationItems[selectedItem];
+            Navigate(path);
+        }
+        finally
+        {
+            isBuildingNavigation = false;
+        }
+    }
+
+    private void HandleNavigationCollectionChanged(object? sender,
+        NotifyCollectionChangedEventArgs args)
+    {
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            BuildNavigation();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(BuildNavigation);
+        }
+    }
+
+    private NavigationViewItem CreateNavigationItem(ISettingViewModel viewModel)
+    {
+        NavigationViewItem item = new()
+        {
+            Content = viewModel.Title,
+            IsExpanded = true,
+            Margin = new Thickness(8, 0, 0, 0),
+            Tag = viewModel
         };
-        ModuleSettingsItemViewModel? module = selectedItem is ModulesViewModel
-            ? currentModule
-            : null;
+
+        if (!string.IsNullOrEmpty(viewModel.Glyph))
+        {
+            item.Icon = new FontIcon { Glyph = viewModel.Glyph };
+        }
+
+        navigationItems[viewModel] = item;
+
+        foreach (ISettingViewModel child in viewModel.Children)
+        {
+            item.MenuItems.Add(CreateNavigationItem(child));
+        }
+
+        return item;
+    }
+
+    private List<ISettingViewModel>? FindNavigationPath(ISettingViewModel target)
+    {
+        foreach (ISettingViewModel root in ViewModel)
+        {
+            List<ISettingViewModel> path = [];
+
+            if (TryFindNavigationPath(root, target, path))
+            {
+                return path;
+            }
+        }
+
+        return null;
+    }
+
+    private List<ISettingViewModel>? RestoreNavigationPath(IReadOnlyList<ISettingViewModel> previousPath)
+    {
+        for (int index = previousPath.Count - 1; index >= 0; index--)
+        {
+            List<ISettingViewModel>? path = FindNavigationPath(previousPath[index]);
+
+            if (path is null)
+            {
+                continue;
+            }
+
+            path.AddRange(previousPath.Skip(index + 1));
+            return path;
+        }
+
+        return null;
+    }
+
+    private void StopObservingNavigationChanges()
+    {
+        foreach (INotifyCollectionChanged collection in observedNavigationCollections)
+        {
+            collection.CollectionChanged -= HandleNavigationCollectionChanged;
+        }
+
+        observedNavigationCollections.Clear();
+    }
+
+    private static bool TryFindNavigationPath(ISettingViewModel current,
+        ISettingViewModel target,
+        List<ISettingViewModel> path)
+    {
+        path.Add(current);
+
+        if (ReferenceEquals(current, target))
+        {
+            return true;
+        }
+
+        foreach (ISettingViewModel child in current.Children)
+        {
+            if (TryFindNavigationPath(child, target, path))
+            {
+                return true;
+            }
+        }
+
+        path.RemoveAt(path.Count - 1);
+        return false;
+    }
+
+    private void Navigate(IReadOnlyList<ISettingViewModel> path)
+    {
+        if (isClosing || path.Count == 0)
+        {
+            return;
+        }
+
+        navigationPath.Clear();
+        navigationPath.AddRange(path);
 
         BreadcrumbItems.Clear();
 
-        if (!string.IsNullOrEmpty(pageTitle))
+        foreach (ISettingViewModel item in path)
         {
-            BreadcrumbItems.Add(pageTitle);
+            BreadcrumbItems.Add(item.Title);
         }
 
-        if (module is not null)
-        {
-            BreadcrumbItems.Add(module.DisplayName);
-        }
-
-        bool showModuleSettings = module is not null;
-        ViewModel.NavigateTo(module?.Settings ?? selectedItem);
-        AppTitleBar.IsBackButtonEnabled = showModuleSettings;
-        AppTitleBar.IsBackButtonVisible = showModuleSettings;
+        ViewModel.NavigateTo(path[^1]);
+        bool canGoBack = path.Count > 2;
+        AppTitleBar.IsBackButtonEnabled = canGoBack;
+        AppTitleBar.IsBackButtonVisible = canGoBack;
     }
 }

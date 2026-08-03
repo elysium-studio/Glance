@@ -45,6 +45,8 @@ public sealed partial class PrivacyControlsComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.DevicesAndSystem;
+
     public int Order => 120;
 
     public object CompactContent { get; }

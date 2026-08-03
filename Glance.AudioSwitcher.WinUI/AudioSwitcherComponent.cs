@@ -46,6 +46,8 @@ public sealed partial class AudioSwitcherComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.MediaAndCapture;
+
     public int Order => 80;
 
     public object CompactContent { get; }

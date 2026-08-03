@@ -55,6 +55,8 @@ public sealed partial class StashComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.Productivity;
+
     public int Order => 55;
 
     public object CompactContent { get; }

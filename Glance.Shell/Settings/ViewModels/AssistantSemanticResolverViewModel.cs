@@ -21,6 +21,8 @@ public sealed partial class AssistantSemanticResolverViewModel :
 
     public ObservableCollection<AssistantSemanticResolverOption> Resolvers { get; } = [];
 
+    public string SettingsCategory => GlanceSettingsCategories.SpeechAndCommands;
+
     public int SelectedIndex
     {
         get => selectedIndex;

@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using System;
 using Windows.UI;
 
 namespace Glance.Media.WinUI;
@@ -8,6 +9,8 @@ namespace Glance.Media.WinUI;
 public sealed partial class MediaExpandedView :
     UserControl
 {
+    private EventHandler<object>? firstFrameHandler;
+
     public MediaExpandedView(MediaViewModel viewModel)
     {
         ViewModel = viewModel;
@@ -17,6 +20,29 @@ public sealed partial class MediaExpandedView :
     public MediaViewModel ViewModel { get; }
 
     public FrameworkElement ConnectedAnimationElement => ArtworkContainer;
+
+    private void HandleLoaded(object sender, RoutedEventArgs args)
+    {
+        TitleText.IsMarqueeEnabled = false;
+        ArtistText.IsMarqueeEnabled = false;
+        firstFrameHandler = (_, _) =>
+        {
+            CompositionTarget.Rendering -= firstFrameHandler;
+            firstFrameHandler = null;
+            TitleText.IsMarqueeEnabled = true;
+            ArtistText.IsMarqueeEnabled = true;
+        };
+        CompositionTarget.Rendering += firstFrameHandler;
+    }
+
+    private void HandleUnloaded(object sender, RoutedEventArgs args)
+    {
+        if (firstFrameHandler is not null)
+        {
+            CompositionTarget.Rendering -= firstFrameHandler;
+            firstFrameHandler = null;
+        }
+    }
 
     private ImageSource? ToImageSource(object? value) => value as ImageSource;
 

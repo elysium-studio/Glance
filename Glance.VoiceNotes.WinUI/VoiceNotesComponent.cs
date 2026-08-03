@@ -65,6 +65,8 @@ public sealed partial class VoiceNotesComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.MediaAndCapture;
+
     public int Order => 90;
 
     public object CompactContent { get; }

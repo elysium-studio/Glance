@@ -45,6 +45,8 @@ public sealed partial class PresenceComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.Productivity;
+
     public int Order => 180;
 
     public object CompactContent { get; }

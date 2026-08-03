@@ -55,6 +55,8 @@ public sealed partial class PowerComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.Information;
+
     public int Order => 40;
 
     public object CompactContent { get; }

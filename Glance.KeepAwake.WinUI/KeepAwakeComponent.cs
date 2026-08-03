@@ -45,6 +45,8 @@ public sealed partial class KeepAwakeComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.Productivity;
+
     public int Order => 170;
 
     public object CompactContent { get; }

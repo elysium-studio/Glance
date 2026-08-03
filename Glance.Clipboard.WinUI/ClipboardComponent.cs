@@ -84,6 +84,8 @@ public sealed partial class ClipboardComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.Productivity;
+
     public int Order => 50;
 
     public object CompactContent { get; }

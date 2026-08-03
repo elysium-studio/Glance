@@ -8,6 +8,8 @@ public interface IGlanceComponent
 
     string Description { get; }
 
+    string SettingsCategory => GlanceModuleCategories.Other;
+
     int Order { get; }
 
     object CompactContent { get; }

@@ -54,6 +54,8 @@ public sealed partial class SpeechToTextComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.MediaAndCapture;
+
     public int Order => 160;
 
     public object CompactContent { get; }

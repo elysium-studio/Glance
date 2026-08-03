@@ -55,13 +55,21 @@ public sealed partial class MediaArtworkTransition :
         perspectiveVisual.TransformMatrix = perspective;
         easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.18f, 0.86f), new Vector2(0.2f, 1));
         UpdateVisuals();
+        CancelPreparation();
+        StopAnimations();
+        currentImage.Source = Source;
+        nextImage.Source = null;
+        Canvas.SetZIndex(currentImage, 1);
+        Canvas.SetZIndex(nextImage, 0);
         currentVisual!.RotationAngleInDegrees = 0;
-        currentVisual.Opacity = currentImage.Source is null ? 0 : 1;
+        currentVisual.Opacity = Source is null ? 0 : 1;
         currentVisual.Scale = Vector3.One;
         nextVisual!.RotationAngleInDegrees = 0;
         nextVisual.Opacity = 0;
         nextVisual.Scale = Vector3.One;
         displayedSource = Source;
+        isPreparing = false;
+        isTransitioning = false;
     }
 
     private void HandleUnloaded(object sender, RoutedEventArgs args)

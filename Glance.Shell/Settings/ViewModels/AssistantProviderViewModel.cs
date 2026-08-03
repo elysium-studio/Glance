@@ -21,6 +21,8 @@ public sealed partial class AssistantProviderViewModel :
 
     public ObservableCollection<AssistantProviderOption> Providers { get; } = [];
 
+    public string SettingsCategory => GlanceSettingsCategories.SpeechAndCommands;
+
     public int SelectedIndex
     {
         get => selectedIndex;

@@ -34,6 +34,9 @@ public sealed partial class MediaViewModel :
     private uint accentColor = DefaultAccentColor;
 
     [ObservableProperty]
+    private uint backgroundForegroundColor = 0xFFFFFFFF;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PlayPauseGlyph))]
     private bool isPlaying;
 

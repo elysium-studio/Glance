@@ -10,5 +10,11 @@ public interface ISettingViewModel :
 {
     bool CanReorder => false;
 
-    string? Description => null;
+    IReadOnlyList<ISettingViewModel> Children => [];
+
+    string Glyph => string.Empty;
+
+    string Title => string.Empty;
+
+    Task SaveOrderAsync() => Task.CompletedTask;
 }

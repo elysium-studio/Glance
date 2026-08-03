@@ -14,4 +14,7 @@ public sealed partial class AssistantEnabledViewModel(IServiceProvider provider,
     Func<GlanceSettings, bool> read,
     Action<GlanceSettings, bool> write) :
     ObservableReadWriteViewModel<GlanceSettings, bool>(provider, factory, messenger, disposer, dispatcher, settings, writer, read, write),
-    IGlanceViewModel;
+    IGlanceViewModel
+{
+    public string SettingsCategory => GlanceSettingsCategories.SpeechAndCommands;
+}

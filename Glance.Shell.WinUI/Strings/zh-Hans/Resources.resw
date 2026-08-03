@@ -9,7 +9,14 @@
   <data name="GlanceSectionTitle.Text" xml:space="preserve"><value>Glance</value></data>
   <data name="ModulesSectionTitle.Text" xml:space="preserve"><value>模块</value></data>
   <data name="WindowsSectionTitle.Text" xml:space="preserve"><value>Windows</value></data>
-  <data name="ModulesDescription.Text" xml:space="preserve"><value>选择在 Glance 中显示的模块。</value></data>
+  <data name="AppearanceAndBehaviourSettingsTitle" xml:space="preserve"><value>外观和行为</value></data>
+  <data name="SpeechAndCommandsSettingsTitle" xml:space="preserve"><value>语音和命令</value></data>
+  <data name="InformationModulesTitle" xml:space="preserve"><value>信息</value></data>
+  <data name="ProductivityModulesTitle" xml:space="preserve"><value>工作效率</value></data>
+  <data name="MediaAndCaptureModulesTitle" xml:space="preserve"><value>媒体和捕获</value></data>
+  <data name="DevicesAndSystemModulesTitle" xml:space="preserve"><value>设备和系统</value></data>
+  <data name="IntegrationsModulesTitle" xml:space="preserve"><value>集成</value></data>
+  <data name="OtherModulesTitle" xml:space="preserve"><value>其他</value></data>
   <data name="GlancePlacementCard.Header" xml:space="preserve"><value>Glance 位置</value></data>
   <data name="GlancePlacementCard.Description" xml:space="preserve"><value>选择在屏幕顶部或底部显示 Glance</value></data>
   <data name="GlancePlacementTopOption.Content" xml:space="preserve"><value>顶部</value></data>

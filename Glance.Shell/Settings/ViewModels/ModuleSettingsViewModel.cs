@@ -10,12 +10,16 @@ public sealed class ModuleSettingsViewModel :
     private readonly IReadOnlyList<IGlanceModuleSettingViewModel> availableSettings;
     private bool disposed;
 
-    public ModuleSettingsViewModel(IEnumerable<IGlanceModuleSettingViewModel> settings)
+    public ModuleSettingsViewModel(string title,
+        IEnumerable<IGlanceModuleSettingViewModel> settings)
     {
+        Title = title;
         availableSettings = [.. settings];
     }
 
     public bool HasSettings => availableSettings.Count > 0;
+
+    public string Title { get; }
 
     public void SetEnabled(bool enabled)
     {

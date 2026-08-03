@@ -9,7 +9,6 @@
     <Grid x:Name="PerspectiveLayer">
         <Image
             x:Name="PrimaryArtwork"
-            Opacity="0"
             Stretch="UniformToFill"
             Translation="0,0,8">
             <Image.Shadow>
@@ -18,7 +17,6 @@
         </Image>
         <Image
             x:Name="SecondaryArtwork"
-            Opacity="0"
             Stretch="UniformToFill"
             Translation="0,0,8">
             <Image.Shadow>

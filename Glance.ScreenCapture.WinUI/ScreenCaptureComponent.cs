@@ -62,6 +62,8 @@ public sealed partial class ScreenCaptureComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.MediaAndCapture;
+
     public int Order => 110;
 
     public object CompactContent { get; }

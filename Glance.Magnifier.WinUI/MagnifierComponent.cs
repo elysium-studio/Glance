@@ -49,6 +49,8 @@ public sealed partial class MagnifierComponent :
 
     public string Description { get; }
 
+    public string SettingsCategory => GlanceModuleCategories.MediaAndCapture;
+
     public int Order => 200;
 
     public object CompactContent { get; }

@@ -59,6 +59,8 @@ public sealed partial class StopwatchComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.Productivity;
+
     public int Order => 0;
 
     public object CompactContent { get; }

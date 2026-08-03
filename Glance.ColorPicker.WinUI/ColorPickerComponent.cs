@@ -53,6 +53,8 @@ public sealed partial class ColorPickerComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.MediaAndCapture;
+
     public int Order => 100;
 
     public object CompactContent { get; }

@@ -37,6 +37,8 @@ public sealed partial class InfinityComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.Integrations;
+
     public int Order => 150;
 
     public object CompactContent { get; }

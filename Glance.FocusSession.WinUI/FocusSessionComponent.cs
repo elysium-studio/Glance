@@ -69,6 +69,8 @@ public sealed partial class FocusSessionComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.Productivity;
+
     public int Order => 70;
 
     public object CompactContent { get; }

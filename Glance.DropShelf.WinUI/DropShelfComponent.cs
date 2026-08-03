@@ -47,6 +47,8 @@ public sealed partial class DropShelfComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.Productivity;
+
     public int Order => 60;
 
     public object CompactContent { get; }

@@ -3,7 +3,9 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:Controls="using:Elysium.UI.Controls.WinUI"
-    xmlns:Local="using:Glance.Media.WinUI">
+    xmlns:Local="using:Glance.Media.WinUI"
+    Loaded="{x:Bind HandleLoaded}"
+    Unloaded="{x:Bind HandleUnloaded}">
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Media.xaml" />
     </UserControl.Resources>
@@ -47,6 +49,7 @@
                     TextTrimming="CharacterEllipsis"
                     TextWrapping="NoWrap" />
                 <Controls:MarqueeTextBlock
+                    x:Name="TitleText"
                     Height="24"
                     FontSize="18"
                     FontWeight="SemiBold"
@@ -54,6 +57,7 @@
                     Text="{x:Bind ViewModel.Title, Mode=OneWay}"
                     ToolTipService.ToolTip="{x:Bind ViewModel.Title, Mode=OneWay}" />
                 <Controls:MarqueeTextBlock
+                    x:Name="ArtistText"
                     Height="16"
                     FontSize="12"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"

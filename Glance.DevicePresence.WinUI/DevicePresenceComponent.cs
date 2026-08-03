@@ -56,6 +56,8 @@ public sealed partial class DevicePresenceComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.DevicesAndSystem;
+
     public int Order => 140;
 
     public object CompactContent { get; }

@@ -70,6 +70,8 @@ public sealed partial class TimerComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.Productivity;
+
     public int Order => 10;
 
     public object CompactContent { get; }

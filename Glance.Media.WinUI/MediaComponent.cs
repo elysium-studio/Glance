@@ -78,6 +78,8 @@ public sealed partial class MediaComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
+    public string SettingsCategory => GlanceModuleCategories.MediaAndCapture;
+
     public int Order => 20;
 
     public object CompactContent { get; }
@@ -95,11 +97,7 @@ public sealed partial class MediaComponent :
                 return null;
             }
 
-            Windows.UI.Color foreground = MediaAccentPalette.GetForeground(viewModel.AccentColor);
-            return ((uint)foreground.A << 24) |
-                ((uint)foreground.R << 16) |
-                ((uint)foreground.G << 8) |
-                foreground.B;
+            return viewModel.BackgroundForegroundColor;
         }
     }
 
@@ -361,6 +359,7 @@ public sealed partial class MediaComponent :
         }
 
         if (args.PropertyName is nameof(MediaViewModel.AccentColor) or
+            nameof(MediaViewModel.BackgroundForegroundColor) or
             nameof(MediaViewModel.AmbientArtwork) or
             nameof(MediaViewModel.HasSession))
         {
@@ -416,6 +415,7 @@ public sealed partial class MediaComponent :
         IRandomAccessStreamWithContentType? artworkStream = null;
         string? artworkHash = null;
         uint accentColor = MediaViewModel.DefaultAccentColor;
+        uint backgroundForegroundColor = 0xFFFFFFFF;
 
         if (properties.Thumbnail is not null)
         {
@@ -436,7 +436,9 @@ public sealed partial class MediaComponent :
         {
             try
             {
-                accentColor = await MediaArtworkColorAnalyzer.GetDominantColorAsync(artworkStream);
+                MediaArtworkColors colors = await MediaArtworkColorAnalyzer.AnalyzeAsync(artworkStream);
+                accentColor = colors.AccentColor;
+                backgroundForegroundColor = colors.ForegroundColor;
             }
             catch
             {
@@ -505,6 +507,7 @@ public sealed partial class MediaComponent :
 
                                 viewModel.Artwork = artwork;
                                 viewModel.AccentColor = accentColor;
+                                viewModel.BackgroundForegroundColor = backgroundForegroundColor;
 
                                 if (ambientArtwork is not null)
                                 {
@@ -527,6 +530,7 @@ public sealed partial class MediaComponent :
                             viewModel.Artwork = null;
                             SetAmbientArtwork(null);
                             viewModel.AccentColor = MediaViewModel.DefaultAccentColor;
+                            viewModel.BackgroundForegroundColor = 0xFFFFFFFF;
                             currentArtworkHash = artworkHash;
                         }
                     }
@@ -576,6 +580,7 @@ public sealed partial class MediaComponent :
         viewModel.Artwork = null;
         SetAmbientArtwork(null);
         viewModel.AccentColor = MediaViewModel.DefaultAccentColor;
+        viewModel.BackgroundForegroundColor = 0xFFFFFFFF;
         viewModel.IsPlaying = false;
         viewModel.HasSession = false;
         viewModel.CanSkipPrevious = false;

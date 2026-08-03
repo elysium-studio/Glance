@@ -4,7 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     IsHitTestVisible="False"
     Loaded="{x:Bind HandleLoaded}"
-    Opacity="0"
     SizeChanged="{x:Bind HandleSizeChanged}"
     Unloaded="{x:Bind HandleUnloaded}">
     <UserControl.Resources>

@@ -11,7 +11,7 @@ internal static class MediaArtworkColorAnalyzer
 {
     private const uint SampleSize = 32;
 
-    public static async Task<uint> GetDominantColorAsync(IRandomAccessStream stream)
+    public static async Task<MediaArtworkColors> AnalyzeAsync(IRandomAccessStream stream)
     {
         stream.Seek(0);
         BitmapDecoder decoder = await BitmapDecoder.CreateAsync(stream);
@@ -26,6 +26,10 @@ internal static class MediaArtworkColorAnalyzer
             ColorManagementMode.ColorManageToSRgb);
         byte[] pixels = provider.DetachPixelData();
         Dictionary<int, ColorBucket> buckets = [];
+        double totalRed = 0;
+        double totalGreen = 0;
+        double totalBlue = 0;
+        int pixelCount = 0;
 
         for (int index = 0; index + 3 < pixels.Length; index += 4)
         {
@@ -38,6 +42,11 @@ internal static class MediaArtworkColorAnalyzer
             {
                 continue;
             }
+
+            totalRed += red;
+            totalGreen += green;
+            totalBlue += blue;
+            pixelCount++;
 
             double maximum = Math.Max(red, Math.Max(green, blue)) / 255d;
             double minimum = Math.Min(red, Math.Min(green, blue)) / 255d;
@@ -60,13 +69,27 @@ internal static class MediaArtworkColorAnalyzer
 
         if (dominant.Count == 0)
         {
-            return MediaViewModel.DefaultAccentColor;
+            return new MediaArtworkColors(MediaViewModel.DefaultAccentColor, 0xFFFFFFFF);
         }
 
-        return Normalize(dominant.Red / dominant.Count,
+        uint accentColor = Normalize(dominant.Red / dominant.Count,
             dominant.Green / dominant.Count,
             dominant.Blue / dominant.Count);
+        uint averageColor = pixelCount == 0 ? accentColor :
+            ToColor(totalRed / pixelCount, totalGreen / pixelCount, totalBlue / pixelCount);
+        Windows.UI.Color foreground = MediaAccentPalette.GetForeground(averageColor);
+        uint foregroundColor = ((uint)foreground.A << 24) |
+            ((uint)foreground.R << 16) |
+            ((uint)foreground.G << 8) |
+            foreground.B;
+        return new MediaArtworkColors(accentColor, foregroundColor);
     }
+
+    private static uint ToColor(double red, double green, double blue) =>
+        0xFF000000u |
+        ((uint)Math.Round(red) << 16) |
+        ((uint)Math.Round(green) << 8) |
+        (uint)Math.Round(blue);
 
     private static uint Normalize(double red, double green, double blue)
     {
@@ -130,3 +153,6 @@ internal static class MediaArtworkColorAnalyzer
             new(Red + red, Green + green, Blue + blue, Score + weight, Count + 1);
     }
 }
+
+internal readonly record struct MediaArtworkColors(uint AccentColor,
+    uint ForegroundColor);
