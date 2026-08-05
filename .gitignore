@@ -3,6 +3,8 @@ obj/
 AppPackages/
 .vs/
 build/
+!/Glance.QuickConvert.WinUI/Build/
+!/Glance.QuickConvert.WinUI/Build/Download-FFmpeg.ps1
 build-check*/
 artifacts/
 TestResults/

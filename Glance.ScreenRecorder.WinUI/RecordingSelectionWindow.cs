@@ -34,6 +34,7 @@ internal sealed class RecordingSelectionWindow
     private readonly RectangleGeometry smokeBounds = new();
     private readonly RectangleGeometry smokeCutout = new();
     private readonly Border toolbar;
+    private readonly Canvas toolbarCanvas;
     private readonly Window window;
     private readonly nint windowHandle;
     private readonly NativeRectangle desktopBounds;
@@ -128,6 +129,8 @@ internal sealed class RecordingSelectionWindow
             Visibility = Visibility.Collapsed
         };
         OverlayChrome.Elevate(toolbar, 48);
+        toolbarCanvas = new Canvas();
+        toolbarCanvas.Children.Add(toolbar);
 
         root = new Grid
         {
@@ -138,7 +141,7 @@ internal sealed class RecordingSelectionWindow
         root.Children.Add(selectionCanvas);
         root.Children.Add(regionCanvas);
         root.Children.Add(instructionContainer);
-        root.Children.Add(toolbar);
+        root.Children.Add(toolbarCanvas);
         root.KeyDown += HandleKeyDown;
         root.Loaded += HandleLoaded;
         root.PointerMoved += HandlePointerMoved;
@@ -497,8 +500,19 @@ internal sealed class RecordingSelectionWindow
     private void HandleRegionInteractionCompleted(object? sender, EventArgs args)
     {
         isRegionInteractionActive = false;
-        HandleRegionBoundsChanged(sender, args);
+        toolbar.Visibility = Visibility.Collapsed;
+        _ = root.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, CompleteRegionInteraction);
+    }
+
+    private void CompleteRegionInteraction()
+    {
+        if (isRegionInteractionActive || regionOverlay is null)
+        {
+            return;
+        }
+
         toolbar.Visibility = Visibility.Visible;
+        HandleRegionBoundsChanged(regionOverlay, EventArgs.Empty);
     }
 
     private void PositionToolbar(Rect selection)
@@ -519,7 +533,8 @@ internal sealed class RecordingSelectionWindow
             top = Math.Max(20, selection.Y + 14);
         }
 
-        toolbar.Margin = new Thickness(left, top, 0, 0);
+        Canvas.SetLeft(toolbar, left);
+        Canvas.SetTop(toolbar, top);
     }
 
     private void ShowHighlight(Rect rectangle)
