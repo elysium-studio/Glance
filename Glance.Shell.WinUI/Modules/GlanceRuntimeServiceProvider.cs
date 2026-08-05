@@ -37,12 +37,7 @@ internal sealed class GlanceRuntimeServiceProvider :
             return viewFactory;
         }
 
-        if (serviceType == typeof(IViewModelFactory))
-        {
-            return viewModelFactory;
-        }
-
-        return applicationServices.GetService(serviceType);
+        return serviceType == typeof(IViewModelFactory) ? viewModelFactory : applicationServices.GetService(serviceType);
     }
 
     private object? CreateView(string key, object?[]? arguments)

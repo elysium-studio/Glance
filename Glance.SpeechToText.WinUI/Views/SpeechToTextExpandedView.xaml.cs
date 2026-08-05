@@ -37,35 +37,26 @@ public sealed partial class SpeechToTextExpandedView :
         }
     }
 
-    private string ToUpper(string value) =>
-        value.ToUpperInvariant();
+    private string ToUpper(string value) => value.ToUpperInvariant();
 
-    private Visibility ToTranscriptVisibility(bool hasTranscript) =>
-        hasTranscript ? Visibility.Visible : Visibility.Collapsed;
+    private Visibility ToTranscriptVisibility(bool hasTranscript) => hasTranscript ? Visibility.Visible : Visibility.Collapsed;
 
-    private Visibility ToModelRequiredVisibility(SpeechRecognitionAvailability availability) =>
-        availability == SpeechRecognitionAvailability.ModelRequired
+    private Visibility ToModelRequiredVisibility(SpeechRecognitionAvailability availability) => availability == SpeechRecognitionAvailability.ModelRequired
             ? Visibility.Visible
             : Visibility.Collapsed;
 
-    private Visibility ToReadyVisibility(SpeechRecognitionAvailability availability) =>
-        availability == SpeechRecognitionAvailability.Ready
+    private Visibility ToReadyVisibility(SpeechRecognitionAvailability availability) => availability == SpeechRecognitionAvailability.Ready
             ? Visibility.Visible
             : Visibility.Collapsed;
 
-    private bool CanDownloadModel(bool isBusy) =>
-        !isBusy;
+    private bool CanDownloadModel(bool isBusy) => !isBusy;
 
     private bool CanChangeAudioSource(bool isListening,
-        bool isBusy) =>
-        !isListening && !isBusy;
+        bool isBusy) => !isListening && !isBusy;
 
-    private bool IsMeetingSource(SpeechAudioSource source) =>
-        source == SpeechAudioSource.Meeting;
+    private bool IsMeetingSource(SpeechAudioSource source) => source == SpeechAudioSource.Meeting;
 
-    private bool IsMicrophoneSource(SpeechAudioSource source) =>
-        source == SpeechAudioSource.Microphone;
+    private bool IsMicrophoneSource(SpeechAudioSource source) => source == SpeechAudioSource.Microphone;
 
-    private bool IsSystemAudioSource(SpeechAudioSource source) =>
-        source == SpeechAudioSource.SystemAudio;
+    private bool IsSystemAudioSource(SpeechAudioSource source) => source == SpeechAudioSource.SystemAudio;
 }

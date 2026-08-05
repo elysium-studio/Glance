@@ -79,8 +79,7 @@ public sealed class GlanceAssistantSemanticResolverServiceTests
 
         public Task<GlanceAssistantActionResolution?> ResolveAsync(string command,
             IReadOnlyList<GlanceActionDescriptor> actions,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult(resolution);
+            CancellationToken cancellationToken = default) => Task.FromResult(resolution);
     }
 
     private sealed class TestActionService(GlanceActionResult? result = null) :
@@ -108,8 +107,7 @@ public sealed class GlanceAssistantSemanticResolverServiceTests
 
         public IReadOnlyList<GlanceActionDescriptor> GetActions() => [action];
 
-        public GlanceActionDescriptor? GetAction(string actionId) =>
-            string.Equals(actionId, action.Id, StringComparison.OrdinalIgnoreCase) ? action : null;
+        public GlanceActionDescriptor? GetAction(string actionId) => string.Equals(actionId, action.Id, StringComparison.OrdinalIgnoreCase) ? action : null;
 
         public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
             CancellationToken cancellationToken = default)
@@ -122,8 +120,7 @@ public sealed class GlanceAssistantSemanticResolverServiceTests
     private sealed class TestWritableOptions(GlanceSettings settings) :
         IWritableOptions<GlanceSettings>
     {
-        public Task<GlanceSettings?> ReadAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult<GlanceSettings?>(settings);
+        public Task<GlanceSettings?> ReadAsync(CancellationToken cancellationToken = default) => Task.FromResult<GlanceSettings?>(settings);
 
         public Task WriteAsync(Action<GlanceSettings> update,
             CancellationToken cancellationToken = default)
@@ -133,7 +130,6 @@ public sealed class GlanceAssistantSemanticResolverServiceTests
         }
 
         public Task WriteAsync(GlanceSettings value,
-            CancellationToken cancellationToken = default) =>
-            Task.CompletedTask;
+            CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 }

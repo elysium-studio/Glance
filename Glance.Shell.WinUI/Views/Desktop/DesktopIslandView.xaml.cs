@@ -15,8 +15,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
-using Windows.UI;
 using Windows.Storage;
+using Windows.UI;
 
 namespace Glance.Shell.WinUI;
 
@@ -34,7 +34,9 @@ public sealed partial class DesktopIslandView :
     private DispatcherQueueTimer? contextualDragExitTimer;
     private DispatcherQueueTimer? interactionExitTimer;
     private DispatcherQueueTimer? startupAttentionTimer;
+    private FrameworkElement? activeContentRouteTarget;
     private Button? pressedButton;
+    private string? droppedContentRouteId;
     private bool isContextualDragActive;
     private int contextualDragSession;
     private IGlanceExpansionLockComponent? expansionLockComponent;
@@ -42,7 +44,9 @@ public sealed partial class DesktopIslandView :
     private IGlanceFooterAppearanceComponent? footerAppearanceComponent;
     private bool isPointerOverIsland;
     private bool isAssistantPresentationRequested;
+    private bool isContentRoutePresentationRequested;
     private int assistantPresentationTransition;
+    private int contentRoutePresentationTransition;
     private int previousIndex;
     private bool skipNextConnectedExpansion;
 
@@ -73,26 +77,19 @@ public sealed partial class DesktopIslandView :
         };
     }
 
-    public Visibility WhenPinned(bool isPinned) =>
-        isPinned ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility WhenPinned(bool isPinned) => isPinned ? Visibility.Visible : Visibility.Collapsed;
 
-    public Visibility WhenNotPinned(bool isPinned) =>
-        isPinned ? Visibility.Collapsed : Visibility.Visible;
+    public Visibility WhenNotPinned(bool isPinned) => isPinned ? Visibility.Collapsed : Visibility.Visible;
 
-    public Visibility WhenAvailable(bool isAvailable) =>
-        isAvailable ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility WhenAvailable(bool isAvailable) => isAvailable ? Visibility.Visible : Visibility.Collapsed;
 
-    public Visibility WhenRoutePickerVisible(bool isVisible) =>
-        isVisible ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility WhenRoutePickerVisible(bool isVisible) => isVisible ? Visibility.Visible : Visibility.Collapsed;
 
-    public Visibility WhenRoutePickerHidden(bool isVisible) =>
-        isVisible ? Visibility.Collapsed : Visibility.Visible;
+    public Visibility WhenRoutePickerHidden(bool isVisible) => isVisible ? Visibility.Collapsed : Visibility.Visible;
 
-    public double ToCompactWidth(bool isAssistantAvailable) =>
-        isAssistantAvailable ? 268 : 228;
+    public double ToCompactWidth(bool isAssistantAvailable) => isAssistantAvailable ? 268 : 228;
 
-    public object? ToBackgroundContent(IGlanceComponent? component) =>
-        (component as IGlanceBackgroundComponent)?.BackgroundContent;
+    public object? ToBackgroundContent(IGlanceComponent? component) => (component as IGlanceBackgroundComponent)?.BackgroundContent;
 
     private void HandleLoaded(object sender, RoutedEventArgs args)
     {
@@ -104,9 +101,10 @@ public sealed partial class DesktopIslandView :
         ActualThemeChanged += HandleActualThemeChanged;
         (ViewModel.IntentService as GlanceIntentService)?.SetPresentationTargetProvider(GetIntentPresentationTarget);
         Deactivated += HandleIslandDeactivated;
-        DispatcherQueue.TryEnqueue(InitializeExpansionState);
+        _ = DispatcherQueue.TryEnqueue(InitializeExpansionState);
         UpdateFooterAppearanceComponent();
         ApplyAssistantPresentation(ViewModel.Assistant.IsOverlayVisible);
+        ApplyContentRoutePresentation(ViewModel.IsContentRoutePickerVisible);
         StartStartupAttentionTimer();
     }
 
@@ -162,31 +160,29 @@ public sealed partial class DesktopIslandView :
         ViewModel.CompleteStartup();
     }
 
-    private void HandleAttentionReceived(object? sender, GlanceAttentionRequest request) =>
-        DispatcherQueue.TryEnqueue(() =>
-        {
-            Reveal();
+    private void HandleAttentionReceived(object? sender, GlanceAttentionRequest request) => _ = DispatcherQueue.TryEnqueue(() =>
+                                                                                                 {
+                                                                                                     Reveal();
 
-            if (request.Expand)
-            {
-                StartAttentionExpansionTimer();
-            }
+                                                                                                     if (request.Expand)
+                                                                                                     {
+                                                                                                         StartAttentionExpansionTimer();
+                                                                                                     }
 
-            FrameworkElement presenter = ViewModel.IsExpanded
-                ? ExpandedPresenter
-                : CompactPresenter;
+                                                                                                     FrameworkElement presenter = ViewModel.IsExpanded
+                                                                                                         ? ExpandedPresenter
+                                                                                                         : CompactPresenter;
 
-            FluentMotion.PlayPulse(presenter);
-        });
+                                                                                                     FluentMotion.PlayPulse(presenter);
+                                                                                                 });
 
-    private void HandleWakeWordDetected(object? sender, EventArgs args) =>
-        DispatcherQueue.TryEnqueue(ShowAssistantPresentation);
+    private void HandleWakeWordDetected(object? sender, EventArgs args) => _ = DispatcherQueue.TryEnqueue(ShowAssistantPresentation);
 
     private void HandleAssistantPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
         if (args.PropertyName == nameof(IGlanceAssistantService.IsResultPresentationActive))
         {
-            DispatcherQueue.TryEnqueue(UpdateAssistantDismissalState);
+            _ = DispatcherQueue.TryEnqueue(UpdateAssistantDismissalState);
             return;
         }
 
@@ -195,7 +191,7 @@ public sealed partial class DesktopIslandView :
             return;
         }
 
-        DispatcherQueue.TryEnqueue(() =>
+        _ = DispatcherQueue.TryEnqueue(() =>
         {
             UpdateAssistantDismissalState();
 
@@ -223,7 +219,7 @@ public sealed partial class DesktopIslandView :
         ApplyExpansionLock();
         Reveal();
         ViewModel.IsExpanded = true;
-        DispatcherQueue.TryEnqueue(() =>
+        _ = DispatcherQueue.TryEnqueue(() =>
         {
             if (isAssistantPresentationRequested)
             {
@@ -272,7 +268,7 @@ public sealed partial class DesktopIslandView :
         {
             if (allowLayoutRetry)
             {
-                DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+                _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
                 {
                     if (showAssistant == isAssistantPresentationRequested)
                     {
@@ -380,7 +376,7 @@ public sealed partial class DesktopIslandView :
 
         try
         {
-            animation.TryStart(destination);
+            _ = animation.TryStart(destination);
         }
         catch (ArgumentException)
         {
@@ -394,8 +390,128 @@ public sealed partial class DesktopIslandView :
         return (indicator.Content as IGlanceAssistantConnectedAnimationView)?.ConnectedAnimationElement as FrameworkElement;
     }
 
-    private FrameworkElement? GetAssistantOverlayAnimationElement() =>
-        (AssistantOverlayPresenter.Content as IGlanceAssistantConnectedAnimationView)?.ConnectedAnimationElement as FrameworkElement;
+    private FrameworkElement? GetAssistantOverlayAnimationElement() => (AssistantOverlayPresenter.Content as IGlanceAssistantConnectedAnimationView)?.ConnectedAnimationElement as FrameworkElement;
+
+    private void ShowContentRoutePresentation()
+    {
+        if (isContentRoutePresentationRequested || !ViewModel.IsContentRoutePickerVisible)
+        {
+            return;
+        }
+
+        isContentRoutePresentationRequested = true;
+        Reveal();
+        ViewModel.IsExpanded = true;
+        _ = DispatcherQueue.TryEnqueue(() =>
+        {
+            if (isContentRoutePresentationRequested)
+            {
+                TransitionContentRoutePresentation(true);
+            }
+        });
+    }
+
+    private void HideContentRoutePresentation()
+    {
+        if (!isContentRoutePresentationRequested)
+        {
+            return;
+        }
+
+        isContentRoutePresentationRequested = false;
+        TransitionContentRoutePresentation(false);
+    }
+
+    private void TransitionContentRoutePresentation(bool showRoutes,
+        bool allowLayoutRetry = true)
+    {
+        if (showRoutes != isContentRoutePresentationRequested)
+        {
+            return;
+        }
+
+        int transition = ++contentRoutePresentationTransition;
+        FrameworkElement outgoing = showRoutes ? ExpandedModuleSurface : ContentRoutePicker;
+        FrameworkElement incoming = showRoutes ? ContentRoutePicker : ExpandedModuleSurface;
+        outgoing.Visibility = Visibility.Visible;
+        incoming.Visibility = Visibility.Visible;
+        UpdateLayout();
+
+        if (!showRoutes)
+        {
+            BackgroundContent = ToBackgroundContent(ViewModel.SelectedComponent);
+        }
+
+        if (!IsInElementTree(outgoing) ||
+            !IsInElementTree(incoming) ||
+            outgoing.ActualWidth <= 0 ||
+            outgoing.ActualHeight <= 0 ||
+            incoming.ActualWidth <= 0 ||
+            incoming.ActualHeight <= 0)
+        {
+            if (allowLayoutRetry)
+            {
+                _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+                {
+                    if (showRoutes == isContentRoutePresentationRequested)
+                    {
+                        TransitionContentRoutePresentation(showRoutes, false);
+                    }
+                });
+                return;
+            }
+
+            ApplyContentRoutePresentation(showRoutes);
+            return;
+        }
+
+        outgoing.IsHitTestVisible = false;
+        incoming.IsHitTestVisible = showRoutes;
+        FrameworkElement? background = GetTemplateChild("PART_BackgroundContent") as FrameworkElement;
+        FrameworkElement? compactContent = showRoutes ?
+            GetTemplateChild("PART_CompactContent") as FrameworkElement :
+            null;
+
+        FluentMotion.PlayVerticalPushTransition(outgoing,
+            incoming,
+            background,
+            compactContent,
+            showRoutes,
+            () =>
+        {
+            if (transition != contentRoutePresentationTransition)
+            {
+                return;
+            }
+
+            ApplyContentRoutePresentation(showRoutes);
+
+            if (background is not null)
+            {
+                FluentMotion.SetContentPresentationState(background, !showRoutes);
+            }
+
+            if (compactContent is not null)
+            {
+                FluentMotion.ResetTranslation(compactContent);
+            }
+        });
+    }
+
+    private void ApplyContentRoutePresentation(bool showRoutes)
+    {
+        if (!showRoutes)
+        {
+            ReleaseActiveContentRouteTarget();
+        }
+
+        isContentRoutePresentationRequested = showRoutes;
+        FluentMotion.SetContentPresentationState(ExpandedModuleSurface, !showRoutes);
+        FluentMotion.SetContentPresentationState(ContentRoutePicker, showRoutes);
+        ExpandedModuleSurface.Visibility = showRoutes ? Visibility.Collapsed : Visibility.Visible;
+        ContentRoutePicker.Visibility = showRoutes ? Visibility.Visible : Visibility.Collapsed;
+        BackgroundContent = showRoutes ? null : ToBackgroundContent(ViewModel.SelectedComponent);
+    }
 
     private GlanceScreenRectangle? GetIntentPresentationTarget()
     {
@@ -432,8 +548,7 @@ public sealed partial class DesktopIslandView :
 
     private void StopAttentionExpansionTimer() => attentionExpansionTimer?.Stop();
 
-    private void UpdateAssistantDismissalState() =>
-        DismissesOnOutsideClick = StaysExpanded &&
+    private void UpdateAssistantDismissalState() => DismissesOnOutsideClick = StaysExpanded &&
             !ViewModel.Assistant.IsOverlayVisible &&
             !ViewModel.Assistant.IsResultPresentationActive;
 
@@ -461,13 +576,33 @@ public sealed partial class DesktopIslandView :
 
     private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
+        if (args.PropertyName == nameof(DesktopIslandViewModel.IsContentRoutePickerVisible))
+        {
+            if (ViewModel.IsContentRoutePickerVisible)
+            {
+                CancelConnectedExpansionAnimation();
+            }
+
+            _ = DispatcherQueue.TryEnqueue(() =>
+            {
+                if (ViewModel.IsContentRoutePickerVisible)
+                {
+                    ShowContentRoutePresentation();
+                    return;
+                }
+
+                HideContentRoutePresentation();
+            });
+            return;
+        }
+
         if (args.PropertyName == nameof(DesktopIslandViewModel.SelectedComponent))
         {
             UpdateExpansionLockComponent();
             UpdateComponentInteraction();
             UpdateFooterAppearanceComponent();
 
-            if (isAssistantPresentationRequested)
+            if (isAssistantPresentationRequested || isContentRoutePresentationRequested)
             {
                 BackgroundContent = null;
             }
@@ -513,7 +648,7 @@ public sealed partial class DesktopIslandView :
 
         previousIndex = selectedIndex;
 
-        DispatcherQueue.TryEnqueue(() =>
+        _ = DispatcherQueue.TryEnqueue(() =>
         {
             skipNextConnectedExpansion = false;
             FluentMotion.PlayHorizontalPageTransition(CompactPresenter, direction);
@@ -521,8 +656,7 @@ public sealed partial class DesktopIslandView :
         });
     }
 
-    private void HandleActualThemeChanged(FrameworkElement sender, object args) =>
-        ApplyFooterAppearance();
+    private void HandleActualThemeChanged(FrameworkElement sender, object args) => ApplyFooterAppearance();
 
     private void UpdateFooterAppearanceComponent()
     {
@@ -538,25 +672,18 @@ public sealed partial class DesktopIslandView :
         ClearFooterAppearanceComponent();
         footerAppearanceComponent = selectedComponent;
 
-        if (footerAppearanceComponent is not null)
-        {
-            footerAppearanceComponent.FooterAppearanceChanged += HandleFooterAppearanceChanged;
-        }
+        footerAppearanceComponent?.FooterAppearanceChanged += HandleFooterAppearanceChanged;
 
         ApplyFooterAppearance();
     }
 
     private void ClearFooterAppearanceComponent()
     {
-        if (footerAppearanceComponent is not null)
-        {
-            footerAppearanceComponent.FooterAppearanceChanged -= HandleFooterAppearanceChanged;
-            footerAppearanceComponent = null;
-        }
+        footerAppearanceComponent?.FooterAppearanceChanged -= HandleFooterAppearanceChanged;
+        footerAppearanceComponent = null;
     }
 
-    private void HandleFooterAppearanceChanged(object? sender, EventArgs args) =>
-        DispatcherQueue.TryEnqueue(ApplyFooterAppearance);
+    private void HandleFooterAppearanceChanged(object? sender, EventArgs args) => _ = DispatcherQueue.TryEnqueue(ApplyFooterAppearance);
 
     private void ApplyFooterAppearance()
     {
@@ -569,10 +696,7 @@ public sealed partial class DesktopIslandView :
 
         SolidColorBrush? foregroundBrush = Resources["GlanceFooterForegroundBrush"] as SolidColorBrush;
 
-        if (foregroundBrush is not null)
-        {
-            foregroundBrush.Color = color;
-        }
+        _ = foregroundBrush?.Color = color;
 
         CompactAssistantIndicator.Foreground = footerAppearanceComponent?.FooterForegroundColor is not null &&
             foregroundBrush is not null ?
@@ -619,14 +743,11 @@ public sealed partial class DesktopIslandView :
         FluentMotion.PlayButtonPress(button);
     }
 
-    private void HandleButtonPointerReleased(object sender, PointerRoutedEventArgs args) =>
-        ReleasePressedButton();
+    private void HandleButtonPointerReleased(object sender, PointerRoutedEventArgs args) => ReleasePressedButton();
 
-    private void HandleButtonPointerCanceled(object sender, PointerRoutedEventArgs args) =>
-        ReleasePressedButton();
+    private void HandleButtonPointerCanceled(object sender, PointerRoutedEventArgs args) => ReleasePressedButton();
 
-    private void HandleButtonPointerCaptureLost(object sender, PointerRoutedEventArgs args) =>
-        ReleasePressedButton();
+    private void HandleButtonPointerCaptureLost(object sender, PointerRoutedEventArgs args) => ReleasePressedButton();
 
     private void ReleasePressedButton()
     {
@@ -730,30 +851,22 @@ public sealed partial class DesktopIslandView :
         ClearExpansionLockComponent();
         expansionLockComponent = selectedComponent;
 
-        if (expansionLockComponent is not null)
-        {
-            expansionLockComponent.ExpansionLockChanged += HandleExpansionLockChanged;
-        }
+        expansionLockComponent?.ExpansionLockChanged += HandleExpansionLockChanged;
 
         ApplyExpansionLock();
     }
 
     private void ClearExpansionLockComponent()
     {
-        if (expansionLockComponent is not null)
-        {
-            expansionLockComponent.ExpansionLockChanged -= HandleExpansionLockChanged;
-            expansionLockComponent = null;
-        }
+        expansionLockComponent?.ExpansionLockChanged -= HandleExpansionLockChanged;
+        expansionLockComponent = null;
 
         ApplyExpansionLock();
     }
 
-    private void HandleExpansionLockChanged(object? sender, EventArgs args) =>
-        DispatcherQueue.TryEnqueue(ApplyExpansionLock);
+    private void HandleExpansionLockChanged(object? sender, EventArgs args) => _ = DispatcherQueue.TryEnqueue(ApplyExpansionLock);
 
-    private void ApplyExpansionLock() =>
-        IsExpansionLocked = ViewModel.IsPinned ||
+    private void ApplyExpansionLock() => IsExpansionLocked = ViewModel.IsPinned ||
             expansionLockComponent?.IsExpansionLocked == true;
 
     private void HandleIslandDeactivated(object? sender, EventArgs args)
@@ -793,14 +906,14 @@ public sealed partial class DesktopIslandView :
 
         try
         {
-            animationService.PrepareToAnimate(animationKey, source);
+            _ = animationService.PrepareToAnimate(animationKey, source);
         }
         catch (ArgumentException)
         {
             return;
         }
 
-        DispatcherQueue.TryEnqueue(() =>
+        _ = DispatcherQueue.TryEnqueue(() =>
         {
             ConnectedAnimation? animation = animationService.GetAnimation(animationKey);
 
@@ -813,7 +926,7 @@ public sealed partial class DesktopIslandView :
 
             try
             {
-                animation.TryStart(destination);
+                _ = animation.TryStart(destination);
             }
             catch (ArgumentException)
             {
@@ -821,8 +934,21 @@ public sealed partial class DesktopIslandView :
         });
     }
 
-    private static bool IsInElementTree(FrameworkElement element) =>
-        element.IsLoaded && element.XamlRoot is not null;
+    private void CancelConnectedExpansionAnimation()
+    {
+        IGlanceComponent? selectedComponent = ViewModel.SelectedComponent;
+
+        if (selectedComponent is not IGlanceConnectedAnimationComponent)
+        {
+            return;
+        }
+
+        ConnectedAnimation? animation = ConnectedAnimationService.GetForCurrentView()
+            .GetAnimation($"DesktopIsland.{selectedComponent.Id}.Status");
+        animation?.Cancel();
+    }
+
+    private static bool IsInElementTree(FrameworkElement element) => element.IsLoaded && element.XamlRoot is not null;
 
     private void HandlePointerWheelChanged(object sender, PointerRoutedEventArgs args)
     {
@@ -835,7 +961,7 @@ public sealed partial class DesktopIslandView :
         }
     }
 
-    private void HandleDragEnter(object sender, DragEventArgs args)
+    private async void HandleDragEnter(object sender, DragEventArgs args)
     {
         if (!TryGetContentKind(args.DataView, out GlanceContentKind kind))
         {
@@ -848,11 +974,34 @@ public sealed partial class DesktopIslandView :
         isContextualDragActive = true;
         int session = ++contextualDragSession;
         args.AcceptedOperation = DataPackageOperation.Copy;
-        DispatcherQueue.TryEnqueue(() =>
+        DragOperationDeferral deferral = args.GetDeferral();
+        GlanceContentContext? context = null;
+
+        try
+        {
+            context = await CreateContentContextAsync(args.DataView, kind);
+        }
+        catch (COMException)
+        {
+        }
+        catch (Exception)
+        {
+        }
+        finally
+        {
+            await CompleteDropDeferralAsync(deferral);
+        }
+
+        if (context is null)
+        {
+            return;
+        }
+
+        _ = DispatcherQueue.TryEnqueue(() =>
         {
             if (isContextualDragActive && session == contextualDragSession)
             {
-                ViewModel.TryActivateContent(kind);
+                _ = ViewModel.TryActivateContent(context);
             }
         });
     }
@@ -873,14 +1022,14 @@ public sealed partial class DesktopIslandView :
     private void HandleContentRouteDragEnter(object sender, DragEventArgs args)
     {
         if (sender is not FrameworkElement element ||
-            element.DataContext is not GlanceIntentDescriptor route ||
-            !ViewModel.TryActivateContentRoute(route.Id))
+            element.DataContext is not GlanceContentRoute)
         {
             args.AcceptedOperation = DataPackageOperation.None;
             return;
         }
 
         StopContextualDragExitTimer();
+        SetActiveContentRouteTarget(element);
         args.AcceptedOperation = DataPackageOperation.Copy;
         args.Handled = true;
     }
@@ -892,8 +1041,60 @@ public sealed partial class DesktopIslandView :
         args.Handled = true;
     }
 
-    private void HandleDragLeave(object sender, DragEventArgs args) =>
+    private void HandleContentRouteDragLeave(object sender, DragEventArgs args)
+    {
+        if (ReferenceEquals(sender, activeContentRouteTarget))
+        {
+            ReleaseActiveContentRouteTarget();
+        }
+
         ScheduleContextualDragExit();
+    }
+
+    private void HandleContentRouteDrop(object sender,
+        DragEventArgs args)
+    {
+        if (sender is not FrameworkElement element ||
+            element.DataContext is not GlanceContentRoute route)
+        {
+            args.AcceptedOperation = DataPackageOperation.None;
+            args.Handled = true;
+            return;
+        }
+
+        droppedContentRouteId = route.Id;
+        ReleaseActiveContentRouteTarget();
+        StopContextualDragExitTimer();
+        args.AcceptedOperation = DataPackageOperation.Copy;
+    }
+
+    private void SetActiveContentRouteTarget(FrameworkElement target)
+    {
+        if (ReferenceEquals(activeContentRouteTarget, target))
+        {
+            return;
+        }
+
+        ReleaseActiveContentRouteTarget();
+        activeContentRouteTarget = target;
+        Canvas.SetZIndex(target, 1);
+        FluentMotion.PlayRouteTargetHover(target);
+    }
+
+    private void ReleaseActiveContentRouteTarget()
+    {
+        if (activeContentRouteTarget is null)
+        {
+            return;
+        }
+
+        FrameworkElement target = activeContentRouteTarget;
+        activeContentRouteTarget = null;
+        Canvas.SetZIndex(target, 0);
+        FluentMotion.PlayRouteTargetRelease(target);
+    }
+
+    private void HandleDragLeave(object sender, DragEventArgs args) => ScheduleContextualDragExit();
 
     private bool TryGetContentKind(DataPackageView dataView,
         out GlanceContentKind kind)
@@ -938,6 +1139,15 @@ public sealed partial class DesktopIslandView :
     private async void HandleDrop(object sender, DragEventArgs args)
     {
         StopContextualDragExitTimer();
+        string? routeId = droppedContentRouteId;
+        droppedContentRouteId = null;
+
+        if (routeId is not null && !ViewModel.TryActivateContentRoute(routeId))
+        {
+            CompleteContextualDrag(false);
+            return;
+        }
+
         DragOperationDeferral deferral = args.GetDeferral();
         GlanceContentContext? context = null;
         bool contentHandled = false;
@@ -1009,12 +1219,13 @@ public sealed partial class DesktopIslandView :
     {
         if (!dispatcherQueue.HasThreadAccess)
         {
-            dispatcherQueue.TryEnqueue(() => CompleteContextualDrag(contentHandled));
+            _ = dispatcherQueue.TryEnqueue(() => CompleteContextualDrag(contentHandled));
             return;
         }
 
         StopContextualDragExitTimer();
         isContextualDragActive = false;
+        droppedContentRouteId = null;
         contextualDragSession++;
 
         if (contentHandled)
@@ -1041,10 +1252,10 @@ public sealed partial class DesktopIslandView :
         if (!dispatcherQueue.TryEnqueue(() =>
         {
             CompleteDropDeferral(deferral);
-            completion.TrySetResult(true);
+            _ = completion.TrySetResult(true);
         }))
         {
-            completion.TrySetResult(false);
+            _ = completion.TrySetResult(false);
         }
 
         return completion.Task;
@@ -1074,15 +1285,15 @@ public sealed partial class DesktopIslandView :
         {
             try
             {
-                completion.TrySetResult(await ViewModel.HandleContentAsync(context));
+                _ = completion.TrySetResult(await ViewModel.HandleContentAsync(context));
             }
             catch (Exception exception)
             {
-                completion.TrySetException(exception);
+                _ = completion.TrySetException(exception);
             }
         }))
         {
-            completion.TrySetResult(false);
+            _ = completion.TrySetResult(false);
         }
 
         return completion.Task;

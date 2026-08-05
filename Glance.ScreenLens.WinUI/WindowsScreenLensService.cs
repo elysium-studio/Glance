@@ -110,12 +110,9 @@ public sealed partial class WindowsScreenLensService :
 
         try
         {
-            if (!NativeMethods.BitBlt(memoryDeviceContext, 0, 0, width, height, screenDeviceContext, x, y, SourceCopy | CaptureBlt))
-            {
-                throw new InvalidOperationException("Unable to copy the desktop surface.");
-            }
-
-            return new LensBitmap(x, y, width, height, ReadBitmapPixels(memoryDeviceContext, bitmap, width, height));
+            return !NativeMethods.BitBlt(memoryDeviceContext, 0, 0, width, height, screenDeviceContext, x, y, SourceCopy | CaptureBlt)
+                ? throw new InvalidOperationException("Unable to copy the desktop surface.")
+                : new LensBitmap(x, y, width, height, ReadBitmapPixels(memoryDeviceContext, bitmap, width, height));
         }
         finally
         {
@@ -130,9 +127,9 @@ public sealed partial class WindowsScreenLensService :
     {
         uint processId = (uint)Environment.ProcessId;
         List<ApplicationWindowState> windows = [];
-        NativeMethods.EnumWindows((window, parameter) =>
+        _ = NativeMethods.EnumWindows((window, parameter) =>
         {
-            NativeMethods.GetWindowThreadProcessId(window, out uint windowProcessId);
+            _ = NativeMethods.GetWindowThreadProcessId(window, out uint windowProcessId);
 
             if (windowProcessId == processId && NativeMethods.IsWindowVisible(window))
             {
@@ -252,21 +249,15 @@ public sealed partial class WindowsScreenLensService :
         }
     }
 
-    private static int GetRecognitionQuality(string text) =>
-        text.Sum(character =>
-        {
-            if (char.IsLetterOrDigit(character))
-            {
-                return 3;
-            }
+    private static int GetRecognitionQuality(string text) => text.Sum(character =>
+                                                                  {
+                                                                      if (char.IsLetterOrDigit(character))
+                                                                      {
+                                                                          return 3;
+                                                                      }
 
-            if ("<>[]{}()\"'=:/\\.-_&#;,+*!?".Contains(character))
-            {
-                return 1;
-            }
-
-            return char.IsWhiteSpace(character) ? 0 : -4;
-        });
+                                                                      return "<>[]{}()\"'=:/\\.-_&#;,+*!?".Contains(character) ? 1 : char.IsWhiteSpace(character) ? 0 : -4;
+                                                                  });
 
     private static LensRecognitionResult BuildRecognitionResult(IReadOnlyList<LensRecognizedWord> words)
     {
@@ -354,7 +345,7 @@ public sealed partial class WindowsScreenLensService :
             byte green = pixels[index + 1];
             byte red = pixels[index + 2];
             int value = darkBackground ? Math.Max(red, Math.Max(green, blue)) : Math.Min(red, Math.Min(green, blue));
-            byte contrast = (byte)Math.Clamp(((value - low) * 255) / Math.Max(1, high - low), 0, 255);
+            byte contrast = (byte)Math.Clamp((value - low) * 255 / Math.Max(1, high - low), 0, 255);
             enhanced[index] = contrast;
             enhanced[index + 1] = contrast;
             enhanced[index + 2] = contrast;

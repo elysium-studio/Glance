@@ -14,9 +14,7 @@ namespace Glance.Shell.WinUI;
 public sealed class NavigationModule :
     IModule
 {
-    public void Register(IServiceCollection services)
-    {
-        services
+    public void Register(IServiceCollection services) => _ = services
             .AddSingleton<IViewModelFactory>(provider => new ViewModelFactory((key, viewModelArgs) =>
             {
                 key = key.EndsWith("ViewModel", StringComparison.Ordinal) ? key[..^"ViewModel".Length]
@@ -55,5 +53,4 @@ public sealed class NavigationModule :
                 return provider.GetKeyedService(type, key);
             }))
             .AddServiceFactory().AddSingleton<WindowRegistry>().AddKeyedSingleton<INavigationHandler, WindowHandler>(typeof(Window)).AddKeyedSingleton<INavigationHandler, ContentDialogHandler>(typeof(ContentDialog)).AddKeyedSingleton<INavigationHandler, PopupHandler>(typeof(Popup));
-    }
 }

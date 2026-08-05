@@ -37,7 +37,7 @@ internal static class AssistantWakeDiagnostics
 
         if (!string.IsNullOrWhiteSpace(directory))
         {
-            Directory.CreateDirectory(directory);
+            _ = Directory.CreateDirectory(directory);
         }
 
         if (File.Exists(LogPath) && new FileInfo(LogPath).Length > 5 * 1024 * 1024)

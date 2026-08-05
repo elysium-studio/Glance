@@ -20,7 +20,7 @@ internal sealed class OpenWeatherService(HttpClient httpClient) :
         string language = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
         string uri = $"https://api.openweathermap.org/data/2.5/weather?q={Uri.EscapeDataString(settings.Location)}&appid={Uri.EscapeDataString(settings.ApiKey)}&units={units}&lang={language}";
         using HttpResponseMessage response = await httpClient.GetAsync(uri, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        _ = response.EnsureSuccessStatusCode();
         await using Stream stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         OpenWeatherResponse weather = await JsonSerializer.DeserializeAsync(stream, WeatherJsonContext.Default.OpenWeatherResponse, cancellationToken) ??
             throw new InvalidOperationException("OpenWeather returned an empty response.");

@@ -1,7 +1,6 @@
 using Elysium.Platform.Windows;
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
-using Microsoft.UI;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
@@ -159,8 +158,7 @@ internal sealed class CaptureSelectionWindow
         windowHandle = WindowNative.GetWindowHandle(window);
     }
 
-    public static Task<CaptureSelectionResult?> SelectAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<CaptureSelectionCandidate> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue, CaptureSelectionCandidate? automaticCandidate = null) =>
-        ShowOnDispatcherAsync(bitmap, mode, candidates, localizer, dispatcherQueue, automaticCandidate);
+    public static Task<CaptureSelectionResult?> SelectAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode, IReadOnlyList<CaptureSelectionCandidate> candidates, ITextLocalizer localizer, DispatcherQueue dispatcherQueue, CaptureSelectionCandidate? automaticCandidate = null) => ShowOnDispatcherAsync(bitmap, mode, candidates, localizer, dispatcherQueue, automaticCandidate);
 
     public void Close()
     {
@@ -170,7 +168,7 @@ internal sealed class CaptureSelectionWindow
         }
         else
         {
-            window.DispatcherQueue.TryEnqueue(CloseCore);
+            _ = window.DispatcherQueue.TryEnqueue(CloseCore);
         }
     }
 
@@ -187,7 +185,7 @@ internal sealed class CaptureSelectionWindow
             catch (Exception exception)
             {
                 CloseCore();
-                flightCompletion.TrySetException(exception);
+                _ = flightCompletion.TrySetException(exception);
             }
         }
 
@@ -197,7 +195,7 @@ internal sealed class CaptureSelectionWindow
         }
         else if (!window.DispatcherQueue.TryEnqueue(Play))
         {
-            flightCompletion.TrySetException(new InvalidOperationException("Unable to start the capture flight animation."));
+            _ = flightCompletion.TrySetException(new InvalidOperationException("Unable to start the capture flight animation."));
         }
 
         return flightCompletion.Task;
@@ -213,7 +211,7 @@ internal sealed class CaptureSelectionWindow
             {
                 if (closed)
                 {
-                    reviewCompletion.TrySetResult(null);
+                    _ = reviewCompletion.TrySetResult(null);
                     return;
                 }
 
@@ -229,7 +227,7 @@ internal sealed class CaptureSelectionWindow
             }
             catch (Exception exception)
             {
-                reviewCompletion.TrySetException(exception);
+                _ = reviewCompletion.TrySetException(exception);
                 CloseCore();
             }
         }
@@ -240,7 +238,7 @@ internal sealed class CaptureSelectionWindow
         }
         else if (!window.DispatcherQueue.TryEnqueue(ShowReview))
         {
-            reviewCompletion.TrySetException(new InvalidOperationException("Unable to open the capture review."));
+            _ = reviewCompletion.TrySetException(new InvalidOperationException("Unable to open the capture review."));
         }
 
         return reviewCompletion.Task;
@@ -250,11 +248,11 @@ internal sealed class CaptureSelectionWindow
     {
         try
         {
-            result.TrySetResult(await selection);
+            _ = result.TrySetResult(await selection);
         }
         catch (Exception exception)
         {
-            result.TrySetException(exception);
+            _ = result.TrySetException(exception);
         }
     }
 
@@ -267,8 +265,7 @@ internal sealed class CaptureSelectionWindow
         return imageSource;
     }
 
-    private static Rect CreateRectangle(Point start, Point end) =>
-        new(Math.Min(start.X, end.X), Math.Min(start.Y, end.Y), Math.Abs(end.X - start.X), Math.Abs(end.Y - start.Y));
+    private static Rect CreateRectangle(Point start, Point end) => new(Math.Min(start.X, end.X), Math.Min(start.Y, end.Y), Math.Abs(end.X - start.X), Math.Abs(end.Y - start.Y));
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmFlush();
@@ -280,25 +277,13 @@ internal sealed class CaptureSelectionWindow
     [DllImport("user32.dll")]
     private static extern int GetWindowLong(nint window, int index);
 
-    private static Brush ResolveSmokeBrush()
-    {
-        if (Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("SmokeFillColorDefaultBrush", out object value) && value is Brush brush)
-        {
-            return brush;
-        }
+    private static Brush ResolveSmokeBrush() => Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("SmokeFillColorDefaultBrush", out object value) && value is Brush brush
+            ? brush
+            : new SolidColorBrush(Color.FromArgb(77, 0, 0, 0));
 
-        return new SolidColorBrush(Color.FromArgb(77, 0, 0, 0));
-    }
-
-    private static Brush ResolveBrush(string key, Color fallback)
-    {
-        if (Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue(key, out object value) && value is Brush brush)
-        {
-            return brush;
-        }
-
-        return new SolidColorBrush(fallback);
-    }
+    private static Brush ResolveBrush(string key, Color fallback) => Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue(key, out object value) && value is Brush brush
+            ? brush
+            : new SolidColorBrush(fallback);
 
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -321,7 +306,7 @@ internal sealed class CaptureSelectionWindow
             }
             catch (Exception exception)
             {
-                result.TrySetException(exception);
+                _ = result.TrySetException(exception);
             }
         }
 
@@ -331,7 +316,7 @@ internal sealed class CaptureSelectionWindow
         }
         else if (!dispatcherQueue.TryEnqueue(ShowSelectionWindow))
         {
-            result.TrySetException(new InvalidOperationException("Unable to open the capture selection window."));
+            _ = result.TrySetException(new InvalidOperationException("Unable to open the capture selection window."));
         }
 
         return result.Task;
@@ -408,7 +393,7 @@ internal sealed class CaptureSelectionWindow
         }
 
         selectionCompleted = true;
-        completion.TrySetResult(null);
+        _ = completion.TrySetResult(null);
         CloseCore();
     }
 
@@ -435,7 +420,7 @@ internal sealed class CaptureSelectionWindow
 
         if (surface is not null)
         {
-            root.Children.Remove(surface.Content);
+            _ = root.Children.Remove(surface.Content);
         }
 
         try
@@ -464,7 +449,7 @@ internal sealed class CaptureSelectionWindow
 
             void Complete()
             {
-                reviewCompletion.TrySetResult(result);
+                _ = reviewCompletion.TrySetResult(result);
 
                 if (result is null)
                 {
@@ -478,18 +463,18 @@ internal sealed class CaptureSelectionWindow
             }
             else if (!window.DispatcherQueue.TryEnqueue(Complete))
             {
-                reviewCompletion.TrySetException(new InvalidOperationException("Unable to complete the capture review."));
+                _ = reviewCompletion.TrySetException(new InvalidOperationException("Unable to complete the capture review."));
             }
         }
         catch (Exception exception)
         {
             if (!window.DispatcherQueue.TryEnqueue(() =>
             {
-                reviewCompletion.TrySetException(exception);
+                _ = reviewCompletion.TrySetException(exception);
                 CloseCore();
             }))
             {
-                reviewCompletion.TrySetException(exception);
+                _ = reviewCompletion.TrySetException(exception);
             }
         }
     }
@@ -503,7 +488,7 @@ internal sealed class CaptureSelectionWindow
         selectionCompleted = true;
         root.ReleasePointerCaptures();
         DetachSelectionHandlers();
-        completion.TrySetResult(new CaptureSelectionResult(candidate, this));
+        _ = completion.TrySetResult(new CaptureSelectionResult(candidate, this));
     }
 
     private void DetachSelectionHandlers()
@@ -533,7 +518,7 @@ internal sealed class CaptureSelectionWindow
         if (!selectionCompleted)
         {
             selectionCompleted = true;
-            completion.TrySetResult(null);
+            _ = completion.TrySetResult(null);
         }
     }
 
@@ -562,7 +547,7 @@ internal sealed class CaptureSelectionWindow
         CompositionTarget.Rendering -= HandleCompositionRendering;
         window.Activate();
         _ = DwmFlush();
-        root.Focus(FocusState.Programmatic);
+        _ = root.Focus(FocusState.Programmatic);
         PlatformWindowExtensions.viSetOpacity(windowHandle, 255);
         isShown = true;
 
@@ -618,7 +603,7 @@ internal sealed class CaptureSelectionWindow
         {
             selectionStart = point;
             isDragging = true;
-            root.CapturePointer(args.Pointer);
+            _ = root.CapturePointer(args.Pointer);
             UpdateRegionHighlight(point);
 
             return;
@@ -675,8 +660,7 @@ internal sealed class CaptureSelectionWindow
         CompositionTarget.Rendering += HandleCompositionRendering;
     }
 
-    private void HandleRootSizeChanged(object sender, SizeChangedEventArgs args) =>
-        UpdateSmokeBounds();
+    private void HandleRootSizeChanged(object sender, SizeChangedEventArgs args) => UpdateSmokeBounds();
 
     private void PlayFlight(DesktopCaptureBitmap capture, NativeRectangle landingBounds, Action onArrived, TaskCompletionSource<bool> flightCompletion)
     {
@@ -715,7 +699,7 @@ internal sealed class CaptureSelectionWindow
 
         if (reviewSurface is not null)
         {
-            root.Children.Remove(reviewSurface.Content);
+            _ = root.Children.Remove(reviewSurface.Content);
             reviewSurface = null;
         }
 
@@ -770,11 +754,11 @@ internal sealed class CaptureSelectionWindow
 
             if (exception is null)
             {
-                flightCompletion.TrySetResult(true);
+                _ = flightCompletion.TrySetResult(true);
             }
             else
             {
-                flightCompletion.TrySetException(exception);
+                _ = flightCompletion.TrySetException(exception);
             }
         }
 
@@ -866,10 +850,9 @@ internal sealed class CaptureSelectionWindow
         return (bitmap.OriginX + (int)Math.Round(point.X * scaleX), bitmap.OriginY + (int)Math.Round(point.Y * scaleY));
     }
 
-    private void UpdateRegionHighlight(Point end) =>
-                        ShowHighlight(CreateRectangle(selectionStart, end));
-    private void UpdateSmokeBounds() =>
-        smokeBounds.Rect = new Rect(0, 0, root.ActualWidth, root.ActualHeight);
+    private void UpdateRegionHighlight(Point end) => ShowHighlight(CreateRectangle(selectionStart, end));
+
+    private void UpdateSmokeBounds() => smokeBounds.Rect = new Rect(0, 0, root.ActualWidth, root.ActualHeight);
 }
 
 internal sealed record CaptureSelectionResult(CaptureSelectionCandidate Candidate, CaptureSelectionWindow Overlay);

@@ -9,9 +9,9 @@ public sealed class RemovableDevicesModule :
 {
     public void Register(IServiceCollection services)
     {
-        services.AddSingleton<ModuleResourceTextLocalizer<RemovableDevicesModule>>();
-        services.AddSingleton<IRemovableDeviceService, WindowsRemovableDeviceService>();
-        services.AddSingleton(provider => new RemovableDevicesViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<RemovableDevicesModule>>()));
-        services.AddSingleton<IGlanceComponent, RemovableDevicesComponent>();
+        _ = services.AddSingleton<ModuleResourceTextLocalizer<RemovableDevicesModule>>();
+        _ = services.AddSingleton<IRemovableDeviceService, WindowsRemovableDeviceService>();
+        _ = services.AddSingleton(provider => new RemovableDevicesViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<RemovableDevicesModule>>()));
+        _ = services.AddSingleton<IGlanceComponent, RemovableDevicesComponent>();
     }
 }

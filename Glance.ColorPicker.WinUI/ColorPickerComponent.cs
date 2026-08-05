@@ -67,8 +67,7 @@ public sealed partial class ColorPickerComponent :
 
     public bool IsAttentionEnabledByDefault => true;
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("ColorPicker.Start", Id, "Pick a colour", "Start the on-screen eyedropper to sample a colour beneath the pointer.")
         {
             SemanticTags = ["colour", "color", "picker", "eyedropper", "dropper", "sample", "pixel", "hex", "rgb", "hsl"],
@@ -81,13 +80,12 @@ public sealed partial class ColorPickerComponent :
         }
     ];
 
-    public bool IsAvailable(string actionId) =>
-        actionId switch
-        {
-            "ColorPicker.Start" => !viewModel.IsPicking,
-            "ColorPicker.Cancel" => viewModel.IsPicking,
-            _ => false
-        };
+    public bool IsAvailable(string actionId) => actionId switch
+    {
+        "ColorPicker.Start" => !viewModel.IsPicking,
+        "ColorPicker.Cancel" => viewModel.IsPicking,
+        _ => false
+    };
 
     public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
         CancellationToken cancellationToken = default)
@@ -107,9 +105,7 @@ public sealed partial class ColorPickerComponent :
         options.Changed -= HandleOptionsChanged;
     }
 
-    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<ColorPickerSettings> args) =>
-        dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<ColorPickerSettings> args) => _ = dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
 
-    private void HandleColorPicked(object? sender, ColorPickerEventArgs args) =>
-        attentionService.RequestAttention(Id);
+    private void HandleColorPicked(object? sender, ColorPickerEventArgs args) => attentionService.RequestAttention(Id);
 }

@@ -94,8 +94,7 @@ public sealed class GlanceIntentServiceTests
     private sealed class TestWritableOptions(GlanceSettings settings) :
         IWritableOptions<GlanceSettings>
     {
-        public Task<GlanceSettings?> ReadAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult<GlanceSettings?>(settings);
+        public Task<GlanceSettings?> ReadAsync(CancellationToken cancellationToken = default) => Task.FromResult<GlanceSettings?>(settings);
 
         public Task WriteAsync(Action<GlanceSettings> update,
             CancellationToken cancellationToken = default)
@@ -105,7 +104,6 @@ public sealed class GlanceIntentServiceTests
         }
 
         public Task WriteAsync(GlanceSettings value,
-            CancellationToken cancellationToken = default) =>
-            Task.CompletedTask;
+            CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 }

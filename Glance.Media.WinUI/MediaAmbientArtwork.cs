@@ -129,7 +129,7 @@ internal sealed partial class MediaAmbientArtwork :
         }
         else
         {
-            dispatcherQueue.TryEnqueue(releasedSurface.Dispose);
+            _ = dispatcherQueue.TryEnqueue(releasedSurface.Dispose);
         }
     }
 }

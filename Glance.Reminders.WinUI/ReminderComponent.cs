@@ -2,7 +2,6 @@ using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI;
 using Microsoft.UI.Dispatching;
-using Microsoft.UI.Xaml;
 using System.Globalization;
 
 namespace Glance.Reminders.WinUI;
@@ -74,8 +73,7 @@ public sealed partial class ReminderComponent :
 
     public bool IsAttentionEnabledByDefault => true;
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("Reminders.Add",
             Id,
             "Add a reminder",
@@ -93,15 +91,9 @@ public sealed partial class ReminderComponent :
     ];
 
     public Task<GlanceActionResult?> ValidateAsync(GlanceActionRequest request,
-        CancellationToken cancellationToken = default)
-    {
-        if (!string.Equals(request.ActionId, "Reminders.Add", StringComparison.OrdinalIgnoreCase))
-        {
-            return Task.FromResult<GlanceActionResult?>(null);
-        }
-
-        return Task.FromResult<GlanceActionResult?>(null);
-    }
+        CancellationToken cancellationToken = default) => !string.Equals(request.ActionId, "Reminders.Add", StringComparison.OrdinalIgnoreCase)
+            ? Task.FromResult<GlanceActionResult?>(null)
+            : Task.FromResult<GlanceActionResult?>(null);
 
     public async Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
         CancellationToken cancellationToken = default)
@@ -116,7 +108,7 @@ public sealed partial class ReminderComponent :
         if (!string.IsNullOrWhiteSpace(title) && validDueAt is DateTimeOffset completeDueAt)
         {
             ReminderEntry entry = CreateEntry(new ReminderDraft(title, completeDueAt, priority));
-            await RunOnDispatcherAsync(() =>
+            _ = await RunOnDispatcherAsync(() =>
             {
                 Save(entry);
                 return true;
@@ -143,8 +135,7 @@ public sealed partial class ReminderComponent :
         timer.Tick -= HandleTimerTick;
     }
 
-    private async Task EditAsync(ReminderItemViewModel? item) =>
-        await OpenEditorAsync(item, item is null ? null : new ReminderDraft(item.Title, item.DueAt, item.Priority));
+    private async Task EditAsync(ReminderItemViewModel? item) => _ = await OpenEditorAsync(item, item is null ? null : new ReminderDraft(item.Title, item.DueAt, item.Priority));
 
     private async Task<ReminderEntry?> OpenEditorAsync(ReminderItemViewModel? item,
         ReminderDraft? draft)
@@ -159,12 +150,9 @@ public sealed partial class ReminderComponent :
         Task<ReminderDraft?> editorTask = await RunOnDispatcherAsync(() => ReminderEditorWindow.ShowAsync(draft, localizer, windowId));
         ReminderDraft? result = await editorTask;
 
-        if (result is null)
-        {
-            return null;
-        }
-
-        return await RunOnDispatcherAsync(() =>
+        return result is null
+            ? null
+            : await RunOnDispatcherAsync(() =>
         {
             ReminderEntry entry = item is null
                 ? CreateEntry(result)
@@ -187,15 +175,15 @@ public sealed partial class ReminderComponent :
         {
             try
             {
-                completion.TrySetResult(action());
+                _ = completion.TrySetResult(action());
             }
             catch (Exception exception)
             {
-                completion.TrySetException(exception);
+                _ = completion.TrySetException(exception);
             }
         }))
         {
-            completion.TrySetException(new InvalidOperationException("The Reminders UI dispatcher is unavailable."));
+            _ = completion.TrySetException(new InvalidOperationException("The Reminders UI dispatcher is unavailable."));
         }
 
         return completion.Task;
@@ -212,12 +200,11 @@ public sealed partial class ReminderComponent :
     private void Save(ReminderEntry entry)
     {
         repository.Save(entry);
-        viewModel.Upsert(entry);
+        _ = viewModel.Upsert(entry);
         attentionTracker.Track(entry, timeProvider.GetLocalNow());
     }
 
-    private ReminderEntry CreateEntry(ReminderDraft draft) =>
-        new(Guid.NewGuid().ToString("N"), draft.Title.Trim(), draft.DueAt, draft.Priority, timeProvider.GetUtcNow());
+    private ReminderEntry CreateEntry(ReminderDraft draft) => new(Guid.NewGuid().ToString("N"), draft.Title.Trim(), draft.DueAt, draft.Priority, timeProvider.GetUtcNow());
 
     private void HandleTimerTick(DispatcherQueueTimer sender,
         object args)

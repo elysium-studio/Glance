@@ -34,8 +34,7 @@ public sealed partial class TimerAssistantCommandHandler(TimerViewModel viewMode
         return Task.FromResult(new GlanceAssistantCommandResult(true, $"Timer set for {FormatDuration(duration)}"));
     }
 
-    private static string FormatDuration(TimeSpan duration) =>
-        duration.TotalHours >= 1
+    private static string FormatDuration(TimeSpan duration) => duration.TotalHours >= 1
             ? $"{duration.TotalHours:0.#} hours"
             : duration.TotalMinutes >= 1
                 ? $"{duration.TotalMinutes:0.#} minutes"

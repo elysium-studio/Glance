@@ -38,11 +38,9 @@ public sealed partial class DropShelfExpandedView :
 
     private string ToUpper(string value) => value.ToUpperInvariant();
 
-    private Visibility WhenEmpty(bool hasItems) =>
-        hasItems ? Visibility.Collapsed : Visibility.Visible;
+    private Visibility WhenEmpty(bool hasItems) => hasItems ? Visibility.Collapsed : Visibility.Visible;
 
-    private Visibility WhenPopulated(bool hasItems) =>
-        hasItems ? Visibility.Visible : Visibility.Collapsed;
+    private Visibility WhenPopulated(bool hasItems) => hasItems ? Visibility.Visible : Visibility.Collapsed;
 
     private void HandleRemoveItemClick(object sender, RoutedEventArgs args)
     {
@@ -124,17 +122,13 @@ public sealed partial class DropShelfExpandedView :
         }
     }
 
-    private static bool IsMissing(string path) =>
-        !File.Exists(path) && !Directory.Exists(path);
+    private static bool IsMissing(string path) => !File.Exists(path) && !Directory.Exists(path);
 
-    private void QueueRemoveOutgoingItems(IReadOnlyCollection<string> paths) =>
-        Queue(() => RemoveOutgoingItems(paths));
+    private void QueueRemoveOutgoingItems(IReadOnlyCollection<string> paths) => Queue(() => RemoveOutgoingItems(paths));
 
-    private void QueueRemoveMissingOutgoingItems(IReadOnlyCollection<string> paths) =>
-        Queue(() => RemoveOutgoingItems([.. paths.Where(IsMissing)]));
+    private void QueueRemoveMissingOutgoingItems(IReadOnlyCollection<string> paths) => Queue(() => RemoveOutgoingItems([.. paths.Where(IsMissing)]));
 
-    private void Queue(Action action) =>
-        _ = dispatcherQueue.TryEnqueue(() => action());
+    private void Queue(Action action) => _ = dispatcherQueue.TryEnqueue(() => action());
 
     private void RemoveOutgoingItems(IReadOnlyCollection<string> paths)
     {

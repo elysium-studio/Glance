@@ -1,4 +1,3 @@
-using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,7 +8,7 @@ public sealed class BridgeModule :
 {
     public void Register(IServiceCollection services)
     {
-        services.AddSingleton<GlanceBridgeRouter>();
-        services.AddHostedService<GlanceBridgeServer>();
+        _ = services.AddSingleton<GlanceBridgeRouter>();
+        _ = services.AddHostedService<GlanceBridgeServer>();
     }
 }

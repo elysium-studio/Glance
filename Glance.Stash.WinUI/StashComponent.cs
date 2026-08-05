@@ -57,6 +57,8 @@ public sealed partial class StashComponent :
 
     public string SettingsCategory => GlanceModuleCategories.Productivity;
 
+    public string AccentResourceKey => "GlanceStashIconBrush";
+
     public int Order => 55;
 
     public object CompactContent { get; }
@@ -67,8 +69,7 @@ public sealed partial class StashComponent :
 
     public object ExpandedAnimationElement { get; }
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("Stash.Add",
             Id,
             "Add to Stash",
@@ -99,13 +100,10 @@ public sealed partial class StashComponent :
             return Task.FromResult<GlanceActionResult?>(GlanceActionResult.InvalidArguments("What should I add to Stash?", "Say the text or link you want to keep."));
         }
 
-        if (request.GetBoolean("isLink") == true &&
-            (!Uri.TryCreate(content, UriKind.Absolute, out Uri? uri) || uri.Scheme is not ("http" or "https")))
-        {
-            return Task.FromResult<GlanceActionResult?>(GlanceActionResult.InvalidArguments("That doesn't look like a complete link.", "Try saying or sharing the link again."));
-        }
-
-        return Task.FromResult<GlanceActionResult?>(null);
+        return request.GetBoolean("isLink") == true &&
+            (!Uri.TryCreate(content, UriKind.Absolute, out Uri? uri) || uri.Scheme is not ("http" or "https"))
+            ? Task.FromResult<GlanceActionResult?>(GlanceActionResult.InvalidArguments("That doesn't look like a complete link.", "Try saying or sharing the link again."))
+            : Task.FromResult<GlanceActionResult?>(null);
     }
 
     public async Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
@@ -133,8 +131,7 @@ public sealed partial class StashComponent :
         localizer.GetText("ShareIntentDescription"),
         "\uE718");
 
-    public bool CanHandle(GlanceContentKind kind) =>
-        kind is GlanceContentKind.Text or GlanceContentKind.WebLink;
+    public bool CanHandle(GlanceContentKind kind) => kind is GlanceContentKind.Text or GlanceContentKind.WebLink;
 
     public async Task HandleAsync(GlanceContentContext context)
     {
@@ -153,11 +150,9 @@ public sealed partial class StashComponent :
     }
 
     Task IGlanceIntent.InvokeAsync(GlanceContentContext context,
-        CancellationToken cancellationToken) =>
-        HandleAsync(context);
+        CancellationToken cancellationToken) => HandleAsync(context);
 
-    private Task CopyAsync(StashItem item) =>
-        copyService.CopyAsync(item.Content);
+    private Task CopyAsync(StashItem item) => copyService.CopyAsync(item.Content);
 
     private Task OpenAsync(StashItem item)
     {
@@ -168,7 +163,7 @@ public sealed partial class StashComponent :
 
         try
         {
-            Process.Start(new ProcessStartInfo(item.Content)
+            _ = Process.Start(new ProcessStartInfo(item.Content)
             {
                 UseShellExecute = true
             });
@@ -213,12 +208,9 @@ public sealed partial class StashComponent :
 
         TaskCompletionSource<StashItem?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        if (!dispatcherQueue.TryEnqueue(() =>
+        if (!dispatcherQueue.TryEnqueue(() => _ = completion.TrySetResult(viewModel.Add(content, isLink))))
         {
-            completion.TrySetResult(viewModel.Add(content, isLink));
-        }))
-        {
-            completion.TrySetException(new InvalidOperationException("The Stash UI dispatcher is unavailable."));
+            _ = completion.TrySetException(new InvalidOperationException("The Stash UI dispatcher is unavailable."));
         }
 
         return completion.Task;

@@ -65,10 +65,7 @@ public sealed partial class InfinityComponent :
 
     public void DismissExpansionLock() => viewModel.CancelEditing();
 
-    public void Dispose()
-    {
-        viewModel.PropertyChanged -= HandleViewModelPropertyChanged;
-    }
+    public void Dispose() => viewModel.PropertyChanged -= HandleViewModelPropertyChanged;
 
     private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {

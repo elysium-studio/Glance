@@ -92,7 +92,7 @@ public sealed class InfinityMessageHandler(InfinityViewModel viewModel, Infinity
 
     public ValueTask DisconnectedAsync(IGlanceApplicationConnection connection, CancellationToken cancellationToken)
     {
-        Interlocked.Increment(ref visibilityGeneration);
+        _ = Interlocked.Increment(ref visibilityGeneration);
         bridgeClient.Disconnect(connection);
         dispatcher.Dispatch(() =>
         {

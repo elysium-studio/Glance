@@ -19,8 +19,7 @@ public sealed partial class WindowsAudioDeviceService :
     private readonly Lock gate = new();
     private bool isDisposed;
 
-    public WindowsAudioDeviceService() =>
-        deviceEnumerator.RegisterEndpointNotificationCallback(this);
+    public WindowsAudioDeviceService() => _ = deviceEnumerator.RegisterEndpointNotificationCallback(this);
 
     public event EventHandler? DevicesChanged;
 
@@ -37,7 +36,7 @@ public sealed partial class WindowsAudioDeviceService :
             for (int index = 0; index < endpoints.Count; index++)
             {
                 MMDevice endpoint = endpoints[index];
-                activeDeviceIds.Add(endpoint.ID);
+                _ = activeDeviceIds.Add(endpoint.ID);
 
                 try
                 {
@@ -85,7 +84,7 @@ public sealed partial class WindowsAudioDeviceService :
         {
             if (policyClient is not null && Marshal.IsComObject(policyClient))
             {
-                Marshal.FinalReleaseComObject(policyClient);
+                _ = Marshal.FinalReleaseComObject(policyClient);
             }
         }
     }
@@ -100,7 +99,7 @@ public sealed partial class WindowsAudioDeviceService :
 
             lock (gate)
             {
-                trackedOutputDevices.TryGetValue(deviceId, out trackedDevice);
+                _ = trackedOutputDevices.TryGetValue(deviceId, out trackedDevice);
             }
 
             if (trackedDevice is not null)
@@ -126,7 +125,7 @@ public sealed partial class WindowsAudioDeviceService :
         }
 
         isDisposed = true;
-        deviceEnumerator.UnregisterEndpointNotificationCallback(this);
+        _ = deviceEnumerator.UnregisterEndpointNotificationCallback(this);
 
         lock (gate)
         {
@@ -170,8 +169,7 @@ public sealed partial class WindowsAudioDeviceService :
         }
     }
 
-    private void RaiseDevicesChanged() =>
-        DevicesChanged?.Invoke(this, EventArgs.Empty);
+    private void RaiseDevicesChanged() => DevicesChanged?.Invoke(this, EventArgs.Empty);
 
     private TrackedOutputDevice GetOrTrack(MMDevice endpoint)
     {
@@ -197,7 +195,7 @@ public sealed partial class WindowsAudioDeviceService :
 
             foreach (string deviceId in inactiveDeviceIds)
             {
-                trackedOutputDevices.Remove(deviceId, out TrackedOutputDevice? device);
+                _ = trackedOutputDevices.Remove(deviceId, out TrackedOutputDevice? device);
                 device?.Dispose();
             }
         }
@@ -205,8 +203,7 @@ public sealed partial class WindowsAudioDeviceService :
 
     private static void SetDefaultEndpoint(IPolicyConfig policyConfig,
         string deviceId,
-        AudioDeviceRole role) =>
-        Marshal.ThrowExceptionForHR(policyConfig.SetDefaultEndpoint(deviceId, role));
+        AudioDeviceRole role) => Marshal.ThrowExceptionForHR(policyConfig.SetDefaultEndpoint(deviceId, role));
 
     private sealed partial class TrackedOutputDevice :
         IDisposable

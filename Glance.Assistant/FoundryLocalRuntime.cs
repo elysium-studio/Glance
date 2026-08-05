@@ -26,7 +26,7 @@ internal static class FoundryLocalRuntime
         }
         finally
         {
-            initializationGate.Release();
+            _ = initializationGate.Release();
         }
     }
 }

@@ -25,8 +25,7 @@ public sealed partial class KeepAwakeExpandedView :
 
     public string Title => localizer.GetText("ModuleDisplayName");
 
-    private bool IsActionEnabled(bool isBusy) =>
-        !isBusy;
+    private bool IsActionEnabled(bool isBusy) => !isBusy;
 
     private async void ToggleAsync()
     {
@@ -34,6 +33,5 @@ public sealed partial class KeepAwakeExpandedView :
         activityPulse.Refresh();
     }
 
-    private string ToUpper(string value) =>
-        value.ToUpperInvariant();
+    private string ToUpper(string value) => value.ToUpperInvariant();
 }

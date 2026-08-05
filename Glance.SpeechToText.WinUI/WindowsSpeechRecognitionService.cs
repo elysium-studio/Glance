@@ -26,8 +26,7 @@ public sealed partial class WindowsSpeechRecognitionService :
 
     public event EventHandler? ListeningStopped;
 
-    public async Task CheckAvailabilityAsync() =>
-        SetAvailability(await GetAvailabilityAsync());
+    public async Task CheckAvailabilityAsync() => SetAvailability(await GetAvailabilityAsync());
 
     public async Task<bool> EnsureModelAsync()
     {
@@ -45,7 +44,7 @@ public sealed partial class WindowsSpeechRecognitionService :
 
         try
         {
-            await SpeechRecognitionModel.EnsureReadyAsync();
+            _ = await SpeechRecognitionModel.EnsureReadyAsync();
             SetAvailability(await GetAvailabilityAsync());
             return Availability == SpeechRecognitionAvailability.Ready;
         }
@@ -121,8 +120,7 @@ public sealed partial class WindowsSpeechRecognitionService :
         ListeningStopped?.Invoke(this, EventArgs.Empty);
     }
 
-    public async ValueTask DisposeAsync() =>
-        await ReleaseRecognitionAsync();
+    public async ValueTask DisposeAsync() => await ReleaseRecognitionAsync();
 
     private SpeechRecognitionAvailability GetAvailability()
     {
@@ -251,11 +249,9 @@ public sealed partial class WindowsSpeechRecognitionService :
         await Task.CompletedTask;
     }
 
-    private void HandleRecognizing(StreamingRecognition sender, StreamingRecognizingEventArgs args) =>
-        SpeechRecognized?.Invoke(this, new SpeechRecognizedEventArgs(args.Text, false));
+    private void HandleRecognizing(StreamingRecognition sender, StreamingRecognizingEventArgs args) => SpeechRecognized?.Invoke(this, new SpeechRecognizedEventArgs(args.Text, false));
 
-    private void HandleRecognized(StreamingRecognition sender, StreamingRecognizedEventArgs args) =>
-        SpeechRecognized?.Invoke(this, new SpeechRecognizedEventArgs(args.Text, true));
+    private void HandleRecognized(StreamingRecognition sender, StreamingRecognizedEventArgs args) => SpeechRecognized?.Invoke(this, new SpeechRecognizedEventArgs(args.Text, true));
 
     private void SetAvailability(SpeechRecognitionAvailability availability)
     {

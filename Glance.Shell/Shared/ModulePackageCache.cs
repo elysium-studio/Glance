@@ -85,10 +85,10 @@ public sealed class ModulePackageCache
 
     private static void Extract(string packagePath, string packageCacheDirectory, string contentDirectory)
     {
-        Directory.CreateDirectory(packageCacheDirectory);
+        _ = Directory.CreateDirectory(packageCacheDirectory);
 
         string temporaryDirectory = Path.Combine(packageCacheDirectory, $".extract-{Guid.NewGuid():N}");
-        Directory.CreateDirectory(temporaryDirectory);
+        _ = Directory.CreateDirectory(temporaryDirectory);
 
         try
         {
@@ -107,11 +107,11 @@ public sealed class ModulePackageCache
 
                 if (string.IsNullOrEmpty(entry.Name))
                 {
-                    Directory.CreateDirectory(destinationPath);
+                    _ = Directory.CreateDirectory(destinationPath);
                     continue;
                 }
 
-                Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
+                _ = Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
                 entry.ExtractToFile(destinationPath);
             }
 

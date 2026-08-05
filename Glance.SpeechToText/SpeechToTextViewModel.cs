@@ -75,23 +75,17 @@ public sealed partial class SpeechToTextViewModel(ITextLocalizer localizer) :
 
     public event EventHandler<string>? CopyRequested;
 
-    public void ToggleListening() =>
-        ToggleListeningRequested?.Invoke(this, EventArgs.Empty);
+    public void ToggleListening() => ToggleListeningRequested?.Invoke(this, EventArgs.Empty);
 
-    public void EnsureModel() =>
-        EnsureModelRequested?.Invoke(this, EventArgs.Empty);
+    public void EnsureModel() => EnsureModelRequested?.Invoke(this, EventArgs.Empty);
 
-    public void Clear() =>
-        ClearRequested?.Invoke(this, EventArgs.Empty);
+    public void Clear() => ClearRequested?.Invoke(this, EventArgs.Empty);
 
-    public void SelectMicrophone() =>
-        SelectedAudioSource = SpeechAudioSource.Microphone;
+    public void SelectMicrophone() => SelectedAudioSource = SpeechAudioSource.Microphone;
 
-    public void SelectSystemAudio() =>
-        SelectedAudioSource = SpeechAudioSource.SystemAudio;
+    public void SelectSystemAudio() => SelectedAudioSource = SpeechAudioSource.SystemAudio;
 
-    public void SelectMeeting() =>
-        SelectedAudioSource = SpeechAudioSource.Meeting;
+    public void SelectMeeting() => SelectedAudioSource = SpeechAudioSource.Meeting;
 
     public void Copy()
     {
@@ -107,8 +101,7 @@ public sealed partial class SpeechToTextViewModel(ITextLocalizer localizer) :
         IsBusy = false;
     }
 
-    public void BeginPreparing() =>
-        IsBusy = true;
+    public void BeginPreparing() => IsBusy = true;
 
     public void BeginListening()
     {
@@ -143,16 +136,16 @@ public sealed partial class SpeechToTextViewModel(ITextLocalizer localizer) :
 
         if (transcriptBuilder.Length > 0)
         {
-            transcriptBuilder.Append(' ');
+            _ = transcriptBuilder.Append(' ');
         }
 
-        transcriptBuilder.Append(normalizedText);
+        _ = transcriptBuilder.Append(normalizedText);
         Transcript = transcriptBuilder.ToString();
     }
 
     public void ClearTranscript()
     {
-        transcriptBuilder.Clear();
+        _ = transcriptBuilder.Clear();
         Transcript = string.Empty;
         PartialText = string.Empty;
     }
@@ -174,28 +167,20 @@ public sealed partial class SpeechToTextViewModel(ITextLocalizer localizer) :
                 return PartialText;
             }
 
-            if (compact && HasTranscript)
+            return compact && HasTranscript ? Transcript : localizer.GetText("ListeningStatus");
+        }
+
+        return IsBusy
+            ? localizer.GetText("CheckingStatus")
+            : Availability switch
             {
-                return Transcript;
-            }
-
-            return localizer.GetText("ListeningStatus");
-        }
-
-        if (IsBusy)
-        {
-            return localizer.GetText("CheckingStatus");
-        }
-
-        return Availability switch
-        {
-            SpeechRecognitionAvailability.Checking => localizer.GetText("CheckingStatus"),
-            SpeechRecognitionAvailability.ModelRequired => localizer.GetText("ModelRequiredStatus"),
-            SpeechRecognitionAvailability.PackageIdentityRequired => localizer.GetText("PackagedBuildRequiredStatus"),
-            SpeechRecognitionAvailability.Unsupported => localizer.GetText("UnsupportedStatus"),
-            SpeechRecognitionAvailability.Unavailable => localizer.GetText("UnavailableStatus"),
-            _ when HasTranscript => Transcript,
-            _ => localizer.GetText("ReadyStatus")
-        };
+                SpeechRecognitionAvailability.Checking => localizer.GetText("CheckingStatus"),
+                SpeechRecognitionAvailability.ModelRequired => localizer.GetText("ModelRequiredStatus"),
+                SpeechRecognitionAvailability.PackageIdentityRequired => localizer.GetText("PackagedBuildRequiredStatus"),
+                SpeechRecognitionAvailability.Unsupported => localizer.GetText("UnsupportedStatus"),
+                SpeechRecognitionAvailability.Unavailable => localizer.GetText("UnavailableStatus"),
+                _ when HasTranscript => Transcript,
+                _ => localizer.GetText("ReadyStatus")
+            };
     }
 }

@@ -51,6 +51,8 @@ public sealed partial class DropShelfComponent :
 
     public string SettingsCategory => GlanceModuleCategories.Productivity;
 
+    public string AccentResourceKey => "GlanceDropShelfIconBrush";
+
     public int Order => 60;
 
     public object CompactContent { get; }
@@ -69,8 +71,7 @@ public sealed partial class DropShelfComponent :
 
     public void Dispose() => options.Changed -= HandleOptionsChanged;
 
-    public bool CanHandle(GlanceContentKind kind) =>
-        kind == GlanceContentKind.FilesAndFolders;
+    public bool CanHandle(GlanceContentKind kind) => kind == GlanceContentKind.FilesAndFolders;
 
     public async Task HandleAsync(GlanceContentContext context)
     {
@@ -87,11 +88,9 @@ public sealed partial class DropShelfComponent :
     }
 
     Task IGlanceIntent.InvokeAsync(GlanceContentContext context,
-        CancellationToken cancellationToken) =>
-        HandleAsync(context);
+        CancellationToken cancellationToken) => HandleAsync(context);
 
-    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<DropShelfSettings> args) =>
-        dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<DropShelfSettings> args) => _ = dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
 
     private Task AddItemsAsync(IReadOnlyList<DropShelfItem> items)
     {
@@ -108,15 +107,15 @@ public sealed partial class DropShelfComponent :
             try
             {
                 viewModel.AddItems(items);
-                completion.TrySetResult(true);
+                _ = completion.TrySetResult(true);
             }
             catch (Exception exception)
             {
-                completion.TrySetException(exception);
+                _ = completion.TrySetException(exception);
             }
         }))
         {
-            completion.TrySetException(new InvalidOperationException("The Drop Shelf UI dispatcher is unavailable."));
+            _ = completion.TrySetException(new InvalidOperationException("The Drop Shelf UI dispatcher is unavailable."));
         }
 
         return completion.Task;

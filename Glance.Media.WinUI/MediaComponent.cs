@@ -8,7 +8,6 @@ using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.Media;
 using Windows.Media.Control;
 using Windows.Storage.Streams;
 
@@ -88,18 +87,7 @@ public sealed partial class MediaComponent :
 
     public object ExpandedContent { get; }
 
-    public uint? FooterForegroundColor
-    {
-        get
-        {
-            if (!viewModel.HasSession || viewModel.AmbientArtwork is null)
-            {
-                return null;
-            }
-
-            return viewModel.BackgroundForegroundColor;
-        }
-    }
+    public uint? FooterForegroundColor => !viewModel.HasSession || viewModel.AmbientArtwork is null ? null : viewModel.BackgroundForegroundColor;
 
     public object CompactAnimationElement { get; }
 
@@ -109,8 +97,7 @@ public sealed partial class MediaComponent :
 
     public event EventHandler? FooterAppearanceChanged;
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("Media.Previous", Id, "Previous track", "Return to the previous song, track, episode, or media item.")
         {
             SemanticTags = ["media", "music", "song", "track", "previous", "back", "last"],
@@ -133,15 +120,14 @@ public sealed partial class MediaComponent :
         }
     ];
 
-    public bool IsAvailable(string actionId) =>
-        actionId switch
-        {
-            "Media.Previous" => viewModel.CanSkipPrevious,
-            "Media.Play" => viewModel.CanTogglePlayback && !viewModel.IsPlaying,
-            "Media.Pause" => viewModel.CanTogglePlayback && viewModel.IsPlaying,
-            "Media.Next" => viewModel.CanSkipNext,
-            _ => false
-        };
+    public bool IsAvailable(string actionId) => actionId switch
+    {
+        "Media.Previous" => viewModel.CanSkipPrevious,
+        "Media.Play" => viewModel.CanTogglePlayback && !viewModel.IsPlaying,
+        "Media.Pause" => viewModel.CanTogglePlayback && viewModel.IsPlaying,
+        "Media.Next" => viewModel.CanSkipNext,
+        _ => false
+    };
 
     public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
         CancellationToken cancellationToken = default)
@@ -173,10 +159,7 @@ public sealed partial class MediaComponent :
         SetAmbientArtwork(null);
         refreshGeneration++;
 
-        if (sessionManager is not null)
-        {
-            sessionManager.CurrentSessionChanged -= HandleCurrentSessionChanged;
-        }
+        sessionManager?.CurrentSessionChanged -= HandleCurrentSessionChanged;
 
         if (mediaRefreshTimer is not null)
         {
@@ -219,8 +202,7 @@ public sealed partial class MediaComponent :
     }
 
     private void HandleCurrentSessionChanged(GlobalSystemMediaTransportControlsSessionManager sender,
-        CurrentSessionChangedEventArgs args) =>
-        dispatcherQueue.TryEnqueue(() => UpdateCurrentSession(sender.GetCurrentSession()));
+        CurrentSessionChangedEventArgs args) => _ = dispatcherQueue.TryEnqueue(() => UpdateCurrentSession(sender.GetCurrentSession()));
 
     private async void UpdateCurrentSession(GlobalSystemMediaTransportControlsSession? newSession)
     {
@@ -265,8 +247,7 @@ public sealed partial class MediaComponent :
     }
 
     private void HandleMediaPropertiesChanged(GlobalSystemMediaTransportControlsSession sender,
-        MediaPropertiesChangedEventArgs args) =>
-        dispatcherQueue.TryEnqueue(ScheduleMediaRefresh);
+        MediaPropertiesChangedEventArgs args) => _ = dispatcherQueue.TryEnqueue(ScheduleMediaRefresh);
 
     private void ScheduleMediaRefresh()
     {
@@ -344,12 +325,10 @@ public sealed partial class MediaComponent :
     }
 
     private void HandlePlaybackInfoChanged(GlobalSystemMediaTransportControlsSession sender,
-        PlaybackInfoChangedEventArgs args) =>
-        dispatcherQueue.TryEnqueue(RefreshPlaybackState);
+        PlaybackInfoChangedEventArgs args) => _ = dispatcherQueue.TryEnqueue(RefreshPlaybackState);
 
     private void HandleAudioLevelsChanged(object? sender,
-        AudioSpectrumEventArgs args) =>
-        dispatcherQueue.TryEnqueue(() => viewModel.UpdateAudioLevels(args.Levels));
+        AudioSpectrumEventArgs args) => _ = dispatcherQueue.TryEnqueue(() => viewModel.UpdateAudioLevels(args.Levels));
 
     private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
@@ -378,13 +357,13 @@ public sealed partial class MediaComponent :
         switch (action)
         {
             case MediaPlaybackAction.Previous:
-                await session.TrySkipPreviousAsync();
+                _ = await session.TrySkipPreviousAsync();
                 break;
             case MediaPlaybackAction.TogglePlayback:
-                await session.TryTogglePlayPauseAsync();
+                _ = await session.TryTogglePlayPauseAsync();
                 break;
             case MediaPlaybackAction.Next:
-                await session.TrySkipNextAsync();
+                _ = await session.TrySkipNextAsync();
                 break;
         }
     }
@@ -597,7 +576,7 @@ public sealed partial class MediaComponent :
         }
 
         using DataReader reader = new(stream.GetInputStreamAt(0));
-        await reader.LoadAsync((uint)stream.Size);
+        _ = await reader.LoadAsync((uint)stream.Size);
         byte[] bytes = new byte[(int)stream.Size];
         reader.ReadBytes(bytes);
         stream.Seek(0);

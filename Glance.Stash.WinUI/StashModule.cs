@@ -11,14 +11,14 @@ public sealed class StashModule :
 {
     public void Register(IServiceCollection services)
     {
-        services.AddSingleton<ModuleResourceTextLocalizer<StashModule>>();
-        services.AddSingleton<StashTextCopyService>();
-        services.AddSingleton<StashTextViewerService>();
-        services.AddSingleton(new StashRepository(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "Stash", "stash.db")));
-        services.AddSingleton(provider => new StashViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<StashModule>>()));
-        services.AddSingleton<StashComponent>();
-        services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<StashComponent>());
-        services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<StashComponent>());
-        services.AddSingleton<IGlanceIntent>(provider => provider.GetRequiredService<StashComponent>());
+        _ = services.AddSingleton<ModuleResourceTextLocalizer<StashModule>>();
+        _ = services.AddSingleton<StashTextCopyService>();
+        _ = services.AddSingleton<StashTextViewerService>();
+        _ = services.AddSingleton(new StashRepository(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "Stash", "stash.db")));
+        _ = services.AddSingleton(provider => new StashViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<StashModule>>()));
+        _ = services.AddSingleton<StashComponent>();
+        _ = services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<StashComponent>());
+        _ = services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<StashComponent>());
+        _ = services.AddSingleton<IGlanceIntent>(provider => provider.GetRequiredService<StashComponent>());
     }
 }

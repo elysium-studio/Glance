@@ -75,15 +75,12 @@ public sealed class LocalizationResourceTests
         }
     }
 
-    private static string[] GetDirectories(string path) =>
-        [.. Directory.GetDirectories(path).Select(Path.GetFileName).OfType<string>().Order()];
+    private static string[] GetDirectories(string path) => [.. Directory.GetDirectories(path).Select(Path.GetFileName).OfType<string>().Order()];
 
-    private static IReadOnlyList<ResourceEntry> ReadResources(string path) =>
-        [.. XDocument.Load(path).Root!
+    private static IReadOnlyList<ResourceEntry> ReadResources(string path) => [.. XDocument.Load(path).Root!
             .Elements("data").Select(element => new ResourceEntry(element.Attribute("name")!.Value, element.Element("value")!.Value))];
 
-    private static string[] GetPlaceholders(string value) =>
-        [.. Regex.Matches(value, "\\{\\d+\\}").Select(match => match.Value).Order()];
+    private static string[] GetPlaceholders(string value) => [.. Regex.Matches(value, "\\{\\d+\\}").Select(match => match.Value).Order()];
 
     private sealed record ResourceEntry(string Name, string Value);
 }

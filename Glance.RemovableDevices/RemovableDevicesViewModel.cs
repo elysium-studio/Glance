@@ -58,39 +58,29 @@ public sealed partial class RemovableDevicesViewModel(ITextLocalizer localizer) 
     {
         RemovableDeviceItemViewModel? item = Find(deviceId);
 
-        if (item is not null)
-        {
-            item.IsBusy = isBusy;
-        }
+        _ = item?.IsBusy = isBusy;
     }
 
-    public void ShowOpenFailure(string deviceId) =>
-        ShowFailure(deviceId, localizer.GetText("OpenFailed"));
+    public void ShowOpenFailure(string deviceId) => ShowFailure(deviceId, localizer.GetText("OpenFailed"));
 
-    public void ShowEjectFailure(string deviceId) =>
-        ShowFailure(deviceId, localizer.GetText("EjectFailed"));
+    public void ShowEjectFailure(string deviceId) => ShowFailure(deviceId, localizer.GetText("EjectFailed"));
 
     partial void OnSelectedDeviceChanged(RemovableDeviceItemViewModel? value) =>
         UpdateCompactStatus();
 
-    private void Open(RemovableDevice device) =>
-        OpenRequested?.Invoke(this, device);
+    private void Open(RemovableDevice device) => OpenRequested?.Invoke(this, device);
 
-    private void Eject(RemovableDevice device) =>
-        EjectRequested?.Invoke(this, device);
+    private void Eject(RemovableDevice device) => EjectRequested?.Invoke(this, device);
 
-    private RemovableDeviceItemViewModel? Find(string? deviceId) =>
-        string.IsNullOrWhiteSpace(deviceId)
+    private RemovableDeviceItemViewModel? Find(string? deviceId) => string.IsNullOrWhiteSpace(deviceId)
             ? null
             : Devices.FirstOrDefault(item => string.Equals(item.Device.Id, deviceId, StringComparison.OrdinalIgnoreCase));
 
-    private string GetDisplayName(RemovableDevice device) =>
-        string.IsNullOrWhiteSpace(device.DisplayName)
+    private string GetDisplayName(RemovableDevice device) => string.IsNullOrWhiteSpace(device.DisplayName)
             ? localizer.GetText("RemovableDrive")
             : device.DisplayName;
 
-    private string GetDetail(RemovableDevice device) =>
-        localizer.GetText("StorageDetail", FormatSize(device.FreeBytes), FormatSize(device.TotalBytes));
+    private string GetDetail(RemovableDevice device) => localizer.GetText("StorageDetail", FormatSize(device.FreeBytes), FormatSize(device.TotalBytes));
 
     private void ShowFailure(string deviceId,
         string message)
@@ -133,8 +123,7 @@ public sealed partial class RemovableDevicesViewModel(ITextLocalizer localizer) 
         }
     }
 
-    private void UpdateCompactStatus() =>
-        CompactStatusText = SelectedDevice?.CompactText ?? localizer.GetText("NoDevices");
+    private void UpdateCompactStatus() => CompactStatusText = SelectedDevice?.CompactText ?? localizer.GetText("NoDevices");
 
     private static string FormatSize(long bytes)
     {

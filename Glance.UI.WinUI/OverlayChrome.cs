@@ -1,4 +1,3 @@
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Media;
@@ -34,12 +33,11 @@ public static class OverlayChrome
         border.Translation = new Vector3(0, 0, depth);
     }
 
-    private static AcrylicBrush CreateAcrylicBrush(Color tintColor) =>
-        new()
-        {
-            FallbackColor = tintColor,
-            TintColor = tintColor,
-            TintLuminosityOpacity = 0.82,
-            TintOpacity = 0.72
-        };
+    private static AcrylicBrush CreateAcrylicBrush(Color tintColor) => new()
+    {
+        FallbackColor = tintColor,
+        TintColor = tintColor,
+        TintLuminosityOpacity = 0.82,
+        TintOpacity = 0.72
+    };
 }

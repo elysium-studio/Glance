@@ -31,12 +31,9 @@ public sealed partial class MagnifierExpandedView :
 
     public string CloseLabel => localizer.GetText("CloseLabel");
 
-    private string ToUpper(string value) =>
-        value.ToUpperInvariant();
+    private string ToUpper(string value) => value.ToUpperInvariant();
 
-    private Visibility WhenRunning(bool value) =>
-        value ? Visibility.Visible : Visibility.Collapsed;
+    private Visibility WhenRunning(bool value) => value ? Visibility.Visible : Visibility.Collapsed;
 
-    private Visibility WhenStopped(bool value) =>
-        value ? Visibility.Collapsed : Visibility.Visible;
+    private Visibility WhenStopped(bool value) => value ? Visibility.Collapsed : Visibility.Visible;
 }

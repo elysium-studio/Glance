@@ -43,7 +43,7 @@ public sealed partial class AssistantOverlayView :
     {
         if (args.PropertyName == nameof(IGlanceAssistantProvider.State))
         {
-            DispatcherQueue.TryEnqueue(UpdateStateAnimations);
+            _ = DispatcherQueue.TryEnqueue(UpdateStateAnimations);
         }
 
     }
@@ -193,7 +193,7 @@ public sealed partial class AssistantOverlayView :
             Visual visual = ElementCompositionPreview.GetElementVisual(energyBars[index]);
             Vector3KeyFrameAnimation scale = visual.Compositor.CreateVector3KeyFrameAnimation();
             float low = 0.25f + (index * 0.06f);
-            float high = isProcessing ? 1.18f - (index * 0.05f) : 0.78f + ((index % 2) * 0.22f);
+            float high = isProcessing ? 1.18f - (index * 0.05f) : 0.78f + (index % 2 * 0.22f);
             scale.InsertKeyFrame(0, new Vector3(1, low, 1));
             scale.InsertKeyFrame(0.5f, new Vector3(1, high, 1), CreateEaseOut(visual.Compositor));
             scale.InsertKeyFrame(1, new Vector3(1, low, 1), CreateEaseOut(visual.Compositor));
@@ -282,6 +282,5 @@ public sealed partial class AssistantOverlayView :
         visual.CenterPoint = new Vector3((float)element.ActualWidth / 2, (float)element.ActualHeight / 2, 0);
     }
 
-    private static CubicBezierEasingFunction CreateEaseOut(Compositor compositor) =>
-        compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
+    private static CubicBezierEasingFunction CreateEaseOut(Compositor compositor) => compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
 }

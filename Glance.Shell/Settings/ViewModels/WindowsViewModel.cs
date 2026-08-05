@@ -15,10 +15,7 @@ public sealed partial class WindowsViewModel :
         IDisposer disposer,
         ITextLocalizer localizer,
         IEnumerable<IWindowsViewModel> items) :
-        base(provider, factory, messenger, disposer, items)
-    {
-        Title = localizer.GetText("WindowsSectionTitle/Text");
-    }
+        base(provider, factory, messenger, disposer, items) => Title = localizer.GetText("WindowsSectionTitle/Text");
 
     public string Glyph => "\uE737";
 

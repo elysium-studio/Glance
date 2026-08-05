@@ -18,7 +18,7 @@ public sealed partial class ModulesViewModel :
         GlanceModuleCategories.Integrations,
         GlanceModuleCategories.Other
     ];
-    private readonly Dictionary<string, SettingsCategoryViewModel> categories = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, SettingsCategoryViewModel> categories = [with(StringComparer.OrdinalIgnoreCase)];
     private readonly ITextLocalizer localizer;
     private readonly ModulePreferenceService preferences;
 
@@ -135,7 +135,7 @@ public sealed partial class ModulesViewModel :
 
         if (category is not null)
         {
-            Messenger.Send(new SettingsNavigationRequestedEventArgs(category, module.Settings));
+            _ = Messenger.Send(new SettingsNavigationRequestedEventArgs(category, module.Settings));
         }
     }
 

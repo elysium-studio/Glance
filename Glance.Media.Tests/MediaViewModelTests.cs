@@ -1,6 +1,6 @@
-using Glance.Application.Abstractions;
 using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
+using Glance.Application.Abstractions;
 
 namespace Glance.Media.Tests;
 
@@ -108,7 +108,7 @@ public sealed class MediaViewModelTests
         WeakReferenceMessenger messenger = new();
         using MediaViewModel viewModel = new(new TestTextLocalizer(), new MediaSettings { ShowAudioVisualization = true }, messenger);
 
-        messenger.Send(new OptionsChangedEventArgs<MediaSettings>(new MediaSettings { ShowAudioVisualization = false }));
+        _ = messenger.Send(new OptionsChangedEventArgs<MediaSettings>(new MediaSettings { ShowAudioVisualization = false }));
 
         Assert.False(viewModel.ShowAudioVisualization);
     }

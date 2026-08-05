@@ -25,16 +25,14 @@ public sealed class ModulePreferenceService
 
     public event EventHandler? PreferencesChanged;
 
-    public IReadOnlyList<IGlanceComponent> GetActiveComponents() =>
-        [.. settings.Modules
+    public IReadOnlyList<IGlanceComponent> GetActiveComponents() => [.. settings.Modules
             .Where(preference => preference.IsEnabled)
             .Select(preference => allComponents.FirstOrDefault(component =>
                 string.Equals(component.Id, preference.Id, StringComparison.OrdinalIgnoreCase)))
             .OfType<IGlanceComponent>()
             .Where(IsAvailable)];
 
-    public IReadOnlyList<GlanceModulePreference> GetPreferences() =>
-        [.. settings.Modules
+    public IReadOnlyList<GlanceModulePreference> GetPreferences() => [.. settings.Modules
             .Where(preference => GetComponent(preference.Id) is not null)
             .Select(preference => new GlanceModulePreference
             {
@@ -43,12 +41,10 @@ public sealed class ModulePreferenceService
                 IsEnabled = preference.IsEnabled
             })];
 
-    public IGlanceComponent? GetComponent(string id) =>
-        allComponents.FirstOrDefault(component =>
-            string.Equals(component.Id, id, StringComparison.OrdinalIgnoreCase));
+    public IGlanceComponent? GetComponent(string id) => allComponents.FirstOrDefault(component =>
+                                                                 string.Equals(component.Id, id, StringComparison.OrdinalIgnoreCase));
 
-    public bool IsEnabled(string id) =>
-        settings.Modules.Any(preference => preference.IsEnabled && string.Equals(preference.Id, id, StringComparison.OrdinalIgnoreCase));
+    public bool IsEnabled(string id) => settings.Modules.Any(preference => preference.IsEnabled && string.Equals(preference.Id, id, StringComparison.OrdinalIgnoreCase));
 
     public bool IsAttentionEnabled(string id)
     {
@@ -65,8 +61,7 @@ public sealed class ModulePreferenceService
         return preference?.IsAttentionEnabled ?? attentionComponent.IsAttentionEnabledByDefault;
     }
 
-    public IReadOnlyList<IGlanceModuleSettingViewModel> CreateRuntimeSettings() =>
-        [.. runtimeSettingsFactories.SelectMany(factory => factory()).OrderBy(setting => setting.Order)];
+    public IReadOnlyList<IGlanceModuleSettingViewModel> CreateRuntimeSettings() => [.. runtimeSettingsFactories.SelectMany(factory => factory()).OrderBy(setting => setting.Order)];
 
     public async Task RegisterComponentsAsync(IReadOnlyList<IGlanceComponent> components, Func<IReadOnlyList<IGlanceModuleSettingViewModel>> createSettings)
     {
@@ -187,8 +182,7 @@ public sealed class ModulePreferenceService
         await writer.WriteAsync(value => value.Modules = snapshot);
     }
 
-    private static bool IsAvailable(IGlanceComponent component) =>
-        component is not IGlanceAvailabilityComponent availability || availability.IsAvailable;
+    private static bool IsAvailable(IGlanceComponent component) => component is not IGlanceAvailabilityComponent availability || availability.IsAvailable;
 
     private void TrackAvailability(IEnumerable<IGlanceComponent> components)
     {
@@ -198,14 +192,12 @@ public sealed class ModulePreferenceService
         }
     }
 
-    private void HandleComponentAvailabilityChanged(object? sender, EventArgs args) =>
-        ActiveComponentsChanged?.Invoke(this, EventArgs.Empty);
+    private void HandleComponentAvailabilityChanged(object? sender, EventArgs args) => ActiveComponentsChanged?.Invoke(this, EventArgs.Empty);
 
-    private static GlanceModulePreference Clone(GlanceModulePreference preference) =>
-        new()
-        {
-            Id = preference.Id,
-            IsAttentionEnabled = preference.IsAttentionEnabled,
-            IsEnabled = preference.IsEnabled
-        };
+    private static GlanceModulePreference Clone(GlanceModulePreference preference) => new()
+    {
+        Id = preference.Id,
+        IsAttentionEnabled = preference.IsAttentionEnabled,
+        IsEnabled = preference.IsEnabled
+    };
 }

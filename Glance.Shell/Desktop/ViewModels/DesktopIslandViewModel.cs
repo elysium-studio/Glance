@@ -5,8 +5,6 @@ using Elysium.Presentation;
 using Elysium.Presentation.Abstractions;
 using Glance.Application.Abstractions;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Glance.Shell;
 
@@ -32,20 +30,16 @@ public sealed partial class DesktopIslandViewModel :
     private GlancePlacement placement;
 
     private GlanceIntentDescriptor? activeContentRoute;
+    private IGlanceContextAwareComponent? activeContentRouteComponent;
     private IReadOnlyList<IGlanceComponent> components;
-    private IReadOnlyList<GlanceIntentDescriptor> contentRoutes = [];
-    private GlanceContentKind contentRoutingKind;
+    private GlanceContentContext? contentRoutingContext;
     private int contentRoutingPreviousIndex;
     private bool contentRoutingPreviousExpanded;
     private bool contentRoutingPreviousOpen;
-    private bool isContentRoutePickerVisible;
     private bool isContentRouting;
-    private int selectedIndex;
     private readonly IGlanceAttentionService attentionService;
-    private readonly IGlanceAssistantService assistant;
     private readonly IGlanceActionService actionService;
     private readonly IDispatcher dispatcher;
-    private readonly IGlanceIntentService intentService;
     private readonly ILogger<DesktopIslandViewModel> logger;
     private readonly ModulePreferenceService modulePreferences;
     private readonly INavigator navigator;
@@ -71,9 +65,9 @@ public sealed partial class DesktopIslandViewModel :
         this.modulePreferences = modulePreferences;
         components = modulePreferences.GetActiveComponents();
         this.attentionService = attentionService;
-        this.assistant = assistant;
+        Assistant = assistant;
         this.actionService = actionService;
-        this.intentService = intentService;
+        IntentService = intentService;
         this.navigator = navigator;
         this.logger = logger;
         this.settingsWriter = settingsWriter;
@@ -91,22 +85,21 @@ public sealed partial class DesktopIslandViewModel :
 
     public event EventHandler<GlanceAttentionRequest>? AttentionReceived;
 
-    public IGlanceIntentService IntentService => intentService;
+    public IGlanceIntentService IntentService { get; }
 
-    public IGlanceAssistantService Assistant => assistant;
+    public IGlanceAssistantService Assistant { get; }
 
-    public IReadOnlyList<GlanceIntentDescriptor> ContentRoutes => contentRoutes;
+    public IReadOnlyList<GlanceContentRoute> ContentRoutes { get; private set; } = [];
 
-    public bool IsContentRoutePickerVisible => isContentRoutePickerVisible;
+    public bool IsContentRoutePickerVisible { get; private set; }
 
     public int SelectedIndex
     {
-        get => selectedIndex;
-        set
+        get; set
         {
             int normalizedIndex = Math.Clamp(value, 0, Math.Max(0, components.Count - 1));
 
-            if (!SetProperty(ref selectedIndex, normalizedIndex))
+            if (!SetProperty(ref field, normalizedIndex))
             {
                 return;
             }
@@ -178,12 +171,11 @@ public sealed partial class DesktopIslandViewModel :
         }
     }
 
-    public bool CanHandleContent(GlanceContentKind kind) =>
-        GetContentRoutes(kind).Count > 0;
+    public bool CanHandleContent(GlanceContentKind kind) => IntentService.GetIntents(kind).Count > 0;
 
-    public bool TryActivateContent(GlanceContentKind kind)
+    public bool TryActivateContent(GlanceContentContext context)
     {
-        IReadOnlyList<GlanceIntentDescriptor> routes = GetContentRoutes(kind);
+        IReadOnlyList<GlanceContentRoute> routes = GetContentRoutes(context);
 
         if (routes.Count == 0)
         {
@@ -193,23 +185,23 @@ public sealed partial class DesktopIslandViewModel :
         if (!isContentRouting)
         {
             isContentRouting = true;
-            contentRoutingKind = kind;
+            contentRoutingContext = context;
             contentRoutingPreviousIndex = SelectedIndex;
             contentRoutingPreviousExpanded = IsExpanded;
             contentRoutingPreviousOpen = IsOpen;
         }
-        else if (contentRoutingKind == kind)
+        else if (contentRoutingContext == context)
         {
             return true;
         }
 
         SetContentRoutes(routes);
-        GlanceIntentDescriptor? currentRoute = routes.FirstOrDefault(route =>
+        GlanceContentRoute? currentRoute = routes.FirstOrDefault(route =>
             string.Equals(route.TargetComponentId, SelectedComponent?.Id, StringComparison.OrdinalIgnoreCase));
 
         if (currentRoute is not null)
         {
-            ActivateContentRoute(currentRoute);
+            ActivateContentRoute(currentRoute.Intent);
             return true;
         }
 
@@ -218,7 +210,7 @@ public sealed partial class DesktopIslandViewModel :
 
         if (routes.Count == 1)
         {
-            ActivateContentRoute(routes[0]);
+            ActivateContentRoute(routes[0].Intent);
             return true;
         }
 
@@ -229,7 +221,7 @@ public sealed partial class DesktopIslandViewModel :
 
     public bool TryActivateContentRoute(string intentId)
     {
-        GlanceIntentDescriptor? route = contentRoutes.FirstOrDefault(candidate =>
+        GlanceContentRoute? route = ContentRoutes.FirstOrDefault(candidate =>
             string.Equals(candidate.Id, intentId, StringComparison.OrdinalIgnoreCase));
 
         if (!isContentRouting || route is null)
@@ -237,7 +229,7 @@ public sealed partial class DesktopIslandViewModel :
             return false;
         }
 
-        ActivateContentRoute(route);
+        ActivateContentRoute(route.Intent);
         return true;
     }
 
@@ -252,7 +244,10 @@ public sealed partial class DesktopIslandViewModel :
         }
 
         isContentRouting = false;
+        IGlanceContextAwareComponent? routeComponent = activeContentRouteComponent;
         activeContentRoute = null;
+        activeContentRouteComponent = null;
+        contentRoutingContext = null;
         SetContentRoutePickerVisible(false);
         SetContentRoutes([]);
 
@@ -262,6 +257,8 @@ public sealed partial class DesktopIslandViewModel :
             IsExpanded = true;
             return;
         }
+
+        routeComponent?.EndContentPreview();
 
         SelectedIndex = contentRoutingPreviousIndex;
         IsOpen = contentRoutingPreviousOpen;
@@ -276,7 +273,7 @@ public sealed partial class DesktopIslandViewModel :
         }
 
         int componentIndex = activeContentRoute is null
-            ? FindContextComponentIndex(context.Kind)
+            ? FindContextComponentIndex(context)
             : FindComponentIndex(activeContentRoute.TargetComponentId);
 
         if (componentIndex < 0 ||
@@ -288,6 +285,12 @@ public sealed partial class DesktopIslandViewModel :
         SelectedIndex = componentIndex;
         IsOpen = true;
         IsExpanded = true;
+
+        if (component is IGlanceContentHandlingResultComponent resultComponent)
+        {
+            return await resultComponent.TryHandleAsync(context);
+        }
+
         await component.HandleAsync(context);
         return true;
     }
@@ -306,50 +309,45 @@ public sealed partial class DesktopIslandViewModel :
     {
         attentionService.AttentionRequested -= HandleAttentionRequested;
         actionService.PresentationRequested -= HandleActionPresentationRequested;
-        intentService.IntentInvoked -= HandleIntentInvoked;
+        IntentService.IntentInvoked -= HandleIntentInvoked;
         modulePreferences.ActiveComponentsChanged -= HandleActiveComponentsChanged;
         modulePreferences.ComponentsAdded -= HandleComponentsAdded;
         modulePreferences.PreferencesChanged -= HandlePreferencesChanged;
         base.Dispose();
     }
 
-    public void Receive(OptionsChangedEventArgs<GlanceSettings> message) =>
-        dispatcher.Dispatch(() =>
-        {
-            AutoHide = message.Options.AutoHide;
-            ExpansionMode = message.Options.ExpansionMode;
-            Placement = message.Options.Placement;
-        });
+    public void Receive(OptionsChangedEventArgs<GlanceSettings> message) => dispatcher.Dispatch(() =>
+                                                                                 {
+                                                                                     AutoHide = message.Options.AutoHide;
+                                                                                     ExpansionMode = message.Options.ExpansionMode;
+                                                                                     Placement = message.Options.Placement;
+                                                                                 });
 
-    protected override void RegisterMessages() =>
-        Messenger.Register<OptionsChangedEventArgs<GlanceSettings>>(this);
+    protected override void RegisterMessages() => Messenger.Register<OptionsChangedEventArgs<GlanceSettings>>(this);
 
-    private void HandlePreferencesChanged(object? sender, EventArgs args)
-        => dispatcher.Dispatch(ApplyPreferences);
+    private void HandlePreferencesChanged(object? sender, EventArgs args) => dispatcher.Dispatch(ApplyPreferences);
 
-    private void HandleActiveComponentsChanged(object? sender, EventArgs args) =>
-        dispatcher.Dispatch(ApplyPreferences);
+    private void HandleActiveComponentsChanged(object? sender, EventArgs args) => dispatcher.Dispatch(ApplyPreferences);
 
-    private void HandleComponentsAdded(object? sender, GlanceComponentsAddedEventArgs args) =>
-        dispatcher.Dispatch(() =>
-        {
-            ApplyPreferences();
+    private void HandleComponentsAdded(object? sender, GlanceComponentsAddedEventArgs args) => dispatcher.Dispatch(() =>
+                                                                                                    {
+                                                                                                        ApplyPreferences();
 
-            string? componentId = args.Components
-                .Select(component => component.Id)
-                .FirstOrDefault(id => components.Any(component => string.Equals(component.Id, id, StringComparison.OrdinalIgnoreCase)));
+                                                                                                        string? componentId = args.Components
+                                                                                                            .Select(component => component.Id)
+                                                                                                            .FirstOrDefault(id => components.Any(component => string.Equals(component.Id, id, StringComparison.OrdinalIgnoreCase)));
 
-            if (componentId is null)
-            {
-                return;
-            }
+                                                                                                        if (componentId is null)
+                                                                                                        {
+                                                                                                            return;
+                                                                                                        }
 
-            SelectedIndex = components
-                .Select((component, index) => (component, index))
-                .First(item => string.Equals(item.component.Id, componentId, StringComparison.OrdinalIgnoreCase))
-                .index;
-            IsOpen = true;
-        });
+                                                                                                        SelectedIndex = components
+                                                                                                            .Select((component, index) => (component, index))
+                                                                                                            .First(item => string.Equals(item.component.Id, componentId, StringComparison.OrdinalIgnoreCase))
+                                                                                                            .index;
+                                                                                                        IsOpen = true;
+                                                                                                    });
 
     private void ApplyPreferences()
     {
@@ -412,83 +410,98 @@ public sealed partial class DesktopIslandViewModel :
         AttentionReceived?.Invoke(this, request);
     }
 
-    private void HandleIntentInvoked(object? sender, GlanceIntentInvokedEventArgs args) =>
-        dispatcher.Dispatch(() =>
-        {
-            int componentIndex = components
-                .Select((component, index) => (component, index))
-                .Where(item => string.Equals(item.component.Id, args.TargetComponentId, StringComparison.OrdinalIgnoreCase))
-                .Select(item => item.index)
-                .DefaultIfEmpty(-1).First();
+    private void HandleIntentInvoked(object? sender, GlanceIntentInvokedEventArgs args) => dispatcher.Dispatch(() =>
+                                                                                                {
+                                                                                                    int componentIndex = components
+                                                                                                        .Select((component, index) => (component, index))
+                                                                                                        .Where(item => string.Equals(item.component.Id, args.TargetComponentId, StringComparison.OrdinalIgnoreCase))
+                                                                                                        .Select(item => item.index)
+                                                                                                        .DefaultIfEmpty(-1).First();
 
-            if (componentIndex < 0)
-            {
-                return;
-            }
+                                                                                                    if (componentIndex < 0)
+                                                                                                    {
+                                                                                                        return;
+                                                                                                    }
 
-            SelectedIndex = componentIndex;
-            IsOpen = true;
-            IsExpanded = true;
-            AttentionReceived?.Invoke(this, new GlanceAttentionRequest(args.TargetComponentId));
-        });
+                                                                                                    SelectedIndex = componentIndex;
+                                                                                                    IsOpen = true;
+                                                                                                    IsExpanded = true;
+                                                                                                    AttentionReceived?.Invoke(this, new GlanceAttentionRequest(args.TargetComponentId));
+                                                                                                });
 
-    private void HandleActionPresentationRequested(object? sender, GlanceActionPresentationRequestedEventArgs args) =>
-        dispatcher.Dispatch(() =>
-        {
-            int componentIndex = components
-                .Select((component, index) => (component, index))
-                .Where(item => string.Equals(item.component.Id, args.TargetComponentId, StringComparison.OrdinalIgnoreCase))
-                .Select(item => item.index)
-                .DefaultIfEmpty(-1).First();
+    private void HandleActionPresentationRequested(object? sender, GlanceActionPresentationRequestedEventArgs args) => dispatcher.Dispatch(() =>
+                                                                                                                            {
+                                                                                                                                int componentIndex = components
+                                                                                                                                    .Select((component, index) => (component, index))
+                                                                                                                                    .Where(item => string.Equals(item.component.Id, args.TargetComponentId, StringComparison.OrdinalIgnoreCase))
+                                                                                                                                    .Select(item => item.index)
+                                                                                                                                    .DefaultIfEmpty(-1).First();
 
-            if (componentIndex < 0)
-            {
-                return;
-            }
+                                                                                                                                if (componentIndex < 0)
+                                                                                                                                {
+                                                                                                                                    return;
+                                                                                                                                }
 
-            SelectedIndex = componentIndex;
-            IsOpen = true;
-            IsExpanded = IsExpanded || args.Presentation == GlanceActionPresentation.Expanded || IsPinned;
-            AttentionReceived?.Invoke(this, new GlanceAttentionRequest(args.TargetComponentId));
-        });
+                                                                                                                                SelectedIndex = componentIndex;
+                                                                                                                                IsOpen = true;
+                                                                                                                                IsExpanded = IsExpanded || args.Presentation == GlanceActionPresentation.Expanded || IsPinned;
+                                                                                                                                AttentionReceived?.Invoke(this, new GlanceAttentionRequest(args.TargetComponentId));
+                                                                                                                            });
 
-    private int FindContextComponentIndex(GlanceContentKind kind) =>
-        components
+    private int FindContextComponentIndex(GlanceContentContext context) => components
             .Select((component, index) => (component, index))
             .Where(item =>
                 item.component is IGlanceContextAwareComponent contextAware &&
-                contextAware.CanHandle(kind))
+                contextAware.CanHandle(context))
             .Select(item => item.index)
             .DefaultIfEmpty(-1).First();
 
-    private int FindComponentIndex(string componentId) =>
-        components
+    private int FindComponentIndex(string componentId) => components
             .Select((component, index) => (component, index))
             .Where(item => string.Equals(item.component.Id, componentId, StringComparison.OrdinalIgnoreCase))
             .Select(item => item.index)
             .DefaultIfEmpty(-1).First();
 
-    private IReadOnlyList<GlanceIntentDescriptor> GetContentRoutes(GlanceContentKind kind)
+    private IReadOnlyList<GlanceContentRoute> GetContentRoutes(GlanceContentContext context)
     {
         HashSet<string> compatibleComponents =
         [
             with(StringComparer.OrdinalIgnoreCase),
-            .. components
-                .Where(component => component is IGlanceContextAwareComponent contextAware && contextAware.CanHandle(kind))
+            .. IntentService.GetIntents(context)
+                .Select(intent => modulePreferences.GetComponent(intent.TargetComponentId))
+                .OfType<IGlanceContextAwareComponent>()
+                .Where(component => component.CanHandle(context))
+                .OfType<IGlanceComponent>()
                 .Select(component => component.Id)
         ];
         return
         [
-            .. intentService.GetIntents(kind)
+            .. IntentService.GetIntents(context)
                 .Where(intent => compatibleComponents.Contains(intent.TargetComponentId))
                 .GroupBy(intent => intent.TargetComponentId, StringComparer.OrdinalIgnoreCase)
                 .Select(group => group.First())
-                .OrderBy(intent => FindComponentIndex(intent.TargetComponentId))
+                .Select(intent => new GlanceContentRoute(intent,
+                    modulePreferences.GetComponent(intent.TargetComponentId)!))
+                .OrderBy(route => route.TargetComponent.Order)
         ];
     }
 
     private void ActivateContentRoute(GlanceIntentDescriptor route)
     {
+        if (contentRoutingContext is null ||
+            modulePreferences.GetComponent(route.TargetComponentId) is not IGlanceContextAwareComponent component)
+        {
+            return;
+        }
+
+        if (!ReferenceEquals(activeContentRouteComponent, component))
+        {
+            activeContentRouteComponent?.EndContentPreview();
+            component.BeginContentPreview(contentRoutingContext);
+            activeContentRouteComponent = component;
+            ApplyPreferences();
+        }
+
         int componentIndex = FindComponentIndex(route.TargetComponentId);
 
         if (componentIndex < 0)
@@ -503,20 +516,20 @@ public sealed partial class DesktopIslandViewModel :
         SetContentRoutePickerVisible(false);
     }
 
-    private void SetContentRoutes(IReadOnlyList<GlanceIntentDescriptor> routes)
+    private void SetContentRoutes(IReadOnlyList<GlanceContentRoute> routes)
     {
-        contentRoutes = routes;
+        ContentRoutes = routes;
         OnPropertyChanged(nameof(ContentRoutes));
     }
 
     private void SetContentRoutePickerVisible(bool value)
     {
-        if (isContentRoutePickerVisible == value)
+        if (IsContentRoutePickerVisible == value)
         {
             return;
         }
 
-        isContentRoutePickerVisible = value;
+        IsContentRoutePickerVisible = value;
         OnPropertyChanged(nameof(IsContentRoutePickerVisible));
     }
 

@@ -2,8 +2,8 @@ using Glance.UI.WinUI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using System.ComponentModel;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Glance.ColorPicker.WinUI;
 
@@ -44,8 +44,7 @@ public sealed partial class ColorPickerExpandedView :
 
     private string ToUpper(string value) => value.ToUpperInvariant();
 
-    private SolidColorBrush ToBrush(ColorValue color) =>
-        new(Windows.UI.Color.FromArgb(255, color.Red, color.Green, color.Blue));
+    private SolidColorBrush ToBrush(ColorValue color) => new(Windows.UI.Color.FromArgb(255, color.Red, color.Green, color.Blue));
 
     private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {

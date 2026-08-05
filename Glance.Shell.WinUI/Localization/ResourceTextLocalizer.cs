@@ -6,6 +6,5 @@ namespace Glance.Shell.WinUI;
 public sealed class ResourceTextLocalizer(IStringLocalizer localizer) :
     ITextLocalizer
 {
-    public string GetText(string key, params object[] arguments) =>
-        localizer.GetString(key, arguments);
+    public string GetText(string key, params object[] arguments) => localizer.GetString(key, arguments);
 }

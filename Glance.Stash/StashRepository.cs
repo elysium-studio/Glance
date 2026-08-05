@@ -13,7 +13,7 @@ public sealed class StashRepository
     public StashRepository(string databasePath)
     {
         InitializeProvider();
-        Directory.CreateDirectory(Path.GetDirectoryName(databasePath) ?? throw new ArgumentException("The database path must include a directory.", nameof(databasePath)));
+        _ = Directory.CreateDirectory(Path.GetDirectoryName(databasePath) ?? throw new ArgumentException("The database path must include a directory.", nameof(databasePath)));
         connectionString = new SqliteConnectionStringBuilder
         {
             DataSource = databasePath,
@@ -34,7 +34,7 @@ public sealed class StashRepository
             ORDER BY created_at DESC
             LIMIT $limit;
             """;
-        command.Parameters.AddWithValue("$limit", ItemLimit);
+        _ = command.Parameters.AddWithValue("$limit", ItemLimit);
         using SqliteDataReader reader = command.ExecuteReader();
         List<StashEntry> entries = [];
 
@@ -72,12 +72,12 @@ public sealed class StashRepository
                 LIMIT -1 OFFSET $limit
             );
             """;
-        command.Parameters.AddWithValue("$id", entry.Id);
-        command.Parameters.AddWithValue("$kind", (int)entry.Kind);
-        command.Parameters.AddWithValue("$content", entry.Content);
-        command.Parameters.AddWithValue("$createdAt", entry.CreatedAt.ToString("O", CultureInfo.InvariantCulture));
-        command.Parameters.AddWithValue("$limit", ItemLimit);
-        command.ExecuteNonQuery();
+        _ = command.Parameters.AddWithValue("$id", entry.Id);
+        _ = command.Parameters.AddWithValue("$kind", (int)entry.Kind);
+        _ = command.Parameters.AddWithValue("$content", entry.Content);
+        _ = command.Parameters.AddWithValue("$createdAt", entry.CreatedAt.ToString("O", CultureInfo.InvariantCulture));
+        _ = command.Parameters.AddWithValue("$limit", ItemLimit);
+        _ = command.ExecuteNonQuery();
         transaction.Commit();
     }
 
@@ -86,8 +86,8 @@ public sealed class StashRepository
         using SqliteConnection connection = OpenConnection();
         using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "DELETE FROM stash_items WHERE id = $id;";
-        command.Parameters.AddWithValue("$id", id);
-        command.ExecuteNonQuery();
+        _ = command.Parameters.AddWithValue("$id", id);
+        _ = command.ExecuteNonQuery();
     }
 
     private void InitializeDatabase()
@@ -107,7 +107,7 @@ public sealed class StashRepository
             CREATE INDEX IF NOT EXISTS ix_stash_items_created_at
             ON stash_items(created_at DESC);
             """;
-        command.ExecuteNonQuery();
+        _ = command.ExecuteNonQuery();
     }
 
     private SqliteConnection OpenConnection()
@@ -117,7 +117,7 @@ public sealed class StashRepository
 
         using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "PRAGMA busy_timeout = 3000;";
-        command.ExecuteNonQuery();
+        _ = command.ExecuteNonQuery();
         return connection;
     }
 

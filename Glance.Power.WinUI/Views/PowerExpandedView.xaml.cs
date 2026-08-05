@@ -18,6 +18,5 @@ public sealed partial class PowerExpandedView :
 
     private string ToUpper(string value) => value.ToUpperInvariant();
 
-    private Visibility WhenPresent(bool hasBattery) =>
-        hasBattery ? Visibility.Visible : Visibility.Collapsed;
+    private Visibility WhenPresent(bool hasBattery) => hasBattery ? Visibility.Visible : Visibility.Collapsed;
 }

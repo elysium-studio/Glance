@@ -16,6 +16,5 @@ public sealed partial class VoiceNotesCompactView :
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
-    private Visibility ToRecordingVisibility(bool isRecording) =>
-        isRecording ? Visibility.Visible : Visibility.Collapsed;
+    private Visibility ToRecordingVisibility(bool isRecording) => isRecording ? Visibility.Visible : Visibility.Collapsed;
 }

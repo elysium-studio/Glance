@@ -135,6 +135,15 @@
   <Project Path="Glance.PrivacyControls.Tests/Glance.PrivacyControls.Tests.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.QuickConvert.WinUI/Glance.QuickConvert.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.QuickConvert/Glance.QuickConvert.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.QuickConvert.Tests/Glance.QuickConvert.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.RemovableDevices.WinUI/Glance.RemovableDevices.WinUI.csproj">
     <Platform Project="x64" />
   </Project>
@@ -160,6 +169,15 @@
     <Platform Project="x64" />
   </Project>
   <Project Path="Glance.ScreenCapture.Tests/Glance.ScreenCapture.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.ScreenRecorder.WinUI/Glance.ScreenRecorder.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.ScreenRecorder/Glance.ScreenRecorder.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.ScreenRecorder.Tests/Glance.ScreenRecorder.Tests.csproj">
     <Platform Project="x64" />
   </Project>
   <Project Path="Glance.ScreenLens.WinUI/Glance.ScreenLens.WinUI.csproj">

@@ -43,8 +43,7 @@ public sealed partial class MediaArtworkTransition :
         set => SetValue(SourceProperty, value);
     }
 
-    private static void HandleSourceChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args) =>
-        ((MediaArtworkTransition)sender).UpdateSource((ImageSource?)args.NewValue);
+    private static void HandleSourceChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args) => ((MediaArtworkTransition)sender).UpdateSource((ImageSource?)args.NewValue);
 
     private void HandleLoaded(object sender, RoutedEventArgs args)
     {
@@ -84,8 +83,7 @@ public sealed partial class MediaArtworkTransition :
         isTransitioning = false;
     }
 
-    private void HandleSizeChanged(object sender, SizeChangedEventArgs args) =>
-        UpdateCenters(args.NewSize);
+    private void HandleSizeChanged(object sender, SizeChangedEventArgs args) => UpdateCenters(args.NewSize);
 
     private void UpdateVisuals()
     {
@@ -100,15 +98,9 @@ public sealed partial class MediaArtworkTransition :
     {
         Vector3 center = new((float)size.Width / 2, (float)size.Height / 2, 0);
 
-        if (currentVisual is not null)
-        {
-            currentVisual.CenterPoint = center;
-        }
+        _ = currentVisual?.CenterPoint = center;
 
-        if (nextVisual is not null)
-        {
-            nextVisual.CenterPoint = center;
-        }
+        _ = nextVisual?.CenterPoint = center;
     }
 
     private void UpdateSource(ImageSource? source)

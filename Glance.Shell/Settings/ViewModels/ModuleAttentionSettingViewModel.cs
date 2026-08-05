@@ -19,6 +19,5 @@ public sealed partial class ModuleAttentionSettingViewModel(string moduleId,
     partial void OnValueChanged(bool value) =>
         _ = setEnabled(value);
 
-    public void Dispose() =>
-        GC.SuppressFinalize(this);
+    public void Dispose() => GC.SuppressFinalize(this);
 }

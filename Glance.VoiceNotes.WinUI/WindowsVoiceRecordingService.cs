@@ -25,7 +25,7 @@ internal sealed class WindowsVoiceRecordingService :
     {
         this.recordingsPath = recordingsPath;
         this.repository = repository;
-        Directory.CreateDirectory(recordingsPath);
+        _ = Directory.CreateDirectory(recordingsPath);
     }
 
     public event EventHandler<VoiceLevelsChangedEventArgs>? LevelsChanged;
@@ -48,7 +48,7 @@ internal sealed class WindowsVoiceRecordingService :
 
             foreach (string missingPath in recordings.Keys.Where(path => !filePaths.Contains(path)).ToArray())
             {
-                recordings.Remove(missingPath);
+                _ = recordings.Remove(missingPath);
                 repository.Remove(missingPath);
             }
 
@@ -157,7 +157,7 @@ internal sealed class WindowsVoiceRecordingService :
                 return false;
             }
 
-            Process.Start(new ProcessStartInfo(recording.FilePath)
+            _ = Process.Start(new ProcessStartInfo(recording.FilePath)
             {
                 UseShellExecute = true
             });
@@ -219,8 +219,7 @@ internal sealed class WindowsVoiceRecordingService :
         }
     }
 
-    private void HandleRecordingStopped(object? sender, StoppedEventArgs args) =>
-        CompleteRecording(args.Exception);
+    private void HandleRecordingStopped(object? sender, StoppedEventArgs args) => CompleteRecording(args.Exception);
 
     private void CompleteRecording(Exception? error)
     {

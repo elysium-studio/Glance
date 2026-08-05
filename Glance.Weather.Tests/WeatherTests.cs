@@ -14,8 +14,7 @@ public sealed class WeatherTests
     [InlineData(800, 28, false, WeatherSceneKind.Clear)]
     [InlineData(801, 20, false, WeatherSceneKind.PartlyCloudy)]
     [InlineData(804, 20, false, WeatherSceneKind.Cloudy)]
-    public void ConditionMapper_MapsOpenWeatherCodes(int code, double temperature, bool useFahrenheit, WeatherSceneKind expected) =>
-        Assert.Equal(expected, WeatherConditionMapper.Map(code, temperature, useFahrenheit));
+    public void ConditionMapper_MapsOpenWeatherCodes(int code, double temperature, bool useFahrenheit, WeatherSceneKind expected) => Assert.Equal(expected, WeatherConditionMapper.Map(code, temperature, useFahrenheit));
 
     [Fact]
     public void Update_FormatsCurrentWeather()
@@ -68,8 +67,7 @@ public sealed class WeatherTests
     [InlineData(0, WeatherSky.Clear)]
     [InlineData(45, WeatherSky.PartlyCloudy)]
     [InlineData(90, WeatherSky.Cloudy)]
-    public void ConditionMapper_MapsCloudCoverIndependently(int cloudCover, WeatherSky expected) =>
-        Assert.Equal(expected, WeatherConditionMapper.MapSky(cloudCover));
+    public void ConditionMapper_MapsCloudCoverIndependently(int cloudCover, WeatherSky expected) => Assert.Equal(expected, WeatherConditionMapper.MapSky(cloudCover));
 
     [Fact]
     public void ConditionMapper_ComposesSnowWithClearSky()
@@ -85,16 +83,14 @@ public sealed class WeatherTests
     [InlineData(10000, 10000, 50000, WeatherTimeOfDay.Dawn)]
     [InlineData(51000, 10000, 50000, WeatherTimeOfDay.Dusk)]
     [InlineData(60000, 10000, 50000, WeatherTimeOfDay.Night)]
-    public void ConditionMapper_MapsTimeIndependently(long timestamp, long sunrise, long sunset, WeatherTimeOfDay expected) =>
-        Assert.Equal(expected, WeatherConditionMapper.MapTime(timestamp, sunrise, sunset));
+    public void ConditionMapper_MapsTimeIndependently(long timestamp, long sunrise, long sunset, WeatherTimeOfDay expected) => Assert.Equal(expected, WeatherConditionMapper.MapTime(timestamp, sunrise, sunset));
 
     [Theory]
     [InlineData(WeatherTimeOfDay.Afternoon, WeatherSky.PartlyCloudy, WeatherCelestial.Sun)]
     [InlineData(WeatherTimeOfDay.Dusk, WeatherSky.Clear, WeatherCelestial.None)]
     [InlineData(WeatherTimeOfDay.Night, WeatherSky.Clear, WeatherCelestial.Moon)]
     [InlineData(WeatherTimeOfDay.Night, WeatherSky.Cloudy, WeatherCelestial.None)]
-    public void ConditionMapper_MapsLiveCelestialBody(WeatherTimeOfDay time, WeatherSky sky, WeatherCelestial expected) =>
-        Assert.Equal(expected, WeatherConditionMapper.MapCelestial(time, sky));
+    public void ConditionMapper_MapsLiveCelestialBody(WeatherTimeOfDay time, WeatherSky sky, WeatherCelestial expected) => Assert.Equal(expected, WeatherConditionMapper.MapCelestial(time, sky));
 
     [Fact]
     public void Update_HidesCelestialBodyUnderCloudySky()
@@ -172,8 +168,7 @@ public sealed class WeatherTests
     [InlineData(18, WeatherTimeOfDay.Evening)]
     [InlineData(19.25, WeatherTimeOfDay.Dusk)]
     [InlineData(22, WeatherTimeOfDay.Night)]
-    public void ConditionMapper_MapsPreviewHour(double hour, WeatherTimeOfDay expected) =>
-        Assert.Equal(expected, WeatherConditionMapper.MapTime(hour, 6, 19));
+    public void ConditionMapper_MapsPreviewHour(double hour, WeatherTimeOfDay expected) => Assert.Equal(expected, WeatherConditionMapper.MapTime(hour, 6, 19));
 
     [Fact]
     public void ConditionMapper_ConvertsTimestampToLocationHour()
@@ -186,7 +181,6 @@ public sealed class WeatherTests
     private sealed class TestTextLocalizer :
         ITextLocalizer
     {
-        public string GetText(string key, params object[] arguments) =>
-            arguments.Length == 0 ? key : $"{key}({string.Join(',', arguments)})";
+        public string GetText(string key, params object[] arguments) => arguments.Length == 0 ? key : $"{key}({string.Join(',', arguments)})";
     }
 }

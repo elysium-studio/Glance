@@ -10,6 +10,8 @@ public interface IGlanceComponent
 
     string SettingsCategory => GlanceModuleCategories.Other;
 
+    string AccentResourceKey => "AccentTextFillColorPrimaryBrush";
+
     int Order { get; }
 
     object CompactContent { get; }

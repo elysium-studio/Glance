@@ -92,7 +92,7 @@ public sealed partial class FocusSessionViewModel :
     {
         if (IsRunning)
         {
-            Refresh();
+            _ = Refresh();
             IsRunning = false;
             SessionStateChanged?.Invoke(this, EventArgs.Empty);
             return;
@@ -178,8 +178,7 @@ public sealed partial class FocusSessionViewModel :
         settings.SessionWasRunning = IsRunning;
     }
 
-    private static FocusSessionPhase GetNextPhase(FocusSessionPhase phase) =>
-        phase == FocusSessionPhase.Focus
+    private static FocusSessionPhase GetNextPhase(FocusSessionPhase phase) => phase == FocusSessionPhase.Focus
             ? FocusSessionPhase.Break
             : FocusSessionPhase.Focus;
 
@@ -192,8 +191,7 @@ public sealed partial class FocusSessionViewModel :
             : $"{display.Minutes:00}:{display.Seconds:00}";
     }
 
-    private TimeSpan GetDuration(FocusSessionPhase value) =>
-        value == FocusSessionPhase.Focus
+    private TimeSpan GetDuration(FocusSessionPhase value) => value == FocusSessionPhase.Focus
             ? focusDuration
             : breakDuration;
 

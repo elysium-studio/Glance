@@ -54,7 +54,7 @@ public sealed class WindowsPresenceService :
         isDisposed = true;
         TaskCompletionSource<bool> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
         requests.Add(new StateRequest(false, true, completion));
-        completion.Task.GetAwaiter().GetResult();
+        _ = completion.Task.GetAwaiter().GetResult();
         requests.CompleteAdding();
         worker.Join();
         requests.Dispose();
@@ -75,7 +75,7 @@ public sealed class WindowsPresenceService :
                     isActive = request.IsActive;
                 }
 
-                request.Completion.TrySetResult(succeeded);
+                _ = request.Completion.TrySetResult(succeeded);
 
                 if (request.IsShutdown)
                 {
@@ -93,7 +93,7 @@ public sealed class WindowsPresenceService :
     {
         if (!TryGetIdleDuration(out TimeSpan idleDuration) ||
             !activityPolicy.ShouldSendInput(idleDuration) ||
-            lastPulseTimestamp != 0 && Stopwatch.GetElapsedTime(lastPulseTimestamp) < activityPolicy.IdleThreshold)
+            (lastPulseTimestamp != 0 && Stopwatch.GetElapsedTime(lastPulseTimestamp) < activityPolicy.IdleThreshold))
         {
             return;
         }

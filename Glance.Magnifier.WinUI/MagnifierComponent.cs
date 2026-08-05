@@ -1,4 +1,3 @@
-using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
@@ -61,8 +60,7 @@ public sealed partial class MagnifierComponent :
 
     public object ExpandedAnimationElement { get; }
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("Magnifier.Start", Id, "Start Magnifier", "Start the Windows screen Magnifier accessibility tool.")
         {
             SemanticTags = ["magnifier", "magnify", "screen zoom", "accessibility", "enlarge", "make bigger"],
@@ -85,15 +83,14 @@ public sealed partial class MagnifierComponent :
         }
     ];
 
-    public bool IsAvailable(string actionId) =>
-        actionId switch
-        {
-            "Magnifier.Start" => viewModel.CanStart,
-            "Magnifier.ZoomIn" => viewModel.CanZoomIn,
-            "Magnifier.ZoomOut" => viewModel.CanZoomOut,
-            "Magnifier.Stop" => viewModel.CanClose,
-            _ => false
-        };
+    public bool IsAvailable(string actionId) => actionId switch
+    {
+        "Magnifier.Start" => viewModel.CanStart,
+        "Magnifier.ZoomIn" => viewModel.CanZoomIn,
+        "Magnifier.ZoomOut" => viewModel.CanZoomOut,
+        "Magnifier.Stop" => viewModel.CanClose,
+        _ => false
+    };
 
     public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
         CancellationToken cancellationToken = default)

@@ -57,8 +57,7 @@ public sealed partial class KeepAwakeComponent :
 
     public object ExpandedAnimationElement { get; }
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("KeepAwake.Start", Id, "Keep this PC awake", "Prevent Windows from sleeping or turning the display off. This does not simulate user presence.")
         {
             SemanticTags = ["keep awake", "stay awake", "prevent sleep", "do not sleep", "screen on", "display on", "power"],
@@ -71,13 +70,12 @@ public sealed partial class KeepAwakeComponent :
         }
     ];
 
-    public bool IsAvailable(string actionId) =>
-        actionId switch
-        {
-            "KeepAwake.Start" => !viewModel.IsActive,
-            "KeepAwake.Stop" => viewModel.IsActive,
-            _ => false
-        };
+    public bool IsAvailable(string actionId) => actionId switch
+    {
+        "KeepAwake.Start" => !viewModel.IsActive,
+        "KeepAwake.Stop" => viewModel.IsActive,
+        _ => false
+    };
 
     public async Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
         CancellationToken cancellationToken = default)

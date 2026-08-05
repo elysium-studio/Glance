@@ -72,21 +72,21 @@ internal static class WeatherScenePalette
 
     private static double GetTimelineHour(double hour, double sunrise, double sunset)
     {
-        double solarNoon = sunrise + (sunset - sunrise) / 2;
+        double solarNoon = sunrise + ((sunset - sunrise) / 2);
 
         if (hour >= sunrise && hour < solarNoon)
         {
-            return 6 + (hour - sunrise) / Math.Max(1, solarNoon - sunrise) * 6.5;
+            return 6 + ((hour - sunrise) / Math.Max(1, solarNoon - sunrise) * 6.5);
         }
 
         if (hour >= solarNoon && hour < sunset)
         {
-            return 12.5 + (hour - solarNoon) / Math.Max(1, sunset - solarNoon) * 6.5;
+            return 12.5 + ((hour - solarNoon) / Math.Max(1, sunset - solarNoon) * 6.5);
         }
 
         double nightDuration = 24 - sunset + sunrise;
         double nightElapsed = hour >= sunset ? hour - sunset : 24 - sunset + hour;
-        return (19 + nightElapsed / Math.Max(1, nightDuration) * 11) % 24;
+        return (19 + (nightElapsed / Math.Max(1, nightDuration) * 11)) % 24;
     }
 
     private static (Color Start, Color End) GetTimelineColors(double hour)
@@ -97,7 +97,7 @@ internal static class WeatherScenePalette
         (Color Start, Color End) afternoon = (Color.FromArgb(255, 20, 105, 202), Color.FromArgb(255, 83, 182, 235));
         (Color Start, Color End) evening = (Color.FromArgb(255, 31, 112, 190), Color.FromArgb(255, 245, 181, 105));
         (Color Start, Color End) dusk = (Color.FromArgb(255, 50, 54, 112), Color.FromArgb(255, 204, 95, 133));
-        double normalizedHour = (hour % 24 + 24) % 24;
+        double normalizedHour = ((hour % 24) + 24) % 24;
 
         return normalizedHour switch
         {
@@ -115,13 +115,12 @@ internal static class WeatherScenePalette
         (Color Start, Color End) to,
         double amount)
     {
-        float easedAmount = (float)(amount * amount * (3 - 2 * amount));
+        float easedAmount = (float)(amount * amount * (3 - (2 * amount)));
         return (Blend(from.Start, to.Start, easedAmount), Blend(from.End, to.End, easedAmount));
     }
 
     private static Color Blend(Color source, Color target, float amount) => Color.FromArgb(255,
-        (byte)(source.R + (target.R - source.R) * amount),
-        (byte)(source.G + (target.G - source.G) * amount),
-        (byte)(source.B + (target.B - source.B) * amount));
-
+        (byte)(source.R + ((target.R - source.R) * amount)),
+        (byte)(source.G + ((target.G - source.G) * amount)),
+        (byte)(source.B + ((target.B - source.B) * amount)));
 }

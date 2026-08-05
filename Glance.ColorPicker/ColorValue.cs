@@ -40,7 +40,7 @@ public readonly record struct ColorValue(byte Red,
 
         double saturation = difference / (1d - Math.Abs((2d * lightness) - 1d));
         double hue = maximum == red
-            ? 60d * (((green - blue) / difference) % 6d)
+            ? 60d * ((green - blue) / difference % 6d)
             : maximum == green
                 ? 60d * (((blue - red) / difference) + 2d)
                 : 60d * (((red - green) / difference) + 4d);

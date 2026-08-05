@@ -71,8 +71,7 @@ public sealed partial class StopwatchComponent :
 
     public object ExpandedAnimationElement { get; }
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("Stopwatch.Start", Id, "Start stopwatch", "Start or resume counting elapsed time without a countdown.")
         {
             SemanticTags = ["stopwatch", "elapsed time", "start timing", "count up", "resume"],
@@ -90,13 +89,12 @@ public sealed partial class StopwatchComponent :
         }
     ];
 
-    public bool IsAvailable(string actionId) =>
-        actionId switch
-        {
-            "Stopwatch.Start" => !viewModel.IsRunning,
-            "Stopwatch.Pause" => viewModel.IsRunning,
-            _ => true
-        };
+    public bool IsAvailable(string actionId) => actionId switch
+    {
+        "Stopwatch.Start" => !viewModel.IsRunning,
+        "Stopwatch.Pause" => viewModel.IsRunning,
+        _ => true
+    };
 
     public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
         CancellationToken cancellationToken = default)
@@ -142,11 +140,9 @@ public sealed partial class StopwatchComponent :
         }
     }
 
-    private void HandleTick(DispatcherQueueTimer sender, object args) =>
-        viewModel.Refresh();
+    private void HandleTick(DispatcherQueueTimer sender, object args) => viewModel.Refresh();
 
-    private async void HandleSessionStateChanged(object? sender, EventArgs args) =>
-        await PersistSessionAsync();
+    private async void HandleSessionStateChanged(object? sender, EventArgs args) => await PersistSessionAsync();
 
     private async Task PersistSessionAsync()
     {

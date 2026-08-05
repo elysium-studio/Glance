@@ -6,6 +6,5 @@ public sealed class PresenceActivityPolicy(TimeSpan idleThreshold)
         ? idleThreshold
         : throw new ArgumentOutOfRangeException(nameof(idleThreshold));
 
-    public bool ShouldSendInput(TimeSpan idleDuration) =>
-        idleDuration >= IdleThreshold;
+    public bool ShouldSendInput(TimeSpan idleDuration) => idleDuration >= IdleThreshold;
 }

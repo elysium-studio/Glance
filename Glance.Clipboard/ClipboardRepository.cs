@@ -12,7 +12,7 @@ public sealed class ClipboardRepository
     public ClipboardRepository(string databasePath)
     {
         InitializeProvider();
-        Directory.CreateDirectory(Path.GetDirectoryName(databasePath) ?? throw new ArgumentException("The database path must include a directory.", nameof(databasePath)));
+        _ = Directory.CreateDirectory(Path.GetDirectoryName(databasePath) ?? throw new ArgumentException("The database path must include a directory.", nameof(databasePath)));
         connectionString = new SqliteConnectionStringBuilder
         {
             DataSource = databasePath,
@@ -34,7 +34,7 @@ public sealed class ClipboardRepository
             ORDER BY sort_order DESC
             LIMIT $limit;
             """;
-        command.Parameters.AddWithValue("$limit", Math.Max(1, limit));
+        _ = command.Parameters.AddWithValue("$limit", Math.Max(1, limit));
         using SqliteDataReader reader = command.ExecuteReader();
         List<ClipboardRecord> records = [];
 
@@ -98,16 +98,16 @@ public sealed class ClipboardRepository
 
             DELETE FROM clipboard_file_paths WHERE clipboard_id = $id;
             """;
-        command.Parameters.AddWithValue("$id", record.Id);
-        command.Parameters.AddWithValue("$contentHash", record.ContentHash);
-        command.Parameters.AddWithValue("$capturedAt", record.Timestamp.ToString("O", CultureInfo.InvariantCulture));
-        command.Parameters.AddWithValue("$text", (object?)record.Text ?? DBNull.Value);
-        command.Parameters.AddWithValue("$html", (object?)record.Html ?? DBNull.Value);
-        command.Parameters.AddWithValue("$rtf", (object?)record.Rtf ?? DBNull.Value);
-        command.Parameters.AddWithValue("$bitmap", (object?)record.Bitmap ?? DBNull.Value);
-        command.Parameters.AddWithValue("$webLink", (object?)record.WebLink ?? DBNull.Value);
-        command.Parameters.AddWithValue("$applicationLink", (object?)record.ApplicationLink ?? DBNull.Value);
-        command.ExecuteNonQuery();
+        _ = command.Parameters.AddWithValue("$id", record.Id);
+        _ = command.Parameters.AddWithValue("$contentHash", record.ContentHash);
+        _ = command.Parameters.AddWithValue("$capturedAt", record.Timestamp.ToString("O", CultureInfo.InvariantCulture));
+        _ = command.Parameters.AddWithValue("$text", (object?)record.Text ?? DBNull.Value);
+        _ = command.Parameters.AddWithValue("$html", (object?)record.Html ?? DBNull.Value);
+        _ = command.Parameters.AddWithValue("$rtf", (object?)record.Rtf ?? DBNull.Value);
+        _ = command.Parameters.AddWithValue("$bitmap", (object?)record.Bitmap ?? DBNull.Value);
+        _ = command.Parameters.AddWithValue("$webLink", (object?)record.WebLink ?? DBNull.Value);
+        _ = command.Parameters.AddWithValue("$applicationLink", (object?)record.ApplicationLink ?? DBNull.Value);
+        _ = command.ExecuteNonQuery();
 
         if (record.FilePaths is { Count: > 0 })
         {
@@ -126,7 +126,7 @@ public sealed class ClipboardRepository
                 clipboardId.Value = record.Id;
                 position.Value = index;
                 path.Value = record.FilePaths[index];
-                fileCommand.ExecuteNonQuery();
+                _ = fileCommand.ExecuteNonQuery();
             }
         }
 
@@ -143,8 +143,8 @@ public sealed class ClipboardRepository
             SET sort_order = (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM clipboard_items)
             WHERE id = $id;
             """;
-        command.Parameters.AddWithValue("$id", id);
-        command.ExecuteNonQuery();
+        _ = command.Parameters.AddWithValue("$id", id);
+        _ = command.ExecuteNonQuery();
     }
 
     public void Remove(string id)
@@ -152,8 +152,8 @@ public sealed class ClipboardRepository
         using SqliteConnection connection = OpenConnection();
         using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "DELETE FROM clipboard_items WHERE id = $id;";
-        command.Parameters.AddWithValue("$id", id);
-        command.ExecuteNonQuery();
+        _ = command.Parameters.AddWithValue("$id", id);
+        _ = command.ExecuteNonQuery();
     }
 
     public void Clear()
@@ -161,7 +161,7 @@ public sealed class ClipboardRepository
         using SqliteConnection connection = OpenConnection();
         using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "DELETE FROM clipboard_items;";
-        command.ExecuteNonQuery();
+        _ = command.ExecuteNonQuery();
     }
 
     public void Trim(int limit)
@@ -206,7 +206,7 @@ public sealed class ClipboardRepository
                 FOREIGN KEY (clipboard_id) REFERENCES clipboard_items(id) ON DELETE CASCADE
             );
             """;
-        command.ExecuteNonQuery();
+        _ = command.ExecuteNonQuery();
     }
 
     private SqliteConnection OpenConnection()
@@ -219,7 +219,7 @@ public sealed class ClipboardRepository
             PRAGMA busy_timeout = 3000;
             PRAGMA foreign_keys = ON;
             """;
-        command.ExecuteNonQuery();
+        _ = command.ExecuteNonQuery();
         return connection;
     }
 
@@ -233,7 +233,7 @@ public sealed class ClipboardRepository
             WHERE clipboard_id = $id
             ORDER BY position;
             """;
-        command.Parameters.AddWithValue("$id", id);
+        _ = command.Parameters.AddWithValue("$id", id);
         using SqliteDataReader reader = command.ExecuteReader();
         List<string> paths = [];
 
@@ -246,8 +246,7 @@ public sealed class ClipboardRepository
     }
 
     private static string? ReadString(SqliteDataReader reader,
-        int ordinal) =>
-        reader.IsDBNull(ordinal) ? null : reader.GetString(ordinal);
+        int ordinal) => reader.IsDBNull(ordinal) ? null : reader.GetString(ordinal);
 
     private static void Trim(SqliteConnection connection,
         SqliteTransaction transaction,
@@ -264,8 +263,8 @@ public sealed class ClipboardRepository
                 LIMIT -1 OFFSET $limit
             );
             """;
-        command.Parameters.AddWithValue("$limit", Math.Max(1, limit));
-        command.ExecuteNonQuery();
+        _ = command.Parameters.AddWithValue("$limit", Math.Max(1, limit));
+        _ = command.ExecuteNonQuery();
     }
 
     private static void InitializeProvider()

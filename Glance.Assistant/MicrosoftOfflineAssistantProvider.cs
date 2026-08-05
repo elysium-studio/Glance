@@ -134,7 +134,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         }
         finally
         {
-            lifecycleGate.Release();
+            _ = lifecycleGate.Release();
             TraceWake("Provider.SetEnabled.Completed", $"Enabled={isEnabled}; {GetWakeSnapshot()}");
         }
     }
@@ -161,7 +161,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         }
         finally
         {
-            lifecycleGate.Release();
+            _ = lifecycleGate.Release();
             lifecycleGate.Dispose();
             wakeSessionGate.Dispose();
         }
@@ -315,7 +315,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         try
         {
             await WaitForWakeOperationAsync(session.StartAsync(), "start");
-            Interlocked.Exchange(ref isWakeSessionActive, 1);
+            _ = Interlocked.Exchange(ref isWakeSessionActive, 1);
             TraceWake("Wake.Start.Completed", $"Generation={generation}; RecognizerState={recognizer.State}; {GetWakeSnapshot()}");
         }
         catch (Exception exception)
@@ -323,7 +323,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             TraceWake("Wake.Start.Failed", $"Generation={generation}; {exception.GetType().Name}: {exception.Message}");
             wakeRecognizer = null;
             wakeRecognitionSession = null;
-            Interlocked.Exchange(ref isWakeSessionActive, 0);
+            _ = Interlocked.Exchange(ref isWakeSessionActive, 0);
             session.ResultGenerated -= HandleWakeResultGenerated;
             session.Completed -= HandleWakeRecognitionCompleted;
             recognizer.StateChanged -= HandleWakeRecognizerStateChanged;
@@ -378,8 +378,8 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
     private void HandleWakeRecognizerStateChanged(SpeechRecognizer sender, SpeechRecognizerStateChangedEventArgs args)
     {
         long timestamp = DateTime.UtcNow.Ticks;
-        Interlocked.Exchange(ref wakeLastStateChangeTicks, timestamp);
-        Interlocked.Exchange(ref wakeLastActivityTicks, timestamp);
+        _ = Interlocked.Exchange(ref wakeLastStateChangeTicks, timestamp);
+        _ = Interlocked.Exchange(ref wakeLastActivityTicks, timestamp);
         string ownership = ReferenceEquals(sender, wakeRecognizer) ? "Current" : "Stale";
 
         if (ownership == "Current" &&
@@ -419,7 +419,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         }
 
         long resultCount = Interlocked.Increment(ref wakeResultCount);
-        Interlocked.Exchange(ref wakeLastActivityTicks, DateTime.UtcNow.Ticks);
+        _ = Interlocked.Exchange(ref wakeLastActivityTicks, DateTime.UtcNow.Ticks);
         TraceWake("Wake.Result", $"Count={resultCount}; Text={args.Result.Text}; Confidence={args.Result.Confidence}; RawConfidence={args.Result.RawConfidence:F4}; {GetWakeSnapshot()}");
         logger.LogInformation("Wake recognition heard {WakeText} with {WakeConfidence} confidence", args.Result.Text, args.Result.Confidence);
 
@@ -452,7 +452,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             }
 
             TraceWake("Wake.ConstrainedDetected", $"Text={wakeText}; {GetWakeSnapshot()}");
-            Interlocked.Exchange(ref commandWakeBoundary, wakeBoundary);
+            _ = Interlocked.Exchange(ref commandWakeBoundary, wakeBoundary);
             BeginCommandWindow();
             await StartCommandRecognitionAsync(providerCancellationTokenSource.Token);
             TraceWake("Command.Start.Ready", GetWakeSnapshot());
@@ -468,7 +468,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         }
         finally
         {
-            Interlocked.Exchange(ref isSwitchingToCommandRecognition, 0);
+            _ = Interlocked.Exchange(ref isSwitchingToCommandRecognition, 0);
         }
     }
 
@@ -536,7 +536,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         }
         finally
         {
-            Interlocked.Exchange(ref isReturningToWakeRecognition, 0);
+            _ = Interlocked.Exchange(ref isReturningToWakeRecognition, 0);
             TraceWake("Wake.Recovery.Ended", GetWakeSnapshot());
         }
     }
@@ -615,12 +615,12 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
                             wakeRecognitionSession is null ||
                             recognizerState is SpeechRecognizerState.Idle or SpeechRecognizerState.Paused or SpeechRecognizerState.Processing;
                         refreshRequired = !restartRequired &&
-                            (recognizerState is SpeechRecognizerState.SoundStarted or SpeechRecognizerState.SoundEnded or SpeechRecognizerState.SpeechDetected &&
-                                stateAge >= TimeSpan.FromSeconds(10) ||
-                            recognizerState == SpeechRecognizerState.Capturing &&
+                            ((recognizerState is SpeechRecognizerState.SoundStarted or SpeechRecognizerState.SoundEnded or SpeechRecognizerState.SpeechDetected &&
+                                stateAge >= TimeSpan.FromSeconds(10)) ||
+                            (recognizerState == SpeechRecognizerState.Capturing &&
                                 lastMicrophoneActivityTicks > lastWakeActivityTicks &&
                                 microphoneActivityAge <= TimeSpan.FromSeconds(4) &&
-                                stateAge >= TimeSpan.FromSeconds(4));
+                                stateAge >= TimeSpan.FromSeconds(4)));
                         return Task.CompletedTask;
                     });
 
@@ -852,10 +852,10 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
 
         if (pendingUtterance.Length > 0 && !char.IsWhiteSpace(pendingUtterance[^1]) && !char.IsPunctuation(text[0]))
         {
-            pendingUtterance.Append(' ');
+            _ = pendingUtterance.Append(' ');
         }
 
-        pendingUtterance.Append(text);
+        _ = pendingUtterance.Append(text);
         Transcript = pendingUtterance.ToString();
         utteranceCompletionCancellationTokenSource?.Cancel();
         utteranceCompletionCancellationTokenSource?.Dispose();
@@ -886,7 +886,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
 
         string command = pendingUtterance.ToString().Trim();
         TraceWake("Command.Utterance.Completed", $"Session={session}; Command={command}; {GetWakeSnapshot()}");
-        pendingUtterance.Clear();
+        _ = pendingUtterance.Clear();
         utteranceCompletionCancellationTokenSource?.Dispose();
         utteranceCompletionCancellationTokenSource = null;
         _ = CompleteCommandAsync(command);
@@ -895,9 +895,9 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
     private void BeginCommandWindow(string transcript = "What can I help with?",
         string status = "Listening for your command")
     {
-        commandSpeechBoundaryCompletion?.TrySetCanceled();
+        _ = (commandSpeechBoundaryCompletion?.TrySetCanceled());
         commandSpeechBoundaryCompletion = new TaskCompletionSource<long>(TaskCreationOptions.RunContinuationsAsynchronously);
-        pendingUtterance.Clear();
+        _ = pendingUtterance.Clear();
         utteranceCompletionCancellationTokenSource?.Cancel();
         utteranceCompletionCancellationTokenSource?.Dispose();
         utteranceCompletionCancellationTokenSource = null;
@@ -1017,7 +1017,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         }
         finally
         {
-            Interlocked.Exchange(ref isReturningToWakeRecognition, 0);
+            _ = Interlocked.Exchange(ref isReturningToWakeRecognition, 0);
             TraceWake("Wake.Return.Ended", $"Status={status}; {GetWakeSnapshot()}");
         }
     }
@@ -1032,7 +1032,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         }
         finally
         {
-            wakeSessionGate.Release();
+            _ = wakeSessionGate.Release();
         }
     }
 
@@ -1138,14 +1138,14 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         commandStartCancellationTokenSource?.Cancel();
         commandStartCancellationTokenSource?.Dispose();
         commandStartCancellationTokenSource = null;
-        commandSpeechBoundaryCompletion?.TrySetCanceled();
+        _ = (commandSpeechBoundaryCompletion?.TrySetCanceled());
         commandSpeechBoundaryCompletion = null;
-        Interlocked.Exchange(ref commandWakeBoundary, 0);
+        _ = Interlocked.Exchange(ref commandWakeBoundary, 0);
         utteranceCompletionCancellationTokenSource?.Cancel();
         utteranceCompletionCancellationTokenSource?.Dispose();
         utteranceCompletionCancellationTokenSource = null;
         utteranceSession++;
-        pendingUtterance.Clear();
+        _ = pendingUtterance.Clear();
     }
 
     private void SetPresentation(GlanceAssistantState state, string transcript, string status)
@@ -1161,8 +1161,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
 
     private void Dispatch(Action action) => dispatcher.Dispatch(action);
 
-    private string GetWakeSnapshot() =>
-        $"ProviderState={State}; Started={isStarted}; ProviderCancelled={providerCancellationTokenSource?.IsCancellationRequested}; " +
+    private string GetWakeSnapshot() => $"ProviderState={State}; Started={isStarted}; ProviderCancelled={providerCancellationTokenSource?.IsCancellationRequested}; " +
         $"WakeGeneration={Volatile.Read(ref wakeGeneration)}; WakeResults={Interlocked.Read(ref wakeResultCount)}; " +
         $"RecognizerPresent={wakeRecognizer is not null}; SessionPresent={wakeRecognitionSession is not null}; " +
         $"SessionActive={Volatile.Read(ref isWakeSessionActive)}; " +
@@ -1181,11 +1180,11 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             try
             {
                 await action();
-                completion.TrySetResult();
+                _ = completion.TrySetResult();
             }
             catch (Exception exception)
             {
-                completion.TrySetException(exception);
+                _ = completion.TrySetException(exception);
             }
         });
         return completion.Task;
@@ -1377,9 +1376,9 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         {
             if (args.BytesRecorded > 0)
             {
-                Interlocked.Increment(ref dataCallbackCount);
-                Interlocked.Add(ref dataBytes, args.BytesRecorded);
-                Interlocked.Exchange(ref lastDataTimestamp, DateTimeOffset.UtcNow.Ticks);
+                _ = Interlocked.Increment(ref dataCallbackCount);
+                _ = Interlocked.Add(ref dataBytes, args.BytesRecorded);
+                _ = Interlocked.Exchange(ref lastDataTimestamp, DateTimeOffset.UtcNow.Ticks);
                 sourceBuffer?.AddSamples(args.Buffer, 0, args.BytesRecorded);
             }
         }
@@ -1412,7 +1411,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
 
                 if (HasSpeechLikeLevel(buffer))
                 {
-                    Interlocked.Exchange(ref lastSpeechLikeAudioTimestamp, DateTime.UtcNow.Ticks);
+                    _ = Interlocked.Exchange(ref lastSpeechLikeAudioTimestamp, DateTime.UtcNow.Ticks);
                 }
 
                 LiveAudioTranscriptionSession? session;
@@ -1424,7 +1423,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
 
                     while (bufferedAudio.Count > BufferedChunkCount)
                     {
-                        bufferedAudio.Dequeue();
+                        _ = bufferedAudio.Dequeue();
                     }
 
                     session = isAttaching ? null : activeSession;

@@ -9,11 +9,11 @@ public sealed class InfinityModule :
 {
     public void Register(IServiceCollection services)
     {
-        services.AddSingleton<ModuleResourceTextLocalizer<InfinityModule>>();
-        services.AddSingleton<InfinityBridgeClient>();
-        services.AddSingleton<IInfinityPageTitleUpdater>(provider => provider.GetRequiredService<InfinityBridgeClient>());
-        services.AddSingleton<InfinityViewModel>();
-        services.AddSingleton<IGlanceComponent, InfinityComponent>();
-        services.AddSingleton<IGlanceApplicationMessageHandler, InfinityMessageHandler>();
+        _ = services.AddSingleton<ModuleResourceTextLocalizer<InfinityModule>>();
+        _ = services.AddSingleton<InfinityBridgeClient>();
+        _ = services.AddSingleton<IInfinityPageTitleUpdater>(provider => provider.GetRequiredService<InfinityBridgeClient>());
+        _ = services.AddSingleton<InfinityViewModel>();
+        _ = services.AddSingleton<IGlanceComponent, InfinityComponent>();
+        _ = services.AddSingleton<IGlanceApplicationMessageHandler, InfinityMessageHandler>();
     }
 }

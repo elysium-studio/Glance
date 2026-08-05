@@ -135,8 +135,8 @@ public sealed class WindowsDevicePresenceService :
             watcher.Removed -= HandleRemoved;
             watcher.EnumerationCompleted -= HandleEnumerationCompleted;
             watcher.Stopped -= HandleStopped;
-            watchers.Remove(watcher);
-            watcherTransports.Remove(watcher);
+            _ = watchers.Remove(watcher);
+            _ = watcherTransports.Remove(watcher);
             expectedWatcherCount--;
         }
     }
@@ -210,11 +210,9 @@ public sealed class WindowsDevicePresenceService :
         }
     }
 
-    private void HandleEnumerationCompleted(DeviceWatcher sender, object args) =>
-        CompleteWatcher(sender);
+    private void HandleEnumerationCompleted(DeviceWatcher sender, object args) => CompleteWatcher(sender);
 
-    private void HandleStopped(DeviceWatcher sender, object args) =>
-        CompleteWatcher(sender);
+    private void HandleStopped(DeviceWatcher sender, object args) => CompleteWatcher(sender);
 
     private void CompleteWatcher(DeviceWatcher watcher)
     {
@@ -222,7 +220,7 @@ public sealed class WindowsDevicePresenceService :
 
         lock (gate)
         {
-            completedWatchers.Add(watcher);
+            _ = completedWatchers.Add(watcher);
 
             if (!isReady && completedWatchers.Count == expectedWatcherCount)
             {
@@ -246,8 +244,7 @@ public sealed class WindowsDevicePresenceService :
         return new ConnectedBluetoothDevice(group.Key, name, kind, batteryLevel);
     }
 
-    private static string GetStorageKey(BluetoothTransport transport, string id) =>
-        $"{transport}:{id}";
+    private static string GetStorageKey(BluetoothTransport transport, string id) => $"{transport}:{id}";
 
     private void RefreshBatteryLevels()
     {
@@ -293,7 +290,7 @@ public sealed class WindowsDevicePresenceService :
 
         lock (gate)
         {
-            activeBatteryReads.Remove(key);
+            _ = activeBatteryReads.Remove(key);
 
             if (batteryLevel is byte value && devices.TryGetValue(key, out ObservedDevice? device) && device.BatteryLevel != value)
             {
@@ -370,7 +367,6 @@ public sealed class WindowsDevicePresenceService :
         IReadOnlyDictionary<string, object> properties)
     {
         private readonly Dictionary<string, object> properties = new(properties, StringComparer.OrdinalIgnoreCase);
-        private byte? supplementalBatteryLevel;
 
         public BluetoothTransport Transport { get; } = transport;
 
@@ -382,10 +378,9 @@ public sealed class WindowsDevicePresenceService :
 
         public BluetoothDeviceKind Kind => GetKind(properties, Name);
 
-        public byte? BatteryLevel => GetBatteryLevel(properties) ?? supplementalBatteryLevel;
+        public byte? BatteryLevel { get => GetBatteryLevel(properties) ?? field; private set; }
 
-        public void SetBatteryLevel(byte value) =>
-            supplementalBatteryLevel = value;
+        public void SetBatteryLevel(byte value) => BatteryLevel = value;
 
         public void Update(IReadOnlyDictionary<string, object> updates)
         {
@@ -495,8 +490,7 @@ public sealed class WindowsDevicePresenceService :
         };
     }
 
-    private static string? GetString(IReadOnlyDictionary<string, object> properties, string key) =>
-        properties.TryGetValue(key, out object? value) ? value?.ToString() : null;
+    private static string? GetString(IReadOnlyDictionary<string, object> properties, string key) => properties.TryGetValue(key, out object? value) ? value?.ToString() : null;
 
     private static IEnumerable<string> GetStrings(IReadOnlyDictionary<string, object> properties, string key)
     {
@@ -505,12 +499,9 @@ public sealed class WindowsDevicePresenceService :
             return [];
         }
 
-        if (value is string text)
-        {
-            return [text];
-        }
-
-        return value is IEnumerable values
+        return value is string text
+            ? [text]
+            : value is IEnumerable values
             ? values.Cast<object>().Select(item => item?.ToString()).OfType<string>()
             : [];
     }

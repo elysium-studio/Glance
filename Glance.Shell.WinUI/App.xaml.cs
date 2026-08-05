@@ -1,7 +1,6 @@
 using Elysium.Application;
 using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
-using Elysium.Presentation;
 using Elysium.UI.WinUI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -33,12 +32,9 @@ public sealed partial class App
         DispatcherQueue applicationDispatcherQueue = DispatcherQueue.GetForCurrentThread();
         dispatcherQueue = applicationDispatcherQueue;
 
-        host = Host.CreateDefaultBuilder().UseWritableContentRoot(applicationData).ConfigureServices(services =>
-            {
-                services
+        host = Host.CreateDefaultBuilder().UseWritableContentRoot(applicationData).ConfigureServices(services => _ = services
                     .AddSingleton<IApplicationLifetime>(new ApplicationLifetime(ShutdownAsync))
-                    .AddApplication().AddPresentation().AddModules(new ApplicationModule(applicationData, applicationDispatcherQueue), new ConfigurationModule(), new LocalizationModule(), new NavigationModule(), new DesktopModule(), new BridgeModule(), new SettingsModule(), new GlanceSettingsModule(), new ModulesSettingsModule(), new WindowsSettingsModule());
-            })
+                    .AddApplication().AddPresentation().AddModules(new ApplicationModule(applicationData, applicationDispatcherQueue), new ConfigurationModule(), new LocalizationModule(), new NavigationModule(), new DesktopModule(), new BridgeModule(), new SettingsModule(), new GlanceSettingsModule(), new ModulesSettingsModule(), new WindowsSettingsModule()))
             .Build();
 
         host.Start();

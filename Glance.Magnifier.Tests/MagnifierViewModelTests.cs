@@ -92,8 +92,7 @@ public sealed class MagnifierViewModelTests
 
         public int StartCount { get; private set; }
 
-        public MagnifierState GetState() =>
-            state;
+        public MagnifierState GetState() => state;
 
         public bool Start()
         {

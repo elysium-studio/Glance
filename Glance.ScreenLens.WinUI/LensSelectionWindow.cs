@@ -204,8 +204,7 @@ internal sealed partial class LensSelectionWindow
         return imageSource;
     }
 
-    private static Rect CreateRectangle(Point start, Point end) =>
-        new(Math.Min(start.X, end.X), Math.Min(start.Y, end.Y), Math.Abs(end.X - start.X), Math.Abs(end.Y - start.Y));
+    private static Rect CreateRectangle(Point start, Point end) => new(Math.Min(start.X, end.X), Math.Min(start.Y, end.Y), Math.Abs(end.X - start.X), Math.Abs(end.Y - start.Y));
 
     private static bool SharesVisualRow(IReadOnlyList<LensWordCandidate> row, LensWordCandidate candidate)
     {
@@ -240,15 +239,9 @@ internal sealed partial class LensSelectionWindow
         return new PathGeometry { Figures = [figure] };
     }
 
-    private static Brush ResolveBrush(string key, Color fallback)
-    {
-        if (Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue(key, out object value) && value is Brush brush)
-        {
-            return brush;
-        }
-
-        return new SolidColorBrush(fallback);
-    }
+    private static Brush ResolveBrush(string key, Color fallback) => Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue(key, out object value) && value is Brush brush
+            ? brush
+            : new SolidColorBrush(fallback);
 
     private void BeginAdjustment(Rect initialBounds)
     {
@@ -460,7 +453,7 @@ internal sealed partial class LensSelectionWindow
         }
 
         _ = NativeMethods.ShowWindow(windowHandle, ShowWindowHide);
-        presentationCompletion.TrySetResult(true);
+        _ = presentationCompletion.TrySetResult(true);
 
         try
         {
@@ -487,13 +480,13 @@ internal sealed partial class LensSelectionWindow
             textSelectionSurface.PointerMoved -= HandleTextPointerMoved;
             textSelectionSurface.PointerPressed -= HandleTextPointerPressed;
             textSelectionSurface.PointerReleased -= HandleTextPointerReleased;
-            selectionCanvas.Children.Remove(textSelectionSurface);
+            _ = selectionCanvas.Children.Remove(textSelectionSurface);
             textSelectionSurface = null;
         }
 
         if (recognitionToolbar is not null)
         {
-            root.Children.Remove(recognitionToolbar);
+            _ = root.Children.Remove(recognitionToolbar);
             recognitionToolbar = null;
         }
     }
@@ -578,7 +571,7 @@ internal sealed partial class LensSelectionWindow
 
             Close();
             using CancellationTokenSource timeout = new(TimeSpan.FromSeconds(3));
-            await intentService.InvokeAsync(intent.Id, new GlanceContentContext(GlanceContentKind.Text, [], text), timeout.Token).WaitAsync(timeout.Token);
+            _ = await intentService.InvokeAsync(intent.Id, new GlanceContentContext(GlanceContentKind.Text, [], text), timeout.Token).WaitAsync(timeout.Token);
         }
         catch
         {
@@ -610,10 +603,7 @@ internal sealed partial class LensSelectionWindow
         Canvas.SetLeft(flightSurface, sourceBounds.X);
         Canvas.SetTop(flightSurface, sourceBounds.Y);
         flightCanvas.Children.Add(flightSurface);
-        if (regionAdjuster is not null)
-        {
-            regionAdjuster.Visibility = Visibility.Collapsed;
-        }
+        _ = regionAdjuster?.Visibility = Visibility.Collapsed;
         instructionContainer.Visibility = Visibility.Collapsed;
         ClearRecognitionSurface();
         smokeGeometry.Children.Clear();
@@ -634,7 +624,7 @@ internal sealed partial class LensSelectionWindow
             }
 
             finished = true;
-            completion.TrySetResult();
+            _ = completion.TrySetResult();
 
             if (renderingHandler is not null)
             {
@@ -646,7 +636,7 @@ internal sealed partial class LensSelectionWindow
             try
             {
                 animationBatch?.Dispose();
-                flightCanvas.Children.Remove(flightSurface);
+                _ = flightCanvas.Children.Remove(flightSurface);
             }
             catch (Exception)
             {
@@ -792,15 +782,15 @@ internal sealed partial class LensSelectionWindow
             try
             {
                 action();
-                completion.TrySetResult();
+                _ = completion.TrySetResult();
             }
             catch (Exception exception)
             {
-                completion.TrySetException(exception);
+                _ = completion.TrySetException(exception);
             }
         }))
         {
-            completion.TrySetCanceled();
+            _ = completion.TrySetCanceled();
         }
 
         return completion.Task;
@@ -810,10 +800,7 @@ internal sealed partial class LensSelectionWindow
     {
         const double inset = 0;
 
-        if (regionAdjuster is not null)
-        {
-            regionAdjuster.IsSelectionOutlineVisible = false;
-        }
+        _ = regionAdjuster?.IsSelectionOutlineVisible = false;
 
         Canvas.SetLeft(recognitionProgress, bounds.X - inset);
         Canvas.SetTop(recognitionProgress, bounds.Y - inset);
@@ -828,10 +815,7 @@ internal sealed partial class LensSelectionWindow
         recognitionProgressStoryboard.Stop();
         recognitionProgress.Visibility = Visibility.Collapsed;
 
-        if (regionAdjuster is not null)
-        {
-            regionAdjuster.IsSelectionOutlineVisible = true;
-        }
+        _ = regionAdjuster?.IsSelectionOutlineVisible = true;
     }
 
     private void DetachSelectionHandlers()
@@ -852,15 +836,13 @@ internal sealed partial class LensSelectionWindow
             closed = true;
             recognitionRequest++;
             recognitionProgressStoryboard.Stop();
-            presentationCompletion.TrySetResult(true);
+            _ = presentationCompletion.TrySetResult(true);
         }
     }
 
-    private void HandleAdjustmentBoundsChanged(object? sender, EventArgs args) =>
-        UpdateAdjustmentMask();
+    private void HandleAdjustmentBoundsChanged(object? sender, EventArgs args) => UpdateAdjustmentMask();
 
-    private void HandleAdjustmentCompleted(object? sender, EventArgs args) =>
-        _ = RecognizeSelectionAsync();
+    private void HandleAdjustmentCompleted(object? sender, EventArgs args) => _ = RecognizeSelectionAsync();
 
     private void HandleAdjustmentStarted(object? sender, EventArgs args)
     {
@@ -878,7 +860,7 @@ internal sealed partial class LensSelectionWindow
         if (!string.IsNullOrWhiteSpace(text))
         {
             args.Handled = true;
-            await copyAsync(text);
+            _ = await copyAsync(text);
         }
     }
 
@@ -897,7 +879,7 @@ internal sealed partial class LensSelectionWindow
         root.UpdateLayout();
         UpdateSmokeBounds();
         window.Activate();
-        root.Focus(FocusState.Programmatic);
+        _ = root.Focus(FocusState.Programmatic);
     }
 
     private void HandleSelectionPointerMoved(object sender, PointerRoutedEventArgs args)
@@ -919,7 +901,7 @@ internal sealed partial class LensSelectionWindow
 
         selectionStart = point.Position;
         isDragging = true;
-        root.CapturePointer(args.Pointer);
+        _ = root.CapturePointer(args.Pointer);
         ShowSelectionHighlight(CreateRectangle(selectionStart, selectionStart));
         args.Handled = true;
     }
@@ -994,7 +976,7 @@ internal sealed partial class LensSelectionWindow
         selectionAnchor = index;
         selectionFocus = index;
         isSelectingText = true;
-        textSelectionSurface.CapturePointer(args.Pointer);
+        _ = textSelectionSurface.CapturePointer(args.Pointer);
         UpdateTextSelection();
         args.Handled = true;
     }
@@ -1042,12 +1024,9 @@ internal sealed partial class LensSelectionWindow
             return firstIndex;
         }
 
-        if (point.X >= selectableWords[lastIndex].Bounds.Right)
-        {
-            return lastIndex;
-        }
-
-        return Enumerable.Range(firstIndex, row.Count).MinBy(index =>
+        return point.X >= selectableWords[lastIndex].Bounds.Right
+            ? lastIndex
+            : Enumerable.Range(firstIndex, row.Count).MinBy(index =>
         {
             Rect bounds = selectableWords[index].Bounds;
             return point.X < bounds.Left
@@ -1069,10 +1048,7 @@ internal sealed partial class LensSelectionWindow
             highlight.Background = new SolidColorBrush(Color.FromArgb(0, 0, 120, 212));
         }
 
-        if (copySelectionButton is not null)
-        {
-            copySelectionButton.IsEnabled = false;
-        }
+        _ = copySelectionButton?.IsEnabled = false;
 
         foreach (Button button in intentButtons)
         {
@@ -1095,14 +1071,11 @@ internal sealed partial class LensSelectionWindow
 
             if (selected)
             {
-                selectedWords.Add(index);
+                _ = selectedWords.Add(index);
             }
         }
 
-        if (copySelectionButton is not null)
-        {
-            copySelectionButton.IsEnabled = selectedWords.Count > 0;
-        }
+        _ = copySelectionButton?.IsEnabled = selectedWords.Count > 0;
 
         foreach (Button button in intentButtons)
         {
@@ -1168,8 +1141,7 @@ internal sealed partial class LensSelectionWindow
             (int)Math.Round(rectangle.Height * scaleY));
     }
 
-    private void UpdateSmokeBounds() =>
-        smokeBounds.Rect = new Rect(0, 0, root.ActualWidth, root.ActualHeight);
+    private void UpdateSmokeBounds() => smokeBounds.Rect = new Rect(0, 0, root.ActualWidth, root.ActualHeight);
 
     private void PositionToolbar()
     {
@@ -1194,13 +1166,11 @@ internal sealed partial class LensSelectionWindow
         {
             y = above;
         }
-        else if (below + toolbarSize.Height <= root.ActualHeight - edgePadding)
-        {
-            y = below;
-        }
         else
         {
-            y = Math.Clamp(regionBounds.Y + regionGap,
+            y = below + toolbarSize.Height <= root.ActualHeight - edgePadding
+                ? below
+                : Math.Clamp(regionBounds.Y + regionGap,
                 edgePadding,
                 Math.Max(edgePadding, root.ActualHeight - toolbarSize.Height - edgePadding));
         }

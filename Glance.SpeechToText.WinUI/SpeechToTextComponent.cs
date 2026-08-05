@@ -71,8 +71,7 @@ public sealed partial class SpeechToTextComponent :
 
     public event EventHandler? AvailabilityChanged;
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("SpeechToText.Start",
             Id,
             "Start transcription",
@@ -107,12 +106,9 @@ public sealed partial class SpeechToTextComponent :
 
         string? source = request.GetString("source");
 
-        if (string.IsNullOrWhiteSpace(source))
-        {
-            return Task.FromResult<GlanceActionResult?>(GlanceActionResult.InvalidArguments("What should I transcribe?", "Say microphone, system audio, or meeting."));
-        }
-
-        return Task.FromResult<GlanceActionResult?>(source is "microphone" or "systemAudio" or "meeting"
+        return string.IsNullOrWhiteSpace(source)
+            ? Task.FromResult<GlanceActionResult?>(GlanceActionResult.InvalidArguments("What should I transcribe?", "Say microphone, system audio, or meeting."))
+            : Task.FromResult<GlanceActionResult?>(source is "microphone" or "systemAudio" or "meeting"
             ? null
             : GlanceActionResult.InvalidArguments($"I don't recognise “{source}”.", "Say microphone, system audio, or meeting."));
     }
@@ -135,7 +131,7 @@ public sealed partial class SpeechToTextComponent :
                     : GlanceActionResult.Unavailable("Speech recognition could not be started.");
 
             case "SpeechToText.Stop":
-                await SetListeningAsync(false);
+                _ = await SetListeningAsync(false);
                 return GlanceActionResult.Success();
 
             default:
@@ -158,13 +154,10 @@ public sealed partial class SpeechToTextComponent :
     private async Task CheckAvailabilityAsync()
     {
         await recognitionService.CheckAvailabilityAsync();
-        dispatcherQueue.TryEnqueue(() => viewModel.SetAvailability(recognitionService.Availability));
+        _ = dispatcherQueue.TryEnqueue(() => viewModel.SetAvailability(recognitionService.Availability));
     }
 
-    private async void HandleToggleListeningRequested(object? sender, EventArgs args)
-    {
-        await SetListeningAsync(!recognitionService.IsListening);
-    }
+    private async void HandleToggleListeningRequested(object? sender, EventArgs args) => _ = await SetListeningAsync(!recognitionService.IsListening);
 
     private async Task<bool> SetListeningAsync(bool listen)
     {
@@ -173,12 +166,12 @@ public sealed partial class SpeechToTextComponent :
         if (!listen)
         {
             await recognitionService.StopAsync();
-            dispatcherQueue.TryEnqueue(viewModel.StopListening);
+            _ = dispatcherQueue.TryEnqueue(viewModel.StopListening);
             return true;
         }
 
         bool started = await recognitionService.StartAsync(viewModel.SelectedAudioSource);
-        dispatcherQueue.TryEnqueue(started ? viewModel.BeginListening : viewModel.ShowUnavailable);
+        _ = dispatcherQueue.TryEnqueue(started ? viewModel.BeginListening : viewModel.ShowUnavailable);
         return started;
     }
 
@@ -186,7 +179,7 @@ public sealed partial class SpeechToTextComponent :
     {
         viewModel.BeginPreparing();
         bool ready = await recognitionService.EnsureModelAsync();
-        dispatcherQueue.TryEnqueue(() =>
+        _ = dispatcherQueue.TryEnqueue(() =>
         {
             viewModel.SetAvailability(recognitionService.Availability);
 
@@ -197,22 +190,17 @@ public sealed partial class SpeechToTextComponent :
         });
     }
 
-    private void HandleClearRequested(object? sender, EventArgs args) =>
-        viewModel.ClearTranscript();
+    private void HandleClearRequested(object? sender, EventArgs args) => viewModel.ClearTranscript();
 
-    private async void HandleCopyRequested(object? sender, string text) =>
-        await textCopyService.CopyAsync(text);
+    private async void HandleCopyRequested(object? sender, string text) => await textCopyService.CopyAsync(text);
 
-    private void HandleAvailabilityChanged(object? sender, SpeechRecognitionAvailabilityChangedEventArgs args) =>
-        dispatcherQueue.TryEnqueue(() =>
-        {
-            viewModel.SetAvailability(args.Availability);
-            AvailabilityChanged?.Invoke(this, EventArgs.Empty);
-        });
+    private void HandleAvailabilityChanged(object? sender, SpeechRecognitionAvailabilityChangedEventArgs args) => _ = dispatcherQueue.TryEnqueue(() =>
+                                                                                                                       {
+                                                                                                                           viewModel.SetAvailability(args.Availability);
+                                                                                                                           AvailabilityChanged?.Invoke(this, EventArgs.Empty);
+                                                                                                                       });
 
-    private void HandleSpeechRecognized(object? sender, SpeechRecognizedEventArgs args) =>
-        dispatcherQueue.TryEnqueue(() => viewModel.ApplyRecognition(args.Text, args.IsFinal));
+    private void HandleSpeechRecognized(object? sender, SpeechRecognizedEventArgs args) => _ = dispatcherQueue.TryEnqueue(() => viewModel.ApplyRecognition(args.Text, args.IsFinal));
 
-    private void HandleListeningStopped(object? sender, EventArgs args) =>
-        dispatcherQueue.TryEnqueue(viewModel.StopListening);
+    private void HandleListeningStopped(object? sender, EventArgs args) => _ = dispatcherQueue.TryEnqueue(viewModel.StopListening);
 }

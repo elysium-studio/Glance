@@ -45,7 +45,7 @@ public sealed partial class WindowsScreenCaptureService :
         this.repository = repository;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         captureFolderPath = ResolveCaptureFolderPath();
-        Directory.CreateDirectory(captureFolderPath);
+        _ = Directory.CreateDirectory(captureFolderPath);
         captureWatcherDebounceTimer = new System.Threading.Timer(_ => CapturesChanged?.Invoke(this, EventArgs.Empty), null, System.Threading.Timeout.InfiniteTimeSpan, System.Threading.Timeout.InfiniteTimeSpan);
         captureWatcher = new FileSystemWatcher(captureFolderPath, "Glance *.png")
         {
@@ -63,8 +63,7 @@ public sealed partial class WindowsScreenCaptureService :
 
     public Task<ScreenCaptureItem?> CaptureWindowAsync(string windowName) => CaptureAsync(ScreenCaptureMode.Window, windowName);
 
-    public int CountMatchingWindows(string windowName) =>
-        string.IsNullOrWhiteSpace(windowName) ? 0 : FindWindowCandidates(EnumerateWindowCandidates(), windowName).Count;
+    public int CountMatchingWindows(string windowName) => string.IsNullOrWhiteSpace(windowName) ? 0 : FindWindowCandidates(EnumerateWindowCandidates(), windowName).Count;
 
     private async Task<ScreenCaptureItem?> CaptureAsync(ScreenCaptureMode mode, string? windowName)
     {
@@ -157,8 +156,7 @@ public sealed partial class WindowsScreenCaptureService :
         return frame;
     }
 
-    private void HandleCaptureFolderChanged(object sender, FileSystemEventArgs args) =>
-        captureWatcherDebounceTimer.Change(TimeSpan.FromMilliseconds(180), System.Threading.Timeout.InfiniteTimeSpan);
+    private void HandleCaptureFolderChanged(object sender, FileSystemEventArgs args) => _ = captureWatcherDebounceTimer.Change(TimeSpan.FromMilliseconds(180), System.Threading.Timeout.InfiniteTimeSpan);
 
     public IReadOnlyList<ScreenCaptureItem> GetRecentCaptures(int maximumCount)
     {
@@ -175,7 +173,7 @@ public sealed partial class WindowsScreenCaptureService :
 
             foreach (string missingPath in captures.Keys.Where(path => !filePaths.Contains(path)).ToArray())
             {
-                captures.Remove(missingPath);
+                _ = captures.Remove(missingPath);
                 repository.Remove(missingPath);
             }
 
@@ -205,7 +203,7 @@ public sealed partial class WindowsScreenCaptureService :
     {
         try
         {
-            Process.Start(new ProcessStartInfo
+            _ = Process.Start(new ProcessStartInfo
             {
                 FileName = "explorer.exe",
                 Arguments = $"/select,\"{capture.FilePath}\"",
@@ -281,12 +279,9 @@ public sealed partial class WindowsScreenCaptureService :
 
         try
         {
-            if (!NativeMethods.BitBlt(memoryDeviceContext, 0, 0, width, height, screenDeviceContext, x, y, SourceCopy | CaptureBlt))
-            {
-                throw new InvalidOperationException("Unable to copy the desktop surface.");
-            }
-
-            return new DesktopCaptureBitmap(x, y, width, height, ReadBitmapPixels(memoryDeviceContext, bitmap, width, height));
+            return !NativeMethods.BitBlt(memoryDeviceContext, 0, 0, width, height, screenDeviceContext, x, y, SourceCopy | CaptureBlt)
+                ? throw new InvalidOperationException("Unable to copy the desktop surface.")
+                : new DesktopCaptureBitmap(x, y, width, height, ReadBitmapPixels(memoryDeviceContext, bitmap, width, height));
         }
         finally
         {
@@ -299,7 +294,7 @@ public sealed partial class WindowsScreenCaptureService :
 
     private async Task<ScreenCaptureItem> SaveAsync(DesktopCaptureBitmap bitmap, ScreenCaptureMode mode)
     {
-        Directory.CreateDirectory(captureFolderPath);
+        _ = Directory.CreateDirectory(captureFolderPath);
         StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(captureFolderPath);
         string fileName = $"Glance {DateTime.Now:yyyy-MM-dd HH-mm-ss}.png";
         StorageFile file = await folder.CreateFileAsync(fileName, CreationCollisionOption.GenerateUniqueName);
@@ -364,7 +359,7 @@ public sealed partial class WindowsScreenCaptureService :
     {
         try
         {
-            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+            _ = Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
             return true;
         }
         catch
@@ -377,9 +372,9 @@ public sealed partial class WindowsScreenCaptureService :
     {
         uint processId = (uint)Environment.ProcessId;
         List<ApplicationWindowState> windows = [];
-        NativeMethods.EnumWindows((window, parameter) =>
+        _ = NativeMethods.EnumWindows((window, parameter) =>
         {
-            NativeMethods.GetWindowThreadProcessId(window, out uint windowProcessId);
+            _ = NativeMethods.GetWindowThreadProcessId(window, out uint windowProcessId);
 
             if (windowProcessId == processId && NativeMethods.IsWindowVisible(window))
             {
@@ -407,15 +402,9 @@ public sealed partial class WindowsScreenCaptureService :
         }
     }
 
-    private static async Task<DesktopCaptureBitmap> CaptureWindowAsync(nint window, NativeRectangle visibleBounds)
-    {
-        if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
-        {
-            return await WindowsGraphicsCapture.CaptureWindowAsync(window, visibleBounds);
-        }
-
-        return CaptureWindowFallback(window, visibleBounds);
-    }
+    private static async Task<DesktopCaptureBitmap> CaptureWindowAsync(nint window, NativeRectangle visibleBounds) => OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362)
+            ? await WindowsGraphicsCapture.CaptureWindowAsync(window, visibleBounds)
+            : CaptureWindowFallback(window, visibleBounds);
 
     private static DesktopCaptureBitmap CaptureWindowFallback(nint window, NativeRectangle visibleBounds)
     {
@@ -496,18 +485,17 @@ public sealed partial class WindowsScreenCaptureService :
     {
         uint processId = (uint)Environment.ProcessId;
         List<CaptureSelectionCandidate> candidates = [];
-        NativeMethods.EnumWindows((window, parameter) =>
+        _ = NativeMethods.EnumWindows((window, parameter) =>
         {
-            NativeMethods.GetWindowThreadProcessId(window, out uint windowProcessId);
+            _ = NativeMethods.GetWindowThreadProcessId(window, out uint windowProcessId);
 
             if (windowProcessId == processId || !NativeMethods.IsWindowVisible(window) || NativeMethods.IsIconic(window))
             {
                 return true;
             }
 
-            NativeRect rectangle;
 
-            if (NativeMethods.DwmGetWindowAttribute(window, DwmExtendedFrameBounds, out rectangle, (uint)Marshal.SizeOf<NativeRect>()) != 0 && !NativeMethods.GetWindowRect(window, out rectangle))
+            if (NativeMethods.DwmGetWindowAttribute(window, DwmExtendedFrameBounds, out NativeRect rectangle, (uint)Marshal.SizeOf<NativeRect>()) != 0 && !NativeMethods.GetWindowRect(window, out rectangle))
             {
                 return true;
             }
@@ -551,7 +539,7 @@ public sealed partial class WindowsScreenCaptureService :
     private static IReadOnlyList<CaptureSelectionCandidate> EnumerateDisplayCandidates()
     {
         List<CaptureSelectionCandidate> candidates = [];
-        NativeMethods.EnumDisplayMonitors(nint.Zero, nint.Zero, (monitor, _, _, _) =>
+        _ = NativeMethods.EnumDisplayMonitors(nint.Zero, nint.Zero, (monitor, _, _, _) =>
         {
             MonitorInfo info = new() { Size = (uint)Marshal.SizeOf<MonitorInfo>() };
 

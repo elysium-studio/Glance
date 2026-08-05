@@ -48,7 +48,7 @@ public sealed class WindowsKeepAwakeService :
         isDisposed = true;
         TaskCompletionSource<bool> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
         requests.Add(new StateRequest(false, true, completion));
-        completion.Task.GetAwaiter().GetResult();
+        _ = completion.Task.GetAwaiter().GetResult();
         requests.CompleteAdding();
         worker.Join();
         requests.Dispose();

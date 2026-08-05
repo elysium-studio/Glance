@@ -2,8 +2,6 @@ using Glance.Application.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Channels;
@@ -67,7 +65,7 @@ internal sealed class GlanceBridgeConnection :
             return;
         }
 
-        messages.Writer.TryComplete();
+        _ = messages.Writer.TryComplete();
         disposalCancellation.Cancel();
         await writer.DisposeAsync();
         await writerTask;
@@ -96,7 +94,7 @@ internal sealed class GlanceBridgeConnection :
         }
         catch (IOException exception)
         {
-            messages.Writer.TryComplete(exception);
+            _ = messages.Writer.TryComplete(exception);
         }
         catch (ObjectDisposedException) when (Volatile.Read(ref disposed) != 0)
         {

@@ -96,10 +96,7 @@ public sealed partial class ThemeSwitcherViewModel(IThemeController controller,
         Dispatch(() => ApplyResult(result, Preference));
     }
 
-    public void ApplySettings(ThemeSwitcherSettings updatedSettings)
-    {
-        settings = updatedSettings;
-    }
+    public void ApplySettings(ThemeSwitcherSettings updatedSettings) => settings = updatedSettings;
 
     public void WriteSettings(ThemeSwitcherSettings target)
     {

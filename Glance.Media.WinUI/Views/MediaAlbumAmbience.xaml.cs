@@ -14,8 +14,6 @@ public sealed partial class MediaAlbumAmbience :
     UserControl
 {
     private const int ArtworkTransitionDurationMs = 520;
-
-    private MediaViewModel? viewModel;
     private Visual? ambientVisual;
     private Visual? motionVisual;
     private ContainerVisual? artworkContainerVisual;
@@ -39,16 +37,16 @@ public sealed partial class MediaAlbumAmbience :
 
     public MediaViewModel? ViewModel
     {
-        get => viewModel;
+        get;
         set
         {
-            if (ReferenceEquals(viewModel, value))
+            if (ReferenceEquals(field, value))
             {
                 return;
             }
 
             Unsubscribe();
-            viewModel = value;
+            field = value;
             Subscribe();
             UpdateArtwork();
             UpdateState();
@@ -77,15 +75,9 @@ public sealed partial class MediaAlbumAmbience :
         artworkTransitionGeneration++;
         CancelArtworkPreparation();
 
-        if (motionVisual is not null)
-        {
-            motionVisual.ImplicitAnimations = null;
-        }
+        _ = motionVisual?.ImplicitAnimations = null;
 
-        if (ambientVisual is not null)
-        {
-            ambientVisual.ImplicitAnimations = null;
-        }
+        _ = ambientVisual?.ImplicitAnimations = null;
 
         nextArtwork?.Dispose();
         currentArtwork?.Dispose();
@@ -115,13 +107,7 @@ public sealed partial class MediaAlbumAmbience :
         isArtworkTransitioning = false;
     }
 
-    private void HandleSizeChanged(object sender, SizeChangedEventArgs args)
-    {
-        if (motionVisual is not null)
-        {
-            motionVisual.CenterPoint = new Vector3((float)args.NewSize.Width / 2, (float)args.NewSize.Height / 2, 0);
-        }
-    }
+    private void HandleSizeChanged(object sender, SizeChangedEventArgs args) => _ = motionVisual?.CenterPoint = new Vector3((float)args.NewSize.Width / 2, (float)args.NewSize.Height / 2, 0);
 
     private void CreateArtworkVisual(Compositor compositor)
     {
@@ -140,26 +126,26 @@ public sealed partial class MediaAlbumAmbience :
 
     private void Subscribe()
     {
-        if (!IsLoaded || viewModel is null)
+        if (!IsLoaded || ViewModel is null)
         {
             return;
         }
 
-        viewModel.PropertyChanged -= HandlePropertyChanged;
-        viewModel.PropertyChanged += HandlePropertyChanged;
-        viewModel.AudioLevelsChanged -= HandleAudioLevelsChanged;
-        viewModel.AudioLevelsChanged += HandleAudioLevelsChanged;
+        ViewModel.PropertyChanged -= HandlePropertyChanged;
+        ViewModel.PropertyChanged += HandlePropertyChanged;
+        ViewModel.AudioLevelsChanged -= HandleAudioLevelsChanged;
+        ViewModel.AudioLevelsChanged += HandleAudioLevelsChanged;
     }
 
     private void Unsubscribe()
     {
-        if (viewModel is null)
+        if (ViewModel is null)
         {
             return;
         }
 
-        viewModel.PropertyChanged -= HandlePropertyChanged;
-        viewModel.AudioLevelsChanged -= HandleAudioLevelsChanged;
+        ViewModel.PropertyChanged -= HandlePropertyChanged;
+        ViewModel.AudioLevelsChanged -= HandleAudioLevelsChanged;
     }
 
     private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs args)
@@ -192,7 +178,7 @@ public sealed partial class MediaAlbumAmbience :
 
     private void UpdateArtwork()
     {
-        MediaAmbientArtwork? artwork = viewModel?.AmbientArtwork as MediaAmbientArtwork;
+        MediaAmbientArtwork? artwork = ViewModel?.AmbientArtwork as MediaAmbientArtwork;
         desiredArtwork = artwork;
 
         if (currentArtworkVisual is null || nextArtworkVisual is null)
@@ -359,8 +345,8 @@ public sealed partial class MediaAlbumAmbience :
             return;
         }
 
-        bool hasArtwork = viewModel?.HasSession == true &&
-            viewModel.AmbientArtwork is MediaAmbientArtwork;
+        bool hasArtwork = ViewModel?.HasSession == true &&
+            ViewModel.AmbientArtwork is MediaAmbientArtwork;
         float opacity = hasArtwork ? 0.92f : 0;
 
         if (ShouldPan)
@@ -462,15 +448,15 @@ public sealed partial class MediaAlbumAmbience :
     }
 
     private bool CanAnimate =>
-        viewModel?.AmbientArtwork is MediaAmbientArtwork &&
-        viewModel.HasSession &&
-        viewModel.IsPlaying &&
-        viewModel.ShowAudioVisualization;
+        ViewModel?.AmbientArtwork is MediaAmbientArtwork &&
+        ViewModel.HasSession &&
+        ViewModel.IsPlaying &&
+        ViewModel.ShowAudioVisualization;
 
     private bool ShouldPan =>
-        viewModel?.AmbientArtwork is MediaAmbientArtwork &&
-        viewModel.HasSession &&
-        viewModel.ShowAudioVisualization;
+        ViewModel?.AmbientArtwork is MediaAmbientArtwork &&
+        ViewModel.HasSession &&
+        ViewModel.ShowAudioVisualization;
 
     private static double Average(IReadOnlyList<double> levels, int start, int count)
     {

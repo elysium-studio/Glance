@@ -10,11 +10,11 @@ public sealed class MagnifierModule :
 {
     public void Register(IServiceCollection services)
     {
-        services.AddSingleton<ModuleResourceTextLocalizer<MagnifierModule>>();
-        services.AddSingleton<IMagnifierService, WindowsMagnifierService>();
-        services.AddSingleton(provider => new MagnifierViewModel(provider.GetRequiredService<IMagnifierService>(), provider.GetRequiredService<ModuleResourceTextLocalizer<MagnifierModule>>()));
-        services.AddSingleton<MagnifierComponent>();
-        services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<MagnifierComponent>());
-        services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<MagnifierComponent>());
+        _ = services.AddSingleton<ModuleResourceTextLocalizer<MagnifierModule>>();
+        _ = services.AddSingleton<IMagnifierService, WindowsMagnifierService>();
+        _ = services.AddSingleton(provider => new MagnifierViewModel(provider.GetRequiredService<IMagnifierService>(), provider.GetRequiredService<ModuleResourceTextLocalizer<MagnifierModule>>()));
+        _ = services.AddSingleton<MagnifierComponent>();
+        _ = services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<MagnifierComponent>());
+        _ = services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<MagnifierComponent>());
     }
 }

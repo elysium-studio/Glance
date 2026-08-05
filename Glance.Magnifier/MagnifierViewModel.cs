@@ -58,7 +58,7 @@ public sealed partial class MagnifierViewModel(IMagnifierService magnifierServic
     {
         if (CanStart)
         {
-            magnifierService.Start();
+            _ = magnifierService.Start();
         }
     }
 
@@ -66,7 +66,7 @@ public sealed partial class MagnifierViewModel(IMagnifierService magnifierServic
     {
         if (CanZoomIn)
         {
-            magnifierService.ZoomIn();
+            _ = magnifierService.ZoomIn();
         }
     }
 
@@ -74,7 +74,7 @@ public sealed partial class MagnifierViewModel(IMagnifierService magnifierServic
     {
         if (CanZoomOut)
         {
-            magnifierService.ZoomOut();
+            _ = magnifierService.ZoomOut();
         }
     }
 
@@ -82,7 +82,7 @@ public sealed partial class MagnifierViewModel(IMagnifierService magnifierServic
     {
         if (CanClose)
         {
-            magnifierService.Close();
+            _ = magnifierService.Close();
         }
     }
 }

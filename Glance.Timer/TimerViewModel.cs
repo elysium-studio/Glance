@@ -83,7 +83,7 @@ public sealed partial class TimerViewModel :
     {
         if (IsRunning)
         {
-            Refresh();
+            _ = Refresh();
             IsRunning = false;
         }
         else if (remaining > TimeSpan.Zero)
@@ -199,24 +199,19 @@ public sealed partial class TimerViewModel :
         settings.SessionWasRunning = IsRunning;
     }
 
-    private void UpdateText()
-    {
-        RemainingText = FormatTime(remaining);
-    }
+    private void UpdateText() => RemainingText = FormatTime(remaining);
 
     private void RefreshIfRunning()
     {
         if (IsRunning)
         {
-            Refresh();
+            _ = Refresh();
         }
     }
 
-    private static TimeSpan GetAdjustment(TimerSettings settings) =>
-        TimeSpan.FromMinutes(Math.Clamp(settings.AdjustmentMinutes, 0.5, 60));
+    private static TimeSpan GetAdjustment(TimerSettings settings) => TimeSpan.FromMinutes(Math.Clamp(settings.AdjustmentMinutes, 0.5, 60));
 
-    private static TimeSpan GetDefaultDuration(TimerSettings settings) =>
-        TimeSpan.FromMinutes(Math.Clamp(settings.DefaultDurationMinutes, 1, 1440));
+    private static TimeSpan GetDefaultDuration(TimerSettings settings) => TimeSpan.FromMinutes(Math.Clamp(settings.DefaultDurationMinutes, 1, 1440));
 
     private static string FormatTime(TimeSpan value)
     {

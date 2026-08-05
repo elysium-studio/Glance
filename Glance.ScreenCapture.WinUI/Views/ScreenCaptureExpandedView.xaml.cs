@@ -2,6 +2,7 @@ using Elysium.UI.Controls.WinUI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Runtime.InteropServices;
@@ -16,6 +17,7 @@ public sealed partial class ScreenCaptureExpandedView :
 
     private DispatcherQueueTimer? captureCompletionTimer;
     private bool isCaptureInProgress;
+    private DesktopIsland? menuExpansionIsland;
 
     public ScreenCaptureExpandedView(ScreenCaptureViewModel viewModel)
     {
@@ -82,31 +84,65 @@ public sealed partial class ScreenCaptureExpandedView :
         return true;
     }
 
-    private void HandleCaptureMenuOpened(object sender, object args) =>
-        SetExpansionLocked(true);
+    private void HandleCaptureMenuOpened(object sender, object args) => SetExpansionLocked(true);
 
     private void HandleCaptureMenuClosed(object sender, object args)
     {
-        if (!isCaptureInProgress)
+        if (isCaptureInProgress)
         {
-            SetExpansionLocked(false);
+            menuExpansionIsland = null;
+            return;
         }
+
+        ReleaseMenuExpansionLock();
     }
 
     private void SetExpansionLocked(bool isLocked)
     {
-        DependencyObject? current = this;
+        DesktopIsland? island = FindIsland();
 
-        while (current is not null)
+        if (island is null)
         {
-            if (current is DesktopIsland island)
-            {
-                island.IsExpansionLocked = isLocked;
-                return;
-            }
-
-            current = VisualTreeHelper.GetParent(current);
+            return;
         }
+
+        DetachMenuExpansionIsland();
+        island.IsExpansionLocked = isLocked;
+        menuExpansionIsland = isLocked ? island : null;
+    }
+
+    private void ReleaseMenuExpansionLock()
+    {
+        DesktopIsland? island = menuExpansionIsland ?? FindIsland();
+
+        if (island is null)
+        {
+            return;
+        }
+
+        if (island.IsPointerWithinInteractiveRegion)
+        {
+            menuExpansionIsland = island;
+            island.PointerExited -= HandleMenuExpansionIslandPointerExited;
+            island.PointerExited += HandleMenuExpansionIslandPointerExited;
+            return;
+        }
+
+        DetachMenuExpansionIsland();
+        island.IsExpansionLocked = false;
+    }
+
+    private void HandleMenuExpansionIslandPointerExited(object sender, PointerRoutedEventArgs args)
+    {
+        DesktopIsland island = (DesktopIsland)sender;
+        DetachMenuExpansionIsland();
+        island.IsExpansionLocked = false;
+    }
+
+    private void DetachMenuExpansionIsland()
+    {
+        menuExpansionIsland?.PointerExited -= HandleMenuExpansionIslandPointerExited;
+        menuExpansionIsland = null;
     }
 
     private DesktopIsland? FindIsland()
@@ -130,11 +166,9 @@ public sealed partial class ScreenCaptureExpandedView :
 
     private bool WhenIdle(bool isCapturing) => !isCapturing;
 
-    private Visibility WhenEmpty(bool hasCaptures) =>
-        hasCaptures ? Visibility.Collapsed : Visibility.Visible;
+    private Visibility WhenEmpty(bool hasCaptures) => hasCaptures ? Visibility.Collapsed : Visibility.Visible;
 
-    private Visibility WhenPopulated(bool hasCaptures) =>
-        hasCaptures ? Visibility.Visible : Visibility.Collapsed;
+    private Visibility WhenPopulated(bool hasCaptures) => hasCaptures ? Visibility.Visible : Visibility.Collapsed;
 
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]

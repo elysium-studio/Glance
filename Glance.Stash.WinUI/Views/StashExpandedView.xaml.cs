@@ -18,14 +18,11 @@ public sealed partial class StashExpandedView :
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
-    private string ToUpper(string value) =>
-        value.ToUpperInvariant();
+    private string ToUpper(string value) => value.ToUpperInvariant();
 
-    private Visibility WhenEmpty(bool hasItems) =>
-        hasItems ? Visibility.Collapsed : Visibility.Visible;
+    private Visibility WhenEmpty(bool hasItems) => hasItems ? Visibility.Collapsed : Visibility.Visible;
 
-    private Visibility WhenPopulated(bool hasItems) =>
-        hasItems ? Visibility.Visible : Visibility.Collapsed;
+    private Visibility WhenPopulated(bool hasItems) => hasItems ? Visibility.Visible : Visibility.Collapsed;
 
     private void HandleItemDragStarting(UIElement sender,
         DragStartingEventArgs args)

@@ -58,8 +58,7 @@ public sealed partial class DevicePresenceViewModel(ITextLocalizer localizer) :
     partial void OnSelectedDeviceChanged(DevicePresenceItemViewModel? value) =>
         UpdateSelectedDevice();
 
-    private DevicePresenceItemViewModel? Find(string? deviceId) =>
-        string.IsNullOrWhiteSpace(deviceId)
+    private DevicePresenceItemViewModel? Find(string? deviceId) => string.IsNullOrWhiteSpace(deviceId)
             ? null
             : Devices.FirstOrDefault(item => string.Equals(item.Device.Id, deviceId, StringComparison.OrdinalIgnoreCase));
 

@@ -9,9 +9,7 @@ namespace Glance.Shell.WinUI;
 public sealed class GlanceSettingsModule :
     IModule
 {
-    public void Register(IServiceCollection services)
-    {
-        services
+    public void Register(IServiceCollection services) => _ = services
             .AddViewFor<AssistantEnabledView, IGlanceViewModel, AssistantEnabledViewModel>(ServiceLifetime.Transient,
                 provider => new AssistantEnabledView(),
                 provider => new AssistantEnabledViewModel(provider,
@@ -62,5 +60,4 @@ public sealed class GlanceSettingsModule :
                     provider.GetRequiredService<IWritableOptions<GlanceSettings>>(),
                     config => config.AutoHide,
                     (config, autoHide) => config.AutoHide = autoHide));
-    }
 }

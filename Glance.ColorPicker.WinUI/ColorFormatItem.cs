@@ -10,7 +10,6 @@ public sealed class ColorFormatItem(string label,
     INotifyPropertyChanged
 {
     private readonly Action copy = copy;
-    private string value = value;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -18,23 +17,22 @@ public sealed class ColorFormatItem(string label,
 
     public string Value
     {
-        get => value;
+        get;
         private set
         {
-            if (this.value == value)
+            if (field == value)
             {
                 return;
             }
 
-            this.value = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = value;
 
     public void Copy() => copy();
 
     public void Update(string newValue) => Value = newValue;
 
-    private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

@@ -1,0 +1,33 @@
+<UserControl
+    x:Class="Glance.ScreenRecorder.WinUI.ScreenRecorderCompactView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Themes/ScreenRecorder.xaml" />
+    </UserControl.Resources>
+    <Grid Padding="12,4" ColumnSpacing="8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid
+            x:Name="StatusIndicator"
+            Width="28"
+            Height="28">
+            <FontIcon
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="24"
+                Foreground="{ThemeResource GlanceScreenRecorderIconBrush}"
+                Glyph="&#xE714;" />
+        </Grid>
+        <TextBlock
+            Grid.Column="1"
+            VerticalAlignment="Center"
+            Style="{StaticResource BodyStrongTextBlockStyle}"
+            Text="{x:Bind ViewModel.CompactStatusText, Mode=OneWay}"
+            TextTrimming="CharacterEllipsis"
+            TextWrapping="NoWrap" />
+    </Grid>
+</UserControl>

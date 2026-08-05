@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net11.0-windows10.0.22000.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>Glance.QuickConvert.WinUI</RootNamespace>
+    <UseWinUI>true</UseWinUI>
+    <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
+    <EnablePreviewFeatures>true</EnablePreviewFeatures>
+    <Nullable>enable</Nullable>
+    <Platforms>AnyCPU;x64</Platforms>
+    <DefaultLanguage>en</DefaultLanguage>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Elysium.Platform.Windows" Version="$(ElysiumVersion)" />
+    <PackageReference Include="Elysium.UI.Controls.WinUI" Version="$(ElysiumVersion)" />
+    <PRIResource Include="Strings\**\*.resw" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
+    <PackageReference Include="WinUIEx" Version="2.9.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Glance.Application.Abstractions\Glance.Application.Abstractions.csproj" />
+    <ProjectReference Include="..\Glance.QuickConvert\Glance.QuickConvert.csproj" />
+    <ProjectReference Include="..\Glance.UI.WinUI\Glance.UI.WinUI.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Themes\QuickConvert.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <PropertyGroup>
+    <QuickConvertFFmpegCache>$(MSBuildProjectDirectory)\$(BaseIntermediateOutputPath)ffmpeg\win-x64</QuickConvertFFmpegCache>
+  </PropertyGroup>
+  <Target Name="PrepareQuickConvertFFmpeg" BeforeTargets="Build" Condition="!Exists('$(QuickConvertFFmpegCache)\ffmpeg.exe')">
+    <Exec Command="powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Build\Download-FFmpeg.ps1&quot; -OutputDirectory &quot;$(QuickConvertFFmpegCache)&quot;" />
+  </Target>
+  <Target Name="CopyQuickConvertFFmpeg" AfterTargets="Build" DependsOnTargets="PrepareQuickConvertFFmpeg">
+    <Copy SourceFiles="$(QuickConvertFFmpegCache)\ffmpeg.exe" DestinationFolder="$(OutDir)ffmpeg\win-x64" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(QuickConvertFFmpegCache)\LICENSE.txt" DestinationFolder="$(OutDir)ffmpeg\win-x64" SkipUnchangedFiles="true" Condition="Exists('$(QuickConvertFFmpegCache)\LICENSE.txt')" />
+  </Target>
+</Project>

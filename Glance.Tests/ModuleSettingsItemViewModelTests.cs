@@ -13,7 +13,7 @@ public sealed class ModuleSettingsItemViewModelTests
         TestSetting second = new("Timer", 20);
         ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", true, [first, second], _ => { }, (_, _) => Task.FromResult(true));
 
-        Assert.IsAssignableFrom<ISettingViewModel>(item.Settings);
+        _ = Assert.IsAssignableFrom<ISettingViewModel>(item.Settings);
         Assert.Equal([first, second], item.Settings);
 
         item.IsEnabled = false;

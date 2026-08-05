@@ -12,7 +12,7 @@ public sealed class VoiceNoteRepository
     public VoiceNoteRepository(string databasePath)
     {
         InitializeProvider();
-        Directory.CreateDirectory(Path.GetDirectoryName(databasePath) ?? throw new ArgumentException("The database path must include a directory.", nameof(databasePath)));
+        _ = Directory.CreateDirectory(Path.GetDirectoryName(databasePath) ?? throw new ArgumentException("The database path must include a directory.", nameof(databasePath)));
         connectionString = new SqliteConnectionStringBuilder
         {
             DataSource = databasePath,
@@ -57,10 +57,10 @@ public sealed class VoiceNoteRepository
                 created_at = excluded.created_at,
                 duration_ticks = excluded.duration_ticks;
             """;
-        command.Parameters.AddWithValue("$filePath", recording.FilePath);
-        command.Parameters.AddWithValue("$createdAt", recording.CreatedAt.ToString("O", CultureInfo.InvariantCulture));
-        command.Parameters.AddWithValue("$durationTicks", recording.Duration.Ticks);
-        command.ExecuteNonQuery();
+        _ = command.Parameters.AddWithValue("$filePath", recording.FilePath);
+        _ = command.Parameters.AddWithValue("$createdAt", recording.CreatedAt.ToString("O", CultureInfo.InvariantCulture));
+        _ = command.Parameters.AddWithValue("$durationTicks", recording.Duration.Ticks);
+        _ = command.ExecuteNonQuery();
     }
 
     public void Remove(string filePath)
@@ -68,8 +68,8 @@ public sealed class VoiceNoteRepository
         using SqliteConnection connection = OpenConnection();
         using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "DELETE FROM voice_notes WHERE file_path = $filePath;";
-        command.Parameters.AddWithValue("$filePath", filePath);
-        command.ExecuteNonQuery();
+        _ = command.Parameters.AddWithValue("$filePath", filePath);
+        _ = command.ExecuteNonQuery();
     }
 
     private void InitializeDatabase()
@@ -88,7 +88,7 @@ public sealed class VoiceNoteRepository
             CREATE INDEX IF NOT EXISTS ix_voice_notes_created_at
             ON voice_notes(created_at DESC);
             """;
-        command.ExecuteNonQuery();
+        _ = command.ExecuteNonQuery();
     }
 
     private SqliteConnection OpenConnection()
@@ -98,7 +98,7 @@ public sealed class VoiceNoteRepository
 
         using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "PRAGMA busy_timeout = 3000;";
-        command.ExecuteNonQuery();
+        _ = command.ExecuteNonQuery();
         return connection;
     }
 

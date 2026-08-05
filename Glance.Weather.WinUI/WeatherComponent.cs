@@ -118,17 +118,16 @@ public sealed partial class WeatherComponent :
 
     private void HandleSettingsTimer(DispatcherQueueTimer sender, object args) => Refresh();
 
-    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<WeatherSettings> args) =>
-        dispatcherQueue.TryEnqueue(() =>
-        {
-            ApplySceneOverride();
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<WeatherSettings> args) => _ = dispatcherQueue.TryEnqueue(() =>
+                                                                                                                         {
+                                                                                                                             ApplySceneOverride();
 
-            if (RequiresRefresh(args.Options))
-            {
-                settingsTimer.Stop();
-                settingsTimer.Start();
-            }
-        });
+                                                                                                                             if (RequiresRefresh(args.Options))
+                                                                                                                             {
+                                                                                                                                 settingsTimer.Stop();
+                                                                                                                                 settingsTimer.Start();
+                                                                                                                             }
+                                                                                                                         });
 
     private bool RequiresRefresh(WeatherSettings settings)
     {
@@ -168,7 +167,7 @@ public sealed partial class WeatherComponent :
 
             if (!cancellationToken.IsCancellationRequested)
             {
-                dispatcherQueue.TryEnqueue(() =>
+                _ = dispatcherQueue.TryEnqueue(() =>
                 {
                     lastSnapshot = snapshot;
                     viewModel.Update(snapshot, settings.UseFahrenheit);
@@ -183,7 +182,7 @@ public sealed partial class WeatherComponent :
         {
             if (!cancellationToken.IsCancellationRequested)
             {
-                dispatcherQueue.TryEnqueue(() =>
+                _ = dispatcherQueue.TryEnqueue(() =>
                 {
                     viewModel.SetError();
                     ApplySceneOverride();

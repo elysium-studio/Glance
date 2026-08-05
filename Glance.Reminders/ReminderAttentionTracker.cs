@@ -16,10 +16,9 @@ public sealed class ReminderAttentionTracker
     }
 
     public void Track(ReminderEntry reminder,
-        DateTimeOffset now) =>
-        states[reminder.Id] = GetState(reminder, now);
+        DateTimeOffset now) => states[reminder.Id] = GetState(reminder, now);
 
-    public void Remove(string id) => states.Remove(id);
+    public void Remove(string id) => _ = states.Remove(id);
 
     public IReadOnlyList<ReminderAttentionChange> Update(IEnumerable<ReminderEntry> reminders,
         DateTimeOffset now)
@@ -29,7 +28,7 @@ public sealed class ReminderAttentionTracker
 
         foreach (ReminderEntry reminder in reminders)
         {
-            activeIds.Add(reminder.Id);
+            _ = activeIds.Add(reminder.Id);
             ReminderAttentionState current = GetState(reminder, now);
 
             if (!states.TryGetValue(reminder.Id, out ReminderAttentionState previous))
@@ -47,7 +46,7 @@ public sealed class ReminderAttentionTracker
 
         foreach (string id in states.Keys.Where(id => !activeIds.Contains(id)).ToArray())
         {
-            states.Remove(id);
+            _ = states.Remove(id);
         }
 
         return changes;

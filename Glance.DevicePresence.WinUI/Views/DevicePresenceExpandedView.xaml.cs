@@ -25,15 +25,11 @@ public sealed partial class DevicePresenceExpandedView :
 
     public string Title => localizer.GetText("ModuleDisplayName");
 
-    private string ToUpper(string value) =>
-        value.ToUpperInvariant();
+    private string ToUpper(string value) => value.ToUpperInvariant();
 
-    private Visibility WhenEmpty(bool hasDevices) =>
-        hasDevices ? Visibility.Collapsed : Visibility.Visible;
+    private Visibility WhenEmpty(bool hasDevices) => hasDevices ? Visibility.Collapsed : Visibility.Visible;
 
-    private Visibility WhenPopulated(bool hasDevices) =>
-        hasDevices ? Visibility.Visible : Visibility.Collapsed;
+    private Visibility WhenPopulated(bool hasDevices) => hasDevices ? Visibility.Visible : Visibility.Collapsed;
 
-    private async void OpenSettings() =>
-        await Launcher.LaunchUriAsync(new Uri("ms-settings:bluetooth"));
+    private async void OpenSettings() => _ = await Launcher.LaunchUriAsync(new Uri("ms-settings:bluetooth"));
 }

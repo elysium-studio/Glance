@@ -10,12 +10,10 @@ public sealed record GlanceActionResult(GlanceActionStatus Status,
         new(GlanceActionStatus.Succeeded, message);
 
     public static GlanceActionResult InvalidArguments(string? message = null,
-        string? guidance = null) =>
-        new(GlanceActionStatus.InvalidArguments, message, guidance);
+        string? guidance = null) => new(GlanceActionStatus.InvalidArguments, message, guidance);
 
     public static GlanceActionResult Unavailable(string? message = null,
-        string? guidance = null) =>
-        new(GlanceActionStatus.Unavailable, message, guidance);
+        string? guidance = null) => new(GlanceActionStatus.Unavailable, message, guidance);
 
     public static GlanceActionResult Failed(string? message = null) =>
         new(GlanceActionStatus.Failed, message);

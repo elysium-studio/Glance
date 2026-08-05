@@ -72,7 +72,6 @@ public sealed class GlanceAssistantServiceTests
         public GlanceActionDescriptor? GetAction(string actionId) => null;
 
         public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult(GlanceActionResult.Unavailable());
+            CancellationToken cancellationToken = default) => Task.FromResult(GlanceActionResult.Unavailable());
     }
 }

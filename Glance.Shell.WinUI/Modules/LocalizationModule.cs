@@ -1,4 +1,3 @@
-using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
 using Elysium.UI.WinUI;
 using Glance.Application.Abstractions;
@@ -11,10 +10,10 @@ public sealed class LocalizationModule :
 {
     public void Register(IServiceCollection services)
     {
-        services.AddSingleton<IStringLocalizer, ResourceStringLocalizer>();
-        services.AddSingleton<ITextLocalizer, ResourceTextLocalizer>();
+        _ = services.AddSingleton<IStringLocalizer, ResourceStringLocalizer>();
+        _ = services.AddSingleton<ITextLocalizer, ResourceTextLocalizer>();
 
-        services.Subscribe<IStringLocalizer>((provider, localizer) =>
+        _ = services.Subscribe<IStringLocalizer>((provider, localizer) =>
         {
             LocalizeExtension.SetLocalizer(localizer);
             return () => LocalizeExtension.SetLocalizer(null);

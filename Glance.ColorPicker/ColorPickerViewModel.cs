@@ -79,8 +79,7 @@ public sealed partial class ColorPickerViewModel :
         colorPickerService.PickingCancelled -= HandlePickingCancelled;
     }
 
-    private void HandlePreviewChanged(object? sender, ColorPickerEventArgs args) =>
-        CurrentColor = args.Color;
+    private void HandlePreviewChanged(object? sender, ColorPickerEventArgs args) => CurrentColor = args.Color;
 
     private void HandleColorPicked(object? sender, ColorPickerEventArgs args)
     {
@@ -104,8 +103,7 @@ public sealed partial class ColorPickerViewModel :
         }
     }
 
-    private void HandlePickingCancelled(object? sender, EventArgs args) =>
-        IsPicking = false;
+    private void HandlePickingCancelled(object? sender, EventArgs args) => IsPicking = false;
 
     public void ApplySettings(ColorPickerSettings settings)
     {
@@ -119,8 +117,7 @@ public sealed partial class ColorPickerViewModel :
         TryPersist(() => repository?.Trim(recentColorLimit));
     }
 
-    private static int GetRecentColorLimit(ColorPickerSettings settings) =>
-        (int)Math.Clamp(settings.RecentColorLimit, 1, 12);
+    private static int GetRecentColorLimit(ColorPickerSettings settings) => (int)Math.Clamp(settings.RecentColorLimit, 1, 12);
 
     private static void TryPersist(Action action)
     {

@@ -28,19 +28,15 @@ internal static class MediaAccentPalette
 
     public static Color GetBorder(uint value) => WithAlpha(GetForeground(value), 44);
 
-    public static Color GetPointerOverBorder(uint value) =>
-        WithAlpha(GetPointerOverForeground(value), 58);
+    public static Color GetPointerOverBorder(uint value) => WithAlpha(GetPointerOverForeground(value), 58);
 
-    public static Color GetPressedBorder(uint value) =>
-        WithAlpha(GetPressedForeground(value), 30);
+    public static Color GetPressedBorder(uint value) => WithAlpha(GetPressedForeground(value), 30);
 
-    public static Color GetDisabledBorder(uint value) =>
-        WithAlpha(GetDisabledForeground(value), 18);
+    public static Color GetDisabledBorder(uint value) => WithAlpha(GetDisabledForeground(value), 18);
 
     public static SolidColorBrush GetBrush(uint value) => new(GetAccent(value));
 
-    private static Color FromArgb(uint value) =>
-        Color.FromArgb((byte)(value >> 24),
+    private static Color FromArgb(uint value) => Color.FromArgb((byte)(value >> 24),
             (byte)(value >> 16),
             (byte)(value >> 8),
             (byte)value);
@@ -53,7 +49,7 @@ internal static class MediaAccentPalette
         double maximum = Math.Max(red, Math.Max(green, blue));
         double minimum = Math.Min(red, Math.Min(green, blue));
         double lightness = (maximum + minimum) / 2;
-        double scale = lightness == 0 || lightness == 1 ? 0 :
+        double scale = lightness is 0 or 1 ? 0 :
             amount / (amount > 0 ? 1 - lightness : lightness);
         return Color.FromArgb(color.A,
             ToByte(red + ((amount > 0 ? 1 - red : red) * scale)),
@@ -71,8 +67,7 @@ internal static class MediaAccentPalette
             Color.FromArgb(alpha, 0, 0, 0);
     }
 
-    private static double RelativeLuminance(Color color) =>
-        (0.2126 * Linearize(color.R)) +
+    private static double RelativeLuminance(Color color) => (0.2126 * Linearize(color.R)) +
         (0.7152 * Linearize(color.G)) +
         (0.0722 * Linearize(color.B));
 
@@ -82,9 +77,7 @@ internal static class MediaAccentPalette
         return value <= 0.04045 ? value / 12.92 : Math.Pow((value + 0.055) / 1.055, 2.4);
     }
 
-    private static Color WithAlpha(Color color, byte alpha) =>
-        Color.FromArgb(alpha, color.R, color.G, color.B);
+    private static Color WithAlpha(Color color, byte alpha) => Color.FromArgb(alpha, color.R, color.G, color.B);
 
-    private static byte ToByte(double value) =>
-        (byte)Math.Round(Math.Clamp(value, 0, 1) * 255);
+    private static byte ToByte(double value) => (byte)Math.Round(Math.Clamp(value, 0, 1) * 255);
 }

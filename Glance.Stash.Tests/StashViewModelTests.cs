@@ -61,7 +61,7 @@ public sealed class StashViewModelTests
     {
         StashViewModel viewModel = CreateViewModel();
         StashItem first = viewModel.Add("First", false)!;
-        viewModel.Add("Second", false);
+        _ = viewModel.Add("Second", false);
 
         StashItem? promoted = viewModel.Add("First", false);
 
@@ -106,7 +106,6 @@ public sealed class StashViewModelTests
         ITextLocalizer
     {
         public string GetText(string key,
-            params object[] arguments) =>
-            arguments.Length == 0 ? key : $"{key}({string.Join(',', arguments)})";
+            params object[] arguments) => arguments.Length == 0 ? key : $"{key}({string.Join(',', arguments)})";
     }
 }

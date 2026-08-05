@@ -229,6 +229,7 @@ public sealed partial class ResizableRegionOverlay :
 
         interaction = CropInteraction.None;
         ReleasePointerCapture(args.Pointer);
+        InteractionCompleted?.Invoke(this, EventArgs.Empty);
     }
 
     private void HandlePointerCaptureLost(object sender, PointerRoutedEventArgs args)
@@ -236,6 +237,7 @@ public sealed partial class ResizableRegionOverlay :
         if (interaction == CropInteraction.Move)
         {
             interaction = CropInteraction.None;
+            InteractionCompleted?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -295,8 +297,7 @@ public sealed partial class ResizableRegionOverlay :
         return false;
     }
 
-    private static Point ToSurfacePoint(Point point) =>
-        new(point.X - VisualPadding, point.Y - VisualPadding);
+    private static Point ToSurfacePoint(Point point) => new(point.X - VisualPadding, point.Y - VisualPadding);
 
     private Rect CalculateBounds(Rect bounds, CropInteraction mode, double deltaX, double deltaY)
     {
@@ -359,9 +360,9 @@ public sealed partial class ResizableRegionOverlay :
         SetBounds(selectionBorder, VisualPadding + cropBounds.X, VisualPadding + cropBounds.Y, cropBounds.Width, cropBounds.Height);
 
         double verticalOne = cropBounds.X + (cropBounds.Width / 3);
-        double verticalTwo = cropBounds.X + ((cropBounds.Width / 3) * 2);
+        double verticalTwo = cropBounds.X + (cropBounds.Width / 3 * 2);
         double horizontalOne = cropBounds.Y + (cropBounds.Height / 3);
-        double horizontalTwo = cropBounds.Y + ((cropBounds.Height / 3) * 2);
+        double horizontalTwo = cropBounds.Y + (cropBounds.Height / 3 * 2);
         SetBounds(verticalLineOne, VisualPadding + verticalOne, VisualPadding + cropBounds.Y, 1, cropBounds.Height);
         SetBounds(verticalLineTwo, VisualPadding + verticalTwo, VisualPadding + cropBounds.Y, 1, cropBounds.Height);
         SetBounds(horizontalLineOne, VisualPadding + cropBounds.X, VisualPadding + horizontalOne, cropBounds.Width, 1);
@@ -436,21 +437,19 @@ public sealed partial class ResizableRegionOverlay :
         element.Height = Math.Max(0, height);
     }
 
-    private static Border CreateShade() =>
-        new()
-        {
-            Background = new SolidColorBrush(Color.FromArgb(132, 0, 0, 0)),
-            IsHitTestVisible = false
-        };
+    private static Border CreateShade() => new()
+    {
+        Background = new SolidColorBrush(Color.FromArgb(132, 0, 0, 0)),
+        IsHitTestVisible = false
+    };
 
-    private static Border CreateGuide(Brush foreground) =>
-        new()
-        {
-            Background = foreground,
-            Opacity = 0.55,
-            Visibility = Visibility.Collapsed,
-            IsHitTestVisible = false
-        };
+    private static Border CreateGuide(Brush foreground) => new()
+    {
+        Background = foreground,
+        Opacity = 0.55,
+        Visibility = Visibility.Collapsed,
+        IsHitTestVisible = false
+    };
 
     private static Thumb CreateHandle(CropInteraction mode)
     {

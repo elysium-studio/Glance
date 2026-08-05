@@ -11,14 +11,14 @@ public sealed class ThemeSwitcherModule :
 {
     public void Register(IServiceCollection services)
     {
-        services.AddModuleOptions<ThemeSwitcherSettings>("ThemeSwitcher", "theme-switcher.settings.dat", ThemeSwitcherJsonContext.Default);
-        services.AddSingleton<ModuleResourceTextLocalizer<ThemeSwitcherModule>>();
-        services.AddSingleton<WindowsSystemThemeService>();
-        services.AddSingleton<WindowsLocationService>();
-        services.AddSingleton<IThemeController, WindowsThemeController>();
-        services.AddSingleton(provider => new ThemeSwitcherViewModel(provider.GetRequiredService<IThemeController>(), provider.GetRequiredService<GlanceModuleOptions<ThemeSwitcherSettings>>().Current, provider.GetRequiredService<ModuleResourceTextLocalizer<ThemeSwitcherModule>>(), provider.GetRequiredService<IDispatcher>()));
-        services.AddSingleton<ThemeSwitcherComponent>();
-        services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<ThemeSwitcherComponent>());
-        services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<ThemeSwitcherComponent>());
+        _ = services.AddModuleOptions<ThemeSwitcherSettings>("ThemeSwitcher", "theme-switcher.settings.dat", ThemeSwitcherJsonContext.Default);
+        _ = services.AddSingleton<ModuleResourceTextLocalizer<ThemeSwitcherModule>>();
+        _ = services.AddSingleton<WindowsSystemThemeService>();
+        _ = services.AddSingleton<WindowsLocationService>();
+        _ = services.AddSingleton<IThemeController, WindowsThemeController>();
+        _ = services.AddSingleton(provider => new ThemeSwitcherViewModel(provider.GetRequiredService<IThemeController>(), provider.GetRequiredService<GlanceModuleOptions<ThemeSwitcherSettings>>().Current, provider.GetRequiredService<ModuleResourceTextLocalizer<ThemeSwitcherModule>>(), provider.GetRequiredService<IDispatcher>()));
+        _ = services.AddSingleton<ThemeSwitcherComponent>();
+        _ = services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<ThemeSwitcherComponent>());
+        _ = services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<ThemeSwitcherComponent>());
     }
 }

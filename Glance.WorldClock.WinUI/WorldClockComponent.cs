@@ -67,8 +67,7 @@ public sealed partial class WorldClockComponent :
 
     public object ExpandedAnimationElement { get; }
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("WorldClock.ShowTime",
             Id,
             "Show time in a city",
@@ -144,12 +143,11 @@ public sealed partial class WorldClockComponent :
 
     private void HandleTick(DispatcherQueueTimer sender, object args) => Refresh();
 
-    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<WorldClockSettings> args) =>
-        dispatcherQueue.TryEnqueue(() =>
-        {
-            viewModel.SetClocks(WorldClockTimeZoneCatalog.CreateDefinitions(args.Options, localizer));
-            Refresh();
-        });
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<WorldClockSettings> args) => _ = dispatcherQueue.TryEnqueue(() =>
+                                                                                                                            {
+                                                                                                                                viewModel.SetClocks(WorldClockTimeZoneCatalog.CreateDefinitions(args.Options, localizer));
+                                                                                                                                Refresh();
+                                                                                                                            });
 
     private void Refresh() => viewModel.Refresh(timeProvider.GetUtcNow(), options.Current.Use24HourTime);
 }

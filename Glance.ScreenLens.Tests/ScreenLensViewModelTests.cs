@@ -42,7 +42,6 @@ public sealed class ScreenLensViewModelTests
             ["ReadyStatus"] = "Extract text"
         };
 
-        public string GetText(string key, params object[] arguments) =>
-            string.Format(Values[key], arguments);
+        public string GetText(string key, params object[] arguments) => string.Format(Values[key], arguments);
     }
 }

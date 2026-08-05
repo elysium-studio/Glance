@@ -69,7 +69,7 @@ internal sealed class GlanceBridgeRouter :
 
         lock (synchronization)
         {
-            connections.Remove(connection);
+            _ = connections.Remove(connection);
             targets = [.. handlers.Where(handler => string.Equals(handler.ApplicationId, connection.ApplicationId, StringComparison.OrdinalIgnoreCase))];
         }
 
@@ -117,10 +117,7 @@ internal sealed class GlanceBridgeRouter :
         }
     }
 
-    public void Dispose()
-    {
-        preferences.PreferencesChanged -= HandlePreferencesChanged;
-    }
+    public void Dispose() => preferences.PreferencesChanged -= HandlePreferencesChanged;
 
     private void HandlePreferencesChanged(object? sender, EventArgs args) => BroadcastCapabilities();
 

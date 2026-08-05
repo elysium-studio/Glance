@@ -46,7 +46,7 @@ public sealed class ColorPickerViewModelTests
 
         Assert.Equal(6, viewModel.RecentColors.Count);
         Assert.Equal(new ColorValue(5, 5, 5), viewModel.RecentColors[0]);
-        Assert.Single(viewModel.RecentColors, color => color == new ColorValue(5, 5, 5));
+        _ = Assert.Single(viewModel.RecentColors, color => color == new ColorValue(5, 5, 5));
     }
 
     [Fact]
@@ -132,8 +132,7 @@ public sealed class ColorPickerViewModelTests
             PickingCancelled?.Invoke(this, EventArgs.Empty);
         }
 
-        public void Preview(ColorValue color) =>
-            PreviewChanged?.Invoke(this, new ColorPickerEventArgs(color));
+        public void Preview(ColorValue color) => PreviewChanged?.Invoke(this, new ColorPickerEventArgs(color));
 
         public void Complete(ColorValue color)
         {

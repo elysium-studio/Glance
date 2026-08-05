@@ -66,7 +66,7 @@ public sealed class KeepAwakeViewModelTests
 
         await viewModel.ToggleAsync();
 
-        Assert.Single(dispatcher.Actions);
+        _ = Assert.Single(dispatcher.Actions);
         Assert.False(viewModel.IsActive);
         Assert.True(viewModel.IsBusy);
 

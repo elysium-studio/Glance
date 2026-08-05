@@ -23,6 +23,7 @@ internal static partial class GlanceModuleLoader
     private static readonly Dictionary<string, nint> nativeLibraryHandles = [with(StringComparer.OrdinalIgnoreCase)];
     private static readonly List<object> xamlMetadataProviderTokens = [];
     private static Dictionary<string, string> moduleAssemblyPaths = [with(StringComparer.OrdinalIgnoreCase)];
+    private static Dictionary<string, string> moduleNativeLibraryPaths = [with(StringComparer.OrdinalIgnoreCase)];
     private static bool resolverRegistered;
 
     public static string UserModulesDirectory =>
@@ -94,8 +95,7 @@ internal static partial class GlanceModuleLoader
             .Select(group => group.First())];
     }
 
-    private static IEnumerable<string> GetModuleDirectories()
-        => ModuleDirectories;
+    private static IEnumerable<string> GetModuleDirectories() => ModuleDirectories;
 
     private static string? PreparePackage(string packagePath)
     {
@@ -155,10 +155,12 @@ internal static partial class GlanceModuleLoader
     private static void RegisterAssemblyPaths(IEnumerable<string> contentDirectories)
     {
         Dictionary<string, string> assemblyPaths;
+        Dictionary<string, string> nativeLibraryPaths;
 
         lock (synchronization)
         {
             assemblyPaths = new Dictionary<string, string>(moduleAssemblyPaths, StringComparer.OrdinalIgnoreCase);
+            nativeLibraryPaths = new Dictionary<string, string>(moduleNativeLibraryPaths, StringComparer.OrdinalIgnoreCase);
         }
 
         foreach (string contentDirectory in contentDirectories.Distinct(StringComparer.OrdinalIgnoreCase))
@@ -176,6 +178,7 @@ internal static partial class GlanceModuleLoader
                 }
                 catch (BadImageFormatException)
                 {
+                    nativeLibraryPaths[Path.GetFileName(path)] = path;
                 }
                 catch (FileLoadException)
                 {
@@ -186,6 +189,7 @@ internal static partial class GlanceModuleLoader
         lock (synchronization)
         {
             moduleAssemblyPaths = assemblyPaths;
+            moduleNativeLibraryPaths = nativeLibraryPaths;
         }
     }
 
@@ -211,6 +215,15 @@ internal static partial class GlanceModuleLoader
 
             AssemblyLoadContext.Default.Resolving += ResolveModuleAssembly;
             AssemblyLoadContext.Default.ResolvingUnmanagedDll += ResolveModuleNativeLibraryFromLoadContext;
+
+            try
+            {
+                NativeLibrary.SetDllImportResolver(typeof(WinRT.ActivationFactory).Assembly, ResolveModuleNativeLibrary);
+            }
+            catch (InvalidOperationException)
+            {
+            }
+
             resolverRegistered = true;
         }
     }
@@ -256,17 +269,17 @@ internal static partial class GlanceModuleLoader
     private static nint ResolveModuleNativeLibrary(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
     {
         string? assemblyDirectory = Path.GetDirectoryName(assembly.Location);
-
-        if (assemblyDirectory is null)
-        {
-            return 0;
-        }
-
         string fileName = Path.HasExtension(libraryName) ? libraryName : $"{libraryName}.dll";
-        string path = Path.Combine(assemblyDirectory, fileName);
 
         lock (synchronization)
         {
+            string? path = assemblyDirectory is null ? null : Path.Combine(assemblyDirectory, fileName);
+
+            if ((path is null || !File.Exists(path)) && !moduleNativeLibraryPaths.TryGetValue(fileName, out path))
+            {
+                return 0;
+            }
+
             if (nativeLibraryHandles.TryGetValue(path, out nint existingHandle))
             {
                 return existingHandle;
@@ -274,15 +287,14 @@ internal static partial class GlanceModuleLoader
 
             if (string.Equals(fileName, "onnxruntime-genai.dll", StringComparison.OrdinalIgnoreCase))
             {
-                LoadNativeLibrary(Path.Combine(assemblyDirectory, "onnxruntime.dll"));
+                _ = LoadNativeLibrary(Path.Combine(Path.GetDirectoryName(path)!, "onnxruntime.dll"));
             }
 
             return LoadNativeLibrary(path);
         }
     }
 
-    private static nint ResolveModuleNativeLibraryFromLoadContext(Assembly assembly, string libraryName)
-        => ResolveModuleNativeLibrary(libraryName, assembly, null);
+    private static nint ResolveModuleNativeLibraryFromLoadContext(Assembly assembly, string libraryName) => ResolveModuleNativeLibrary(libraryName, assembly, null);
 
     private static nint LoadNativeLibrary(string path)
     {

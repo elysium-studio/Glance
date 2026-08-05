@@ -4,7 +4,6 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using Windows.Graphics;
 using WinRT;
 using WinRT.Interop;
 using WinUIEx;
@@ -88,11 +87,11 @@ internal sealed partial class SpeechModelConsentWindow
         {
             dialog.XamlRoot = root.XamlRoot;
             ContentDialogResult result = await dialog.ShowAsync();
-            completion.TrySetResult(result == ContentDialogResult.Primary);
+            _ = completion.TrySetResult(result == ContentDialogResult.Primary);
         }
         catch (Exception exception)
         {
-            completion.TrySetException(exception);
+            _ = completion.TrySetException(exception);
         }
         finally
         {
@@ -103,7 +102,7 @@ internal sealed partial class SpeechModelConsentWindow
     private void HandleWindowClosed(object sender, WindowEventArgs args)
     {
         isClosed = true;
-        completion.TrySetResult(false);
+        _ = completion.TrySetResult(false);
     }
 
     private void Close()

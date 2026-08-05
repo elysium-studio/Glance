@@ -32,23 +32,19 @@ public sealed record GlanceActionRequest(string ActionId,
         return false;
     }
 
-    public string? GetString(string name) =>
-        TryGetArgument(name, out JsonElement value) && value.ValueKind == JsonValueKind.String
+    public string? GetString(string name) => TryGetArgument(name, out JsonElement value) && value.ValueKind == JsonValueKind.String
             ? value.GetString()
             : null;
 
-    public double? GetNumber(string name) =>
-        TryGetArgument(name, out JsonElement value) && value.TryGetDouble(out double number)
+    public double? GetNumber(string name) => TryGetArgument(name, out JsonElement value) && value.TryGetDouble(out double number)
             ? number
             : null;
 
-    public long? GetInteger(string name) =>
-        TryGetArgument(name, out JsonElement value) && value.TryGetInt64(out long number)
+    public long? GetInteger(string name) => TryGetArgument(name, out JsonElement value) && value.TryGetInt64(out long number)
             ? number
             : null;
 
-    public bool? GetBoolean(string name) =>
-        TryGetArgument(name, out JsonElement value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False
+    public bool? GetBoolean(string name) => TryGetArgument(name, out JsonElement value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False
             ? value.GetBoolean()
             : null;
 }

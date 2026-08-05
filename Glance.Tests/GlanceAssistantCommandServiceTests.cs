@@ -93,8 +93,7 @@ public sealed class GlanceAssistantCommandServiceTests
 
         public int InvocationCount { get; private set; }
 
-        public Task SetActiveResolverAsync(string resolverId, CancellationToken cancellationToken = default) =>
-            Task.CompletedTask;
+        public Task SetActiveResolverAsync(string resolverId, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
         public Task<GlanceAssistantCommandResult> TryExecuteAsync(string command, CancellationToken cancellationToken = default)
         {

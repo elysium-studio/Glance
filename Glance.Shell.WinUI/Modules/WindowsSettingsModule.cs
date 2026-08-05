@@ -8,9 +8,7 @@ namespace Glance.Shell.WinUI;
 public sealed class WindowsSettingsModule :
     IModule
 {
-    public void Register(IServiceCollection services)
-    {
-        services.AddViewFor<StartWithWindowsView, IWindowsViewModel, StartWithWindowsViewModel>(ServiceLifetime.Transient,
+    public void Register(IServiceCollection services) => _ = services.AddViewFor<StartWithWindowsView, IWindowsViewModel, StartWithWindowsViewModel>(ServiceLifetime.Transient,
             provider => new StartWithWindowsView(),
             provider => new StartWithWindowsViewModel(provider,
                 provider.GetRequiredService<IServiceFactory>(),
@@ -21,5 +19,4 @@ public sealed class WindowsSettingsModule :
                 provider.GetRequiredService<IWritableOptions<GlanceSettings>>(),
                 config => config.StartWithWindows,
                 (config, startWithWindows) => config.StartWithWindows = startWithWindows));
-    }
 }

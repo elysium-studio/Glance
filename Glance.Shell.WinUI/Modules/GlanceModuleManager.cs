@@ -1,5 +1,4 @@
 using Glance.Application.Abstractions;
-using Glance.Shell;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
@@ -26,6 +25,7 @@ internal sealed class GlanceModuleManager :
     private readonly GlanceAssistantService assistantService;
     private readonly GlanceActionService actionService;
     private readonly GlanceIntentService intentService;
+    private readonly GlanceQuickConverterRegistry quickConverterRegistry;
     private readonly List<GlanceModuleRuntime> runtimes = [];
     private readonly ModulePreferenceService preferences;
     private readonly IServiceProvider applicationServices;
@@ -44,8 +44,9 @@ internal sealed class GlanceModuleManager :
         assistantService = applicationServices.GetRequiredService<GlanceAssistantService>();
         actionService = applicationServices.GetRequiredService<GlanceActionService>();
         intentService = applicationServices.GetRequiredService<GlanceIntentService>();
+        quickConverterRegistry = applicationServices.GetRequiredService<GlanceQuickConverterRegistry>();
 
-        Directory.CreateDirectory(GlanceModuleLoader.UserModulesDirectory);
+        _ = Directory.CreateDirectory(GlanceModuleLoader.UserModulesDirectory);
         watchers = (FileSystemWatcher[])[.. GlanceModuleLoader.ModuleDirectories
             .Where(Directory.Exists)
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -116,8 +117,9 @@ internal sealed class GlanceModuleManager :
             IReadOnlyList<IGlanceAssistantProvider> assistantProviders = (IGlanceAssistantProvider[])[.. runtime.Services.GetServices<IGlanceAssistantProvider>()];
             IReadOnlyList<IGlanceAssistantCommandHandler> assistantCommandHandlers = (IGlanceAssistantCommandHandler[])[.. runtime.Services.GetServices<IGlanceAssistantCommandHandler>()];
             IReadOnlyList<IGlanceAssistantSemanticResolver> assistantSemanticResolvers = (IGlanceAssistantSemanticResolver[])[.. runtime.Services.GetServices<IGlanceAssistantSemanticResolver>()];
+            IReadOnlyList<IGlanceQuickConverter> quickConverters = (IGlanceQuickConverter[])[.. runtime.Services.GetServices<IGlanceQuickConverter>()];
 
-            if (components.Count == 0 && assistantProviders.Count == 0 && assistantCommandHandlers.Count == 0 && assistantSemanticResolvers.Count == 0)
+            if (components.Count == 0 && assistantProviders.Count == 0 && assistantCommandHandlers.Count == 0 && assistantSemanticResolvers.Count == 0 && quickConverters.Count == 0)
             {
                 throw new InvalidOperationException("The package did not register a Glance component or background capability.");
             }
@@ -138,6 +140,7 @@ internal sealed class GlanceModuleManager :
             bridgeRouter.AddHandlers(moduleServices.GetServices<IGlanceApplicationMessageHandler>());
             actionService.Register(moduleServices.GetServices<IGlanceActionProvider>());
             intentService.Register(moduleServices.GetServices<IGlanceIntent>());
+            quickConverterRegistry.Register(quickConverters);
             assistantCommandService.Register(assistantCommandHandlers);
             applicationServices.GetRequiredService<GlanceAssistantSemanticResolverService>().Register(assistantSemanticResolvers);
             assistantService.Register(assistantProviders);
@@ -146,7 +149,7 @@ internal sealed class GlanceModuleManager :
 
             lock (synchronization)
             {
-                knownPackages.Add(result.SourcePath);
+                _ = knownPackages.Add(result.SourcePath);
             }
 
             logger.LogInformation("Loaded Glance module package {ModulePackage} with {ComponentCount} component(s) and {AssistantProviderCount} assistant provider(s)", result.SourcePath, components.Count, assistantProviders.Count);
@@ -257,7 +260,7 @@ internal sealed class GlanceModuleManager :
             {
                 if (pendingPackages.TryGetValue(packagePath, out CancellationTokenSource? current) && ReferenceEquals(current, cancellation))
                 {
-                    pendingPackages.Remove(packagePath);
+                    _ = pendingPackages.Remove(packagePath);
                     cancellation.Dispose();
                 }
             }

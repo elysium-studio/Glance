@@ -25,13 +25,13 @@ public static class ModuleSettingsServiceCollectionExtensions
         }
 
         WritableOptionsBuilder<TOptions> builder = new(services, sectionPath, filePath);
-        builder.UseJson().WithChangeHandler((provider, options, _) =>
+        _ = builder.UseJson().WithChangeHandler((provider, options, _) =>
         {
             provider.GetRequiredService<GlanceModuleOptions<TOptions>>().Update(options);
             provider.GetRequiredService<IMessenger>().Send(new OptionsChangedEventArgs<TOptions>(options));
         });
 
-        services.AddSingleton(provider => new GlanceModuleOptions<TOptions>(provider.GetRequiredService<TOptions>()));
+        _ = services.AddSingleton(provider => new GlanceModuleOptions<TOptions>(provider.GetRequiredService<TOptions>()));
         return services;
     }
 
@@ -51,7 +51,7 @@ public static class ModuleSettingsServiceCollectionExtensions
             WriteIndented = true,
             PropertyNameCaseInsensitive = true
         };
-        services.AddSingleton(options);
+        _ = services.AddSingleton(options);
         return options;
     }
 }

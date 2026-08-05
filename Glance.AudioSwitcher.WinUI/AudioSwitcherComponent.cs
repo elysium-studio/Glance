@@ -58,8 +58,7 @@ public sealed partial class AudioSwitcherComponent :
 
     public object ExpandedAnimationElement { get; }
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("AudioSwitcher.SelectOutput",
             Id,
             "Switch audio output",
@@ -107,9 +106,7 @@ public sealed partial class AudioSwitcherComponent :
             : GlanceActionResult.InvalidArguments("The requested audio output is not available."));
     }
 
-    public void Dispose() =>
-        audioDeviceService.DevicesChanged -= HandleDevicesChanged;
+    public void Dispose() => audioDeviceService.DevicesChanged -= HandleDevicesChanged;
 
-    private void HandleDevicesChanged(object? sender, EventArgs args) =>
-        dispatcherQueue.TryEnqueue(viewModel.Refresh);
+    private void HandleDevicesChanged(object? sender, EventArgs args) => _ = dispatcherQueue.TryEnqueue(viewModel.Refresh);
 }

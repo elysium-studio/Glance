@@ -111,7 +111,7 @@ internal sealed partial class ColorPickerInputWindow :
         }
 
         isPointerPressed = true;
-        inputSurface.CapturePointer(args.Pointer);
+        _ = inputSurface.CapturePointer(args.Pointer);
         args.Handled = true;
     }
 
@@ -143,8 +143,7 @@ internal sealed partial class ColorPickerInputWindow :
     {
         private readonly InputCursor cursor = InputSystemCursor.Create(InputSystemCursorShape.Arrow);
 
-        public PickerInputSurface() =>
-            ProtectedCursor = cursor;
+        public PickerInputSurface() => ProtectedCursor = cursor;
 
         public void Dispose()
         {

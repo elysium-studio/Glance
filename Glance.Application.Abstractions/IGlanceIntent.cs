@@ -6,6 +6,8 @@ public interface IGlanceIntent
 
     bool CanHandle(GlanceContentKind kind);
 
+    bool CanHandle(GlanceContentContext context) => CanHandle(context.Kind);
+
     Task InvokeAsync(GlanceContentContext context,
         CancellationToken cancellationToken = default);
 }

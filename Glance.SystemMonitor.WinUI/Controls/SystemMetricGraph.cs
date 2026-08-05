@@ -208,10 +208,7 @@ public sealed partial class SystemMetricGraph :
             shape.StrokeBrush = gridBrush;
         }
 
-        if (secondaryVisual is not null)
-        {
-            secondaryVisual.IsVisible = SecondaryStroke is not null;
-        }
+        _ = secondaryVisual?.IsVisible = SecondaryStroke is not null;
     }
 
     private void Render()

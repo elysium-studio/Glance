@@ -72,11 +72,9 @@ public sealed partial class MediaExpandedView :
 
     private Color ToDisabledBorderColor(uint color) => MediaAccentPalette.GetDisabledBorder(color);
 
-    private Visibility WhenArtworkUnavailable(object? artwork) =>
-        artwork is null ? Visibility.Visible : Visibility.Collapsed;
+    private Visibility WhenArtworkUnavailable(object? artwork) => artwork is null ? Visibility.Visible : Visibility.Collapsed;
 
     private string ToUpper(string value) => value.ToUpperInvariant();
 
-    private Visibility WhenAvailable(bool isAvailable) =>
-        isAvailable ? Visibility.Visible : Visibility.Collapsed;
+    private Visibility WhenAvailable(bool isAvailable) => isAvailable ? Visibility.Visible : Visibility.Collapsed;
 }

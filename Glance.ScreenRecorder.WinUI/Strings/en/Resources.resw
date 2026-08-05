@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve"><value>Screen recorder</value></data>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Screen recorder</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Record a region, window, or full screen using GPU capture.</value></data>
+  <data name="ReadyToRecord" xml:space="preserve"><value>Ready to record</value></data>
+  <data name="SelectingRecording" xml:space="preserve"><value>Select what to record</value></data>
+  <data name="Countdown" xml:space="preserve"><value>Recording in {0}</value></data>
+  <data name="RecordingStatus" xml:space="preserve"><value>Recording</value></data>
+  <data name="RecordingPaused" xml:space="preserve"><value>Recording paused</value></data>
+  <data name="SavingRecording" xml:space="preserve"><value>Saving recording</value></data>
+  <data name="RecordingSaved" xml:space="preserve"><value>Recording saved</value></data>
+  <data name="RecordingFailed" xml:space="preserve"><value>Recording unavailable</value></data>
+  <data name="RecordingItemDetail" xml:space="preserve"><value>{0} · {1} × {2}</value></data>
+  <data name="RecordRegion" xml:space="preserve"><value>Region</value></data>
+  <data name="RecordWindow" xml:space="preserve"><value>Window</value></data>
+  <data name="RecordDisplay" xml:space="preserve"><value>Full screen</value></data>
+  <data name="SelectRegionInstruction" xml:space="preserve"><value>Drag to select a region · Esc to cancel</value></data>
+  <data name="SelectWindowInstruction" xml:space="preserve"><value>Select a window to record · Esc to cancel</value></data>
+  <data name="SelectDisplayInstruction" xml:space="preserve"><value>Select a screen to record · Esc to cancel</value></data>
+  <data name="CancelRecording" xml:space="preserve"><value>Cancel recording</value></data>
+  <data name="ConfirmRecording" xml:space="preserve"><value>Start recording</value></data>
+  <data name="StopRecording" xml:space="preserve"><value>Stop recording</value></data>
+  <data name="PauseRecording" xml:space="preserve"><value>Pause recording</value></data>
+  <data name="ResumeRecording" xml:space="preserve"><value>Resume recording</value></data>
+  <data name="HidePointerFromRecording" xml:space="preserve"><value>Hide pointer in recording</value></data>
+  <data name="ShowPointerInRecording" xml:space="preserve"><value>Show pointer in recording</value></data>
+  <data name="DismissRecordingReview" xml:space="preserve"><value>Dismiss recording</value></data>
+  <data name="ConfirmRecordingReview" xml:space="preserve"><value>Keep recording</value></data>
+  <data name="PlayRecordingReview" xml:space="preserve"><value>Play recording</value></data>
+  <data name="MuteRecordingReview" xml:space="preserve"><value>Mute recording</value></data>
+  <data name="EmptyDetail.Text" xml:space="preserve"><value>Choose a region, window, or screen</value></data>
+  <data name="RecordingDetail.Text" xml:space="preserve"><value>The selected area is outlined on screen</value></data>
+  <data name="OpenRecordingButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Open recording</value></data>
+  <data name="RevealRecordingButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Show in folder</value></data>
+  <data name="DeleteRecordingButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Delete recording</value></data>
+  <data name="CountdownSecondsSettingCard.Header" xml:space="preserve"><value>Countdown</value></data>
+  <data name="CountdownSecondsSettingCard.Description" xml:space="preserve"><value>Seconds before recording begins.</value></data>
+  <data name="IncludeCursorSettingCard.Header" xml:space="preserve"><value>Record pointer</value></data>
+  <data name="IncludeCursorSettingCard.Description" xml:space="preserve"><value>Include the mouse pointer in recordings.</value></data>
+  <data name="RecentRecordingLimitSettingCard.Header" xml:space="preserve"><value>Recent recordings</value></data>
+  <data name="RecentRecordingLimitSettingCard.Description" xml:space="preserve"><value>Maximum number of recent recordings shown in the island.</value></data>
+</root>

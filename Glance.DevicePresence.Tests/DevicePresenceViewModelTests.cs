@@ -72,15 +72,14 @@ public sealed class DevicePresenceViewModelTests
 
         viewModel.Update([CreateDevice("audio", "Headphones", BluetoothDeviceKind.Audio)]);
 
-        Assert.Single(viewModel.Devices);
+        _ = Assert.Single(viewModel.Devices);
         Assert.Equal("audio", viewModel.SelectedDevice?.Device.Id);
     }
 
     private static ConnectedBluetoothDevice CreateDevice(string id,
         string name,
         BluetoothDeviceKind kind,
-        byte? batteryLevel = null) =>
-        new(id, name, kind, batteryLevel);
+        byte? batteryLevel = null) => new(id, name, kind, batteryLevel);
 
     private sealed class FakeLocalizer :
         ITextLocalizer

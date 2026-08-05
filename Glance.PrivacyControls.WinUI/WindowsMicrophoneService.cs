@@ -14,8 +14,7 @@ public sealed class WindowsMicrophoneService :
     private volatile bool isDeviceInvalidated = true;
     private bool isDisposed;
 
-    public WindowsMicrophoneService() =>
-        deviceEnumerator.RegisterEndpointNotificationCallback(this);
+    public WindowsMicrophoneService() => _ = deviceEnumerator.RegisterEndpointNotificationCallback(this);
 
     public MicrophoneState GetState()
     {
@@ -70,19 +69,16 @@ public sealed class WindowsMicrophoneService :
         }
 
         isDisposed = true;
-        deviceEnumerator.UnregisterEndpointNotificationCallback(this);
+        _ = deviceEnumerator.UnregisterEndpointNotificationCallback(this);
         microphone?.Dispose();
         deviceEnumerator.Dispose();
     }
 
-    public void OnDeviceAdded(string deviceId) =>
-        InvalidateDevice();
+    public void OnDeviceAdded(string deviceId) => InvalidateDevice();
 
-    public void OnDeviceRemoved(string deviceId) =>
-        InvalidateDevice();
+    public void OnDeviceRemoved(string deviceId) => InvalidateDevice();
 
-    public void OnDeviceStateChanged(string deviceId, DeviceState newState) =>
-        InvalidateDevice();
+    public void OnDeviceStateChanged(string deviceId, DeviceState newState) => InvalidateDevice();
 
     public void OnDefaultDeviceChanged(DataFlow flow,
         Role role,
@@ -94,8 +90,7 @@ public sealed class WindowsMicrophoneService :
         }
     }
 
-    public void OnPropertyValueChanged(string deviceId, PropertyKey key) =>
-        InvalidateDevice();
+    public void OnPropertyValueChanged(string deviceId, PropertyKey key) => InvalidateDevice();
 
     private MMDevice? GetMicrophone()
     {
@@ -119,6 +114,5 @@ public sealed class WindowsMicrophoneService :
         return microphone;
     }
 
-    private void InvalidateDevice() =>
-        isDeviceInvalidated = true;
+    private void InvalidateDevice() => isDeviceInvalidated = true;
 }

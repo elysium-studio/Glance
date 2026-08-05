@@ -1,4 +1,3 @@
-using Glance.Shell;
 using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.Shell.WinUI;

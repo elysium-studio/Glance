@@ -19,9 +19,7 @@ public sealed class GlanceAssistantService :
     private readonly IDispatcher dispatcher;
     private readonly GlanceSettings settings;
     private readonly IWritableOptions<GlanceSettings> settingsWriter;
-    private IGlanceAssistantProvider? activeProvider;
     private bool isEnabled;
-    private bool isOverlaySuppressed;
     private int presentationNotificationPending;
 
     public GlanceAssistantService(GlanceSettings settings,
@@ -47,26 +45,20 @@ public sealed class GlanceAssistantService :
 
     public IGlanceAssistantProvider? ActiveProvider
     {
-        get => activeProvider;
+        get;
         private set
         {
-            if (ReferenceEquals(activeProvider, value))
+            if (ReferenceEquals(field, value))
             {
                 return;
             }
 
-            if (activeProvider is not null)
-            {
-                activeProvider.PropertyChanged -= HandleProviderPropertyChanged;
-            }
+            field?.PropertyChanged -= HandleProviderPropertyChanged;
 
-            activeProvider = value;
-            isOverlaySuppressed = false;
+            field = value;
+            IsResultPresentationActive = false;
 
-            if (activeProvider is not null)
-            {
-                activeProvider.PropertyChanged += HandleProviderPropertyChanged;
-            }
+            field?.PropertyChanged += HandleProviderPropertyChanged;
 
             OnPropertyChanged();
             NotifyPresentationChanged();
@@ -81,10 +73,10 @@ public sealed class GlanceAssistantService :
         private set => SetProperty(ref isEnabled, value);
     }
 
-    public bool IsOverlayVisible => !isOverlaySuppressed &&
-        ActiveProvider?.State is (GlanceAssistantState.ListeningForCommand or GlanceAssistantState.ProcessingCommand);
+    public bool IsOverlayVisible => !IsResultPresentationActive &&
+        ActiveProvider?.State is GlanceAssistantState.ListeningForCommand or GlanceAssistantState.ProcessingCommand;
 
-    public bool IsResultPresentationActive => isOverlaySuppressed;
+    public bool IsResultPresentationActive { get; private set; }
 
     public object? CompactIndicatorContent => ActiveProvider?.CompactIndicatorContent;
 
@@ -108,10 +100,7 @@ public sealed class GlanceAssistantService :
 
         OnPropertyChanged(nameof(Providers));
 
-        if (ActiveProvider is null)
-        {
-            ActiveProvider = providers.FirstOrDefault(provider => string.Equals(provider.Id, settings.AssistantProviderId, StringComparison.OrdinalIgnoreCase)) ?? providers.FirstOrDefault();
-        }
+        ActiveProvider ??= providers.FirstOrDefault(provider => string.Equals(provider.Id, settings.AssistantProviderId, StringComparison.OrdinalIgnoreCase)) ?? providers.FirstOrDefault();
 
         if (!ReferenceEquals(previousProvider, ActiveProvider) && ActiveProvider is not null && IsEnabled)
         {
@@ -162,13 +151,9 @@ public sealed class GlanceAssistantService :
         }
     }
 
-    public void Receive(OptionsChangedEventArgs<GlanceSettings> message)
-    {
-        dispatcher.Dispatch(() => ApplySettings(message.Options));
-    }
+    public void Receive(OptionsChangedEventArgs<GlanceSettings> message) => dispatcher.Dispatch(() => ApplySettings(message.Options));
 
-    public void Dispose() =>
-        actionService.PresentationRequested -= HandleActionPresentationRequested;
+    public void Dispose() => actionService.PresentationRequested -= HandleActionPresentationRequested;
 
     private void ApplySettings(GlanceSettings options)
     {
@@ -222,29 +207,28 @@ public sealed class GlanceAssistantService :
         {
             if (ActiveProvider?.State == GlanceAssistantState.ListeningForCommand)
             {
-                isOverlaySuppressed = false;
+                IsResultPresentationActive = false;
                 WakeWordDetected?.Invoke(this, EventArgs.Empty);
             }
             else if (ActiveProvider?.State is GlanceAssistantState.ListeningForWakeWord or GlanceAssistantState.Disabled or GlanceAssistantState.Error)
             {
-                isOverlaySuppressed = false;
+                IsResultPresentationActive = false;
             }
         }
 
         NotifyPresentationChanged();
     }
 
-    private void HandleActionPresentationRequested(object? sender, GlanceActionPresentationRequestedEventArgs args) =>
-        dispatcher.Dispatch(() => dispatcher.Dispatch(() =>
-        {
-            if (ActiveProvider?.State is not (GlanceAssistantState.ListeningForCommand or GlanceAssistantState.ProcessingCommand))
-            {
-                return;
-            }
+    private void HandleActionPresentationRequested(object? sender, GlanceActionPresentationRequestedEventArgs args) => dispatcher.Dispatch(() => dispatcher.Dispatch(() =>
+                                                                                                                            {
+                                                                                                                                if (ActiveProvider?.State is not (GlanceAssistantState.ListeningForCommand or GlanceAssistantState.ProcessingCommand))
+                                                                                                                                {
+                                                                                                                                    return;
+                                                                                                                                }
 
-            isOverlaySuppressed = true;
-            NotifyPresentationChanged();
-        }));
+                                                                                                                                IsResultPresentationActive = true;
+                                                                                                                                NotifyPresentationChanged();
+                                                                                                                            }));
 
     private void NotifyPresentationChanged()
     {
@@ -255,7 +239,7 @@ public sealed class GlanceAssistantService :
 
         dispatcher.Dispatch(() =>
         {
-            Interlocked.Exchange(ref presentationNotificationPending, 0);
+            _ = Interlocked.Exchange(ref presentationNotificationPending, 0);
             OnPropertyChanged(nameof(IsAvailable));
             OnPropertyChanged(nameof(IsOverlayVisible));
             OnPropertyChanged(nameof(IsResultPresentationActive));

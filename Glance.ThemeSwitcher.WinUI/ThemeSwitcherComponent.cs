@@ -70,8 +70,7 @@ public sealed partial class ThemeSwitcherComponent :
 
     public object ExpandedAnimationElement { get; }
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("ThemeSwitcher.Light", Id, "Use light theme", "Switch Windows apps and system surfaces to light appearance.")
         {
             SemanticTags = ["theme", "appearance", "light", "light mode", "bright", "Windows theme"],
@@ -147,6 +146,5 @@ public sealed partial class ThemeSwitcherComponent :
         { }
     }
 
-    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<ThemeSwitcherSettings> args) =>
-        dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<ThemeSwitcherSettings> args) => _ = dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
 }

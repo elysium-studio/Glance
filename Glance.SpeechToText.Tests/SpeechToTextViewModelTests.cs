@@ -92,8 +92,7 @@ public sealed class SpeechToTextViewModelTests
         Assert.Equal(1, requests);
     }
 
-    private static SpeechToTextViewModel CreateViewModel() =>
-        new(new FakeLocalizer());
+    private static SpeechToTextViewModel CreateViewModel() => new(new FakeLocalizer());
 
     private sealed class FakeLocalizer :
         ITextLocalizer

@@ -12,7 +12,6 @@ public sealed partial class WindowsColorPickerService :
     private readonly DispatcherQueueTimer trackingTimer;
     private CursorColorPreviewWindow? cursorPreviewWindow;
     private ColorPickerInputWindow? inputWindow;
-    private bool isPicking;
 
     public WindowsColorPickerService()
     {
@@ -28,16 +27,16 @@ public sealed partial class WindowsColorPickerService :
 
     public event EventHandler? PickingCancelled;
 
-    public bool IsPicking => isPicking;
+    public bool IsPicking { get; private set; }
 
     public void StartPicking()
     {
-        if (isPicking)
+        if (IsPicking)
         {
             return;
         }
 
-        isPicking = true;
+        IsPicking = true;
         cursorPreviewWindow ??= new CursorColorPreviewWindow();
         inputWindow ??= CreateInputWindow();
         inputWindow.Show();
@@ -46,7 +45,7 @@ public sealed partial class WindowsColorPickerService :
 
     public void CancelPicking()
     {
-        if (!isPicking)
+        if (!IsPicking)
         {
             return;
         }
@@ -81,12 +80,12 @@ public sealed partial class WindowsColorPickerService :
 
     private void CompletePicking(ColorValue? color)
     {
-        if (!isPicking)
+        if (!IsPicking)
         {
             return;
         }
 
-        isPicking = false;
+        IsPicking = false;
         trackingTimer.Stop();
         inputWindow?.Hide();
         cursorPreviewWindow?.Hide();
@@ -108,11 +107,9 @@ public sealed partial class WindowsColorPickerService :
         return window;
     }
 
-    private void HandlePicked(object? sender, EventArgs args) =>
-        CompletePicking(ReadColorUnderPointer()?.Color);
+    private void HandlePicked(object? sender, EventArgs args) => CompletePicking(ReadColorUnderPointer()?.Color);
 
-    private static bool IsKeyPressed(int key) =>
-        (NativeMethods.GetAsyncKeyState(key) & 0x8000) != 0;
+    private static bool IsKeyPressed(int key) => (NativeMethods.GetAsyncKeyState(key) & 0x8000) != 0;
 
     private static ColorSample? ReadColorUnderPointer()
     {

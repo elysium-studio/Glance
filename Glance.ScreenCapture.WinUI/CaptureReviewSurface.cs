@@ -23,6 +23,7 @@ internal sealed class CaptureReviewSurface
     private const int EntranceDurationMs = 360;
     private readonly Border animationPreview;
     private readonly double availableHeight;
+    private readonly double availableWidth;
     private readonly DesktopCaptureBitmap bitmap;
     private readonly TaskCompletionSource<DesktopCaptureBitmap?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly ResizableRegionOverlay cropOverlay;
@@ -39,6 +40,7 @@ internal sealed class CaptureReviewSurface
     public CaptureReviewSurface(DesktopCaptureBitmap bitmap, ITextLocalizer localizer, double availableWidth, double availableHeight)
     {
         this.bitmap = bitmap;
+        this.availableWidth = availableWidth;
         this.availableHeight = availableHeight;
 
         double maximumWidth = Math.Max(240, availableWidth - 96);
@@ -57,6 +59,9 @@ internal sealed class CaptureReviewSurface
             Stretch = Stretch.Fill
         };
         cropOverlay = new ResizableRegionOverlay(previewWidth, previewHeight, bitmap.Width, bitmap.Height);
+        cropOverlay.BoundsChanged += HandleCropBoundsChanged;
+        cropOverlay.InteractionCompleted += HandleCropInteractionCompleted;
+        cropOverlay.InteractionStarted += HandleCropInteractionStarted;
         previewHost = CreatePreviewHost(previewImage, previewWidth, previewHeight);
         ElementCompositionPreview.SetIsTranslationEnabled(previewHost, true);
         previewHost.Translation = new Vector3(0, 0, 32);
@@ -97,7 +102,7 @@ internal sealed class CaptureReviewSurface
         toolbar = new Border
         {
             Padding = new Thickness(6),
-            HorizontalAlignment = HorizontalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
             Background = OverlayChrome.CreateAcrylicBrush(),
             BorderBrush = ResolveBrush("SurfaceStrokeColorDefaultBrush", Windows.UI.Color.FromArgb(48, 255, 255, 255)),
@@ -106,10 +111,7 @@ internal sealed class CaptureReviewSurface
             Child = toolbarContent
         };
         OverlayChrome.Elevate(toolbar, 48);
-        toolbar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-
-        double toolbarHeight = toolbar.DesiredSize.Height;
-        toolbar.Margin = new Thickness(0, Math.Max(20, previewY - toolbarHeight - 14), 0, 0);
+        PositionToolbar(PreviewBounds);
 
         reviewBackdrop = new Border
         {
@@ -149,7 +151,7 @@ internal sealed class CaptureReviewSurface
         }
     }
 
-    public void Focus() => reviewLayer.Focus(FocusState.Programmatic);
+    public void Focus() => _ = reviewLayer.Focus(FocusState.Programmatic);
 
     public void PlayEntrance(Rect sourceBounds)
     {
@@ -236,6 +238,45 @@ internal sealed class CaptureReviewSurface
         entranceTimer = null;
         animationPreview.Visibility = Visibility.Collapsed;
         cropOverlay.IsHitTestVisible = true;
+    }
+
+    private void HandleCropBoundsChanged(object? sender, EventArgs args)
+    {
+        if (toolbar.Visibility == Visibility.Visible)
+        {
+            PositionToolbar(SelectedPreviewBounds);
+        }
+    }
+
+    private void HandleCropInteractionStarted(object? sender, EventArgs args) => toolbar.Visibility = Visibility.Collapsed;
+
+    private void HandleCropInteractionCompleted(object? sender, EventArgs args)
+    {
+        PositionToolbar(SelectedPreviewBounds);
+        toolbar.Visibility = Visibility.Visible;
+    }
+
+    private void PositionToolbar(Rect selection)
+    {
+        toolbar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        double width = toolbar.DesiredSize.Width;
+        double height = toolbar.DesiredSize.Height;
+        double left = Math.Clamp(selection.X + ((selection.Width - width) / 2),
+            20,
+            Math.Max(20, availableWidth - width - 20));
+        double top = selection.Y - height - 14;
+
+        if (top < 20)
+        {
+            top = selection.Bottom + 14;
+        }
+
+        if (top + height > availableHeight - 20)
+        {
+            top = Math.Max(20, selection.Y + 14);
+        }
+
+        toolbar.Margin = new Thickness(left, top, 0, 0);
     }
 
     private void StopEntrance()
@@ -345,7 +386,10 @@ internal sealed class CaptureReviewSurface
         }
 
         completed = true;
-        completion.TrySetResult(result);
+        cropOverlay.BoundsChanged -= HandleCropBoundsChanged;
+        cropOverlay.InteractionCompleted -= HandleCropInteractionCompleted;
+        cropOverlay.InteractionStarted -= HandleCropInteractionStarted;
+        _ = completion.TrySetResult(result);
     }
 
     private DesktopCaptureBitmap CreateCroppedBitmap()
@@ -358,26 +402,22 @@ internal sealed class CaptureReviewSurface
         int right = Math.Clamp((int)Math.Ceiling(crop.Right * scaleX), left + 1, bitmap.Width);
         int bottom = Math.Clamp((int)Math.Ceiling(crop.Bottom * scaleY), top + 1, bitmap.Height);
 
-        if (left == 0 && top == 0 && right == bitmap.Width && bottom == bitmap.Height)
-        {
-            return bitmap;
-        }
-
-        return bitmap.Crop(new NativeRectangle(bitmap.OriginX + left, bitmap.OriginY + top, right - left, bottom - top));
+        return left == 0 && top == 0 && right == bitmap.Width && bottom == bitmap.Height
+            ? bitmap
+            : bitmap.Crop(new NativeRectangle(bitmap.OriginX + left, bitmap.OriginY + top, right - left, bottom - top));
     }
 
-    private static Border CreatePreviewHost(UIElement content, double width, double height) =>
-        new()
-        {
-            Width = width,
-            Height = height,
-            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 16, 20, 28)),
-            BorderBrush = ResolveBrush("ControlStrokeColorDefaultBrush", Windows.UI.Color.FromArgb(72, 255, 255, 255)),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(8),
-            Child = content,
-            Shadow = new ThemeShadow()
-        };
+    private static Border CreatePreviewHost(UIElement content, double width, double height) => new()
+    {
+        Width = width,
+        Height = height,
+        Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 16, 20, 28)),
+        BorderBrush = ResolveBrush("ControlStrokeColorDefaultBrush", Windows.UI.Color.FromArgb(72, 255, 255, 255)),
+        BorderThickness = new Thickness(1),
+        CornerRadius = new CornerRadius(8),
+        Child = content,
+        Shadow = new ThemeShadow()
+    };
 
     private static Button CreateToolbarButton(string glyph, string label, bool accent)
     {
@@ -438,13 +478,7 @@ internal sealed class CaptureReviewSurface
         return imageSource;
     }
 
-    private static Brush ResolveBrush(string key, Windows.UI.Color fallback)
-    {
-        if (Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue(key, out object value) && value is Brush brush)
-        {
-            return brush;
-        }
-
-        return new SolidColorBrush(fallback);
-    }
+    private static Brush ResolveBrush(string key, Windows.UI.Color fallback) => Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue(key, out object value) && value is Brush brush
+            ? brush
+            : new SolidColorBrush(fallback);
 }

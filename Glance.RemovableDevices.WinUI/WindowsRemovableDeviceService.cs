@@ -1,3 +1,4 @@
+using Microsoft.Win32.SafeHandles;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,7 +8,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using Microsoft.Win32.SafeHandles;
 
 namespace Glance.RemovableDevices.WinUI;
 
@@ -46,7 +46,7 @@ public sealed class WindowsRemovableDeviceService :
             try
             {
                 string rootPath = NormalizeRoot(drive.RootDirectory.FullName);
-                cachedMetadata.TryGetValue(rootPath, out DriveMetadata? driveMetadata);
+                _ = cachedMetadata.TryGetValue(rootPath, out DriveMetadata? driveMetadata);
 
                 if (!drive.IsReady || (drive.DriveType != DriveType.Removable && driveMetadata?.IsUsb != true))
                 {
@@ -73,7 +73,7 @@ public sealed class WindowsRemovableDeviceService :
     {
         try
         {
-            Process.Start(new ProcessStartInfo(device.RootPath)
+            _ = Process.Start(new ProcessStartInfo(device.RootPath)
             {
                 UseShellExecute = true
             });
@@ -177,8 +177,7 @@ public sealed class WindowsRemovableDeviceService :
         return Encoding.ASCII.GetString(descriptor, start, end - start).Trim();
     }
 
-    private static string GetDriveSignature(IEnumerable<DriveInfo> drives) =>
-        string.Join('|', drives.OrderBy(drive => drive.Name, StringComparer.OrdinalIgnoreCase).Select(GetDriveSignaturePart));
+    private static string GetDriveSignature(IEnumerable<DriveInfo> drives) => string.Join('|', drives.OrderBy(drive => drive.Name, StringComparer.OrdinalIgnoreCase).Select(GetDriveSignaturePart));
 
     private static string GetDriveSignaturePart(DriveInfo drive)
     {
@@ -226,7 +225,7 @@ public sealed class WindowsRemovableDeviceService :
                 return false;
             }
 
-            item.GetType().InvokeMember("InvokeVerb", BindingFlags.InvokeMethod, null, item, ["Eject"]);
+            _ = item.GetType().InvokeMember("InvokeVerb", BindingFlags.InvokeMethod, null, item, ["Eject"]);
             return true;
         }
         catch (Exception)
@@ -245,12 +244,11 @@ public sealed class WindowsRemovableDeviceService :
     {
         if (value is not null && Marshal.IsComObject(value))
         {
-            Marshal.FinalReleaseComObject(value);
+            _ = Marshal.FinalReleaseComObject(value);
         }
     }
 
-    private static string NormalizeRoot(string rootPath) =>
-        Path.GetFullPath(rootPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+    private static string NormalizeRoot(string rootPath) => Path.GetFullPath(rootPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
 
     [DllImport("CfgMgr32.dll", CharSet = CharSet.Unicode)]
     private static extern uint CM_Locate_DevNodeW(out uint deviceInstance, string deviceId, uint flags);

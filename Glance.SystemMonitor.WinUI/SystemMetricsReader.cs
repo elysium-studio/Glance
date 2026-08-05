@@ -1,7 +1,7 @@
+using System;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
-using System;
 
 namespace Glance.SystemMonitor.WinUI;
 

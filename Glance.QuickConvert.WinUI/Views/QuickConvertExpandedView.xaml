@@ -1,0 +1,92 @@
+<UserControl
+    x:Class="Glance.QuickConvert.WinUI.QuickConvertExpandedView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Controls="using:Elysium.UI.Controls.WinUI">
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Themes/QuickConvert.xaml" />
+    </UserControl.Resources>
+    <Grid Padding="20,12,20,26">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid
+            x:Name="StatusIndicator"
+            Width="36"
+            Height="36"
+            VerticalAlignment="Center">
+            <FontIcon
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="30"
+                Foreground="{ThemeResource GlanceQuickConvertIconBrush}"
+                Glyph="&#xE8B1;" />
+        </Grid>
+        <Grid
+            Grid.Column="1"
+            Height="58"
+            Margin="18,0,0,0"
+            VerticalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="14" />
+                <RowDefinition Height="22" />
+                <RowDefinition Height="18" />
+            </Grid.RowDefinitions>
+            <TextBlock
+                FontWeight="SemiBold"
+                Foreground="{ThemeResource GlanceQuickConvertIconBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{x:Bind ToUpper(ViewModel.Title)}" />
+            <Controls:MarqueeTextBlock
+                Grid.Row="1"
+                Height="20"
+                VerticalAlignment="Center"
+                FontSize="14"
+                FontWeight="SemiBold"
+                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                Text="{x:Bind ViewModel.Summary, Mode=OneWay}" />
+            <Controls:MarqueeTextBlock
+                Grid.Row="2"
+                Height="16"
+                VerticalAlignment="Center"
+                FontSize="12"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="{x:Bind ViewModel.Detail, Mode=OneWay}" />
+        </Grid>
+        <Grid
+            Grid.Column="2"
+            Width="36"
+            Height="36"
+            Margin="18,0,0,0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+            <Ellipse
+                x:Name="PulseRing"
+                Width="36"
+                Height="36"
+                IsHitTestVisible="False"
+                Stroke="{ThemeResource GlanceQuickConvertIconBrush}"
+                StrokeThickness="1.5" />
+            <Button
+                AutomationProperties.Name="{x:Bind StopConversionsLabel}"
+                Click="{x:Bind StopConversions}"
+                Content="&#xE71A;"
+                IsEnabled="{x:Bind ViewModel.IsBusy, Mode=OneWay}"
+                ToolTipService.ToolTip="{x:Bind StopConversionsLabel}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+                        <Setter Property="Width" Value="36" />
+                        <Setter Property="Height" Value="36" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="CornerRadius" Value="18" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="14" />
+                    </Style>
+                </Button.Style>
+            </Button>
+        </Grid>
+    </Grid>
+</UserControl>

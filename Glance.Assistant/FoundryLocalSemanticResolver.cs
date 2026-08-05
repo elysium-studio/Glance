@@ -91,7 +91,7 @@ public sealed class FoundryLocalSemanticResolver(ILogger<FoundryLocalSemanticRes
         }
         finally
         {
-            resolutionGate.Release();
+            _ = resolutionGate.Release();
         }
     }
 
@@ -110,7 +110,7 @@ public sealed class FoundryLocalSemanticResolver(ILogger<FoundryLocalSemanticRes
         }
         finally
         {
-            modelGate.Release();
+            _ = modelGate.Release();
             modelGate.Dispose();
             resolutionGate.Dispose();
         }
@@ -145,7 +145,7 @@ public sealed class FoundryLocalSemanticResolver(ILogger<FoundryLocalSemanticRes
         }
         finally
         {
-            modelGate.Release();
+            _ = modelGate.Release();
         }
     }
 
@@ -184,8 +184,7 @@ public sealed class FoundryLocalSemanticResolver(ILogger<FoundryLocalSemanticRes
     }
 
     private static ToolDefinition CreateDecisionTool(string name,
-        string description) =>
-        new()
+        string description) => new()
         {
             Type = "function",
             Function = new FunctionDefinition
@@ -304,12 +303,9 @@ public sealed class FoundryLocalSemanticResolver(ILogger<FoundryLocalSemanticRes
             .ToArray();
         int bestActionScore = candidateActions.FirstOrDefault()?.Score ?? 0;
 
-        if (bestActionScore < 4)
-        {
-            return [];
-        }
-
-        return [.. candidateActions
+        return bestActionScore < 4
+            ? []
+            : [.. candidateActions
             .Where(candidate => candidate.Score >= bestActionScore - 2)
             .Select(candidate => candidate.Action)];
     }
@@ -388,12 +384,12 @@ public sealed class FoundryLocalSemanticResolver(ILogger<FoundryLocalSemanticRes
         {
             if (char.IsLetterOrDigit(character))
             {
-                term.Append(char.ToLowerInvariant(character));
+                _ = term.Append(char.ToLowerInvariant(character));
             }
             else if (term.Length > 0)
             {
                 yield return term.ToString();
-                term.Clear();
+                _ = term.Clear();
             }
         }
 
@@ -441,7 +437,7 @@ public sealed class FoundryLocalSemanticResolver(ILogger<FoundryLocalSemanticRes
             {
                 if (name[^1] != '_')
                 {
-                    name.Append('_');
+                    _ = name.Append('_');
                 }
 
                 continue;
@@ -449,10 +445,10 @@ public sealed class FoundryLocalSemanticResolver(ILogger<FoundryLocalSemanticRes
 
             if (char.IsUpper(character) && index > 0 && char.IsLower(actionId[index - 1]) && name[^1] != '_')
             {
-                name.Append('_');
+                _ = name.Append('_');
             }
 
-            name.Append(char.ToLowerInvariant(character));
+            _ = name.Append(char.ToLowerInvariant(character));
         }
 
         return name.ToString().TrimEnd('_');
@@ -461,50 +457,48 @@ public sealed class FoundryLocalSemanticResolver(ILogger<FoundryLocalSemanticRes
     private static string CreateToolDescription(GlanceActionDescriptor action)
     {
         StringBuilder description = new();
-        description.Append(action.DisplayName);
-        description.Append(". ");
-        description.Append(action.Description);
+        _ = description.Append(action.DisplayName);
+        _ = description.Append(". ");
+        _ = description.Append(action.Description);
 
         if (action.SemanticTags.Count > 0)
         {
-            description.Append(" Semantic tags: ");
-            description.Append(string.Join(", ", action.SemanticTags));
-            description.Append('.');
+            _ = description.Append(" Semantic tags: ");
+            _ = description.Append(string.Join(", ", action.SemanticTags));
+            _ = description.Append('.');
         }
 
         if (action.ExampleUtterances.Count > 0)
         {
-            description.Append(" Example requests: ");
-            description.Append(string.Join("; ", action.ExampleUtterances.Select(example => $"'{example}'")));
-            description.Append('.');
+            _ = description.Append(" Example requests: ");
+            _ = description.Append(string.Join("; ", action.ExampleUtterances.Select(example => $"'{example}'")));
+            _ = description.Append('.');
         }
 
         return description.ToString();
     }
 
-    private static PropertyDefinition CreateParameters(IReadOnlyList<GlanceActionParameterDescriptor> parameters) =>
-        new()
-        {
-            Type = "object",
-            Properties = parameters.ToDictionary(parameter => parameter.Name, CreateParameter),
-            Required = [.. parameters.Where(parameter => parameter.IsRequired).Select(parameter => parameter.Name)],
-            AdditionalProperties = false
-        };
+    private static PropertyDefinition CreateParameters(IReadOnlyList<GlanceActionParameterDescriptor> parameters) => new()
+    {
+        Type = "object",
+        Properties = parameters.ToDictionary(parameter => parameter.Name, CreateParameter),
+        Required = [.. parameters.Where(parameter => parameter.IsRequired).Select(parameter => parameter.Name)],
+        AdditionalProperties = false
+    };
 
-    private static PropertyDefinition CreateParameter(GlanceActionParameterDescriptor parameter) =>
-        new()
+    private static PropertyDefinition CreateParameter(GlanceActionParameterDescriptor parameter) => new()
+    {
+        Type = parameter.Type switch
         {
-            Type = parameter.Type switch
-            {
-                GlanceActionParameterType.String => "string",
-                GlanceActionParameterType.Integer => "integer",
-                GlanceActionParameterType.Number => "number",
-                GlanceActionParameterType.Boolean => "boolean",
-                _ => "string"
-            },
-            Description = parameter.Description,
-            Enum = parameter.AllowedValues is null ? null : [.. parameter.AllowedValues],
-            Minimum = (float?)parameter.Minimum,
-            Maximum = (float?)parameter.Maximum
-        };
+            GlanceActionParameterType.String => "string",
+            GlanceActionParameterType.Integer => "integer",
+            GlanceActionParameterType.Number => "number",
+            GlanceActionParameterType.Boolean => "boolean",
+            _ => "string"
+        },
+        Description = parameter.Description,
+        Enum = parameter.AllowedValues is null ? null : [.. parameter.AllowedValues],
+        Minimum = (float?)parameter.Minimum,
+        Maximum = (float?)parameter.Maximum
+    };
 }

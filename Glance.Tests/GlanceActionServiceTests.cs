@@ -122,8 +122,7 @@ public sealed class GlanceActionServiceTests
 
         public bool WasInvoked { get; private set; }
 
-        public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-        [
+        public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
             new GlanceActionDescriptor("Timer.Start",
                 "Timer",
                 "Start timer",
@@ -165,8 +164,7 @@ public sealed class GlanceActionServiceTests
 
         public bool WasValidated { get; private set; }
 
-        public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-        [
+        public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
             new GlanceActionDescriptor("Timer.Start",
                 "Timer",
                 "Start timer",
@@ -199,8 +197,7 @@ public sealed class GlanceActionServiceTests
     private sealed class TestWritableOptions(GlanceSettings settings) :
         IWritableOptions<GlanceSettings>
     {
-        public Task<GlanceSettings?> ReadAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult<GlanceSettings?>(settings);
+        public Task<GlanceSettings?> ReadAsync(CancellationToken cancellationToken = default) => Task.FromResult<GlanceSettings?>(settings);
 
         public Task WriteAsync(Action<GlanceSettings> update,
             CancellationToken cancellationToken = default)
@@ -210,7 +207,6 @@ public sealed class GlanceActionServiceTests
         }
 
         public Task WriteAsync(GlanceSettings value,
-            CancellationToken cancellationToken = default) =>
-            Task.CompletedTask;
+            CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 }

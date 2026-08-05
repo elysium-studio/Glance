@@ -57,8 +57,7 @@ public sealed partial class PrivacyControlsComponent :
 
     public object ExpandedAnimationElement { get; }
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("PrivacyControls.MuteMicrophone", Id, "Mute microphone", "Mute the current default microphone input.")
         {
             SemanticTags = ["microphone", "mic", "mute", "silence", "input", "privacy"],
@@ -71,13 +70,12 @@ public sealed partial class PrivacyControlsComponent :
         }
     ];
 
-    public bool IsAvailable(string actionId) =>
-        viewModel.IsAvailable && actionId switch
-        {
-            "PrivacyControls.MuteMicrophone" => !viewModel.IsMuted,
-            "PrivacyControls.UnmuteMicrophone" => viewModel.IsMuted,
-            _ => false
-        };
+    public bool IsAvailable(string actionId) => viewModel.IsAvailable && actionId switch
+    {
+        "PrivacyControls.MuteMicrophone" => !viewModel.IsMuted,
+        "PrivacyControls.UnmuteMicrophone" => viewModel.IsMuted,
+        _ => false
+    };
 
     public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
         CancellationToken cancellationToken = default)
@@ -97,6 +95,5 @@ public sealed partial class PrivacyControlsComponent :
         timer.Tick -= HandleTick;
     }
 
-    private void HandleTick(DispatcherQueueTimer sender, object args) =>
-        viewModel.Refresh();
+    private void HandleTick(DispatcherQueueTimer sender, object args) => viewModel.Refresh();
 }

@@ -6,8 +6,8 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using Windows.Graphics;
 
@@ -28,7 +28,6 @@ public sealed partial class SettingsWindow :
     private bool isBuildingNavigation;
     private bool isClosing;
     private bool isQuitDialogOpen;
-    private SettingsViewModel? viewModel;
 
     public SettingsWindow(IMessenger messenger,
         ITextLocalizer localizer,
@@ -59,7 +58,7 @@ public sealed partial class SettingsWindow :
 
     public ObservableCollection<string> BreadcrumbItems { get; } = [];
 
-    public SettingsViewModel ViewModel => viewModel ??= (SettingsViewModel)((FrameworkElement)Content).DataContext;
+    public SettingsViewModel ViewModel => field ??= (SettingsViewModel)((FrameworkElement)Content).DataContext;
 
     public void Receive(SettingsNavigationRequestedEventArgs message)
     {
@@ -162,8 +161,7 @@ public sealed partial class SettingsWindow :
     }
 
     private void HandleBackRequested(TitleBar sender,
-        object args) =>
-        GoBack();
+        object args) => GoBack();
 
     private void HandleBreadcrumbItemClicked(BreadcrumbBar sender,
         BreadcrumbBarItemClickedEventArgs args)
@@ -285,7 +283,7 @@ public sealed partial class SettingsWindow :
         }
         else
         {
-            DispatcherQueue.TryEnqueue(BuildNavigation);
+            _ = DispatcherQueue.TryEnqueue(BuildNavigation);
         }
     }
 

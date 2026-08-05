@@ -12,7 +12,7 @@ public sealed class ScreenCaptureRepository
     public ScreenCaptureRepository(string databasePath)
     {
         InitializeProvider();
-        Directory.CreateDirectory(Path.GetDirectoryName(databasePath) ?? throw new ArgumentException("The database path must include a directory.", nameof(databasePath)));
+        _ = Directory.CreateDirectory(Path.GetDirectoryName(databasePath) ?? throw new ArgumentException("The database path must include a directory.", nameof(databasePath)));
         connectionString = new SqliteConnectionStringBuilder
         {
             DataSource = databasePath,
@@ -68,13 +68,13 @@ public sealed class ScreenCaptureRepository
                 height = excluded.height,
                 capture_mode = excluded.capture_mode;
             """;
-        command.Parameters.AddWithValue("$filePath", capture.FilePath);
-        command.Parameters.AddWithValue("$fileName", capture.FileName);
-        command.Parameters.AddWithValue("$capturedAt", capture.CapturedAt.ToString("O", CultureInfo.InvariantCulture));
-        command.Parameters.AddWithValue("$width", capture.Width);
-        command.Parameters.AddWithValue("$height", capture.Height);
-        command.Parameters.AddWithValue("$captureMode", (int)capture.Mode);
-        command.ExecuteNonQuery();
+        _ = command.Parameters.AddWithValue("$filePath", capture.FilePath);
+        _ = command.Parameters.AddWithValue("$fileName", capture.FileName);
+        _ = command.Parameters.AddWithValue("$capturedAt", capture.CapturedAt.ToString("O", CultureInfo.InvariantCulture));
+        _ = command.Parameters.AddWithValue("$width", capture.Width);
+        _ = command.Parameters.AddWithValue("$height", capture.Height);
+        _ = command.Parameters.AddWithValue("$captureMode", (int)capture.Mode);
+        _ = command.ExecuteNonQuery();
     }
 
     public void Remove(string filePath)
@@ -82,8 +82,8 @@ public sealed class ScreenCaptureRepository
         using SqliteConnection connection = OpenConnection();
         using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "DELETE FROM screen_captures WHERE file_path = $filePath;";
-        command.Parameters.AddWithValue("$filePath", filePath);
-        command.ExecuteNonQuery();
+        _ = command.Parameters.AddWithValue("$filePath", filePath);
+        _ = command.ExecuteNonQuery();
     }
 
     private void InitializeDatabase()
@@ -105,7 +105,7 @@ public sealed class ScreenCaptureRepository
             CREATE INDEX IF NOT EXISTS ix_screen_captures_captured_at
             ON screen_captures(captured_at DESC);
             """;
-        command.ExecuteNonQuery();
+        _ = command.ExecuteNonQuery();
     }
 
     private SqliteConnection OpenConnection()
@@ -115,7 +115,7 @@ public sealed class ScreenCaptureRepository
 
         using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "PRAGMA busy_timeout = 3000;";
-        command.ExecuteNonQuery();
+        _ = command.ExecuteNonQuery();
         return connection;
     }
 

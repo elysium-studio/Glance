@@ -36,8 +36,7 @@ public sealed class CompositionActivityPulse
         Update();
     }
 
-    public void Refresh() =>
-        owner.DispatcherQueue.TryEnqueue(Update);
+    public void Refresh() => _ = owner.DispatcherQueue.TryEnqueue(Update);
 
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
@@ -49,8 +48,7 @@ public sealed class CompositionActivityPulse
         Refresh();
     }
 
-    private void OnActualThemeChanged(FrameworkElement sender, object args) =>
-        owner.DispatcherQueue.TryEnqueue(UpdateBrush);
+    private void OnActualThemeChanged(FrameworkElement sender, object args) => _ = owner.DispatcherQueue.TryEnqueue(UpdateBrush);
 
     private void Update()
     {
@@ -104,7 +102,7 @@ public sealed class CompositionActivityPulse
         float height = (float)(ring.ActualHeight > 0 ? ring.ActualHeight : ring.Height);
         CompositionEllipseGeometry geometry = compositor.CreateEllipseGeometry();
         geometry.Center = new(width / 2, height / 2);
-        geometry.Radius = new(MathF.Max(0, width / 2 - .75f), MathF.Max(0, height / 2 - .75f));
+        geometry.Radius = new(MathF.Max(0, (width / 2) - .75f), MathF.Max(0, (height / 2) - .75f));
         pulseBrush = compositor.CreateColorBrush(GetColor());
         CompositionSpriteShape sprite = compositor.CreateSpriteShape(geometry);
         sprite.StrokeBrush = pulseBrush;
@@ -120,16 +118,9 @@ public sealed class CompositionActivityPulse
         return visual;
     }
 
-    private void UpdateBrush()
-    {
-        if (pulseBrush is not null)
-        {
-            pulseBrush.Color = GetColor();
-        }
-    }
+    private void UpdateBrush() => _ = pulseBrush?.Color = GetColor();
 
-    private Color GetColor() =>
-        ring.Stroke is SolidColorBrush brush
+    private Color GetColor() => ring.Stroke is SolidColorBrush brush
             ? brush.Color
             : Color.FromArgb(255, 255, 255, 255);
 

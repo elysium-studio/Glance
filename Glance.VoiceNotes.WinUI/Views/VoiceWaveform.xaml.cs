@@ -12,7 +12,6 @@ public sealed partial class VoiceWaveform :
     UserControl
 {
     private FrameworkElement[]? bars;
-    private VoiceNotesViewModel? viewModel;
 
     public VoiceWaveform() => InitializeComponent();
 
@@ -20,16 +19,16 @@ public sealed partial class VoiceWaveform :
 
     public VoiceNotesViewModel? ViewModel
     {
-        get => viewModel;
+        get;
         set
         {
-            if (ReferenceEquals(viewModel, value))
+            if (ReferenceEquals(field, value))
             {
                 return;
             }
 
             Unsubscribe();
-            viewModel = value;
+            field = value;
             Subscribe();
         }
     }
@@ -48,9 +47,9 @@ public sealed partial class VoiceWaveform :
             {
                 Width = 1,
                 Height = 2,
-                CornerRadius = new CornerRadius(0.5)
+                CornerRadius = new CornerRadius(0.5),
+                Background = waveformBrush
             };
-            bar.Background = waveformBrush;
             Grid.SetColumn(bar, index);
             WaveformPanel.Children.Add(bar);
             bars[index] = bar;
@@ -67,8 +66,7 @@ public sealed partial class VoiceWaveform :
     }
 
     private void HandleSizeChanged(object sender,
-        SizeChangedEventArgs args) =>
-        UpdateBarGeometry();
+        SizeChangedEventArgs args) => UpdateBarGeometry();
 
     private void HandleUnloaded(object sender, RoutedEventArgs args)
     {
@@ -112,20 +110,14 @@ public sealed partial class VoiceWaveform :
 
     private void Subscribe()
     {
-        if (IsLoaded && viewModel is not null)
+        if (IsLoaded && ViewModel is not null)
         {
-            viewModel.AudioLevelsChanged -= HandleAudioLevelsChanged;
-            viewModel.AudioLevelsChanged += HandleAudioLevelsChanged;
+            ViewModel.AudioLevelsChanged -= HandleAudioLevelsChanged;
+            ViewModel.AudioLevelsChanged += HandleAudioLevelsChanged;
         }
     }
 
-    private void Unsubscribe()
-    {
-        if (viewModel is not null)
-        {
-            viewModel.AudioLevelsChanged -= HandleAudioLevelsChanged;
-        }
-    }
+    private void Unsubscribe() => ViewModel?.AudioLevelsChanged -= HandleAudioLevelsChanged;
 
     private void HandleAudioLevelsChanged(object? sender,
         VoiceLevelsChangedEventArgs args)

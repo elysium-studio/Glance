@@ -16,7 +16,7 @@ public sealed class DevicePresenceAttentionTrackerTests
     public void FirstAsynchronousBatteryReading_DoesNotRequestAttention()
     {
         DevicePresenceAttentionTracker tracker = new();
-        tracker.Update([CreateDevice("mouse", null)], 20);
+        _ = tracker.Update([CreateDevice("mouse", null)], 20);
 
         ConnectedBluetoothDevice? result = tracker.Update([CreateDevice("mouse", 10)], 20);
 
@@ -27,7 +27,7 @@ public sealed class DevicePresenceAttentionTrackerTests
     public void BatteryCrossingThreshold_RequestsAttention()
     {
         DevicePresenceAttentionTracker tracker = new();
-        tracker.Update([CreateDevice("mouse", 50)], 20);
+        _ = tracker.Update([CreateDevice("mouse", 50)], 20);
 
         ConnectedBluetoothDevice? result = tracker.Update([CreateDevice("mouse", 20)], 20);
 
@@ -38,7 +38,7 @@ public sealed class DevicePresenceAttentionTrackerTests
     public void NewlyConnectedDevice_RequestsAttention()
     {
         DevicePresenceAttentionTracker tracker = new();
-        tracker.Update([CreateDevice("mouse", 50)], 20);
+        _ = tracker.Update([CreateDevice("mouse", 50)], 20);
 
         ConnectedBluetoothDevice? result = tracker.Update([CreateDevice("mouse", 50), CreateDevice("keyboard", 80)], 20);
 
@@ -49,7 +49,7 @@ public sealed class DevicePresenceAttentionTrackerTests
     public void EstablishBaseline_DoesNotTreatExistingDeviceAsNew()
     {
         DevicePresenceAttentionTracker tracker = new();
-        tracker.Update([CreateDevice("mouse", 50)], 20);
+        _ = tracker.Update([CreateDevice("mouse", 50)], 20);
         tracker.EstablishBaseline([CreateDevice("mouse", 15)]);
 
         ConnectedBluetoothDevice? result = tracker.Update([CreateDevice("mouse", 15)], 20);
@@ -57,6 +57,5 @@ public sealed class DevicePresenceAttentionTrackerTests
         Assert.Null(result);
     }
 
-    private static ConnectedBluetoothDevice CreateDevice(string id, byte? batteryLevel) =>
-        new(id, id, BluetoothDeviceKind.Bluetooth, batteryLevel);
+    private static ConnectedBluetoothDevice CreateDevice(string id, byte? batteryLevel) => new(id, id, BluetoothDeviceKind.Bluetooth, batteryLevel);
 }

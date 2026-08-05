@@ -12,7 +12,7 @@ public sealed class ReminderRepository
     public ReminderRepository(string databasePath)
     {
         InitializeProvider();
-        Directory.CreateDirectory(Path.GetDirectoryName(databasePath) ?? throw new ArgumentException("The database path must include a directory.", nameof(databasePath)));
+        _ = Directory.CreateDirectory(Path.GetDirectoryName(databasePath) ?? throw new ArgumentException("The database path must include a directory.", nameof(databasePath)));
         connectionString = new SqliteConnectionStringBuilder
         {
             DataSource = databasePath,
@@ -60,12 +60,12 @@ public sealed class ReminderRepository
                 due_at = excluded.due_at,
                 priority = excluded.priority;
             """;
-        command.Parameters.AddWithValue("$id", entry.Id);
-        command.Parameters.AddWithValue("$title", entry.Title);
-        command.Parameters.AddWithValue("$dueAt", entry.DueAt.ToString("O", CultureInfo.InvariantCulture));
-        command.Parameters.AddWithValue("$priority", (int)entry.Priority);
-        command.Parameters.AddWithValue("$createdAt", entry.CreatedAt.ToString("O", CultureInfo.InvariantCulture));
-        command.ExecuteNonQuery();
+        _ = command.Parameters.AddWithValue("$id", entry.Id);
+        _ = command.Parameters.AddWithValue("$title", entry.Title);
+        _ = command.Parameters.AddWithValue("$dueAt", entry.DueAt.ToString("O", CultureInfo.InvariantCulture));
+        _ = command.Parameters.AddWithValue("$priority", (int)entry.Priority);
+        _ = command.Parameters.AddWithValue("$createdAt", entry.CreatedAt.ToString("O", CultureInfo.InvariantCulture));
+        _ = command.ExecuteNonQuery();
     }
 
     public void Remove(string id)
@@ -73,8 +73,8 @@ public sealed class ReminderRepository
         using SqliteConnection connection = OpenConnection();
         using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "DELETE FROM reminders WHERE id = $id;";
-        command.Parameters.AddWithValue("$id", id);
-        command.ExecuteNonQuery();
+        _ = command.Parameters.AddWithValue("$id", id);
+        _ = command.ExecuteNonQuery();
     }
 
     private void InitializeDatabase()
@@ -95,7 +95,7 @@ public sealed class ReminderRepository
             CREATE INDEX IF NOT EXISTS ix_reminders_due_at_priority
             ON reminders(due_at ASC, priority DESC);
             """;
-        command.ExecuteNonQuery();
+        _ = command.ExecuteNonQuery();
     }
 
     private SqliteConnection OpenConnection()
@@ -104,7 +104,7 @@ public sealed class ReminderRepository
         connection.Open();
         using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "PRAGMA busy_timeout = 3000;";
-        command.ExecuteNonQuery();
+        _ = command.ExecuteNonQuery();
         return connection;
     }
 

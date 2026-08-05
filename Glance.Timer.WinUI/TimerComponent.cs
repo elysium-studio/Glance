@@ -84,8 +84,7 @@ public sealed partial class TimerComponent :
 
     public bool IsAttentionEnabledByDefault => true;
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("Timer.Start",
             Id,
             "Start timer",
@@ -112,13 +111,12 @@ public sealed partial class TimerComponent :
         }
     ];
 
-    public bool IsAvailable(string actionId) =>
-        actionId switch
-        {
-            "Timer.Pause" => viewModel.IsRunning,
-            "Timer.Resume" => !viewModel.IsRunning,
-            _ => true
-        };
+    public bool IsAvailable(string actionId) => actionId switch
+    {
+        "Timer.Pause" => viewModel.IsRunning,
+        "Timer.Resume" => !viewModel.IsRunning,
+        _ => true
+    };
 
     public Task<GlanceActionResult?> ValidateAsync(GlanceActionRequest request,
         CancellationToken cancellationToken = default)
@@ -130,12 +128,9 @@ public sealed partial class TimerComponent :
 
         double? minutes = request.GetNumber("minutes");
 
-        if (minutes is null)
-        {
-            return Task.FromResult<GlanceActionResult?>(GlanceActionResult.InvalidArguments("How long should the timer run?", "Say a duration such as 24 minutes."));
-        }
-
-        return Task.FromResult<GlanceActionResult?>(minutes is >= 1d / 60 and <= 1440
+        return minutes is null
+            ? Task.FromResult<GlanceActionResult?>(GlanceActionResult.InvalidArguments("How long should the timer run?", "Say a duration such as 24 minutes."))
+            : Task.FromResult<GlanceActionResult?>(minutes is >= 1d / 60 and <= 1440
             ? null
             : GlanceActionResult.InvalidArguments("That timer duration isn't supported.", "Choose between one second and 24 hours."));
     }
@@ -173,8 +168,7 @@ public sealed partial class TimerComponent :
         options.Changed -= HandleOptionsChanged;
     }
 
-    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<TimerSettings> args) =>
-        dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<TimerSettings> args) => _ = dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
 
     private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
@@ -201,8 +195,7 @@ public sealed partial class TimerComponent :
         }
     }
 
-    private async void HandleSessionStateChanged(object? sender, EventArgs args) =>
-        await PersistSessionAsync();
+    private async void HandleSessionStateChanged(object? sender, EventArgs args) => await PersistSessionAsync();
 
     private async Task PersistSessionAsync()
     {

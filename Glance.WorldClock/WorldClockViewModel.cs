@@ -56,12 +56,9 @@ public sealed partial class WorldClockViewModel(IEnumerable<WorldClockDefinition
             string.Equals(clock.Id, query, StringComparison.OrdinalIgnoreCase) ||
             string.Equals(clock.DisplayName, query, StringComparison.OrdinalIgnoreCase));
 
-        if (clock is null)
-        {
-            clock = Clocks.FirstOrDefault(clock =>
+        clock ??= Clocks.FirstOrDefault(clock =>
                 clock.DisplayName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 query.Contains(clock.DisplayName, StringComparison.OrdinalIgnoreCase));
-        }
 
         return clock;
     }

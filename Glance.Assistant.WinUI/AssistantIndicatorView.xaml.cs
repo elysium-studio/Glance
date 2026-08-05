@@ -62,7 +62,7 @@ public sealed partial class AssistantIndicatorView :
         }
         finally
         {
-            DispatcherQueue.TryEnqueue(() =>
+            _ = DispatcherQueue.TryEnqueue(() =>
             {
                 CompactToggleButton.IsEnabled = true;
                 ExpandedToggleButton.IsEnabled = true;
@@ -82,8 +82,7 @@ public sealed partial class AssistantIndicatorView :
         StopPreparingAnimation();
     }
 
-    private void HandleProviderPropertyChanged(object? sender, PropertyChangedEventArgs args) =>
-        DispatcherQueue.TryEnqueue(UpdateState);
+    private void HandleProviderPropertyChanged(object? sender, PropertyChangedEventArgs args) => _ = DispatcherQueue.TryEnqueue(UpdateState);
 
     private void UpdateState()
     {
@@ -149,8 +148,7 @@ public sealed partial class AssistantIndicatorView :
         expandedVisual.RotationAngleInDegrees = 0;
     }
 
-    private bool IsAssistantActive() =>
-        provider.State is GlanceAssistantState.ListeningForWakeWord or
+    private bool IsAssistantActive() => provider.State is GlanceAssistantState.ListeningForWakeWord or
             GlanceAssistantState.ListeningForCommand or
             GlanceAssistantState.ProcessingCommand;
 }

@@ -56,11 +56,9 @@ public sealed class StashItem(StashEntry entry,
     }
 
     private static string GetLinkDetail(string content,
-        ITextLocalizer localizer) =>
-        Uri.TryCreate(content, UriKind.Absolute, out Uri? uri)
+        ITextLocalizer localizer) => Uri.TryCreate(content, UriKind.Absolute, out Uri? uri)
             ? localizer.GetText("LinkDetail", uri.Host)
             : localizer.GetText("KindLink");
 
-    private static string Normalize(string value) =>
-        string.Join(" ", value.Split(['\r', '\n', '\t', ' '], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+    private static string Normalize(string value) => string.Join(" ", value.Split(['\r', '\n', '\t', ' '], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
 }

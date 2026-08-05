@@ -86,7 +86,7 @@ public sealed partial class ScreenCaptureViewModel(ITextLocalizer localizer, Scr
 
         if (existing is not null)
         {
-            Captures.Remove(existing);
+            _ = Captures.Remove(existing);
         }
 
         Captures.Insert(0, CreateItem(capture));
@@ -110,7 +110,7 @@ public sealed partial class ScreenCaptureViewModel(ITextLocalizer localizer, Scr
 
         if (item is not null)
         {
-            Captures.Remove(item);
+            _ = Captures.Remove(item);
         }
 
         UpdateSelection();
@@ -131,8 +131,7 @@ public sealed partial class ScreenCaptureViewModel(ITextLocalizer localizer, Scr
         }
     }
 
-    private static int GetRecentCaptureLimit(ScreenCaptureSettings settings) =>
-        (int)Math.Clamp(settings.RecentCaptureLimit, 1, 12);
+    private static int GetRecentCaptureLimit(ScreenCaptureSettings settings) => (int)Math.Clamp(settings.RecentCaptureLimit, 1, 12);
 
     private void RequestCapture(ScreenCaptureMode mode)
     {
@@ -155,8 +154,7 @@ public sealed partial class ScreenCaptureViewModel(ITextLocalizer localizer, Scr
             : localizer.GetText("ReadyToCapture");
     }
 
-    private ScreenCaptureItemViewModel CreateItem(ScreenCaptureItem capture) =>
-        new(capture,
+    private ScreenCaptureItemViewModel CreateItem(ScreenCaptureItem capture) => new(capture,
             localizer.GetText("CaptureDetail", capture.Width, capture.Height),
             value => OpenRequested?.Invoke(this, value),
             value => RevealRequested?.Invoke(this, value),

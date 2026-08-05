@@ -117,8 +117,7 @@ public sealed class VoiceNotesViewModelTests
         Assert.Equal("voice-note.wav", viewModel.Recordings[0].FileName);
     }
 
-    private static VoiceNote CreateNote(string name, int minute) =>
-        new(name, DateTimeOffset.Now.AddMinutes(minute), TimeSpan.FromSeconds(minute));
+    private static VoiceNote CreateNote(string name, int minute) => new(name, DateTimeOffset.Now.AddMinutes(minute), TimeSpan.FromSeconds(minute));
 
     private sealed class FakeLocalizer :
         ITextLocalizer

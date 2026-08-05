@@ -16,10 +16,7 @@ public sealed class GlanceAssistantCommandService :
         this.semanticResolvers = semanticResolvers;
     }
 
-    public GlanceAssistantCommandService(IEnumerable<IGlanceAssistantCommandHandler> handlers)
-    {
-        this.handlers = [.. handlers];
-    }
+    public GlanceAssistantCommandService(IEnumerable<IGlanceAssistantCommandHandler> handlers) => this.handlers = [.. handlers];
 
     public void Register(IEnumerable<IGlanceAssistantCommandHandler> registrations)
     {

@@ -23,9 +23,7 @@ public sealed partial class RemovableDevicesExpandedView :
 
     public string Title => localizer.GetText("ModuleDisplayName");
 
-    private string ToUpper(string value) =>
-        value.ToUpperInvariant();
+    private string ToUpper(string value) => value.ToUpperInvariant();
 
-    private bool WhenEmpty(bool hasDevices) =>
-        !hasDevices;
+    private bool WhenEmpty(bool hasDevices) => !hasDevices;
 }

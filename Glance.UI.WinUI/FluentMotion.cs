@@ -13,12 +13,13 @@ public static class FluentMotion
     private static readonly TimeSpan ContentTransitionDuration = TimeSpan.FromMilliseconds(240);
     private static readonly TimeSpan EntranceDuration = TimeSpan.FromMilliseconds(240);
     private static readonly TimeSpan PulseDuration = TimeSpan.FromMilliseconds(320);
+    private static readonly TimeSpan RoutePushDuration = TimeSpan.FromMilliseconds(280);
+    private static readonly TimeSpan RouteTargetHoverDuration = TimeSpan.FromMilliseconds(140);
+    private static readonly TimeSpan RouteTargetReleaseDuration = TimeSpan.FromMilliseconds(180);
 
-    public static void PlayButtonPress(FrameworkElement element) =>
-        PlayScale(element, 0.94f, ButtonPressDuration);
+    public static void PlayButtonPress(FrameworkElement element) => PlayScale(element, 0.94f, ButtonPressDuration);
 
-    public static void PlayButtonRelease(FrameworkElement element) =>
-        PlayScale(element, 1f, ButtonReleaseDuration);
+    public static void PlayButtonRelease(FrameworkElement element) => PlayScale(element, 1f, ButtonReleaseDuration);
 
     public static void PlayEntrance(FrameworkElement element, float verticalOffset = 8f)
     {
@@ -151,6 +152,85 @@ public static class FluentMotion
         batch.End();
     }
 
+    public static void PlayVerticalPushTransition(FrameworkElement outgoing,
+        FrameworkElement incoming,
+        FrameworkElement? moduleBackground,
+        FrameworkElement? outgoingCompanion,
+        bool forward,
+        Action completed)
+    {
+        ElementCompositionPreview.SetIsTranslationEnabled(outgoing, true);
+        ElementCompositionPreview.SetIsTranslationEnabled(incoming, true);
+
+        Visual outgoingVisual = ElementCompositionPreview.GetElementVisual(outgoing);
+        Visual incomingVisual = ElementCompositionPreview.GetElementVisual(incoming);
+        Compositor compositor = outgoingVisual.Compositor;
+        CubicBezierEasingFunction easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.1f, 0.9f), new Vector2(0.2f, 1f));
+        float distance = (float)Math.Max(outgoing.ActualHeight, incoming.ActualHeight);
+        float direction = forward ? -1 : 1;
+
+        outgoingVisual.StopAnimation(nameof(Visual.Opacity));
+        incomingVisual.StopAnimation(nameof(Visual.Opacity));
+        outgoingVisual.StopAnimation("Translation.Y");
+        incomingVisual.StopAnimation("Translation.Y");
+        outgoingVisual.Opacity = 1;
+        incomingVisual.Opacity = 1;
+        outgoingVisual.Properties.InsertVector3("Translation", Vector3.Zero);
+        incomingVisual.Properties.InsertVector3("Translation", new Vector3(0, -direction * distance, 0));
+
+        CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+
+        ScalarKeyFrameAnimation outgoingTranslation = compositor.CreateScalarKeyFrameAnimation();
+        outgoingTranslation.InsertKeyFrame(0, 0);
+        outgoingTranslation.InsertKeyFrame(1, direction * distance, easing);
+        outgoingTranslation.Duration = RoutePushDuration;
+
+        ScalarKeyFrameAnimation incomingTranslation = compositor.CreateScalarKeyFrameAnimation();
+        incomingTranslation.InsertKeyFrame(0, -direction * distance);
+        incomingTranslation.InsertKeyFrame(1, 0, easing);
+        incomingTranslation.Duration = RoutePushDuration;
+
+        outgoingVisual.StartAnimation("Translation.Y", outgoingTranslation);
+        incomingVisual.StartAnimation("Translation.Y", incomingTranslation);
+
+        if (moduleBackground is not null)
+        {
+            ElementCompositionPreview.SetIsTranslationEnabled(moduleBackground, true);
+            Visual backgroundVisual = ElementCompositionPreview.GetElementVisual(moduleBackground);
+            backgroundVisual.StopAnimation(nameof(Visual.Opacity));
+            backgroundVisual.StopAnimation("Translation.Y");
+            backgroundVisual.Opacity = 1;
+            backgroundVisual.Properties.InsertVector3("Translation", new Vector3(0, forward ? 0 : -distance, 0));
+
+            ScalarKeyFrameAnimation backgroundTranslation = compositor.CreateScalarKeyFrameAnimation();
+            backgroundTranslation.InsertKeyFrame(0, forward ? 0 : -distance);
+            backgroundTranslation.InsertKeyFrame(1, forward ? -distance : 0, easing);
+            backgroundTranslation.Duration = RoutePushDuration;
+            backgroundVisual.StartAnimation("Translation.Y", backgroundTranslation);
+        }
+
+        if (outgoingCompanion is not null)
+        {
+            ElementCompositionPreview.SetIsTranslationEnabled(outgoingCompanion, true);
+            Visual companionVisual = ElementCompositionPreview.GetElementVisual(outgoingCompanion);
+            companionVisual.StopAnimation("Translation.Y");
+            companionVisual.Properties.InsertVector3("Translation", Vector3.Zero);
+
+            ScalarKeyFrameAnimation companionTranslation = compositor.CreateScalarKeyFrameAnimation();
+            companionTranslation.InsertKeyFrame(0, 0);
+            companionTranslation.InsertKeyFrame(1, direction * distance, easing);
+            companionTranslation.Duration = RoutePushDuration;
+            companionVisual.StartAnimation("Translation.Y", companionTranslation);
+        }
+
+        batch.Completed += (_, _) => incoming.DispatcherQueue.TryEnqueue(() => completed());
+        batch.End();
+    }
+
+    public static void PlayRouteTargetHover(FrameworkElement element) => PlayRouteTargetTransform(element, 1.055f, -3f, RouteTargetHoverDuration);
+
+    public static void PlayRouteTargetRelease(FrameworkElement element) => PlayRouteTargetTransform(element, 1f, 0, RouteTargetReleaseDuration);
+
     public static void SetContentPresentationState(FrameworkElement element, bool isVisible)
     {
         ElementCompositionPreview.SetIsTranslationEnabled(element, true);
@@ -172,6 +252,15 @@ public static class FluentMotion
         visual.Opacity = opacity;
     }
 
+    public static void ResetTranslation(FrameworkElement element)
+    {
+        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
+        Visual visual = ElementCompositionPreview.GetElementVisual(element);
+        visual.StopAnimation("Translation.X");
+        visual.StopAnimation("Translation.Y");
+        visual.Properties.InsertVector3("Translation", Vector3.Zero);
+    }
+
     private static void PlayScale(FrameworkElement element, float scale, TimeSpan duration)
     {
         Visual visual = ElementCompositionPreview.GetElementVisual(element);
@@ -186,6 +275,29 @@ public static class FluentMotion
         visual.StartAnimation(nameof(Visual.Scale), animation);
     }
 
-    private static CubicBezierEasingFunction CreateEasing(Compositor compositor) =>
-        compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1f), new Vector2(0.3f, 1f));
+    private static void PlayRouteTargetTransform(FrameworkElement element,
+        float scale,
+        float translationY,
+        TimeSpan duration)
+    {
+        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
+
+        Visual visual = ElementCompositionPreview.GetElementVisual(element);
+        Compositor compositor = visual.Compositor;
+        CubicBezierEasingFunction easing = CreateEasing(compositor);
+        visual.CenterPoint = new Vector3((float)element.ActualWidth / 2, (float)element.ActualHeight / 2, 0);
+
+        Vector3KeyFrameAnimation scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
+        scaleAnimation.InsertKeyFrame(1, new Vector3(scale, scale, 1), easing);
+        scaleAnimation.Duration = duration;
+
+        ScalarKeyFrameAnimation translationAnimation = compositor.CreateScalarKeyFrameAnimation();
+        translationAnimation.InsertKeyFrame(1, translationY, easing);
+        translationAnimation.Duration = duration;
+
+        visual.StartAnimation(nameof(Visual.Scale), scaleAnimation);
+        visual.StartAnimation("Translation.Y", translationAnimation);
+    }
+
+    private static CubicBezierEasingFunction CreateEasing(Compositor compositor) => compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1f), new Vector2(0.3f, 1f));
 }

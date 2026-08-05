@@ -51,11 +51,11 @@ internal static partial class WindowsGraphicsCapture
                 DesktopCaptureBitmap bitmap = new(bounds.X, bounds.Y, width, height, pixels);
                 int contentWidth = Math.Min(frame.ContentSize.Width, width);
                 int contentHeight = Math.Min(frame.ContentSize.Height, height);
-                completion.TrySetResult(contentWidth == width && contentHeight == height ? bitmap : bitmap.Crop(new NativeRectangle(bounds.X, bounds.Y, contentWidth, contentHeight)));
+                _ = completion.TrySetResult(contentWidth == width && contentHeight == height ? bitmap : bitmap.Crop(new NativeRectangle(bounds.X, bounds.Y, contentWidth, contentHeight)));
             }
             catch (Exception exception)
             {
-                completion.TrySetException(exception);
+                _ = completion.TrySetException(exception);
             }
         }
 
@@ -88,7 +88,7 @@ internal static partial class WindowsGraphicsCapture
         }
         finally
         {
-            Marshal.Release(itemPointer);
+            _ = Marshal.Release(itemPointer);
         }
     }
 
@@ -119,7 +119,7 @@ internal static partial class WindowsGraphicsCapture
     {
         if (value != nint.Zero)
         {
-            Marshal.Release(value);
+            _ = Marshal.Release(value);
         }
     }
 

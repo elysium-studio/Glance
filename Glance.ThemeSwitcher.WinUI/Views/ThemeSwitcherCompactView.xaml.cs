@@ -19,11 +19,9 @@ public sealed partial class ThemeSwitcherCompactView :
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
-    private void HandleLoaded(object sender, RoutedEventArgs args) =>
-        ViewModel.PropertyChanged += HandlePropertyChanged;
+    private void HandleLoaded(object sender, RoutedEventArgs args) => ViewModel.PropertyChanged += HandlePropertyChanged;
 
-    private void HandleUnloaded(object sender, RoutedEventArgs args) =>
-        ViewModel.PropertyChanged -= HandlePropertyChanged;
+    private void HandleUnloaded(object sender, RoutedEventArgs args) => ViewModel.PropertyChanged -= HandlePropertyChanged;
 
     private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs args)
     {

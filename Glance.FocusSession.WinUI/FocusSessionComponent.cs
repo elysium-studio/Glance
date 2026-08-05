@@ -83,8 +83,7 @@ public sealed partial class FocusSessionComponent :
 
     public bool IsAttentionEnabledByDefault => true;
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("FocusSession.Start", Id, "Start focus session", "Start or resume the Pomodoro-style focus session.")
         {
             SemanticTags = ["focus", "focus session", "pomodoro", "productivity", "concentrate", "resume"],
@@ -107,13 +106,12 @@ public sealed partial class FocusSessionComponent :
         }
     ];
 
-    public bool IsAvailable(string actionId) =>
-        actionId switch
-        {
-            "FocusSession.Start" => !viewModel.IsRunning,
-            "FocusSession.Pause" => viewModel.IsRunning,
-            _ => true
-        };
+    public bool IsAvailable(string actionId) => actionId switch
+    {
+        "FocusSession.Start" => !viewModel.IsRunning,
+        "FocusSession.Pause" => viewModel.IsRunning,
+        _ => true
+    };
 
     public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
         CancellationToken cancellationToken = default)
@@ -145,8 +143,7 @@ public sealed partial class FocusSessionComponent :
         options.Changed -= HandleOptionsChanged;
     }
 
-    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<FocusSessionSettings> args) =>
-        dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<FocusSessionSettings> args) => _ = dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
 
     private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
@@ -173,8 +170,7 @@ public sealed partial class FocusSessionComponent :
         }
     }
 
-    private async void HandleSessionStateChanged(object? sender, EventArgs args) =>
-        await PersistSessionAsync();
+    private async void HandleSessionStateChanged(object? sender, EventArgs args) => await PersistSessionAsync();
 
     private async Task PersistSessionAsync()
     {

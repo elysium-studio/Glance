@@ -16,10 +16,7 @@ public sealed partial class SettingsViewModel :
         IMessenger messenger,
         IDisposer disposer,
         IEnumerable<ISettingViewModel> items) :
-        base(provider, factory, messenger, disposer, items)
-    {
-        CurrentView = SelectedItem;
-    }
+        base(provider, factory, messenger, disposer, items) => CurrentView = SelectedItem;
 
     public void NavigateTo(ISettingViewModel? viewModel) => CurrentView = viewModel;
 }

@@ -63,7 +63,7 @@ public sealed class RemovableDevicesViewModelTests
 
         viewModel.Update([CreateDevice("usb-a", "E:\\", "Archive")]);
 
-        Assert.Single(viewModel.Devices);
+        _ = Assert.Single(viewModel.Devices);
         Assert.Equal("usb-a", viewModel.SelectedDevice?.Device.Id);
     }
 
@@ -105,8 +105,7 @@ public sealed class RemovableDevicesViewModelTests
         string rootPath,
         string name,
         long totalBytes = 1024,
-        long freeBytes = 512) =>
-        new(id, rootPath, name, totalBytes, freeBytes, true);
+        long freeBytes = 512) => new(id, rootPath, name, totalBytes, freeBytes, true);
 
     private sealed class FakeLocalizer :
         ITextLocalizer

@@ -23,6 +23,5 @@ public sealed partial class PrivacyControlsExpandedView :
 
     public string Title => localizer.GetText("ModuleDisplayName");
 
-    private string ToUpper(string value) =>
-        value.ToUpperInvariant();
+    private string ToUpper(string value) => value.ToUpperInvariant();
 }

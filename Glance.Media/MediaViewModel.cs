@@ -94,17 +94,13 @@ public sealed partial class MediaViewModel :
         GC.SuppressFinalize(this);
     }
 
-    public void UpdateAudioLevels(IReadOnlyList<double> levels) =>
-        AudioLevelsChanged?.Invoke(this, new AudioLevelsChangedEventArgs([.. levels]));
+    public void UpdateAudioLevels(IReadOnlyList<double> levels) => AudioLevelsChanged?.Invoke(this, new AudioLevelsChangedEventArgs([.. levels]));
 
-    public void Previous() =>
-        PlaybackActionRequested?.Invoke(this, MediaPlaybackAction.Previous);
+    public void Previous() => PlaybackActionRequested?.Invoke(this, MediaPlaybackAction.Previous);
 
-    public void TogglePlayback() =>
-        PlaybackActionRequested?.Invoke(this, MediaPlaybackAction.TogglePlayback);
+    public void TogglePlayback() => PlaybackActionRequested?.Invoke(this, MediaPlaybackAction.TogglePlayback);
 
-    public void Next() =>
-        PlaybackActionRequested?.Invoke(this, MediaPlaybackAction.Next);
+    public void Next() => PlaybackActionRequested?.Invoke(this, MediaPlaybackAction.Next);
 }
 
 public sealed class AudioLevelsChangedEventArgs(IReadOnlyList<double> levels) :

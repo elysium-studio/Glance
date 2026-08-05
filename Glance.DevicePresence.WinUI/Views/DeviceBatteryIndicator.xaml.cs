@@ -23,8 +23,7 @@ public sealed partial class DeviceBatteryIndicator :
         set => SetValue(BatteryLevelProperty, value);
     }
 
-    private static void HandleBatteryLevelChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args) =>
-        ((DeviceBatteryIndicator)sender).UpdateBatteryLevel();
+    private static void HandleBatteryLevelChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args) => ((DeviceBatteryIndicator)sender).UpdateBatteryLevel();
 
     private void UpdateBatteryLevel()
     {

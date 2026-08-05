@@ -43,9 +43,7 @@ public sealed partial class MediaCompactView :
 
     private ImageSource? ToImageSource(object? value) => value as ImageSource;
 
-    private Visibility WhenArtworkUnavailable(object? artwork) =>
-        artwork is null ? Visibility.Visible : Visibility.Collapsed;
+    private Visibility WhenArtworkUnavailable(object? artwork) => artwork is null ? Visibility.Visible : Visibility.Collapsed;
 
-    private Visibility WhenAvailable(bool isAvailable) =>
-        isAvailable ? Visibility.Visible : Visibility.Collapsed;
+    private Visibility WhenAvailable(bool isAvailable) => isAvailable ? Visibility.Visible : Visibility.Collapsed;
 }

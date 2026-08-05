@@ -11,9 +11,7 @@ namespace Glance.Shell.WinUI;
 public sealed class DesktopModule :
     IModule
 {
-    public void Register(IServiceCollection services)
-    {
-        services
+    public void Register(IServiceCollection services) => _ = services
             .AddSingleton<IGlanceAttentionService, GlanceAttentionService>()
             .AddSingleton<GlanceAssistantSemanticResolverService>()
             .AddSingleton<IGlanceAssistantSemanticResolverService>(provider => provider.GetRequiredService<GlanceAssistantSemanticResolverService>())
@@ -27,8 +25,9 @@ public sealed class DesktopModule :
             .AddSingleton<IGlanceActionService>(provider => provider.GetRequiredService<GlanceActionService>())
             .AddSingleton<GlanceIntentService>()
             .AddSingleton<IGlanceIntentService>(provider => provider.GetRequiredService<GlanceIntentService>())
+            .AddSingleton<GlanceQuickConverterRegistry>()
+            .AddSingleton<IGlanceQuickConverterRegistry>(provider => provider.GetRequiredService<GlanceQuickConverterRegistry>())
             .AddViewFor(ServiceLifetime.Singleton,
                 provider => new DesktopIslandView(),
                 provider => new DesktopIslandViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<ModulePreferenceService>(), provider.GetRequiredService<IGlanceAttentionService>(), provider.GetRequiredService<IGlanceAssistantService>(), provider.GetRequiredService<IGlanceActionService>(), provider.GetRequiredService<IGlanceIntentService>(), provider.GetRequiredService<INavigator>(), provider.GetRequiredService<ILogger<DesktopIslandViewModel>>(), provider.GetRequiredService<GlanceSettings>(), provider.GetRequiredService<IWritableOptions<GlanceSettings>>()));
-    }
 }

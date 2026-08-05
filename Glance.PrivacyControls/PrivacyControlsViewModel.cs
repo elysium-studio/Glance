@@ -46,8 +46,7 @@ public sealed partial class PrivacyControlsViewModel :
 
     public string ToggleGlyph => IsMuted ? "\uE74F" : "\uE720";
 
-    public void Refresh() =>
-        Update(microphoneService.GetState());
+    public void Refresh() => Update(microphoneService.GetState());
 
     public void ToggleMute()
     {
@@ -71,6 +70,5 @@ public sealed partial class PrivacyControlsViewModel :
         IsActive = level >= 0.08;
     }
 
-    private static double NormalizeLevel(double level) =>
-        Math.Clamp(Math.Pow(Math.Clamp(level, 0, 1), 0.45) * 1.15, 0, 1);
+    private static double NormalizeLevel(double level) => Math.Clamp(Math.Pow(Math.Clamp(level, 0, 1), 0.45) * 1.15, 0, 1);
 }

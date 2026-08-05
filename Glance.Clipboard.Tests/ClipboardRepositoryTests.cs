@@ -85,8 +85,7 @@ public sealed class ClipboardRepositoryTests
         }
     }
 
-    private static ClipboardRecord CreateRecord(int index) =>
-        new(index.ToString(),
+    private static ClipboardRecord CreateRecord(int index) => new(index.ToString(),
             $"HASH{index}",
             DateTimeOffset.UtcNow.AddMinutes(index),
             $"Text {index}",

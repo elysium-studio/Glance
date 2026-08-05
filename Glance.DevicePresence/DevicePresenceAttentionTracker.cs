@@ -35,8 +35,7 @@ public sealed class DevicePresenceAttentionTracker
         hasSnapshot = true;
     }
 
-    private bool HasCrossedLowBatteryThreshold(ConnectedBluetoothDevice device, byte lowBatteryThreshold) =>
-        device.BatteryLevel is byte batteryLevel &&
+    private bool HasCrossedLowBatteryThreshold(ConnectedBluetoothDevice device, byte lowBatteryThreshold) => device.BatteryLevel is byte batteryLevel &&
         batteryLevel <= lowBatteryThreshold &&
         batteryLevels.TryGetValue(device.Id, out byte previousBatteryLevel) &&
         previousBatteryLevel > lowBatteryThreshold;

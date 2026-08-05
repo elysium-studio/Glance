@@ -83,11 +83,9 @@ public sealed partial class RemovableDevicesComponent :
         viewModel.EjectRequested -= HandleEjectRequested;
     }
 
-    private void HandleTick(DispatcherQueueTimer sender, object args) =>
-        _ = RefreshAsync();
+    private void HandleTick(DispatcherQueueTimer sender, object args) => _ = RefreshAsync();
 
-    private void HandleOpenRequested(object? sender, RemovableDevice device) =>
-        _ = OpenAsync(device);
+    private void HandleOpenRequested(object? sender, RemovableDevice device) => _ = OpenAsync(device);
 
     private void HandleEjectRequested(object? sender, RemovableDevice device)
     {
@@ -101,7 +99,7 @@ public sealed partial class RemovableDevicesComponent :
 
         if (!opened)
         {
-            dispatcherQueue.TryEnqueue(() => viewModel.ShowOpenFailure(device.Id));
+            _ = dispatcherQueue.TryEnqueue(() => viewModel.ShowOpenFailure(device.Id));
         }
     }
 
@@ -111,7 +109,7 @@ public sealed partial class RemovableDevicesComponent :
 
         if (!ejected)
         {
-            dispatcherQueue.TryEnqueue(() =>
+            _ = dispatcherQueue.TryEnqueue(() =>
             {
                 viewModel.SetBusy(device.Id, false);
                 viewModel.ShowEjectFailure(device.Id);
@@ -142,10 +140,10 @@ public sealed partial class RemovableDevicesComponent :
         }
         finally
         {
-            Interlocked.Exchange(ref isRefreshing, 0);
+            _ = Interlocked.Exchange(ref isRefreshing, 0);
         }
 
-        dispatcherQueue.TryEnqueue(() => ApplyDevices(devices));
+        _ = dispatcherQueue.TryEnqueue(() => ApplyDevices(devices));
     }
 
     private void ApplyDevices(IReadOnlyList<RemovableDevice> devices)

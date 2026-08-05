@@ -60,11 +60,9 @@ public sealed partial class ThemeSwitcherExpandedView :
 
     private string ToUpper(string value) => value.ToUpperInvariant();
 
-    private void HandleLoaded(object sender, RoutedEventArgs args) =>
-        ViewModel.PropertyChanged += HandlePropertyChanged;
+    private void HandleLoaded(object sender, RoutedEventArgs args) => ViewModel.PropertyChanged += HandlePropertyChanged;
 
-    private void HandleUnloaded(object sender, RoutedEventArgs args) =>
-        ViewModel.PropertyChanged -= HandlePropertyChanged;
+    private void HandleUnloaded(object sender, RoutedEventArgs args) => ViewModel.PropertyChanged -= HandlePropertyChanged;
 
     private void HandlePropertyChanged(object? sender, PropertyChangedEventArgs args)
     {

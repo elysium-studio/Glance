@@ -15,7 +15,6 @@ public sealed class GlanceAssistantSemanticResolverService :
     private readonly GlanceSettings settings;
     private readonly object synchronization = new();
     private readonly IWritableOptions<GlanceSettings> settingsWriter;
-    private IGlanceAssistantSemanticResolver? activeResolver;
 
     public GlanceAssistantSemanticResolverService(IEnumerable<IGlanceAssistantSemanticResolver> resolvers,
         IGlanceActionService actionService,
@@ -43,8 +42,8 @@ public sealed class GlanceAssistantSemanticResolverService :
 
     public IGlanceAssistantSemanticResolver? ActiveResolver
     {
-        get => activeResolver;
-        private set => SetProperty(ref activeResolver, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public void Register(IEnumerable<IGlanceAssistantSemanticResolver> registrations)
@@ -73,7 +72,7 @@ public sealed class GlanceAssistantSemanticResolverService :
         OnPropertyChanged(nameof(Resolvers));
         IGlanceAssistantSemanticResolver? preferred = Resolvers.FirstOrDefault(resolver => string.Equals(resolver.Id, settings.AssistantSemanticResolverId, StringComparison.OrdinalIgnoreCase));
 
-        if (ActiveResolver is null || preferred is not null && !ReferenceEquals(ActiveResolver, preferred))
+        if (ActiveResolver is null || (preferred is not null && !ReferenceEquals(ActiveResolver, preferred)))
         {
             ActiveResolver = preferred ?? Resolvers.FirstOrDefault();
         }

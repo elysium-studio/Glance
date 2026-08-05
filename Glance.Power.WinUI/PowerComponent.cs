@@ -78,11 +78,9 @@ public sealed partial class PowerComponent :
         options.Changed -= HandleOptionsChanged;
     }
 
-    private void HandlePowerChanged(object? sender, object args) =>
-        dispatcherQueue.TryEnqueue(Refresh);
+    private void HandlePowerChanged(object? sender, object args) => _ = dispatcherQueue.TryEnqueue(Refresh);
 
-    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<PowerSettings> args) =>
-        dispatcherQueue.TryEnqueue(() => attentionBand = GetAttentionBand(PowerStateReader.Read()));
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<PowerSettings> args) => _ = dispatcherQueue.TryEnqueue(() => attentionBand = GetAttentionBand(PowerStateReader.Read()));
 
     private void Refresh()
     {

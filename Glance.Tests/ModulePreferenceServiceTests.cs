@@ -59,7 +59,7 @@ public sealed class ModulePreferenceServiceTests
         GlanceSettings settings = new();
         ModulePreferenceService service = new([new TestComponent("Timer")], settings, new TestWritableOptions(settings));
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => service.RegisterComponentsAsync([new TestComponent("timer")], () => []));
+        _ = await Assert.ThrowsAsync<InvalidOperationException>(() => service.RegisterComponentsAsync([new TestComponent("timer")], () => []));
     }
 
     [Fact]
@@ -233,8 +233,7 @@ public sealed class ModulePreferenceServiceTests
     {
         public int WriteCount { get; private set; }
 
-        public Task<GlanceSettings?> ReadAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult<GlanceSettings?>(settings);
+        public Task<GlanceSettings?> ReadAsync(CancellationToken cancellationToken = default) => Task.FromResult<GlanceSettings?>(settings);
 
         public Task WriteAsync(Action<GlanceSettings> update, CancellationToken cancellationToken = default)
         {

@@ -14,7 +14,7 @@ public sealed class StashTextViewerService
     public StashTextViewerService()
     {
         directory = Path.Combine(Path.GetTempPath(), "Glance", "Stash");
-        Directory.CreateDirectory(directory);
+        _ = Directory.CreateDirectory(directory);
         DeleteExpiredFiles();
     }
 
@@ -25,14 +25,13 @@ public sealed class StashTextViewerService
         MakeWritable(path);
         await File.WriteAllTextAsync(path, content, new UTF8Encoding(false));
         File.SetAttributes(path, File.GetAttributes(path) | FileAttributes.ReadOnly);
-        Process.Start(new ProcessStartInfo(path)
+        _ = Process.Start(new ProcessStartInfo(path)
         {
             UseShellExecute = true
         });
     }
 
-    public void Remove(string id) =>
-        TryDelete(Path.Combine(directory, $"{id}.txt"));
+    public void Remove(string id) => TryDelete(Path.Combine(directory, $"{id}.txt"));
 
     private void DeleteExpiredFiles()
     {

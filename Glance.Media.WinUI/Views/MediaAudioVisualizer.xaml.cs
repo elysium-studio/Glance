@@ -16,7 +16,6 @@ public sealed partial class MediaAudioVisualizer :
             typeof(MediaAudioVisualizer), new PropertyMetadata(MediaViewModel.DefaultAccentColor, HandleAccentColorChanged));
 
     private FrameworkElement[]? bars;
-    private MediaViewModel? viewModel;
 
     public MediaAudioVisualizer() => InitializeComponent();
 
@@ -28,16 +27,16 @@ public sealed partial class MediaAudioVisualizer :
 
     public MediaViewModel? ViewModel
     {
-        get => viewModel;
+        get;
         set
         {
-            if (ReferenceEquals(viewModel, value))
+            if (ReferenceEquals(field, value))
             {
                 return;
             }
 
             Unsubscribe();
-            viewModel = value;
+            field = value;
             Subscribe();
         }
     }
@@ -65,23 +64,16 @@ public sealed partial class MediaAudioVisualizer :
 
     private void Subscribe()
     {
-        if (IsLoaded && viewModel is not null)
+        if (IsLoaded && ViewModel is not null)
         {
-            viewModel.AudioLevelsChanged -= HandleAudioLevelsChanged;
-            viewModel.AudioLevelsChanged += HandleAudioLevelsChanged;
+            ViewModel.AudioLevelsChanged -= HandleAudioLevelsChanged;
+            ViewModel.AudioLevelsChanged += HandleAudioLevelsChanged;
         }
     }
 
-    private void Unsubscribe()
-    {
-        if (viewModel is not null)
-        {
-            viewModel.AudioLevelsChanged -= HandleAudioLevelsChanged;
-        }
-    }
+    private void Unsubscribe() => ViewModel?.AudioLevelsChanged -= HandleAudioLevelsChanged;
 
-    private static void HandleAccentColorChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args) =>
-        ((MediaAudioVisualizer)sender).ApplyAccentColor();
+    private static void HandleAccentColorChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args) => ((MediaAudioVisualizer)sender).ApplyAccentColor();
 
     private void ApplyAccentColor()
     {

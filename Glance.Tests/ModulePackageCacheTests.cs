@@ -44,7 +44,7 @@ public sealed class ModulePackageCacheTests
         string firstContentDirectory = cache.Prepare(packagePath);
 
         File.Delete(packagePath);
-        CreatePackage(temporaryDirectory.DirectoryPath, ("Example.WinUI.dll", "updated"));
+        _ = CreatePackage(temporaryDirectory.DirectoryPath, ("Example.WinUI.dll", "updated"));
         File.SetLastWriteTimeUtc(packagePath, DateTime.UtcNow.AddSeconds(2));
         string updatedContentDirectory = cache.Prepare(packagePath);
 
@@ -59,7 +59,7 @@ public sealed class ModulePackageCacheTests
         string packagePath = CreatePackage(temporaryDirectory.DirectoryPath, ("../outside.txt", "invalid"));
         ModulePackageCache cache = new(Path.Combine(temporaryDirectory.DirectoryPath, "Cache"));
 
-        Assert.Throws<InvalidDataException>(() => cache.Prepare(packagePath));
+        _ = Assert.Throws<InvalidDataException>(() => cache.Prepare(packagePath));
         Assert.False(File.Exists(Path.Combine(temporaryDirectory.DirectoryPath, "outside.txt")));
     }
 
@@ -86,7 +86,7 @@ public sealed class ModulePackageCacheTests
         public TemporaryDirectory()
         {
             DirectoryPath = Path.Combine(Path.GetTempPath(), "Glance.Tests", Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(DirectoryPath);
+            _ = Directory.CreateDirectory(DirectoryPath);
         }
 
         public string DirectoryPath

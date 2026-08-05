@@ -1,5 +1,4 @@
 using Glance.Application.Abstractions;
-using Glance.Assistant;
 
 namespace Glance.Assistant.WinUI;
 

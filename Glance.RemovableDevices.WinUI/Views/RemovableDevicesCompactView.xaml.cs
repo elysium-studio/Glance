@@ -16,6 +16,5 @@ public sealed partial class RemovableDevicesCompactView :
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
-    private bool WhenEmpty(bool hasDevices) =>
-        !hasDevices;
+    private bool WhenEmpty(bool hasDevices) => !hasDevices;
 }

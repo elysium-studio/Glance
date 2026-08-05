@@ -1,4 +1,3 @@
-using Glance.DropShelf;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -29,7 +28,7 @@ public sealed class DropShelfTransferStore
                 IStorageItem storageItem = item.IsFolder
                     ? await StorageFolder.GetFolderFromPathAsync(item.Path) : await StorageFile.GetFileFromPathAsync(item.Path);
 
-                storageItems.TryAdd(item.Path, storageItem);
+                _ = storageItems.TryAdd(item.Path, storageItem);
                 stagedItems.Add(item);
             }
             catch (Exception)
@@ -40,13 +39,12 @@ public sealed class DropShelfTransferStore
         return stagedItems;
     }
 
-    public IReadOnlyList<IStorageItem> GetStorageItems(IEnumerable<DropShelfItem> items) =>
-        [.. items
+    public IReadOnlyList<IStorageItem> GetStorageItems(IEnumerable<DropShelfItem> items) => [.. items
             .Select(item => storageItems.TryGetValue(item.Path, out IStorageItem? storageItem) ? storageItem
                 : null)
             .OfType<IStorageItem>()];
 
-    public void Remove(string path) => storageItems.TryRemove(path, out _);
+    public void Remove(string path) => _ = storageItems.TryRemove(path, out _);
 
     public void Clear() => storageItems.Clear();
 }

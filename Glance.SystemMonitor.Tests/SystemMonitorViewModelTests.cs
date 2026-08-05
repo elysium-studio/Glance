@@ -95,7 +95,6 @@ public sealed class SystemMonitorViewModelTests
     private sealed class TestTextLocalizer :
         ITextLocalizer
     {
-        public string GetText(string key, params object[] arguments) =>
-            arguments.Length == 0 ? key : $"{key}({string.Join(',', arguments)})";
+        public string GetText(string key, params object[] arguments) => arguments.Length == 0 ? key : $"{key}({string.Join(',', arguments)})";
     }
 }

@@ -5,8 +5,7 @@ namespace Glance.ScreenCapture.Tests;
 public sealed class ScreenCaptureViewModelTests
 {
     [Fact]
-    public void Settings_DoNotCopyCapturesByDefault() =>
-        Assert.False(new ScreenCaptureSettings().CopyToClipboardAutomatically);
+    public void Settings_DoNotCopyCapturesByDefault() => Assert.False(new ScreenCaptureSettings().CopyToClipboardAutomatically);
 
     [Theory]
     [InlineData(ScreenCaptureMode.Region)]
@@ -66,7 +65,7 @@ public sealed class ScreenCaptureViewModelTests
 
         viewModel.SetCaptures([retained]);
 
-        Assert.Single(viewModel.Captures);
+        _ = Assert.Single(viewModel.Captures);
         Assert.Equal(retained, viewModel.SelectedCapture?.Capture);
     }
 
@@ -110,8 +109,7 @@ public sealed class ScreenCaptureViewModelTests
 
     private static ScreenCaptureViewModel CreateViewModel() => new(new FakeLocalizer());
 
-    private static ScreenCaptureItem CreateCapture(string fileName, int width, int height) =>
-        new(Path.Combine("C:\\Captures", fileName), fileName, DateTimeOffset.Now, width, height, ScreenCaptureMode.Region);
+    private static ScreenCaptureItem CreateCapture(string fileName, int width, int height) => new(Path.Combine("C:\\Captures", fileName), fileName, DateTimeOffset.Now, width, height, ScreenCaptureMode.Region);
 
     private static void InvokeCapture(ScreenCaptureViewModel viewModel, ScreenCaptureMode mode)
     {
@@ -149,7 +147,6 @@ public sealed class ScreenCaptureViewModelTests
             ["CaptureAllDisplays"] = "All displays"
         };
 
-        public string GetText(string key, params object[] arguments) =>
-            string.Format(Values[key], arguments);
+        public string GetText(string key, params object[] arguments) => string.Format(Values[key], arguments);
     }
 }

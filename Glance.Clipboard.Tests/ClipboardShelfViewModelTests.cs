@@ -184,8 +184,7 @@ public sealed class ClipboardShelfViewModelTests
         string preview,
         string kind = "Text",
         string glyph = "G",
-        DateTimeOffset? timestamp = null) =>
-        new(id, preview, kind, glyph, timestamp ?? DateTimeOffset.Now, localizer);
+        DateTimeOffset? timestamp = null) => new(id, preview, kind, glyph, timestamp ?? DateTimeOffset.Now, localizer);
 
     private sealed class TestTextLocalizer :
         ITextLocalizer

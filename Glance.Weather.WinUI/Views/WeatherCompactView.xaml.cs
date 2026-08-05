@@ -21,5 +21,4 @@ public sealed partial class WeatherCompactView :
     public Brush ToBrush(string color) => (Brush)XamlBindingHelper.ConvertValue(typeof(Brush), color);
 
     public Geometry ToGeometry(string data) => (Geometry)XamlBindingHelper.ConvertValue(typeof(Geometry), data);
-
 }

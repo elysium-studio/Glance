@@ -9,12 +9,12 @@ public sealed class ReminderModule :
 {
     public void Register(IServiceCollection services)
     {
-        services.AddSingleton(TimeProvider.System);
-        services.AddSingleton<ModuleResourceTextLocalizer<ReminderModule>>();
-        services.AddSingleton(new ReminderRepository(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "Reminders", "reminders.db")));
-        services.AddSingleton(provider => new ReminderViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<ReminderModule>>()));
-        services.AddSingleton<ReminderComponent>();
-        services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<ReminderComponent>());
-        services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<ReminderComponent>());
+        _ = services.AddSingleton(TimeProvider.System);
+        _ = services.AddSingleton<ModuleResourceTextLocalizer<ReminderModule>>();
+        _ = services.AddSingleton(new ReminderRepository(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "Reminders", "reminders.db")));
+        _ = services.AddSingleton(provider => new ReminderViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<ReminderModule>>()));
+        _ = services.AddSingleton<ReminderComponent>();
+        _ = services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<ReminderComponent>());
+        _ = services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<ReminderComponent>());
     }
 }

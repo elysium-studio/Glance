@@ -9,11 +9,11 @@ public sealed class ScreenLensModule :
 {
     public void Register(IServiceCollection services)
     {
-        services.AddSingleton<ModuleResourceTextLocalizer<ScreenLensModule>>();
-        services.AddSingleton<IScreenLensService, WindowsScreenLensService>();
-        services.AddSingleton(provider => new ScreenLensViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<ScreenLensModule>>()));
-        services.AddSingleton<ScreenLensComponent>();
-        services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<ScreenLensComponent>());
-        services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<ScreenLensComponent>());
+        _ = services.AddSingleton<ModuleResourceTextLocalizer<ScreenLensModule>>();
+        _ = services.AddSingleton<IScreenLensService, WindowsScreenLensService>();
+        _ = services.AddSingleton(provider => new ScreenLensViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<ScreenLensModule>>()));
+        _ = services.AddSingleton<ScreenLensComponent>();
+        _ = services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<ScreenLensComponent>());
+        _ = services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<ScreenLensComponent>());
     }
 }

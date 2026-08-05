@@ -6,7 +6,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
-using Windows.Graphics;
 using WinRT;
 using WinRT.Interop;
 using WinUIEx;
@@ -115,8 +114,7 @@ internal sealed partial class ReminderEditorWindow
 
     public static Task<ReminderDraft?> ShowAsync(ReminderDraft? draft,
         ModuleResourceTextLocalizer<ReminderModule> localizer,
-        WindowId ownerWindowId) =>
-        new ReminderEditorWindow(draft, localizer, ownerWindowId).ShowAsync();
+        WindowId ownerWindowId) => new ReminderEditorWindow(draft, localizer, ownerWindowId).ShowAsync();
 
     private Task<ReminderDraft?> ShowAsync()
     {
@@ -159,7 +157,7 @@ internal sealed partial class ReminderEditorWindow
             return;
         }
 
-        completion.TrySetResult(new ReminderDraft(title, dueAt, (ReminderPriority)priorityPicker.SelectedIndex));
+        _ = completion.TrySetResult(new ReminderDraft(title, dueAt, (ReminderPriority)priorityPicker.SelectedIndex));
     }
 
     private async void HandleRootLoaded(object sender,
@@ -171,12 +169,12 @@ internal sealed partial class ReminderEditorWindow
         {
             AnimateSmoke(1);
             dialog.XamlRoot = root.XamlRoot;
-            await dialog.ShowAsync(ContentDialogPlacement.InPlace);
-            completion.TrySetResult(null);
+            _ = await dialog.ShowAsync(ContentDialogPlacement.InPlace);
+            _ = completion.TrySetResult(null);
         }
         catch (Exception exception)
         {
-            completion.TrySetException(exception);
+            _ = completion.TrySetException(exception);
         }
         finally
         {
@@ -185,14 +183,13 @@ internal sealed partial class ReminderEditorWindow
     }
 
     private void HandleDialogClosing(ContentDialog sender,
-        ContentDialogClosingEventArgs args) =>
-        AnimateSmoke(0);
+        ContentDialogClosingEventArgs args) => AnimateSmoke(0);
 
     private void HandleWindowClosed(object sender,
         WindowEventArgs args)
     {
         isClosed = true;
-        completion.TrySetResult(null);
+        _ = completion.TrySetResult(null);
     }
 
     private void ShowError(string message)
@@ -215,15 +212,9 @@ internal sealed partial class ReminderEditorWindow
         storyboard.Begin();
     }
 
-    private static Brush ResolveSmokeBrush()
-    {
-        if (Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("SmokeFillColorDefaultBrush", out object value) && value is Brush brush)
-        {
-            return brush;
-        }
-
-        return new SolidColorBrush(Windows.UI.Color.FromArgb(77, 0, 0, 0));
-    }
+    private static Brush ResolveSmokeBrush() => Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("SmokeFillColorDefaultBrush", out object value) && value is Brush brush
+            ? brush
+            : new SolidColorBrush(Windows.UI.Color.FromArgb(77, 0, 0, 0));
 
     private void Close()
     {

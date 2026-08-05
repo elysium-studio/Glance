@@ -32,8 +32,21 @@ public sealed class GlanceIntentService(ModulePreferenceService modulePreference
         }
     }
 
-    public GlanceScreenRectangle? GetPresentationTarget() =>
-        presentationTargetProvider?.Invoke();
+    public IReadOnlyList<GlanceIntentDescriptor> GetIntents(GlanceContentContext context)
+    {
+        lock (synchronization)
+        {
+            return
+            [
+                .. intents.Values
+                    .Where(intent => modulePreferences.IsEnabled(intent.Descriptor.TargetComponentId) && intent.CanHandle(context))
+                    .Select(intent => intent.Descriptor)
+                    .OrderBy(intent => intent.DisplayName)
+            ];
+        }
+    }
+
+    public GlanceScreenRectangle? GetPresentationTarget() => presentationTargetProvider?.Invoke();
 
     public async Task<bool> InvokeAsync(string intentId,
         GlanceContentContext context,
@@ -43,12 +56,12 @@ public sealed class GlanceIntentService(ModulePreferenceService modulePreference
 
         lock (synchronization)
         {
-            intents.TryGetValue(intentId, out intent);
+            _ = intents.TryGetValue(intentId, out intent);
         }
 
         if (intent is null ||
-            !intent.CanHandle(context.Kind) ||
-            !modulePreferences.GetActiveComponents().Any(component => string.Equals(component.Id, intent.Descriptor.TargetComponentId, StringComparison.OrdinalIgnoreCase)))
+            !intent.CanHandle(context) ||
+            !modulePreferences.IsEnabled(intent.Descriptor.TargetComponentId))
         {
             return false;
         }
@@ -83,6 +96,5 @@ public sealed class GlanceIntentService(ModulePreferenceService modulePreference
         }
     }
 
-    public void SetPresentationTargetProvider(Func<GlanceScreenRectangle?>? provider) =>
-        presentationTargetProvider = provider;
+    public void SetPresentationTargetProvider(Func<GlanceScreenRectangle?>? provider) => presentationTargetProvider = provider;
 }

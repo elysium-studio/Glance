@@ -75,16 +75,15 @@ public sealed partial class SystemMonitorComponent :
 
     private void HandleTick(DispatcherQueueTimer sender, object args) => UpdateMetrics();
 
-    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<SystemMonitorSettings> args) => dispatcherQueue.TryEnqueue(() =>
-    {
-        TimeSpan refreshInterval = GetRefreshInterval(args.Options);
-        timer.Interval = refreshInterval;
-        expandedView.SetSampleInterval(refreshInterval);
-        expandedView.ShowPerformanceCharts = args.Options.ShowPerformanceCharts;
-    });
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<SystemMonitorSettings> args) => _ = dispatcherQueue.TryEnqueue(() =>
+                                                                                                                           {
+                                                                                                                               TimeSpan refreshInterval = GetRefreshInterval(args.Options);
+                                                                                                                               timer.Interval = refreshInterval;
+                                                                                                                               expandedView.SetSampleInterval(refreshInterval);
+                                                                                                                               expandedView.ShowPerformanceCharts = args.Options.ShowPerformanceCharts;
+                                                                                                                           });
 
-    private static TimeSpan GetRefreshInterval(SystemMonitorSettings settings) =>
-        TimeSpan.FromSeconds(Math.Clamp(settings.RefreshIntervalSeconds, 0.5, 10));
+    private static TimeSpan GetRefreshInterval(SystemMonitorSettings settings) => TimeSpan.FromSeconds(Math.Clamp(settings.RefreshIntervalSeconds, 0.5, 10));
 
     private void UpdateMetrics()
     {

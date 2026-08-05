@@ -88,20 +88,15 @@ internal sealed class GlanceModuleRuntime :
         await Services.DisposeAsync();
     }
 
-    private static void AddModuleInfrastructure(IServiceCollection services)
-    {
-        services
+    private static void AddModuleInfrastructure(IServiceCollection services) => _ = services
             .AddSingleton<IViewModelFactory>(provider => new ViewModelFactory((key, arguments) =>
             {
                 string normalizedKey = NormalizeViewKey(key);
                 Type type = provider.GetRequiredKeyedService<ViewDescriptor>(normalizedKey).ViewModelType!;
 
-                if (arguments is { Length: > 0 })
-                {
-                    return provider.GetRequiredService<IServiceFactory>().Create(type, arguments);
-                }
-
-                return provider.GetRequiredKeyedService(type, normalizedKey)!;
+                return arguments is { Length: > 0 }
+                    ? provider.GetRequiredService<IServiceFactory>().Create(type, arguments)
+                    : provider.GetRequiredKeyedService(type, normalizedKey)!;
             }))
             .AddSingleton<IViewFactory>(provider => new ViewFactory((key, arguments) =>
             {
@@ -113,18 +108,13 @@ internal sealed class GlanceModuleRuntime :
                     return null;
                 }
 
-                if (arguments is { Length: > 0 })
-                {
-                    return provider.GetRequiredService<IServiceFactory>().Create(type, arguments);
-                }
-
-                return provider.GetKeyedService(type, normalizedKey);
+                return arguments is { Length: > 0 }
+                    ? provider.GetRequiredService<IServiceFactory>().Create(type, arguments)
+                    : provider.GetKeyedService(type, normalizedKey);
             }))
             .AddServiceFactory();
-    }
 
-    private static string NormalizeViewKey(string key) =>
-        key.EndsWith("ViewModel", StringComparison.Ordinal) ? key[..^"ViewModel".Length] : key;
+    private static string NormalizeViewKey(string key) => key.EndsWith("ViewModel", StringComparison.Ordinal) ? key[..^"ViewModel".Length] : key;
 
     private static ServiceDescriptor RewriteDescriptor(ServiceDescriptor descriptor,
         IServiceProvider applicationServices)
@@ -166,30 +156,20 @@ internal sealed class GlanceModuleRuntime :
         IServiceProviderIsService,
         IServiceProviderIsKeyedService
     {
-        public object? GetService(Type serviceType)
-        {
-            if (serviceType == typeof(IServiceProvider))
-            {
-                return this;
-            }
+        public object? GetService(Type serviceType) => serviceType == typeof(IServiceProvider)
+                ? this
+                : moduleServices.GetService(serviceType) ?? applicationServices.GetService(serviceType);
 
-            return moduleServices.GetService(serviceType) ?? applicationServices.GetService(serviceType);
-        }
-
-        public object? GetKeyedService(Type serviceType, object? serviceKey) =>
-            (moduleServices as IKeyedServiceProvider)?.GetKeyedService(serviceType, serviceKey) ??
+        public object? GetKeyedService(Type serviceType, object? serviceKey) => (moduleServices as IKeyedServiceProvider)?.GetKeyedService(serviceType, serviceKey) ??
             (applicationServices as IKeyedServiceProvider)?.GetKeyedService(serviceType, serviceKey);
 
-        public object GetRequiredKeyedService(Type serviceType, object? serviceKey) =>
-            GetKeyedService(serviceType, serviceKey) ??
+        public object GetRequiredKeyedService(Type serviceType, object? serviceKey) => GetKeyedService(serviceType, serviceKey) ??
             throw new InvalidOperationException($"No keyed service for type '{serviceType}' and key '{serviceKey}' has been registered.");
 
-        public bool IsService(Type serviceType) =>
-            (moduleServices.GetService<IServiceProviderIsService>()?.IsService(serviceType) ?? false) ||
+        public bool IsService(Type serviceType) => (moduleServices.GetService<IServiceProviderIsService>()?.IsService(serviceType) ?? false) ||
             (applicationServices.GetService<IServiceProviderIsService>()?.IsService(serviceType) ?? false);
 
-        public bool IsKeyedService(Type serviceType, object? serviceKey) =>
-            (moduleServices.GetService<IServiceProviderIsKeyedService>()?.IsKeyedService(serviceType, serviceKey) ?? false) ||
+        public bool IsKeyedService(Type serviceType, object? serviceKey) => (moduleServices.GetService<IServiceProviderIsKeyedService>()?.IsKeyedService(serviceType, serviceKey) ?? false) ||
             (applicationServices.GetService<IServiceProviderIsKeyedService>()?.IsKeyedService(serviceType, serviceKey) ?? false);
     }
 }

@@ -30,9 +30,9 @@ public sealed class FocusSessionViewModelTests
     [Fact]
     public void Constructor_RejectsNonPositiveDurations()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() =>
+        _ = Assert.Throws<ArgumentOutOfRangeException>(() =>
             new FocusSessionViewModel(TimeSpan.Zero, TimeSpan.FromMinutes(5)));
-        Assert.Throws<ArgumentOutOfRangeException>(() =>
+        _ = Assert.Throws<ArgumentOutOfRangeException>(() =>
             new FocusSessionViewModel(TimeSpan.FromMinutes(25), TimeSpan.Zero));
     }
 
@@ -128,7 +128,7 @@ public sealed class FocusSessionViewModelTests
         FocusSessionViewModel viewModel = new(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
         viewModel.Toggle();
         Thread.Sleep(20);
-        viewModel.Refresh();
+        _ = viewModel.Refresh();
 
         viewModel.Reset();
 

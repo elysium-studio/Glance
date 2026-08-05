@@ -6,14 +6,11 @@ public sealed class PresenceActivityPolicyTests
     private readonly PresenceActivityPolicy policy = new(threshold);
 
     [Fact]
-    public void ShouldSendInput_ReturnsFalseBeforeThreshold() =>
-        Assert.False(policy.ShouldSendInput(threshold - TimeSpan.FromMilliseconds(1)));
+    public void ShouldSendInput_ReturnsFalseBeforeThreshold() => Assert.False(policy.ShouldSendInput(threshold - TimeSpan.FromMilliseconds(1)));
 
     [Fact]
-    public void ShouldSendInput_ReturnsTrueAtThreshold() =>
-        Assert.True(policy.ShouldSendInput(threshold));
+    public void ShouldSendInput_ReturnsTrueAtThreshold() => Assert.True(policy.ShouldSendInput(threshold));
 
     [Fact]
-    public void Constructor_RejectsNonPositiveThreshold() =>
-        Assert.Throws<ArgumentOutOfRangeException>(() => new PresenceActivityPolicy(TimeSpan.Zero));
+    public void Constructor_RejectsNonPositiveThreshold() => _ = Assert.Throws<ArgumentOutOfRangeException>(() => new PresenceActivityPolicy(TimeSpan.Zero));
 }

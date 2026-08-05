@@ -10,9 +10,7 @@ namespace Glance.Shell.WinUI;
 public sealed class SettingsModule :
     IModule
 {
-    public void Register(IServiceCollection services)
-    {
-        services
+    public void Register(IServiceCollection services) => _ = services
             .AddViewFor(ServiceLifetime.Transient,
                 provider => new SettingsWindow(provider.GetRequiredService<IMessenger>(),
                     provider.GetRequiredService<ITextLocalizer>(),
@@ -47,5 +45,4 @@ public sealed class SettingsModule :
                     provider.GetRequiredService<IDisposer>(),
                     provider.GetRequiredService<ITextLocalizer>(),
                     provider.GetRequiredService<IEnumerable<IWindowsViewModel>>()));
-    }
 }

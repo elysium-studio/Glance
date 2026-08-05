@@ -41,7 +41,7 @@ public sealed class DropShelfViewModelTests
             new("C:\\Work\\notes.txt", "notes.txt", false),
             new("c:\\work\\NOTES.TXT", "NOTES.TXT", false)        ]);
 
-        Assert.Single(viewModel.Items);
+        _ = Assert.Single(viewModel.Items);
         Assert.Equal("OneItemSummary", viewModel.Summary);
     }
 
@@ -138,7 +138,6 @@ public sealed class DropShelfViewModelTests
     private sealed class TestTextLocalizer :
         ITextLocalizer
     {
-        public string GetText(string key, params object[] arguments) =>
-            arguments.Length == 0 ? key : $"{key}({string.Join(',', arguments)})";
+        public string GetText(string key, params object[] arguments) => arguments.Length == 0 ? key : $"{key}({string.Join(',', arguments)})";
     }
 }

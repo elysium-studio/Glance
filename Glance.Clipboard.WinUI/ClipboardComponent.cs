@@ -149,7 +149,7 @@ public sealed partial class ClipboardComponent :
         }
         finally
         {
-            refreshGate.Release();
+            _ = refreshGate.Release();
         }
     }
 
@@ -213,19 +213,18 @@ public sealed partial class ClipboardComponent :
 
     private int HistoryLimit => (int)Math.Clamp(options.Current.HistoryLimit, 1, 20);
 
-    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<ClipboardSettings> args) =>
-        dispatcherQueue.TryEnqueue(() =>
-        {
-            while (localEntries.Count > HistoryLimit)
-            {
-                ClipboardEntry removed = localEntries[^1];
-                localEntries.RemoveAt(localEntries.Count - 1);
-                UntrackSnapshot(removed.Id);
-            }
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<ClipboardSettings> args) => _ = dispatcherQueue.TryEnqueue(() =>
+                                                                                                                           {
+                                                                                                                               while (localEntries.Count > HistoryLimit)
+                                                                                                                               {
+                                                                                                                                   ClipboardEntry removed = localEntries[^1];
+                                                                                                                                   localEntries.RemoveAt(localEntries.Count - 1);
+                                                                                                                                   UntrackSnapshot(removed.Id);
+                                                                                                                               }
 
-            TryPersist(() => repository.Trim(HistoryLimit), "TrimFailed");
-            PublishEntries();
-        });
+                                                                                                                               TryPersist(() => repository.Trim(HistoryLimit), "TrimFailed");
+                                                                                                                               PublishEntries();
+                                                                                                                           });
 
     private void PublishEntries()
     {
@@ -308,7 +307,7 @@ public sealed partial class ClipboardComponent :
         try
         {
             repository.Remove(entry.Id);
-            localEntries.RemoveAll(candidate => candidate.Id == entry.Id);
+            _ = localEntries.RemoveAll(candidate => candidate.Id == entry.Id);
             UntrackSnapshot(entry.Id);
             PublishEntries();
             return Task.FromResult(true);
@@ -393,19 +392,18 @@ public sealed partial class ClipboardComponent :
 
     private void UntrackSnapshot(string id)
     {
-        localSnapshots.Remove(id);
+        _ = localSnapshots.Remove(id);
 
         if (localHashesById.Remove(id, out string? contentHash))
         {
-            localIdsByHash.Remove(contentHash);
+            _ = localIdsByHash.Remove(contentHash);
         }
     }
 
     private static ClipboardRecord CreateRecord(string id,
         string contentHash,
         DateTimeOffset timestamp,
-        ClipboardSnapshot snapshot) =>
-        new(id,
+        ClipboardSnapshot snapshot) => new(id,
             contentHash,
             timestamp,
             snapshot.Text,
@@ -430,8 +428,7 @@ public sealed partial class ClipboardComponent :
     }
 
     private static void AppendString(IncrementalHash hash,
-        string? value) =>
-        AppendBytes(hash, value is null ? null : Encoding.UTF8.GetBytes(value));
+        string? value) => AppendBytes(hash, value is null ? null : Encoding.UTF8.GetBytes(value));
 
     private static void AppendStrings(IncrementalHash hash,
         IReadOnlyList<string>? values)
@@ -517,20 +514,16 @@ public sealed partial class ClipboardComponent :
             return CreateEntry(id, localizer.GetText("RichHtmlContent"), localizer.GetText("KindHtml"), "\uE8D2", timestamp);
         }
 
-        if (snapshot.Rtf is not null)
-        {
-            return CreateEntry(id, localizer.GetText("FormattedText"), localizer.GetText("KindRichText"), "\uE8D2", timestamp);
-        }
-
-        return CreateEntry(id, localizer.GetText("UnsupportedContent"), localizer.GetText("KindOther"), "\uE77F", timestamp);
+        return snapshot.Rtf is not null
+            ? CreateEntry(id, localizer.GetText("FormattedText"), localizer.GetText("KindRichText"), "\uE8D2", timestamp)
+            : CreateEntry(id, localizer.GetText("UnsupportedContent"), localizer.GetText("KindOther"), "\uE77F", timestamp);
     }
 
     private ClipboardEntry CreateEntry(string id,
         string preview,
         string kind,
         string glyph,
-        DateTimeOffset timestamp) =>
-        new(id, Truncate(preview), kind, glyph, timestamp, localizer);
+        DateTimeOffset timestamp) => new(id, Truncate(preview), kind, glyph, timestamp, localizer);
 
     private static string GetFileName(string path)
     {
@@ -539,13 +532,11 @@ public sealed partial class ClipboardComponent :
         return string.IsNullOrWhiteSpace(name) ? path : name;
     }
 
-    private static string Normalize(string value) =>
-        string.Join(" ",
+    private static string Normalize(string value) => string.Join(" ",
             value.Split(['\r', '\n', '\t', ' '],
                 StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
 
-    private static string Truncate(string value) =>
-        value.Length <= 120 ? value : $"{value[..117]}...";
+    private static string Truncate(string value) => value.Length <= 120 ? value : $"{value[..117]}...";
 
     private static string DescribeSnapshot(ClipboardSnapshot snapshot)
     {

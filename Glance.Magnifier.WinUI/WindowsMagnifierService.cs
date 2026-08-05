@@ -33,13 +33,10 @@ internal sealed partial class WindowsMagnifierService :
 
         bool isRunning = IsMagnifierRunning();
 
-        if (!isRunning ||
-            !MagnificationNativeMethods.MagGetFullscreenTransform(out float zoomFactor, out _, out _))
-        {
-            return new(true, isRunning, 1);
-        }
-
-        return new(true, true, Math.Max(1, zoomFactor));
+        return !isRunning ||
+            !MagnificationNativeMethods.MagGetFullscreenTransform(out float zoomFactor, out _, out _)
+            ? new(true, isRunning, 1)
+            : new(true, true, Math.Max(1, zoomFactor));
     }
 
     public bool Start()
@@ -51,12 +48,7 @@ internal sealed partial class WindowsMagnifierService :
 
         BeginSuppressingNativeToolbar();
 
-        if (IsMagnifierRunning())
-        {
-            return true;
-        }
-
-        return SendShortcut(VIRTUAL_KEY.VK_ADD);
+        return IsMagnifierRunning() || SendShortcut(VIRTUAL_KEY.VK_ADD);
     }
 
     public bool ZoomIn()
@@ -71,10 +63,7 @@ internal sealed partial class WindowsMagnifierService :
         return SendShortcut(VIRTUAL_KEY.VK_SUBTRACT);
     }
 
-    public bool Close()
-    {
-        return SendShortcut(VIRTUAL_KEY.VK_ESCAPE);
-    }
+    public bool Close() => SendShortcut(VIRTUAL_KEY.VK_ESCAPE);
 
     public void Dispose()
     {
@@ -91,18 +80,18 @@ internal sealed partial class WindowsMagnifierService :
         if (automation is not null &&
             Marshal.IsComObject(automation))
         {
-            Marshal.FinalReleaseComObject(automation);
+            _ = Marshal.FinalReleaseComObject(automation);
         }
 
         if (taskbarList is not null &&
             Marshal.IsComObject(taskbarList))
         {
-            Marshal.FinalReleaseComObject(taskbarList);
+            _ = Marshal.FinalReleaseComObject(taskbarList);
         }
 
         if (isInitialized)
         {
-            MagnificationNativeMethods.MagUninitialize();
+            _ = MagnificationNativeMethods.MagUninitialize();
         }
     }
 
@@ -138,7 +127,7 @@ internal sealed partial class WindowsMagnifierService :
             {
                 try
                 {
-                    processIds.Add((uint)process.Id);
+                    _ = processIds.Add((uint)process.Id);
                 }
                 catch (InvalidOperationException)
                 { }
@@ -150,7 +139,7 @@ internal sealed partial class WindowsMagnifierService :
             return;
         }
 
-        MagnificationNativeMethods.EnumWindows((window, _) =>
+        _ = MagnificationNativeMethods.EnumWindows((window, _) =>
         {
             MagnificationNativeMethods.GetWindowThreadProcessId(window, out uint processId);
 
@@ -195,13 +184,13 @@ internal sealed partial class WindowsMagnifierService :
             if (pattern is not null &&
                 Marshal.IsComObject(pattern))
             {
-                Marshal.FinalReleaseComObject(pattern);
+                _ = Marshal.FinalReleaseComObject(pattern);
             }
 
             if (element is not null &&
                 Marshal.IsComObject(element))
             {
-                Marshal.FinalReleaseComObject(element);
+                _ = Marshal.FinalReleaseComObject(element);
             }
         }
     }
@@ -216,7 +205,7 @@ internal sealed partial class WindowsMagnifierService :
         try
         {
             taskbarList.DeleteTab(new HWND(window));
-            removedTaskbarWindows.Add(window);
+            _ = removedTaskbarWindows.Add(window);
         }
         catch (COMException)
         { }
@@ -284,12 +273,7 @@ internal sealed partial class WindowsMagnifierService :
     {
         string className = GetWindowClassName(window);
 
-        if (className is "MagUIClass" or "ScreenMagnifierUIWnd")
-        {
-            return true;
-        }
-
-        return GetWindowTitle(window).Contains("Magnifier Touch", StringComparison.OrdinalIgnoreCase);
+        return className is "MagUIClass" or "ScreenMagnifierUIWnd" || GetWindowTitle(window).Contains("Magnifier Touch", StringComparison.OrdinalIgnoreCase);
     }
 
     private static unsafe string GetWindowClassName(nint window)

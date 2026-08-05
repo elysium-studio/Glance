@@ -24,7 +24,7 @@ internal static class WorldClockTimeZoneCatalog
         ITextLocalizer localizer)
     {
         yield return new WorldClockDefinition("Local", localizer.GetText("LocalClock"), TimeZoneInfo.Local);
-        HashSet<string> addedIds = new(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> addedIds = [with(StringComparer.OrdinalIgnoreCase)];
 
         foreach (string id in settings.TimeZoneIds ?? [])
         {
@@ -49,19 +49,17 @@ internal static class WorldClockTimeZoneCatalog
     }
 
     public static bool TryCreateDefinition(string query,
-        out WorldClockDefinition? definition) =>
-        ResolveDefinition(query, out definition) == WorldClockDefinitionResolution.Resolved;
+        out WorldClockDefinition? definition) => ResolveDefinition(query, out definition) == WorldClockDefinitionResolution.Resolved;
 
     public static WorldClockDefinitionResolution ResolveDefinition(string query,
         out WorldClockDefinition? definition)
     {
         string normalizedQuery = Normalize(query);
-        var candidates = SystemTimeZones
+        (TimeZoneInfo TimeZone, int Score)[] candidates = [.. SystemTimeZones
             .Select(timeZone => (TimeZone: timeZone, Score: GetMatchScore(timeZone, normalizedQuery)))
             .Where(candidate => candidate.Score > 0)
             .OrderByDescending(candidate => candidate.Score)
-            .ThenBy(candidate => candidate.TimeZone.DisplayName.Length)
-            .ToArray();
+            .ThenBy(candidate => candidate.TimeZone.DisplayName.Length)];
 
         if (candidates.Length == 0)
         {
@@ -84,14 +82,9 @@ internal static class WorldClockTimeZoneCatalog
     }
 
     private static int GetMatchScore(TimeZoneInfo timeZone,
-        string query)
-    {
-        if (query.Length == 0)
-        {
-            return 0;
-        }
-
-        return GetSearchNames(timeZone)
+        string query) => query.Length == 0
+            ? 0
+            : GetSearchNames(timeZone)
             .Select(name => Normalize(name))
             .Select(name => name == query
                 ? 100
@@ -106,7 +99,6 @@ internal static class WorldClockTimeZoneCatalog
                                 : 0)
             .DefaultIfEmpty(0)
             .Max();
-    }
 
     private static IEnumerable<string> GetSearchNames(TimeZoneInfo timeZone)
     {

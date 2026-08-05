@@ -17,7 +17,6 @@ internal sealed unsafe class ClipboardChangeListener :
     private readonly WNDPROC windowProcedure;
     private ushort classAtom;
     private bool disposed;
-    private HWND windowHandle;
 
     public ClipboardChangeListener()
     {
@@ -39,16 +38,16 @@ internal sealed unsafe class ClipboardChangeListener :
                 throw new Win32Exception(Marshal.GetLastWin32Error());
             }
 
-            windowHandle = PInvoke.CreateWindowEx(WINDOW_EX_STYLE.WS_EX_NOACTIVATE, className, default, WINDOW_STYLE.WS_OVERLAPPED, 0, 0, 0, 0, HWND.HWND_MESSAGE, default, moduleHandle, null);
+            WindowHandle = PInvoke.CreateWindowEx(WINDOW_EX_STYLE.WS_EX_NOACTIVATE, className, default, WINDOW_STYLE.WS_OVERLAPPED, 0, 0, 0, 0, HWND.HWND_MESSAGE, default, moduleHandle, null);
         }
 
-        if (windowHandle.IsNull)
+        if (WindowHandle.IsNull)
         {
             Dispose();
             throw new Win32Exception(Marshal.GetLastWin32Error());
         }
 
-        if (!PInvoke.AddClipboardFormatListener(windowHandle))
+        if (!PInvoke.AddClipboardFormatListener(WindowHandle))
         {
             Dispose();
             throw new Win32Exception(Marshal.GetLastWin32Error());
@@ -57,9 +56,9 @@ internal sealed unsafe class ClipboardChangeListener :
 
     public event EventHandler? ClipboardChanged;
 
-    public HWND WindowHandle => windowHandle;
+    public HWND WindowHandle { get; private set; }
 
-    public nint Handle => (nint)windowHandle.Value;
+    public nint Handle => (nint)WindowHandle.Value;
 
     public void Dispose()
     {
@@ -70,18 +69,18 @@ internal sealed unsafe class ClipboardChangeListener :
 
         disposed = true;
 
-        if (!windowHandle.IsNull)
+        if (!WindowHandle.IsNull)
         {
-            PInvoke.RemoveClipboardFormatListener(windowHandle);
-            PInvoke.DestroyWindow(windowHandle);
-            windowHandle = default;
+            _ = PInvoke.RemoveClipboardFormatListener(WindowHandle);
+            _ = PInvoke.DestroyWindow(WindowHandle);
+            WindowHandle = default;
         }
 
         if (classAtom != 0)
         {
             fixed (char* className = windowClassName)
             {
-                PInvoke.UnregisterClass(className, moduleHandle);
+                _ = PInvoke.UnregisterClass(className, moduleHandle);
             }
 
             classAtom = 0;

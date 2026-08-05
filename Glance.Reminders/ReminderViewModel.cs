@@ -53,7 +53,7 @@ public sealed partial class ReminderViewModel(ITextLocalizer localizer) :
         }
         else
         {
-            Reminders.Remove(existing);
+            _ = Reminders.Remove(existing);
             existing.Update(entry);
         }
 
@@ -90,17 +90,13 @@ public sealed partial class ReminderViewModel(ITextLocalizer localizer) :
         OnPropertyChanged(nameof(CompactText));
     }
 
-    private ReminderItemViewModel CreateItem(ReminderEntry entry) =>
-        new(entry, localizer, EditAsync, RemoveAsync);
+    private ReminderItemViewModel CreateItem(ReminderEntry entry) => new(entry, localizer, EditAsync, RemoveAsync);
 
-    private Task EditAsync(ReminderItemViewModel item) =>
-        editReminder?.Invoke(item) ?? Task.CompletedTask;
+    private Task EditAsync(ReminderItemViewModel item) => editReminder?.Invoke(item) ?? Task.CompletedTask;
 
-    private Task RemoveAsync(ReminderItemViewModel item) =>
-        removeReminder?.Invoke(item) ?? Task.CompletedTask;
+    private Task RemoveAsync(ReminderItemViewModel item) => removeReminder?.Invoke(item) ?? Task.CompletedTask;
 
-    private static IEnumerable<ReminderEntry> Sort(IEnumerable<ReminderEntry> entries) =>
-        entries.OrderBy(entry => entry.DueAt).ThenByDescending(entry => entry.Priority).ThenBy(entry => entry.CreatedAt);
+    private static IEnumerable<ReminderEntry> Sort(IEnumerable<ReminderEntry> entries) => entries.OrderBy(entry => entry.DueAt).ThenByDescending(entry => entry.Priority).ThenBy(entry => entry.CreatedAt);
 
     private static int Compare(ReminderEntry left,
         ReminderEntry right)

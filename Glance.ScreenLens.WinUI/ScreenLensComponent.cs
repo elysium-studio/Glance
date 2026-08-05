@@ -1,9 +1,6 @@
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Glance.ScreenLens.WinUI;
 
@@ -55,8 +52,7 @@ public sealed partial class ScreenLensComponent :
 
     public object ExpandedAnimationElement { get; }
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("ScreenLens.Extract", Id, "Extract text from the screen", "Select a screen region, recognise visible text with OCR, and let the user copy or share it.")
         {
             SemanticTags = ["screen lens", "text extractor", "extract text", "copy text", "OCR", "recognise text", "read screen"],
@@ -87,10 +83,7 @@ public sealed partial class ScreenLensComponent :
         }
     }
 
-    public void Dispose()
-    {
-        viewModel.ExtractionRequested -= HandleExtractionRequested;
-    }
+    public void Dispose() => viewModel.ExtractionRequested -= HandleExtractionRequested;
 
     private async void HandleExtractionRequested(object? sender, EventArgs args)
     {
@@ -102,7 +95,7 @@ public sealed partial class ScreenLensComponent :
         { }
         finally
         {
-            dispatcherQueue.TryEnqueue(viewModel.Complete);
+            _ = dispatcherQueue.TryEnqueue(viewModel.Complete);
         }
     }
 }

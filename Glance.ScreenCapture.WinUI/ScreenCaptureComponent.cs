@@ -74,8 +74,7 @@ public sealed partial class ScreenCaptureComponent :
 
     public object ExpandedAnimationElement { get; }
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("ScreenCapture.Region", Id, "Capture a region", "Select and capture a region of the screen.", GlanceActionPresentation.Expanded)
         {
             SemanticTags = ["screenshot", "screen shot", "screen capture", "snip", "region", "area", "selection"],
@@ -169,8 +168,7 @@ public sealed partial class ScreenCaptureComponent :
 
     private int RecentCaptureLimit => (int)Math.Clamp(options.Current.RecentCaptureLimit, 1, 12);
 
-    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<ScreenCaptureSettings> args) =>
-        dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<ScreenCaptureSettings> args) => _ = dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
 
     private void HandleCaptureRequested(object? sender, ScreenCaptureMode mode)
     {
@@ -299,15 +297,15 @@ public sealed partial class ScreenCaptureComponent :
         {
             try
             {
-                completion.TrySetResult(action());
+                _ = completion.TrySetResult(action());
             }
             catch (Exception exception)
             {
-                completion.TrySetException(exception);
+                _ = completion.TrySetException(exception);
             }
         }))
         {
-            completion.TrySetException(new InvalidOperationException("Unable to access the screen capture view."));
+            _ = completion.TrySetException(new InvalidOperationException("Unable to access the screen capture view."));
         }
 
         return completion.Task;
@@ -321,37 +319,33 @@ public sealed partial class ScreenCaptureComponent :
             return;
         }
 
-        dispatcherQueue.TryEnqueue(() => action());
+        _ = dispatcherQueue.TryEnqueue(() => action());
     }
 
-    private void HandleOpenRequested(object? sender, ScreenCaptureItem capture) =>
-        screenCaptureService.TryOpen(capture);
+    private void HandleOpenRequested(object? sender, ScreenCaptureItem capture) => _ = screenCaptureService.TryOpen(capture);
 
-    private void HandleRevealRequested(object? sender, ScreenCaptureItem capture) =>
-        screenCaptureService.TryReveal(capture);
+    private void HandleRevealRequested(object? sender, ScreenCaptureItem capture) => _ = screenCaptureService.TryReveal(capture);
 
-    private async void HandleCopyRequested(object? sender, ScreenCaptureItem capture) =>
-        await screenCaptureService.TryCopyAsync(capture);
+    private async void HandleCopyRequested(object? sender, ScreenCaptureItem capture) => _ = await screenCaptureService.TryCopyAsync(capture);
 
     private void HandleDeleteRequested(object? sender, ScreenCaptureItem capture)
     {
         if (screenCaptureService.TryDelete(capture))
         {
-            dispatcherQueue.TryEnqueue(() => viewModel.Remove(capture));
+            _ = dispatcherQueue.TryEnqueue(() => viewModel.Remove(capture));
         }
     }
 
-    private void HandleCapturesChanged(object? sender, EventArgs args) =>
-        dispatcherQueue.TryEnqueue(() =>
-        {
-            if (viewModel.IsCapturing)
-            {
-                captureRefreshPending = true;
-                return;
-            }
+    private void HandleCapturesChanged(object? sender, EventArgs args) => _ = dispatcherQueue.TryEnqueue(() =>
+                                                                               {
+                                                                                   if (viewModel.IsCapturing)
+                                                                                   {
+                                                                                       captureRefreshPending = true;
+                                                                                       return;
+                                                                                   }
 
-            RefreshCaptures();
-        });
+                                                                                   RefreshCaptures();
+                                                                               });
 
     private void ApplyPendingCaptureRefresh()
     {
@@ -364,6 +358,5 @@ public sealed partial class ScreenCaptureComponent :
         RefreshCaptures();
     }
 
-    private void RefreshCaptures() =>
-        viewModel.SetCaptures(screenCaptureService.GetRecentCaptures(RecentCaptureLimit));
+    private void RefreshCaptures() => viewModel.SetCaptures(screenCaptureService.GetRecentCaptures(RecentCaptureLimit));
 }

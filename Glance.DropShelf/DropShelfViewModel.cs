@@ -46,7 +46,7 @@ public sealed partial class DropShelfViewModel(ITextLocalizer localizer, DropShe
 
     public void Remove(DropShelfItem item)
     {
-        Items.Remove(item);
+        _ = Items.Remove(item);
         UpdateState();
     }
 
@@ -84,8 +84,7 @@ public sealed partial class DropShelfViewModel(ITextLocalizer localizer, DropShe
         }
     }
 
-    private static int GetItemLimit(DropShelfSettings settings) =>
-        (int)Math.Clamp(settings.ItemLimit, 1, 50);
+    private static int GetItemLimit(DropShelfSettings settings) => (int)Math.Clamp(settings.ItemLimit, 1, 50);
 
     private void UpdateState()
     {

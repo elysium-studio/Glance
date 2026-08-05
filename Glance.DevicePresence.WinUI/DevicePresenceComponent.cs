@@ -78,16 +78,15 @@ public sealed partial class DevicePresenceComponent :
 
     private byte LowBatteryThreshold => (byte)Math.Clamp(options.Current.LowBatteryThreshold, 5, 50);
 
-    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<DevicePresenceSettings> args) =>
-        dispatcherQueue.TryEnqueue(() =>
-        {
-            if (devicePresenceService.IsReady)
-            {
-                IReadOnlyList<ConnectedBluetoothDevice> devices = devicePresenceService.GetConnectedDevices();
-                viewModel.Update(devices, null);
-                attentionTracker.EstablishBaseline(devices);
-            }
-        });
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<DevicePresenceSettings> args) => _ = dispatcherQueue.TryEnqueue(() =>
+                                                                                                                                {
+                                                                                                                                    if (devicePresenceService.IsReady)
+                                                                                                                                    {
+                                                                                                                                        IReadOnlyList<ConnectedBluetoothDevice> devices = devicePresenceService.GetConnectedDevices();
+                                                                                                                                        viewModel.Update(devices, null);
+                                                                                                                                        attentionTracker.EstablishBaseline(devices);
+                                                                                                                                    }
+                                                                                                                                });
 
     private void HandleDevicesChanged(object? sender, EventArgs args)
     {
@@ -97,7 +96,7 @@ public sealed partial class DevicePresenceComponent :
         }
 
         IReadOnlyList<ConnectedBluetoothDevice> devices = devicePresenceService.GetConnectedDevices();
-        dispatcherQueue.TryEnqueue(() => ApplyDevices(devices));
+        _ = dispatcherQueue.TryEnqueue(() => ApplyDevices(devices));
     }
 
     private void ApplyDevices(IReadOnlyList<ConnectedBluetoothDevice> devices)

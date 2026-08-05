@@ -46,7 +46,7 @@ public sealed class GlanceSettingsTests
         Assert.Equal(GlanceExpansionMode.AlwaysExpanded, result.ExpansionMode);
         Assert.Equal(GlancePlacement.Bottom, result.Placement);
         Assert.False(result.StartWithWindows);
-        Assert.Single(result.Modules);
+        _ = Assert.Single(result.Modules);
         Assert.Equal("Timer", result.Modules[0].Id);
         Assert.False(result.Modules[0].IsAttentionEnabled);
         Assert.False(result.Modules[0].IsEnabled);

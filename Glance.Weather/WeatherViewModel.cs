@@ -167,45 +167,36 @@ public sealed partial class WeatherViewModel(ITextLocalizer localizer) :
         AccentColor = GetAccentColor(time, sky, effect, temperature);
     }
 
-    private string Capitalize(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return localizer.GetText("WeatherUnavailable");
-        }
-
-        return value.Length == 1 ?
+    private string Capitalize(string value) => string.IsNullOrWhiteSpace(value)
+            ? localizer.GetText("WeatherUnavailable")
+            : value.Length == 1 ?
             char.ToUpper(value[0], CultureInfo.CurrentCulture).ToString() :
             $"{char.ToUpper(value[0], CultureInfo.CurrentCulture)}{value[1..]}";
-    }
 
-    private static string FormatWind(double speed, bool useFahrenheit) =>
-        useFahrenheit ? $"{speed:0} mph" : $"{speed:0} m/s";
+    private static string FormatWind(double speed, bool useFahrenheit) => useFahrenheit ? $"{speed:0} mph" : $"{speed:0} m/s";
 
-    private static string GetIconPath(WeatherTimeOfDay time, WeatherSky sky, WeatherEffect effect) =>
-        effect switch
+    private static string GetIconPath(WeatherTimeOfDay time, WeatherSky sky, WeatherEffect effect) => effect switch
+    {
+        WeatherEffect.Rain => WeatherIconPaths.Rain,
+        WeatherEffect.Snow => WeatherIconPaths.Snow,
+        WeatherEffect.Thunderstorm => WeatherIconPaths.Thunderstorm,
+        WeatherEffect.Fog => WeatherIconPaths.Fog,
+        _ => sky switch
         {
-            WeatherEffect.Rain => WeatherIconPaths.Rain,
-            WeatherEffect.Snow => WeatherIconPaths.Snow,
-            WeatherEffect.Thunderstorm => WeatherIconPaths.Thunderstorm,
-            WeatherEffect.Fog => WeatherIconPaths.Fog,
-            _ => sky switch
-            {
-                WeatherSky.Cloudy => WeatherIconPaths.Cloudy,
-                WeatherSky.PartlyCloudy => time is WeatherTimeOfDay.Dusk or WeatherTimeOfDay.Night ?
-                    WeatherIconPaths.PartlyCloudyNight :
-                    WeatherIconPaths.PartlyCloudyDay,
-                _ => time is WeatherTimeOfDay.Dusk or WeatherTimeOfDay.Night ?
-                    WeatherIconPaths.Moon :
-                    WeatherIconPaths.Sunny
-            }
-        };
+            WeatherSky.Cloudy => WeatherIconPaths.Cloudy,
+            WeatherSky.PartlyCloudy => time is WeatherTimeOfDay.Dusk or WeatherTimeOfDay.Night ?
+                WeatherIconPaths.PartlyCloudyNight :
+                WeatherIconPaths.PartlyCloudyDay,
+            _ => time is WeatherTimeOfDay.Dusk or WeatherTimeOfDay.Night ?
+                WeatherIconPaths.Moon :
+                WeatherIconPaths.Sunny
+        }
+    };
 
     private static string GetAccentColor(WeatherTimeOfDay time,
         WeatherSky sky,
         WeatherEffect effect,
-        WeatherTemperature temperature) =>
-        effect switch
+        WeatherTemperature temperature) => effect switch
         {
             WeatherEffect.Rain => "#FF7DD3FC",
             WeatherEffect.Snow => "#FFF0F9FF",

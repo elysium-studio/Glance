@@ -47,11 +47,9 @@ public sealed partial class RemovableDeviceItemViewModel :
 
     public bool CanEject => Device.CanEject && !IsBusy;
 
-    public void Open() =>
-        open(Device);
+    public void Open() => open(Device);
 
-    public void Eject() =>
-        eject(Device);
+    public void Eject() => eject(Device);
 
     public void Update(RemovableDevice device,
         string displayName,
@@ -66,15 +64,12 @@ public sealed partial class RemovableDeviceItemViewModel :
         OnPropertyChanged(nameof(CanEject));
     }
 
-    private static string GetDriveLetter(string rootPath) =>
-        rootPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+    private static string GetDriveLetter(string rootPath) => rootPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
     private static string GetCompactText(string displayName,
-        string driveLetter) =>
-        $"{displayName}  ·  {driveLetter}";
+        string driveLetter) => $"{displayName}  ·  {driveLetter}";
 
-    private static double GetUsagePercent(RemovableDevice device) =>
-        device.TotalBytes <= 0
+    private static double GetUsagePercent(RemovableDevice device) => device.TotalBytes <= 0
             ? 0
             : Math.Clamp((device.TotalBytes - device.FreeBytes) * 100d / device.TotalBytes, 0, 100);
 }

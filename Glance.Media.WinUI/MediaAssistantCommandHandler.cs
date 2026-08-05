@@ -1,5 +1,4 @@
 using Glance.Application.Abstractions;
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -62,9 +61,7 @@ public sealed class MediaAssistantCommandHandler(MediaViewModel viewModel) :
         return Task.FromResult(GlanceAssistantCommandResult.NotHandled);
     }
 
-    private static bool ContainsAny(string command, params string[] phrases) =>
-        phrases.Any(command.Contains);
+    private static bool ContainsAny(string command, params string[] phrases) => phrases.Any(command.Contains);
 
-    private static Task<GlanceAssistantCommandResult> Handled(string response) =>
-        Task.FromResult(new GlanceAssistantCommandResult(true, response));
+    private static Task<GlanceAssistantCommandResult> Handled(string response) => Task.FromResult(new GlanceAssistantCommandResult(true, response));
 }

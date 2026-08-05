@@ -77,8 +77,7 @@ public sealed partial class VoiceNotesComponent :
 
     public object ExpandedAnimationElement { get; }
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("VoiceNotes.Start", Id, "Start voice note", "Record microphone audio as a saved voice note. This does not transcribe speech into text.")
         {
             SemanticTags = ["voice note", "audio note", "record", "recording", "memo", "microphone", "save audio"],
@@ -91,13 +90,12 @@ public sealed partial class VoiceNotesComponent :
         }
     ];
 
-    public bool IsAvailable(string actionId) =>
-        actionId switch
-        {
-            "VoiceNotes.Start" => !recordingService.IsRecording,
-            "VoiceNotes.Stop" => recordingService.IsRecording,
-            _ => false
-        };
+    public bool IsAvailable(string actionId) => actionId switch
+    {
+        "VoiceNotes.Start" => !recordingService.IsRecording,
+        "VoiceNotes.Stop" => recordingService.IsRecording,
+        _ => false
+    };
 
     public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
         CancellationToken cancellationToken = default)
@@ -130,8 +128,7 @@ public sealed partial class VoiceNotesComponent :
 
     private int RecentRecordingLimit => (int)Math.Clamp(options.Current.RecentRecordingLimit, 1, 10);
 
-    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<VoiceNotesSettings> args) =>
-        dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
+    private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<VoiceNotesSettings> args) => _ = dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
 
     private void HandleRecordingToggleRequested(object? sender, EventArgs args)
     {
@@ -153,8 +150,7 @@ public sealed partial class VoiceNotesComponent :
         timer.Start();
     }
 
-    private void HandleOpenRequested(object? sender, VoiceNote recording) =>
-        recordingService.TryOpen(recording);
+    private void HandleOpenRequested(object? sender, VoiceNote recording) => _ = recordingService.TryOpen(recording);
 
     private void HandleDeleteRequested(object? sender, VoiceNote recording)
     {
@@ -165,44 +161,42 @@ public sealed partial class VoiceNotesComponent :
     }
 
     private void HandleLevelsChanged(object? sender,
-        VoiceLevelsChangedEventArgs args) =>
-        dispatcherQueue.TryEnqueue(() =>
-        {
-            double averageLevel = 0;
-            double peakLevel = 0;
+        VoiceLevelsChangedEventArgs args) => _ = dispatcherQueue.TryEnqueue(() =>
+                                                  {
+                                                      double averageLevel = 0;
+                                                      double peakLevel = 0;
 
-            foreach (double sample in args.Levels)
-            {
-                averageLevel += sample;
-                peakLevel = Math.Max(peakLevel, sample);
-            }
+                                                      foreach (double sample in args.Levels)
+                                                      {
+                                                          averageLevel += sample;
+                                                          peakLevel = Math.Max(peakLevel, sample);
+                                                      }
 
-            averageLevel = args.Levels.Count == 0
-                ? 0
-                : averageLevel / args.Levels.Count;
-            double level = Math.Clamp((averageLevel * 0.78) + (peakLevel * 0.34), 0, 1);
-            Array.Copy(waveformHistory, 1, waveformHistory, 0, waveformHistory.Length - 1);
-            waveformHistory[^1] = Math.Clamp(level, 0, 1);
-            viewModel.UpdateAudioLevels(waveformHistory);
-        });
+                                                      averageLevel = args.Levels.Count == 0
+                                                          ? 0
+                                                          : averageLevel / args.Levels.Count;
+                                                      double level = Math.Clamp((averageLevel * 0.78) + (peakLevel * 0.34), 0, 1);
+                                                      Array.Copy(waveformHistory, 1, waveformHistory, 0, waveformHistory.Length - 1);
+                                                      waveformHistory[^1] = Math.Clamp(level, 0, 1);
+                                                      viewModel.UpdateAudioLevels(waveformHistory);
+                                                  });
 
     private void HandleRecordingCompleted(object? sender,
-        VoiceRecordingCompletedEventArgs args) =>
-        dispatcherQueue.TryEnqueue(() =>
-        {
-            timer.Stop();
-            recordingStartedTimestamp = 0;
-            Array.Clear(waveformHistory);
-            viewModel.UpdateAudioLevels(SilentLevels);
+        VoiceRecordingCompletedEventArgs args) => _ = dispatcherQueue.TryEnqueue(() =>
+                                                       {
+                                                           timer.Stop();
+                                                           recordingStartedTimestamp = 0;
+                                                           Array.Clear(waveformHistory);
+                                                           viewModel.UpdateAudioLevels(SilentLevels);
 
-            if (args.Error is not null)
-            {
-                viewModel.ShowRecordingError();
-                return;
-            }
+                                                           if (args.Error is not null)
+                                                           {
+                                                               viewModel.ShowRecordingError();
+                                                               return;
+                                                           }
 
-            viewModel.FinishRecording(args.Recording);
-        });
+                                                           viewModel.FinishRecording(args.Recording);
+                                                       });
 
     private void HandleTick(DispatcherQueueTimer sender, object args)
     {

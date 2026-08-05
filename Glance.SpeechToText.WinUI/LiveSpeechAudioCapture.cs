@@ -16,8 +16,7 @@ public sealed class LiveSpeechAudioCapture :
     private readonly SpeechAudioProvider provider = new();
     private Task? pumpTask;
 
-    public AudioConfiguration CreateAudioConfiguration() =>
-        AudioConfiguration.ForProvider(provider);
+    public AudioConfiguration CreateAudioConfiguration() => AudioConfiguration.ForProvider(provider);
 
     public void Start(SpeechAudioSource audioSource)
     {

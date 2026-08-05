@@ -17,7 +17,6 @@ public sealed partial class WeatherScene :
     UserControl
 {
     private readonly Random random = new();
-    private WeatherViewModel? viewModel;
     private ContainerVisual? sceneVisual;
     private ContainerVisual? activeSceneLayer;
     private ContainerVisual? activeCelestial;
@@ -36,16 +35,16 @@ public sealed partial class WeatherScene :
 
     public WeatherViewModel? ViewModel
     {
-        get => viewModel;
+        get;
         set
         {
-            if (ReferenceEquals(viewModel, value))
+            if (ReferenceEquals(field, value))
             {
                 return;
             }
 
             Unsubscribe();
-            viewModel = value;
+            field = value;
             Subscribe();
             RebuildScene();
         }
@@ -81,22 +80,16 @@ public sealed partial class WeatherScene :
 
     private void Subscribe()
     {
-        if (!IsLoaded || viewModel is null)
+        if (!IsLoaded || ViewModel is null)
         {
             return;
         }
 
-        viewModel.PropertyChanged -= HandleViewModelPropertyChanged;
-        viewModel.PropertyChanged += HandleViewModelPropertyChanged;
+        ViewModel.PropertyChanged -= HandleViewModelPropertyChanged;
+        ViewModel.PropertyChanged += HandleViewModelPropertyChanged;
     }
 
-    private void Unsubscribe()
-    {
-        if (viewModel is not null)
-        {
-            viewModel.PropertyChanged -= HandleViewModelPropertyChanged;
-        }
-    }
+    private void Unsubscribe() => ViewModel?.PropertyChanged -= HandleViewModelPropertyChanged;
 
     private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
@@ -124,7 +117,7 @@ public sealed partial class WeatherScene :
         }
 
         rebuildQueued = true;
-        DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+        _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
         {
             rebuildQueued = false;
             RebuildScene();
@@ -147,14 +140,14 @@ public sealed partial class WeatherScene :
             ElementCompositionPreview.SetElementChildVisual(ParticleHost, sceneVisual);
         }
 
-        WeatherTimeOfDay time = viewModel?.WeatherTime ?? WeatherTimeOfDay.Afternoon;
-        WeatherSky sky = viewModel?.WeatherSky ?? WeatherSky.Clear;
-        WeatherCelestial celestial = viewModel?.WeatherCelestial ?? WeatherCelestial.Sun;
-        WeatherEffect effect = viewModel?.WeatherEffect ?? WeatherEffect.None;
-        WeatherTemperature temperature = viewModel?.WeatherTemperature ?? WeatherTemperature.Normal;
-        double hour = viewModel?.WeatherHour ?? 14;
-        double sunrise = viewModel?.SunriseHour ?? 6;
-        double sunset = viewModel?.SunsetHour ?? 19;
+        WeatherTimeOfDay time = ViewModel?.WeatherTime ?? WeatherTimeOfDay.Afternoon;
+        WeatherSky sky = ViewModel?.WeatherSky ?? WeatherSky.Clear;
+        WeatherCelestial celestial = ViewModel?.WeatherCelestial ?? WeatherCelestial.Sun;
+        WeatherEffect effect = ViewModel?.WeatherEffect ?? WeatherEffect.None;
+        WeatherTemperature temperature = ViewModel?.WeatherTemperature ?? WeatherTemperature.Normal;
+        double hour = ViewModel?.WeatherHour ?? 14;
+        double sunrise = ViewModel?.SunriseHour ?? 6;
+        double sunset = ViewModel?.SunsetHour ?? 19;
         WeatherSceneState state = new(time,
             sky,
             celestial,
@@ -183,7 +176,7 @@ public sealed partial class WeatherScene :
         sceneVisual.Children.InsertAtTop(activeSceneLayer);
         activeCloudLayer = new Canvas { IsHitTestVisible = false };
         CloudLayerHost.Children.Add(activeCloudLayer);
-        activeBackgroundLayer = new Border { Background = WeatherScenePalette.CreateBackground(viewModel!), IsHitTestVisible = false };
+        activeBackgroundLayer = new Border { Background = WeatherScenePalette.CreateBackground(ViewModel!), IsHitTestVisible = false };
         BackgroundHost.Children.Add(activeBackgroundLayer);
         ElementCompositionPreview.GetElementVisual(activeCloudLayer).Opacity = previousCloudLayer is null ? 1 : 0;
         ElementCompositionPreview.GetElementVisual(activeBackgroundLayer).Opacity = previousBackgroundLayer is null ? 1 : 0;
@@ -310,8 +303,8 @@ public sealed partial class WeatherScene :
             nextBackgroundVisual.Opacity = 1;
             sceneVisual?.Children.Remove(previousScene);
             previousScene.Dispose();
-            CloudLayerHost.Children.Remove(previousClouds);
-            BackgroundHost.Children.Remove(previousBackground);
+            _ = CloudLayerHost.Children.Remove(previousClouds);
+            _ = BackgroundHost.Children.Remove(previousBackground);
             batch.Dispose();
             transitionActive = false;
 
@@ -335,17 +328,17 @@ public sealed partial class WeatherScene :
 
     private void UpdateTimeline()
     {
-        if (!IsLoaded || viewModel is null || activeBackgroundLayer is null)
+        if (!IsLoaded || ViewModel is null || activeBackgroundLayer is null)
         {
             return;
         }
 
-        activeBackgroundLayer.Background = WeatherScenePalette.CreateBackground(viewModel);
+        activeBackgroundLayer.Background = WeatherScenePalette.CreateBackground(ViewModel);
         UpdateCelestialPosition(activeCelestial,
-            viewModel.WeatherCelestial == WeatherCelestial.Moon,
-            viewModel.WeatherHour,
-            viewModel.SunriseHour,
-            viewModel.SunsetHour);
+            ViewModel.WeatherCelestial == WeatherCelestial.Moon,
+            ViewModel.WeatherHour,
+            ViewModel.SunriseHour,
+            ViewModel.SunsetHour);
     }
 
     private void AddCelestial(Compositor compositor,
@@ -371,9 +364,9 @@ public sealed partial class WeatherScene :
 
             for (int index = 0; index < 3; index++)
             {
-                float craterSize = 5 + index * 2;
+                float craterSize = 5 + (index * 2);
                 ShapeVisual crater = CreateDisc(compositor, craterSize, Color.FromArgb(42, 94, 111, 151));
-                crater.Offset = new Vector3(14 + index * 11, 18 + index % 2 * 13, 0);
+                crater.Offset = new Vector3(14 + (index * 11), 18 + (index % 2 * 13), 0);
                 celestial.Children.InsertAtTop(crater);
             }
         }
@@ -382,8 +375,8 @@ public sealed partial class WeatherScene :
             for (int index = 0; index < 3; index++)
             {
                 float inset = index * 12;
-                Color color = Color.FromArgb((byte)(45 + index * 40), 255, (byte)(hot ? 142 : isTransition ? 181 : 220), (byte)(isTransition ? 105 : 73));
-                ShapeVisual disc = CreateDisc(compositor, diameter - inset * 2, color);
+                Color color = Color.FromArgb((byte)(45 + (index * 40)), 255, (byte)(hot ? 142 : isTransition ? 181 : 220), (byte)(isTransition ? 105 : 73));
+                ShapeVisual disc = CreateDisc(compositor, diameter - (inset * 2), color);
                 disc.Offset = new Vector3(inset, inset, 0);
                 celestial.Children.InsertAtTop(disc);
             }
@@ -409,8 +402,8 @@ public sealed partial class WeatherScene :
 
         double progress = GetCelestialProgress(isMoon, hour, sunrise, sunset);
         float diameter = celestial.Size.X;
-        float horizontalPosition = (float)(progress * (SceneWidth + diameter) - diameter);
-        float verticalPosition = (float)(SceneHeight * 0.72 - Math.Sin(Math.PI * progress) * SceneHeight * 0.68 - diameter / 2);
+        float horizontalPosition = (float)((progress * (SceneWidth + diameter)) - diameter);
+        float verticalPosition = (float)((SceneHeight * 0.72) - (Math.Sin(Math.PI * progress) * SceneHeight * 0.68) - (diameter / 2));
         celestial.Offset = new Vector3(horizontalPosition, verticalPosition, 0);
     }
 
@@ -435,12 +428,12 @@ public sealed partial class WeatherScene :
             byte alpha = (byte)RandomBetween(80, 145);
             Path cloud = CreateCloud(width, height, alpha);
             Canvas.SetLeft(cloud, -width);
-            Canvas.SetTop(cloud, 6 + index * 28);
+            Canvas.SetTop(cloud, 6 + (index * 28));
             activeCloudLayer?.Children.Add(cloud);
             ElementCompositionPreview.SetIsTranslationEnabled(cloud, true);
             Visual cloudVisual = ElementCompositionPreview.GetElementVisual(cloud);
             float phase = (float)(index + 1) / (count + 1);
-            float travel = SceneWidth + width * 2;
+            float travel = SceneWidth + (width * 2);
             float initialTranslation = travel * phase;
             StartInitialCloudDrift(compositor, cloud, cloudVisual, initialTranslation, travel);
         }
@@ -452,7 +445,7 @@ public sealed partial class WeatherScene :
         ScalarKeyFrameAnimation drift = compositor.CreateScalarKeyFrameAnimation();
         drift.InsertKeyFrame(0, initialTranslation);
         drift.InsertKeyFrame(1, travel);
-        drift.Duration = TimeSpan.FromSeconds(42 * (1 - initialTranslation / travel));
+        drift.Duration = TimeSpan.FromSeconds(42 * (1 - (initialTranslation / travel)));
         cloudVisual.StartAnimation("Translation.X", drift);
         batch.End();
         batch.Completed += (sender, args) => DispatcherQueue.TryEnqueue(() =>
@@ -655,13 +648,7 @@ public sealed partial class WeatherScene :
         visual.StartAnimation("Opacity", pulse);
     }
 
-    private void ScheduleNextLightning()
-    {
-        if (lightningTimer is not null)
-        {
-            lightningTimer.Interval = TimeSpan.FromSeconds(RandomBetween(2.4f, 7.5f));
-        }
-    }
+    private void ScheduleNextLightning() => _ = lightningTimer?.Interval = TimeSpan.FromSeconds(RandomBetween(2.4f, 7.5f));
 
     private void StopLightning()
     {
@@ -681,8 +668,8 @@ public sealed partial class WeatherScene :
         for (int index = 0; index < 4; index++)
         {
             Vector2 size = new(SceneWidth * RandomBetween(0.75f, 1.05f), RandomBetween(18, 30));
-            ShapeVisual band = CreateRoundedRectangle(compositor, size, Color.FromArgb((byte)(18 + index * 7), 230, 238, 243));
-            band.Offset = new Vector3(-SceneWidth * 0.15f, 8 + index * 25, 0);
+            ShapeVisual band = CreateRoundedRectangle(compositor, size, Color.FromArgb((byte)(18 + (index * 7)), 230, 238, 243));
+            band.Offset = new Vector3(-SceneWidth * 0.15f, 8 + (index * 25), 0);
             ScalarKeyFrameAnimation drift = compositor.CreateScalarKeyFrameAnimation();
             drift.InsertKeyFrame(0, -SceneWidth * 0.12f);
             drift.InsertKeyFrame(0.5f, SceneWidth * 0.08f);
@@ -701,12 +688,12 @@ public sealed partial class WeatherScene :
             SpriteVisual haze = compositor.CreateSpriteVisual();
             haze.Brush = compositor.CreateColorBrush(Color.FromArgb(35, 255, 228, 150));
             haze.Size = new Vector2(SceneWidth * 0.65f, 1.5f);
-            haze.Offset = new Vector3(SceneWidth * 0.15f, 34 + index * 13, 0);
+            haze.Offset = new Vector3(SceneWidth * 0.15f, 34 + (index * 13), 0);
             ScalarKeyFrameAnimation shimmer = compositor.CreateScalarKeyFrameAnimation();
             shimmer.InsertKeyFrame(0, 0.15f);
             shimmer.InsertKeyFrame(0.5f, 0.7f);
             shimmer.InsertKeyFrame(1, 0.15f);
-            shimmer.Duration = TimeSpan.FromSeconds(2 + index * 0.3);
+            shimmer.Duration = TimeSpan.FromSeconds(2 + (index * 0.3));
             shimmer.IterationBehavior = AnimationIterationBehavior.Forever;
             haze.StartAnimation("Opacity", shimmer);
             activeSceneLayer?.Children.InsertAtTop(haze);
@@ -739,8 +726,7 @@ public sealed partial class WeatherScene :
         return visual;
     }
 
-    private float RandomBetween(float minimum, float maximum) =>
-        minimum + (float)random.NextDouble() * (maximum - minimum);
+    private float RandomBetween(float minimum, float maximum) => minimum + ((float)random.NextDouble() * (maximum - minimum));
 
     private float SceneWidth => Math.Max((float)ActualWidth, 380);
 

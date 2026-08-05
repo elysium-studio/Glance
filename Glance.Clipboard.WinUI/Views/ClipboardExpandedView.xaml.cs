@@ -19,11 +19,9 @@ public sealed partial class ClipboardExpandedView :
 
     private string ToUpper(string value) => value.ToUpperInvariant();
 
-    private Visibility WhenEmpty(bool hasItems) =>
-        hasItems ? Visibility.Collapsed : Visibility.Visible;
+    private Visibility WhenEmpty(bool hasItems) => hasItems ? Visibility.Collapsed : Visibility.Visible;
 
-    private Visibility WhenPopulated(bool hasItems) =>
-        hasItems ? Visibility.Visible : Visibility.Collapsed;
+    private Visibility WhenPopulated(bool hasItems) => hasItems ? Visibility.Visible : Visibility.Collapsed;
 
     private async void HandleCopyClick(object sender, RoutedEventArgs args)
     {
@@ -76,6 +74,5 @@ public sealed partial class ClipboardExpandedView :
         }
     }
 
-    private static ClipboardEntry? GetEntry(object sender) =>
-        (sender as FrameworkElement)?.DataContext as ClipboardEntry;
+    private static ClipboardEntry? GetEntry(object sender) => (sender as FrameworkElement)?.DataContext as ClipboardEntry;
 }

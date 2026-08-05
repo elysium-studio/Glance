@@ -57,8 +57,7 @@ public sealed partial class PresenceComponent :
 
     public object ExpandedAnimationElement { get; }
 
-    public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
-    [
+    public IReadOnlyList<GlanceActionDescriptor> GetActions() => [
         new GlanceActionDescriptor("Presence.Start", Id, "Stay available", "Simulate occasional user activity so communication apps continue to show you as available.")
         {
             SemanticTags = ["presence", "available", "active", "away", "online", "status", "Teams", "activity"],
@@ -71,13 +70,12 @@ public sealed partial class PresenceComponent :
         }
     ];
 
-    public bool IsAvailable(string actionId) =>
-        actionId switch
-        {
-            "Presence.Start" => !viewModel.IsActive,
-            "Presence.Stop" => viewModel.IsActive,
-            _ => false
-        };
+    public bool IsAvailable(string actionId) => actionId switch
+    {
+        "Presence.Start" => !viewModel.IsActive,
+        "Presence.Stop" => viewModel.IsActive,
+        _ => false
+    };
 
     public async Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
         CancellationToken cancellationToken = default)

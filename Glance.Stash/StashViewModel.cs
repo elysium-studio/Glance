@@ -73,7 +73,7 @@ public sealed partial class StashViewModel(ITextLocalizer localizer) :
 
         if (existing is not null)
         {
-            Items.Remove(existing);
+            _ = Items.Remove(existing);
         }
 
         StashItem item = CreateItem(new StashEntry(existing?.Id ?? Guid.NewGuid().ToString("N"), kind, normalizedContent, DateTimeOffset.Now));
@@ -89,14 +89,11 @@ public sealed partial class StashViewModel(ITextLocalizer localizer) :
         return item;
     }
 
-    public Task CopyAsync(StashItem item) =>
-        copyItem?.Invoke(item) ?? Task.CompletedTask;
+    public Task CopyAsync(StashItem item) => copyItem?.Invoke(item) ?? Task.CompletedTask;
 
-    public Task OpenAsync(StashItem item) =>
-        openItem?.Invoke(item) ?? Task.CompletedTask;
+    public Task OpenAsync(StashItem item) => openItem?.Invoke(item) ?? Task.CompletedTask;
 
-    public Task ViewFullTextAsync(StashItem item) =>
-        viewItem?.Invoke(item) ?? Task.CompletedTask;
+    public Task ViewFullTextAsync(StashItem item) => viewItem?.Invoke(item) ?? Task.CompletedTask;
 
     public async Task RemoveAsync(StashItem item)
     {
@@ -131,26 +128,19 @@ public sealed partial class StashViewModel(ITextLocalizer localizer) :
         CompactText = SelectedItem?.DisplayText ?? localizer.GetText("EmptySummary");
     }
 
-    private static bool IsValid(StashEntry entry) =>
-        !string.IsNullOrWhiteSpace(entry.Id) &&
+    private static bool IsValid(StashEntry entry) => !string.IsNullOrWhiteSpace(entry.Id) &&
         !string.IsNullOrWhiteSpace(entry.Content);
 
-    private static bool IsWebLink(string value) =>
-        Uri.TryCreate(value, UriKind.Absolute, out Uri? uri) &&
+    private static bool IsWebLink(string value) => Uri.TryCreate(value, UriKind.Absolute, out Uri? uri) &&
         (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
 
-    private StashItem CreateItem(StashEntry entry) =>
-        new(entry, localizer, Copy, Open, ViewFullText, Remove);
+    private StashItem CreateItem(StashEntry entry) => new(entry, localizer, Copy, Open, ViewFullText, Remove);
 
-    private async void Copy(StashItem item) =>
-        await CopyAsync(item);
+    private async void Copy(StashItem item) => await CopyAsync(item);
 
-    private async void Open(StashItem item) =>
-        await OpenAsync(item);
+    private async void Open(StashItem item) => await OpenAsync(item);
 
-    private async void ViewFullText(StashItem item) =>
-        await ViewFullTextAsync(item);
+    private async void ViewFullText(StashItem item) => await ViewFullTextAsync(item);
 
-    private async void Remove(StashItem item) =>
-        await RemoveAsync(item);
+    private async void Remove(StashItem item) => await RemoveAsync(item);
 }

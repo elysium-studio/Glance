@@ -11,7 +11,7 @@ public sealed class ColorHistoryRepository
     public ColorHistoryRepository(string databasePath)
     {
         InitializeProvider();
-        Directory.CreateDirectory(Path.GetDirectoryName(databasePath) ?? throw new ArgumentException("The database path must include a directory.", nameof(databasePath)));
+        _ = Directory.CreateDirectory(Path.GetDirectoryName(databasePath) ?? throw new ArgumentException("The database path must include a directory.", nameof(databasePath)));
         connectionString = new SqliteConnectionStringBuilder
         {
             DataSource = databasePath,
@@ -32,7 +32,7 @@ public sealed class ColorHistoryRepository
             ORDER BY sort_order DESC
             LIMIT $limit;
             """;
-        command.Parameters.AddWithValue("$limit", Math.Max(1, limit));
+        _ = command.Parameters.AddWithValue("$limit", Math.Max(1, limit));
         using SqliteDataReader reader = command.ExecuteReader();
         List<ColorValue> colors = [];
 
@@ -59,11 +59,11 @@ public sealed class ColorHistoryRepository
             ON CONFLICT(packed_rgb) DO UPDATE SET
                 sort_order = excluded.sort_order;
             """;
-        command.Parameters.AddWithValue("$packedRgb", (color.Red << 16) | (color.Green << 8) | color.Blue);
-        command.Parameters.AddWithValue("$red", color.Red);
-        command.Parameters.AddWithValue("$green", color.Green);
-        command.Parameters.AddWithValue("$blue", color.Blue);
-        command.ExecuteNonQuery();
+        _ = command.Parameters.AddWithValue("$packedRgb", (color.Red << 16) | (color.Green << 8) | color.Blue);
+        _ = command.Parameters.AddWithValue("$red", color.Red);
+        _ = command.Parameters.AddWithValue("$green", color.Green);
+        _ = command.Parameters.AddWithValue("$blue", color.Blue);
+        _ = command.ExecuteNonQuery();
         Trim(connection, transaction, limit);
         transaction.Commit();
     }
@@ -94,7 +94,7 @@ public sealed class ColorHistoryRepository
             CREATE INDEX IF NOT EXISTS ix_recent_colors_sort_order
             ON recent_colors(sort_order DESC);
             """;
-        command.ExecuteNonQuery();
+        _ = command.ExecuteNonQuery();
     }
 
     private SqliteConnection OpenConnection()
@@ -104,7 +104,7 @@ public sealed class ColorHistoryRepository
 
         using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "PRAGMA busy_timeout = 3000;";
-        command.ExecuteNonQuery();
+        _ = command.ExecuteNonQuery();
         return connection;
     }
 
@@ -123,8 +123,8 @@ public sealed class ColorHistoryRepository
                 LIMIT -1 OFFSET $limit
             );
             """;
-        command.Parameters.AddWithValue("$limit", Math.Max(1, limit));
-        command.ExecuteNonQuery();
+        _ = command.Parameters.AddWithValue("$limit", Math.Max(1, limit));
+        _ = command.ExecuteNonQuery();
     }
 
     private static void InitializeProvider()

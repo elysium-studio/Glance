@@ -84,7 +84,7 @@ public sealed class ThemeSwitcherViewModelTests
         await viewModel.SelectDarkAsync();
 
         Assert.True(viewModel.IsBusy);
-        Assert.Single(dispatcher.Actions);
+        _ = Assert.Single(dispatcher.Actions);
 
         dispatcher.Actions[0]();
 
@@ -100,13 +100,11 @@ public sealed class ThemeSwitcherViewModelTests
         public ThemeChangeResult SelectionResult { get; init; } = new(true, ThemeVariant.Dark, null);
 
         public Task<ThemeChangeResult> RefreshAsync(ThemeSwitcherSettings settings,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult(new ThemeChangeResult(true, CurrentTheme, null));
+            CancellationToken cancellationToken = default) => Task.FromResult(new ThemeChangeResult(true, CurrentTheme, null));
 
         public Task<ThemeChangeResult> SelectAsync(ThemePreference preference,
             ThemeSwitcherSettings settings,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult(SelectionResult);
+            CancellationToken cancellationToken = default) => Task.FromResult(SelectionResult);
     }
 
     private sealed class FakeLocalizer :
@@ -130,7 +128,6 @@ public sealed class ThemeSwitcherViewModelTests
     {
         public List<Action> Actions { get; } = [];
 
-        public void Dispatch(Action action) =>
-            Actions.Add(action);
+        public void Dispatch(Action action) => Actions.Add(action);
     }
 }

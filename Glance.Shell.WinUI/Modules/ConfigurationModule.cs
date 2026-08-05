@@ -15,7 +15,7 @@ public sealed class ConfigurationModule :
         WritableOptionsBuilder<GlanceSettings> builder =
             new(services, "Settings", "settings.dat");
 
-        builder
+        _ = builder
             .WithJsonOptions(new JsonSerializerOptions
             {
                 WriteIndented = true,

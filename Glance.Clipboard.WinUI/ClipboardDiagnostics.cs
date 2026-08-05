@@ -10,14 +10,13 @@ internal static class ClipboardDiagnostics
 {
     private static readonly AsyncLocal<string?> CurrentOperation = new();
     private static readonly object SyncRoot = new();
-    private static readonly string LogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "clipboard-diagnostics.log");
     private static int nextOperationId;
     private static int initialized;
 
     [ThreadStatic]
     private static bool isWriting;
 
-    public static string FilePath => LogPath;
+    public static string FilePath { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "clipboard-diagnostics.log");
 
     public static void Initialize()
     {
@@ -58,8 +57,8 @@ internal static class ClipboardDiagnostics
 
             lock (SyncRoot)
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(LogPath)!);
-                File.AppendAllText(LogPath, line);
+                _ = Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
+                File.AppendAllText(FilePath, line);
             }
         }
         catch
@@ -71,8 +70,7 @@ internal static class ClipboardDiagnostics
         }
     }
 
-    public static void WriteException(string stage, Exception exception) =>
-        Write(stage, DescribeException(exception));
+    public static void WriteException(string stage, Exception exception) => Write(stage, DescribeException(exception));
 
     private static void HandleFirstChanceException(object? sender, FirstChanceExceptionEventArgs args)
     {
@@ -94,8 +92,7 @@ internal static class ClipboardDiagnostics
             $"Message={exception.Message}; Stack={stackTrace}";
     }
 
-    private static string Normalize(string value) =>
-        value.Replace('\r', ' ').Replace('\n', ' ');
+    private static string Normalize(string value) => value.Replace('\r', ' ').Replace('\n', ' ');
 
     private sealed class DiagnosticScope(string operation,
         string? previousOperation) : IDisposable

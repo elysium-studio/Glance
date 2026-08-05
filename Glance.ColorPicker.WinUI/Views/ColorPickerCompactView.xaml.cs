@@ -17,6 +17,5 @@ public sealed partial class ColorPickerCompactView :
 
     public FrameworkElement ConnectedAnimationElement => ColorSwatch;
 
-    private SolidColorBrush ToBrush(ColorValue color) =>
-        new(Windows.UI.Color.FromArgb(255, color.Red, color.Green, color.Blue));
+    private SolidColorBrush ToBrush(ColorValue color) => new(Windows.UI.Color.FromArgb(255, color.Red, color.Green, color.Blue));
 }

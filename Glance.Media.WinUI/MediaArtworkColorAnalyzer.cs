@@ -52,7 +52,7 @@ internal static class MediaArtworkColorAnalyzer
             double minimum = Math.Min(red, Math.Min(green, blue)) / 255d;
             double lightness = (maximum + minimum) / 2;
 
-            if (lightness < 0.06 || lightness > 0.94)
+            if (lightness is < 0.06 or > 0.94)
             {
                 continue;
             }
@@ -61,7 +61,7 @@ internal static class MediaArtworkColorAnalyzer
                 (maximum - minimum) / (1 - Math.Abs((2 * lightness) - 1));
             double weight = 0.3 + (saturation * 1.7);
             int key = ((red >> 4) << 8) | ((green >> 4) << 4) | (blue >> 4);
-            buckets.TryGetValue(key, out ColorBucket bucket);
+            _ = buckets.TryGetValue(key, out ColorBucket bucket);
             buckets[key] = bucket.Add(red, green, blue, weight);
         }
 
@@ -85,8 +85,7 @@ internal static class MediaArtworkColorAnalyzer
         return new MediaArtworkColors(accentColor, foregroundColor);
     }
 
-    private static uint ToColor(double red, double green, double blue) =>
-        0xFF000000u |
+    private static uint ToColor(double red, double green, double blue) => 0xFF000000u |
         ((uint)Math.Round(red) << 16) |
         ((uint)Math.Round(green) << 8) |
         (uint)Math.Round(blue);
@@ -116,10 +115,10 @@ internal static class MediaArtworkColorAnalyzer
         }
 
         double saturation = delta / (1 - Math.Abs((2 * lightness) - 1));
-        double hue = maximum == red ? ((green - blue) / delta) % 6 :
+        double hue = maximum == red ? (green - blue) / delta % 6 :
             maximum == green ? ((blue - red) / delta) + 2 :
             ((red - green) / delta) + 4;
-        hue = (hue * 60 + 360) % 360;
+        hue = ((hue * 60) + 360) % 360;
         return (hue, saturation, lightness);
     }
 
@@ -149,8 +148,7 @@ internal static class MediaArtworkColorAnalyzer
         double Score,
         int Count)
     {
-        public ColorBucket Add(byte red, byte green, byte blue, double weight) =>
-            new(Red + red, Green + green, Blue + blue, Score + weight, Count + 1);
+        public ColorBucket Add(byte red, byte green, byte blue, double weight) => new(Red + red, Green + green, Blue + blue, Score + weight, Count + 1);
     }
 }
 

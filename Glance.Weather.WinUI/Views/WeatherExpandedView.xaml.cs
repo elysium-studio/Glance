@@ -28,5 +28,4 @@ public sealed partial class WeatherExpandedView :
     public Visibility WhenHasWeather(bool hasWeather) => hasWeather ? Visibility.Visible : Visibility.Collapsed;
 
     public Visibility WhenMissingWeather(bool hasWeather) => hasWeather ? Visibility.Collapsed : Visibility.Visible;
-
 }

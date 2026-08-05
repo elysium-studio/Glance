@@ -9,8 +9,7 @@ public sealed class GlanceAttentionService :
 
     public event EventHandler<GlanceAttentionRequest>? AttentionRequested;
 
-    public void CompleteStartup() =>
-        isStartupComplete = true;
+    public void CompleteStartup() => isStartupComplete = true;
 
     public void RequestAttention(string componentId,
         GlanceAttentionLevel level = GlanceAttentionLevel.Default,

@@ -37,8 +37,7 @@ public sealed class GlanceActionService(ModulePreferenceService modulePreference
         ];
     }
 
-    public GlanceActionDescriptor? GetAction(string actionId) =>
-        GetActions().FirstOrDefault(action => string.Equals(action.Id, actionId, StringComparison.OrdinalIgnoreCase));
+    public GlanceActionDescriptor? GetAction(string actionId) => GetActions().FirstOrDefault(action => string.Equals(action.Id, actionId, StringComparison.OrdinalIgnoreCase));
 
     public async Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
         CancellationToken cancellationToken = default)
@@ -69,7 +68,7 @@ public sealed class GlanceActionService(ModulePreferenceService modulePreference
         {
             lock (synchronization)
             {
-                actions.TryGetValue(descriptor.Id, out registration);
+                _ = actions.TryGetValue(descriptor.Id, out registration);
             }
 
             if (registration is null)
@@ -195,15 +194,13 @@ public sealed class GlanceActionService(ModulePreferenceService modulePreference
         return completion.Task;
     }
 
-    private static GlanceActionDescriptor CreateShowDescriptor(IGlanceComponent component) =>
-        new($"{component.Id}.Show",
+    private static GlanceActionDescriptor CreateShowDescriptor(IGlanceComponent component) => new($"{component.Id}.Show",
             component.Id,
             $"Show {component.DisplayName}",
             $"Bring {component.DisplayName} into view in Glance.",
             GlanceActionPresentation.Expanded);
 
-    private static bool IsShowAction(GlanceActionDescriptor descriptor) =>
-        descriptor.Id.EndsWith(".Show", StringComparison.OrdinalIgnoreCase) && descriptor.Parameters.Count == 0;
+    private static bool IsShowAction(GlanceActionDescriptor descriptor) => descriptor.Id.EndsWith(".Show", StringComparison.OrdinalIgnoreCase) && descriptor.Parameters.Count == 0;
 
     private static bool IsProviderAvailable(ActionRegistration registration)
     {
@@ -267,7 +264,7 @@ public sealed class GlanceActionService(ModulePreferenceService modulePreference
 
             if (value.ValueKind == JsonValueKind.Number &&
                 value.TryGetDouble(out double number) &&
-                (parameter.Minimum is double minimum && number < minimum || parameter.Maximum is double maximum && number > maximum))
+                ((parameter.Minimum is double minimum && number < minimum) || (parameter.Maximum is double maximum && number > maximum)))
             {
                 return GlanceActionResult.InvalidArguments($"The argument '{parameter.Name}' is outside the supported range.");
             }
@@ -277,8 +274,7 @@ public sealed class GlanceActionService(ModulePreferenceService modulePreference
     }
 
     private static bool IsValidType(GlanceActionParameterType type,
-        JsonElement value) =>
-        type switch
+        JsonElement value) => type switch
         {
             GlanceActionParameterType.String => value.ValueKind == JsonValueKind.String,
             GlanceActionParameterType.Number => value.ValueKind == JsonValueKind.Number,

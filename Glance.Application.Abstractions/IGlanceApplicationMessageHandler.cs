@@ -10,13 +10,11 @@ public interface IGlanceApplicationMessageHandler
 
     IReadOnlyCollection<string> Capabilities { get; }
 
-    ValueTask ConnectedAsync(IGlanceApplicationConnection connection, CancellationToken cancellationToken) =>
-        ValueTask.CompletedTask;
+    ValueTask ConnectedAsync(IGlanceApplicationConnection connection, CancellationToken cancellationToken) => ValueTask.CompletedTask;
 
     ValueTask HandleAsync(GlanceApplicationMessage message, IGlanceApplicationConnection connection, CancellationToken cancellationToken);
 
-    ValueTask DisconnectedAsync(IGlanceApplicationConnection connection, CancellationToken cancellationToken) =>
-        ValueTask.CompletedTask;
+    ValueTask DisconnectedAsync(IGlanceApplicationConnection connection, CancellationToken cancellationToken) => ValueTask.CompletedTask;
 }
 
 public interface IGlanceApplicationConnection
