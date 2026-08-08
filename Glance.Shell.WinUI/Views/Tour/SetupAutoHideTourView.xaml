@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="Glance.Shell.WinUI.SetupAutoHideTourView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    HorizontalAlignment="Stretch"
+    VerticalAlignment="Stretch"
+    HorizontalContentAlignment="Center"
+    VerticalContentAlignment="Top">
+    <StackPanel
+        MaxWidth="600"
+        HorizontalAlignment="Center"
+        Spacing="28">
+        <Grid
+            Height="300"
+            ColumnDefinitions="288,24,288">
+            <Button
+                Grid.Column="0"
+                Width="288"
+                Height="300"
+                Padding="0"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                Background="Transparent"
+                BorderThickness="0"
+                Click="HandleAutoHideClicked">
+                <Border
+                    Padding="12"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="14">
+                    <Grid RowDefinitions="190,*">
+                        <Border
+                            Grid.RowSpan="2"
+                            Margin="-12"
+                            BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+                            BorderThickness="2"
+                            CornerRadius="14"
+                            IsHitTestVisible="False"
+                            Opacity="{x:Bind ViewModel.AutoHideSelectionOpacity, Mode=OneWay}" />
+                        <Border Background="{ThemeResource LayerFillColorAltBrush}" CornerRadius="10">
+                            <Grid>
+                                <Grid.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Offset="0" Color="#18255973" />
+                                        <GradientStop Offset="0.55" Color="#2933588D" />
+                                        <GradientStop Offset="1" Color="#2A3D164D" />
+                                    </LinearGradientBrush>
+                                </Grid.Background>
+                                <Border Width="94" Height="72" Margin="20,48,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{ThemeResource ControlFillColorDefaultBrush}" CornerRadius="8" />
+                                <Grid
+                                    x:Name="AutoHideIsland"
+                                    Width="156"
+                                    Height="50"
+                                    Margin="0,12,0,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Top">
+                                    <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="25" />
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
+                                        <Ellipse Width="16" Height="16" Fill="{ThemeResource AccentFillColorDefaultBrush}" />
+                                        <Rectangle Width="58" Height="7" Fill="{ThemeResource TextFillColorPrimaryBrush}" RadiusX="3.5" RadiusY="3.5" />
+                                    </StackPanel>
+                                </Grid>
+                                <Border
+                                    x:Name="AutoHideHandle"
+                                    Width="34"
+                                    Height="4"
+                                    Margin="0,0,0,29"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Bottom"
+                                    Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                    CornerRadius="2"
+                                    Opacity="0" />
+                                <FontIcon
+                                    x:Name="AutoHidePointer"
+                                    Margin="0,0,52,40"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Bottom"
+                                    FontSize="20"
+                                    Glyph="&#xE8B0;" />
+                                <Border Height="32" VerticalAlignment="Bottom" Background="#B0181B22">
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
+                                        <Rectangle Width="14" Height="14" Fill="#FF60CDFF" RadiusX="4" RadiusY="4" />
+                                        <Rectangle Width="14" Height="14" Fill="#FF8B76E8" RadiusX="4" RadiusY="4" />
+                                        <Rectangle Width="14" Height="14" Fill="#FFF763C6" RadiusX="4" RadiusY="4" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <StackPanel Grid.Row="1" Margin="4,12,4,0" Spacing="4">
+                            <TextBlock x:Uid="SetupAutoHideOnTitle" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <TextBlock
+                                x:Uid="SetupAutoHideOnDescription"
+                                MinHeight="36"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                MaxLines="2"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Button>
+            <Button
+                Grid.Column="2"
+                Width="288"
+                Height="300"
+                Padding="0"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                Background="Transparent"
+                BorderThickness="0"
+                Click="HandleAlwaysVisibleClicked">
+                <Border
+                    Padding="12"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="14">
+                    <Grid RowDefinitions="190,*">
+                        <Border
+                            Grid.RowSpan="2"
+                            Margin="-12"
+                            BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+                            BorderThickness="2"
+                            CornerRadius="14"
+                            IsHitTestVisible="False"
+                            Opacity="{x:Bind ViewModel.AlwaysVisibleSelectionOpacity, Mode=OneWay}" />
+                        <Border Background="{ThemeResource LayerFillColorAltBrush}" CornerRadius="10">
+                            <Grid>
+                                <Grid.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Offset="0" Color="#18255973" />
+                                        <GradientStop Offset="0.55" Color="#2933588D" />
+                                        <GradientStop Offset="1" Color="#2A3D164D" />
+                                    </LinearGradientBrush>
+                                </Grid.Background>
+                                <Border Width="94" Height="72" Margin="20,48,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{ThemeResource ControlFillColorDefaultBrush}" CornerRadius="8" />
+                                <Grid
+                                    x:Name="VisibleIsland"
+                                    Width="156"
+                                    Height="50"
+                                    Margin="0,12,0,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Top">
+                                    <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="25" />
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
+                                        <Ellipse x:Name="VisibleActivity" Width="16" Height="16" Fill="{ThemeResource AccentFillColorDefaultBrush}" />
+                                        <Rectangle Width="58" Height="7" Fill="{ThemeResource TextFillColorPrimaryBrush}" RadiusX="3.5" RadiusY="3.5" />
+                                    </StackPanel>
+                                </Grid>
+                                <FontIcon
+                                    x:Name="VisiblePointer"
+                                    Margin="0,0,52,40"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Bottom"
+                                    FontSize="20"
+                                    Glyph="&#xE8B0;" />
+                                <Border Height="32" VerticalAlignment="Bottom" Background="#B0181B22">
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
+                                        <Rectangle Width="14" Height="14" Fill="#FF60CDFF" RadiusX="4" RadiusY="4" />
+                                        <Rectangle Width="14" Height="14" Fill="#FF8B76E8" RadiusX="4" RadiusY="4" />
+                                        <Rectangle Width="14" Height="14" Fill="#FFF763C6" RadiusX="4" RadiusY="4" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <StackPanel Grid.Row="1" Margin="4,12,4,0" Spacing="4">
+                            <TextBlock x:Uid="SetupAutoHideOffTitle" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <TextBlock
+                                x:Uid="SetupAutoHideOffDescription"
+                                MinHeight="36"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                MaxLines="2"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Button>
+        </Grid>
+        <StackPanel Spacing="8">
+            <TextBlock
+                x:Uid="SetupAutoHideTitle"
+                Style="{StaticResource TitleTextBlockStyle}"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+            <TextBlock
+                x:Uid="SetupAutoHideDescription"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

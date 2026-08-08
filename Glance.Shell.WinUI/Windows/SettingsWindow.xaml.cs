@@ -33,12 +33,13 @@ public sealed partial class SettingsWindow :
         ITextLocalizer localizer,
         IApplicationLifetime applicationLifetime)
     {
+        InitializeComponent();
+
         this.messenger = messenger;
         this.localizer = localizer;
         this.applicationLifetime = applicationLifetime;
-        InitializeComponent();
 
-        messenger.Register<SettingsNavigationRequestedEventArgs>(this);
+        messenger.Register(this);
         Closed += HandleClosed;
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);

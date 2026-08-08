@@ -15,6 +15,7 @@ public sealed class GlanceSettingsTests
         Assert.Equal(GlanceExpansionMode.ExpandOnHover, settings.ExpansionMode);
         Assert.Empty(settings.Modules);
         Assert.Equal(GlancePlacement.Top, settings.Placement);
+        Assert.True(settings.ShowSetupOnStartup);
         Assert.True(settings.StartWithWindows);
     }
 
@@ -26,6 +27,7 @@ public sealed class GlanceSettingsTests
             AutoHide = true,
             ExpansionMode = GlanceExpansionMode.AlwaysExpanded,
             Placement = GlancePlacement.Bottom,
+            ShowSetupOnStartup = false,
             StartWithWindows = false,
             Modules =
             [
@@ -45,6 +47,7 @@ public sealed class GlanceSettingsTests
         Assert.True(result.AutoHide);
         Assert.Equal(GlanceExpansionMode.AlwaysExpanded, result.ExpansionMode);
         Assert.Equal(GlancePlacement.Bottom, result.Placement);
+        Assert.False(result.ShowSetupOnStartup);
         Assert.False(result.StartWithWindows);
         _ = Assert.Single(result.Modules);
         Assert.Equal("Timer", result.Modules[0].Id);

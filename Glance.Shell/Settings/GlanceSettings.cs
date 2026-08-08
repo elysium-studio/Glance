@@ -16,5 +16,7 @@ public sealed class GlanceSettings
 
     public bool IsAssistantEnabled { get; set; } = true;
 
+    public bool ShowSetupOnStartup { get; set; } = true;
+
     public bool StartWithWindows { get; set; } = true;
 }

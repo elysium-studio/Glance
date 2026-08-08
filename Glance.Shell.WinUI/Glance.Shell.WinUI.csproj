@@ -1,123 +1,125 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net11.0-windows10.0.26100.0</TargetFramework>
-    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-    <RootNamespace>Glance.Shell.WinUI</RootNamespace>
-    <AssemblyName>Glance</AssemblyName>
-    <AssemblyTitle>Glance</AssemblyTitle>
-    <ApplicationIcon>Assets\Glance.ico</ApplicationIcon>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Configurations>Debug;DebugPackaged;Release</Configurations>
-    <Platforms>x64</Platforms>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <UseWinUI>true</UseWinUI>
-    <EnableMsixTooling>false</EnableMsixTooling>
-    <WindowsPackageType>None</WindowsPackageType>
-    <Nullable>enable</Nullable>
-    <EnablePreviewFeatures>true</EnablePreviewFeatures>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-    <StartupObject>Glance.Shell.WinUI.Start</StartupObject>
-    <DefaultLanguage>en</DefaultLanguage>
-    <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3842</MSBuildWarningsAsMessages>
-    <NoWarn>$(NoWarn);CS8305</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'DebugPackaged'">
-    <EnableMsixTooling>true</EnableMsixTooling>
-    <WindowsPackageType></WindowsPackageType>
-    <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
-    <AppxBundle>Never</AppxBundle>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>portable</DebugType>
-    <DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
-    <EnableDefaultPriItems>false</EnableDefaultPriItems>
-    <GenerateAppInstallerFile>false</GenerateAppInstallerFile>
-    <Optimize>false</Optimize>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <ApplicationManifest>app.external.debug.manifest</ApplicationManifest>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <ApplicationManifest>app.external.manifest</ApplicationManifest>
-  </PropertyGroup>
-  <ItemGroup>
-    <Content Include="Assets\**\*">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <PRIResource Include="Strings\**\*.resw" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.3.260402-preview2" />
-    <PackageReference Include="DynamicXaml.WinUI" Version="1.0.2" GeneratePathProperty="true" />
-    <PackageReference Include="Elysium.Application" Version="$(ElysiumVersion)" />
-    <PackageReference Include="Elysium.Application.Abstractions" Version="$(ElysiumVersion)" />
-    <PackageReference Include="Elysium.Application.DependencyInjection" Version="$(ElysiumVersion)" />
-    <PackageReference Include="Elysium.Platform.Abstractions" Version="$(ElysiumVersion)" />
-    <PackageReference Include="Elysium.Platform.Windows" Version="$(ElysiumVersion)" />
-    <PackageReference Include="Elysium.Presentation" Version="$(ElysiumVersion)" />
-    <PackageReference Include="Elysium.Presentation.Abstractions" Version="$(ElysiumVersion)" />
-    <PackageReference Include="Elysium.Presentation.DependencyInjection" Version="$(ElysiumVersion)" />
-    <PackageReference Include="Elysium.UI.Controls.WinUI" Version="$(ElysiumVersion)" />
-    <PackageReference Include="Elysium.UI.WinUI" Version="$(ElysiumVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
-    <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.3.1" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
-    <PackageReference Include="Microsoft.WindowsAppSDK.AI" Version="2.2.6-experimental" />
-    <PackageReference Include="Microsoft.WindowsAppSDK.Runtime" Version="2.2.0" GeneratePathProperty="true" PrivateAssets="all" />
-    <PackageReference Include="NAudio" Version="2.3.0" />
-    <PackageReference Include="Velopack" Version="1.2.0" />
-    <PackageReference Include="WinUIEx" Version="2.9.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <GlanceModuleProject Include="..\Glance.Assistant.WinUI\Glance.Assistant.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.AudioSwitcher.WinUI\Glance.AudioSwitcher.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.Clipboard.WinUI\Glance.Clipboard.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.ColorPicker.WinUI\Glance.ColorPicker.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.DevicePresence.WinUI\Glance.DevicePresence.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.DropShelf.WinUI\Glance.DropShelf.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.FocusSession.WinUI\Glance.FocusSession.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.Infinity.WinUI\Glance.Infinity.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.KeepAwake.WinUI\Glance.KeepAwake.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.Magnifier.WinUI\Glance.Magnifier.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.Media.WinUI\Glance.Media.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.Power.WinUI\Glance.Power.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.Presence.WinUI\Glance.Presence.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.PrivacyControls.WinUI\Glance.PrivacyControls.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.QuickConvert.WinUI\Glance.QuickConvert.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.RemovableDevices.WinUI\Glance.RemovableDevices.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.Reminders.WinUI\Glance.Reminders.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.ScreenCapture.WinUI\Glance.ScreenCapture.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.ScreenRecorder.WinUI\Glance.ScreenRecorder.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.ScreenLens.WinUI\Glance.ScreenLens.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.SpeechToText.WinUI\Glance.SpeechToText.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.Stopwatch.WinUI\Glance.Stopwatch.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.Stash.WinUI\Glance.Stash.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.SystemMonitor.WinUI\Glance.SystemMonitor.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.ThemeSwitcher.WinUI\Glance.ThemeSwitcher.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.Timer.WinUI\Glance.Timer.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.VoiceNotes.WinUI\Glance.VoiceNotes.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.Weather.WinUI\Glance.Weather.WinUI.csproj" />
-    <GlanceModuleProject Include="..\Glance.WorldClock.WinUI\Glance.WorldClock.WinUI.csproj" />
-    <ProjectReference Include="@(GlanceModuleProject)" ReferenceOutputAssembly="false" Private="false" GlobalPropertiesToRemove="RuntimeIdentifier;SelfContained" />
-    <ProjectReference Include="..\Glance.Application.Abstractions\Glance.Application.Abstractions.csproj" />
-    <ProjectReference Include="..\Glance.Shell\Glance.Shell.csproj" />
-    <ProjectReference Include="..\Glance.UI.WinUI\Glance.UI.WinUI.csproj" />
-  </ItemGroup>
-  <UsingTask TaskName="CreateGlanceModulePackage" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
-    <ParameterGroup>
-      <SourceDirectory ParameterType="System.String" Required="true" />
-      <ArchivePath ParameterType="System.String" Required="true" />
-    </ParameterGroup>
-    <Task>
-      <Using Namespace="System.IO" />
-      <Using Namespace="System.IO.Compression" />
-      <Using Namespace="System.Linq" />
-      <Code Type="Fragment" Language="cs"><![CDATA[
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net11.0-windows10.0.26100.0</TargetFramework>
+		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+		<RootNamespace>Glance.Shell.WinUI</RootNamespace>
+		<AssemblyName>Glance</AssemblyName>
+		<AssemblyTitle>Glance</AssemblyTitle>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<Configurations>Debug;DebugPackaged;Release</Configurations>
+		<Platforms>x64</Platforms>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<UseWinUI>true</UseWinUI>
+		<EnableMsixTooling>false</EnableMsixTooling>
+		<WindowsPackageType>None</WindowsPackageType>
+		<Nullable>enable</Nullable>
+		<EnablePreviewFeatures>true</EnablePreviewFeatures>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+		<StartupObject>Glance.Shell.WinUI.Start</StartupObject>
+		<DefaultLanguage>en</DefaultLanguage>
+		<MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3842</MSBuildWarningsAsMessages>
+		<NoWarn>$(NoWarn);CS8305</NoWarn>
+		<ApplicationIcon>Assets\Glance.ico</ApplicationIcon>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)' == 'DebugPackaged'">
+		<EnableMsixTooling>true</EnableMsixTooling>
+		<WindowsPackageType></WindowsPackageType>
+		<AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
+		<AppxBundle>Never</AppxBundle>
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>portable</DebugType>
+		<DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
+		<EnableDefaultPriItems>false</EnableDefaultPriItems>
+		<GenerateAppInstallerFile>false</GenerateAppInstallerFile>
+		<Optimize>false</Optimize>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+		<ApplicationManifest>app.external.debug.manifest</ApplicationManifest>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<ApplicationManifest>app.external.manifest</ApplicationManifest>
+	</PropertyGroup>
+	<ItemGroup>
+		<Content Include="Assets\**\*">
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Content>
+	</ItemGroup>
+	<ItemGroup>
+		<PRIResource Include="Strings\**\*.resw" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.3.260402-preview2" />
+		<PackageReference Include="DynamicXaml.WinUI" Version="1.0.2" GeneratePathProperty="true" />
+		<PackageReference Include="Elysium.Application" Version="$(ElysiumVersion)" />
+		<PackageReference Include="Elysium.Application.Abstractions" Version="$(ElysiumVersion)" />
+		<PackageReference Include="Elysium.Application.DependencyInjection" Version="$(ElysiumVersion)" />
+		<PackageReference Include="Elysium.Platform.Abstractions" Version="$(ElysiumVersion)" />
+		<PackageReference Include="Elysium.Platform.Windows" Version="$(ElysiumVersion)" />
+		<PackageReference Include="Elysium.Presentation" Version="$(ElysiumVersion)" />
+		<PackageReference Include="Elysium.Presentation.Abstractions" Version="$(ElysiumVersion)" />
+		<PackageReference Include="Elysium.Presentation.DependencyInjection" Version="$(ElysiumVersion)" />
+		<PackageReference Include="Elysium.UI.Controls.WinUI" Version="$(ElysiumVersion)" />
+		<PackageReference Include="Elysium.UI.WinUI" Version="$(ElysiumVersion)" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Graphics.Win2D" Version="1.4.0" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
+		<PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.3.1" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
+		<PackageReference Include="Microsoft.WindowsAppSDK.AI" Version="2.2.6-experimental" />
+		<PackageReference Include="Microsoft.WindowsAppSDK.Runtime" Version="2.2.0" GeneratePathProperty="true" PrivateAssets="all" />
+		<PackageReference Include="NAudio" Version="2.3.0" />
+		<PackageReference Include="Velopack" Version="1.2.0" />
+		<PackageReference Include="WinUIEx" Version="2.9.1" />
+	</ItemGroup>
+	<ItemGroup>
+		<GlanceModuleProject Include="..\Glance.Assistant.WinUI\Glance.Assistant.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.AudioSwitcher.WinUI\Glance.AudioSwitcher.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.Clipboard.WinUI\Glance.Clipboard.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.ColorPicker.WinUI\Glance.ColorPicker.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.DevicePresence.WinUI\Glance.DevicePresence.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.DropShelf.WinUI\Glance.DropShelf.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.FocusSession.WinUI\Glance.FocusSession.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.Infinity.WinUI\Glance.Infinity.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.KeepAwake.WinUI\Glance.KeepAwake.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.Magnifier.WinUI\Glance.Magnifier.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.Media.WinUI\Glance.Media.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.Power.WinUI\Glance.Power.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.Presence.WinUI\Glance.Presence.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.PrivacyControls.WinUI\Glance.PrivacyControls.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.QuickConvert.WinUI\Glance.QuickConvert.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.RemovableDevices.WinUI\Glance.RemovableDevices.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.Reminders.WinUI\Glance.Reminders.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.ScreenCapture.WinUI\Glance.ScreenCapture.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.ScreenRecorder.WinUI\Glance.ScreenRecorder.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.ScreenLens.WinUI\Glance.ScreenLens.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.SpeechToText.WinUI\Glance.SpeechToText.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.Stopwatch.WinUI\Glance.Stopwatch.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.Stash.WinUI\Glance.Stash.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.SystemMonitor.WinUI\Glance.SystemMonitor.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.ThemeSwitcher.WinUI\Glance.ThemeSwitcher.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.Timer.WinUI\Glance.Timer.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.VoiceNotes.WinUI\Glance.VoiceNotes.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.Weather.WinUI\Glance.Weather.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.WorldClock.WinUI\Glance.WorldClock.WinUI.csproj" />
+		<ProjectReference Include="@(GlanceModuleProject)" ReferenceOutputAssembly="false" Private="false" GlobalPropertiesToRemove="RuntimeIdentifier;SelfContained" />
+		<ProjectReference Include="..\Glance.Application.Abstractions\Glance.Application.Abstractions.csproj" />
+		<ProjectReference Include="..\Glance.Shell\Glance.Shell.csproj" />
+		<ProjectReference Include="..\Glance.UI.WinUI\Glance.UI.WinUI.csproj" />
+	</ItemGroup>
+	<UsingTask TaskName="CreateGlanceModulePackage" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+		<ParameterGroup>
+			<SourceDirectory ParameterType="System.String" Required="true" />
+			<ArchivePath ParameterType="System.String" Required="true" />
+		</ParameterGroup>
+		<Task>
+			<Using Namespace="System.IO" />
+			<Using Namespace="System.IO.Compression" />
+			<Using Namespace="System.Linq" />
+			<Code Type="Fragment" Language="cs">
+				<![CDATA[
         if (!Directory.Exists(SourceDirectory))
         {
           Log.LogError($"The module staging directory was not found: {SourceDirectory}");
@@ -138,162 +140,248 @@
             }
           }
         }
-      ]]></Code>
-    </Task>
-  </UsingTask>
-  <Target Name="ArrangeGlanceModulesInBuildOutput" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true'">
-    <MSBuild Projects="@(GlanceModuleProject)" Targets="Build" BuildInParallel="$(BuildInParallel)" Properties="Configuration=$(Configuration);Platform=$(Platform)" />
-    <ItemGroup>
-      <GlanceModuleStagingDirectory Include="$(OutDir)Modules\Assistant;$(OutDir)Modules\AudioSwitcher;$(OutDir)Modules\Clipboard;$(OutDir)Modules\ColorPicker;$(OutDir)Modules\DevicePresence;$(OutDir)Modules\DropShelf;$(OutDir)Modules\FocusSession;$(OutDir)Modules\Infinity;$(OutDir)Modules\KeepAwake;$(OutDir)Modules\Magnifier;$(OutDir)Modules\Media;$(OutDir)Modules\Power;$(OutDir)Modules\Presence;$(OutDir)Modules\PrivacyControls;$(OutDir)Modules\QuickConvert;$(OutDir)Modules\Reminders;$(OutDir)Modules\RemovableDevices;$(OutDir)Modules\ScreenCapture;$(OutDir)Modules\ScreenRecorder;$(OutDir)Modules\ScreenLens;$(OutDir)Modules\SpeechToText;$(OutDir)Modules\Stopwatch;$(OutDir)Modules\Stash;$(OutDir)Modules\SystemMonitor;$(OutDir)Modules\ThemeSwitcher;$(OutDir)Modules\Timer;$(OutDir)Modules\VoiceNotes;$(OutDir)Modules\Weather;$(OutDir)Modules\WorldClock" />
-      <ExistingGlanceModulePackage Include="$(OutDir)Modules\*.glance" />
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Glance.Assistant.*;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Betalgo.Ranul.OpenAI.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.AI.Foundry.Local.*.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Bcl.AsyncInterfaces.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.AI.Abstractions.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.Configuration*.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.Diagnostics.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.Http.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.Logging.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.Options.ConfigurationExtensions.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.ML.OnnxRuntime*.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Windows.AI.MachineLearning*.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\NAudio*.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\onnxruntime*;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\System.Numerics.Tensors.dll"><ModuleName>Assistant</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.AudioSwitcher.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.AudioSwitcher.*"><ModuleName>AudioSwitcher</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.AudioSwitcher.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\NAudio*.dll"><ModuleName>AudioSwitcher</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Clipboard.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Clipboard.*"><ModuleName>Clipboard</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Clipboard.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Microsoft.Data.Sqlite.dll;$(MSBuildProjectDirectory)\..\Glance.Clipboard.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.core.dll;$(MSBuildProjectDirectory)\..\Glance.Clipboard.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.provider.winsqlite3.dll"><ModuleName>Clipboard</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.ColorPicker.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.ColorPicker.*"><ModuleName>ColorPicker</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.ColorPicker.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Microsoft.Data.Sqlite.dll;$(MSBuildProjectDirectory)\..\Glance.ColorPicker.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.core.dll;$(MSBuildProjectDirectory)\..\Glance.ColorPicker.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.provider.winsqlite3.dll"><ModuleName>ColorPicker</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.DevicePresence.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.DevicePresence.*"><ModuleName>DevicePresence</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.DropShelf.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.DropShelf.*"><ModuleName>DropShelf</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.FocusSession.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.FocusSession.*"><ModuleName>FocusSession</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Infinity.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Infinity.*"><ModuleName>Infinity</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.KeepAwake.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.KeepAwake.*"><ModuleName>KeepAwake</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Magnifier.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Magnifier.*"><ModuleName>Magnifier</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Media.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Media.*"><ModuleName>Media</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Media.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\NAudio*.dll"><ModuleName>Media</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Power.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Power.*"><ModuleName>Power</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Presence.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Presence.*"><ModuleName>Presence</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.PrivacyControls.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.PrivacyControls.*"><ModuleName>PrivacyControls</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.QuickConvert.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.QuickConvert.*"><ModuleName>QuickConvert</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.QuickConvert.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\ffmpeg\win-x64\ffmpeg.exe;$(MSBuildProjectDirectory)\..\Glance.QuickConvert.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\ffmpeg\win-x64\LICENSE.txt"><ModuleName>QuickConvert</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.PrivacyControls.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\NAudio*.dll"><ModuleName>PrivacyControls</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.RemovableDevices.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.RemovableDevices.*"><ModuleName>RemovableDevices</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Reminders.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Reminders.*"><ModuleName>Reminders</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Reminders.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Microsoft.Data.Sqlite.dll;$(MSBuildProjectDirectory)\..\Glance.Reminders.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.core.dll;$(MSBuildProjectDirectory)\..\Glance.Reminders.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.provider.winsqlite3.dll"><ModuleName>Reminders</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.ScreenCapture.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.ScreenCapture.*"><ModuleName>ScreenCapture</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.ScreenCapture.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Microsoft.Data.Sqlite.dll;$(MSBuildProjectDirectory)\..\Glance.ScreenCapture.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.core.dll;$(MSBuildProjectDirectory)\..\Glance.ScreenCapture.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.provider.winsqlite3.dll"><ModuleName>ScreenCapture</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.ScreenRecorder.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.ScreenRecorder.*;$(MSBuildProjectDirectory)\..\Glance.ScreenRecorder.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Microsoft.Graphics.Canvas.*;$(MSBuildProjectDirectory)\..\Glance.ScreenRecorder.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\runtimes\win-$(Platform)\native\Microsoft.Graphics.Canvas.dll"><ModuleName>ScreenRecorder</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.ScreenLens.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.ScreenLens.*"><ModuleName>ScreenLens</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\Glance.SpeechToText.*"><ModuleName>SpeechToText</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\NAudio*.dll"><ModuleName>SpeechToText</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\Microsoft.Windows.AI.Projection.dll;$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\Microsoft.Windows.AI.Foundation.Projection.dll;$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\Microsoft.Windows.AI.Speech.dll;$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\Microsoft.Windows.AI.Speech.Projection.dll"><ModuleName>SpeechToText</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Stopwatch.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Stopwatch.*"><ModuleName>Stopwatch</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Stash.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Stash.*"><ModuleName>Stash</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Stash.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Microsoft.Data.Sqlite.dll;$(MSBuildProjectDirectory)\..\Glance.Stash.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.core.dll;$(MSBuildProjectDirectory)\..\Glance.Stash.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.provider.winsqlite3.dll"><ModuleName>Stash</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.SystemMonitor.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.SystemMonitor.*"><ModuleName>SystemMonitor</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.ThemeSwitcher.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.ThemeSwitcher.*"><ModuleName>ThemeSwitcher</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Timer.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Timer.*"><ModuleName>Timer</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.VoiceNotes.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.VoiceNotes.*"><ModuleName>VoiceNotes</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.VoiceNotes.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\NAudio*.dll"><ModuleName>VoiceNotes</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.VoiceNotes.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Microsoft.Data.Sqlite.dll;$(MSBuildProjectDirectory)\..\Glance.VoiceNotes.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.core.dll;$(MSBuildProjectDirectory)\..\Glance.VoiceNotes.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.provider.winsqlite3.dll"><ModuleName>VoiceNotes</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Weather.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Weather.*"><ModuleName>Weather</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.WorldClock.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.WorldClock.*"><ModuleName>WorldClock</ModuleName></GlanceModuleBuildFile>
-      <GlanceModuleBuildRootFile Include="$(OutDir)Glance.Assistant.*;$(OutDir)Glance.AudioSwitcher.*;$(OutDir)Glance.Clipboard.*;$(OutDir)Glance.ColorPicker.*;$(OutDir)Glance.DevicePresence.*;$(OutDir)Glance.DropShelf.*;$(OutDir)Glance.FocusSession.*;$(OutDir)Glance.Infinity.*;$(OutDir)Glance.KeepAwake.*;$(OutDir)Glance.Magnifier.*;$(OutDir)Glance.Media.*;$(OutDir)Glance.Power.*;$(OutDir)Glance.Presence.*;$(OutDir)Glance.PrivacyControls.*;$(OutDir)Glance.QuickConvert.*;$(OutDir)Glance.Reminders.*;$(OutDir)Glance.RemovableDevices.*;$(OutDir)Glance.ScreenCapture.*;$(OutDir)Glance.ScreenRecorder.*;$(OutDir)Glance.ScreenLens.*;$(OutDir)Glance.SpeechToText.*;$(OutDir)Glance.Stopwatch.*;$(OutDir)Glance.Stash.*;$(OutDir)Glance.SystemMonitor.*;$(OutDir)Glance.ThemeSwitcher.*;$(OutDir)Glance.Timer.*;$(OutDir)Glance.VoiceNotes.*;$(OutDir)Glance.Weather.*;$(OutDir)Glance.WorldClock.*" />
-      <GlanceModuleRootXbfDirectory Include="$(OutDir)Glance.Assistant.WinUI;$(OutDir)Glance.AudioSwitcher.WinUI;$(OutDir)Glance.Clipboard.WinUI;$(OutDir)Glance.ColorPicker.WinUI;$(OutDir)Glance.DevicePresence.WinUI;$(OutDir)Glance.DropShelf.WinUI;$(OutDir)Glance.FocusSession.WinUI;$(OutDir)Glance.Infinity.WinUI;$(OutDir)Glance.KeepAwake.WinUI;$(OutDir)Glance.Magnifier.WinUI;$(OutDir)Glance.Media.WinUI;$(OutDir)Glance.Power.WinUI;$(OutDir)Glance.Presence.WinUI;$(OutDir)Glance.PrivacyControls.WinUI;$(OutDir)Glance.QuickConvert.WinUI;$(OutDir)Glance.Reminders.WinUI;$(OutDir)Glance.RemovableDevices.WinUI;$(OutDir)Glance.ScreenCapture.WinUI;$(OutDir)Glance.ScreenRecorder.WinUI;$(OutDir)Glance.ScreenLens.WinUI;$(OutDir)Glance.SpeechToText.WinUI;$(OutDir)Glance.Stopwatch.WinUI;$(OutDir)Glance.Stash.WinUI;$(OutDir)Glance.SystemMonitor.WinUI;$(OutDir)Glance.ThemeSwitcher.WinUI;$(OutDir)Glance.Timer.WinUI;$(OutDir)Glance.VoiceNotes.WinUI;$(OutDir)Glance.Weather.WinUI;$(OutDir)Glance.WorldClock.WinUI" />
-    </ItemGroup>
-    <RemoveDir Directories="@(GlanceModuleStagingDirectory);$(OutDir)Modules\UI" />
-    <Delete Files="@(ExistingGlanceModulePackage)" />
-    <Copy SourceFiles="@(GlanceModuleBuildFile)" DestinationFiles="@(GlanceModuleBuildFile->'$(OutDir)Modules\%(ModuleName)\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Assistant" ArchivePath="$(OutDir)Modules\Assistant.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\AudioSwitcher" ArchivePath="$(OutDir)Modules\AudioSwitcher.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Clipboard" ArchivePath="$(OutDir)Modules\Clipboard.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ColorPicker" ArchivePath="$(OutDir)Modules\ColorPicker.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\DevicePresence" ArchivePath="$(OutDir)Modules\DevicePresence.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\DropShelf" ArchivePath="$(OutDir)Modules\DropShelf.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\FocusSession" ArchivePath="$(OutDir)Modules\FocusSession.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Infinity" ArchivePath="$(OutDir)Modules\Infinity.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\KeepAwake" ArchivePath="$(OutDir)Modules\KeepAwake.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Magnifier" ArchivePath="$(OutDir)Modules\Magnifier.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Media" ArchivePath="$(OutDir)Modules\Media.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Power" ArchivePath="$(OutDir)Modules\Power.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Presence" ArchivePath="$(OutDir)Modules\Presence.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\PrivacyControls" ArchivePath="$(OutDir)Modules\PrivacyControls.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\QuickConvert" ArchivePath="$(OutDir)Modules\QuickConvert.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\RemovableDevices" ArchivePath="$(OutDir)Modules\RemovableDevices.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Reminders" ArchivePath="$(OutDir)Modules\Reminders.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ScreenCapture" ArchivePath="$(OutDir)Modules\ScreenCapture.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ScreenRecorder" ArchivePath="$(OutDir)Modules\ScreenRecorder.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ScreenLens" ArchivePath="$(OutDir)Modules\ScreenLens.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\SpeechToText" ArchivePath="$(OutDir)Modules\SpeechToText.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Stopwatch" ArchivePath="$(OutDir)Modules\Stopwatch.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Stash" ArchivePath="$(OutDir)Modules\Stash.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\SystemMonitor" ArchivePath="$(OutDir)Modules\SystemMonitor.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ThemeSwitcher" ArchivePath="$(OutDir)Modules\ThemeSwitcher.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Timer" ArchivePath="$(OutDir)Modules\Timer.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\VoiceNotes" ArchivePath="$(OutDir)Modules\VoiceNotes.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Weather" ArchivePath="$(OutDir)Modules\Weather.glance" />
-    <CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\WorldClock" ArchivePath="$(OutDir)Modules\WorldClock.glance" />
-    <RemoveDir Directories="@(GlanceModuleStagingDirectory)" />
-    <Delete Files="@(GlanceModuleBuildRootFile)" />
-    <RemoveDir Directories="@(GlanceModuleRootXbfDirectory)" />
-  </Target>
-  <Target Name="RegisterDebugExternalPackage" AfterTargets="ArrangeGlanceModulesInBuildOutput" Condition="'$(Configuration)' == 'Debug' and '$(DesignTimeBuild)' != 'true'">
-    <Exec Command="powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\ExternalLocation\Register-DebugPackage.ps1&quot; -ManifestPath &quot;$(MSBuildProjectDirectory)\..\ExternalLocation\Debug\AppxManifest.xml&quot; -ExecutablePath &quot;$(TargetDir)$(AssemblyName).exe&quot;" />
-  </Target>
-  <Target Name="IncludeGlanceModulesInPackage" BeforeTargets="_ComputeAppxPackagePayload" DependsOnTargets="ArrangeGlanceModulesInBuildOutput" Condition="'$(EnableMsixTooling)' == 'true'">
-    <PropertyGroup>
-      <GlanceModulePackageDirectory>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(OutDir)', 'Modules'))</GlanceModulePackageDirectory>
-    </PropertyGroup>
-    <ItemGroup>
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Assistant.glance" TargetPath="Modules\Assistant.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)AudioSwitcher.glance" TargetPath="Modules\AudioSwitcher.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Clipboard.glance" TargetPath="Modules\Clipboard.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)ColorPicker.glance" TargetPath="Modules\ColorPicker.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)DevicePresence.glance" TargetPath="Modules\DevicePresence.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)DropShelf.glance" TargetPath="Modules\DropShelf.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)FocusSession.glance" TargetPath="Modules\FocusSession.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Infinity.glance" TargetPath="Modules\Infinity.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)KeepAwake.glance" TargetPath="Modules\KeepAwake.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Magnifier.glance" TargetPath="Modules\Magnifier.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Media.glance" TargetPath="Modules\Media.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Power.glance" TargetPath="Modules\Power.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Presence.glance" TargetPath="Modules\Presence.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)PrivacyControls.glance" TargetPath="Modules\PrivacyControls.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)QuickConvert.glance" TargetPath="Modules\QuickConvert.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)RemovableDevices.glance" TargetPath="Modules\RemovableDevices.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Reminders.glance" TargetPath="Modules\Reminders.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)ScreenCapture.glance" TargetPath="Modules\ScreenCapture.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)ScreenRecorder.glance" TargetPath="Modules\ScreenRecorder.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)ScreenLens.glance" TargetPath="Modules\ScreenLens.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)SpeechToText.glance" TargetPath="Modules\SpeechToText.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Stopwatch.glance" TargetPath="Modules\Stopwatch.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Stash.glance" TargetPath="Modules\Stash.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)SystemMonitor.glance" TargetPath="Modules\SystemMonitor.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)ThemeSwitcher.glance" TargetPath="Modules\ThemeSwitcher.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Timer.glance" TargetPath="Modules\Timer.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)VoiceNotes.glance" TargetPath="Modules\VoiceNotes.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)Weather.glance" TargetPath="Modules\Weather.glance" />
-      <GlanceModulePackage Include="$(GlanceModulePackageDirectory)WorldClock.glance" TargetPath="Modules\WorldClock.glance" />
-      <GlanceModulePackage Update="@(GlanceModulePackage)" OutputGroup="ContentFilesProjectOutputGroup" />
-      <PackagingOutputs Include="@(GlanceModulePackage)" />
-    </ItemGroup>
-  </Target>
-  <Target Name="CopyPriAndXbfToPublish" AfterTargets="Publish">
-    <ItemGroup>
-      <PriFiles Include="$(OutDir)*.pri" />
-      <XbfFiles Include="$(OutDir)*.xbf" />
-    </ItemGroup>
-    <Copy SourceFiles="@(PriFiles)" DestinationFolder="$(PublishDir)" />
-    <Copy SourceFiles="@(XbfFiles)" DestinationFolder="$(PublishDir)" />
-  </Target>
-  <Target Name="ArrangeGlanceModulesInPublishOutput" AfterTargets="Publish" DependsOnTargets="CopyPriAndXbfToPublish">
-    <ItemGroup>
-      <GlanceModulePublishFile Include="$(OutDir)Modules\*.glance" />
-      <GlanceModulePublishRootFile Include="$(PublishDir)Glance.Assistant.*;$(PublishDir)Glance.AudioSwitcher.*;$(PublishDir)Glance.Clipboard.*;$(PublishDir)Glance.ColorPicker.*;$(PublishDir)Glance.DevicePresence.*;$(PublishDir)Glance.DropShelf.*;$(PublishDir)Glance.FocusSession.*;$(PublishDir)Glance.Infinity.*;$(PublishDir)Glance.KeepAwake.*;$(PublishDir)Glance.Magnifier.*;$(PublishDir)Glance.Media.*;$(PublishDir)Glance.Power.*;$(PublishDir)Glance.Presence.*;$(PublishDir)Glance.PrivacyControls.*;$(PublishDir)Glance.QuickConvert.*;$(PublishDir)Glance.Reminders.*;$(PublishDir)Glance.RemovableDevices.*;$(PublishDir)Glance.ScreenCapture.*;$(PublishDir)Glance.ScreenRecorder.*;$(PublishDir)Glance.ScreenLens.*;$(PublishDir)Glance.SpeechToText.*;$(PublishDir)Glance.Stopwatch.*;$(PublishDir)Glance.Stash.*;$(PublishDir)Glance.SystemMonitor.*;$(PublishDir)Glance.ThemeSwitcher.*;$(PublishDir)Glance.Timer.*;$(PublishDir)Glance.VoiceNotes.*;$(PublishDir)Glance.Weather.*;$(PublishDir)Glance.WorldClock.*" />
-    </ItemGroup>
-    <RemoveDir Directories="$(PublishDir)Modules" />
-    <Copy SourceFiles="@(GlanceModulePublishFile)" DestinationFolder="$(PublishDir)Modules" SkipUnchangedFiles="true" />
-    <Delete Files="@(GlanceModulePublishRootFile)" />
-  </Target>
-  <UsingTask TaskName="ExtractWindowsAppRuntimeInsightsResource" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
-    <ParameterGroup>
-      <ArchivePath ParameterType="System.String" Required="true" />
-      <OutputPath ParameterType="System.String" Required="true" />
-    </ParameterGroup>
-    <Task>
-      <Using Namespace="System.IO" />
-      <Using Namespace="System.IO.Compression" />
-      <Code Type="Fragment" Language="cs"><![CDATA[
+      ]]>
+			</Code>
+		</Task>
+	</UsingTask>
+	<Target Name="ArrangeGlanceModulesInBuildOutput" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true'">
+		<MSBuild Projects="@(GlanceModuleProject)" Targets="Build" BuildInParallel="$(BuildInParallel)" Properties="Configuration=$(Configuration);Platform=$(Platform)" />
+		<ItemGroup>
+			<GlanceModuleStagingDirectory Include="$(OutDir)Modules\Assistant;$(OutDir)Modules\AudioSwitcher;$(OutDir)Modules\Clipboard;$(OutDir)Modules\ColorPicker;$(OutDir)Modules\DevicePresence;$(OutDir)Modules\DropShelf;$(OutDir)Modules\FocusSession;$(OutDir)Modules\Infinity;$(OutDir)Modules\KeepAwake;$(OutDir)Modules\Magnifier;$(OutDir)Modules\Media;$(OutDir)Modules\Power;$(OutDir)Modules\Presence;$(OutDir)Modules\PrivacyControls;$(OutDir)Modules\QuickConvert;$(OutDir)Modules\Reminders;$(OutDir)Modules\RemovableDevices;$(OutDir)Modules\ScreenCapture;$(OutDir)Modules\ScreenRecorder;$(OutDir)Modules\ScreenLens;$(OutDir)Modules\SpeechToText;$(OutDir)Modules\Stopwatch;$(OutDir)Modules\Stash;$(OutDir)Modules\SystemMonitor;$(OutDir)Modules\ThemeSwitcher;$(OutDir)Modules\Timer;$(OutDir)Modules\VoiceNotes;$(OutDir)Modules\Weather;$(OutDir)Modules\WorldClock" />
+			<ExistingGlanceModulePackage Include="$(OutDir)Modules\*.glance" />
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Glance.Assistant.*;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Betalgo.Ranul.OpenAI.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.AI.Foundry.Local.*.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Bcl.AsyncInterfaces.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.AI.Abstractions.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.Configuration*.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.Diagnostics.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.Http.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.Logging.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.Options.ConfigurationExtensions.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.ML.OnnxRuntime*.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Windows.AI.MachineLearning*.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\NAudio*.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\onnxruntime*;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\System.Numerics.Tensors.dll">
+				<ModuleName>Assistant</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.AudioSwitcher.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.AudioSwitcher.*">
+				<ModuleName>AudioSwitcher</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.AudioSwitcher.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\NAudio*.dll">
+				<ModuleName>AudioSwitcher</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Clipboard.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Clipboard.*">
+				<ModuleName>Clipboard</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Clipboard.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Microsoft.Data.Sqlite.dll;$(MSBuildProjectDirectory)\..\Glance.Clipboard.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.core.dll;$(MSBuildProjectDirectory)\..\Glance.Clipboard.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.provider.winsqlite3.dll">
+				<ModuleName>Clipboard</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.ColorPicker.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.ColorPicker.*">
+				<ModuleName>ColorPicker</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.ColorPicker.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Microsoft.Data.Sqlite.dll;$(MSBuildProjectDirectory)\..\Glance.ColorPicker.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.core.dll;$(MSBuildProjectDirectory)\..\Glance.ColorPicker.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.provider.winsqlite3.dll">
+				<ModuleName>ColorPicker</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.DevicePresence.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.DevicePresence.*">
+				<ModuleName>DevicePresence</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.DropShelf.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.DropShelf.*">
+				<ModuleName>DropShelf</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.FocusSession.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.FocusSession.*">
+				<ModuleName>FocusSession</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Infinity.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Infinity.*">
+				<ModuleName>Infinity</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.KeepAwake.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.KeepAwake.*">
+				<ModuleName>KeepAwake</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Magnifier.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Magnifier.*">
+				<ModuleName>Magnifier</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Media.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Media.*">
+				<ModuleName>Media</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Media.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\NAudio*.dll">
+				<ModuleName>Media</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Power.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Power.*">
+				<ModuleName>Power</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Presence.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Presence.*">
+				<ModuleName>Presence</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.PrivacyControls.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.PrivacyControls.*">
+				<ModuleName>PrivacyControls</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.QuickConvert.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.QuickConvert.*">
+				<ModuleName>QuickConvert</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.QuickConvert.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\ffmpeg\win-x64\ffmpeg.exe;$(MSBuildProjectDirectory)\..\Glance.QuickConvert.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\ffmpeg\win-x64\LICENSE.txt">
+				<ModuleName>QuickConvert</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.PrivacyControls.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\NAudio*.dll">
+				<ModuleName>PrivacyControls</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.RemovableDevices.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.RemovableDevices.*">
+				<ModuleName>RemovableDevices</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Reminders.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Reminders.*">
+				<ModuleName>Reminders</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Reminders.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Microsoft.Data.Sqlite.dll;$(MSBuildProjectDirectory)\..\Glance.Reminders.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.core.dll;$(MSBuildProjectDirectory)\..\Glance.Reminders.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.provider.winsqlite3.dll">
+				<ModuleName>Reminders</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.ScreenCapture.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.ScreenCapture.*">
+				<ModuleName>ScreenCapture</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.ScreenCapture.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Microsoft.Data.Sqlite.dll;$(MSBuildProjectDirectory)\..\Glance.ScreenCapture.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.core.dll;$(MSBuildProjectDirectory)\..\Glance.ScreenCapture.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.provider.winsqlite3.dll">
+				<ModuleName>ScreenCapture</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.ScreenRecorder.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.ScreenRecorder.*;$(MSBuildProjectDirectory)\..\Glance.ScreenRecorder.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Microsoft.Graphics.Canvas.*;$(MSBuildProjectDirectory)\..\Glance.ScreenRecorder.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\runtimes\win-$(Platform)\native\Microsoft.Graphics.Canvas.dll">
+				<ModuleName>ScreenRecorder</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.ScreenLens.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.ScreenLens.*">
+				<ModuleName>ScreenLens</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\Glance.SpeechToText.*">
+				<ModuleName>SpeechToText</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\NAudio*.dll">
+				<ModuleName>SpeechToText</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\Microsoft.Windows.AI.Projection.dll;$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\Microsoft.Windows.AI.Foundation.Projection.dll;$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\Microsoft.Windows.AI.Speech.dll;$(MSBuildProjectDirectory)\..\Glance.SpeechToText.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\Microsoft.Windows.AI.Speech.Projection.dll">
+				<ModuleName>SpeechToText</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Stopwatch.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Stopwatch.*">
+				<ModuleName>Stopwatch</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Stash.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Stash.*">
+				<ModuleName>Stash</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Stash.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Microsoft.Data.Sqlite.dll;$(MSBuildProjectDirectory)\..\Glance.Stash.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.core.dll;$(MSBuildProjectDirectory)\..\Glance.Stash.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.provider.winsqlite3.dll">
+				<ModuleName>Stash</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.SystemMonitor.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.SystemMonitor.*">
+				<ModuleName>SystemMonitor</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.ThemeSwitcher.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.ThemeSwitcher.*">
+				<ModuleName>ThemeSwitcher</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Timer.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Timer.*">
+				<ModuleName>Timer</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.VoiceNotes.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.VoiceNotes.*">
+				<ModuleName>VoiceNotes</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.VoiceNotes.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\NAudio*.dll">
+				<ModuleName>VoiceNotes</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.VoiceNotes.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Microsoft.Data.Sqlite.dll;$(MSBuildProjectDirectory)\..\Glance.VoiceNotes.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.core.dll;$(MSBuildProjectDirectory)\..\Glance.VoiceNotes.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\SQLitePCLRaw.provider.winsqlite3.dll">
+				<ModuleName>VoiceNotes</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Weather.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Weather.*">
+				<ModuleName>Weather</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.WorldClock.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.WorldClock.*">
+				<ModuleName>WorldClock</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildRootFile Include="$(OutDir)Glance.Assistant.*;$(OutDir)Glance.AudioSwitcher.*;$(OutDir)Glance.Clipboard.*;$(OutDir)Glance.ColorPicker.*;$(OutDir)Glance.DevicePresence.*;$(OutDir)Glance.DropShelf.*;$(OutDir)Glance.FocusSession.*;$(OutDir)Glance.Infinity.*;$(OutDir)Glance.KeepAwake.*;$(OutDir)Glance.Magnifier.*;$(OutDir)Glance.Media.*;$(OutDir)Glance.Power.*;$(OutDir)Glance.Presence.*;$(OutDir)Glance.PrivacyControls.*;$(OutDir)Glance.QuickConvert.*;$(OutDir)Glance.Reminders.*;$(OutDir)Glance.RemovableDevices.*;$(OutDir)Glance.ScreenCapture.*;$(OutDir)Glance.ScreenRecorder.*;$(OutDir)Glance.ScreenLens.*;$(OutDir)Glance.SpeechToText.*;$(OutDir)Glance.Stopwatch.*;$(OutDir)Glance.Stash.*;$(OutDir)Glance.SystemMonitor.*;$(OutDir)Glance.ThemeSwitcher.*;$(OutDir)Glance.Timer.*;$(OutDir)Glance.VoiceNotes.*;$(OutDir)Glance.Weather.*;$(OutDir)Glance.WorldClock.*" />
+			<GlanceModuleRootXbfDirectory Include="$(OutDir)Glance.Assistant.WinUI;$(OutDir)Glance.AudioSwitcher.WinUI;$(OutDir)Glance.Clipboard.WinUI;$(OutDir)Glance.ColorPicker.WinUI;$(OutDir)Glance.DevicePresence.WinUI;$(OutDir)Glance.DropShelf.WinUI;$(OutDir)Glance.FocusSession.WinUI;$(OutDir)Glance.Infinity.WinUI;$(OutDir)Glance.KeepAwake.WinUI;$(OutDir)Glance.Magnifier.WinUI;$(OutDir)Glance.Media.WinUI;$(OutDir)Glance.Power.WinUI;$(OutDir)Glance.Presence.WinUI;$(OutDir)Glance.PrivacyControls.WinUI;$(OutDir)Glance.QuickConvert.WinUI;$(OutDir)Glance.Reminders.WinUI;$(OutDir)Glance.RemovableDevices.WinUI;$(OutDir)Glance.ScreenCapture.WinUI;$(OutDir)Glance.ScreenRecorder.WinUI;$(OutDir)Glance.ScreenLens.WinUI;$(OutDir)Glance.SpeechToText.WinUI;$(OutDir)Glance.Stopwatch.WinUI;$(OutDir)Glance.Stash.WinUI;$(OutDir)Glance.SystemMonitor.WinUI;$(OutDir)Glance.ThemeSwitcher.WinUI;$(OutDir)Glance.Timer.WinUI;$(OutDir)Glance.VoiceNotes.WinUI;$(OutDir)Glance.Weather.WinUI;$(OutDir)Glance.WorldClock.WinUI" />
+		</ItemGroup>
+		<RemoveDir Directories="@(GlanceModuleStagingDirectory);$(OutDir)Modules\UI" />
+		<Delete Files="@(ExistingGlanceModulePackage)" />
+		<Copy SourceFiles="@(GlanceModuleBuildFile)" DestinationFiles="@(GlanceModuleBuildFile->'$(OutDir)Modules\%(ModuleName)\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Assistant" ArchivePath="$(OutDir)Modules\Assistant.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\AudioSwitcher" ArchivePath="$(OutDir)Modules\AudioSwitcher.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Clipboard" ArchivePath="$(OutDir)Modules\Clipboard.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ColorPicker" ArchivePath="$(OutDir)Modules\ColorPicker.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\DevicePresence" ArchivePath="$(OutDir)Modules\DevicePresence.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\DropShelf" ArchivePath="$(OutDir)Modules\DropShelf.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\FocusSession" ArchivePath="$(OutDir)Modules\FocusSession.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Infinity" ArchivePath="$(OutDir)Modules\Infinity.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\KeepAwake" ArchivePath="$(OutDir)Modules\KeepAwake.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Magnifier" ArchivePath="$(OutDir)Modules\Magnifier.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Media" ArchivePath="$(OutDir)Modules\Media.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Power" ArchivePath="$(OutDir)Modules\Power.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Presence" ArchivePath="$(OutDir)Modules\Presence.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\PrivacyControls" ArchivePath="$(OutDir)Modules\PrivacyControls.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\QuickConvert" ArchivePath="$(OutDir)Modules\QuickConvert.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\RemovableDevices" ArchivePath="$(OutDir)Modules\RemovableDevices.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Reminders" ArchivePath="$(OutDir)Modules\Reminders.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ScreenCapture" ArchivePath="$(OutDir)Modules\ScreenCapture.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ScreenRecorder" ArchivePath="$(OutDir)Modules\ScreenRecorder.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ScreenLens" ArchivePath="$(OutDir)Modules\ScreenLens.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\SpeechToText" ArchivePath="$(OutDir)Modules\SpeechToText.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Stopwatch" ArchivePath="$(OutDir)Modules\Stopwatch.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Stash" ArchivePath="$(OutDir)Modules\Stash.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\SystemMonitor" ArchivePath="$(OutDir)Modules\SystemMonitor.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ThemeSwitcher" ArchivePath="$(OutDir)Modules\ThemeSwitcher.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Timer" ArchivePath="$(OutDir)Modules\Timer.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\VoiceNotes" ArchivePath="$(OutDir)Modules\VoiceNotes.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Weather" ArchivePath="$(OutDir)Modules\Weather.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\WorldClock" ArchivePath="$(OutDir)Modules\WorldClock.glance" />
+		<RemoveDir Directories="@(GlanceModuleStagingDirectory)" />
+		<Delete Files="@(GlanceModuleBuildRootFile)" />
+		<RemoveDir Directories="@(GlanceModuleRootXbfDirectory)" />
+	</Target>
+	<Target Name="RegisterDebugExternalPackage" AfterTargets="ArrangeGlanceModulesInBuildOutput" Condition="'$(Configuration)' == 'Debug' and '$(DesignTimeBuild)' != 'true'">
+		<Exec Command="powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\ExternalLocation\Register-DebugPackage.ps1&quot; -ManifestPath &quot;$(MSBuildProjectDirectory)\..\ExternalLocation\Debug\AppxManifest.xml&quot; -ExecutablePath &quot;$(TargetDir)$(AssemblyName).exe&quot;" />
+	</Target>
+	<Target Name="IncludeGlanceModulesInPackage" BeforeTargets="_ComputeAppxPackagePayload" DependsOnTargets="ArrangeGlanceModulesInBuildOutput" Condition="'$(EnableMsixTooling)' == 'true'">
+		<PropertyGroup>
+			<GlanceModulePackageDirectory>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(OutDir)', 'Modules'))</GlanceModulePackageDirectory>
+		</PropertyGroup>
+		<ItemGroup>
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)Assistant.glance" TargetPath="Modules\Assistant.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)AudioSwitcher.glance" TargetPath="Modules\AudioSwitcher.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)Clipboard.glance" TargetPath="Modules\Clipboard.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)ColorPicker.glance" TargetPath="Modules\ColorPicker.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)DevicePresence.glance" TargetPath="Modules\DevicePresence.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)DropShelf.glance" TargetPath="Modules\DropShelf.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)FocusSession.glance" TargetPath="Modules\FocusSession.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)Infinity.glance" TargetPath="Modules\Infinity.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)KeepAwake.glance" TargetPath="Modules\KeepAwake.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)Magnifier.glance" TargetPath="Modules\Magnifier.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)Media.glance" TargetPath="Modules\Media.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)Power.glance" TargetPath="Modules\Power.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)Presence.glance" TargetPath="Modules\Presence.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)PrivacyControls.glance" TargetPath="Modules\PrivacyControls.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)QuickConvert.glance" TargetPath="Modules\QuickConvert.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)RemovableDevices.glance" TargetPath="Modules\RemovableDevices.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)Reminders.glance" TargetPath="Modules\Reminders.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)ScreenCapture.glance" TargetPath="Modules\ScreenCapture.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)ScreenRecorder.glance" TargetPath="Modules\ScreenRecorder.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)ScreenLens.glance" TargetPath="Modules\ScreenLens.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)SpeechToText.glance" TargetPath="Modules\SpeechToText.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)Stopwatch.glance" TargetPath="Modules\Stopwatch.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)Stash.glance" TargetPath="Modules\Stash.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)SystemMonitor.glance" TargetPath="Modules\SystemMonitor.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)ThemeSwitcher.glance" TargetPath="Modules\ThemeSwitcher.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)Timer.glance" TargetPath="Modules\Timer.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)VoiceNotes.glance" TargetPath="Modules\VoiceNotes.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)Weather.glance" TargetPath="Modules\Weather.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)WorldClock.glance" TargetPath="Modules\WorldClock.glance" />
+			<GlanceModulePackage Update="@(GlanceModulePackage)" OutputGroup="ContentFilesProjectOutputGroup" />
+			<PackagingOutputs Include="@(GlanceModulePackage)" />
+		</ItemGroup>
+	</Target>
+	<Target Name="CopyPriAndXbfToPublish" AfterTargets="Publish">
+		<ItemGroup>
+			<PriFiles Include="$(OutDir)*.pri" />
+			<XbfFiles Include="$(OutDir)*.xbf" />
+		</ItemGroup>
+		<Copy SourceFiles="@(PriFiles)" DestinationFolder="$(PublishDir)" />
+		<Copy SourceFiles="@(XbfFiles)" DestinationFolder="$(PublishDir)" />
+	</Target>
+	<Target Name="ArrangeGlanceModulesInPublishOutput" AfterTargets="Publish" DependsOnTargets="CopyPriAndXbfToPublish">
+		<ItemGroup>
+			<GlanceModulePublishFile Include="$(OutDir)Modules\*.glance" />
+			<GlanceModulePublishRootFile Include="$(PublishDir)Glance.Assistant.*;$(PublishDir)Glance.AudioSwitcher.*;$(PublishDir)Glance.Clipboard.*;$(PublishDir)Glance.ColorPicker.*;$(PublishDir)Glance.DevicePresence.*;$(PublishDir)Glance.DropShelf.*;$(PublishDir)Glance.FocusSession.*;$(PublishDir)Glance.Infinity.*;$(PublishDir)Glance.KeepAwake.*;$(PublishDir)Glance.Magnifier.*;$(PublishDir)Glance.Media.*;$(PublishDir)Glance.Power.*;$(PublishDir)Glance.Presence.*;$(PublishDir)Glance.PrivacyControls.*;$(PublishDir)Glance.QuickConvert.*;$(PublishDir)Glance.Reminders.*;$(PublishDir)Glance.RemovableDevices.*;$(PublishDir)Glance.ScreenCapture.*;$(PublishDir)Glance.ScreenRecorder.*;$(PublishDir)Glance.ScreenLens.*;$(PublishDir)Glance.SpeechToText.*;$(PublishDir)Glance.Stopwatch.*;$(PublishDir)Glance.Stash.*;$(PublishDir)Glance.SystemMonitor.*;$(PublishDir)Glance.ThemeSwitcher.*;$(PublishDir)Glance.Timer.*;$(PublishDir)Glance.VoiceNotes.*;$(PublishDir)Glance.Weather.*;$(PublishDir)Glance.WorldClock.*" />
+		</ItemGroup>
+		<RemoveDir Directories="$(PublishDir)Modules" />
+		<Copy SourceFiles="@(GlanceModulePublishFile)" DestinationFolder="$(PublishDir)Modules" SkipUnchangedFiles="true" />
+		<Delete Files="@(GlanceModulePublishRootFile)" />
+	</Target>
+	<UsingTask TaskName="ExtractWindowsAppRuntimeInsightsResource" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+		<ParameterGroup>
+			<ArchivePath ParameterType="System.String" Required="true" />
+			<OutputPath ParameterType="System.String" Required="true" />
+		</ParameterGroup>
+		<Task>
+			<Using Namespace="System.IO" />
+			<Using Namespace="System.IO.Compression" />
+			<Code Type="Fragment" Language="cs">
+				<![CDATA[
         const string entryName = "Microsoft.WindowsAppRuntime.Insights.Resource.dll";
         using (ZipArchive archive = ZipFile.OpenRead(ArchivePath))
         {
@@ -308,20 +396,21 @@
             entry.ExtractToFile(OutputPath, true);
           }
         }
-      ]]></Code>
-    </Task>
-  </UsingTask>
-  <Target Name="CopyWindowsAppRuntimeInsightsResourceToPublish" AfterTargets="Publish" Condition="'$(WindowsAppSDKSelfContained)' == 'true'">
-    <PropertyGroup>
-      <WindowsAppRuntimeFrameworkMsix>$(PkgMicrosoft_WindowsAppSDK_Runtime)\tools\MSIX\win10-x64\Microsoft.WindowsAppRuntime.2.msix</WindowsAppRuntimeFrameworkMsix>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(WindowsAppRuntimeFrameworkMsix)')" Text="Windows App Runtime framework package was not found at $(WindowsAppRuntimeFrameworkMsix)." />
-    <ExtractWindowsAppRuntimeInsightsResource ArchivePath="$(WindowsAppRuntimeFrameworkMsix)" OutputPath="$(PublishDir)Microsoft.WindowsAppRuntime.Insights.Resource.dll" />
-  </Target>
-  <Target Name="CorrectDynamicXamlMetadataPath" BeforeTargets="_UpdateWindowsMetadataReference" Condition="'$(EnableMsixTooling)' == 'true'">
-    <ItemGroup>
-      <WindowsMetadataReference Remove="$(DynamicXamlWinMDPath)" />
-      <WindowsMetadataReference Include="$(PkgDynamicXaml_WinUI)\lib\native\DynamicXaml.WinUI.winmd" Implementation="DynamicXaml.WinUI.dll" />
-    </ItemGroup>
-  </Target>
+      ]]>
+			</Code>
+		</Task>
+	</UsingTask>
+	<Target Name="CopyWindowsAppRuntimeInsightsResourceToPublish" AfterTargets="Publish" Condition="'$(WindowsAppSDKSelfContained)' == 'true'">
+		<PropertyGroup>
+			<WindowsAppRuntimeFrameworkMsix>$(PkgMicrosoft_WindowsAppSDK_Runtime)\tools\MSIX\win10-x64\Microsoft.WindowsAppRuntime.2.msix</WindowsAppRuntimeFrameworkMsix>
+		</PropertyGroup>
+		<Error Condition="!Exists('$(WindowsAppRuntimeFrameworkMsix)')" Text="Windows App Runtime framework package was not found at $(WindowsAppRuntimeFrameworkMsix)." />
+		<ExtractWindowsAppRuntimeInsightsResource ArchivePath="$(WindowsAppRuntimeFrameworkMsix)" OutputPath="$(PublishDir)Microsoft.WindowsAppRuntime.Insights.Resource.dll" />
+	</Target>
+	<Target Name="CorrectDynamicXamlMetadataPath" BeforeTargets="_UpdateWindowsMetadataReference" Condition="'$(EnableMsixTooling)' == 'true'">
+		<ItemGroup>
+			<WindowsMetadataReference Remove="$(DynamicXamlWinMDPath)" />
+			<WindowsMetadataReference Include="$(PkgDynamicXaml_WinUI)\lib\native\DynamicXaml.WinUI.winmd" Implementation="DynamicXaml.WinUI.dll" />
+		</ItemGroup>
+	</Target>
 </Project>

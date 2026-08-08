@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="Glance.Shell.WinUI.SetupExpansionTourView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    HorizontalAlignment="Stretch"
+    VerticalAlignment="Stretch"
+    HorizontalContentAlignment="Center"
+    VerticalContentAlignment="Top">
+    <StackPanel
+        MaxWidth="600"
+        HorizontalAlignment="Center"
+        Spacing="28">
+        <Grid
+            Height="300"
+            ColumnDefinitions="288,24,288">
+            <Button
+                Grid.Column="0"
+                Width="288"
+                Height="300"
+                Padding="0"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                Background="Transparent"
+                BorderThickness="0"
+                Click="HandleCompactClicked">
+                <Border
+                    Padding="12"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="14">
+                    <Grid RowDefinitions="190,*">
+                        <Border
+                            Grid.RowSpan="2"
+                            Margin="-12"
+                            BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+                            BorderThickness="2"
+                            CornerRadius="14"
+                            IsHitTestVisible="False"
+                            Opacity="{x:Bind ViewModel.CompactModeSelectionOpacity, Mode=OneWay}" />
+                        <Border
+                            Background="{ThemeResource LayerFillColorAltBrush}"
+                            CornerRadius="10">
+                            <Grid>
+                                <Grid.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Offset="0" Color="#162E668F" />
+                                        <GradientStop Offset="0.52" Color="#2436599B" />
+                                        <GradientStop Offset="1" Color="#30240B45" />
+                                    </LinearGradientBrush>
+                                </Grid.Background>
+                                <Border
+                                    Width="94"
+                                    Height="72"
+                                    Margin="20,44,0,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Background="{ThemeResource ControlFillColorDefaultBrush}"
+                                    CornerRadius="8" />
+                                <Border
+                                    Width="80"
+                                    Height="60"
+                                    Margin="0,66,20,0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                    CornerRadius="8" />
+                                <Grid
+                                    x:Name="CompactIsland"
+                                    Width="156"
+                                    Height="44"
+                                    Margin="0,12,0,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Top">
+                                    <Border
+                                        Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+                                        BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="22" />
+                                    <StackPanel
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Orientation="Horizontal"
+                                        Spacing="8">
+                                        <Ellipse Width="12" Height="12" Fill="{ThemeResource AccentFillColorDefaultBrush}" />
+                                        <Rectangle Width="52" Height="6" Fill="{ThemeResource TextFillColorPrimaryBrush}" RadiusX="3" RadiusY="3" />
+                                        <Ellipse Width="5" Height="5" Fill="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    </StackPanel>
+                                </Grid>
+                                <FontIcon
+                                    x:Name="CompactPointer"
+                                    Margin="0,76,48,0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    FontSize="20"
+                                    Glyph="&#xE8B0;" />
+                                <Border Height="32" VerticalAlignment="Bottom" Background="#B0181B22">
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
+                                        <Rectangle Width="14" Height="14" Fill="#FF60CDFF" RadiusX="4" RadiusY="4" />
+                                        <Rectangle Width="14" Height="14" Fill="#FF8B76E8" RadiusX="4" RadiusY="4" />
+                                        <Rectangle Width="14" Height="14" Fill="#FFF763C6" RadiusX="4" RadiusY="4" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <StackPanel
+                            Grid.Row="1"
+                            Margin="4,12,4,0"
+                            Spacing="4">
+                            <TextBlock x:Uid="SetupExpansionCompactTitle" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <TextBlock
+                                x:Uid="SetupExpansionCompactDescription"
+                                MinHeight="36"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                MaxLines="2"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Button>
+            <Button
+                Grid.Column="2"
+                Width="288"
+                Height="300"
+                Padding="0"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                Background="Transparent"
+                BorderThickness="0"
+                Click="HandleExpandedClicked">
+                <Border
+                    Padding="12"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="14">
+                    <Grid RowDefinitions="190,*">
+                        <Border
+                            Grid.RowSpan="2"
+                            Margin="-12"
+                            BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+                            BorderThickness="2"
+                            CornerRadius="14"
+                            IsHitTestVisible="False"
+                            Opacity="{x:Bind ViewModel.ExpandedModeSelectionOpacity, Mode=OneWay}" />
+                        <Border
+                            Background="{ThemeResource LayerFillColorAltBrush}"
+                            CornerRadius="10">
+                            <Grid>
+                                <Grid.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Offset="0" Color="#162E668F" />
+                                        <GradientStop Offset="0.52" Color="#2436599B" />
+                                        <GradientStop Offset="1" Color="#30240B45" />
+                                    </LinearGradientBrush>
+                                </Grid.Background>
+                                <Border Width="94" Height="72" Margin="20,44,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{ThemeResource ControlFillColorDefaultBrush}" CornerRadius="8" />
+                                <Border Width="80" Height="60" Margin="0,66,20,0" HorizontalAlignment="Right" VerticalAlignment="Top" Background="{ThemeResource ControlFillColorSecondaryBrush}" CornerRadius="8" />
+                                <Grid
+                                    x:Name="ExpandedIsland"
+                                    Width="156"
+                                    Height="62"
+                                    Margin="0,12,0,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Top">
+                                    <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="26" />
+                                    <Grid Padding="16,10" ColumnDefinitions="Auto,*,Auto">
+                                        <Ellipse Width="24" Height="24" Fill="{ThemeResource AccentFillColorDefaultBrush}" />
+                                        <StackPanel Grid.Column="1" Margin="9,0" VerticalAlignment="Center" Spacing="4">
+                                            <Rectangle Width="58" Height="6" HorizontalAlignment="Left" Fill="{ThemeResource TextFillColorPrimaryBrush}" RadiusX="3" RadiusY="3" />
+                                            <Rectangle Width="44" Height="5" HorizontalAlignment="Left" Fill="{ThemeResource TextFillColorSecondaryBrush}" RadiusX="2.5" RadiusY="2.5" />
+                                        </StackPanel>
+                                        <Ellipse x:Name="ExpandedActivity" Grid.Column="2" Width="9" Height="9" Fill="{ThemeResource AccentFillColorDefaultBrush}" />
+                                    </Grid>
+                                </Grid>
+                                <FontIcon
+                                    x:Name="ExpandedPointer"
+                                    Margin="0,90,44,0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    FontSize="20"
+                                    Glyph="&#xE8B0;" />
+                                <Border Height="32" VerticalAlignment="Bottom" Background="#B0181B22">
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
+                                        <Rectangle Width="14" Height="14" Fill="#FF60CDFF" RadiusX="4" RadiusY="4" />
+                                        <Rectangle Width="14" Height="14" Fill="#FF8B76E8" RadiusX="4" RadiusY="4" />
+                                        <Rectangle Width="14" Height="14" Fill="#FFF763C6" RadiusX="4" RadiusY="4" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <StackPanel
+                            Grid.Row="1"
+                            Margin="4,12,4,0"
+                            Spacing="4">
+                            <TextBlock x:Uid="SetupExpansionExpandedTitle" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <TextBlock
+                                x:Uid="SetupExpansionExpandedDescription"
+                                MinHeight="36"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                MaxLines="2"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Button>
+        </Grid>
+        <StackPanel Spacing="8">
+            <TextBlock
+                x:Uid="SetupExpansionTitle"
+                Style="{StaticResource TitleTextBlockStyle}"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+            <TextBlock
+                x:Uid="SetupExpansionDescription"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

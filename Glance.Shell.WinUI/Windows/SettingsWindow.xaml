@@ -17,7 +17,11 @@
             x:Uid="SettingsTitleBar"
             BackRequested="HandleBackRequested"
             IsBackButtonEnabled="False"
-            IsBackButtonVisible="False" />
+            IsBackButtonVisible="False">
+            <TitleBar.IconSource>
+                <ImageIconSource ImageSource="ms-appx:///Assets/GlanceLogo.png" />
+            </TitleBar.IconSource>
+        </TitleBar>
         <NavigationView
             x:Name="SettingsNavigation"
             Grid.Row="1"

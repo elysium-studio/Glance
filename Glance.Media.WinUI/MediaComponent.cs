@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +24,10 @@ public sealed partial class MediaComponent :
     IDisposable
 {
     private const int ArtworkMissingDelayMs = 700;
+    private const int ErrorDeviceNotReady = unchecked((int)0x80070015);
+    private const int ErrorElementNotFound = unchecked((int)0x80070490);
+    private const int ErrorObjectClosed = unchecked((int)0x80000013);
+    private const int ErrorRpcDisconnected = unchecked((int)0x80010108);
     private const int MediaRefreshDelayMs = 120;
     private const int SessionMissingDelayMs = 700;
 
@@ -383,14 +388,24 @@ public sealed partial class MediaComponent :
             return;
         }
 
-        GlobalSystemMediaTransportControlsSessionMediaProperties properties =
-            await mediaSession.TryGetMediaPropertiesAsync();
+        GlobalSystemMediaTransportControlsSessionMediaProperties properties;
+        string source;
+        GlobalSystemMediaTransportControlsSessionPlaybackInfo? playbackInfo;
+
+        try
+        {
+            properties = await mediaSession.TryGetMediaPropertiesAsync();
+            source = FormatSourceName(mediaSession.SourceAppUserModelId);
+            playbackInfo = mediaSession.GetPlaybackInfo();
+        }
+        catch (COMException exception) when (IsUnavailableMediaSession(exception))
+        {
+            await RecoverUnavailableSessionAsync(mediaSession, generation);
+            return;
+        }
 
         string title = string.IsNullOrWhiteSpace(properties.Title) ? localizer.GetText("UnknownTrack") : properties.Title;
         string artist = string.IsNullOrWhiteSpace(properties.Artist) ? localizer.GetText("UnknownArtist") : properties.Artist;
-        string source = FormatSourceName(mediaSession.SourceAppUserModelId);
-        GlobalSystemMediaTransportControlsSessionPlaybackInfo? playbackInfo =
-            mediaSession.GetPlaybackInfo();
         IRandomAccessStreamWithContentType? artworkStream = null;
         string? artworkHash = null;
         uint accentColor = MediaViewModel.DefaultAccentColor;
@@ -541,12 +556,40 @@ public sealed partial class MediaComponent :
 
     private void RefreshPlaybackState()
     {
-        GlobalSystemMediaTransportControlsSessionPlaybackInfo? playbackInfo =
-            session?.GetPlaybackInfo();
+        GlobalSystemMediaTransportControlsSession? mediaSession = session;
+        GlobalSystemMediaTransportControlsSessionPlaybackInfo? playbackInfo;
 
-        viewModel.HasSession = session is not null;
+        try
+        {
+            playbackInfo = mediaSession?.GetPlaybackInfo();
+        }
+        catch (COMException exception) when (IsUnavailableMediaSession(exception))
+        {
+            ScheduleSessionMissingCheck();
+            return;
+        }
+
+        viewModel.HasSession = mediaSession is not null;
         ApplyPlaybackInfo(playbackInfo);
     }
+
+    private Task RecoverUnavailableSessionAsync(GlobalSystemMediaTransportControlsSession unavailableSession,
+        int generation) => RunOnDispatcherAsync(() =>
+        {
+            if (generation != refreshGeneration || !ReferenceEquals(unavailableSession, session))
+            {
+                return Task.CompletedTask;
+            }
+
+            ScheduleSessionMissingCheck();
+            return Task.CompletedTask;
+        });
+
+    private static bool IsUnavailableMediaSession(COMException exception) => exception.HResult is
+        ErrorDeviceNotReady or
+        ErrorElementNotFound or
+        ErrorObjectClosed or
+        ErrorRpcDisconnected;
 
     private void ShowEmptyState()
     {

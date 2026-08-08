@@ -1,6 +1,7 @@
 using Elysium.Application;
 using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
+using Elysium.Presentation.Abstractions;
 using Elysium.UI.WinUI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,6 +24,7 @@ public sealed partial class App
     private IHost? host;
     private GlanceModuleManager? moduleManager;
     private Task? shutdownTask;
+    private Task? startupNavigationTask;
 
     public App() => InitializeComponent();
 
@@ -34,7 +36,7 @@ public sealed partial class App
 
         host = Host.CreateDefaultBuilder().UseWritableContentRoot(applicationData).ConfigureServices(services => _ = services
                     .AddSingleton<IApplicationLifetime>(new ApplicationLifetime(ShutdownAsync))
-                    .AddApplication().AddPresentation().AddModules(new ApplicationModule(applicationData, applicationDispatcherQueue), new ConfigurationModule(), new LocalizationModule(), new NavigationModule(), new DesktopModule(), new BridgeModule(), new SettingsModule(), new GlanceSettingsModule(), new ModulesSettingsModule(), new WindowsSettingsModule()))
+                    .AddApplication().AddPresentation().AddModules(new ApplicationModule(applicationData, applicationDispatcherQueue), new ConfigurationModule(), new LocalizationModule(), new NavigationModule(), new DesktopModule(), new BridgeModule(), new SettingsModule(), new GlanceSettingsModule(), new ModulesSettingsModule(), new SetupTourModule(), new WindowsSettingsModule()))
             .Build();
 
         host.Start();
@@ -48,6 +50,12 @@ public sealed partial class App
 
         _ = host.Services.GetRequiredKeyedService<DesktopIslandView>("DesktopIslandView");
         moduleManager.StartWatching();
+
+        //if (host.Services.GetRequiredService<GlanceSettings>().ShowSetupOnStartup)
+        {
+            startupNavigationTask = NavigateToStartupTourAsync(host.Services.GetRequiredService<INavigator>(),
+                host.Services.GetRequiredService<ILogger<App>>());
+        }
     }
 
     private Task ShutdownAsync()
@@ -71,6 +79,11 @@ public sealed partial class App
 
         if (currentHost is not null)
         {
+            if (startupNavigationTask is not null)
+            {
+                await startupNavigationTask;
+            }
+
             await currentHost.StopAsync();
             await CompleteShutdownAsync(currentHost);
             return;
@@ -116,5 +129,18 @@ public sealed partial class App
         currentHost.Dispose();
         host = null;
         Current.Exit();
+    }
+
+    private static async Task NavigateToStartupTourAsync(INavigator navigator,
+        ILogger logger)
+    {
+        try
+        {
+            await navigator.NavigateAsync("SetupTourWindow");
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Failed to navigate to the startup setup tour");
+        }
     }
 }
