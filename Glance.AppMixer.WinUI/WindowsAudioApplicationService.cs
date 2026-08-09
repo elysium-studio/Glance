@@ -69,6 +69,11 @@ public sealed class WindowsAudioApplicationService :
 
                 try
                 {
+                    if (IsGlanceSession(session))
+                    {
+                        continue;
+                    }
+
                     SessionIdentity identity = GetSessionIdentity(session);
                     snapshots.Add(new SessionSnapshot(identity.Id,
                         identity.ProcessName,
@@ -118,6 +123,11 @@ public sealed class WindowsAudioApplicationService :
 
                     try
                     {
+                        if (IsGlanceSession(session))
+                        {
+                            continue;
+                        }
+
                         if (!string.Equals(GetSessionIdentity(session).Id, applicationId, StringComparison.OrdinalIgnoreCase))
                         {
                             continue;
@@ -151,6 +161,9 @@ public sealed class WindowsAudioApplicationService :
 
         return updated;
     }
+
+    private static bool IsGlanceSession(AudioSessionControl session) =>
+        !session.IsSystemSoundsSession && session.GetProcessID == (uint)Environment.ProcessId;
 
     private static SessionIdentity GetSessionIdentity(AudioSessionControl session)
     {
