@@ -43,10 +43,11 @@
                         x:Name="ModulesPage"
                         Visibility="{x:Bind ToPageVisibility(ViewModel.CurrentPage, 4), Mode=OneWay}" />
                     <PipsPager
+                        x:Name="TourPager"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Bottom"
                         NextButtonVisibility="Collapsed"
-                        NumberOfPages="5"
+                        NumberOfPages="{x:Bind ViewModel.Count, Mode=OneTime}"
                         PreviousButtonVisibility="Collapsed"
                         SelectedPageIndex="{x:Bind ViewModel.CurrentPage, Mode=TwoWay}" />
                 </Grid>

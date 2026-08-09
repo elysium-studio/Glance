@@ -67,5 +67,5 @@ public sealed class NavigationModule :
 
                 return provider.GetKeyedService(type, key);
             }))
-            .AddServiceFactory().AddSingleton<WindowRegistry>().AddKeyedSingleton<INavigationHandler, WindowHandler>(typeof(Window)).AddKeyedSingleton<INavigationHandler, ContentDialogHandler>(typeof(ContentDialog)).AddKeyedSingleton<INavigationHandler, PopupHandler>(typeof(Popup));
+            .AddServiceFactory().AddSingleton<WindowRegistry>().AddKeyedSingleton<INavigationHandler, WindowHandler>(typeof(Window)).AddKeyedSingleton<INavigationHandler, GlanceContentDialogHandler>(typeof(ContentDialog)).AddKeyedSingleton<INavigationHandler, PopupHandler>(typeof(Popup));
 }

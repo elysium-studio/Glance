@@ -47,6 +47,22 @@ public sealed partial class SetupTourWindow :
     {
         ((FrameworkElement)Content).Loaded -= HandleContentLoaded;
         ViewModel.Finished += HandleViewModelFinished;
+        RefreshTourPager();
+    }
+
+    private void RefreshTourPager()
+    {
+        int pageCount = ViewModel.Count;
+        TourPager.NumberOfPages = 1;
+
+        _ = DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low,
+            () =>
+            {
+                TourPager.NumberOfPages = pageCount;
+                TourPager.SelectedPageIndex = ViewModel.CurrentPage;
+                TourPager.InvalidateMeasure();
+                TourPager.UpdateLayout();
+            });
     }
 
     private void HandleViewModelFinished(object? sender,

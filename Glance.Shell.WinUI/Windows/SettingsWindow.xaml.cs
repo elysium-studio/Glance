@@ -142,14 +142,9 @@ public sealed partial class SettingsWindow :
 
         try
         {
-            ContentDialog dialog = new()
+            QuitDialog dialog = new(localizer)
             {
-                XamlRoot = ((FrameworkElement)Content).XamlRoot,
-                Title = localizer.GetText("QuitDialogTitle"),
-                Content = localizer.GetText("QuitDialogMessage"),
-                PrimaryButtonText = localizer.GetText("QuitDialogPrimaryButton"),
-                CloseButtonText = localizer.GetText("QuitDialogCloseButton"),
-                DefaultButton = ContentDialogButton.Close
+                XamlRoot = ((FrameworkElement)Content).XamlRoot
             };
 
             if (await dialog.ShowAsync() == ContentDialogResult.Primary)
@@ -178,13 +173,10 @@ public sealed partial class SettingsWindow :
 
         try
         {
-            ContentDialog dialog = new()
+            AboutDialog dialog = new(aboutViewModel,
+                localizer)
             {
-                XamlRoot = ((FrameworkElement)Content).XamlRoot,
-                Title = localizer.GetText("AboutDialogTitle"),
-                Content = new AboutDialog(aboutViewModel),
-                CloseButtonText = localizer.GetText("AboutDialogCloseButton"),
-                DefaultButton = ContentDialogButton.Close
+                XamlRoot = ((FrameworkElement)Content).XamlRoot
             };
             _ = await dialog.ShowAsync();
         }
