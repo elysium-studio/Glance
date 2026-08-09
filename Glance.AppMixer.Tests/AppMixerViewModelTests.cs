@@ -1,4 +1,5 @@
 using Glance.Application.Abstractions;
+using Xunit;
 
 namespace Glance.AppMixer.Tests;
 

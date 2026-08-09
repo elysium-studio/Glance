@@ -24,9 +24,9 @@ public sealed partial class AppMixerExpandedView :
 
     public string Title => localizer.GetText("ModuleDisplayName");
 
-    private static string ToUpper(string value) => value.ToUpperInvariant();
+    private string ToUpper(string value) => value.ToUpperInvariant();
 
-    private static Visibility WhenEmpty(bool hasApplications) => hasApplications ? Visibility.Collapsed : Visibility.Visible;
+    private Visibility WhenEmpty(bool hasApplications) => hasApplications ? Visibility.Collapsed : Visibility.Visible;
 
-    private static Visibility WhenPopulated(bool hasApplications) => hasApplications ? Visibility.Visible : Visibility.Collapsed;
+    private Visibility WhenPopulated(bool hasApplications) => hasApplications ? Visibility.Visible : Visibility.Collapsed;
 }

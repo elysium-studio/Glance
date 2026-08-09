@@ -17,5 +17,5 @@ public sealed partial class AppMixerCompactView :
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
-    private static Visibility WhenPopulated(bool hasApplications) => hasApplications ? Visibility.Visible : Visibility.Collapsed;
+    private Visibility WhenPopulated(bool hasApplications) => hasApplications ? Visibility.Visible : Visibility.Collapsed;
 }
