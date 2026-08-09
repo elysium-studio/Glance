@@ -1,6 +1,7 @@
 using Elysium.Presentation;
 using Elysium.Presentation.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 
@@ -11,6 +12,7 @@ internal sealed class GlanceRuntimeServiceProvider :
 {
     private readonly List<IServiceProvider> moduleProviders = [];
     private readonly object synchronization = new();
+    private readonly INavigator navigator;
     private readonly IViewFactory viewFactory;
     private readonly IViewModelFactory viewModelFactory;
     private readonly IServiceProvider applicationServices;
@@ -20,6 +22,10 @@ internal sealed class GlanceRuntimeServiceProvider :
         this.applicationServices = applicationServices;
         viewFactory = new ViewFactory(CreateView);
         viewModelFactory = new ViewModelFactory(CreateViewModel);
+        navigator = new Navigator(viewFactory,
+            viewModelFactory,
+            applicationServices.GetRequiredService<INavigationHandlerRegistry>(),
+            applicationServices.GetRequiredService<ILogger<Navigator>>());
     }
 
     public void AddModuleProvider(IServiceProvider provider)
@@ -37,7 +43,12 @@ internal sealed class GlanceRuntimeServiceProvider :
             return viewFactory;
         }
 
-        return serviceType == typeof(IViewModelFactory) ? viewModelFactory : applicationServices.GetService(serviceType);
+        if (serviceType == typeof(IViewModelFactory))
+        {
+            return viewModelFactory;
+        }
+
+        return serviceType == typeof(INavigator) ? navigator : applicationServices.GetService(serviceType);
     }
 
     private object? CreateView(string key, object?[]? arguments)

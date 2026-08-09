@@ -112,7 +112,7 @@ internal sealed class GlanceModuleManager :
 
         try
         {
-            runtime = await GlanceModuleRuntime.CreateAsync(applicationServices, result.Modules);
+            runtime = await GlanceModuleRuntime.CreateAsync(runtimeServices, result.Modules);
             IReadOnlyList<IGlanceComponent> components = (IGlanceComponent[])[.. runtime.Services.GetServices<IGlanceComponent>()];
             IReadOnlyList<IGlanceAssistantProvider> assistantProviders = (IGlanceAssistantProvider[])[.. runtime.Services.GetServices<IGlanceAssistantProvider>()];
             IReadOnlyList<IGlanceAssistantCommandHandler> assistantCommandHandlers = (IGlanceAssistantCommandHandler[])[.. runtime.Services.GetServices<IGlanceAssistantCommandHandler>()];
