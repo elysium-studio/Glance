@@ -23,6 +23,7 @@ public sealed partial class AudioApplicationItemViewModel :
     private bool isMuted;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PeakScale))]
     private double peakPercent;
 
     [ObservableProperty]
@@ -45,6 +46,8 @@ public sealed partial class AudioApplicationItemViewModel :
     public string MuteGlyph => IsMuted ? "\uE74F" : "\uE767";
 
     public string MuteLabel => IsMuted ? "Unmute" : "Mute";
+
+    public double PeakScale => PeakPercent / 100;
 
     public void ToggleMute() => IsMuted = !IsMuted;
 

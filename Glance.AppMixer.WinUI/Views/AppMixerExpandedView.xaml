@@ -50,15 +50,20 @@
                                 IsHitTestVisible="False"
                                 Maximum="100"
                                 Value="{x:Bind Volume, Mode=OneWay}" />
-                            <ProgressBar
+                            <Rectangle
                                 Height="2"
                                 Margin="8,0"
                                 VerticalAlignment="Center"
-                                Background="Transparent"
-                                Foreground="{ThemeResource GlanceAppMixerMeterBrush}"
+                                Fill="{ThemeResource GlanceAppMixerMeterBrush}"
+                                HorizontalAlignment="Stretch"
                                 IsHitTestVisible="False"
-                                Maximum="100"
-                                Value="{x:Bind PeakPercent, Mode=OneWay}" />
+                                RadiusX="1"
+                                RadiusY="1"
+                                RenderTransformOrigin="0,0.5">
+                                <Rectangle.RenderTransform>
+                                    <ScaleTransform ScaleX="{x:Bind PeakScale, Mode=OneWay}" />
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
                             <Slider
                                 AutomationProperties.Name="Application volume"
                                 Height="32"
