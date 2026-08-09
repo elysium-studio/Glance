@@ -14,6 +14,15 @@
   <Project Path="Glance.Assistant.WinUI/Glance.Assistant.WinUI.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.AppMixer.WinUI/Glance.AppMixer.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.AppMixer/Glance.AppMixer.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.AppMixer.Tests/Glance.AppMixer.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.AudioSwitcher.WinUI/Glance.AudioSwitcher.WinUI.csproj">
     <Platform Project="x64" />
   </Project>

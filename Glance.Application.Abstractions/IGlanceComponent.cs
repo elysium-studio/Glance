@@ -12,6 +12,7 @@ public interface IGlanceComponent
 
     string AccentResourceKey => Id switch
     {
+        "AppMixer" => "GlanceAppMixerIconBrush",
         "AudioSwitcher" => "GlanceAudioSwitcherIconBrush",
         "Clipboard" => "GlanceClipboardIconBrush",
         "ColorPicker" => "GlanceColorPickerIconBrush",
@@ -44,6 +45,7 @@ public interface IGlanceComponent
 
     string IconGlyph => Id switch
     {
+        "AppMixer" => "\uE9E9",
         "AudioSwitcher" => "\uE767",
         "Clipboard" => "\uF0E3",
         "ColorPicker" => "\uE790",

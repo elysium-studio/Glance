@@ -17,6 +17,7 @@ The island remains at the top or bottom of the desktop in a compact state, expan
 - **Drop Shelf** — temporarily collect files and folders, then drag them together to another location.
 - **Focus Session** — run a focused work session with a clear remaining-time display.
 - **Audio Switcher** — move quickly between available playback devices.
+- **App Mixer** — control the volume and mute state of each application playing sound.
 - **Voice Notes** — record short audio notes and revisit recordings indexed in a module-owned SQLite database.
 - **Colour Picker** — sample a screen colour, retain recent colours in SQLite, and copy HEX, RGB, or HSL values.
 - **Screen Capture** — capture a region, a window, one display, or all displays to the Captures folder with metadata indexed in SQLite.
