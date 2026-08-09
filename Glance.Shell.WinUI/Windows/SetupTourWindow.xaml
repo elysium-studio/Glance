@@ -46,7 +46,7 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Bottom"
                         NextButtonVisibility="Collapsed"
-                        NumberOfPages="{x:Bind ViewModel.Count, Mode=OneTime}"
+                        NumberOfPages="5"
                         PreviousButtonVisibility="Collapsed"
                         SelectedPageIndex="{x:Bind ViewModel.CurrentPage, Mode=TwoWay}" />
                 </Grid>

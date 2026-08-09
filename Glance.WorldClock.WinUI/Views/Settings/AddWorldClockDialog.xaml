@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="Glance.WorldClock.WinUI.AddWorldClockDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="{Binding Title}"
+    CloseButtonText="{Binding CancelLabel}"
+    DefaultButton="Primary"
+    IsPrimaryButtonEnabled="{Binding CanAddClock}"
+    PrimaryButtonCommand="{Binding AddClockCommand}"
+    PrimaryButtonText="{Binding AddLabel}"
+    Style="{StaticResource DefaultContentDialogStyle}">
+    <ListView
+        Width="512"
+        Height="360"
+        DisplayMemberPath="DisplayName"
+        ItemsSource="{Binding AvailableClocks}"
+        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+        ScrollViewer.VerticalScrollBarVisibility="Visible"
+        SelectedItem="{Binding SelectedClock, Mode=TwoWay}"
+        SelectionMode="Single" />
+</ContentDialog>

@@ -498,6 +498,7 @@ function New-ExternalIdentityPackage
     }
 
     New-Item $stagingPath -ItemType Directory -Force | Out-Null
+    Copy-Item (Join-Path $PSScriptRoot "Glance.Shell.WinUI\Assets") $stagingPath -Recurse -Force
     $manifest = (Get-Content $manifestTemplatePath -Raw).Replace("__VERSION__", $packageVersion)
     [System.IO.File]::WriteAllText((Join-Path $stagingPath "AppxManifest.xml"), $manifest, [System.Text.UTF8Encoding]::new($false))
 
@@ -686,6 +687,11 @@ function Send-MicrosoftStoreRelease
     New-StoreImage $logoPath (Join-Path $storeAssetsPath "StoreLogo.png") 50 50
     New-StoreImage $logoPath (Join-Path $storeAssetsPath "Square44x44Logo.png") 44 44
     New-StoreImage $logoPath (Join-Path $storeAssetsPath "Square150x150Logo.png") 150 150
+
+    foreach ($targetSize in @(16, 20, 24, 30, 32, 36, 40, 44, 48, 60, 64, 72, 80, 96, 256))
+    {
+        New-StoreImage $logoPath (Join-Path $storeAssetsPath "Square44x44Logo.targetsize-$($targetSize)_altform-unplated.png") $targetSize $targetSize
+    }
 
     $manifest = Get-Content $manifestTemplatePath -Raw
     $manifest = $manifest.Replace("__IDENTITY_NAME__", (Convert-ToXmlValue $IdentityName))

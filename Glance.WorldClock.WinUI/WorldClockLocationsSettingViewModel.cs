@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Elysium.Application.Abstractions;
+using Elysium.Presentation.Abstractions;
 using Glance.Application.Abstractions;
+using Microsoft.UI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,7 +12,8 @@ using System.Threading.Tasks;
 namespace Glance.WorldClock.WinUI;
 
 public sealed partial class WorldClockLocationsSettingViewModel(WorldClockSettings settings,
-    IWritableOptions<WorldClockSettings> writer) :
+    IWritableOptions<WorldClockSettings> writer,
+    INavigator navigator) :
     ObservableObject,
     IGlanceModuleSettingViewModel
 {
@@ -35,6 +38,13 @@ public sealed partial class WorldClockLocationsSettingViewModel(WorldClockSettin
 
     public IReadOnlyList<WorldClockTimeZoneOption> GetAvailableClocks() => [.. AvailableTimeZones
         .Where(option => !Clocks.Any(clock => string.Equals(clock.Id, option.Id, StringComparison.OrdinalIgnoreCase)))];
+
+    public Task ShowAddClockDialogAsync(XamlRoot xamlRoot)
+    {
+        NavigationParameters parameters = new();
+        parameters.Set("XamlRoot", xamlRoot);
+        return navigator.NavigateAsync(nameof(AddWorldClockDialog), [this], parameters);
+    }
 
     public async Task AddClockAsync()
     {

@@ -10,6 +10,8 @@ artifacts/
 TestResults/
 *.user
 *.nupkg
+*.registration
+/ExternalLocation/Debug/Assets/
 publish.local.json
 Publish/*
 !Publish/releases.json

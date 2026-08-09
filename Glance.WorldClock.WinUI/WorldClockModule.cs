@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
+using Elysium.Presentation.Abstractions;
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,8 +22,9 @@ public sealed class WorldClockModule :
         _ = services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<WorldClockComponent>());
         _ = services.AddSingleton<IGlanceActionProvider>(provider => provider.GetRequiredService<WorldClockComponent>());
         _ = services.AddSingleton<IGlanceAssistantCommandHandler, WorldClockAssistantCommandHandler>();
+        _ = services.AddViewFor<AddWorldClockDialog, AddWorldClockDialogViewModel>(ServiceLifetime.Transient, provider => new AddWorldClockDialog());
         _ = services.AddViewFor<WorldClockTimeFormatSettingView, IGlanceModuleSettingViewModel, WorldClockTimeFormatSettingViewModel>(ServiceLifetime.Transient, provider => new WorldClockTimeFormatSettingView(), provider => new WorldClockTimeFormatSettingViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<GlanceModuleOptions<WorldClockSettings>>().Current, provider.GetRequiredService<IWritableOptions<WorldClockSettings>>()));
-        _ = services.AddViewFor<WorldClockLocationsSettingView, IGlanceModuleSettingViewModel, WorldClockLocationsSettingViewModel>(ServiceLifetime.Transient, provider => new WorldClockLocationsSettingView(), provider => new WorldClockLocationsSettingViewModel(provider.GetRequiredService<GlanceModuleOptions<WorldClockSettings>>().Current, provider.GetRequiredService<IWritableOptions<WorldClockSettings>>()));
+        _ = services.AddViewFor<WorldClockLocationsSettingView, IGlanceModuleSettingViewModel, WorldClockLocationsSettingViewModel>(ServiceLifetime.Transient, provider => new WorldClockLocationsSettingView(), provider => new WorldClockLocationsSettingViewModel(provider.GetRequiredService<GlanceModuleOptions<WorldClockSettings>>().Current, provider.GetRequiredService<IWritableOptions<WorldClockSettings>>(), provider.GetRequiredService<INavigator>()));
     }
 
     private static WorldClockViewModel CreateViewModel(IServiceProvider provider)

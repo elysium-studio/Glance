@@ -318,9 +318,15 @@ public sealed partial class DesktopIslandViewModel :
 
     public void Receive(OptionsChangedEventArgs<GlanceSettings> message) => dispatcher.Dispatch(() =>
                                                                                  {
-                                                                                     AutoHide = message.Options.AutoHide;
+                                                                                     bool restoreExpansionState = AutoHide && !message.Options.AutoHide;
                                                                                      ExpansionMode = message.Options.ExpansionMode;
+                                                                                     AutoHide = message.Options.AutoHide;
                                                                                      Placement = message.Options.Placement;
+
+                                                                                     if (restoreExpansionState)
+                                                                                     {
+                                                                                         IsExpanded = IsPinned;
+                                                                                     }
                                                                                  });
 
     protected override void RegisterMessages() => Messenger.Register<OptionsChangedEventArgs<GlanceSettings>>(this);

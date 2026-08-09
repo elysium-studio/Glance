@@ -5,8 +5,7 @@
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  xmlns:systemai="http://schemas.microsoft.com/appx/manifest/systemai/windows10"
-  IgnorableNamespaces="desktop uap uap10 rescap systemai">
+  IgnorableNamespaces="desktop uap uap10 rescap">
   <Identity
     Name="ElysiumStudio.Glance.Debug"
     Publisher="CN=Elysium Studio"
@@ -58,7 +57,6 @@
     </Application>
   </Applications>
   <Capabilities>
-    <systemai:Capability Name="systemAIModels" />
     <rescap:Capability Name="runFullTrust" />
     <DeviceCapability Name="location" />
     <DeviceCapability Name="microphone" />
