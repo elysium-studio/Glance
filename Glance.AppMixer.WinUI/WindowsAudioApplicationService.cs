@@ -202,7 +202,19 @@ public sealed class WindowsAudioApplicationService :
         }
     }
 
-    private static string Humanize(string value) => value.Length == 0
+    private static string Humanize(string value)
+    {
+        string applicationName = value.StartsWith("Microsoft.", StringComparison.OrdinalIgnoreCase)
+            ? value["Microsoft.".Length..]
+            : value;
+        string[] words = applicationName.Split(['.', '_', '-'], StringSplitOptions.RemoveEmptyEntries);
+
+        return words.Length == 0
+            ? value
+            : string.Join(" ", words.Select(HumanizeWord));
+    }
+
+    private static string HumanizeWord(string value) => value.Length == 0
         ? value
         : char.ToUpperInvariant(value[0]) + value[1..];
 
