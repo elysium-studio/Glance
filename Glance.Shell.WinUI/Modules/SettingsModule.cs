@@ -11,10 +11,12 @@ public sealed class SettingsModule :
     IModule
 {
     public void Register(IServiceCollection services) => _ = services
+            .AddTransient<AboutViewModel>()
             .AddViewFor(ServiceLifetime.Transient,
                 provider => new SettingsWindow(provider.GetRequiredService<IMessenger>(),
                     provider.GetRequiredService<ITextLocalizer>(),
-                    provider.GetRequiredService<IApplicationLifetime>()),
+                    provider.GetRequiredService<IApplicationLifetime>(),
+                    provider.GetRequiredService<AboutViewModel>()),
                 provider => new SettingsViewModel(provider,
                     provider.GetRequiredService<IServiceFactory>(),
                     provider.GetRequiredService<IMessenger>(),

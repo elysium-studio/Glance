@@ -62,4 +62,11 @@
   <data name="WeatherCelestialAutomaticOption.Content" xml:space="preserve"><value>Automatic</value></data>
   <data name="WeatherCelestialSunOption.Content" xml:space="preserve"><value>Sun</value></data>
   <data name="WeatherCelestialMoonOption.Content" xml:space="preserve"><value>Moon</value></data>
+  <data name="WeatherApiKeyRequired" xml:space="preserve"><value>Enter your OpenWeather API key.</value></data>
+  <data name="WeatherApiKeyInvalidFormat" xml:space="preserve"><value>This does not look like a valid OpenWeather API key.</value></data>
+  <data name="WeatherApiKeyRejected" xml:space="preserve"><value>OpenWeather rejected this API key. New keys can take time to activate.</value></data>
+  <data name="WeatherApiKeyRateLimited" xml:space="preserve"><value>This API key has reached its OpenWeather request limit.</value></data>
+  <data name="WeatherLocationRequired" xml:space="preserve"><value>Enter a location for the weather forecast.</value></data>
+  <data name="WeatherLocationInvalid" xml:space="preserve"><value>Enter a city, optionally followed by a two-letter country code.</value></data>
+  <data name="WeatherLocationNotFound" xml:space="preserve"><value>OpenWeather could not find this location.</value></data>
 </root>

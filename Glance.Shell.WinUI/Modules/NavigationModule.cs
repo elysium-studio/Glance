@@ -19,7 +19,16 @@ public sealed class NavigationModule :
             {
                 key = key.EndsWith("ViewModel", StringComparison.Ordinal) ? key[..^"ViewModel".Length]
                     : key;
-                Type type = provider.GetRequiredKeyedService<ViewDescriptor>(key).ViewModelType!;
+                ViewDescriptor descriptor = provider.GetRequiredKeyedService<ViewDescriptor>(key);
+                Type type = descriptor.ViewModelType!;
+
+                if (descriptor.ViewType is not null &&
+                    typeof(Window).IsAssignableFrom(descriptor.ViewType) &&
+                    provider.GetRequiredService<WindowRegistry>().TryGetOpen(descriptor.ViewType, out Window? existingWindow) &&
+                    existingWindow?.Content is FrameworkElement { DataContext: not null } content)
+                {
+                    return content.DataContext;
+                }
 
                 if (viewModelArgs is { Length: > 0 })
                 {
@@ -41,6 +50,12 @@ public sealed class NavigationModule :
                 if (type is null)
                 {
                     return null;
+                }
+
+                if (typeof(Window).IsAssignableFrom(type) &&
+                    provider.GetRequiredService<WindowRegistry>().TryGetOpen(type, out Window? existingWindow))
+                {
+                    return existingWindow;
                 }
 
                 if (viewArgs is { Length: > 0 })

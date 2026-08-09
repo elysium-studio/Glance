@@ -20,24 +20,28 @@ public sealed partial class SettingsWindow :
     private const int WindowWidth = 1100;
     private const int WindowHeight = 680;
     private readonly IApplicationLifetime applicationLifetime;
+    private readonly AboutViewModel aboutViewModel;
     private readonly ITextLocalizer localizer;
     private readonly IMessenger messenger;
     private readonly Dictionary<ISettingViewModel, NavigationViewItem> navigationItems = [];
     private readonly List<ISettingViewModel> navigationPath = [];
     private readonly List<INotifyCollectionChanged> observedNavigationCollections = [];
     private bool isBuildingNavigation;
+    private bool isAboutDialogOpen;
     private bool isClosing;
     private bool isQuitDialogOpen;
 
     public SettingsWindow(IMessenger messenger,
         ITextLocalizer localizer,
-        IApplicationLifetime applicationLifetime)
+        IApplicationLifetime applicationLifetime,
+        AboutViewModel aboutViewModel)
     {
         InitializeComponent();
 
         this.messenger = messenger;
         this.localizer = localizer;
         this.applicationLifetime = applicationLifetime;
+        this.aboutViewModel = aboutViewModel;
 
         messenger.Register(this);
         Closed += HandleClosed;
@@ -80,7 +84,8 @@ public sealed partial class SettingsWindow :
     private void HandleLoaded(object sender,
         RoutedEventArgs args)
     {
-        if (!isClosing)
+        if (!isClosing &&
+            ((FrameworkElement)Content).DataContext is SettingsViewModel)
         {
             BuildNavigation();
         }
@@ -158,6 +163,34 @@ public sealed partial class SettingsWindow :
         finally
         {
             isQuitDialogOpen = false;
+        }
+    }
+
+    private async void HandleAboutTapped(object sender,
+        Microsoft.UI.Xaml.Input.TappedRoutedEventArgs args)
+    {
+        if (isAboutDialogOpen)
+        {
+            return;
+        }
+
+        isAboutDialogOpen = true;
+
+        try
+        {
+            ContentDialog dialog = new()
+            {
+                XamlRoot = ((FrameworkElement)Content).XamlRoot,
+                Title = localizer.GetText("AboutDialogTitle"),
+                Content = new AboutDialog(aboutViewModel),
+                CloseButtonText = localizer.GetText("AboutDialogCloseButton"),
+                DefaultButton = ContentDialogButton.Close
+            };
+            _ = await dialog.ShowAsync();
+        }
+        finally
+        {
+            isAboutDialogOpen = false;
         }
     }
 

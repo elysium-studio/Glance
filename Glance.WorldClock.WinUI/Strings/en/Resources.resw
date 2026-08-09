@@ -22,4 +22,11 @@
   <data name="WorldClockAddButton.ToolTipService.ToolTip" xml:space="preserve"><value>Add clock</value></data>
   <data name="WorldClockRemoveButton.AutomationProperties.Name" xml:space="preserve"><value>Remove clock</value></data>
   <data name="WorldClockRemoveButton.ToolTipService.ToolTip" xml:space="preserve"><value>Remove clock</value></data>
+  <data name="WorldClockMoveUpButton.AutomationProperties.Name" xml:space="preserve"><value>Move clock up</value></data>
+  <data name="WorldClockMoveUpButton.ToolTipService.ToolTip" xml:space="preserve"><value>Move clock up</value></data>
+  <data name="WorldClockMoveDownButton.AutomationProperties.Name" xml:space="preserve"><value>Move clock down</value></data>
+  <data name="WorldClockMoveDownButton.ToolTipService.ToolTip" xml:space="preserve"><value>Move clock down</value></data>
+  <data name="AddClock" xml:space="preserve"><value>Add a clock</value></data>
+  <data name="Add" xml:space="preserve"><value>Add</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
 </root>

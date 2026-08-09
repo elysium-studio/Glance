@@ -18,9 +18,11 @@ public sealed class SetupTourViewModelTests
 
         Assert.True(viewModel.IsCompactModeSelected);
         Assert.True(viewModel.IsAlwaysVisibleSelected);
+        Assert.True(viewModel.IsTopPlacementSelected);
         Assert.False(viewModel.CanGoBack);
         Assert.True(viewModel.CanGoNext);
 
+        viewModel.GoNext();
         viewModel.GoNext();
         viewModel.GoNext();
         viewModel.GoNext();
@@ -30,7 +32,7 @@ public sealed class SetupTourViewModelTests
 
         viewModel.GoBack();
 
-        Assert.Equal(2, viewModel.CurrentPage);
+        Assert.Equal(3, viewModel.CurrentPage);
         Assert.True(viewModel.CanGoBack);
     }
 
@@ -45,10 +47,12 @@ public sealed class SetupTourViewModelTests
         viewModel.Finished += (_, _) => completion.SetResult();
         await viewModel.SelectExpansionModeAsync(GlanceExpansionMode.AlwaysExpanded);
         await viewModel.SelectAutoHideAsync(true);
+        await viewModel.SelectPlacementAsync(GlancePlacement.Bottom);
         viewModel.Modules[1].IsEnabled = false;
 
         Assert.Equal(GlanceExpansionMode.AlwaysExpanded, settings.ExpansionMode);
         Assert.True(settings.AutoHide);
+        Assert.Equal(GlancePlacement.Bottom, settings.Placement);
         Assert.True(settings.ShowSetupOnStartup);
 
         viewModel.Finish();
@@ -56,6 +60,7 @@ public sealed class SetupTourViewModelTests
 
         Assert.Equal(GlanceExpansionMode.AlwaysExpanded, settings.ExpansionMode);
         Assert.True(settings.AutoHide);
+        Assert.Equal(GlancePlacement.Bottom, settings.Placement);
         Assert.False(settings.ShowSetupOnStartup);
         Assert.True(preferences.IsEnabled("Weather"));
         Assert.False(preferences.IsEnabled("Timer"));

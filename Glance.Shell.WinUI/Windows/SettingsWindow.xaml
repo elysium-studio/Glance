@@ -32,16 +32,28 @@
             PaneDisplayMode="Left"
             SelectionChanged="HandleNavigationSelectionChanged">
             <NavigationView.PaneFooter>
-                <NavigationViewItem
-                    x:Name="QuitGlanceNavigationItem"
-                    x:Uid="QuitGlanceNavigationItem"
-                    Margin="8,0,0,0"
-                    SelectsOnInvoked="False"
-                    Tapped="{x:Bind HandleQuitTapped}">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE7E8;" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
+                <StackPanel Spacing="4">
+                    <NavigationViewItem
+                        x:Name="AboutNavigationItem"
+                        x:Uid="AboutNavigationItem"
+                        Margin="8,0,0,0"
+                        SelectsOnInvoked="False"
+                        Tapped="{x:Bind HandleAboutTapped}">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE946;" />
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                    <NavigationViewItem
+                        x:Name="QuitGlanceNavigationItem"
+                        x:Uid="QuitGlanceNavigationItem"
+                        Margin="8,0,0,0"
+                        SelectsOnInvoked="False"
+                        Tapped="{x:Bind HandleQuitTapped}">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE7E8;" />
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                </StackPanel>
             </NavigationView.PaneFooter>
             <NavigationView.Resources>
                 <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />

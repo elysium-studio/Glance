@@ -29,7 +29,12 @@ public sealed partial class WorldClockLocationsSettingViewModel(WorldClockSettin
         .OfType<WorldClockTimeZoneOption>()
         .DistinctBy(option => option.Id, StringComparer.OrdinalIgnoreCase)];
 
+    public bool HasClocks => Clocks.Count > 0;
+
     public bool CanAddClock => SelectedTimeZone is not null && !Clocks.Any(clock => string.Equals(clock.Id, SelectedTimeZone.Id, StringComparison.OrdinalIgnoreCase));
+
+    public IReadOnlyList<WorldClockTimeZoneOption> GetAvailableClocks() => [.. AvailableTimeZones
+        .Where(option => !Clocks.Any(clock => string.Equals(clock.Id, option.Id, StringComparison.OrdinalIgnoreCase)))];
 
     public async Task AddClockAsync()
     {
@@ -42,6 +47,7 @@ public sealed partial class WorldClockLocationsSettingViewModel(WorldClockSettin
 
         Clocks.Add(clock);
         SelectedTimeZone = null;
+        NotifyClocksChanged();
         await SaveAsync();
     }
 
@@ -49,12 +55,25 @@ public sealed partial class WorldClockLocationsSettingViewModel(WorldClockSettin
     {
         if (Clocks.Remove(clock))
         {
-            OnPropertyChanged(nameof(CanAddClock));
+            NotifyClocksChanged();
             await SaveAsync();
         }
     }
 
-    public Task SaveOrderAsync() => SaveAsync();
+    public async Task MoveClockAsync(WorldClockTimeZoneOption clock,
+        int offset)
+    {
+        int currentIndex = Clocks.IndexOf(clock);
+        int targetIndex = currentIndex + offset;
+
+        if (currentIndex < 0 || targetIndex < 0 || targetIndex >= Clocks.Count)
+        {
+            return;
+        }
+
+        Clocks.Move(currentIndex, targetIndex);
+        await SaveAsync();
+    }
 
     public void Dispose()
     {
@@ -64,5 +83,11 @@ public sealed partial class WorldClockLocationsSettingViewModel(WorldClockSettin
     {
         string[] ids = [.. Clocks.Select(clock => clock.Id)];
         return writer.WriteAsync(options => options.TimeZoneIds = [.. ids]);
+    }
+
+    private void NotifyClocksChanged()
+    {
+        OnPropertyChanged(nameof(HasClocks));
+        OnPropertyChanged(nameof(CanAddClock));
     }
 }

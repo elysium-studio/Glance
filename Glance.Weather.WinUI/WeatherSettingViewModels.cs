@@ -6,11 +6,118 @@ using System;
 
 namespace Glance.Weather.WinUI;
 
-public sealed partial class WeatherApiKeySettingViewModel(IServiceProvider provider, IServiceFactory factory, IMessenger messenger, IDisposer disposer, IDispatcher dispatcher, WeatherSettings settings, IWritableOptions<WeatherSettings> writer) :
-    ModuleSettingViewModel<WeatherSettings, string>(provider, factory, messenger, disposer, dispatcher, settings, writer, "Weather", 10, config => config.ApiKey, (config, value) => config.ApiKey = value?.Trim() ?? string.Empty);
+public sealed partial class WeatherApiKeySettingViewModel(IServiceProvider provider,
+    IServiceFactory factory,
+    IMessenger messenger,
+    IDisposer disposer,
+    IDispatcher dispatcher,
+    WeatherSettings settings,
+    IWritableOptions<WeatherSettings> writer,
+    WeatherConfigurationValidator validator,
+    ModuleResourceTextLocalizer<WeatherModule> localizer) :
+    ModuleSettingViewModel<WeatherSettings, string>(provider, factory, messenger, disposer, dispatcher, settings, writer, "Weather", 10, config => config.ApiKey, (config, value) => config.ApiKey = value?.Trim() ?? string.Empty)
+{
+    [ObservableProperty]
+    public partial bool HasValidationError { get; private set; }
 
-public sealed partial class WeatherLocationSettingViewModel(IServiceProvider provider, IServiceFactory factory, IMessenger messenger, IDisposer disposer, IDispatcher dispatcher, WeatherSettings settings, IWritableOptions<WeatherSettings> writer) :
-    ModuleSettingViewModel<WeatherSettings, string>(provider, factory, messenger, disposer, dispatcher, settings, writer, "Weather", 20, config => config.Location, (config, value) => config.Location = value?.Trim() ?? string.Empty);
+    [ObservableProperty]
+    public partial string ValidationMessage { get; private set; } = string.Empty;
+
+    public override void Activated()
+    {
+        base.Activated();
+        validator.Changed += HandleValidationChanged;
+        validator.Update(Options);
+        ApplyValidation();
+    }
+
+    public override void Deactivated()
+    {
+        validator.Changed -= HandleValidationChanged;
+        base.Deactivated();
+    }
+
+    protected override void OptionsChanged(WeatherSettings options) => validator.Update(options);
+
+    protected override void ValueChanged(string? value)
+    {
+        base.ValueChanged(value);
+        validator.UpdateApiKey(value ?? string.Empty);
+    }
+
+    private void HandleValidationChanged(object? sender,
+        EventArgs args) => Dispatcher.Dispatch(ApplyValidation);
+
+    private void ApplyValidation()
+    {
+        WeatherConfigurationError error = validator.Current.ApiKeyError;
+        HasValidationError = error != WeatherConfigurationError.None;
+        ValidationMessage = error switch
+        {
+            WeatherConfigurationError.Required => localizer.GetText("WeatherApiKeyRequired"),
+            WeatherConfigurationError.Invalid => localizer.GetText("WeatherApiKeyInvalidFormat"),
+            WeatherConfigurationError.Rejected => localizer.GetText("WeatherApiKeyRejected"),
+            WeatherConfigurationError.RateLimited => localizer.GetText("WeatherApiKeyRateLimited"),
+            _ => string.Empty
+        };
+    }
+}
+
+public sealed partial class WeatherLocationSettingViewModel(IServiceProvider provider,
+    IServiceFactory factory,
+    IMessenger messenger,
+    IDisposer disposer,
+    IDispatcher dispatcher,
+    WeatherSettings settings,
+    IWritableOptions<WeatherSettings> writer,
+    WeatherConfigurationValidator validator,
+    ModuleResourceTextLocalizer<WeatherModule> localizer) :
+    ModuleSettingViewModel<WeatherSettings, string>(provider, factory, messenger, disposer, dispatcher, settings, writer, "Weather", 20, config => config.Location, (config, value) => config.Location = value?.Trim() ?? string.Empty)
+{
+    [ObservableProperty]
+    public partial bool HasValidationError { get; private set; }
+
+    [ObservableProperty]
+    public partial string ValidationMessage { get; private set; } = string.Empty;
+
+    public override void Activated()
+    {
+        base.Activated();
+        validator.Changed += HandleValidationChanged;
+        validator.Update(Options);
+        ApplyValidation();
+    }
+
+    public override void Deactivated()
+    {
+        validator.Changed -= HandleValidationChanged;
+        base.Deactivated();
+    }
+
+    protected override void OptionsChanged(WeatherSettings options) => validator.Update(options);
+
+    protected override void ValueChanged(string? value)
+    {
+        base.ValueChanged(value);
+        validator.UpdateLocation(value ?? string.Empty);
+    }
+
+    private void HandleValidationChanged(object? sender,
+        EventArgs args) => Dispatcher.Dispatch(ApplyValidation);
+
+    private void ApplyValidation()
+    {
+        WeatherConfigurationError error = validator.Current.LocationError;
+        HasValidationError = error != WeatherConfigurationError.None;
+        ValidationMessage = error switch
+        {
+            WeatherConfigurationError.Required => localizer.GetText("WeatherLocationRequired"),
+            WeatherConfigurationError.Invalid => localizer.GetText("WeatherLocationInvalid"),
+            WeatherConfigurationError.NotFound => localizer.GetText("WeatherLocationNotFound"),
+            _ => string.Empty
+        };
+    }
+}
 
 public sealed partial class WeatherUnitsSettingViewModel(IServiceProvider provider, IServiceFactory factory, IMessenger messenger, IDisposer disposer, IDispatcher dispatcher, WeatherSettings settings, IWritableOptions<WeatherSettings> writer) :
     ModuleSettingViewModel<WeatherSettings, int>(provider, factory, messenger, disposer, dispatcher, settings, writer, "Weather", 30, config => config.UseFahrenheit ? 1 : 0, (config, value) => config.UseFahrenheit = value == 1);

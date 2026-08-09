@@ -7,9 +7,16 @@
     Loaded="{x:Bind ViewModel.Activate}"
     Unloaded="{x:Bind ViewModel.Deactivate}">
     <CommunityToolkit:SettingsCard x:Uid="WeatherApiKeySettingCard">
-        <PasswordBox
-            Width="240"
-            Password="{x:Bind ViewModel.Value, Mode=TwoWay}"
-            PasswordRevealMode="Peek" />
+        <StackPanel Width="240" Spacing="8">
+            <PasswordBox
+                HorizontalAlignment="Stretch"
+                Password="{x:Bind ViewModel.Value, Mode=TwoWay}"
+                PasswordRevealMode="Peek" />
+            <InfoBar
+                IsClosable="False"
+                IsOpen="{x:Bind ViewModel.HasValidationError, Mode=OneWay}"
+                Message="{x:Bind ViewModel.ValidationMessage, Mode=OneWay}"
+                Severity="Warning" />
+        </StackPanel>
     </CommunityToolkit:SettingsCard>
 </UserControl>

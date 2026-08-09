@@ -9,7 +9,7 @@ namespace Glance.Shell;
 public sealed partial class SetupTourViewModel :
     ObservableObject
 {
-    private const int PageCount = 4;
+    private const int PageCount = 5;
 
     private readonly ILogger<SetupTourViewModel> logger;
     private readonly ModulePreferenceService preferences;
@@ -37,6 +37,13 @@ public sealed partial class SetupTourViewModel :
     private bool autoHide;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsTopPlacementSelected))]
+    [NotifyPropertyChangedFor(nameof(IsBottomPlacementSelected))]
+    [NotifyPropertyChangedFor(nameof(TopPlacementSelectionOpacity))]
+    [NotifyPropertyChangedFor(nameof(BottomPlacementSelectionOpacity))]
+    private GlancePlacement placement;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CurrentModule))]
     [NotifyPropertyChangedFor(nameof(ModulePosition))]
     private int selectedModuleIndex;
@@ -52,6 +59,7 @@ public sealed partial class SetupTourViewModel :
         this.logger = logger;
         expansionMode = settings.ExpansionMode;
         autoHide = settings.AutoHide;
+        placement = settings.Placement;
         Modules = [.. preferences.GetPreferences().Select(preference => CreateModule(preference, preferences, localizer))];
 
         foreach (SetupTourModuleViewModel module in Modules)
@@ -63,6 +71,8 @@ public sealed partial class SetupTourViewModel :
     public event EventHandler? Finished;
 
     public ObservableCollection<SetupTourModuleViewModel> Modules { get; }
+
+    public int Count => PageCount;
 
     public bool CanGoBack => CurrentPage > 0;
 
@@ -78,6 +88,10 @@ public sealed partial class SetupTourViewModel :
 
     public bool IsAlwaysVisibleSelected => !AutoHide;
 
+    public bool IsTopPlacementSelected => Placement == GlancePlacement.Top;
+
+    public bool IsBottomPlacementSelected => Placement == GlancePlacement.Bottom;
+
     public double CompactModeSelectionOpacity => IsCompactModeSelected ? 1 : 0;
 
     public double ExpandedModeSelectionOpacity => IsExpandedModeSelected ? 1 : 0;
@@ -85,6 +99,10 @@ public sealed partial class SetupTourViewModel :
     public double AutoHideSelectionOpacity => IsAutoHideSelected ? 1 : 0;
 
     public double AlwaysVisibleSelectionOpacity => IsAlwaysVisibleSelected ? 1 : 0;
+
+    public double TopPlacementSelectionOpacity => IsTopPlacementSelected ? 1 : 0;
+
+    public double BottomPlacementSelectionOpacity => IsBottomPlacementSelected ? 1 : 0;
 
     public SetupTourModuleViewModel? CurrentModule => SelectedModuleIndex >= 0 && SelectedModuleIndex < Modules.Count
         ? Modules[SelectedModuleIndex]
@@ -136,6 +154,20 @@ public sealed partial class SetupTourViewModel :
         }
     }
 
+    public async Task SelectPlacementAsync(GlancePlacement value)
+    {
+        Placement = value;
+
+        try
+        {
+            await writer.WriteAsync(settings => settings.Placement = value);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Failed to apply the setup tour placement choice");
+        }
+    }
+
     public async void Finish()
     {
         if (isFinishing)
@@ -161,6 +193,7 @@ public sealed partial class SetupTourViewModel :
             {
                 settings.ExpansionMode = ExpansionMode;
                 settings.AutoHide = AutoHide;
+                settings.Placement = Placement;
                 settings.ShowSetupOnStartup = false;
             });
         }

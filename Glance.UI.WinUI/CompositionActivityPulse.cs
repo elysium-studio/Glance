@@ -16,6 +16,8 @@ public sealed class CompositionActivityPulse
     private readonly Shape ring;
     private readonly string propertyName;
     private readonly Func<bool> isActive;
+    private SolidColorBrush? observedBrush;
+    private long observedBrushColorCallbackToken;
     private CompositionColorBrush? pulseBrush;
     private ShapeVisual? visual;
     private bool isRunning;
@@ -32,6 +34,8 @@ public sealed class CompositionActivityPulse
         this.isActive = isActive;
         source.PropertyChanged += OnPropertyChanged;
         owner.ActualThemeChanged += OnActualThemeChanged;
+        _ = ring.RegisterPropertyChangedCallback(Shape.StrokeProperty, HandleStrokeChanged);
+        ObserveStrokeBrush();
         _ = GetVisual();
         Update();
     }
@@ -49,6 +53,29 @@ public sealed class CompositionActivityPulse
     }
 
     private void OnActualThemeChanged(FrameworkElement sender, object args) => _ = owner.DispatcherQueue.TryEnqueue(UpdateBrush);
+
+    private void HandleStrokeChanged(DependencyObject sender,
+        DependencyProperty property)
+    {
+        ObserveStrokeBrush();
+        UpdateBrush();
+    }
+
+    private void HandleStrokeColorChanged(DependencyObject sender,
+        DependencyProperty property) => UpdateBrush();
+
+    private void ObserveStrokeBrush()
+    {
+        if (observedBrush is not null && observedBrushColorCallbackToken != 0)
+        {
+            observedBrush.UnregisterPropertyChangedCallback(SolidColorBrush.ColorProperty,
+                observedBrushColorCallbackToken);
+        }
+
+        observedBrush = ring.Stroke as SolidColorBrush;
+        observedBrushColorCallbackToken = observedBrush?.RegisterPropertyChangedCallback(SolidColorBrush.ColorProperty,
+            HandleStrokeColorChanged) ?? 0;
+    }
 
     private void Update()
     {
@@ -120,8 +147,8 @@ public sealed class CompositionActivityPulse
 
     private void UpdateBrush() => _ = pulseBrush?.Color = GetColor();
 
-    private Color GetColor() => ring.Stroke is SolidColorBrush brush
-            ? brush.Color
+    private Color GetColor() => observedBrush is not null
+            ? observedBrush.Color
             : Color.FromArgb(255, 255, 255, 255);
 
     private void Stop()

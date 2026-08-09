@@ -37,7 +37,10 @@
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Parar de manter a ilha expandida</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>Permitir alertas</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>Permita que este módulo seja exibido quando algo precisar da sua atenção</value></data>
-  <data name="QuitGlanceNavigationItem.Content" xml:space="preserve"><value>Sair do Glance</value></data>
+  <data name="AboutNavigationItem.Content" xml:space="preserve"><value>Sobre</value></data>
+  <data name="AboutDialogTitle" xml:space="preserve"><value>Sobre</value></data>
+  <data name="AboutDialogCloseButton" xml:space="preserve"><value>Fechar</value></data>
+  <data name="QuitGlanceNavigationItem.Content" xml:space="preserve"><value>Sair</value></data>
   <data name="QuitDialogTitle" xml:space="preserve"><value>Sair do Glance?</value></data>
   <data name="QuitDialogMessage" xml:space="preserve"><value>O Glance será fechado. Temporizadores, gravações e outros módulos em execução serão interrompidos.</value></data>
   <data name="QuitDialogPrimaryButton" xml:space="preserve"><value>Sair</value></data>
@@ -69,4 +72,10 @@
   <data name="SetupModulesTitle.Text" xml:space="preserve"><value>Make Glance yours</value></data>
   <data name="SetupModulesDescription.Text" xml:space="preserve"><value>Explore every module and keep only the ones that belong in your island.</value></data>
   <data name="SetupModuleEnabledLabel.Text" xml:space="preserve"><value>Show this module</value></data>
+  <data name="SetupPlacementTitle.Text" xml:space="preserve"><value>Where should Glance sit?</value></data>
+  <data name="SetupPlacementDescription.Text" xml:space="preserve"><value>Place the island at the screen edge that feels most natural to reach.</value></data>
+  <data name="SetupPlacementTopTitle.Text" xml:space="preserve"><value>Top of screen</value></data>
+  <data name="SetupPlacementTopDescription.Text" xml:space="preserve"><value>Keep Glance close to the upper edge of your desktop.</value></data>
+  <data name="SetupPlacementBottomTitle.Text" xml:space="preserve"><value>Bottom of screen</value></data>
+  <data name="SetupPlacementBottomDescription.Text" xml:space="preserve"><value>Keep Glance close to the lower edge of your desktop.</value></data>
 </root>

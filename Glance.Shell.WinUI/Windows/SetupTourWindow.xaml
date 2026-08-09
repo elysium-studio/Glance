@@ -33,17 +33,20 @@
                     <Tour:SetupExpansionTourView
                         x:Name="ExpansionPage"
                         Visibility="{x:Bind ToPageVisibility(ViewModel.CurrentPage, 1), Mode=OneWay}" />
+                    <Tour:SetupPlacementTourView
+                        x:Name="PlacementPage"
+                        Visibility="{x:Bind ToPageVisibility(ViewModel.CurrentPage, 2), Mode=OneWay}" />
                     <Tour:SetupAutoHideTourView
                         x:Name="AutoHidePage"
-                        Visibility="{x:Bind ToPageVisibility(ViewModel.CurrentPage, 2), Mode=OneWay}" />
+                        Visibility="{x:Bind ToPageVisibility(ViewModel.CurrentPage, 3), Mode=OneWay}" />
                     <Tour:SetupModulesTourView
                         x:Name="ModulesPage"
-                        Visibility="{x:Bind ToPageVisibility(ViewModel.CurrentPage, 3), Mode=OneWay}" />
+                        Visibility="{x:Bind ToPageVisibility(ViewModel.CurrentPage, 4), Mode=OneWay}" />
                     <PipsPager
                         HorizontalAlignment="Center"
                         VerticalAlignment="Bottom"
                         NextButtonVisibility="Collapsed"
-                        NumberOfPages="4"
+                        NumberOfPages="{x:Bind ViewModel.Count, Mode=OneTime}"
                         PreviousButtonVisibility="Collapsed"
                         SelectedPageIndex="{x:Bind ViewModel.CurrentPage, Mode=TwoWay}" />
                 </Grid>
