@@ -11,7 +11,7 @@
     PrimaryButtonText="{Binding AddLabel}"
     Style="{StaticResource DefaultContentDialogStyle}">
     <ListView
-        Width="512"
+        Width="480"
         Height="360"
         DisplayMemberPath="DisplayName"
         ItemsSource="{Binding AvailableClocks}"
