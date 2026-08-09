@@ -18,7 +18,7 @@ public sealed class WindowsAudioApplicationService :
     {
         try
         {
-            string? foregroundProcessName = GetForegroundProcessName();
+            ForegroundApplication foregroundApplication = GetForegroundApplication();
             List<SessionSnapshot> snapshots = ReadSessions();
 
             return [.. snapshots
@@ -28,7 +28,7 @@ public sealed class WindowsAudioApplicationService :
                     (int)Math.Round(group.Average(snapshot => snapshot.VolumePercent)),
                     group.All(snapshot => snapshot.IsMuted),
                     group.Max(snapshot => snapshot.Peak),
-                    foregroundProcessName is not null && group.Any(snapshot => string.Equals(snapshot.ProcessName, foregroundProcessName, StringComparison.OrdinalIgnoreCase)),
+                    group.Any(snapshot => foregroundApplication.Contains(snapshot.ProcessId, snapshot.ProcessName)),
                     group.Any(snapshot => snapshot.IsActive)))
                 .OrderByDescending(application => application.IsForeground)
                 .ThenByDescending(application => application.Peak)
@@ -76,6 +76,7 @@ public sealed class WindowsAudioApplicationService :
 
                     SessionIdentity identity = GetSessionIdentity(session);
                     snapshots.Add(new SessionSnapshot(identity.Id,
+                        identity.ProcessId,
                         identity.ProcessName,
                         identity.DisplayName,
                         session.SimpleAudioVolume.Volume * 100,
@@ -169,7 +170,7 @@ public sealed class WindowsAudioApplicationService :
     {
         if (session.IsSystemSoundsSession || session.GetProcessID == 0)
         {
-            return new SessionIdentity(SystemSoundsId, SystemSoundsId, "System sounds");
+            return new SessionIdentity(0, SystemSoundsId, SystemSoundsId, "System sounds");
         }
 
         int processId = checked((int)session.GetProcessID);
@@ -178,7 +179,7 @@ public sealed class WindowsAudioApplicationService :
         string processName = process.ProcessName;
         string id = processName.ToLowerInvariant();
         string displayName = GetDisplayName(session, process, processName);
-        return new SessionIdentity(id, processName, displayName);
+        return new SessionIdentity(processId, id, processName, displayName);
     }
 
     private static string GetDisplayName(AudioSessionControl session,
@@ -205,32 +206,60 @@ public sealed class WindowsAudioApplicationService :
         ? value
         : char.ToUpperInvariant(value[0]) + value[1..];
 
-    private static string? GetForegroundProcessName()
+    private static ForegroundApplication GetForegroundApplication()
     {
         nint window = GetForegroundWindow();
+        HashSet<int> processIds = [];
 
         if (window == 0)
         {
-            return null;
+            return new ForegroundApplication(processIds, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
         }
 
+        AddWindowProcess(window, processIds);
+        EnumWindowsProc callback = (childWindow, _) =>
+        {
+            AddWindowProcess(childWindow, processIds);
+            return true;
+        };
+        _ = EnumChildWindows(window, callback, 0);
+
+        HashSet<string> processNames = new(StringComparer.OrdinalIgnoreCase);
+
+        foreach (int processId in processIds)
+        {
+            try
+            {
+                using Process process = Process.GetProcessById(processId);
+                _ = processNames.Add(process.ProcessName);
+            }
+            catch (ArgumentException)
+            {
+            }
+        }
+
+        return new ForegroundApplication(processIds, processNames);
+    }
+
+    private static void AddWindowProcess(nint window,
+        ISet<int> processIds)
+    {
         _ = GetWindowThreadProcessId(window, out uint processId);
 
-        if (processId == 0)
+        if (processId != 0)
         {
-            return null;
-        }
-
-        try
-        {
-            using Process process = Process.GetProcessById(checked((int)processId));
-            return process.ProcessName;
-        }
-        catch (ArgumentException)
-        {
-            return null;
+            _ = processIds.Add(checked((int)processId));
         }
     }
+
+    private delegate bool EnumWindowsProc(nint window,
+        nint parameter);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool EnumChildWindows(nint parentWindow,
+        EnumWindowsProc callback,
+        nint parameter);
 
     [DllImport("user32.dll")]
     private static extern nint GetForegroundWindow();
@@ -239,15 +268,24 @@ public sealed class WindowsAudioApplicationService :
     private static extern uint GetWindowThreadProcessId(nint window,
         out uint processId);
 
-    private sealed record SessionIdentity(string Id,
+    private sealed record SessionIdentity(int ProcessId,
+        string Id,
         string ProcessName,
         string DisplayName);
 
     private sealed record SessionSnapshot(string Id,
+        int ProcessId,
         string ProcessName,
         string DisplayName,
         double VolumePercent,
         bool IsMuted,
         double Peak,
         bool IsActive);
+
+    private sealed record ForegroundApplication(HashSet<int> ProcessIds,
+        HashSet<string> ProcessNames)
+    {
+        public bool Contains(int processId,
+            string processName) => ProcessIds.Contains(processId) || ProcessNames.Contains(processName);
+    }
 }

@@ -54,24 +54,32 @@ public sealed partial class AppMixerViewModel :
             }
         }
 
-        Synchronize(ordered);
-        HasApplications = Applications.Count > 0;
-        AudioApplicationItemViewModel? current = SelectedApplication is not null
-            ? Applications.FirstOrDefault(application => string.Equals(application.Id, SelectedApplication.Id, StringComparison.OrdinalIgnoreCase))
-            : null;
-
-        bool retainManualSelection = current is not null && DateTimeOffset.UtcNow < automaticSelectionSuppressedUntil;
-        AudioApplicationItemViewModel? preferred = retainManualSelection
-            ? current
-            : Applications.FirstOrDefault(application => application.IsForeground)
-                ?? Applications.OrderByDescending(application => application.PeakPercent).FirstOrDefault(application => application.PeakPercent > 0)
-                ?? Applications.FirstOrDefault(application => application.IsActive)
-                ?? current
-                ?? Applications.FirstOrDefault();
-
         isRefreshing = true;
-        SelectedApplication = preferred;
-        isRefreshing = false;
+
+        try
+        {
+            Synchronize(ordered);
+            HasApplications = Applications.Count > 0;
+            AudioApplicationItemViewModel? current = SelectedApplication is not null
+                ? Applications.FirstOrDefault(application => string.Equals(application.Id, SelectedApplication.Id, StringComparison.OrdinalIgnoreCase))
+                : null;
+
+            bool retainManualSelection = current is not null && DateTimeOffset.UtcNow < automaticSelectionSuppressedUntil;
+            AudioApplicationItemViewModel? preferred = retainManualSelection
+                ? current
+                : Applications.FirstOrDefault(application => application.IsForeground)
+                    ?? Applications.OrderByDescending(application => application.PeakPercent).FirstOrDefault(application => application.PeakPercent > 0)
+                    ?? Applications.FirstOrDefault(application => application.IsActive)
+                    ?? current
+                    ?? Applications.FirstOrDefault();
+
+            SelectedApplication = preferred;
+        }
+        finally
+        {
+            isRefreshing = false;
+        }
+
         OnPropertyChanged(nameof(CurrentApplicationName));
         OnPropertyChanged(nameof(CurrentVolumeText));
     }
