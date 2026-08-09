@@ -2,6 +2,7 @@
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Default">
             <SolidColorBrush x:Key="GlanceAppMixerIconBrush" Color="#FFB69CFF" />
+            <SolidColorBrush x:Key="GlanceAppMixerMeterBrush" Color="#FFE1D7FF" />
             <SolidColorBrush x:Key="SliderThumbBackground" Color="#FFB69CFF" />
             <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="#FFCAB9FF" />
             <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="#FF9E7AFF" />
@@ -11,6 +12,7 @@
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="GlanceAppMixerIconBrush" Color="#FF5B2E91" />
+            <SolidColorBrush x:Key="GlanceAppMixerMeterBrush" Color="#FF7D4FB5" />
             <SolidColorBrush x:Key="SliderThumbBackground" Color="#FF5B2E91" />
             <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="#FF7043A8" />
             <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="#FF45206F" />
@@ -20,6 +22,7 @@
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <StaticResource x:Key="GlanceAppMixerIconBrush" ResourceKey="SystemColorWindowTextColorBrush" />
+            <StaticResource x:Key="GlanceAppMixerMeterBrush" ResourceKey="SystemColorHighlightColorBrush" />
             <StaticResource x:Key="SliderThumbBackground" ResourceKey="SystemColorHighlightColorBrush" />
             <StaticResource x:Key="SliderThumbBackgroundPointerOver" ResourceKey="SystemColorHighlightColorBrush" />
             <StaticResource x:Key="SliderThumbBackgroundPressed" ResourceKey="SystemColorHighlightColorBrush" />

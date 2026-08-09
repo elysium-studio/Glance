@@ -39,21 +39,42 @@
                                 Style="{StaticResource CaptionTextBlockStyle}"
                                 Text="{x:Bind VolumeText, Mode=OneWay}" />
                         </Grid>
-                        <Grid Grid.Row="1">
+                        <Grid
+                            Grid.Row="1"
+                            Height="32">
+                            <ProgressBar
+                                Height="4"
+                                Margin="8,0"
+                                VerticalAlignment="Center"
+                                Foreground="{ThemeResource GlanceAppMixerIconBrush}"
+                                IsHitTestVisible="False"
+                                Maximum="100"
+                                Value="{x:Bind Volume, Mode=OneWay}" />
+                            <ProgressBar
+                                Height="2"
+                                Margin="8,0"
+                                VerticalAlignment="Center"
+                                Background="Transparent"
+                                Foreground="{ThemeResource GlanceAppMixerMeterBrush}"
+                                IsHitTestVisible="False"
+                                Maximum="100"
+                                Value="{x:Bind PeakPercent, Mode=OneWay}" />
                             <Slider
                                 AutomationProperties.Name="Application volume"
                                 Height="32"
                                 Maximum="100"
                                 Minimum="0"
                                 StepFrequency="1"
-                                Value="{x:Bind Volume, Mode=TwoWay}" />
-                            <ProgressBar
-                                Height="2"
-                                Margin="8,0"
-                                VerticalAlignment="Bottom"
-                                IsHitTestVisible="False"
-                                Maximum="100"
-                                Value="{x:Bind PeakPercent, Mode=OneWay}" />
+                                Value="{x:Bind Volume, Mode=TwoWay}">
+                                <Slider.Resources>
+                                    <SolidColorBrush x:Key="SliderTrackFill" Color="Transparent" />
+                                    <SolidColorBrush x:Key="SliderTrackFillPointerOver" Color="Transparent" />
+                                    <SolidColorBrush x:Key="SliderTrackFillPressed" Color="Transparent" />
+                                    <SolidColorBrush x:Key="SliderTrackValueFill" Color="Transparent" />
+                                    <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="Transparent" />
+                                    <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="Transparent" />
+                                </Slider.Resources>
+                            </Slider>
                         </Grid>
                     </Grid>
                     <Button
