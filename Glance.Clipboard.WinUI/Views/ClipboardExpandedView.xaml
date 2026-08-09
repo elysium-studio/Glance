@@ -45,9 +45,7 @@
                         VerticalAlignment="Center"
                         Orientation="Horizontal"
                         Spacing="2">
-                        <Button
-                            x:Uid="CopyButton"
-                            Click="HandleCopyClick">
+                        <Button x:Uid="CopyButton" Click="HandleCopyClick">
                             <Button.Style>
                                 <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
                                     <Setter Property="Width" Value="32" />
@@ -61,9 +59,7 @@
                                 </Style>
                             </Button.Style>
                         </Button>
-                        <Button
-                            x:Uid="SendButton"
-                            Click="HandlePasteClick">
+                        <Button x:Uid="SendButton" Click="HandlePasteClick">
                             <Button.Style>
                                 <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
                                     <Setter Property="Width" Value="32" />
@@ -77,9 +73,7 @@
                                 </Style>
                             </Button.Style>
                         </Button>
-                        <Button
-                            x:Uid="RemoveButton"
-                            Click="HandleRemoveClick">
+                        <Button x:Uid="RemoveButton" Click="HandleRemoveClick">
                             <Button.Style>
                                 <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
                                     <Setter Property="Width" Value="32" />
