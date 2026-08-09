@@ -24,6 +24,8 @@ public sealed partial class DesktopIslandView :
     DesktopIsland
 {
     private const string AssistantContinuumAnimationKey = "DesktopIsland.Assistant.Continuum";
+    private const int ExtendedWindowStyleIndex = -20;
+    private const int NoActivateExtendedWindowStyle = 0x08000000;
     private const int AttentionExpansionDurationMs = 4000;
     private const int ContextualDragExitDelayMs = 160;
     private const int InteractionExitDelayMs = 240;
@@ -55,6 +57,7 @@ public sealed partial class DesktopIslandView :
         InitializeComponent();
         dispatcherQueue = DispatcherQueue;
 
+        Opened += HandleIslandOpened;
         Loaded += HandleLoaded;
         Unloaded += HandleUnloaded;
         AddHandler(PointerPressedEvent, new PointerEventHandler(HandleButtonPointerPressed), true);
@@ -106,7 +109,26 @@ public sealed partial class DesktopIslandView :
         ApplyAssistantPresentation(ViewModel.Assistant.IsOverlayVisible);
         ApplyContentRoutePresentation(ViewModel.IsContentRoutePickerVisible);
         StartStartupAttentionTimer();
+        _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, KeepIslandNonActivating);
     }
+
+    private void HandleIslandOpened(object sender,
+        RoutedEventArgs args) => _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, KeepIslandNonActivating);
+
+    private void KeepIslandNonActivating()
+    {
+        int extendedStyle = GetWindowLong(Handle, ExtendedWindowStyleIndex);
+        _ = SetWindowLong(Handle, ExtendedWindowStyleIndex, extendedStyle | NoActivateExtendedWindowStyle);
+    }
+
+    [LibraryImport("user32.dll", EntryPoint = "GetWindowLongW")]
+    private static partial int GetWindowLong(nint window,
+        int index);
+
+    [LibraryImport("user32.dll", EntryPoint = "SetWindowLongW")]
+    private static partial int SetWindowLong(nint window,
+        int index,
+        int value);
 
     private void InitializeExpansionState()
     {

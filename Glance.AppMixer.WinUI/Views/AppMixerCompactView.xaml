@@ -11,6 +11,7 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Grid
             x:Name="StatusIndicator"
@@ -24,43 +25,39 @@
                 Foreground="{ThemeResource GlanceAppMixerIconBrush}"
                 Glyph="&#xE9E9;" />
         </Grid>
-        <StackPanel
+        <Controls:MarqueeTextBlock
             Grid.Column="1"
             MinWidth="0"
             VerticalAlignment="Center"
-            Spacing="0">
-            <Controls:MarqueeTextBlock
-                FontSize="14"
-                FontWeight="SemiBold"
-                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                Text="{x:Bind ViewModel.CurrentApplicationName, Mode=OneWay}"
-                ToolTipService.ToolTip="{x:Bind ViewModel.CurrentApplicationName, Mode=OneWay}" />
-            <TextBlock
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                Style="{StaticResource CaptionTextBlockStyle}"
-                Text="{x:Bind ViewModel.CurrentVolumeText, Mode=OneWay}"
-                TextTrimming="CharacterEllipsis" />
-        </StackPanel>
-        <Grid
+            FontSize="14"
+            FontWeight="SemiBold"
+            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+            Text="{x:Bind ViewModel.CurrentApplicationName, Mode=OneWay}"
+            ToolTipService.ToolTip="{x:Bind ViewModel.CurrentApplicationName, Mode=OneWay}" />
+        <TextBlock
             Grid.Column="2"
             VerticalAlignment="Center"
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            Style="{StaticResource CaptionTextBlockStyle}"
+            Text="{x:Bind ViewModel.CurrentVolumeText, Mode=OneWay}"
+            Visibility="{x:Bind WhenPopulated(ViewModel.HasApplications), Mode=OneWay}" />
+        <Button
+            x:Uid="ToggleMuteButton"
+            Grid.Column="3"
+            Click="{x:Bind ViewModel.SelectedApplication.ToggleMute}"
+            Content="{x:Bind ViewModel.SelectedApplication.MuteGlyph, Mode=OneWay}"
             Visibility="{x:Bind WhenPopulated(ViewModel.HasApplications), Mode=OneWay}">
-            <Button
-                x:Uid="ToggleMuteButton"
-                Click="{x:Bind ViewModel.SelectedApplication.ToggleMute}"
-                Content="{x:Bind ViewModel.SelectedApplication.MuteGlyph, Mode=OneWay}">
-                <Button.Style>
-                    <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
-                        <Setter Property="Width" Value="28" />
-                        <Setter Property="Height" Value="28" />
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="BorderThickness" Value="0" />
-                        <Setter Property="CornerRadius" Value="14" />
-                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                        <Setter Property="FontSize" Value="12" />
-                    </Style>
-                </Button.Style>
-            </Button>
-        </Grid>
+            <Button.Style>
+                <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                    <Setter Property="Width" Value="28" />
+                    <Setter Property="Height" Value="28" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="CornerRadius" Value="14" />
+                    <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                    <Setter Property="FontSize" Value="12" />
+                </Style>
+            </Button.Style>
+        </Button>
     </Grid>
 </UserControl>

@@ -10,7 +10,7 @@
                 <ResourceDictionary Source="../Themes/AppMixer.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <DataTemplate x:Key="AudioApplicationItemTemplate" x:DataType="AppMixer:AudioApplicationItemViewModel">
-                <Grid Margin="2,0,0,0" ColumnSpacing="8">
+                <Grid Margin="2,0,0,0" Padding="0,0,0,3" ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -42,6 +42,7 @@
                         <Grid Grid.Row="1">
                             <Slider
                                 AutomationProperties.Name="Application volume"
+                                Height="32"
                                 Maximum="100"
                                 Minimum="0"
                                 StepFrequency="1"
@@ -96,7 +97,7 @@
         </Grid>
         <Grid
             Grid.Column="1"
-            Height="58"
+            Height="68"
             VerticalAlignment="Center"
             RowSpacing="1">
             <Grid.RowDefinitions>

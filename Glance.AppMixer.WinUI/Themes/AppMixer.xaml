@@ -2,12 +2,30 @@
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Default">
             <SolidColorBrush x:Key="GlanceAppMixerIconBrush" Color="#FFB69CFF" />
+            <SolidColorBrush x:Key="SliderThumbBackground" Color="#FFB69CFF" />
+            <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="#FFCAB9FF" />
+            <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="#FF9E7AFF" />
+            <SolidColorBrush x:Key="SliderTrackValueFill" Color="#FFB69CFF" />
+            <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="#FFCAB9FF" />
+            <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="#FF9E7AFF" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="GlanceAppMixerIconBrush" Color="#FF5B2E91" />
+            <SolidColorBrush x:Key="SliderThumbBackground" Color="#FF5B2E91" />
+            <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="#FF7043A8" />
+            <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="#FF45206F" />
+            <SolidColorBrush x:Key="SliderTrackValueFill" Color="#FF5B2E91" />
+            <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="#FF7043A8" />
+            <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="#FF45206F" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <StaticResource x:Key="GlanceAppMixerIconBrush" ResourceKey="SystemColorWindowTextColorBrush" />
+            <StaticResource x:Key="SliderThumbBackground" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="SliderThumbBackgroundPointerOver" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="SliderThumbBackgroundPressed" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="SliderTrackValueFill" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="SliderTrackValueFillPointerOver" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="SliderTrackValueFillPressed" ResourceKey="SystemColorHighlightColorBrush" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>
