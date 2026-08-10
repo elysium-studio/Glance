@@ -42,6 +42,15 @@
                         </Grid>
                         <Grid Grid.Row="1" Height="20">
                             <Rectangle
+                                Height="2"
+                                Margin="0,0,8,0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                Fill="{ThemeResource SliderTrackFill}"
+                                IsHitTestVisible="False"
+                                RadiusX="1"
+                                RadiusY="1" />
+                            <Rectangle
                                 Height="4"
                                 Margin="0,0,8,0"
                                 HorizontalAlignment="Stretch"
