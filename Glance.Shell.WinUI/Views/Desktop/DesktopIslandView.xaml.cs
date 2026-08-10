@@ -36,8 +36,6 @@ public sealed partial class DesktopIslandView :
     private const int AttentionExpansionDurationMs = 4000;
     private const int ContextualDragExitDelayMs = 160;
     private const int InteractionExitDelayMs = 240;
-    private const double ModuleReorderDragScrollEdgeWidth = 52;
-    private const int ModuleReorderDragScrollIntervalMs = 450;
     private const float ModuleReorderEdgeFadeWidth = 32;
     private const double ModuleReorderSideItemMinimumOpacity = 0.68;
     private const int StartupAttentionDelayMs = 2500;
@@ -46,7 +44,6 @@ public sealed partial class DesktopIslandView :
     private DispatcherQueueTimer? attentionExpansionTimer;
     private DispatcherQueueTimer? contextualDragExitTimer;
     private DispatcherQueueTimer? interactionExitTimer;
-    private DispatcherQueueTimer? moduleReorderDragScrollTimer;
     private DispatcherQueueTimer? startupAttentionTimer;
     private FrameworkElement? activeContentRouteTarget;
     private Button? pressedButton;
@@ -65,7 +62,6 @@ public sealed partial class DesktopIslandView :
     private CompositionVisualSurface? moduleReorderRightEdgeSurface;
     private ScrollViewer? moduleReorderScrollViewer;
     private int moduleReorderCenteredIndex = -1;
-    private int moduleReorderDragScrollDirection;
     private int moduleReorderTargetIndex = -1;
     private string? droppedContentRouteId;
     private bool isContextualDragActive;
@@ -187,7 +183,6 @@ public sealed partial class DesktopIslandView :
         StopAttentionExpansionTimer();
         StopContextualDragExitTimer();
         StopInteractionExitTimer();
-        StopModuleReorderDragScroll();
         StopStartupAttentionTimer();
         DisposeModuleReorderEdgeFade();
         StaysExpanded = false;
@@ -1250,18 +1245,10 @@ public sealed partial class DesktopIslandView :
     private void HandleModuleReorderDragStarting(object sender,
         DragItemsStartingEventArgs args)
     {
-        StopModuleReorderDragScroll();
         object? item = args.Items.FirstOrDefault();
         draggedModuleOrderItem = item is null
             ? null
             : ModuleReorderList.ContainerFromItem(item) as ListViewItem;
-
-        ScrollViewer? scrollViewer = GetModuleReorderScrollViewer();
-
-        if (scrollViewer is not null)
-        {
-            scrollViewer.HorizontalScrollMode = ScrollMode.Disabled;
-        }
 
         if (draggedModuleOrderItem is not null)
         {
@@ -1273,13 +1260,7 @@ public sealed partial class DesktopIslandView :
     private void HandleModuleReorderDragCompleted(ListViewBase sender,
         DragItemsCompletedEventArgs args)
     {
-        StopModuleReorderDragScroll();
         ScrollViewer? scrollViewer = GetModuleReorderScrollViewer();
-
-        if (scrollViewer is not null)
-        {
-            scrollViewer.HorizontalScrollMode = ScrollMode.Enabled;
-        }
 
         moduleOrderDragPreview?.Dispose();
         moduleOrderDragPreview = null;
@@ -1301,83 +1282,7 @@ public sealed partial class DesktopIslandView :
     {
         args.DragUIOverride.IsGlyphVisible = false;
         args.DragUIOverride.IsCaptionVisible = false;
-
-        Windows.Foundation.Point position = args.GetPosition(ModuleReorderList);
-        double width = ModuleReorderList.ActualWidth;
-        int direction = position.X <= ModuleReorderDragScrollEdgeWidth
-            ? -1
-            : position.X >= width - ModuleReorderDragScrollEdgeWidth
-                ? 1
-                : 0;
-        SetModuleReorderDragScrollDirection(direction);
         UpdateModuleReorderItemFade(moduleReorderScrollViewer);
-    }
-
-    private void HandleModuleReorderDragLeave(object sender,
-        DragEventArgs args) => StopModuleReorderDragScroll();
-
-    private void SetModuleReorderDragScrollDirection(int direction)
-    {
-        if (direction == moduleReorderDragScrollDirection &&
-            moduleReorderDragScrollTimer?.IsRunning == true)
-        {
-            return;
-        }
-
-        StopModuleReorderDragScroll();
-
-        if (direction == 0)
-        {
-            return;
-        }
-
-        moduleReorderDragScrollDirection = direction;
-        moduleReorderDragScrollTimer ??= CreateModuleReorderDragScrollTimer();
-        moduleReorderDragScrollTimer.Start();
-    }
-
-    private DispatcherQueueTimer CreateModuleReorderDragScrollTimer()
-    {
-        DispatcherQueueTimer timer = DispatcherQueue.CreateTimer();
-        timer.Interval = TimeSpan.FromMilliseconds(ModuleReorderDragScrollIntervalMs);
-        timer.IsRepeating = true;
-        timer.Tick += HandleModuleReorderDragScrollTimerTick;
-        return timer;
-    }
-
-    private void HandleModuleReorderDragScrollTimerTick(DispatcherQueueTimer sender,
-        object args)
-    {
-        if (draggedModuleOrderItem is null ||
-            !ViewModel.IsModuleReorderVisible ||
-            moduleReorderDragScrollDirection == 0)
-        {
-            StopModuleReorderDragScroll();
-            return;
-        }
-
-        ScrollViewer? scrollViewer = GetModuleReorderScrollViewer();
-
-        if (scrollViewer is null)
-        {
-            return;
-        }
-
-        int currentIndex = moduleReorderTargetIndex >= 0
-            ? moduleReorderTargetIndex
-            : moduleReorderCenteredIndex >= 0
-                ? moduleReorderCenteredIndex
-                : GetNearestModuleOrderIndex(scrollViewer);
-        scrollViewer.HorizontalScrollMode = ScrollMode.Enabled;
-        CenterModuleOrderItem(currentIndex + moduleReorderDragScrollDirection,
-            true);
-        scrollViewer.HorizontalScrollMode = ScrollMode.Disabled;
-    }
-
-    private void StopModuleReorderDragScroll()
-    {
-        moduleReorderDragScrollTimer?.Stop();
-        moduleReorderDragScrollDirection = 0;
     }
 
     private async void HandleModuleReorderDragStartingVisual(UIElement sender,

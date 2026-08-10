@@ -232,7 +232,6 @@
                         Background="Transparent"
                         CanDragItems="True"
                         CanReorderItems="True"
-                        DragLeave="HandleModuleReorderDragLeave"
                         DragOver="HandleModuleReorderDragOver"
                         DragStarting="HandleModuleReorderDragStartingVisual"
                         DragItemsCompleted="HandleModuleReorderDragCompleted"
