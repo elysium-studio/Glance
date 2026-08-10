@@ -29,6 +29,7 @@ public sealed partial class AudioApplicationItemViewModel :
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PeakScale))]
     [NotifyPropertyChangedFor(nameof(VolumeText))]
+    [NotifyPropertyChangedFor(nameof(VolumeScale))]
     private double volume;
 
     public AudioApplicationItemViewModel(AudioApplicationSession session,
@@ -49,6 +50,8 @@ public sealed partial class AudioApplicationItemViewModel :
     public string MuteLabel => IsMuted ? "Unmute" : "Mute";
 
     public double PeakScale => Math.Min(PeakPercent, Volume) / 100;
+
+    public double VolumeScale => Math.Clamp(Volume, 0, 100) / 100;
 
     public void ToggleMute() => IsMuted = !IsMuted;
 

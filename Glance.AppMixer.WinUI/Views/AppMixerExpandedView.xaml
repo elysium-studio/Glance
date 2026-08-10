@@ -40,14 +40,20 @@
                                 Text="{x:Bind VolumeText, Mode=OneWay}" />
                         </Grid>
                         <Grid Grid.Row="1" Height="20">
-                            <ProgressBar
+                            <Rectangle
                                 Height="4"
                                 Margin="0,0,8,0"
+                                HorizontalAlignment="Stretch"
                                 VerticalAlignment="Center"
-                                Foreground="{ThemeResource GlanceAppMixerIconBrush}"
+                                Fill="{ThemeResource GlanceAppMixerIconBrush}"
                                 IsHitTestVisible="False"
-                                Maximum="100"
-                                Value="{x:Bind Volume, Mode=OneWay}" />
+                                RadiusX="2"
+                                RadiusY="2"
+                                RenderTransformOrigin="0,0.5">
+                                <Rectangle.RenderTransform>
+                                    <ScaleTransform ScaleX="{x:Bind VolumeScale, Mode=OneWay}" />
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
                             <Rectangle
                                 Height="2"
                                 Margin="0,0,8,0"
