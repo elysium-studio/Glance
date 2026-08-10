@@ -604,6 +604,13 @@ public sealed partial class DesktopIslandView :
 
         UpdateLayout();
 
+        if (showReorder && ViewModel.SelectedComponent is not null)
+        {
+            ModuleReorderList.ScrollIntoView(ViewModel.SelectedComponent,
+                ScrollIntoViewAlignment.Default);
+            UpdateLayout();
+        }
+
         if (!IsInElementTree(outgoing) ||
             !IsInElementTree(incoming) ||
             outgoing.ActualWidth <= 0 ||

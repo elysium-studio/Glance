@@ -201,11 +201,14 @@
                         Width="30"
                         Height="30"
                         Padding="0"
+                        Background="{ThemeResource ControlFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
                         Click="{x:Bind ViewModel.CancelModuleReorder}"
                         Content="&#xE711;"
                         CornerRadius="15"
                         FontFamily="Segoe Fluent Icons"
-                        FontSize="12"
+                        FontSize="14"
                         Style="{StaticResource SubtleButtonStyle}" />
                     <Button
                         x:Uid="ConfirmModuleReorderButton"
@@ -216,7 +219,7 @@
                         Content="&#xE73E;"
                         CornerRadius="15"
                         FontFamily="Segoe Fluent Icons"
-                        FontSize="12"
+                        FontSize="14"
                         Style="{StaticResource AccentButtonStyle}" />
                 </StackPanel>
                 <ListView
@@ -242,7 +245,9 @@
                     </ListView.ItemContainerTransitions>
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <ItemsStackPanel Orientation="Horizontal" />
+                            <ItemsStackPanel
+                                CacheLength="16"
+                                Orientation="Horizontal" />
                         </ItemsPanelTemplate>
                     </ListView.ItemsPanel>
                     <ListView.ItemContainerStyle>
