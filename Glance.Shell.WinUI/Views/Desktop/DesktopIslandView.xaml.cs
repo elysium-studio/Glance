@@ -687,8 +687,7 @@ public sealed partial class DesktopIslandView :
 
         ListViewItem? item =
             ModuleReorderList.ContainerFromItem(selectedComponent) as ListViewItem;
-        ScrollViewer? scrollViewer =
-            FindVisualDescendant<ScrollViewer>(ModuleReorderList);
+        ScrollViewer? scrollViewer = GetModuleReorderScrollViewer();
 
         if (item is null || scrollViewer is null || scrollViewer.ViewportWidth <= 0)
         {
@@ -710,9 +709,31 @@ public sealed partial class DesktopIslandView :
     private void HandleModuleReorderListLoaded(object sender,
         RoutedEventArgs args)
     {
+        ScrollViewer? scrollViewer = GetModuleReorderScrollViewer();
+
+        if (scrollViewer is null)
+        {
+            _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+                UpdateModuleReorderScrollButtons(GetModuleReorderScrollViewer()));
+        }
+    }
+
+    private ScrollViewer? GetModuleReorderScrollViewer()
+    {
         ScrollViewer? scrollViewer =
             FindVisualDescendant<ScrollViewer>(ModuleReorderList);
 
+        if (scrollViewer is null)
+        {
+            return null;
+        }
+
+        AttachModuleReorderScrollViewer(scrollViewer);
+        return scrollViewer;
+    }
+
+    private void AttachModuleReorderScrollViewer(ScrollViewer scrollViewer)
+    {
         if (ReferenceEquals(moduleReorderScrollViewer, scrollViewer))
         {
             UpdateModuleReorderScrollButtons(scrollViewer);
@@ -725,12 +746,7 @@ public sealed partial class DesktopIslandView :
         }
 
         moduleReorderScrollViewer = scrollViewer;
-
-        if (scrollViewer is not null)
-        {
-            scrollViewer.ViewChanged += HandleModuleReorderViewChanged;
-        }
-
+        scrollViewer.ViewChanged += HandleModuleReorderViewChanged;
         UpdateModuleReorderScrollButtons(scrollViewer);
     }
 
@@ -746,8 +762,7 @@ public sealed partial class DesktopIslandView :
 
     private void ScrollModuleOrder(int direction)
     {
-        ScrollViewer? scrollViewer = moduleReorderScrollViewer ??
-            FindVisualDescendant<ScrollViewer>(ModuleReorderList);
+        ScrollViewer? scrollViewer = GetModuleReorderScrollViewer();
 
         if (scrollViewer is null)
         {
