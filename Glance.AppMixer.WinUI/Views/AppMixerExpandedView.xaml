@@ -70,6 +70,9 @@
                                 Minimum="0"
                                 StepFrequency="0.1"
                                 Value="{x:Bind Volume, Mode=TwoWay}">
+                                <Slider.RenderTransform>
+                                    <TranslateTransform Y="-2" />
+                                </Slider.RenderTransform>
                                 <Slider.Resources>
                                     <x:Double x:Key="SliderHorizontalHeight">20</x:Double>
                                     <x:Double x:Key="SliderPreContentMargin">10</x:Double>
