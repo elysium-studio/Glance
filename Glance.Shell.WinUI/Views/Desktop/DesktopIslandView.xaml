@@ -192,25 +192,31 @@
                 </Grid.RowDefinitions>
                 <StackPanel
                     Grid.Row="1"
-                    HorizontalAlignment="Right"
+                    HorizontalAlignment="Center"
                     VerticalAlignment="Bottom"
                     Orientation="Horizontal"
-                    Spacing="8">
+                    Spacing="6">
                     <Button
                         x:Uid="CancelModuleReorderButton"
-                        MinWidth="72"
-                        Height="28"
-                        Padding="12,0"
+                        Width="30"
+                        Height="30"
+                        Padding="0"
                         Click="{x:Bind ViewModel.CancelModuleReorder}"
-                        CornerRadius="6"
+                        Content="&#xE711;"
+                        CornerRadius="15"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="12"
                         Style="{StaticResource SubtleButtonStyle}" />
                     <Button
                         x:Uid="ConfirmModuleReorderButton"
-                        MinWidth="72"
-                        Height="28"
-                        Padding="12,0"
+                        Width="30"
+                        Height="30"
+                        Padding="0"
                         Click="{x:Bind ViewModel.ConfirmModuleReorder}"
-                        CornerRadius="6"
+                        Content="&#xE73E;"
+                        CornerRadius="15"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="12"
                         Style="{StaticResource AccentButtonStyle}" />
                 </StackPanel>
                 <ListView
@@ -219,11 +225,9 @@
                     AllowDrop="True"
                     Background="Transparent"
                     CanDragItems="True"
-                    CanReorderItems="False"
+                    CanReorderItems="True"
                     DragItemsCompleted="HandleModuleReorderDragCompleted"
                     DragItemsStarting="HandleModuleReorderDragStarting"
-                    DragOver="HandleModuleReorderDragOver"
-                    Drop="HandleModuleReorderDrop"
                     IsItemClickEnabled="False"
                     ItemsSource="{x:Bind ViewModel.ModuleOrder, Mode=OneWay}"
                     SelectionMode="None"
