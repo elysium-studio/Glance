@@ -41,16 +41,22 @@
                                 Text="{x:Bind VolumeText, Mode=OneWay}" />
                         </Grid>
                         <Grid Grid.Row="1" Height="20">
-                            <Local:CompositionScaleBar
+                            <Rectangle
                                 Height="4"
                                 Margin="0,0,8,0"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Center"
-                                BarCornerRadius="2"
                                 Fill="{ThemeResource GlanceAppMixerIconBrush}"
                                 IsHitTestVisible="False"
-                                Value="{x:Bind VolumeScale, Mode=OneWay}" />
+                                RadiusX="2"
+                                RadiusY="2"
+                                RenderTransformOrigin="0,0.5">
+                                <Rectangle.RenderTransform>
+                                    <ScaleTransform ScaleX="{x:Bind VolumeScale, Mode=OneWay}" />
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
                             <Local:CompositionScaleBar
+                                Canvas.ZIndex="1"
                                 Height="2"
                                 Margin="0,0,8,0"
                                 HorizontalAlignment="Stretch"
@@ -58,8 +64,10 @@
                                 BarCornerRadius="1"
                                 Fill="{ThemeResource GlanceAppMixerMeterBrush}"
                                 IsHitTestVisible="False"
+                                MaximumValue="{x:Bind VolumeScale, Mode=OneWay}"
                                 Value="{x:Bind PeakScale, Mode=OneWay}" />
                             <Slider
+                                Canvas.ZIndex="2"
                                 Height="20"
                                 Margin="2,0,10,0"
                                 AutomationProperties.Name="Application volume"
