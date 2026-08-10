@@ -24,6 +24,7 @@
     PointerExited="{x:Bind HandleIslandPointerExited}"
     PointerWheelChanged="{x:Bind HandlePointerWheelChanged}">
     <Controls:DesktopIsland.Resources>
+        <x:Double x:Key="GlanceModuleReorderItemWidth">148</x:Double>
         <Local:GlanceIntentAccentBrushConverter x:Key="GlanceIntentAccentBrushConverter" />
         <Local:GlanceModuleAccentBrushConverter x:Key="GlanceModuleAccentBrushConverter" />
         <StaticResource x:Key="GlanceDefaultAssistantIndicatorForegroundBrush" ResourceKey="AccentTextFillColorPrimaryBrush" />
@@ -255,7 +256,7 @@
                     </ListView.ItemsPanel>
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
-                            <Setter Property="Width" Value="64" />
+                            <Setter Property="Width" Value="{StaticResource GlanceModuleReorderItemWidth}" />
                             <Setter Property="Height" Value="60" />
                             <Setter Property="Margin" Value="1,0" />
                             <Setter Property="Padding" Value="0" />
@@ -270,29 +271,74 @@
                                 Background="{ThemeResource ControlFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="8"
+                                CornerRadius="20"
+                                Padding="10,6"
                                 PointerEntered="HandleModuleOrderItemPointerEntered"
                                 PointerExited="HandleModuleOrderItemPointerExited"
                                 ToolTipService.ToolTip="{x:Bind DisplayName}">
-                                <StackPanel
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Spacing="2">
+                                <Grid ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="22" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="20" />
+                                    </Grid.ColumnDefinitions>
                                     <FontIcon
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
                                         FontFamily="{x:Bind IconFontFamily}"
-                                        FontSize="20"
+                                        FontSize="18"
                                         Foreground="{Binding Converter={StaticResource GlanceModuleAccentBrushConverter}}"
                                         Glyph="{x:Bind IconGlyph}" />
-                                    <TextBlock
-                                        MaxWidth="54"
-                                        HorizontalAlignment="Center"
-                                        FontSize="10"
-                                        Foreground="{Binding Converter={StaticResource GlanceModuleAccentBrushConverter}}"
-                                        Text="{x:Bind DisplayName}"
-                                        TextAlignment="Center"
-                                        TextTrimming="CharacterEllipsis"
-                                        TextWrapping="NoWrap" />
-                                </StackPanel>
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        Spacing="4">
+                                        <TextBlock
+                                            FontSize="10"
+                                            FontWeight="SemiBold"
+                                            Foreground="{Binding Converter={StaticResource GlanceModuleAccentBrushConverter}}"
+                                            Text="{x:Bind DisplayName}"
+                                            TextTrimming="CharacterEllipsis"
+                                            TextWrapping="NoWrap" />
+                                        <StackPanel Spacing="3">
+                                            <Border
+                                                Width="42"
+                                                Height="3"
+                                                HorizontalAlignment="Left"
+                                                Background="{Binding Converter={StaticResource GlanceModuleAccentBrushConverter}}"
+                                                CornerRadius="1.5"
+                                                Opacity="0.5" />
+                                            <StackPanel Orientation="Horizontal" Spacing="3">
+                                                <Border
+                                                    Width="22"
+                                                    Height="3"
+                                                    Background="{Binding Converter={StaticResource GlanceModuleAccentBrushConverter}}"
+                                                    CornerRadius="1.5"
+                                                    Opacity="0.28" />
+                                                <Border
+                                                    Width="10"
+                                                    Height="3"
+                                                    Background="{Binding Converter={StaticResource GlanceModuleAccentBrushConverter}}"
+                                                    CornerRadius="1.5"
+                                                    Opacity="0.28" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <Grid
+                                        Grid.Column="2"
+                                        Width="20"
+                                        Height="20"
+                                        VerticalAlignment="Center">
+                                        <Ellipse
+                                            Fill="{Binding Converter={StaticResource GlanceModuleAccentBrushConverter}}"
+                                            Opacity="0.16" />
+                                        <Ellipse
+                                            Width="6"
+                                            Height="6"
+                                            Fill="{Binding Converter={StaticResource GlanceModuleAccentBrushConverter}}"
+                                            Opacity="0.8" />
+                                    </Grid>
+                                </Grid>
                             </Border>
                         </DataTemplate>
                     </ListView.ItemTemplate>

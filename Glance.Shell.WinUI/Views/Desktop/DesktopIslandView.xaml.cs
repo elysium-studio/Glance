@@ -674,7 +674,9 @@ public sealed partial class DesktopIslandView :
             return;
         }
 
-        const double itemWidth = 64;
+        double itemWidth = Resources["GlanceModuleReorderItemWidth"] is double width ?
+            width :
+            148;
         double edgePadding = Math.Max(0,
             (ModuleReorderList.ActualWidth - itemWidth) / 2);
         ModuleReorderList.Padding = new Thickness(edgePadding, 0, edgePadding, 0);
