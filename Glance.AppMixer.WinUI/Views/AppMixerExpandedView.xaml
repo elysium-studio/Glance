@@ -155,11 +155,13 @@
                     Text="{x:Bind ViewModel.CurrentVolumeText, Mode=OneWay}" />
             </StackPanel>
             <Controls:CompactFlipView
+                x:Name="ApplicationFlipView"
                 Grid.Row="1"
                 Margin="-22,0,0,0"
                 Background="Transparent"
                 ItemTemplate="{StaticResource AudioApplicationItemTemplate}"
                 ItemsSource="{x:Bind ViewModel.Applications}"
+                Loaded="{x:Bind HandleFlipViewLoaded}"
                 SelectedItem="{x:Bind ViewModel.SelectedApplication, Mode=TwoWay}"
                 Visibility="{x:Bind WhenPopulated(ViewModel.HasApplications), Mode=OneWay}" />
         </Grid>
