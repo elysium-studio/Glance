@@ -24,51 +24,53 @@
     PointerExited="{x:Bind HandleIslandPointerExited}"
     PointerWheelChanged="{x:Bind HandlePointerWheelChanged}">
     <Controls:DesktopIsland.Resources>
-        <ResourceDictionary.ThemeDictionaries>
-            <ResourceDictionary x:Key="Default">
-                <LinearGradientBrush
-                    x:Key="GlanceModuleReorderLeftEdgeFadeBrush"
-                    StartPoint="0,0.5"
-                    EndPoint="1,0.5">
-                    <GradientStop Color="#D0181A20" Offset="0" />
-                    <GradientStop Color="#8A181A20" Offset="0.28" />
-                    <GradientStop Color="#00181A20" Offset="1" />
-                </LinearGradientBrush>
-                <LinearGradientBrush
-                    x:Key="GlanceModuleReorderRightEdgeFadeBrush"
-                    StartPoint="0,0.5"
-                    EndPoint="1,0.5">
-                    <GradientStop Color="#00181A20" Offset="0" />
-                    <GradientStop Color="#8A181A20" Offset="0.72" />
-                    <GradientStop Color="#D0181A20" Offset="1" />
-                </LinearGradientBrush>
-            </ResourceDictionary>
-            <ResourceDictionary x:Key="Light">
-                <LinearGradientBrush
-                    x:Key="GlanceModuleReorderLeftEdgeFadeBrush"
-                    StartPoint="0,0.5"
-                    EndPoint="1,0.5">
-                    <GradientStop Color="#D0F3F3F3" Offset="0" />
-                    <GradientStop Color="#8AF3F3F3" Offset="0.28" />
-                    <GradientStop Color="#00F3F3F3" Offset="1" />
-                </LinearGradientBrush>
-                <LinearGradientBrush
-                    x:Key="GlanceModuleReorderRightEdgeFadeBrush"
-                    StartPoint="0,0.5"
-                    EndPoint="1,0.5">
-                    <GradientStop Color="#00F3F3F3" Offset="0" />
-                    <GradientStop Color="#8AF3F3F3" Offset="0.72" />
-                    <GradientStop Color="#D0F3F3F3" Offset="1" />
-                </LinearGradientBrush>
-            </ResourceDictionary>
-        </ResourceDictionary.ThemeDictionaries>
-        <x:Double x:Key="GlanceModuleReorderItemWidth">164</x:Double>
-        <Local:GlanceIntentAccentBrushConverter x:Key="GlanceIntentAccentBrushConverter" />
-        <Local:GlanceModuleAccentBrushConverter x:Key="GlanceModuleAccentBrushConverter" />
-        <Local:UppercaseTextConverter x:Key="UppercaseTextConverter" />
-        <StaticResource x:Key="GlanceDefaultAssistantIndicatorForegroundBrush" ResourceKey="AccentTextFillColorPrimaryBrush" />
-        <SolidColorBrush x:Key="GlanceFooterDividerBrush" Color="#33FFFFFF" />
-        <SolidColorBrush x:Key="GlanceFooterForegroundBrush" Color="#FFF8FAFC" />
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <LinearGradientBrush
+                        x:Key="GlanceModuleReorderLeftEdgeFadeBrush"
+                        StartPoint="0,0.5"
+                        EndPoint="1,0.5">
+                        <GradientStop Color="#D0181A20" Offset="0" />
+                        <GradientStop Color="#8A181A20" Offset="0.28" />
+                        <GradientStop Color="#00181A20" Offset="1" />
+                    </LinearGradientBrush>
+                    <LinearGradientBrush
+                        x:Key="GlanceModuleReorderRightEdgeFadeBrush"
+                        StartPoint="0,0.5"
+                        EndPoint="1,0.5">
+                        <GradientStop Color="#00181A20" Offset="0" />
+                        <GradientStop Color="#8A181A20" Offset="0.72" />
+                        <GradientStop Color="#D0181A20" Offset="1" />
+                    </LinearGradientBrush>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Light">
+                    <LinearGradientBrush
+                        x:Key="GlanceModuleReorderLeftEdgeFadeBrush"
+                        StartPoint="0,0.5"
+                        EndPoint="1,0.5">
+                        <GradientStop Color="#D0F3F3F3" Offset="0" />
+                        <GradientStop Color="#8AF3F3F3" Offset="0.28" />
+                        <GradientStop Color="#00F3F3F3" Offset="1" />
+                    </LinearGradientBrush>
+                    <LinearGradientBrush
+                        x:Key="GlanceModuleReorderRightEdgeFadeBrush"
+                        StartPoint="0,0.5"
+                        EndPoint="1,0.5">
+                        <GradientStop Color="#00F3F3F3" Offset="0" />
+                        <GradientStop Color="#8AF3F3F3" Offset="0.72" />
+                        <GradientStop Color="#D0F3F3F3" Offset="1" />
+                    </LinearGradientBrush>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+            <x:Double x:Key="GlanceModuleReorderItemWidth">164</x:Double>
+            <Local:GlanceIntentAccentBrushConverter x:Key="GlanceIntentAccentBrushConverter" />
+            <Local:GlanceModuleAccentBrushConverter x:Key="GlanceModuleAccentBrushConverter" />
+            <Local:UppercaseTextConverter x:Key="UppercaseTextConverter" />
+            <StaticResource x:Key="GlanceDefaultAssistantIndicatorForegroundBrush" ResourceKey="AccentTextFillColorPrimaryBrush" />
+            <SolidColorBrush x:Key="GlanceFooterDividerBrush" Color="#33FFFFFF" />
+            <SolidColorBrush x:Key="GlanceFooterForegroundBrush" Color="#FFF8FAFC" />
+        </ResourceDictionary>
     </Controls:DesktopIsland.Resources>
     <Controls:DesktopIsland.CompactContent>
         <Grid>
