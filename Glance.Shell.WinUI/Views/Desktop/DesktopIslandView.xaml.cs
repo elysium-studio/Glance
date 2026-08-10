@@ -1356,7 +1356,22 @@ public sealed partial class DesktopIslandView :
             return;
         }
 
-        ScrollModuleOrder(moduleReorderDragScrollDirection);
+        ScrollViewer? scrollViewer = GetModuleReorderScrollViewer();
+
+        if (scrollViewer is null)
+        {
+            return;
+        }
+
+        int currentIndex = moduleReorderTargetIndex >= 0
+            ? moduleReorderTargetIndex
+            : moduleReorderCenteredIndex >= 0
+                ? moduleReorderCenteredIndex
+                : GetNearestModuleOrderIndex(scrollViewer);
+        scrollViewer.HorizontalScrollMode = ScrollMode.Enabled;
+        CenterModuleOrderItem(currentIndex + moduleReorderDragScrollDirection,
+            true);
+        scrollViewer.HorizontalScrollMode = ScrollMode.Disabled;
     }
 
     private void StopModuleReorderDragScroll()
