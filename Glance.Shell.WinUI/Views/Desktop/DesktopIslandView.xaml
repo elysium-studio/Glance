@@ -234,6 +234,7 @@
                     IsItemClickEnabled="False"
                     ItemsSource="{x:Bind ViewModel.ModuleOrder, Mode=OneWay}"
                     SelectionMode="None"
+                    ShowsScrollingPlaceholders="False"
                     ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                     ScrollViewer.HorizontalScrollMode="Enabled"
                     ScrollViewer.VerticalScrollBarVisibility="Disabled"
