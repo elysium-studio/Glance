@@ -51,7 +51,7 @@ public sealed partial class App
         _ = host.Services.GetRequiredKeyedService<DesktopIslandView>("DesktopIslandView");
         moduleManager.StartWatching();
 
-        //if (host.Services.GetRequiredService<GlanceSettings>().ShowSetupOnStartup)
+        if (host.Services.GetRequiredService<GlanceSettings>().ShowSetupOnStartup)
         {
             startupNavigationTask = NavigateToStartupTourAsync(host.Services.GetRequiredService<INavigator>(),
                 host.Services.GetRequiredService<ILogger<App>>());
