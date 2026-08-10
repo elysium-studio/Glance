@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Numerics;
+using Windows.UI;
 
 namespace Glance.Media.WinUI;
 
@@ -34,6 +35,22 @@ public sealed partial class MediaAlbumAmbience :
     private bool isPanning;
 
     public MediaAlbumAmbience() => InitializeComponent();
+
+    internal event EventHandler? SurfaceAppearanceChanged;
+
+    internal uint GetContrastingForeground(uint artworkColor)
+    {
+        Color artwork = FromArgb(artworkColor);
+        Color surface = AcrylicOverlay.Fill switch
+        {
+            AcrylicBrush acrylic => EstimateAcrylicSurface(artwork, acrylic),
+            SolidColorBrush solid => Blend(artwork,
+                solid.Color,
+                (solid.Color.A / 255d) * solid.Opacity),
+            _ => artwork
+        };
+        return ToArgb(MediaAccentPalette.GetForeground(ToArgb(surface)));
+    }
 
     public MediaViewModel? ViewModel
     {
@@ -67,6 +84,9 @@ public sealed partial class MediaAlbumAmbience :
         ConfigureResponseAnimations(compositor);
         UpdateState();
     }
+
+    private void HandleActualThemeChanged(FrameworkElement sender,
+        object args) => SurfaceAppearanceChanged?.Invoke(this, EventArgs.Empty);
 
     private void HandleUnloaded(object sender, RoutedEventArgs args)
     {
@@ -476,4 +496,41 @@ public sealed partial class MediaAlbumAmbience :
 
         return total / (end - start);
     }
+
+    private static Color EstimateAcrylicSurface(Color artwork,
+        AcrylicBrush acrylic)
+    {
+        double luminosityOpacity = acrylic.TintLuminosityOpacity ?? 1;
+        Color luminositySurface = Blend(artwork,
+            acrylic.FallbackColor,
+            luminosityOpacity);
+        return Blend(luminositySurface,
+            acrylic.TintColor,
+            acrylic.TintOpacity * acrylic.Opacity);
+    }
+
+    private static Color Blend(Color background,
+        Color foreground,
+        double opacity)
+    {
+        double amount = Math.Clamp(opacity, 0, 1);
+        return Color.FromArgb(255,
+            BlendChannel(background.R, foreground.R, amount),
+            BlendChannel(background.G, foreground.G, amount),
+            BlendChannel(background.B, foreground.B, amount));
+    }
+
+    private static byte BlendChannel(byte background,
+        byte foreground,
+        double opacity) => (byte)Math.Round(background + ((foreground - background) * opacity));
+
+    private static Color FromArgb(uint value) => Color.FromArgb((byte)(value >> 24),
+        (byte)(value >> 16),
+        (byte)(value >> 8),
+        (byte)value);
+
+    private static uint ToArgb(Color color) => ((uint)color.A << 24) |
+        ((uint)color.R << 16) |
+        ((uint)color.G << 8) |
+        color.B;
 }

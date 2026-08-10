@@ -38,6 +38,7 @@ public sealed partial class MediaComponent :
     private readonly IGlanceAttentionService attentionService;
     private readonly DispatcherQueue dispatcherQueue;
     private readonly AudioLevelMonitor audioLevelMonitor;
+    private readonly MediaAlbumAmbience backgroundView;
     private DispatcherQueueTimer? artworkMissingTimer;
     private DispatcherQueueTimer? mediaRefreshTimer;
     private DispatcherQueueTimer? sessionMissingTimer;
@@ -46,6 +47,7 @@ public sealed partial class MediaComponent :
     private MediaAmbientArtwork? currentAmbientArtwork;
     private string? currentArtworkHash;
     private string? currentTitle;
+    private uint currentArtworkAverageColor = 0xFF2C2C2C;
     private int refreshGeneration;
 
     public MediaComponent(MediaViewModel viewModel,
@@ -58,10 +60,11 @@ public sealed partial class MediaComponent :
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         audioLevelMonitor = new AudioLevelMonitor();
 
-        BackgroundContent = new MediaAlbumAmbience
+        backgroundView = new MediaAlbumAmbience
         {
             ViewModel = viewModel
         };
+        BackgroundContent = backgroundView;
         MediaCompactView compactView = new(viewModel);
         MediaExpandedView expandedView = new(viewModel);
 
@@ -73,6 +76,7 @@ public sealed partial class MediaComponent :
         viewModel.PlaybackActionRequested += HandlePlaybackActionRequested;
         viewModel.PropertyChanged += HandleViewModelPropertyChanged;
         audioLevelMonitor.LevelsChanged += HandleAudioLevelsChanged;
+        backgroundView.SurfaceAppearanceChanged += HandleBackgroundSurfaceAppearanceChanged;
         Initialize();
     }
 
@@ -160,6 +164,7 @@ public sealed partial class MediaComponent :
         viewModel.PlaybackActionRequested -= HandlePlaybackActionRequested;
         viewModel.PropertyChanged -= HandleViewModelPropertyChanged;
         audioLevelMonitor.LevelsChanged -= HandleAudioLevelsChanged;
+        backgroundView.SurfaceAppearanceChanged -= HandleBackgroundSurfaceAppearanceChanged;
         audioLevelMonitor.Dispose();
         SetAmbientArtwork(null);
         refreshGeneration++;
@@ -335,6 +340,16 @@ public sealed partial class MediaComponent :
     private void HandleAudioLevelsChanged(object? sender,
         AudioSpectrumEventArgs args) => _ = dispatcherQueue.TryEnqueue(() => viewModel.UpdateAudioLevels(args.Levels));
 
+    private void HandleBackgroundSurfaceAppearanceChanged(object? sender,
+        EventArgs args)
+    {
+        if (viewModel.HasSession && viewModel.AmbientArtwork is not null)
+        {
+            viewModel.BackgroundForegroundColor =
+                backgroundView.GetContrastingForeground(currentArtworkAverageColor);
+        }
+    }
+
     private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
         if (args.PropertyName == nameof(MediaViewModel.ShowAudioVisualization))
@@ -409,7 +424,7 @@ public sealed partial class MediaComponent :
         IRandomAccessStreamWithContentType? artworkStream = null;
         string? artworkHash = null;
         uint accentColor = MediaViewModel.DefaultAccentColor;
-        uint backgroundForegroundColor = 0xFFFFFFFF;
+        uint artworkAverageColor = currentArtworkAverageColor;
 
         if (properties.Thumbnail is not null)
         {
@@ -432,7 +447,7 @@ public sealed partial class MediaComponent :
             {
                 MediaArtworkColors colors = await MediaArtworkColorAnalyzer.AnalyzeAsync(artworkStream);
                 accentColor = colors.AccentColor;
-                backgroundForegroundColor = colors.ForegroundColor;
+                artworkAverageColor = colors.AverageColor;
             }
             catch
             {
@@ -501,7 +516,9 @@ public sealed partial class MediaComponent :
 
                                 viewModel.Artwork = artwork;
                                 viewModel.AccentColor = accentColor;
-                                viewModel.BackgroundForegroundColor = backgroundForegroundColor;
+                                currentArtworkAverageColor = artworkAverageColor;
+                                viewModel.BackgroundForegroundColor =
+                                    backgroundView.GetContrastingForeground(artworkAverageColor);
 
                                 if (ambientArtwork is not null)
                                 {
@@ -524,6 +541,7 @@ public sealed partial class MediaComponent :
                             viewModel.Artwork = null;
                             SetAmbientArtwork(null);
                             viewModel.AccentColor = MediaViewModel.DefaultAccentColor;
+                            currentArtworkAverageColor = 0xFF2C2C2C;
                             viewModel.BackgroundForegroundColor = 0xFFFFFFFF;
                             currentArtworkHash = artworkHash;
                         }
@@ -602,6 +620,7 @@ public sealed partial class MediaComponent :
         viewModel.Artwork = null;
         SetAmbientArtwork(null);
         viewModel.AccentColor = MediaViewModel.DefaultAccentColor;
+        currentArtworkAverageColor = 0xFF2C2C2C;
         viewModel.BackgroundForegroundColor = 0xFFFFFFFF;
         viewModel.IsPlaying = false;
         viewModel.HasSession = false;

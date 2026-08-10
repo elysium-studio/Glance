@@ -65,24 +65,19 @@ internal static class MediaArtworkColorAnalyzer
             buckets[key] = bucket.Add(red, green, blue, weight);
         }
 
+        uint averageColor = pixelCount == 0 ? 0xFF2C2C2C :
+            ToColor(totalRed / pixelCount, totalGreen / pixelCount, totalBlue / pixelCount);
         ColorBucket dominant = buckets.Values.OrderByDescending(bucket => bucket.Score).FirstOrDefault();
 
         if (dominant.Count == 0)
         {
-            return new MediaArtworkColors(MediaViewModel.DefaultAccentColor, 0xFFFFFFFF);
+            return new MediaArtworkColors(MediaViewModel.DefaultAccentColor, averageColor);
         }
 
         uint accentColor = Normalize(dominant.Red / dominant.Count,
             dominant.Green / dominant.Count,
             dominant.Blue / dominant.Count);
-        uint averageColor = pixelCount == 0 ? accentColor :
-            ToColor(totalRed / pixelCount, totalGreen / pixelCount, totalBlue / pixelCount);
-        Windows.UI.Color foreground = MediaAccentPalette.GetForeground(averageColor);
-        uint foregroundColor = ((uint)foreground.A << 24) |
-            ((uint)foreground.R << 16) |
-            ((uint)foreground.G << 8) |
-            foreground.B;
-        return new MediaArtworkColors(accentColor, foregroundColor);
+        return new MediaArtworkColors(accentColor, averageColor);
     }
 
     private static uint ToColor(double red, double green, double blue) => 0xFF000000u |
@@ -153,4 +148,4 @@ internal static class MediaArtworkColorAnalyzer
 }
 
 internal readonly record struct MediaArtworkColors(uint AccentColor,
-    uint ForegroundColor);
+    uint AverageColor);
