@@ -745,7 +745,6 @@ public sealed partial class DesktopIslandView :
 
         moduleReorderCenteredIndex = GetNearestModuleOrderIndex(scrollViewer);
         UpdateModuleReorderScrollButtons(scrollViewer);
-        UpdateModuleReorderItemFade(scrollViewer);
 
         if (args.IsIntermediate)
         {
@@ -840,7 +839,6 @@ public sealed partial class DesktopIslandView :
             null,
             disableAnimation);
         UpdateModuleReorderScrollButtons(scrollViewer);
-        UpdateModuleReorderItemFade(scrollViewer);
     }
 
     private int GetNearestModuleOrderIndex(ScrollViewer scrollViewer)
@@ -869,42 +867,6 @@ public sealed partial class DesktopIslandView :
             width :
             164;
         return itemWidth + 2;
-    }
-
-    private void UpdateModuleReorderItemFade(ScrollViewer? scrollViewer)
-    {
-        if (scrollViewer is null || scrollViewer.ViewportWidth <= 0)
-        {
-            return;
-        }
-
-        double viewportCenter = scrollViewer.ViewportWidth / 2;
-        double fadeStart = GetModuleOrderItemStride() * 0.35;
-        double fadeRange = Math.Max(1, viewportCenter - fadeStart);
-
-        foreach (IGlanceComponent component in ViewModel.ModuleOrder)
-        {
-            if (ModuleReorderList.ContainerFromItem(component) is not ListViewItem item)
-            {
-                continue;
-            }
-
-            if (ReferenceEquals(item, draggedModuleOrderItem))
-            {
-                item.Opacity = 1;
-                continue;
-            }
-
-            GeneralTransform transform = item.TransformToVisual(scrollViewer);
-            Windows.Foundation.Point origin =
-                transform.TransformPoint(new Windows.Foundation.Point());
-            double itemCenter = origin.X + (item.ActualWidth / 2);
-            double distance = Math.Abs(itemCenter - viewportCenter);
-            double progress = Math.Clamp((distance - fadeStart) / fadeRange,
-                0,
-                1);
-            item.Opacity = 1 - (progress * 0.75);
-        }
     }
 
     private void ApplyModuleReorderPresentation(bool showReorder)
@@ -1141,7 +1103,6 @@ public sealed partial class DesktopIslandView :
         draggedModuleOrderItem = null;
         Canvas.SetZIndex(item, 0);
         FluentMotion.PlayRouteTargetRelease(item);
-        UpdateModuleReorderItemFade(GetModuleReorderScrollViewer());
     }
 
     private void HandleModuleReorderDragOver(object sender,
