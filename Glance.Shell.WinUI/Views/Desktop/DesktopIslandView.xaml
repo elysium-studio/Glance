@@ -24,9 +24,10 @@
     PointerExited="{x:Bind HandleIslandPointerExited}"
     PointerWheelChanged="{x:Bind HandlePointerWheelChanged}">
     <Controls:DesktopIsland.Resources>
-        <x:Double x:Key="GlanceModuleReorderItemWidth">148</x:Double>
+        <x:Double x:Key="GlanceModuleReorderItemWidth">164</x:Double>
         <Local:GlanceIntentAccentBrushConverter x:Key="GlanceIntentAccentBrushConverter" />
         <Local:GlanceModuleAccentBrushConverter x:Key="GlanceModuleAccentBrushConverter" />
+        <Local:UppercaseTextConverter x:Key="UppercaseTextConverter" />
         <StaticResource x:Key="GlanceDefaultAssistantIndicatorForegroundBrush" ResourceKey="AccentTextFillColorPrimaryBrush" />
         <SolidColorBrush x:Key="GlanceFooterDividerBrush" Color="#33FFFFFF" />
         <SolidColorBrush x:Key="GlanceFooterForegroundBrush" Color="#FFF8FAFC" />
@@ -223,25 +224,46 @@
                         FontSize="14"
                         Style="{StaticResource AccentButtonStyle}" />
                 </StackPanel>
-                <ListView
-                    x:Name="ModuleReorderList"
-                    Margin="0,0,0,2"
-                    AllowDrop="True"
-                    Background="Transparent"
-                    CanDragItems="True"
-                    CanReorderItems="True"
-                    DragOver="HandleModuleReorderDragOver"
-                    DragStarting="HandleModuleReorderDragStartingVisual"
-                    DragItemsCompleted="HandleModuleReorderDragCompleted"
-                    DragItemsStarting="HandleModuleReorderDragStarting"
-                    IsItemClickEnabled="False"
-                    ItemsSource="{x:Bind ViewModel.ModuleOrder, Mode=OneWay}"
-                    SelectionMode="None"
-                    ShowsScrollingPlaceholders="False"
-                    ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                    ScrollViewer.HorizontalScrollMode="Enabled"
-                    ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                    ScrollViewer.VerticalScrollMode="Disabled">
+                <Grid Margin="0,0,0,2" ColumnSpacing="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="28" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="28" />
+                    </Grid.ColumnDefinitions>
+                    <Button
+                        x:Name="PreviousModuleOrderButton"
+                        Width="26"
+                        Height="34"
+                        Padding="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Click="HandlePreviousModuleOrderClicked"
+                        Content="&#xE76B;"
+                        CornerRadius="13"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="12"
+                        IsEnabled="False"
+                        Style="{StaticResource SubtleButtonStyle}" />
+                    <ListView
+                        x:Name="ModuleReorderList"
+                        Grid.Column="1"
+                        AllowDrop="True"
+                        Background="Transparent"
+                        CanDragItems="True"
+                        CanReorderItems="True"
+                        DragOver="HandleModuleReorderDragOver"
+                        DragStarting="HandleModuleReorderDragStartingVisual"
+                        DragItemsCompleted="HandleModuleReorderDragCompleted"
+                        DragItemsStarting="HandleModuleReorderDragStarting"
+                        IsItemClickEnabled="False"
+                        ItemsSource="{x:Bind ViewModel.ModuleOrder, Mode=OneWay}"
+                        Loaded="HandleModuleReorderListLoaded"
+                        SelectionMode="None"
+                        ShowsScrollingPlaceholders="False"
+                        ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                        ScrollViewer.HorizontalScrollMode="Enabled"
+                        ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                        ScrollViewer.VerticalScrollMode="Disabled">
                     <ListView.ItemContainerTransitions>
                         <TransitionCollection>
                             <ReorderThemeTransition />
@@ -257,7 +279,7 @@
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <Setter Property="Width" Value="{StaticResource GlanceModuleReorderItemWidth}" />
-                            <Setter Property="Height" Value="60" />
+                            <Setter Property="Height" Value="66" />
                             <Setter Property="Margin" Value="1,0" />
                             <Setter Property="Padding" Value="0" />
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -271,22 +293,22 @@
                                 Background="{ThemeResource ControlFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="20"
-                                Padding="10,6"
+                                CornerRadius="22"
+                                Padding="12,7"
                                 PointerEntered="HandleModuleOrderItemPointerEntered"
                                 PointerExited="HandleModuleOrderItemPointerExited"
                                 ToolTipService.ToolTip="{x:Bind DisplayName}">
-                                <Grid ColumnSpacing="8">
+                                <Grid ColumnSpacing="9">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="22" />
+                                        <ColumnDefinition Width="24" />
                                         <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="20" />
+                                        <ColumnDefinition Width="22" />
                                     </Grid.ColumnDefinitions>
                                     <FontIcon
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         FontFamily="{x:Bind IconFontFamily}"
-                                        FontSize="18"
+                                        FontSize="20"
                                         Foreground="{Binding Converter={StaticResource GlanceModuleAccentBrushConverter}}"
                                         Glyph="{x:Bind IconGlyph}" />
                                     <StackPanel
@@ -297,7 +319,7 @@
                                             FontSize="10"
                                             FontWeight="SemiBold"
                                             Foreground="{Binding Converter={StaticResource GlanceModuleAccentBrushConverter}}"
-                                            Text="{x:Bind DisplayName}"
+                                            Text="{Binding DisplayName, Converter={StaticResource UppercaseTextConverter}}"
                                             TextTrimming="CharacterEllipsis"
                                             TextWrapping="NoWrap" />
                                         <StackPanel Spacing="3">
@@ -326,8 +348,8 @@
                                     </StackPanel>
                                     <Grid
                                         Grid.Column="2"
-                                        Width="20"
-                                        Height="20"
+                                        Width="22"
+                                        Height="22"
                                         VerticalAlignment="Center">
                                         <Ellipse
                                             Fill="{Binding Converter={StaticResource GlanceModuleAccentBrushConverter}}"
@@ -342,7 +364,23 @@
                             </Border>
                         </DataTemplate>
                     </ListView.ItemTemplate>
-                </ListView>
+                    </ListView>
+                    <Button
+                        x:Name="NextModuleOrderButton"
+                        Grid.Column="2"
+                        Width="26"
+                        Height="34"
+                        Padding="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Click="HandleNextModuleOrderClicked"
+                        Content="&#xE76C;"
+                        CornerRadius="13"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="12"
+                        IsEnabled="False"
+                        Style="{StaticResource SubtleButtonStyle}" />
+                </Grid>
             </Grid>
             <ContentControl
                 x:Name="AssistantOverlayPresenter"

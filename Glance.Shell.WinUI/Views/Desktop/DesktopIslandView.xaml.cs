@@ -43,6 +43,7 @@ public sealed partial class DesktopIslandView :
     private Button? pressedButton;
     private ListViewItem? draggedModuleOrderItem;
     private SoftwareBitmap? moduleOrderDragPreview;
+    private ScrollViewer? moduleReorderScrollViewer;
     private string? droppedContentRouteId;
     private bool isContextualDragActive;
     private int contextualDragSession;
@@ -676,7 +677,7 @@ public sealed partial class DesktopIslandView :
 
         double itemWidth = Resources["GlanceModuleReorderItemWidth"] is double width ?
             width :
-            148;
+            164;
         double edgePadding = Math.Max(0,
             (ModuleReorderList.ActualWidth - itemWidth) / 2);
         ModuleReorderList.Padding = new Thickness(edgePadding, 0, edgePadding, 0);
@@ -703,6 +704,74 @@ public sealed partial class DesktopIslandView :
             (scrollViewer.ViewportWidth / 2);
         targetOffset = Math.Clamp(targetOffset, 0, scrollViewer.ScrollableWidth);
         _ = scrollViewer.ChangeView(targetOffset, null, null, true);
+        UpdateModuleReorderScrollButtons(scrollViewer);
+    }
+
+    private void HandleModuleReorderListLoaded(object sender,
+        RoutedEventArgs args)
+    {
+        ScrollViewer? scrollViewer =
+            FindVisualDescendant<ScrollViewer>(ModuleReorderList);
+
+        if (ReferenceEquals(moduleReorderScrollViewer, scrollViewer))
+        {
+            UpdateModuleReorderScrollButtons(scrollViewer);
+            return;
+        }
+
+        if (moduleReorderScrollViewer is not null)
+        {
+            moduleReorderScrollViewer.ViewChanged -= HandleModuleReorderViewChanged;
+        }
+
+        moduleReorderScrollViewer = scrollViewer;
+
+        if (scrollViewer is not null)
+        {
+            scrollViewer.ViewChanged += HandleModuleReorderViewChanged;
+        }
+
+        UpdateModuleReorderScrollButtons(scrollViewer);
+    }
+
+    private void HandleModuleReorderViewChanged(object? sender,
+        ScrollViewerViewChangedEventArgs args) =>
+        UpdateModuleReorderScrollButtons(sender as ScrollViewer);
+
+    private void HandlePreviousModuleOrderClicked(object sender,
+        RoutedEventArgs args) => ScrollModuleOrder(-1);
+
+    private void HandleNextModuleOrderClicked(object sender,
+        RoutedEventArgs args) => ScrollModuleOrder(1);
+
+    private void ScrollModuleOrder(int direction)
+    {
+        ScrollViewer? scrollViewer = moduleReorderScrollViewer ??
+            FindVisualDescendant<ScrollViewer>(ModuleReorderList);
+
+        if (scrollViewer is null)
+        {
+            return;
+        }
+
+        double itemWidth = Resources["GlanceModuleReorderItemWidth"] is double width ?
+            width :
+            164;
+        double targetOffset = Math.Clamp(scrollViewer.HorizontalOffset +
+            (direction * (itemWidth + 2)),
+            0,
+            scrollViewer.ScrollableWidth);
+        _ = scrollViewer.ChangeView(targetOffset, null, null, false);
+    }
+
+    private void UpdateModuleReorderScrollButtons(ScrollViewer? scrollViewer)
+    {
+        bool canScroll = scrollViewer is not null &&
+            scrollViewer.ScrollableWidth > 0;
+        PreviousModuleOrderButton.IsEnabled = canScroll &&
+            scrollViewer!.HorizontalOffset > 0.5;
+        NextModuleOrderButton.IsEnabled = canScroll &&
+            scrollViewer!.HorizontalOffset < scrollViewer.ScrollableWidth - 0.5;
     }
 
     private void ApplyModuleReorderPresentation(bool showReorder)
