@@ -80,9 +80,10 @@
   <data name="SetupPlacementBottomDescription.Text" xml:space="preserve"><value>Keep Glance close to the lower edge of your desktop.</value></data>
   <data name="ReorderModulesButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Riordina moduli</value></data>
   <data name="ReorderModulesButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Riordina moduli</value></data>
-  <data name="ModuleReorderTitle.Text" xml:space="preserve"><value>Organizza moduli</value></data>
+  <data name="CancelModuleReorderButton.Content" xml:space="preserve"><value>Annulla</value></data>
   <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Annulla</value></data>
   <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Annulla il riordino dei moduli</value></data>
+  <data name="ConfirmModuleReorderButton.Content" xml:space="preserve"><value>Fine</value></data>
   <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Fine</value></data>
   <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Salva l’ordine dei moduli</value></data>
 </root>

@@ -80,9 +80,10 @@
   <data name="SetupPlacementBottomDescription.Text" xml:space="preserve"><value>Keep Glance close to the lower edge of your desktop.</value></data>
   <data name="ReorderModulesButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>모듈 순서 변경</value></data>
   <data name="ReorderModulesButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>모듈 순서 변경</value></data>
-  <data name="ModuleReorderTitle.Text" xml:space="preserve"><value>모듈 정렬</value></data>
+  <data name="CancelModuleReorderButton.Content" xml:space="preserve"><value>취소</value></data>
   <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>취소</value></data>
   <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>모듈 순서 변경 취소</value></data>
+  <data name="ConfirmModuleReorderButton.Content" xml:space="preserve"><value>완료</value></data>
   <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>완료</value></data>
   <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>모듈 순서 저장</value></data>
 </root>

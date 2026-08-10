@@ -80,9 +80,10 @@
   <data name="SetupPlacementBottomDescription.Text" xml:space="preserve"><value>Keep Glance close to the lower edge of your desktop.</value></data>
   <data name="ReorderModulesButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>モジュールの並べ替え</value></data>
   <data name="ReorderModulesButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>モジュールの並べ替え</value></data>
-  <data name="ModuleReorderTitle.Text" xml:space="preserve"><value>モジュールを整理</value></data>
+  <data name="CancelModuleReorderButton.Content" xml:space="preserve"><value>キャンセル</value></data>
   <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>キャンセル</value></data>
   <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>モジュールの並べ替えをキャンセル</value></data>
+  <data name="ConfirmModuleReorderButton.Content" xml:space="preserve"><value>完了</value></data>
   <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>完了</value></data>
   <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>モジュールの順序を保存</value></data>
 </root>

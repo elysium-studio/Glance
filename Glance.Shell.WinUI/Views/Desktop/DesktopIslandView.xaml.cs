@@ -15,6 +15,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Foundation;
 using Windows.Storage;
 using Windows.UI;
 
@@ -38,6 +39,7 @@ public sealed partial class DesktopIslandView :
     private DispatcherQueueTimer? startupAttentionTimer;
     private FrameworkElement? activeContentRouteTarget;
     private Button? pressedButton;
+    private IGlanceComponent? draggedModuleOrderComponent;
     private ListViewItem? draggedModuleOrderItem;
     private string? droppedContentRouteId;
     private bool isContextualDragActive;
@@ -863,10 +865,12 @@ public sealed partial class DesktopIslandView :
     private void HandleModuleReorderDragStarting(object sender,
         DragItemsStartingEventArgs args)
     {
-        object? item = args.Items.FirstOrDefault();
-        draggedModuleOrderItem = item is null
+        draggedModuleOrderComponent = args.Items.OfType<IGlanceComponent>().FirstOrDefault();
+        draggedModuleOrderItem = draggedModuleOrderComponent is null
             ? null
-            : ModuleReorderList.ContainerFromItem(item) as ListViewItem;
+            : ModuleReorderList.ContainerFromItem(draggedModuleOrderComponent) as ListViewItem;
+
+        args.Data.RequestedOperation = DataPackageOperation.Move;
 
         if (draggedModuleOrderItem is not null)
         {
@@ -875,9 +879,71 @@ public sealed partial class DesktopIslandView :
         }
     }
 
+    private void HandleModuleReorderDragOver(object sender,
+        DragEventArgs args)
+    {
+        if (draggedModuleOrderComponent is null)
+        {
+            args.AcceptedOperation = DataPackageOperation.None;
+            return;
+        }
+
+        args.AcceptedOperation = DataPackageOperation.Move;
+        args.DragUIOverride.IsCaptionVisible = false;
+        args.DragUIOverride.IsGlyphVisible = false;
+        args.Handled = true;
+
+        int currentIndex = ViewModel.ModuleOrder.IndexOf(draggedModuleOrderComponent);
+
+        if (currentIndex < 0)
+        {
+            return;
+        }
+
+        Point pointer = args.GetPosition(ModuleReorderList);
+        int insertionIndex = ViewModel.ModuleOrder.Count;
+
+        for (int index = 0; index < ViewModel.ModuleOrder.Count; index++)
+        {
+            if (ModuleReorderList.ContainerFromIndex(index) is not ListViewItem container)
+            {
+                continue;
+            }
+
+            Point containerPosition = container.TransformToVisual(ModuleReorderList).TransformPoint(new Point());
+
+            if (pointer.X < containerPosition.X + (container.ActualWidth / 2))
+            {
+                insertionIndex = index;
+                break;
+            }
+        }
+
+        int destinationIndex = insertionIndex > currentIndex
+            ? insertionIndex - 1
+            : insertionIndex;
+        destinationIndex = Math.Clamp(destinationIndex, 0, ViewModel.ModuleOrder.Count - 1);
+
+        if (destinationIndex != currentIndex)
+        {
+            ViewModel.ModuleOrder.Move(currentIndex, destinationIndex);
+        }
+    }
+
+    private void HandleModuleReorderDrop(object sender,
+        DragEventArgs args)
+    {
+        args.AcceptedOperation = draggedModuleOrderComponent is null
+            ? DataPackageOperation.None
+            : DataPackageOperation.Move;
+        args.Handled = true;
+    }
+
     private void HandleModuleReorderDragCompleted(ListViewBase sender,
         DragItemsCompletedEventArgs args)
     {
+        draggedModuleOrderComponent = null;
+
         if (draggedModuleOrderItem is null)
         {
             return;

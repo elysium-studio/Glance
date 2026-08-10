@@ -187,52 +187,43 @@
                 Background="Transparent"
                 Visibility="Collapsed">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="24" />
                     <RowDefinition Height="*" />
+                    <RowDefinition Height="32" />
                 </Grid.RowDefinitions>
-                <TextBlock
-                    x:Uid="ModuleReorderTitle"
-                    Margin="4,0,0,0"
-                    VerticalAlignment="Center"
-                    FontSize="12"
-                    FontWeight="SemiBold" />
                 <StackPanel
+                    Grid.Row="1"
                     HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
                     Orientation="Horizontal"
-                    Spacing="4">
+                    Spacing="8">
                     <Button
                         x:Uid="CancelModuleReorderButton"
-                        Width="24"
-                        Height="24"
-                        Padding="0"
+                        MinWidth="72"
+                        Height="28"
+                        Padding="12,0"
                         Click="{x:Bind ViewModel.CancelModuleReorder}"
-                        Content="&#xE711;"
-                        CornerRadius="12"
-                        FontFamily="Segoe Fluent Icons"
-                        FontSize="11"
+                        CornerRadius="6"
                         Style="{StaticResource SubtleButtonStyle}" />
                     <Button
                         x:Uid="ConfirmModuleReorderButton"
-                        Width="24"
-                        Height="24"
-                        Padding="0"
+                        MinWidth="72"
+                        Height="28"
+                        Padding="12,0"
                         Click="{x:Bind ViewModel.ConfirmModuleReorder}"
-                        Content="&#xE73E;"
-                        CornerRadius="12"
-                        FontFamily="Segoe Fluent Icons"
-                        FontSize="11"
+                        CornerRadius="6"
                         Style="{StaticResource AccentButtonStyle}" />
                 </StackPanel>
                 <ListView
                     x:Name="ModuleReorderList"
-                    Grid.Row="1"
-                    Margin="0,2,0,0"
+                    Margin="0,0,0,2"
                     AllowDrop="True"
                     Background="Transparent"
                     CanDragItems="True"
-                    CanReorderItems="True"
+                    CanReorderItems="False"
                     DragItemsCompleted="HandleModuleReorderDragCompleted"
                     DragItemsStarting="HandleModuleReorderDragStarting"
+                    DragOver="HandleModuleReorderDragOver"
+                    Drop="HandleModuleReorderDrop"
                     IsItemClickEnabled="False"
                     ItemsSource="{x:Bind ViewModel.ModuleOrder, Mode=OneWay}"
                     SelectionMode="None"
@@ -240,6 +231,11 @@
                     ScrollViewer.HorizontalScrollMode="Enabled"
                     ScrollViewer.VerticalScrollBarVisibility="Disabled"
                     ScrollViewer.VerticalScrollMode="Disabled">
+                    <ListView.ItemContainerTransitions>
+                        <TransitionCollection>
+                            <ReorderThemeTransition />
+                        </TransitionCollection>
+                    </ListView.ItemContainerTransitions>
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
                             <ItemsStackPanel Orientation="Horizontal" />
