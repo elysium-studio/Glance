@@ -2,6 +2,7 @@
     x:Class="Glance.Shell.WinUI.DesktopIslandView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ApplicationAbstractions="using:Glance.Application.Abstractions"
     xmlns:Controls="using:Elysium.UI.Controls.WinUI"
     xmlns:Local="using:Glance.Shell.WinUI"
     xmlns:WinUI="using:Elysium.UI.WinUI"
@@ -24,6 +25,7 @@
     PointerWheelChanged="{x:Bind HandlePointerWheelChanged}">
     <Controls:DesktopIsland.Resources>
         <Local:GlanceIntentAccentBrushConverter x:Key="GlanceIntentAccentBrushConverter" />
+        <Local:GlanceModuleAccentBrushConverter x:Key="GlanceModuleAccentBrushConverter" />
         <StaticResource x:Key="GlanceDefaultAssistantIndicatorForegroundBrush" ResourceKey="AccentTextFillColorPrimaryBrush" />
         <SolidColorBrush x:Key="GlanceFooterDividerBrush" Color="#33FFFFFF" />
         <SolidColorBrush x:Key="GlanceFooterForegroundBrush" Color="#FFF8FAFC" />
@@ -139,6 +141,26 @@
                         </Button.Style>
                     </Button>
                     <Button
+                        x:Uid="ReorderModulesButton"
+                        VerticalAlignment="Center"
+                        Click="{x:Bind ViewModel.BeginModuleReorder}"
+                        Visibility="{x:Bind WhenAvailable(ViewModel.HasMultipleComponents), Mode=OneWay}">
+                        <Button.Style>
+                            <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                                <Setter Property="Width" Value="24" />
+                                <Setter Property="Height" Value="24" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Content" Value="&#xEC8F;" />
+                                <Setter Property="CornerRadius" Value="6" />
+                                <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                                <Setter Property="FontSize" Value="12" />
+                                <Setter Property="Foreground" Value="{StaticResource GlanceFooterForegroundBrush}" />
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button
                         x:Uid="SettingsButton"
                         VerticalAlignment="Center"
                         Click="{x:Bind ViewModel.NavigateToSettings}">
@@ -158,6 +180,115 @@
                         </Button.Style>
                     </Button>
                 </StackPanel>
+            </Grid>
+            <Grid
+                x:Name="ModuleReorderSurface"
+                Padding="10,6"
+                Background="Transparent"
+                Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="24" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock
+                    x:Uid="ModuleReorderTitle"
+                    Margin="4,0,0,0"
+                    VerticalAlignment="Center"
+                    FontSize="12"
+                    FontWeight="SemiBold" />
+                <StackPanel
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal"
+                    Spacing="4">
+                    <Button
+                        x:Uid="CancelModuleReorderButton"
+                        Width="24"
+                        Height="24"
+                        Padding="0"
+                        Click="{x:Bind ViewModel.CancelModuleReorder}"
+                        Content="&#xE711;"
+                        CornerRadius="12"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="11"
+                        Style="{StaticResource SubtleButtonStyle}" />
+                    <Button
+                        x:Uid="ConfirmModuleReorderButton"
+                        Width="24"
+                        Height="24"
+                        Padding="0"
+                        Click="{x:Bind ViewModel.ConfirmModuleReorder}"
+                        Content="&#xE73E;"
+                        CornerRadius="12"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="11"
+                        Style="{StaticResource AccentButtonStyle}" />
+                </StackPanel>
+                <ListView
+                    x:Name="ModuleReorderList"
+                    Grid.Row="1"
+                    Margin="0,2,0,0"
+                    AllowDrop="True"
+                    Background="Transparent"
+                    CanDragItems="True"
+                    CanReorderItems="True"
+                    DragItemsCompleted="HandleModuleReorderDragCompleted"
+                    DragItemsStarting="HandleModuleReorderDragStarting"
+                    IsItemClickEnabled="False"
+                    ItemsSource="{x:Bind ViewModel.ModuleOrder, Mode=OneWay}"
+                    SelectionMode="None"
+                    ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                    ScrollViewer.HorizontalScrollMode="Enabled"
+                    ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                    ScrollViewer.VerticalScrollMode="Disabled">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsStackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Width" Value="64" />
+                            <Setter Property="Height" Value="60" />
+                            <Setter Property="Margin" Value="1,0" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="ApplicationAbstractions:IGlanceComponent">
+                            <Border
+                                Margin="2"
+                                Background="{ThemeResource ControlFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                PointerEntered="HandleModuleOrderItemPointerEntered"
+                                PointerExited="HandleModuleOrderItemPointerExited"
+                                ToolTipService.ToolTip="{x:Bind DisplayName}">
+                                <StackPanel
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Spacing="2">
+                                    <FontIcon
+                                        FontFamily="{x:Bind IconFontFamily}"
+                                        FontSize="20"
+                                        Foreground="{Binding Converter={StaticResource GlanceModuleAccentBrushConverter}}"
+                                        Glyph="{x:Bind IconGlyph}" />
+                                    <TextBlock
+                                        MaxWidth="54"
+                                        HorizontalAlignment="Center"
+                                        FontSize="10"
+                                        Foreground="{Binding Converter={StaticResource GlanceModuleAccentBrushConverter}}"
+                                        Text="{x:Bind DisplayName}"
+                                        TextAlignment="Center"
+                                        TextTrimming="CharacterEllipsis"
+                                        TextWrapping="NoWrap" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
             </Grid>
             <ContentControl
                 x:Name="AssistantOverlayPresenter"

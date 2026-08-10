@@ -8,13 +8,9 @@ public interface ISettingViewModel :
     IDisposable,
     INotifyPropertyChanged
 {
-    bool CanReorder => false;
-
     IReadOnlyList<ISettingViewModel> Children => [];
 
     string Glyph => string.Empty;
 
     string Title => string.Empty;
-
-    Task SaveOrderAsync() => Task.CompletedTask;
 }

@@ -79,6 +79,7 @@ public sealed partial class ModulesViewModel :
         return new ModuleSettingsItemViewModel(preference.Id,
             displayName,
             description,
+            component,
             preference.IsEnabled,
             availableSettings.OrderBy(setting => setting.Order),
             NavigateToModule,
@@ -95,8 +96,7 @@ public sealed partial class ModulesViewModel :
         category = new SettingsCategoryViewModel(id,
             ResolveCategoryTitle(id),
             ResolveCategoryGlyph(id),
-            [],
-            items => preferences.SetOrderAsync(items.OfType<ModuleSettingsItemViewModel>().Select(item => item.Id)));
+            []);
         categories.Add(id, category);
         int categoryOrder = GetCategoryOrder(id);
         int index = this.TakeWhile(item => item is SettingsCategoryViewModel existing && GetCategoryOrder(existing.Id) <= categoryOrder).Count();

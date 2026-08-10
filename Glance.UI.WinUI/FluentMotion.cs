@@ -16,6 +16,7 @@ public static class FluentMotion
     private static readonly TimeSpan RoutePushDuration = TimeSpan.FromMilliseconds(280);
     private static readonly TimeSpan RouteTargetHoverDuration = TimeSpan.FromMilliseconds(140);
     private static readonly TimeSpan RouteTargetReleaseDuration = TimeSpan.FromMilliseconds(180);
+    private static readonly TimeSpan SemanticZoomDuration = TimeSpan.FromMilliseconds(340);
 
     public static void PlayButtonPress(FrameworkElement element) => PlayScale(element, 0.94f, ButtonPressDuration);
 
@@ -106,6 +107,83 @@ public static class FluentMotion
 
         visual.StartAnimation("Translation.X", translation);
         visual.StartAnimation(nameof(Visual.Opacity), opacity);
+    }
+
+    public static void PlaySemanticZoomTransition(FrameworkElement outgoing,
+        FrameworkElement incoming,
+        FrameworkElement? background,
+        bool zoomingOut,
+        Action completed)
+    {
+        Visual outgoingVisual = ElementCompositionPreview.GetElementVisual(outgoing);
+        Visual incomingVisual = ElementCompositionPreview.GetElementVisual(incoming);
+        Compositor compositor = outgoingVisual.Compositor;
+        CubicBezierEasingFunction easing = CreateEasing(compositor);
+        Vector3 outgoingScale = zoomingOut
+            ? new Vector3(0.72f, 0.72f, 1)
+            : new Vector3(1.16f, 1.16f, 1);
+        Vector3 incomingScale = zoomingOut
+            ? new Vector3(1.16f, 1.16f, 1)
+            : new Vector3(0.72f, 0.72f, 1);
+
+        outgoingVisual.CenterPoint = new Vector3((float)outgoing.ActualWidth / 2,
+            (float)outgoing.ActualHeight / 2,
+            0);
+        incomingVisual.CenterPoint = new Vector3((float)incoming.ActualWidth / 2,
+            (float)incoming.ActualHeight / 2,
+            0);
+        outgoingVisual.StopAnimation(nameof(Visual.Opacity));
+        outgoingVisual.StopAnimation(nameof(Visual.Scale));
+        incomingVisual.StopAnimation(nameof(Visual.Opacity));
+        incomingVisual.StopAnimation(nameof(Visual.Scale));
+        outgoingVisual.Opacity = 1;
+        outgoingVisual.Scale = Vector3.One;
+        incomingVisual.Opacity = 0;
+        incomingVisual.Scale = incomingScale;
+
+        CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+
+        Vector3KeyFrameAnimation outgoingScaleAnimation = compositor.CreateVector3KeyFrameAnimation();
+        outgoingScaleAnimation.InsertKeyFrame(0, Vector3.One);
+        outgoingScaleAnimation.InsertKeyFrame(1, outgoingScale, easing);
+        outgoingScaleAnimation.Duration = SemanticZoomDuration;
+
+        ScalarKeyFrameAnimation outgoingOpacityAnimation = compositor.CreateScalarKeyFrameAnimation();
+        outgoingOpacityAnimation.InsertKeyFrame(0, 1);
+        outgoingOpacityAnimation.InsertKeyFrame(0.72f, 0.18f, easing);
+        outgoingOpacityAnimation.InsertKeyFrame(1, 0, easing);
+        outgoingOpacityAnimation.Duration = SemanticZoomDuration;
+
+        Vector3KeyFrameAnimation incomingScaleAnimation = compositor.CreateVector3KeyFrameAnimation();
+        incomingScaleAnimation.InsertKeyFrame(0, incomingScale);
+        incomingScaleAnimation.InsertKeyFrame(1, Vector3.One, easing);
+        incomingScaleAnimation.Duration = SemanticZoomDuration;
+
+        ScalarKeyFrameAnimation incomingOpacityAnimation = compositor.CreateScalarKeyFrameAnimation();
+        incomingOpacityAnimation.InsertKeyFrame(0, 0);
+        incomingOpacityAnimation.InsertKeyFrame(0.28f, 0.12f);
+        incomingOpacityAnimation.InsertKeyFrame(1, 1, easing);
+        incomingOpacityAnimation.Duration = SemanticZoomDuration;
+
+        outgoingVisual.StartAnimation(nameof(Visual.Scale), outgoingScaleAnimation);
+        outgoingVisual.StartAnimation(nameof(Visual.Opacity), outgoingOpacityAnimation);
+        incomingVisual.StartAnimation(nameof(Visual.Scale), incomingScaleAnimation);
+        incomingVisual.StartAnimation(nameof(Visual.Opacity), incomingOpacityAnimation);
+
+        if (background is not null)
+        {
+            Visual backgroundVisual = ElementCompositionPreview.GetElementVisual(background);
+            backgroundVisual.StopAnimation(nameof(Visual.Opacity));
+            backgroundVisual.Opacity = zoomingOut ? 1 : 0;
+            ScalarKeyFrameAnimation backgroundOpacityAnimation = compositor.CreateScalarKeyFrameAnimation();
+            backgroundOpacityAnimation.InsertKeyFrame(0, zoomingOut ? 1 : 0);
+            backgroundOpacityAnimation.InsertKeyFrame(1, zoomingOut ? 0 : 1, easing);
+            backgroundOpacityAnimation.Duration = SemanticZoomDuration;
+            backgroundVisual.StartAnimation(nameof(Visual.Opacity), backgroundOpacityAnimation);
+        }
+
+        batch.Completed += (_, _) => incoming.DispatcherQueue.TryEnqueue(() => completed());
+        batch.End();
     }
 
     public static void PlayConnectedContentTransition(FrameworkElement outgoing,

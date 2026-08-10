@@ -38,6 +38,7 @@ public sealed partial class DesktopIslandView :
     private DispatcherQueueTimer? startupAttentionTimer;
     private FrameworkElement? activeContentRouteTarget;
     private Button? pressedButton;
+    private ListViewItem? draggedModuleOrderItem;
     private string? droppedContentRouteId;
     private bool isContextualDragActive;
     private int contextualDragSession;
@@ -47,8 +48,10 @@ public sealed partial class DesktopIslandView :
     private bool isPointerOverIsland;
     private bool isAssistantPresentationRequested;
     private bool isContentRoutePresentationRequested;
+    private bool isModuleReorderPresentationRequested;
     private int assistantPresentationTransition;
     private int contentRoutePresentationTransition;
+    private int moduleReorderPresentationTransition;
     private int previousIndex;
     private bool skipNextConnectedExpansion;
 
@@ -108,6 +111,7 @@ public sealed partial class DesktopIslandView :
         UpdateFooterAppearanceComponent();
         ApplyAssistantPresentation(ViewModel.Assistant.IsOverlayVisible);
         ApplyContentRoutePresentation(ViewModel.IsContentRoutePickerVisible);
+        ApplyModuleReorderPresentation(ViewModel.IsModuleReorderVisible);
         StartStartupAttentionTimer();
         _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, KeepIslandNonActivating);
     }
@@ -156,6 +160,7 @@ public sealed partial class DesktopIslandView :
         StaysExpanded = false;
         DismissesOnOutsideClick = false;
         assistantPresentationTransition++;
+        moduleReorderPresentationTransition++;
     }
 
     private void StartStartupAttentionTimer()
@@ -198,7 +203,17 @@ public sealed partial class DesktopIslandView :
                                                                                                      FluentMotion.PlayPulse(presenter);
                                                                                                  });
 
-    private void HandleWakeWordDetected(object? sender, EventArgs args) => _ = DispatcherQueue.TryEnqueue(ShowAssistantPresentation);
+    private void HandleWakeWordDetected(object? sender, EventArgs args) => _ = DispatcherQueue.TryEnqueue(() =>
+    {
+        if (ViewModel.IsModuleReorderVisible)
+        {
+            ViewModel.CancelModuleReorder();
+            _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, ShowAssistantPresentation);
+            return;
+        }
+
+        ShowAssistantPresentation();
+    });
 
     private void HandleAssistantPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
@@ -535,6 +550,138 @@ public sealed partial class DesktopIslandView :
         BackgroundContent = showRoutes ? null : ToBackgroundContent(ViewModel.SelectedComponent);
     }
 
+    private void ShowModuleReorderPresentation()
+    {
+        if (isModuleReorderPresentationRequested || !ViewModel.IsModuleReorderVisible)
+        {
+            return;
+        }
+
+        isModuleReorderPresentationRequested = true;
+        StaysExpanded = true;
+        DismissesOnOutsideClick = false;
+        ApplyExpansionLock();
+        Reveal();
+        ViewModel.IsExpanded = true;
+        _ = DispatcherQueue.TryEnqueue(() =>
+        {
+            if (isModuleReorderPresentationRequested)
+            {
+                TransitionModuleReorderPresentation(true);
+            }
+        });
+    }
+
+    private void HideModuleReorderPresentation()
+    {
+        if (!isModuleReorderPresentationRequested)
+        {
+            return;
+        }
+
+        isModuleReorderPresentationRequested = false;
+        TransitionModuleReorderPresentation(false);
+    }
+
+    private void TransitionModuleReorderPresentation(bool showReorder,
+        bool allowLayoutRetry = true)
+    {
+        if (showReorder != isModuleReorderPresentationRequested)
+        {
+            return;
+        }
+
+        int transition = ++moduleReorderPresentationTransition;
+        FrameworkElement outgoing = showReorder ? ExpandedModuleSurface : ModuleReorderSurface;
+        FrameworkElement incoming = showReorder ? ModuleReorderSurface : ExpandedModuleSurface;
+        outgoing.Visibility = Visibility.Visible;
+        incoming.Visibility = Visibility.Visible;
+
+        if (!showReorder)
+        {
+            BackgroundContent = ToBackgroundContent(ViewModel.SelectedComponent);
+        }
+
+        UpdateLayout();
+
+        if (!IsInElementTree(outgoing) ||
+            !IsInElementTree(incoming) ||
+            outgoing.ActualWidth <= 0 ||
+            outgoing.ActualHeight <= 0 ||
+            incoming.ActualWidth <= 0 ||
+            incoming.ActualHeight <= 0)
+        {
+            if (allowLayoutRetry)
+            {
+                _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+                {
+                    if (showReorder == isModuleReorderPresentationRequested)
+                    {
+                        TransitionModuleReorderPresentation(showReorder, false);
+                    }
+                });
+                return;
+            }
+
+            ApplyModuleReorderPresentation(showReorder);
+
+            if (!showReorder)
+            {
+                CompleteModuleReorderPresentationExit();
+            }
+
+            return;
+        }
+
+        outgoing.IsHitTestVisible = false;
+        incoming.IsHitTestVisible = false;
+        FrameworkElement? background = GetTemplateChild("PART_BackgroundContent") as FrameworkElement;
+        FluentMotion.PlaySemanticZoomTransition(outgoing,
+            incoming,
+            background,
+            showReorder,
+            () =>
+        {
+            if (transition != moduleReorderPresentationTransition)
+            {
+                return;
+            }
+
+            ApplyModuleReorderPresentation(showReorder);
+
+            if (!showReorder)
+            {
+                CompleteModuleReorderPresentationExit();
+            }
+        });
+    }
+
+    private void ApplyModuleReorderPresentation(bool showReorder)
+    {
+        isModuleReorderPresentationRequested = showReorder;
+
+        if (showReorder)
+        {
+            StaysExpanded = true;
+            DismissesOnOutsideClick = false;
+            ApplyExpansionLock();
+        }
+
+        FluentMotion.SetContentPresentationState(ExpandedModuleSurface, !showReorder);
+        FluentMotion.SetContentPresentationState(ModuleReorderSurface, showReorder);
+        ExpandedModuleSurface.Visibility = showReorder ? Visibility.Collapsed : Visibility.Visible;
+        ModuleReorderSurface.Visibility = showReorder ? Visibility.Visible : Visibility.Collapsed;
+        BackgroundContent = showReorder ? null : ToBackgroundContent(ViewModel.SelectedComponent);
+    }
+
+    private void CompleteModuleReorderPresentationExit()
+    {
+        StaysExpanded = false;
+        DismissesOnOutsideClick = false;
+        ViewModel.IsExpanded = true;
+        ApplyExpansionLock();
+    }
+
     private GlanceScreenRectangle? GetIntentPresentationTarget()
     {
         if (!GetWindowRect(Handle, out NativeRect windowBounds))
@@ -598,6 +745,21 @@ public sealed partial class DesktopIslandView :
 
     private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
+        if (args.PropertyName == nameof(DesktopIslandViewModel.IsModuleReorderVisible))
+        {
+            _ = DispatcherQueue.TryEnqueue(() =>
+            {
+                if (ViewModel.IsModuleReorderVisible)
+                {
+                    ShowModuleReorderPresentation();
+                    return;
+                }
+
+                HideModuleReorderPresentation();
+            });
+            return;
+        }
+
         if (args.PropertyName == nameof(DesktopIslandViewModel.IsContentRoutePickerVisible))
         {
             if (ViewModel.IsContentRoutePickerVisible)
@@ -624,7 +786,7 @@ public sealed partial class DesktopIslandView :
             UpdateComponentInteraction();
             UpdateFooterAppearanceComponent();
 
-            if (isAssistantPresentationRequested || isContentRoutePresentationRequested)
+            if (isAssistantPresentationRequested || isContentRoutePresentationRequested || isModuleReorderPresentationRequested)
             {
                 BackgroundContent = null;
             }
@@ -679,6 +841,53 @@ public sealed partial class DesktopIslandView :
     }
 
     private void HandleActualThemeChanged(FrameworkElement sender, object args) => ApplyFooterAppearance();
+
+    private void HandleModuleOrderItemPointerEntered(object sender,
+        PointerRoutedEventArgs args)
+    {
+        if (sender is FrameworkElement element && !ReferenceEquals(element, draggedModuleOrderItem))
+        {
+            FluentMotion.PlayRouteTargetHover(element);
+        }
+    }
+
+    private void HandleModuleOrderItemPointerExited(object sender,
+        PointerRoutedEventArgs args)
+    {
+        if (sender is FrameworkElement element && !ReferenceEquals(element, draggedModuleOrderItem))
+        {
+            FluentMotion.PlayRouteTargetRelease(element);
+        }
+    }
+
+    private void HandleModuleReorderDragStarting(object sender,
+        DragItemsStartingEventArgs args)
+    {
+        object? item = args.Items.FirstOrDefault();
+        draggedModuleOrderItem = item is null
+            ? null
+            : ModuleReorderList.ContainerFromItem(item) as ListViewItem;
+
+        if (draggedModuleOrderItem is not null)
+        {
+            Canvas.SetZIndex(draggedModuleOrderItem, 2);
+            FluentMotion.PlayRouteTargetHover(draggedModuleOrderItem);
+        }
+    }
+
+    private void HandleModuleReorderDragCompleted(ListViewBase sender,
+        DragItemsCompletedEventArgs args)
+    {
+        if (draggedModuleOrderItem is null)
+        {
+            return;
+        }
+
+        ListViewItem item = draggedModuleOrderItem;
+        draggedModuleOrderItem = null;
+        Canvas.SetZIndex(item, 0);
+        FluentMotion.PlayRouteTargetRelease(item);
+    }
 
     private void UpdateFooterAppearanceComponent()
     {
@@ -889,6 +1098,7 @@ public sealed partial class DesktopIslandView :
     private void HandleExpansionLockChanged(object? sender, EventArgs args) => _ = DispatcherQueue.TryEnqueue(ApplyExpansionLock);
 
     private void ApplyExpansionLock() => IsExpansionLocked = ViewModel.IsPinned ||
+            ViewModel.IsModuleReorderVisible ||
             expansionLockComponent?.IsExpansionLocked == true;
 
     private void HandleIslandDeactivated(object? sender, EventArgs args)
@@ -974,6 +1184,11 @@ public sealed partial class DesktopIslandView :
 
     private void HandlePointerWheelChanged(object sender, PointerRoutedEventArgs args)
     {
+        if (ViewModel.IsModuleReorderVisible)
+        {
+            return;
+        }
+
         int delta = args.GetCurrentPoint(this).Properties.MouseWheelDelta;
 
         if (delta != 0)
@@ -985,6 +1200,11 @@ public sealed partial class DesktopIslandView :
 
     private async void HandleDragEnter(object sender, DragEventArgs args)
     {
+        if (ViewModel.IsModuleReorderVisible)
+        {
+            return;
+        }
+
         if (!TryGetContentKind(args.DataView, out GlanceContentKind kind))
         {
             args.AcceptedOperation = DataPackageOperation.None;
@@ -1030,6 +1250,11 @@ public sealed partial class DesktopIslandView :
 
     private void HandleDragOver(object sender, DragEventArgs args)
     {
+        if (ViewModel.IsModuleReorderVisible)
+        {
+            return;
+        }
+
         if (!TryGetContentKind(args.DataView, out _))
         {
             args.AcceptedOperation = DataPackageOperation.None;
@@ -1116,7 +1341,13 @@ public sealed partial class DesktopIslandView :
         FluentMotion.PlayRouteTargetRelease(target);
     }
 
-    private void HandleDragLeave(object sender, DragEventArgs args) => ScheduleContextualDragExit();
+    private void HandleDragLeave(object sender, DragEventArgs args)
+    {
+        if (!ViewModel.IsModuleReorderVisible)
+        {
+            ScheduleContextualDragExit();
+        }
+    }
 
     private bool TryGetContentKind(DataPackageView dataView,
         out GlanceContentKind kind)
@@ -1160,6 +1391,11 @@ public sealed partial class DesktopIslandView :
 
     private async void HandleDrop(object sender, DragEventArgs args)
     {
+        if (ViewModel.IsModuleReorderVisible)
+        {
+            return;
+        }
+
         StopContextualDragExitTimer();
         string? routeId = droppedContentRouteId;
         droppedContentRouteId = null;

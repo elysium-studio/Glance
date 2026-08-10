@@ -78,4 +78,11 @@
   <data name="SetupPlacementTopDescription.Text" xml:space="preserve"><value>Keep Glance close to the upper edge of your desktop.</value></data>
   <data name="SetupPlacementBottomTitle.Text" xml:space="preserve"><value>Bottom of screen</value></data>
   <data name="SetupPlacementBottomDescription.Text" xml:space="preserve"><value>Keep Glance close to the lower edge of your desktop.</value></data>
+  <data name="ReorderModulesButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Reordenar módulos</value></data>
+  <data name="ReorderModulesButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Reordenar módulos</value></data>
+  <data name="ModuleReorderTitle.Text" xml:space="preserve"><value>Organizar módulos</value></data>
+  <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Cancelar a reordenação dos módulos</value></data>
+  <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Concluído</value></data>
+  <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Salvar a ordem dos módulos</value></data>
 </root>

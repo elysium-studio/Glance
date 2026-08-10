@@ -98,11 +98,7 @@
                         <DataTemplate x:DataType="Shell:ISettingViewModel">
                             <ListView
                                 Margin="36,0,36,36"
-                                AllowDrop="{x:Bind CanReorder}"
-                                CanDragItems="{x:Bind CanReorder}"
                                 ItemsSource="{x:Bind}"
-                                CanReorderItems="{x:Bind CanReorder}"
-                                DragItemsCompleted="HandleSettingItemsReordered"
                                 SelectionMode="None">
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">

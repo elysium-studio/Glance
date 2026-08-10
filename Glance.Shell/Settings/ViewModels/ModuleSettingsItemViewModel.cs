@@ -13,6 +13,7 @@ public sealed partial class ModuleSettingsItemViewModel :
     public ModuleSettingsItemViewModel(string id,
         string displayName,
         string description,
+        IGlanceComponent? component,
         bool isEnabled,
         IEnumerable<IGlanceModuleSettingViewModel> settings,
         Action<ModuleSettingsItemViewModel> navigate,
@@ -21,6 +22,10 @@ public sealed partial class ModuleSettingsItemViewModel :
         Id = id;
         DisplayName = displayName;
         Description = description;
+        AccentResourceKey = component?.AccentResourceKey ?? "AccentTextFillColorPrimaryBrush";
+        AccentResourceSource = component?.CompactContent;
+        IconFontFamily = component?.IconFontFamily ?? "Segoe Fluent Icons";
+        IconGlyph = string.IsNullOrEmpty(component?.IconGlyph) ? "\uE8B7" : component.IconGlyph;
         Settings = new ModuleSettingsViewModel(displayName, settings);
         this.navigate = navigate;
         this.isEnabled = isEnabled;
@@ -33,6 +38,14 @@ public sealed partial class ModuleSettingsItemViewModel :
     public string DisplayName { get; }
 
     public string Description { get; }
+
+    public string AccentResourceKey { get; }
+
+    public object? AccentResourceSource { get; }
+
+    public string IconFontFamily { get; }
+
+    public string IconGlyph { get; }
 
     public bool HasSettings => Settings.HasSettings;
 

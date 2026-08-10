@@ -121,15 +121,6 @@ public sealed partial class SettingsWindow :
         Navigate(path);
     }
 
-    private async void HandleSettingItemsReordered(ListViewBase sender,
-        DragItemsCompletedEventArgs args)
-    {
-        if (sender.ItemsSource is ISettingViewModel viewModel)
-        {
-            await viewModel.SaveOrderAsync();
-        }
-    }
-
     private async void HandleQuitTapped(object sender,
         Microsoft.UI.Xaml.Input.TappedRoutedEventArgs args)
     {

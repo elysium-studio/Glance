@@ -5,6 +5,7 @@ using Elysium.Presentation;
 using Elysium.Presentation.Abstractions;
 using Glance.Application.Abstractions;
 using Microsoft.Extensions.Logging;
+using System.Collections.ObjectModel;
 
 namespace Glance.Shell;
 
@@ -22,6 +23,9 @@ public sealed partial class DesktopIslandViewModel :
     private bool isExpanded;
 
     [ObservableProperty]
+    private bool isModuleReorderVisible;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsPinned))]
     private GlanceExpansionMode expansionMode;
 
@@ -37,6 +41,7 @@ public sealed partial class DesktopIslandViewModel :
     private bool contentRoutingPreviousExpanded;
     private bool contentRoutingPreviousOpen;
     private bool isContentRouting;
+    private bool isSavingModuleOrder;
     private readonly IGlanceAttentionService attentionService;
     private readonly IGlanceActionService actionService;
     private readonly IDispatcher dispatcher;
@@ -89,6 +94,8 @@ public sealed partial class DesktopIslandViewModel :
 
     public IGlanceAssistantService Assistant { get; }
 
+    public ObservableCollection<IGlanceComponent> ModuleOrder { get; } = [];
+
     public IReadOnlyList<GlanceContentRoute> ContentRoutes { get; private set; } = [];
 
     public bool IsContentRoutePickerVisible { get; private set; }
@@ -129,6 +136,51 @@ public sealed partial class DesktopIslandViewModel :
     public void MoveNext() => Move(1);
 
     public void MovePrevious() => Move(-1);
+
+    public void BeginModuleReorder()
+    {
+        if (components.Count < 2 || IsModuleReorderVisible)
+        {
+            return;
+        }
+
+        ModuleOrder.Clear();
+
+        foreach (IGlanceComponent component in components)
+        {
+            ModuleOrder.Add(component);
+        }
+
+        IsOpen = true;
+        IsExpanded = true;
+        IsModuleReorderVisible = true;
+    }
+
+    public void CancelModuleReorder() => IsModuleReorderVisible = false;
+
+    public async void ConfirmModuleReorder()
+    {
+        if (!IsModuleReorderVisible || isSavingModuleOrder)
+        {
+            return;
+        }
+
+        isSavingModuleOrder = true;
+
+        try
+        {
+            await modulePreferences.SetOrderAsync(ModuleOrder.Select(component => component.Id));
+            IsModuleReorderVisible = false;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Failed to save the Glance module order");
+        }
+        finally
+        {
+            isSavingModuleOrder = false;
+        }
+    }
 
     public void ShowComponent(string componentId)
     {
