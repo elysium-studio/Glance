@@ -44,6 +44,8 @@ public sealed partial class DesktopIslandView :
     private ListViewItem? draggedModuleOrderItem;
     private SoftwareBitmap? moduleOrderDragPreview;
     private ScrollViewer? moduleReorderScrollViewer;
+    private int moduleReorderCenteredIndex = -1;
+    private int moduleReorderTargetIndex = -1;
     private string? droppedContentRouteId;
     private bool isContextualDragActive;
     private int contextualDragSession;
@@ -72,6 +74,9 @@ public sealed partial class DesktopIslandView :
         AddHandler(PointerReleasedEvent, new PointerEventHandler(HandleButtonPointerReleased), true);
         AddHandler(PointerCanceledEvent, new PointerEventHandler(HandleButtonPointerCanceled), true);
         AddHandler(PointerCaptureLostEvent, new PointerEventHandler(HandleButtonPointerCaptureLost), true);
+        ModuleReorderList.AddHandler(PointerWheelChangedEvent,
+            new PointerEventHandler(HandleModuleReorderPointerWheelChanged),
+            true);
     }
 
     public DesktopIslandViewModel ViewModel => (DesktopIslandViewModel)DataContext;
@@ -681,29 +686,9 @@ public sealed partial class DesktopIslandView :
         double edgePadding = Math.Max(0,
             (ModuleReorderList.ActualWidth - itemWidth) / 2);
         ModuleReorderList.Padding = new Thickness(edgePadding, 0, edgePadding, 0);
-        ModuleReorderList.ScrollIntoView(selectedComponent,
-            ScrollIntoViewAlignment.Default);
         ModuleReorderList.UpdateLayout();
-
-        ListViewItem? item =
-            ModuleReorderList.ContainerFromItem(selectedComponent) as ListViewItem;
-        ScrollViewer? scrollViewer = GetModuleReorderScrollViewer();
-
-        if (item is null || scrollViewer is null || scrollViewer.ViewportWidth <= 0)
-        {
-            return;
-        }
-
-        GeneralTransform transform = item.TransformToVisual(scrollViewer);
-        Windows.Foundation.Point origin =
-            transform.TransformPoint(new Windows.Foundation.Point());
-        double targetOffset = scrollViewer.HorizontalOffset +
-            origin.X +
-            (item.ActualWidth / 2) -
-            (scrollViewer.ViewportWidth / 2);
-        targetOffset = Math.Clamp(targetOffset, 0, scrollViewer.ScrollableWidth);
-        _ = scrollViewer.ChangeView(targetOffset, null, null, true);
-        UpdateModuleReorderScrollButtons(scrollViewer);
+        CenterModuleOrderItem(ViewModel.ModuleOrder.IndexOf(selectedComponent),
+            true);
     }
 
     private void HandleModuleReorderListLoaded(object sender,
@@ -751,8 +736,50 @@ public sealed partial class DesktopIslandView :
     }
 
     private void HandleModuleReorderViewChanged(object? sender,
-        ScrollViewerViewChangedEventArgs args) =>
-        UpdateModuleReorderScrollButtons(sender as ScrollViewer);
+        ScrollViewerViewChangedEventArgs args)
+    {
+        if (sender is not ScrollViewer scrollViewer)
+        {
+            return;
+        }
+
+        moduleReorderCenteredIndex = GetNearestModuleOrderIndex(scrollViewer);
+        UpdateModuleReorderScrollButtons(scrollViewer);
+
+        if (args.IsIntermediate)
+        {
+            return;
+        }
+
+        moduleReorderTargetIndex = -1;
+        double targetOffset = GetModuleOrderOffset(moduleReorderCenteredIndex,
+            scrollViewer);
+
+        if (Math.Abs(scrollViewer.HorizontalOffset - targetOffset) > 0.5)
+        {
+            CenterModuleOrderItem(moduleReorderCenteredIndex, false);
+        }
+    }
+
+    private void HandleModuleReorderPointerWheelChanged(object sender,
+        PointerRoutedEventArgs args)
+    {
+        if (!ViewModel.IsModuleReorderVisible)
+        {
+            return;
+        }
+
+        int delta = args.GetCurrentPoint(ModuleReorderList)
+            .Properties.MouseWheelDelta;
+
+        if (delta == 0)
+        {
+            return;
+        }
+
+        ScrollModuleOrder(delta < 0 ? 1 : -1);
+        args.Handled = true;
+    }
 
     private void HandlePreviousModuleOrderClicked(object sender,
         RoutedEventArgs args) => ScrollModuleOrder(-1);
@@ -769,24 +796,77 @@ public sealed partial class DesktopIslandView :
             return;
         }
 
-        double itemWidth = Resources["GlanceModuleReorderItemWidth"] is double width ?
-            width :
-            164;
-        double targetOffset = Math.Clamp(scrollViewer.HorizontalOffset +
-            (direction * (itemWidth + 2)),
-            0,
-            scrollViewer.ScrollableWidth);
-        _ = scrollViewer.ChangeView(targetOffset, null, null, false);
+        int currentIndex = moduleReorderTargetIndex >= 0 ?
+            moduleReorderTargetIndex :
+            moduleReorderCenteredIndex >= 0 ?
+            moduleReorderCenteredIndex :
+            GetNearestModuleOrderIndex(scrollViewer);
+        CenterModuleOrderItem(currentIndex + direction, false);
     }
 
     private void UpdateModuleReorderScrollButtons(ScrollViewer? scrollViewer)
     {
-        bool canScroll = scrollViewer is not null &&
-            scrollViewer.ScrollableWidth > 0;
-        PreviousModuleOrderButton.IsEnabled = canScroll &&
-            scrollViewer!.HorizontalOffset > 0.5;
-        NextModuleOrderButton.IsEnabled = canScroll &&
-            scrollViewer!.HorizontalOffset < scrollViewer.ScrollableWidth - 0.5;
+        int itemCount = ViewModel.ModuleOrder.Count;
+        int centeredIndex = moduleReorderTargetIndex >= 0 ?
+            moduleReorderTargetIndex :
+            scrollViewer is null ?
+            moduleReorderCenteredIndex :
+            GetNearestModuleOrderIndex(scrollViewer);
+        PreviousModuleOrderButton.IsEnabled = itemCount > 1 && centeredIndex > 0;
+        NextModuleOrderButton.IsEnabled = itemCount > 1 &&
+            centeredIndex < itemCount - 1;
+    }
+
+    private void CenterModuleOrderItem(int index,
+        bool disableAnimation)
+    {
+        ScrollViewer? scrollViewer = GetModuleReorderScrollViewer();
+        int itemCount = ViewModel.ModuleOrder.Count;
+
+        if (scrollViewer is null || itemCount == 0)
+        {
+            return;
+        }
+
+        moduleReorderCenteredIndex = Math.Clamp(index, 0, itemCount - 1);
+        moduleReorderTargetIndex = disableAnimation ?
+            -1 :
+            moduleReorderCenteredIndex;
+        double targetOffset = GetModuleOrderOffset(moduleReorderCenteredIndex,
+            scrollViewer);
+        _ = scrollViewer.ChangeView(targetOffset,
+            null,
+            null,
+            disableAnimation);
+        UpdateModuleReorderScrollButtons(scrollViewer);
+    }
+
+    private int GetNearestModuleOrderIndex(ScrollViewer scrollViewer)
+    {
+        int itemCount = ViewModel.ModuleOrder.Count;
+
+        if (itemCount == 0)
+        {
+            return -1;
+        }
+
+        double stride = GetModuleOrderItemStride();
+        int index = (int)Math.Round(scrollViewer.HorizontalOffset / stride,
+            MidpointRounding.AwayFromZero);
+        return Math.Clamp(index, 0, itemCount - 1);
+    }
+
+    private double GetModuleOrderOffset(int index,
+        ScrollViewer scrollViewer) => Math.Clamp(index * GetModuleOrderItemStride(),
+            0,
+            scrollViewer.ScrollableWidth);
+
+    private double GetModuleOrderItemStride()
+    {
+        double itemWidth = Resources["GlanceModuleReorderItemWidth"] is double width ?
+            width :
+            164;
+        return itemWidth + 2;
     }
 
     private void ApplyModuleReorderPresentation(bool showReorder)
