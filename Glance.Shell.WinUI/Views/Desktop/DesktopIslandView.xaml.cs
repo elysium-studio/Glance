@@ -896,11 +896,11 @@ public sealed partial class DesktopIslandView :
         FluentMotion.PlayRouteTargetRelease(item);
     }
 
-    private void HandleModuleReorderDragStartingVisual(UIElement sender,
-        DragStartingEventArgs args)
+    private void HandleModuleReorderDragOver(object sender,
+        DragEventArgs args)
     {
-        args.DragUI.IsGlyphVisible = false;
-        args.DragUI.IsCaptionVisible = false;
+        args.DragUIOverride.IsGlyphVisible = false;
+        args.DragUIOverride.IsCaptionVisible = false;
     }
 
     private void UpdateFooterAppearanceComponent()

@@ -21,7 +21,7 @@
 		<StartupObject>Glance.Shell.WinUI.Start</StartupObject>
 		<DefaultLanguage>en</DefaultLanguage>
 		<MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3842</MSBuildWarningsAsMessages>
-		<NoWarn>$(NoWarn);CS8305</NoWarn>
+		<NoWarn>$(NoWarn);CA2252;CS8305</NoWarn>
 		<ApplicationIcon>Assets\Glance.ico</ApplicationIcon>
 		<ServerGarbageCollection>false</ServerGarbageCollection>
 		<ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
