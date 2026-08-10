@@ -224,32 +224,9 @@
                         FontSize="14"
                         Style="{StaticResource AccentButtonStyle}" />
                 </StackPanel>
-                <Grid Margin="-6,0,-6,2" ColumnSpacing="4">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="16" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="16" />
-                    </Grid.ColumnDefinitions>
-                    <Button
-                        x:Name="PreviousModuleOrderButton"
-                        Width="14"
-                        Height="38"
-                        Padding="0"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Background="{ThemeResource ControlFillColorDefaultBrush}"
-                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
-                        BorderThickness="1"
-                        Click="HandlePreviousModuleOrderClicked"
-                        Content="&#xE76B;"
-                        CornerRadius="4"
-                        FontFamily="Segoe Fluent Icons"
-                        FontSize="9"
-                        IsEnabled="False"
-                        Style="{StaticResource SubtleButtonStyle}" />
+                <Grid Margin="14,0,14,2">
                     <ListView
                         x:Name="ModuleReorderList"
-                        Grid.Column="1"
                         AllowDrop="True"
                         Background="Transparent"
                         CanDragItems="True"
@@ -368,25 +345,45 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                     </ListView>
-                    <Button
-                        x:Name="NextModuleOrderButton"
-                        Grid.Column="2"
-                        Width="14"
-                        Height="38"
-                        Padding="0"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Background="{ThemeResource ControlFillColorDefaultBrush}"
-                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
-                        BorderThickness="1"
-                        Click="HandleNextModuleOrderClicked"
-                        Content="&#xE76C;"
-                        CornerRadius="4"
-                        FontFamily="Segoe Fluent Icons"
-                        FontSize="9"
-                        IsEnabled="False"
-                        Style="{StaticResource SubtleButtonStyle}" />
                 </Grid>
+                <Button
+                    x:Name="PreviousModuleOrderButton"
+                    Grid.RowSpan="2"
+                    Width="14"
+                    Height="38"
+                    Margin="-6,0,0,0"
+                    Padding="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Background="{ThemeResource ControlFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    Click="HandlePreviousModuleOrderClicked"
+                    Content="&#xE76B;"
+                    CornerRadius="4"
+                    FontFamily="Segoe Fluent Icons"
+                    FontSize="9"
+                    IsEnabled="False"
+                    Style="{StaticResource SubtleButtonStyle}" />
+                <Button
+                    x:Name="NextModuleOrderButton"
+                    Grid.RowSpan="2"
+                    Width="14"
+                    Height="38"
+                    Margin="0,0,-6,0"
+                    Padding="0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Background="{ThemeResource ControlFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    Click="HandleNextModuleOrderClicked"
+                    Content="&#xE76C;"
+                    CornerRadius="4"
+                    FontFamily="Segoe Fluent Icons"
+                    FontSize="9"
+                    IsEnabled="False"
+                    Style="{StaticResource SubtleButtonStyle}" />
             </Grid>
             <ContentControl
                 x:Name="AssistantOverlayPresenter"
