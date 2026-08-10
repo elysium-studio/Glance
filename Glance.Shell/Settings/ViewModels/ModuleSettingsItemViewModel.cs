@@ -13,6 +13,24 @@ public sealed partial class ModuleSettingsItemViewModel :
     public ModuleSettingsItemViewModel(string id,
         string displayName,
         string description,
+        bool isEnabled,
+        IEnumerable<IGlanceModuleSettingViewModel> settings,
+        Action<ModuleSettingsItemViewModel> navigate,
+        Func<ModuleSettingsItemViewModel, bool, Task<bool>> setEnabled) :
+        this(id,
+            displayName,
+            description,
+            null,
+            isEnabled,
+            settings,
+            navigate,
+            setEnabled)
+    {
+    }
+
+    public ModuleSettingsItemViewModel(string id,
+        string displayName,
+        string description,
         IGlanceComponent? component,
         bool isEnabled,
         IEnumerable<IGlanceModuleSettingViewModel> settings,

@@ -75,7 +75,7 @@ internal sealed partial class MediaAmbientArtwork :
                 }
                 else
                 {
-                    surface.Dispose();
+                    CloseSurface(surface);
                     completion.TrySetResult(null);
                 }
             }
@@ -125,11 +125,24 @@ internal sealed partial class MediaAmbientArtwork :
     {
         if (dispatcherQueue.HasThreadAccess)
         {
-            releasedSurface.Dispose();
+            CloseSurface(releasedSurface);
         }
         else
         {
-            _ = dispatcherQueue.TryEnqueue(releasedSurface.Dispose);
+            _ = dispatcherQueue.TryEnqueue(() => CloseSurface(releasedSurface));
+        }
+    }
+
+    private static void CloseSurface(LoadedImageSurface releasedSurface)
+    {
+        try
+        {
+            releasedSurface.Dispose();
+        }
+        catch (InvalidCastException)
+        {
+            // During XAML teardown the WinRT object can be disconnected before its
+            // final managed owner releases it, so IClosable is no longer queryable.
         }
     }
 }

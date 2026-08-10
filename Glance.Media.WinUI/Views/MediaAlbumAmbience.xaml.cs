@@ -99,9 +99,6 @@ public sealed partial class MediaAlbumAmbience :
 
         _ = ambientVisual?.ImplicitAnimations = null;
 
-        nextArtwork?.Dispose();
-        currentArtwork?.Dispose();
-
         ElementCompositionPreview.SetElementChildVisual(ArtworkHost, null);
         currentSurfaceBrush?.Dispose();
         nextSurfaceBrush?.Dispose();
@@ -110,6 +107,8 @@ public sealed partial class MediaAlbumAmbience :
         artworkContainerVisual?.Dispose();
         motionImplicitAnimations?.Dispose();
         ambientImplicitAnimations?.Dispose();
+        nextArtwork?.Dispose();
+        currentArtwork?.Dispose();
         currentSurfaceBrush = null;
         nextSurfaceBrush = null;
         currentArtworkVisual = null;
