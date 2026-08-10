@@ -610,9 +610,7 @@ public sealed partial class DesktopIslandView :
 
         if (showReorder && ViewModel.SelectedComponent is not null)
         {
-            ModuleReorderList.ScrollIntoView(ViewModel.SelectedComponent,
-                ScrollIntoViewAlignment.Default);
-            UpdateLayout();
+            CenterSelectedModuleInReorderList();
         }
 
         if (!IsInElementTree(outgoing) ||
@@ -665,6 +663,44 @@ public sealed partial class DesktopIslandView :
                 CompleteModuleReorderPresentationExit();
             }
         });
+    }
+
+    private void CenterSelectedModuleInReorderList()
+    {
+        IGlanceComponent? selectedComponent = ViewModel.SelectedComponent;
+
+        if (selectedComponent is null || ModuleReorderList.ActualWidth <= 0)
+        {
+            return;
+        }
+
+        const double itemWidth = 64;
+        double edgePadding = Math.Max(0,
+            (ModuleReorderList.ActualWidth - itemWidth) / 2);
+        ModuleReorderList.Padding = new Thickness(edgePadding, 0, edgePadding, 0);
+        ModuleReorderList.ScrollIntoView(selectedComponent,
+            ScrollIntoViewAlignment.Default);
+        ModuleReorderList.UpdateLayout();
+
+        ListViewItem? item =
+            ModuleReorderList.ContainerFromItem(selectedComponent) as ListViewItem;
+        ScrollViewer? scrollViewer =
+            FindVisualDescendant<ScrollViewer>(ModuleReorderList);
+
+        if (item is null || scrollViewer is null || scrollViewer.ViewportWidth <= 0)
+        {
+            return;
+        }
+
+        GeneralTransform transform = item.TransformToVisual(scrollViewer);
+        Windows.Foundation.Point origin =
+            transform.TransformPoint(new Windows.Foundation.Point());
+        double targetOffset = scrollViewer.HorizontalOffset +
+            origin.X +
+            (item.ActualWidth / 2) -
+            (scrollViewer.ViewportWidth / 2);
+        targetOffset = Math.Clamp(targetOffset, 0, scrollViewer.ScrollableWidth);
+        _ = scrollViewer.ChangeView(targetOffset, null, null, true);
     }
 
     private void ApplyModuleReorderPresentation(bool showReorder)
@@ -966,6 +1002,31 @@ public sealed partial class DesktopIslandView :
             }
 
             element = VisualTreeHelper.GetParent(element);
+        }
+
+        return null;
+    }
+
+    private static T? FindVisualDescendant<T>(DependencyObject element)
+        where T : DependencyObject
+    {
+        int childCount = VisualTreeHelper.GetChildrenCount(element);
+
+        for (int index = 0; index < childCount; index++)
+        {
+            DependencyObject child = VisualTreeHelper.GetChild(element, index);
+
+            if (child is T match)
+            {
+                return match;
+            }
+
+            T? descendant = FindVisualDescendant<T>(child);
+
+            if (descendant is not null)
+            {
+                return descendant;
+            }
         }
 
         return null;
