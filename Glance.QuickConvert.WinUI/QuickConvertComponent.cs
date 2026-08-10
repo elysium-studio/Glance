@@ -19,6 +19,7 @@ public sealed partial class QuickConvertComponent :
         SingleReader = true,
         SingleWriter = false
     });
+    private readonly object disposalSynchronization = new();
     private readonly object queueSynchronization = new();
     private readonly List<CancellationTokenSource> retiredJobCancellations = [];
     private readonly SemaphoreSlim promptSynchronization = new(1, 1);
@@ -28,6 +29,7 @@ public sealed partial class QuickConvertComponent :
     private readonly ModuleResourceTextLocalizer<QuickConvertModule> localizer;
     private readonly QuickConvertViewModel viewModel;
     private readonly Task worker;
+    private Task? disposalTask;
     private int failedConversions;
     private int pendingJobs;
     private int successfulConversions;
@@ -160,7 +162,15 @@ public sealed partial class QuickConvertComponent :
     Task IGlanceIntent.InvokeAsync(GlanceContentContext context,
         CancellationToken cancellationToken) => HandleAsync(context);
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
+    {
+        lock (disposalSynchronization)
+        {
+            return new ValueTask(disposalTask ??= DisposeCoreAsync());
+        }
+    }
+
+    private async Task DisposeCoreAsync()
     {
         _ = jobs.Writer.TryComplete();
         cancellation.Cancel();
