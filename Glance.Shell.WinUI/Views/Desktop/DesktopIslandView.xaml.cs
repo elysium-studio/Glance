@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,7 +16,9 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Graphics.Imaging;
 using Windows.Storage;
+using Windows.Storage.Streams;
 using Windows.UI;
 
 namespace Glance.Shell.WinUI;
@@ -39,6 +42,7 @@ public sealed partial class DesktopIslandView :
     private FrameworkElement? activeContentRouteTarget;
     private Button? pressedButton;
     private ListViewItem? draggedModuleOrderItem;
+    private SoftwareBitmap? moduleOrderDragPreview;
     private string? droppedContentRouteId;
     private bool isContextualDragActive;
     private int contextualDragSession;
@@ -885,6 +889,9 @@ public sealed partial class DesktopIslandView :
     private void HandleModuleReorderDragCompleted(ListViewBase sender,
         DragItemsCompletedEventArgs args)
     {
+        moduleOrderDragPreview?.Dispose();
+        moduleOrderDragPreview = null;
+
         if (draggedModuleOrderItem is null)
         {
             return;
@@ -901,6 +908,67 @@ public sealed partial class DesktopIslandView :
     {
         args.DragUIOverride.IsGlyphVisible = false;
         args.DragUIOverride.IsCaptionVisible = false;
+    }
+
+    private async void HandleModuleReorderDragStartingVisual(UIElement sender,
+        DragStartingEventArgs args)
+    {
+        ListViewItem? item =
+            FindVisualAncestor<ListViewItem>(args.OriginalSource as DependencyObject);
+
+        if (item is null)
+        {
+            return;
+        }
+
+        DragOperationDeferral deferral = args.GetDeferral();
+
+        try
+        {
+            RenderTargetBitmap renderer = new();
+            await renderer.RenderAsync(item);
+
+            if (renderer.PixelWidth <= 0 || renderer.PixelHeight <= 0)
+            {
+                return;
+            }
+
+            IBuffer pixels = await renderer.GetPixelsAsync();
+            SoftwareBitmap preview = SoftwareBitmap.CreateCopyFromBuffer(pixels,
+                BitmapPixelFormat.Bgra8,
+                renderer.PixelWidth,
+                renderer.PixelHeight,
+                BitmapAlphaMode.Premultiplied);
+
+            moduleOrderDragPreview?.Dispose();
+            moduleOrderDragPreview = preview;
+            args.DragUI.SetContentFromSoftwareBitmap(preview);
+        }
+        catch (Exception)
+        {
+            moduleOrderDragPreview?.Dispose();
+            moduleOrderDragPreview = null;
+        }
+        finally
+        {
+            deferral.Complete();
+        }
+    }
+
+    private static T? FindVisualAncestor<T>(DependencyObject? element)
+        where T : DependencyObject
+    {
+        while (element is not null)
+        {
+            if (element is T match)
+            {
+                return match;
+            }
+
+            element = VisualTreeHelper.GetParent(element);
+        }
+
+        return null;
     }
 
     private void UpdateFooterAppearanceComponent()

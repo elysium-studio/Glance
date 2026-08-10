@@ -230,6 +230,7 @@
                     CanDragItems="True"
                     CanReorderItems="True"
                     DragOver="HandleModuleReorderDragOver"
+                    DragStarting="HandleModuleReorderDragStartingVisual"
                     DragItemsCompleted="HandleModuleReorderDragCompleted"
                     DragItemsStarting="HandleModuleReorderDragStarting"
                     IsItemClickEnabled="False"
