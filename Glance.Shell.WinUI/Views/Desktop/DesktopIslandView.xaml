@@ -152,7 +152,7 @@
                                 <Setter Property="Padding" Value="0" />
                                 <Setter Property="Background" Value="Transparent" />
                                 <Setter Property="BorderThickness" Value="0" />
-                                <Setter Property="Content" Value="&#xEC8F;" />
+                                <Setter Property="Content" Value="&#xE8A9;" />
                                 <Setter Property="CornerRadius" Value="6" />
                                 <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
                                 <Setter Property="FontSize" Value="12" />
