@@ -1,9 +1,11 @@
 using Elysium.UI.Controls.WinUI;
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
@@ -13,6 +15,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
@@ -32,6 +35,7 @@ public sealed partial class DesktopIslandView :
     private const int AttentionExpansionDurationMs = 4000;
     private const int ContextualDragExitDelayMs = 160;
     private const int InteractionExitDelayMs = 240;
+    private const float ModuleReorderEdgeFadeWidth = 32;
     private const int StartupAttentionDelayMs = 2500;
 
     private readonly DispatcherQueue dispatcherQueue;
@@ -43,6 +47,17 @@ public sealed partial class DesktopIslandView :
     private Button? pressedButton;
     private ListViewItem? draggedModuleOrderItem;
     private SoftwareBitmap? moduleOrderDragPreview;
+    private ContainerVisual? moduleReorderEdgeFadeContainer;
+    private CompositionLinearGradientBrush? moduleReorderLeftEdgeFadeGradient;
+    private CompositionMaskBrush? moduleReorderLeftEdgeFadeMask;
+    private CompositionSurfaceBrush? moduleReorderLeftEdgeFadeSourceBrush;
+    private SpriteVisual? moduleReorderLeftEdgeFadeVisual;
+    private CompositionVisualSurface? moduleReorderLeftEdgeSurface;
+    private CompositionLinearGradientBrush? moduleReorderRightEdgeFadeGradient;
+    private CompositionMaskBrush? moduleReorderRightEdgeFadeMask;
+    private CompositionSurfaceBrush? moduleReorderRightEdgeFadeSourceBrush;
+    private SpriteVisual? moduleReorderRightEdgeFadeVisual;
+    private CompositionVisualSurface? moduleReorderRightEdgeSurface;
     private ScrollViewer? moduleReorderScrollViewer;
     private int moduleReorderCenteredIndex = -1;
     private int moduleReorderTargetIndex = -1;
@@ -167,6 +182,7 @@ public sealed partial class DesktopIslandView :
         StopContextualDragExitTimer();
         StopInteractionExitTimer();
         StopStartupAttentionTimer();
+        DisposeModuleReorderEdgeFade();
         StaysExpanded = false;
         DismissesOnOutsideClick = false;
         assistantPresentationTransition++;
@@ -694,6 +710,7 @@ public sealed partial class DesktopIslandView :
     private void HandleModuleReorderListLoaded(object sender,
         RoutedEventArgs args)
     {
+        UpdateModuleReorderEdgeFade();
         ScrollViewer? scrollViewer = GetModuleReorderScrollViewer();
 
         if (scrollViewer is null)
@@ -701,6 +718,116 @@ public sealed partial class DesktopIslandView :
             _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
                 UpdateModuleReorderScrollButtons(GetModuleReorderScrollViewer()));
         }
+    }
+
+    private void HandleModuleReorderEdgeFadeHostSizeChanged(object sender,
+        SizeChangedEventArgs args) => UpdateModuleReorderEdgeFade();
+
+    private void UpdateModuleReorderEdgeFade()
+    {
+        float width = (float)ModuleReorderEdgeFadeHost.ActualWidth;
+        float height = (float)ModuleReorderEdgeFadeHost.ActualHeight;
+
+        if (!IsLoaded || width <= 0 || height <= 0)
+        {
+            return;
+        }
+
+        float fadeWidth = Math.Min(ModuleReorderEdgeFadeWidth, width / 2);
+        Visual sourceVisual = ElementCompositionPreview.GetElementVisual(ModuleReorderList);
+        Compositor compositor = sourceVisual.Compositor;
+
+        if (moduleReorderEdgeFadeContainer is null)
+        {
+            CreateModuleReorderEdgeFade(compositor, sourceVisual);
+        }
+
+        Visual clipHostVisual = ElementCompositionPreview.GetElementVisual(ModuleReorderListClipHost);
+        InsetClip clip = compositor.CreateInsetClip();
+        clip.LeftInset = fadeWidth;
+        clip.RightInset = fadeWidth;
+        clipHostVisual.Clip = clip;
+
+        moduleReorderEdgeFadeContainer!.Size = new Vector2(width, height);
+        moduleReorderLeftEdgeSurface!.SourceSize = new Vector2(fadeWidth, height);
+        moduleReorderLeftEdgeSurface.SourceOffset = Vector2.Zero;
+        moduleReorderLeftEdgeFadeVisual!.Size = new Vector2(fadeWidth, height);
+        moduleReorderLeftEdgeFadeVisual.Offset = Vector3.Zero;
+        moduleReorderRightEdgeSurface!.SourceSize = new Vector2(fadeWidth, height);
+        moduleReorderRightEdgeSurface.SourceOffset = new Vector2(width - fadeWidth, 0);
+        moduleReorderRightEdgeFadeVisual!.Size = new Vector2(fadeWidth, height);
+        moduleReorderRightEdgeFadeVisual.Offset = new Vector3(width - fadeWidth, 0, 0);
+    }
+
+    private void CreateModuleReorderEdgeFade(Compositor compositor,
+        Visual sourceVisual)
+    {
+        moduleReorderLeftEdgeSurface = compositor.CreateVisualSurface();
+        moduleReorderLeftEdgeSurface.SourceVisual = sourceVisual;
+        moduleReorderLeftEdgeFadeSourceBrush = compositor.CreateSurfaceBrush(moduleReorderLeftEdgeSurface);
+        moduleReorderLeftEdgeFadeGradient = CreateModuleReorderEdgeFadeGradient(compositor, true);
+        moduleReorderLeftEdgeFadeMask = compositor.CreateMaskBrush();
+        moduleReorderLeftEdgeFadeMask.Source = moduleReorderLeftEdgeFadeSourceBrush;
+        moduleReorderLeftEdgeFadeMask.Mask = moduleReorderLeftEdgeFadeGradient;
+        moduleReorderLeftEdgeFadeVisual = compositor.CreateSpriteVisual();
+        moduleReorderLeftEdgeFadeVisual.Brush = moduleReorderLeftEdgeFadeMask;
+
+        moduleReorderRightEdgeSurface = compositor.CreateVisualSurface();
+        moduleReorderRightEdgeSurface.SourceVisual = sourceVisual;
+        moduleReorderRightEdgeFadeSourceBrush = compositor.CreateSurfaceBrush(moduleReorderRightEdgeSurface);
+        moduleReorderRightEdgeFadeGradient = CreateModuleReorderEdgeFadeGradient(compositor, false);
+        moduleReorderRightEdgeFadeMask = compositor.CreateMaskBrush();
+        moduleReorderRightEdgeFadeMask.Source = moduleReorderRightEdgeFadeSourceBrush;
+        moduleReorderRightEdgeFadeMask.Mask = moduleReorderRightEdgeFadeGradient;
+        moduleReorderRightEdgeFadeVisual = compositor.CreateSpriteVisual();
+        moduleReorderRightEdgeFadeVisual.Brush = moduleReorderRightEdgeFadeMask;
+
+        moduleReorderEdgeFadeContainer = compositor.CreateContainerVisual();
+        moduleReorderEdgeFadeContainer.Children.InsertAtTop(moduleReorderLeftEdgeFadeVisual);
+        moduleReorderEdgeFadeContainer.Children.InsertAtTop(moduleReorderRightEdgeFadeVisual);
+        ElementCompositionPreview.SetElementChildVisual(ModuleReorderEdgeFadeHost,
+            moduleReorderEdgeFadeContainer);
+    }
+
+    private static CompositionLinearGradientBrush CreateModuleReorderEdgeFadeGradient(Compositor compositor,
+        bool isLeftEdge)
+    {
+        CompositionLinearGradientBrush gradient = compositor.CreateLinearGradientBrush();
+        gradient.StartPoint = Vector2.Zero;
+        gradient.EndPoint = Vector2.UnitX;
+        gradient.ColorStops.Add(compositor.CreateColorGradientStop(0,
+            isLeftEdge ? Colors.Transparent : Colors.White));
+        gradient.ColorStops.Add(compositor.CreateColorGradientStop(1,
+            isLeftEdge ? Colors.White : Colors.Transparent));
+        return gradient;
+    }
+
+    private void DisposeModuleReorderEdgeFade()
+    {
+        ElementCompositionPreview.GetElementVisual(ModuleReorderListClipHost).Clip = null;
+        ElementCompositionPreview.SetElementChildVisual(ModuleReorderEdgeFadeHost, null);
+        moduleReorderLeftEdgeFadeGradient?.Dispose();
+        moduleReorderRightEdgeFadeGradient?.Dispose();
+        moduleReorderLeftEdgeFadeMask?.Dispose();
+        moduleReorderRightEdgeFadeMask?.Dispose();
+        moduleReorderLeftEdgeFadeSourceBrush?.Dispose();
+        moduleReorderRightEdgeFadeSourceBrush?.Dispose();
+        moduleReorderLeftEdgeFadeVisual?.Dispose();
+        moduleReorderRightEdgeFadeVisual?.Dispose();
+        moduleReorderLeftEdgeSurface?.Dispose();
+        moduleReorderRightEdgeSurface?.Dispose();
+        moduleReorderEdgeFadeContainer?.Dispose();
+        moduleReorderLeftEdgeFadeGradient = null;
+        moduleReorderRightEdgeFadeGradient = null;
+        moduleReorderLeftEdgeFadeMask = null;
+        moduleReorderRightEdgeFadeMask = null;
+        moduleReorderLeftEdgeFadeSourceBrush = null;
+        moduleReorderRightEdgeFadeSourceBrush = null;
+        moduleReorderLeftEdgeFadeVisual = null;
+        moduleReorderRightEdgeFadeVisual = null;
+        moduleReorderLeftEdgeSurface = null;
+        moduleReorderRightEdgeSurface = null;
+        moduleReorderEdgeFadeContainer = null;
     }
 
     private ScrollViewer? GetModuleReorderScrollViewer()
