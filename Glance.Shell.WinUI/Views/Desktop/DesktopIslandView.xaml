@@ -224,15 +224,15 @@
                         FontSize="14"
                         Style="{StaticResource AccentButtonStyle}" />
                 </StackPanel>
-                <Grid Margin="0,0,0,2" ColumnSpacing="4">
+                <Grid Margin="-6,0,-6,2" ColumnSpacing="4">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="24" />
+                        <ColumnDefinition Width="16" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="24" />
+                        <ColumnDefinition Width="16" />
                     </Grid.ColumnDefinitions>
                     <Button
                         x:Name="PreviousModuleOrderButton"
-                        Width="20"
+                        Width="14"
                         Height="38"
                         Padding="0"
                         HorizontalAlignment="Center"
@@ -242,9 +242,9 @@
                         BorderThickness="1"
                         Click="HandlePreviousModuleOrderClicked"
                         Content="&#xE76B;"
-                        CornerRadius="5"
+                        CornerRadius="4"
                         FontFamily="Segoe Fluent Icons"
-                        FontSize="11"
+                        FontSize="9"
                         IsEnabled="False"
                         Style="{StaticResource SubtleButtonStyle}" />
                     <ListView
@@ -371,7 +371,7 @@
                     <Button
                         x:Name="NextModuleOrderButton"
                         Grid.Column="2"
-                        Width="20"
+                        Width="14"
                         Height="38"
                         Padding="0"
                         HorizontalAlignment="Center"
@@ -381,9 +381,9 @@
                         BorderThickness="1"
                         Click="HandleNextModuleOrderClicked"
                         Content="&#xE76C;"
-                        CornerRadius="5"
+                        CornerRadius="4"
                         FontFamily="Segoe Fluent Icons"
-                        FontSize="11"
+                        FontSize="9"
                         IsEnabled="False"
                         Style="{StaticResource SubtleButtonStyle}" />
                 </Grid>
