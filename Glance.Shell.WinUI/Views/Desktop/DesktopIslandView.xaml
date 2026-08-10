@@ -227,23 +227,23 @@
                 <Grid Margin="0,0,0,2">
                     <Button
                         x:Name="PreviousModuleOrderButton"
-                        Width="18"
-                        Height="38"
-                        Margin="-6,0,0,0"
+                        Width="22"
+                        Height="40"
+                        Margin="-4,0,0,0"
                         Padding="0"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
-                        Canvas.ZIndex="2"
-                        Background="{ThemeResource ControlFillColorDefaultBrush}"
-                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
-                        BorderThickness="1"
+                        Canvas.ZIndex="10"
+                        Background="#B31C1C1C"
+                        BorderBrush="Transparent"
+                        BorderThickness="0"
                         Click="HandlePreviousModuleOrderClicked"
                         Content="&#xE76B;"
-                        CornerRadius="4"
+                        CornerRadius="5"
                         FontFamily="Segoe Fluent Icons"
-                        FontSize="10"
-                        IsEnabled="False"
-                        Style="{StaticResource SubtleButtonStyle}" />
+                        FontSize="11"
+                        Foreground="White"
+                        IsEnabled="False" />
                     <ListView
                         x:Name="ModuleReorderList"
                         AllowDrop="True"
@@ -366,23 +366,23 @@
                     </ListView>
                     <Button
                         x:Name="NextModuleOrderButton"
-                        Width="18"
-                        Height="38"
-                        Margin="0,0,-6,0"
+                        Width="22"
+                        Height="40"
+                        Margin="0,0,-4,0"
                         Padding="0"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
-                        Canvas.ZIndex="2"
-                        Background="{ThemeResource ControlFillColorDefaultBrush}"
-                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
-                        BorderThickness="1"
+                        Canvas.ZIndex="10"
+                        Background="#B31C1C1C"
+                        BorderBrush="Transparent"
+                        BorderThickness="0"
                         Click="HandleNextModuleOrderClicked"
                         Content="&#xE76C;"
-                        CornerRadius="4"
+                        CornerRadius="5"
                         FontFamily="Segoe Fluent Icons"
-                        FontSize="10"
-                        IsEnabled="False"
-                        Style="{StaticResource SubtleButtonStyle}" />
+                        FontSize="11"
+                        Foreground="White"
+                        IsEnabled="False" />
                 </Grid>
             </Grid>
             <ContentControl
