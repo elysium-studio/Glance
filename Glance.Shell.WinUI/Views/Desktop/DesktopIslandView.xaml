@@ -224,29 +224,28 @@
                         FontSize="14"
                         Style="{StaticResource AccentButtonStyle}" />
                 </StackPanel>
-                <Grid Margin="0,0,0,2" ColumnSpacing="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="28" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="28" />
-                    </Grid.ColumnDefinitions>
+                <Grid Margin="0,0,0,2">
                     <Button
                         x:Name="PreviousModuleOrderButton"
-                        Width="26"
-                        Height="34"
+                        Width="18"
+                        Height="38"
+                        Margin="-6,0,0,0"
                         Padding="0"
-                        HorizontalAlignment="Center"
+                        HorizontalAlignment="Left"
                         VerticalAlignment="Center"
+                        Canvas.ZIndex="2"
+                        Background="{ThemeResource ControlFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
                         Click="HandlePreviousModuleOrderClicked"
                         Content="&#xE76B;"
-                        CornerRadius="13"
+                        CornerRadius="4"
                         FontFamily="Segoe Fluent Icons"
-                        FontSize="12"
+                        FontSize="10"
                         IsEnabled="False"
                         Style="{StaticResource SubtleButtonStyle}" />
                     <ListView
                         x:Name="ModuleReorderList"
-                        Grid.Column="1"
                         AllowDrop="True"
                         Background="Transparent"
                         CanDragItems="True"
@@ -367,17 +366,21 @@
                     </ListView>
                     <Button
                         x:Name="NextModuleOrderButton"
-                        Grid.Column="2"
-                        Width="26"
-                        Height="34"
+                        Width="18"
+                        Height="38"
+                        Margin="0,0,-6,0"
                         Padding="0"
-                        HorizontalAlignment="Center"
+                        HorizontalAlignment="Right"
                         VerticalAlignment="Center"
+                        Canvas.ZIndex="2"
+                        Background="{ThemeResource ControlFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
                         Click="HandleNextModuleOrderClicked"
                         Content="&#xE76C;"
-                        CornerRadius="13"
+                        CornerRadius="4"
                         FontFamily="Segoe Fluent Icons"
-                        FontSize="12"
+                        FontSize="10"
                         IsEnabled="False"
                         Style="{StaticResource SubtleButtonStyle}" />
                 </Grid>
