@@ -1,18 +1,24 @@
-using Glance.Shell;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.Windows.ApplicationModel.Resources;
+using System.Globalization;
 
 namespace Glance.Shell.WinUI;
 
 public sealed partial class UninstallModuleDialog :
     ContentDialog
 {
-    public UninstallModuleDialog(ModuleSettingsItemViewModel viewModel)
+    public UninstallModuleDialog(string moduleName)
     {
         InitializeComponent();
-        Title = viewModel.UninstallDialogTitle;
-        MessageText.Text = viewModel.UninstallDialogMessage;
-        DataMessageText.Text = viewModel.UninstallDialogDataMessage;
-        PrimaryButtonText = viewModel.UninstallDialogPrimaryButtonText;
-        CloseButtonText = viewModel.UninstallDialogCloseButtonText;
+        ResourceLoader resourceLoader = new();
+        Title = string.Format(CultureInfo.CurrentCulture,
+            resourceLoader.GetString("UninstallModuleDialogTitle"),
+            moduleName);
+        MessageText.Text = string.Format(CultureInfo.CurrentCulture,
+            resourceLoader.GetString("UninstallModuleDialogMessage"),
+            moduleName);
+        DataMessageText.Text = resourceLoader.GetString("UninstallModuleDialogDataMessage");
+        PrimaryButtonText = resourceLoader.GetString("UninstallModuleDialogPrimaryButton");
+        CloseButtonText = resourceLoader.GetString("UninstallModuleDialogCloseButton");
     }
 }

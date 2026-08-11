@@ -95,8 +95,7 @@ public sealed partial class ModulesViewModel :
             (_, enabled) => preferences.SetEnabledAsync(preference.Id, enabled),
             installations.CanUninstall(preference.Id)
                 ? _ => installations.UninstallAsync(preference.Id)
-                : null,
-            localizer);
+                : null);
     }
 
     private SettingsCategoryViewModel GetOrCreateCategory(string id)

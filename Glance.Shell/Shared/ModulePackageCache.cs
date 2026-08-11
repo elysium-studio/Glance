@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.IO.Compression;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace Glance.Shell;
 
