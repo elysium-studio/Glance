@@ -1127,6 +1127,12 @@ public sealed partial class DesktopIslandView :
 
     private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
+        if (!dispatcherQueue.HasThreadAccess)
+        {
+            _ = dispatcherQueue.TryEnqueue(() => HandleViewModelPropertyChanged(sender, args));
+            return;
+        }
+
         if (args.PropertyName == nameof(DesktopIslandViewModel.IsModuleReorderVisible))
         {
             _ = DispatcherQueue.TryEnqueue(() =>

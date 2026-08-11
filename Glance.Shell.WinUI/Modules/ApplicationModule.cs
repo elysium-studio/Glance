@@ -16,6 +16,12 @@ public sealed class ApplicationModule(string applicationData,
     public void Register(IServiceCollection services) => _ = services
             .AddSingleton(new AppEnvironment(applicationData)).AddSingleton<IStartupManager>(new StartupManager(Environment.ProcessPath ?? string.Empty, "GlanceDesktop", "GlanceDesktop")).AddSingleton<IDispatcher>(new Dispatcher(args =>
             {
+                if (dispatcherQueue.HasThreadAccess)
+                {
+                    args();
+                    return;
+                }
+
                 if (!dispatcherQueue.TryEnqueue(() => args()))
                 {
                     throw new InvalidOperationException("The UI dispatcher queue rejected the operation.");
