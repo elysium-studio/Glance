@@ -56,7 +56,8 @@ public sealed partial class SettingsWindow :
         this.aboutViewModel = aboutViewModel;
         this.moduleInstallations = moduleInstallations;
 
-        messenger.Register(this);
+        messenger.Register<SettingsNavigationRequestedEventArgs>(this);
+        messenger.Register<ModuleUninstalledEventArgs>(this);
         Closed += HandleClosed;
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
