@@ -40,7 +40,10 @@ public sealed partial class DesktopIslandViewModel :
     private int contentRoutingPreviousIndex;
     private bool contentRoutingPreviousExpanded;
     private bool contentRoutingPreviousOpen;
+    private string? attentionPresentedComponentId;
+    private string? attentionPreviousComponentId;
     private bool isContentRouting;
+    private bool isSelectingAttentionComponent;
     private bool isSavingModuleOrder;
     private readonly IGlanceAttentionService attentionService;
     private readonly IGlanceActionService actionService;
@@ -105,6 +108,17 @@ public sealed partial class DesktopIslandViewModel :
         get; set
         {
             int normalizedIndex = Math.Clamp(value, 0, Math.Max(0, components.Count - 1));
+
+            if (!isSelectingAttentionComponent &&
+                attentionPresentedComponentId is not null &&
+                normalizedIndex >= 0 &&
+                normalizedIndex < components.Count &&
+                !string.Equals(components[normalizedIndex].Id,
+                    attentionPresentedComponentId,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                ClearAttentionRestoration();
+            }
 
             if (!SetProperty(ref field, normalizedIndex))
             {
@@ -414,6 +428,15 @@ public sealed partial class DesktopIslandViewModel :
         IReadOnlyList<IGlanceComponent> activeComponents =
             modulePreferences.GetActiveComponents();
 
+        string? restorationId = string.Equals(selectedId,
+            attentionPresentedComponentId,
+            StringComparison.OrdinalIgnoreCase) &&
+            !activeComponents.Any(component => string.Equals(component.Id,
+                attentionPresentedComponentId,
+                StringComparison.OrdinalIgnoreCase))
+            ? attentionPreviousComponentId
+            : null;
+
         int selectedComponentIndex = selectedId is null
             ? -1
             : activeComponents
@@ -422,10 +445,40 @@ public sealed partial class DesktopIslandViewModel :
                 .Select(item => item.index)
                 .DefaultIfEmpty(-1).First();
 
+        int restoredComponentIndex = restorationId is null
+            ? -1
+            : activeComponents
+                .Select((component, index) => (component, index))
+                .Where(item => string.Equals(item.component.Id,
+                    restorationId,
+                    StringComparison.OrdinalIgnoreCase))
+                .Select(item => item.index)
+                .DefaultIfEmpty(-1).First();
+
         components = activeComponents;
-        SelectedIndex = selectedComponentIndex >= 0
-            ? selectedComponentIndex
-            : Math.Clamp(previousSelectedIndex, 0, Math.Max(0, components.Count - 1));
+        isSelectingAttentionComponent = true;
+
+        try
+        {
+            SelectedIndex = selectedComponentIndex >= 0
+                ? selectedComponentIndex
+                : restoredComponentIndex >= 0
+                    ? restoredComponentIndex
+                    : Math.Clamp(previousSelectedIndex, 0, Math.Max(0, components.Count - 1));
+        }
+        finally
+        {
+            isSelectingAttentionComponent = false;
+        }
+
+        if (restorationId is not null ||
+            attentionPresentedComponentId is not null &&
+            !components.Any(component => string.Equals(component.Id,
+                attentionPresentedComponentId,
+                StringComparison.OrdinalIgnoreCase)))
+        {
+            ClearAttentionRestoration();
+        }
 
         OnPropertyChanged(nameof(SelectedComponent));
         OnPropertyChanged(nameof(HasMultipleComponents));
@@ -460,7 +513,28 @@ public sealed partial class DesktopIslandViewModel :
 
         if (request.Level != GlanceAttentionLevel.Passive)
         {
-            SelectedIndex = componentIndex;
+            IGlanceComponent attentionComponent = components[componentIndex];
+
+            if (attentionComponent is IGlanceAvailabilityComponent &&
+                !string.Equals(SelectedComponent?.Id,
+                    request.ComponentId,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                attentionPreviousComponentId = SelectedComponent?.Id;
+                attentionPresentedComponentId = request.ComponentId;
+            }
+
+            isSelectingAttentionComponent = true;
+
+            try
+            {
+                SelectedIndex = componentIndex;
+            }
+            finally
+            {
+                isSelectingAttentionComponent = false;
+            }
+
             IsOpen = true;
             IsExpanded = IsExpanded || request.Expand;
         }
@@ -513,6 +587,12 @@ public sealed partial class DesktopIslandViewModel :
                 contextAware.CanHandle(context))
             .Select(item => item.index)
             .DefaultIfEmpty(-1).First();
+
+    private void ClearAttentionRestoration()
+    {
+        attentionPresentedComponentId = null;
+        attentionPreviousComponentId = null;
+    }
 
     private int FindComponentIndex(string componentId) => components
             .Select((component, index) => (component, index))
