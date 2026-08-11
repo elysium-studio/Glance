@@ -378,6 +378,11 @@ public sealed partial class SettingsWindow :
             return;
         }
 
+        if (ReferenceEquals(ViewModel.CurrentView, category))
+        {
+            return;
+        }
+
         List<ISettingViewModel>? path = FindNavigationPath(category);
 
         if (path is null)
