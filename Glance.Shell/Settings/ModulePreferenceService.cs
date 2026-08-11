@@ -154,6 +154,41 @@ public sealed class ModulePreferenceService
         await SaveAsync();
     }
 
+    public async Task<bool> ApplyReorderAsync(IEnumerable<string> originalActiveIds,
+        IEnumerable<string> orderedActiveIds)
+    {
+        string[] originalIds = [.. originalActiveIds
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Distinct(StringComparer.OrdinalIgnoreCase)];
+        string[] orderedIds = [.. orderedActiveIds
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Distinct(StringComparer.OrdinalIgnoreCase)];
+
+        if (orderedIds.Length == 0)
+        {
+            return false;
+        }
+
+        HashSet<string> originalIdSet = [.. originalIds];
+        HashSet<string> orderedIdSet = [.. orderedIds];
+        Dictionary<string, GlanceModulePreference> preferences = settings.Modules
+            .ToDictionary(item => item.Id, StringComparer.OrdinalIgnoreCase);
+        Queue<GlanceModulePreference> ordered = new(orderedIds
+            .Where(preferences.ContainsKey)
+            .Select(id => preferences[id]));
+        List<GlanceModulePreference> modules = [.. settings.Modules.Select(item =>
+            orderedIdSet.Contains(item.Id) ? ordered.Dequeue() : item)];
+
+        foreach (GlanceModulePreference preference in modules.Where(item => originalIdSet.Contains(item.Id)))
+        {
+            preference.IsEnabled = orderedIdSet.Contains(preference.Id);
+        }
+
+        settings.Modules = modules;
+        await SaveAsync();
+        return true;
+    }
+
     private void Normalize()
     {
         Dictionary<string, GlanceModulePreference> saved = settings.Modules

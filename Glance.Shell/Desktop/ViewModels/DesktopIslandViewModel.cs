@@ -42,6 +42,7 @@ public sealed partial class DesktopIslandViewModel :
     private bool contentRoutingPreviousOpen;
     private bool isContentRouting;
     private bool isSavingModuleOrder;
+    private string[] moduleOrderSnapshot = [];
     private readonly IGlanceAttentionService attentionService;
     private readonly IGlanceActionService actionService;
     private readonly IDispatcher dispatcher;
@@ -145,6 +146,7 @@ public sealed partial class DesktopIslandViewModel :
         }
 
         ModuleOrder.Clear();
+        moduleOrderSnapshot = [.. components.Select(component => component.Id)];
 
         foreach (IGlanceComponent component in components)
         {
@@ -156,7 +158,27 @@ public sealed partial class DesktopIslandViewModel :
         IsModuleReorderVisible = true;
     }
 
-    public void CancelModuleReorder() => IsModuleReorderVisible = false;
+    public void CancelModuleReorder()
+    {
+        moduleOrderSnapshot = [];
+        IsModuleReorderVisible = false;
+    }
+
+    public void RemoveModuleFromOrder(string componentId)
+    {
+        if (!IsModuleReorderVisible || ModuleOrder.Count <= 1)
+        {
+            return;
+        }
+
+        IGlanceComponent? component = ModuleOrder.FirstOrDefault(item =>
+            string.Equals(item.Id, componentId, StringComparison.OrdinalIgnoreCase));
+
+        if (component is not null)
+        {
+            ModuleOrder.Remove(component);
+        }
+    }
 
     public async void ConfirmModuleReorder()
     {
@@ -169,8 +191,12 @@ public sealed partial class DesktopIslandViewModel :
 
         try
         {
-            await modulePreferences.SetOrderAsync(ModuleOrder.Select(component => component.Id));
-            IsModuleReorderVisible = false;
+            if (await modulePreferences.ApplyReorderAsync(moduleOrderSnapshot,
+                ModuleOrder.Select(component => component.Id)))
+            {
+                moduleOrderSnapshot = [];
+                IsModuleReorderVisible = false;
+            }
         }
         catch (Exception exception)
         {

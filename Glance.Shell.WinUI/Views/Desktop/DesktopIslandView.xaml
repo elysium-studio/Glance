@@ -341,6 +341,29 @@
                                             Fill="{Binding Converter={StaticResource GlanceModuleAccentBrushConverter}}"
                                             Opacity="0.8" />
                                     </Grid>
+                                    <Button
+                                        x:Name="RemoveModuleButton"
+                                        x:Uid="RemoveModuleButton"
+                                        Grid.ColumnSpan="3"
+                                        Width="24"
+                                        Height="24"
+                                        Margin="0,-3,-3,0"
+                                        Padding="0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Top"
+                                        Background="{ThemeResource ControlFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        Click="HandleRemoveModuleClicked"
+                                        Content="&#xE74D;"
+                                        CornerRadius="12"
+                                        FontFamily="Segoe Fluent Icons"
+                                        FontSize="11"
+                                        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                        IsHitTestVisible="False"
+                                        Opacity="0"
+                                        Style="{StaticResource SubtleButtonStyle}"
+                                        Tag="{x:Bind Id}" />
                                 </Grid>
                             </Border>
                         </DataTemplate>
