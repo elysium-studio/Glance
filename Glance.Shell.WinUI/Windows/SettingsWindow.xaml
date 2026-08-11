@@ -131,9 +131,7 @@
                                 ItemsSource="{x:Bind}"
                                 SelectionMode="None">
                                 <ListView.ItemContainerTransitions>
-                                    <TransitionCollection>
-                                        <AddDeleteThemeTransition />
-                                    </TransitionCollection>
+                                    <TransitionCollection />
                                 </ListView.ItemContainerTransitions>
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">
