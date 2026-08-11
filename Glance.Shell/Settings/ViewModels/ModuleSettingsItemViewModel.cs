@@ -8,6 +8,7 @@ public sealed partial class ModuleSettingsItemViewModel :
     IModulesViewModel
 {
     private readonly Action<ModuleSettingsItemViewModel> navigate;
+    private readonly ITextLocalizer? localizer;
     private readonly Func<ModuleSettingsItemViewModel, Task<bool>>? uninstall;
     private bool suppressPersistence;
 
@@ -38,7 +39,8 @@ public sealed partial class ModuleSettingsItemViewModel :
         IEnumerable<IGlanceModuleSettingViewModel> settings,
         Action<ModuleSettingsItemViewModel> navigate,
         Func<ModuleSettingsItemViewModel, bool, Task<bool>> setEnabled,
-        Func<ModuleSettingsItemViewModel, Task<bool>>? uninstall = null)
+        Func<ModuleSettingsItemViewModel, Task<bool>>? uninstall = null,
+        ITextLocalizer? localizer = null)
     {
         Id = id;
         DisplayName = displayName;
@@ -50,6 +52,7 @@ public sealed partial class ModuleSettingsItemViewModel :
         Settings = new ModuleSettingsViewModel(displayName, settings);
         this.navigate = navigate;
         this.uninstall = uninstall;
+        this.localizer = localizer;
         this.isEnabled = isEnabled;
         SetEnabled = setEnabled;
         RefreshSettings();
@@ -74,6 +77,21 @@ public sealed partial class ModuleSettingsItemViewModel :
     public bool CanExpand => IsEnabled && HasSettings;
 
     public bool CanUninstall => uninstall is not null;
+
+    public string UninstallDialogTitle => localizer?.GetText("UninstallModuleDialogTitle", DisplayName)
+        ?? $"Uninstall {DisplayName}?";
+
+    public string UninstallDialogMessage => localizer?.GetText("UninstallModuleDialogMessage", DisplayName)
+        ?? $"{DisplayName} will be removed from Glance immediately.";
+
+    public string UninstallDialogDataMessage => localizer?.GetText("UninstallModuleDialogDataMessage")
+        ?? "Its package, settings, saved data, and runtime files will be deleted.";
+
+    public string UninstallDialogPrimaryButtonText => localizer?.GetText("UninstallModuleDialogPrimaryButton")
+        ?? "Uninstall";
+
+    public string UninstallDialogCloseButtonText => localizer?.GetText("UninstallModuleDialogCloseButton")
+        ?? "Cancel";
 
     public ModuleSettingsViewModel Settings { get; }
 

@@ -1,22 +1,12 @@
-using Glance.Application.Abstractions;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System;
 
 namespace Glance.Shell.WinUI;
 
 public sealed partial class ModuleSettingsItemView :
     UserControl
 {
-    private readonly ITextLocalizer? localizer;
-
     public ModuleSettingsItemView() => InitializeComponent();
-
-    public ModuleSettingsItemView(ITextLocalizer localizer)
-    {
-        this.localizer = localizer;
-        InitializeComponent();
-    }
 
     public ModuleSettingsItemViewModel ViewModel => (ModuleSettingsItemViewModel)DataContext;
 
@@ -27,12 +17,14 @@ public sealed partial class ModuleSettingsItemView :
     private async void HandleUninstallClicked(object sender,
         RoutedEventArgs args)
     {
-        if (!ViewModel.CanUninstall || localizer is null || XamlRoot is null)
+        args.Handled = true;
+
+        if (!ViewModel.CanUninstall || XamlRoot is null)
         {
             return;
         }
 
-        UninstallModuleDialog dialog = new(ViewModel.DisplayName, localizer)
+        UninstallModuleDialog dialog = new(ViewModel)
         {
             XamlRoot = XamlRoot
         };

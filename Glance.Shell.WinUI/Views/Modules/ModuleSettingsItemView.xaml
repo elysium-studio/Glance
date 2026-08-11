@@ -21,25 +21,28 @@
         </CommunityToolkit:SettingsCard.HeaderIcon>
         <StackPanel
             Margin="{x:Bind GetToggleMargin(ViewModel.CanExpand), Mode=OneWay}"
+            VerticalAlignment="Center"
             Orientation="Horizontal"
             Spacing="8">
+            <ToggleSwitch
+                VerticalAlignment="Center"
+                AutomationProperties.Name="{x:Bind ViewModel.DisplayName}"
+                IsOn="{x:Bind ViewModel.IsEnabled, Mode=TwoWay}" />
             <Button
                 x:Name="UninstallButton"
                 x:Uid="UninstallModuleButton"
                 Width="32"
                 Height="32"
+                MinWidth="32"
+                Padding="0"
+                VerticalAlignment="Center"
                 Click="HandleUninstallClicked"
                 Style="{StaticResource SubtleButtonStyle}"
                 Visibility="{x:Bind GetUninstallVisibility(ViewModel.CanUninstall), Mode=OneWay}">
                 <FontIcon
                     FontSize="14"
-                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
                     Glyph="&#xE74D;" />
             </Button>
-            <ToggleSwitch
-                VerticalAlignment="Center"
-                AutomationProperties.Name="{x:Bind ViewModel.DisplayName}"
-                IsOn="{x:Bind ViewModel.IsEnabled, Mode=TwoWay}" />
         </StackPanel>
     </CommunityToolkit:SettingsCard>
 </UserControl>
