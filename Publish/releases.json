@@ -5,5 +5,12 @@
         "releaseNotes":  [
                              "Initial Glance preview release."
                          ]
+    },
+    {
+        "version":  "0.1.1-preview",
+        "date":  "2026-08-11",
+        "releaseNotes":  [
+
+                         ]
     }
 ]
