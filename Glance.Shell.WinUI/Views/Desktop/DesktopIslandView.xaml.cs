@@ -33,17 +33,12 @@ public sealed partial class DesktopIslandView :
     private const string AssistantContinuumAnimationKey = "DesktopIsland.Assistant.Continuum";
     private const int ExtendedWindowStyleIndex = -20;
     private const int NoActivateExtendedWindowStyle = 0x08000000;
-    private const uint SetWindowPositionNoActivate = 0x0010;
-    private const uint SetWindowPositionNoMove = 0x0002;
-    private const uint SetWindowPositionNoSize = 0x0001;
     private const int AttentionExpansionDurationMs = 4000;
     private const int ContextualDragExitDelayMs = 160;
     private const int InteractionExitDelayMs = 240;
     private const float ModuleReorderEdgeFadeWidth = 32;
     private const double ModuleReorderSideItemMinimumOpacity = 0.68;
     private const int StartupAttentionDelayMs = 2500;
-
-    private static readonly nint TopmostWindow = new(-1);
 
     private readonly DispatcherQueue dispatcherQueue;
     private DispatcherQueueTimer? attentionExpansionTimer;
@@ -145,25 +140,16 @@ public sealed partial class DesktopIslandView :
         ApplyContentRoutePresentation(ViewModel.IsContentRoutePickerVisible);
         ApplyModuleReorderPresentation(ViewModel.IsModuleReorderVisible);
         StartStartupAttentionTimer();
-        _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, KeepIslandTopmostAndNonActivating);
+        _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, KeepIslandNonActivating);
     }
 
     private void HandleIslandOpened(object sender,
-        RoutedEventArgs args) => _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, KeepIslandTopmostAndNonActivating);
+        RoutedEventArgs args) => _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, KeepIslandNonActivating);
 
-    private void KeepIslandTopmostAndNonActivating()
+    private void KeepIslandNonActivating()
     {
         int extendedStyle = GetWindowLong(Handle, ExtendedWindowStyleIndex);
-        _ = SetWindowLong(Handle,
-            ExtendedWindowStyleIndex,
-            extendedStyle | NoActivateExtendedWindowStyle);
-        _ = SetWindowPos(Handle,
-            TopmostWindow,
-            0,
-            0,
-            0,
-            0,
-            SetWindowPositionNoActivate | SetWindowPositionNoMove | SetWindowPositionNoSize);
+        _ = SetWindowLong(Handle, ExtendedWindowStyleIndex, extendedStyle | NoActivateExtendedWindowStyle);
     }
 
     [LibraryImport("user32.dll", EntryPoint = "GetWindowLongW")]
@@ -174,16 +160,6 @@ public sealed partial class DesktopIslandView :
     private static partial int SetWindowLong(nint window,
         int index,
         int value);
-
-    [LibraryImport("user32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool SetWindowPos(nint window,
-        nint insertAfter,
-        int x,
-        int y,
-        int width,
-        int height,
-        uint flags);
 
     private void InitializeExpansionState()
     {
@@ -1609,8 +1585,6 @@ public sealed partial class DesktopIslandView :
 
     private void HandleIslandDeactivated(object? sender, EventArgs args)
     {
-        _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, KeepIslandTopmostAndNonActivating);
-
         if (expansionLockComponent?.IsExpansionLocked == true)
         {
             expansionLockComponent.DismissExpansionLock();
