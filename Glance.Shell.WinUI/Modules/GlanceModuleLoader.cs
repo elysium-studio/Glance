@@ -43,7 +43,7 @@ internal static partial class GlanceModuleLoader
         RegisterAssemblyPaths(sources.Select(source => source.ContentDirectory), true);
         RegisterResolver();
 
-        return (GlanceModuleLoadResult[])[.. sources.Select(Load).Where(result => result.Modules.Count > 0)];
+        return (GlanceModuleLoadResult[])[.. sources.Select(source => Load(source, false)).Where(result => result.Modules.Count > 0)];
     }
 
     public static GlanceModuleLoadResult? LoadPackage(string packagePath)
@@ -54,7 +54,7 @@ internal static partial class GlanceModuleLoader
         RegisterAssemblyPaths((string[])[contentDirectory]);
         RegisterResolver();
 
-        GlanceModuleLoadResult result = Load(new ModuleSource(fullPackagePath, contentDirectory));
+        GlanceModuleLoadResult result = Load(new ModuleSource(fullPackagePath, contentDirectory), true);
         return result.Modules.Count > 0 ? result : null;
     }
 
@@ -112,19 +112,21 @@ internal static partial class GlanceModuleLoader
         }
     }
 
-    private static GlanceModuleLoadResult Load(ModuleSource source)
+    private static GlanceModuleLoadResult Load(ModuleSource source,
+        bool throwOnFailure)
     {
         List<IGlanceModule> modules = [];
 
         foreach (string path in Directory.EnumerateFiles(source.ContentDirectory, "*.dll", SearchOption.AllDirectories).Where(path => File.Exists(Path.ChangeExtension(path, ".pri"))).Order(StringComparer.OrdinalIgnoreCase))
         {
-            modules.AddRange(LoadAssembly(path));
+            modules.AddRange(LoadAssembly(path, throwOnFailure));
         }
 
         return new GlanceModuleLoadResult(source.SourcePath, source.ContentDirectory, modules);
     }
 
-    private static IReadOnlyList<IGlanceModule> LoadAssembly(string path)
+    private static IReadOnlyList<IGlanceModule> LoadAssembly(string path,
+        bool throwOnFailure)
     {
         List<IGlanceModule> modules = [];
 
@@ -136,6 +138,11 @@ internal static partial class GlanceModuleLoader
 
             if (existingAssembly is null && !DynamicLoader.TryLoadPri(Path.ChangeExtension(path, ".pri")))
             {
+                if (throwOnFailure)
+                {
+                    throw new InvalidOperationException($"The module PRI resource for '{Path.GetFileName(path)}' could not be loaded.");
+                }
+
                 return modules;
             }
 
@@ -155,7 +162,7 @@ internal static partial class GlanceModuleLoader
                 }
             }
         }
-        catch
+        catch when (!throwOnFailure)
         {
         }
 

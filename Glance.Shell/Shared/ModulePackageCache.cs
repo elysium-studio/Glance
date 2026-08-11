@@ -39,10 +39,7 @@ public sealed class ModulePackageCache
 
         string contentDirectory = Path.Combine(packageCacheDirectory, contentHash);
 
-        if (!Directory.Exists(contentDirectory))
-        {
-            Extract(fullPackagePath, packageCacheDirectory, contentDirectory);
-        }
+        Extract(fullPackagePath, packageCacheDirectory, contentDirectory);
 
         WriteState(packageCacheDirectory, package, contentHash);
         DeleteOldContentDirectories(packageCacheDirectory, contentDirectory);
@@ -77,7 +74,8 @@ public sealed class ModulePackageCache
 
         string candidate = Path.Combine(packageCacheDirectory, values[2]);
 
-        if (!Directory.Exists(candidate))
+        if (!Directory.Exists(candidate) ||
+            !IsExtractedPackageComplete(package.FullName, candidate))
         {
             return false;
         }
@@ -119,14 +117,25 @@ public sealed class ModulePackageCache
                 entry.ExtractToFile(destinationPath);
             }
 
-            if (Directory.Exists(contentDirectory))
-            {
-                Directory.Delete(temporaryDirectory, true);
-            }
-            else
+            if (!Directory.Exists(contentDirectory))
             {
                 Directory.Move(temporaryDirectory, contentDirectory);
+                return;
             }
+
+            foreach (string extractedFile in Directory.EnumerateFiles(temporaryDirectory, "*", SearchOption.AllDirectories))
+            {
+                string relativePath = Path.GetRelativePath(temporaryDirectory, extractedFile);
+                string destinationPath = Path.Combine(contentDirectory, relativePath);
+
+                if (!File.Exists(destinationPath))
+                {
+                    _ = Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
+                    File.Move(extractedFile, destinationPath);
+                }
+            }
+
+            Directory.Delete(temporaryDirectory, true);
         }
         catch
         {
@@ -137,6 +146,27 @@ public sealed class ModulePackageCache
 
             throw;
         }
+    }
+
+    private static bool IsExtractedPackageComplete(string packagePath,
+        string contentDirectory)
+    {
+        string contentDirectoryPrefix = Path.TrimEndingDirectorySeparator(Path.GetFullPath(contentDirectory)) + Path.DirectorySeparatorChar;
+
+        using ZipArchive archive = ZipFile.OpenRead(packagePath);
+
+        foreach (ZipArchiveEntry entry in archive.Entries.Where(entry => !string.IsNullOrEmpty(entry.Name)))
+        {
+            string destinationPath = Path.GetFullPath(Path.Combine(contentDirectory, entry.FullName));
+
+            if (!destinationPath.StartsWith(contentDirectoryPrefix, StringComparison.OrdinalIgnoreCase) ||
+                !File.Exists(destinationPath))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static void WriteState(string packageCacheDirectory, FileInfo package, string contentHash)

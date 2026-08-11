@@ -457,7 +457,7 @@ internal sealed class GlanceModuleManager :
             _ = knownPackages.Remove(package.SourcePath);
         }
 
-        GlanceModuleInstallationStore.DeleteOrQuarantinePackage(package.SourcePath);
+        GlanceModuleInstallationStore.RemovePackageForCurrentProcess(package.SourcePath);
         logger.LogInformation("Uninstalled Glance module package {ModulePackage}", package.SourcePath);
         return true;
     }

@@ -90,7 +90,28 @@ internal static class GlanceModuleInstallationStore
         }
     }
 
-    public static void DeleteOrQuarantinePackage(string packagePath) => DeleteOrQuarantine(Path.GetDirectoryName(Path.GetFullPath(packagePath))!);
+    public static void RemovePackageForCurrentProcess(string packagePath)
+    {
+        string moduleDirectory = Path.GetDirectoryName(Path.GetFullPath(packagePath))!;
+
+        if (!Directory.Exists(moduleDirectory))
+        {
+            return;
+        }
+
+        foreach (string file in Directory.EnumerateFiles(moduleDirectory, "*", SearchOption.TopDirectoryOnly))
+        {
+            TryDeleteFile(file);
+        }
+
+        foreach (string directory in Directory.EnumerateDirectories(moduleDirectory, "*", SearchOption.TopDirectoryOnly))
+        {
+            if (!string.Equals(Path.GetFileName(directory), "Runtime", StringComparison.OrdinalIgnoreCase))
+            {
+                _ = TryDeleteDirectory(directory);
+            }
+        }
+    }
 
     public static void DeletePackagePayload(string packagePath)
     {

@@ -36,6 +36,24 @@ public sealed class ModulePackageCacheTests
     }
 
     [Fact]
+    public void PrepareRepairsMissingPackageContents()
+    {
+        using TemporaryDirectory temporaryDirectory = new();
+        string packagePath = CreatePackage(temporaryDirectory.DirectoryPath,
+            ("Example.WinUI.dll", "assembly"),
+            ("Example.WinUI.pri", "resources"));
+        ModulePackageCache cache = new(Path.Combine(temporaryDirectory.DirectoryPath, "Cache"));
+        string contentDirectory = cache.Prepare(packagePath);
+        string resourcePath = Path.Combine(contentDirectory, "Example.WinUI.pri");
+        File.Delete(resourcePath);
+
+        string repairedContentDirectory = cache.Prepare(packagePath);
+
+        Assert.Equal(contentDirectory, repairedContentDirectory);
+        Assert.Equal("resources", File.ReadAllText(resourcePath));
+    }
+
+    [Fact]
     public void PrepareExtractsUpdatedPackage()
     {
         using TemporaryDirectory temporaryDirectory = new();
