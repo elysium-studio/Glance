@@ -192,11 +192,7 @@ public sealed partial class SettingsWindow :
 
     private async Task InstallModulePathsAsync(IEnumerable<string> paths)
     {
-        await RunOnDispatcherAsync(() =>
-        {
-            AddModuleButton.IsEnabled = false;
-            ModuleInstallInfoBar.IsOpen = false;
-        });
+        await RunOnDispatcherAsync(() => AddModuleButton.IsEnabled = false);
         ModuleInstallResult? lastResult = null;
         bool restartRequired = false;
 
