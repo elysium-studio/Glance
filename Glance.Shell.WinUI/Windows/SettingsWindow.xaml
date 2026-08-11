@@ -130,6 +130,11 @@
                                 Margin="36,0,36,36"
                                 ItemsSource="{x:Bind}"
                                 SelectionMode="None">
+                                <ListView.ItemContainerTransitions>
+                                    <TransitionCollection>
+                                        <AddDeleteThemeTransition />
+                                    </TransitionCollection>
+                                </ListView.ItemContainerTransitions>
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">
                                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
