@@ -6,7 +6,7 @@ namespace Glance.Shell;
 public sealed class ModulePreferenceService
 {
     private readonly List<IGlanceComponent> allComponents;
-    private readonly List<Func<IReadOnlyList<IGlanceModuleSettingViewModel>>> runtimeSettingsFactories = [];
+    private readonly List<RuntimeSettingsRegistration> runtimeSettingsFactories = [];
     private readonly GlanceSettings settings;
     private readonly IWritableOptions<GlanceSettings> writer;
 
@@ -22,6 +22,8 @@ public sealed class ModulePreferenceService
     public event EventHandler? ActiveComponentsChanged;
 
     public event EventHandler<GlanceComponentsAddedEventArgs>? ComponentsAdded;
+
+    public event EventHandler<GlanceComponentsRemovedEventArgs>? ComponentsRemoved;
 
     public event EventHandler? PreferencesChanged;
 
@@ -61,7 +63,7 @@ public sealed class ModulePreferenceService
         return preference?.IsAttentionEnabled ?? attentionComponent.IsAttentionEnabledByDefault;
     }
 
-    public IReadOnlyList<IGlanceModuleSettingViewModel> CreateRuntimeSettings() => [.. runtimeSettingsFactories.SelectMany(factory => factory()).OrderBy(setting => setting.Order)];
+    public IReadOnlyList<IGlanceModuleSettingViewModel> CreateRuntimeSettings() => [.. runtimeSettingsFactories.SelectMany(registration => registration.Factory()).OrderBy(setting => setting.Order)];
 
     public async Task RegisterComponentsAsync(IReadOnlyList<IGlanceComponent> components, Func<IReadOnlyList<IGlanceModuleSettingViewModel>> createSettings)
     {
@@ -78,7 +80,7 @@ public sealed class ModulePreferenceService
         }
 
         allComponents.AddRange(components);
-        runtimeSettingsFactories.Add(createSettings);
+        runtimeSettingsFactories.Add(new RuntimeSettingsRegistration([.. ids], createSettings));
         TrackAvailability(components);
 
         bool settingsChanged = false;
@@ -134,6 +136,31 @@ public sealed class ModulePreferenceService
         }
 
         preference.IsAttentionEnabled = isEnabled;
+        await SaveAsync();
+    }
+
+    public async Task UnregisterComponentsAsync(IReadOnlyList<IGlanceComponent> components)
+    {
+        ArgumentNullException.ThrowIfNull(components);
+
+        if (components.Count == 0)
+        {
+            return;
+        }
+
+        HashSet<string> ids = [with(StringComparer.OrdinalIgnoreCase), .. components.Select(component => component.Id)];
+
+        foreach (IGlanceAvailabilityComponent component in components.OfType<IGlanceAvailabilityComponent>())
+        {
+            component.AvailabilityChanged -= HandleComponentAvailabilityChanged;
+        }
+
+        _ = allComponents.RemoveAll(component => ids.Contains(component.Id));
+        _ = settings.Modules.RemoveAll(preference => ids.Contains(preference.Id));
+        _ = runtimeSettingsFactories.RemoveAll(registration => registration.ComponentIds.Any(ids.Contains));
+
+        ComponentsRemoved?.Invoke(this, new GlanceComponentsRemovedEventArgs(components));
+        ActiveComponentsChanged?.Invoke(this, EventArgs.Empty);
         await SaveAsync();
     }
 
@@ -200,4 +227,7 @@ public sealed class ModulePreferenceService
         IsAttentionEnabled = preference.IsAttentionEnabled,
         IsEnabled = preference.IsEnabled
     };
+
+    private sealed record RuntimeSettingsRegistration(IReadOnlyList<string> ComponentIds,
+        Func<IReadOnlyList<IGlanceModuleSettingViewModel>> Factory);
 }

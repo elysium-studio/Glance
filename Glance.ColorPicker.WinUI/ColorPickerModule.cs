@@ -16,7 +16,7 @@ public sealed class ColorPickerModule :
     {
         _ = services.AddModuleOptions<ColorPickerSettings>("ColorPicker", "color-picker.settings.dat", ColorPickerJsonContext.Default);
         _ = services.AddSingleton<ModuleResourceTextLocalizer<ColorPickerModule>>();
-        _ = services.AddSingleton(new ColorHistoryRepository(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "ColorPicker", "colors.db")));
+        _ = services.AddSingleton(new ColorHistoryRepository(GlanceModuleData.GetPath("ColorPicker", "colors.db")));
         _ = services.AddSingleton<IColorPickerService, WindowsColorPickerService>();
         _ = services.AddSingleton<ITextCopyService, WindowsTextCopyService>();
         _ = services.AddSingleton(provider => new ColorPickerViewModel(provider.GetRequiredService<IColorPickerService>(), provider.GetRequiredService<ITextCopyService>(), provider.GetRequiredService<GlanceModuleOptions<ColorPickerSettings>>().Current, provider.GetRequiredService<ColorHistoryRepository>()));

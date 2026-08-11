@@ -31,6 +31,7 @@ public sealed partial class App
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         string applicationData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance");
+        GlanceModuleDataMigration.Migrate(applicationData);
         DispatcherQueue applicationDispatcherQueue = DispatcherQueue.GetForCurrentThread();
         dispatcherQueue = applicationDispatcherQueue;
 

@@ -47,6 +47,18 @@ internal sealed class GlanceBridgeRouter :
         BroadcastCapabilities();
     }
 
+    public void RemoveHandlers(IEnumerable<IGlanceApplicationMessageHandler> values)
+    {
+        HashSet<IGlanceApplicationMessageHandler> removals = [.. values];
+
+        lock (synchronization)
+        {
+            _ = handlers.RemoveAll(removals.Contains);
+        }
+
+        BroadcastCapabilities();
+    }
+
     public async ValueTask AddConnectionAsync(GlanceBridgeConnection connection, CancellationToken cancellationToken)
     {
         IGlanceApplicationMessageHandler[] targets;

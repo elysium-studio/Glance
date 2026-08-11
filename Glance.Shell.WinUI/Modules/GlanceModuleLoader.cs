@@ -12,13 +12,13 @@ using System.Runtime.Loader;
 namespace Glance.Shell.WinUI;
 
 internal sealed record GlanceModuleLoadResult(string SourcePath,
+    string ContentDirectory,
     IReadOnlyList<IGlanceModule> Modules);
 
 internal static partial class GlanceModuleLoader
 {
     private const string ModulesDirectoryName = "Modules";
     private static readonly object synchronization = new();
-    private static readonly ModulePackageCache modulePackageCache = new(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "ModuleCache"));
     private static readonly HashSet<Assembly> nativeResolverAssemblies = [];
     private static readonly Dictionary<string, nint> nativeLibraryHandles = [with(StringComparer.OrdinalIgnoreCase)];
     private static readonly List<object> xamlMetadataProviderTokens = [];
@@ -26,14 +26,9 @@ internal static partial class GlanceModuleLoader
     private static Dictionary<string, string> moduleNativeLibraryPaths = [with(StringComparer.OrdinalIgnoreCase)];
     private static bool resolverRegistered;
 
-    public static string UserModulesDirectory =>
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", ModulesDirectoryName);
+    public static string UserModulesDirectory => GlanceModuleInstallationStore.RootDirectory;
 
-    public static string[] ModuleDirectories =>
-    [
-        Path.Combine(AppContext.BaseDirectory, ModulesDirectoryName),
-        UserModulesDirectory
-    ];
+    public static string[] ModuleDirectories => [UserModulesDirectory];
 
     public static void Initialize()
     {
@@ -45,7 +40,7 @@ internal static partial class GlanceModuleLoader
     public static IReadOnlyList<GlanceModuleLoadResult> Load()
     {
         IReadOnlyList<ModuleSource> sources = DiscoverSources();
-        RegisterAssemblyPaths(sources.Select(source => source.ContentDirectory));
+        RegisterAssemblyPaths(sources.Select(source => source.ContentDirectory), true);
         RegisterResolver();
 
         return (GlanceModuleLoadResult[])[.. sources.Select(Load).Where(result => result.Modules.Count > 0)];
@@ -54,7 +49,7 @@ internal static partial class GlanceModuleLoader
     public static GlanceModuleLoadResult? LoadPackage(string packagePath)
     {
         string fullPackagePath = Path.GetFullPath(packagePath);
-        string contentDirectory = modulePackageCache.Prepare(fullPackagePath);
+        string contentDirectory = PrepareInstalledPackage(fullPackagePath);
 
         RegisterAssemblyPaths((string[])[contentDirectory]);
         RegisterResolver();
@@ -62,6 +57,8 @@ internal static partial class GlanceModuleLoader
         GlanceModuleLoadResult result = Load(new ModuleSource(fullPackagePath, contentDirectory));
         return result.Modules.Count > 0 ? result : null;
     }
+
+    public static void RefreshResolutionPaths(IEnumerable<string> contentDirectories) => RegisterAssemblyPaths(contentDirectories, true);
 
     private static IReadOnlyList<ModuleSource> DiscoverSources()
     {
@@ -78,7 +75,9 @@ internal static partial class GlanceModuleLoader
                 }
             }
 
-            foreach (string priPath in Directory.EnumerateFiles(modulesDirectory, "*.pri", SearchOption.AllDirectories).Order(StringComparer.OrdinalIgnoreCase))
+            foreach (string priPath in Directory.EnumerateFiles(modulesDirectory, "*.pri", SearchOption.AllDirectories)
+                .Where(path => !IsRuntimePath(path))
+                .Order(StringComparer.OrdinalIgnoreCase))
             {
                 string assemblyPath = Path.ChangeExtension(priPath, ".dll");
 
@@ -97,11 +96,15 @@ internal static partial class GlanceModuleLoader
 
     private static IEnumerable<string> GetModuleDirectories() => ModuleDirectories;
 
+    private static bool IsRuntimePath(string path) => Path.GetFullPath(path)
+        .Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+        .Contains("Runtime", StringComparer.OrdinalIgnoreCase);
+
     private static string? PreparePackage(string packagePath)
     {
         try
         {
-            return modulePackageCache.Prepare(packagePath);
+            return PrepareInstalledPackage(packagePath);
         }
         catch
         {
@@ -118,7 +121,7 @@ internal static partial class GlanceModuleLoader
             modules.AddRange(LoadAssembly(path));
         }
 
-        return new GlanceModuleLoadResult(source.SourcePath, modules);
+        return new GlanceModuleLoadResult(source.SourcePath, source.ContentDirectory, modules);
     }
 
     private static IReadOnlyList<IGlanceModule> LoadAssembly(string path)
@@ -152,15 +155,20 @@ internal static partial class GlanceModuleLoader
         return modules;
     }
 
-    private static void RegisterAssemblyPaths(IEnumerable<string> contentDirectories)
+    private static void RegisterAssemblyPaths(IEnumerable<string> contentDirectories,
+        bool replaceExisting = false)
     {
         Dictionary<string, string> assemblyPaths;
         Dictionary<string, string> nativeLibraryPaths;
 
         lock (synchronization)
         {
-            assemblyPaths = new Dictionary<string, string>(moduleAssemblyPaths, StringComparer.OrdinalIgnoreCase);
-            nativeLibraryPaths = new Dictionary<string, string>(moduleNativeLibraryPaths, StringComparer.OrdinalIgnoreCase);
+            assemblyPaths = replaceExisting
+                ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                : new Dictionary<string, string>(moduleAssemblyPaths, StringComparer.OrdinalIgnoreCase);
+            nativeLibraryPaths = replaceExisting
+                ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                : new Dictionary<string, string>(moduleNativeLibraryPaths, StringComparer.OrdinalIgnoreCase);
         }
 
         foreach (string contentDirectory in contentDirectories.Distinct(StringComparer.OrdinalIgnoreCase))
@@ -226,6 +234,13 @@ internal static partial class GlanceModuleLoader
 
             resolverRegistered = true;
         }
+    }
+
+    private static string PrepareInstalledPackage(string packagePath)
+    {
+        string packageDirectory = Path.GetDirectoryName(Path.GetFullPath(packagePath))!;
+        ModulePackageCache packageCache = new(Path.Combine(packageDirectory, "Runtime"));
+        return packageCache.Prepare(packagePath);
     }
 
     private static Assembly? ResolveModuleAssembly(AssemblyLoadContext context, AssemblyName assemblyName)

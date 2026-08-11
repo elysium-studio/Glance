@@ -19,9 +19,27 @@
                 Foreground="{x:Bind ViewModel, Converter={StaticResource GlanceModuleAccentBrushConverter}}"
                 Glyph="{x:Bind ViewModel.IconGlyph}" />
         </CommunityToolkit:SettingsCard.HeaderIcon>
-        <ToggleSwitch
+        <StackPanel
             Margin="{x:Bind GetToggleMargin(ViewModel.CanExpand), Mode=OneWay}"
-            AutomationProperties.Name="{x:Bind ViewModel.DisplayName}"
-            IsOn="{x:Bind ViewModel.IsEnabled, Mode=TwoWay}" />
+            Orientation="Horizontal"
+            Spacing="8">
+            <Button
+                x:Name="UninstallButton"
+                x:Uid="UninstallModuleButton"
+                Width="32"
+                Height="32"
+                Click="HandleUninstallClicked"
+                Style="{StaticResource SubtleButtonStyle}"
+                Visibility="{x:Bind GetUninstallVisibility(ViewModel.CanUninstall), Mode=OneWay}">
+                <FontIcon
+                    FontSize="14"
+                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                    Glyph="&#xE74D;" />
+            </Button>
+            <ToggleSwitch
+                VerticalAlignment="Center"
+                AutomationProperties.Name="{x:Bind ViewModel.DisplayName}"
+                IsOn="{x:Bind ViewModel.IsEnabled, Mode=TwoWay}" />
+        </StackPanel>
     </CommunityToolkit:SettingsCard>
 </UserControl>

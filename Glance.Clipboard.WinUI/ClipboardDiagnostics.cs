@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Glance.UI.WinUI;
 
 namespace Glance.Clipboard.WinUI;
 
@@ -16,7 +17,7 @@ internal static class ClipboardDiagnostics
     [ThreadStatic]
     private static bool isWriting;
 
-    public static string FilePath { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "clipboard-diagnostics.log");
+    public static string FilePath { get; } = GlanceModuleData.GetPath("Clipboard", "clipboard-diagnostics.log");
 
     public static void Initialize()
     {

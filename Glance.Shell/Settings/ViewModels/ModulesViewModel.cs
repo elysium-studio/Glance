@@ -21,17 +21,20 @@ public sealed partial class ModulesViewModel :
     private readonly Dictionary<string, SettingsCategoryViewModel> categories = [with(StringComparer.OrdinalIgnoreCase)];
     private readonly ITextLocalizer localizer;
     private readonly ModulePreferenceService preferences;
+    private readonly ModuleInstallationService installations;
 
     public ModulesViewModel(IServiceProvider provider,
         IServiceFactory factory,
         IMessenger messenger,
         IDisposer disposer,
         ModulePreferenceService preferences,
+        ModuleInstallationService installations,
         ITextLocalizer localizer,
         IEnumerable<IGlanceModuleSettingViewModel> settings) :
         base(provider, factory, messenger, disposer)
     {
         this.preferences = preferences;
+        this.installations = installations;
         this.localizer = localizer;
         Title = localizer.GetText("ModulesSectionTitle/Text");
         ILookup<string, IGlanceModuleSettingViewModel> settingsByModule = settings
@@ -47,6 +50,7 @@ public sealed partial class ModulesViewModel :
         }
 
         preferences.ComponentsAdded += HandleComponentsAdded;
+        preferences.ComponentsRemoved += HandleComponentsRemoved;
     }
 
     public IReadOnlyList<ISettingViewModel> Children => [.. this];
@@ -55,9 +59,14 @@ public sealed partial class ModulesViewModel :
 
     public string Title { get; }
 
+    public SettingsCategoryViewModel? FindCategoryForComponent(string componentId) => categories.Values
+        .FirstOrDefault(category => category.OfType<ModuleSettingsItemViewModel>()
+            .Any(item => string.Equals(item.Id, componentId, StringComparison.OrdinalIgnoreCase)));
+
     public override void Dispose()
     {
         preferences.ComponentsAdded -= HandleComponentsAdded;
+        preferences.ComponentsRemoved -= HandleComponentsRemoved;
         base.Dispose();
     }
 
@@ -83,7 +92,10 @@ public sealed partial class ModulesViewModel :
             preference.IsEnabled,
             availableSettings.OrderBy(setting => setting.Order),
             NavigateToModule,
-            (_, enabled) => preferences.SetEnabledAsync(preference.Id, enabled));
+            (_, enabled) => preferences.SetEnabledAsync(preference.Id, enabled),
+            installations.CanUninstall(preference.Id)
+                ? _ => installations.UninstallAsync(preference.Id)
+                : null);
     }
 
     private SettingsCategoryViewModel GetOrCreateCategory(string id)
@@ -126,6 +138,27 @@ public sealed partial class ModulesViewModel :
                 .TakeWhile(item => !string.Equals(item.Id, component.Id, StringComparison.OrdinalIgnoreCase))
                 .Count(item => string.Equals(preferences.GetComponent(item.Id)?.SettingsCategory, component.SettingsCategory, StringComparison.OrdinalIgnoreCase));
             category.Insert(Math.Min(index, category.Count), CreateItem(preference, settingsByModule[component.Id]));
+        }
+    }
+
+    private void HandleComponentsRemoved(object? sender,
+        GlanceComponentsRemovedEventArgs args)
+    {
+        HashSet<string> ids = [with(StringComparer.OrdinalIgnoreCase), .. args.Components.Select(component => component.Id)];
+
+        foreach (SettingsCategoryViewModel category in categories.Values.ToArray())
+        {
+            foreach (ModuleSettingsItemViewModel item in category.OfType<ModuleSettingsItemViewModel>().Where(item => ids.Contains(item.Id)).ToArray())
+            {
+                _ = category.Remove(item);
+                item.Dispose();
+            }
+
+            if (category.Count == 0)
+            {
+                _ = Remove(category);
+                _ = categories.Remove(category.Id);
+            }
         }
     }
 

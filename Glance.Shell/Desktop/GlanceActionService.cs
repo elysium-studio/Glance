@@ -175,6 +175,19 @@ public sealed class GlanceActionService(ModulePreferenceService modulePreference
         }
     }
 
+    public void Unregister(IEnumerable<IGlanceActionProvider> providers)
+    {
+        HashSet<IGlanceActionProvider> removals = [.. providers];
+
+        lock (synchronization)
+        {
+            foreach (string id in actions.Where(item => removals.Contains(item.Value.Provider)).Select(item => item.Key).ToArray())
+            {
+                _ = actions.Remove(id);
+            }
+        }
+    }
+
     private Task<T> DispatchAsync<T>(Func<Task<T>> action)
     {
         TaskCompletionSource<T> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);

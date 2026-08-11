@@ -36,6 +36,14 @@ internal sealed class GlanceRuntimeServiceProvider :
         }
     }
 
+    public void RemoveModuleProvider(IServiceProvider provider)
+    {
+        lock (synchronization)
+        {
+            _ = moduleProviders.Remove(provider);
+        }
+    }
+
     public object? GetService(Type serviceType)
     {
         if (serviceType == typeof(IViewFactory))

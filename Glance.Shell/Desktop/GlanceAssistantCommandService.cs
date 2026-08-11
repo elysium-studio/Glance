@@ -32,6 +32,16 @@ public sealed class GlanceAssistantCommandService :
         }
     }
 
+    public void Unregister(IEnumerable<IGlanceAssistantCommandHandler> registrations)
+    {
+        HashSet<IGlanceAssistantCommandHandler> removals = [.. registrations];
+
+        lock (synchronization)
+        {
+            _ = handlers.RemoveAll(removals.Contains);
+        }
+    }
+
     public async Task<GlanceAssistantCommandResult> ExecuteAsync(string command, CancellationToken cancellationToken = default)
     {
         if (semanticResolvers is not null)

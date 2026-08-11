@@ -47,11 +47,18 @@ Glance consumes Elysium through NuGet package references, using the shared versi
 
 ## Third-party modules
 
-A third-party module is installed by placing its `.glance` package below `%LOCALAPPDATA%\Glance\Modules`:
+A third-party module can be installed from the **Modules** settings page by dragging in its `.glance` package or choosing **Add module**. Glance gives every module its own directory:
 
 ```text
 %LOCALAPPDATA%/Glance/Modules/
-  Example.glance
+  Example/
+    Example.glance
+    example.settings.dat
+    Runtime/
+      state.dat
+      <SHA-256 content hash>/
+        Example.Glance.WinUI.dll
+        Example.Glance.WinUI.pri
 ```
 
 A `.glance` file is a ZIP container with the module files at its root:
@@ -75,9 +82,9 @@ Unpacked module directories remain supported for development:
     Example.Dependency.dll
 ```
 
-Glance scans and watches both this user-writable location and the built-in `Modules` directory beside `Glance.exe`. New `.glance` files placed in either directory are detected, validated after the copy completes, activated while Glance is running, and selected on the island. Replacing or removing a loaded package takes effect after restarting Glance because WinUI module assemblies and PRI resources cannot be safely unloaded in place.
+Built-in packages continue to be produced under the `Modules` directory beside `Glance.exe`. At startup Glance atomically stages new or updated built-in packages into their per-module directories. New user packages are activated while Glance is running and their advertised category determines which settings group is shown after installation. Replacing an already loaded package stages the update for the next launch because WinUI module assemblies and PRI resources cannot be safely replaced inside the default load context.
 
-The original package remains intact while its runtime contents are kept under `%LOCALAPPDATA%\Glance\ModuleCache`. The entry assembly and PRI must have the same base filename. Glance does not require the assembly name to begin with `Glance` or to be known when the application is compiled.
+The original package remains intact beside the module's settings and data. Runtime contents are extracted into `Runtime/<SHA-256 content hash>` and switched through `Runtime/state.dat`, so a package update never overwrites the active generation. The entry assembly and PRI must have the same base filename. Glance does not require the assembly name to begin with `Glance` or to be known when the application is compiled.
 
 The module's WinUI project must:
 

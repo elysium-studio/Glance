@@ -45,4 +45,17 @@ public sealed class GlanceQuickConverterRegistry :
             }
         }
     }
+
+    public void Unregister(IEnumerable<IGlanceQuickConverter> registrations)
+    {
+        HashSet<IGlanceQuickConverter> removals = [.. registrations];
+
+        lock (synchronization)
+        {
+            foreach (string id in converters.Where(item => removals.Contains(item.Value)).Select(item => item.Key).ToArray())
+            {
+                _ = converters.Remove(id);
+            }
+        }
+    }
 }

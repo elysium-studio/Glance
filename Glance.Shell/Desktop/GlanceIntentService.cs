@@ -96,5 +96,18 @@ public sealed class GlanceIntentService(ModulePreferenceService modulePreference
         }
     }
 
+    public void Unregister(IEnumerable<IGlanceIntent> advertisedIntents)
+    {
+        HashSet<IGlanceIntent> removals = [.. advertisedIntents];
+
+        lock (synchronization)
+        {
+            foreach (string id in intents.Where(item => removals.Contains(item.Value)).Select(item => item.Key).ToArray())
+            {
+                _ = intents.Remove(id);
+            }
+        }
+    }
+
     public void SetPresentationTargetProvider(Func<GlanceScreenRectangle?>? provider) => presentationTargetProvider = provider;
 }

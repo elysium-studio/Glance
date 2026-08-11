@@ -21,6 +21,7 @@ public sealed class DesktopModule :
             .AddSingleton<IGlanceAssistantService>(provider => provider.GetRequiredService<GlanceAssistantService>())
             .AddSingleton<IGlanceAssistantCommandHandler, ShowComponentAssistantCommandHandler>()
             .AddSingleton<ModulePreferenceService>()
+            .AddSingleton<ModuleInstallationService>()
             .AddSingleton<GlanceActionService>()
             .AddSingleton<IGlanceActionService>(provider => provider.GetRequiredService<GlanceActionService>())
             .AddSingleton<GlanceIntentService>()

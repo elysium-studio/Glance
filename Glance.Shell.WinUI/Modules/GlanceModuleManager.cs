@@ -1,4 +1,5 @@
 using Glance.Application.Abstractions;
+using Elysium.Application.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
@@ -26,8 +27,11 @@ internal sealed class GlanceModuleManager :
     private readonly GlanceActionService actionService;
     private readonly GlanceIntentService intentService;
     private readonly GlanceQuickConverterRegistry quickConverterRegistry;
-    private readonly List<GlanceModuleRuntime> runtimes = [];
+    private readonly List<LoadedModulePackage> loadedPackages = [];
     private readonly ModulePreferenceService preferences;
+    private readonly ModuleInstallationService installations;
+    private readonly GlanceSettings settings;
+    private readonly IWritableOptions<GlanceSettings> settingsWriter;
     private readonly IServiceProvider applicationServices;
     private readonly Dictionary<string, CancellationTokenSource> pendingPackages = [with(StringComparer.OrdinalIgnoreCase)];
     private readonly object synchronization = new();
@@ -39,14 +43,19 @@ internal sealed class GlanceModuleManager :
         this.dispatcherQueue = dispatcherQueue;
         this.logger = logger;
         preferences = applicationServices.GetRequiredService<ModulePreferenceService>();
+        installations = applicationServices.GetRequiredService<ModuleInstallationService>();
+        settings = applicationServices.GetRequiredService<GlanceSettings>();
+        settingsWriter = applicationServices.GetRequiredService<IWritableOptions<GlanceSettings>>();
         bridgeRouter = applicationServices.GetRequiredService<GlanceBridgeRouter>();
         assistantCommandService = applicationServices.GetRequiredService<GlanceAssistantCommandService>();
         assistantService = applicationServices.GetRequiredService<GlanceAssistantService>();
         actionService = applicationServices.GetRequiredService<GlanceActionService>();
         intentService = applicationServices.GetRequiredService<GlanceIntentService>();
         quickConverterRegistry = applicationServices.GetRequiredService<GlanceQuickConverterRegistry>();
+        installations.ConfigureInstaller(InstallPackageAsync);
 
         _ = Directory.CreateDirectory(GlanceModuleLoader.UserModulesDirectory);
+        GlanceModuleInstallationStore.RemoveSuppressedPackages(settings.UninstalledModulePackages);
         watchers = (FileSystemWatcher[])[.. GlanceModuleLoader.ModuleDirectories
             .Where(Directory.Exists)
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -100,15 +109,16 @@ internal sealed class GlanceModuleManager :
             cancellation.Dispose();
         }
 
-        foreach (GlanceModuleRuntime runtime in runtimes.AsEnumerable().Reverse())
+        foreach (LoadedModulePackage package in loadedPackages.AsEnumerable().Reverse())
         {
-            await runtime.DisposeAsync();
+            await package.Runtime.DisposeAsync();
         }
     }
 
-    private async Task InstallAsync(GlanceModuleLoadResult result)
+    private async Task<ModuleInstallResult> InstallAsync(GlanceModuleLoadResult result)
     {
         GlanceModuleRuntime? runtime = null;
+        string[] registeredInstallationIds = [];
 
         try
         {
@@ -118,6 +128,9 @@ internal sealed class GlanceModuleManager :
             IReadOnlyList<IGlanceAssistantCommandHandler> assistantCommandHandlers = (IGlanceAssistantCommandHandler[])[.. runtime.Services.GetServices<IGlanceAssistantCommandHandler>()];
             IReadOnlyList<IGlanceAssistantSemanticResolver> assistantSemanticResolvers = (IGlanceAssistantSemanticResolver[])[.. runtime.Services.GetServices<IGlanceAssistantSemanticResolver>()];
             IReadOnlyList<IGlanceQuickConverter> quickConverters = (IGlanceQuickConverter[])[.. runtime.Services.GetServices<IGlanceQuickConverter>()];
+            IReadOnlyList<IGlanceApplicationMessageHandler> bridgeHandlers = (IGlanceApplicationMessageHandler[])[.. runtime.Services.GetServices<IGlanceApplicationMessageHandler>()];
+            IReadOnlyList<IGlanceActionProvider> actionProviders = (IGlanceActionProvider[])[.. runtime.Services.GetServices<IGlanceActionProvider>()];
+            IReadOnlyList<IGlanceIntent> intents = (IGlanceIntent[])[.. runtime.Services.GetServices<IGlanceIntent>()];
 
             if (components.Count == 0 && assistantProviders.Count == 0 && assistantCommandHandlers.Count == 0 && assistantSemanticResolvers.Count == 0 && quickConverters.Count == 0)
             {
@@ -129,6 +142,16 @@ internal sealed class GlanceModuleManager :
                 throw new InvalidOperationException("The package registered a component identifier that is already loaded.");
             }
 
+            string packageId = GlanceModuleInstallationStore.GetPackageId(result.SourcePath);
+            registeredInstallationIds = [.. components.Select(component => component.Id)];
+
+            if (registeredInstallationIds.Length > 0)
+            {
+                installations.Register(packageId,
+                    registeredInstallationIds,
+                    () => UninstallAsync(result.SourcePath));
+            }
+
             IServiceProvider moduleServices = runtime.Services;
             runtimeServices.AddModuleProvider(moduleServices);
 
@@ -137,14 +160,27 @@ internal sealed class GlanceModuleManager :
                 await preferences.RegisterComponentsAsync(components, () => (IGlanceModuleSettingViewModel[])[.. moduleServices.GetServices<IGlanceModuleSettingViewModel>()]);
             }
 
-            bridgeRouter.AddHandlers(moduleServices.GetServices<IGlanceApplicationMessageHandler>());
-            actionService.Register(moduleServices.GetServices<IGlanceActionProvider>());
-            intentService.Register(moduleServices.GetServices<IGlanceIntent>());
+            bridgeRouter.AddHandlers(bridgeHandlers);
+            actionService.Register(actionProviders);
+            intentService.Register(intents);
             quickConverterRegistry.Register(quickConverters);
             assistantCommandService.Register(assistantCommandHandlers);
             applicationServices.GetRequiredService<GlanceAssistantSemanticResolverService>().Register(assistantSemanticResolvers);
             assistantService.Register(assistantProviders);
-            runtimes.Add(runtime);
+            LoadedModulePackage loadedPackage = new(packageId,
+                result.SourcePath,
+                result.ContentDirectory,
+                runtime,
+                components,
+                assistantProviders,
+                assistantCommandHandlers,
+                assistantSemanticResolvers,
+                quickConverters,
+                bridgeHandlers,
+                actionProviders,
+                intents);
+            loadedPackages.Add(loadedPackage);
+
             runtime = null;
 
             lock (synchronization)
@@ -153,10 +189,13 @@ internal sealed class GlanceModuleManager :
             }
 
             logger.LogInformation("Loaded Glance module package {ModulePackage} with {ComponentCount} component(s) and {AssistantProviderCount} assistant provider(s)", result.SourcePath, components.Count, assistantProviders.Count);
+            return ModuleInstallResult.Installed(components.Select(component => component.Id));
         }
         catch (Exception exception)
         {
+            installations.Unregister(registeredInstallationIds);
             logger.LogError(exception, "Failed to activate Glance module package {ModulePackage}", result.SourcePath);
+            return ModuleInstallResult.Failed(exception.Message);
         }
         finally
         {
@@ -204,6 +243,12 @@ internal sealed class GlanceModuleManager :
     {
         string fullPackagePath = Path.GetFullPath(packagePath);
 
+        if (fullPackagePath.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+            .Any(segment => segment.StartsWith(".removed-", StringComparison.OrdinalIgnoreCase)))
+        {
+            return;
+        }
+
         lock (synchronization)
         {
             if (knownPackages.Contains(fullPackagePath))
@@ -236,10 +281,17 @@ internal sealed class GlanceModuleManager :
 
             await DispatchAsync(async () =>
             {
-                GlanceModuleLoadResult? result = GlanceModuleLoader.LoadPackage(packagePath);
+                string installedPackagePath = GlanceModuleInstallationStore.NormalizePackage(packagePath);
+                string packageId = GlanceModuleInstallationStore.GetPackageId(installedPackagePath);
+                GlanceModuleLoadResult? result = GlanceModuleLoader.LoadPackage(installedPackagePath);
 
                 if (result is not null)
                 {
+                    if (settings.UninstalledModulePackages.RemoveAll(value => string.Equals(value, packageId, StringComparison.OrdinalIgnoreCase)) > 0)
+                    {
+                        await settingsWriter.WriteAsync(value => value.UninstalledModulePackages = [.. settings.UninstalledModulePackages]);
+                    }
+
                     await InstallAsync(result);
                     return;
                 }
@@ -265,6 +317,141 @@ internal sealed class GlanceModuleManager :
                 }
             }
         }
+    }
+
+    private Task<ModuleInstallResult> InstallPackageAsync(string packagePath) => DispatchAsync(async () =>
+    {
+        if (!File.Exists(packagePath) ||
+            !string.Equals(Path.GetExtension(packagePath), ".glance", StringComparison.OrdinalIgnoreCase))
+        {
+            return ModuleInstallResult.Failed("Choose a valid .glance module package.");
+        }
+
+        string packageId = Path.GetFileNameWithoutExtension(packagePath);
+        LoadedModulePackage? existingPackage = loadedPackages.FirstOrDefault(candidate =>
+            string.Equals(candidate.PackageId, packageId, StringComparison.OrdinalIgnoreCase));
+        string installedPackagePath;
+
+        try
+        {
+            string fullSourcePath = Path.GetFullPath(packagePath);
+            string expectedPath = Path.Combine(GlanceModuleInstallationStore.RootDirectory,
+                packageId,
+                $"{packageId}.glance");
+            installedPackagePath = string.Equals(fullSourcePath, expectedPath, StringComparison.OrdinalIgnoreCase)
+                ? fullSourcePath
+                : GlanceModuleInstallationStore.StagePackage(fullSourcePath);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
+        {
+            logger.LogError(exception, "Failed to stage Glance module package {ModulePackage}", packagePath);
+            return ModuleInstallResult.Failed(exception.Message);
+        }
+
+        lock (synchronization)
+        {
+            _ = knownPackages.Add(installedPackagePath);
+        }
+
+        if (existingPackage is not null)
+        {
+            logger.LogInformation("Staged updated Glance module package {ModulePackage}; it will be activated on the next launch", installedPackagePath);
+            return ModuleInstallResult.Staged(existingPackage.Components.Select(component => component.Id));
+        }
+
+        GlanceModuleLoadResult? result;
+
+        try
+        {
+            result = GlanceModuleLoader.LoadPackage(installedPackagePath);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Failed to inspect Glance module package {ModulePackage}", installedPackagePath);
+
+            lock (synchronization)
+            {
+                _ = knownPackages.Remove(installedPackagePath);
+            }
+
+            GlanceModuleInstallationStore.DeletePackagePayload(installedPackagePath);
+            GlanceModuleLoader.RefreshResolutionPaths(loadedPackages.Select(package => package.ContentDirectory));
+            return ModuleInstallResult.Failed(exception.Message);
+        }
+
+        if (result is null)
+        {
+            lock (synchronization)
+            {
+                _ = knownPackages.Remove(installedPackagePath);
+            }
+
+            GlanceModuleInstallationStore.DeletePackagePayload(installedPackagePath);
+            GlanceModuleLoader.RefreshResolutionPaths(loadedPackages.Select(package => package.ContentDirectory));
+            return ModuleInstallResult.Failed("The package does not contain a loadable Glance module.");
+        }
+
+        ModuleInstallResult installResult = await InstallAsync(result);
+
+        if (!installResult.IsSuccessful)
+        {
+            lock (synchronization)
+            {
+                _ = knownPackages.Remove(installedPackagePath);
+            }
+
+            GlanceModuleInstallationStore.DeletePackagePayload(installedPackagePath);
+            GlanceModuleLoader.RefreshResolutionPaths(loadedPackages.Select(package => package.ContentDirectory));
+            return installResult;
+        }
+
+        if (settings.UninstalledModulePackages.RemoveAll(value => string.Equals(value, packageId, StringComparison.OrdinalIgnoreCase)) > 0)
+        {
+            await settingsWriter.WriteAsync(value => value.UninstalledModulePackages = [.. settings.UninstalledModulePackages]);
+        }
+
+        return installResult;
+    });
+
+    private async Task<bool> UninstallAsync(string sourcePath)
+    {
+        LoadedModulePackage? package = loadedPackages.FirstOrDefault(candidate =>
+            string.Equals(candidate.SourcePath, sourcePath, StringComparison.OrdinalIgnoreCase));
+
+        if (package is null)
+        {
+            return false;
+        }
+
+        if (!settings.UninstalledModulePackages.Contains(package.PackageId, StringComparer.OrdinalIgnoreCase))
+        {
+            settings.UninstalledModulePackages.Add(package.PackageId);
+            await settingsWriter.WriteAsync(value => value.UninstalledModulePackages = [.. settings.UninstalledModulePackages]);
+        }
+
+        string[] componentIds = [.. package.Components.Select(component => component.Id)];
+        installations.Unregister(componentIds);
+        await preferences.UnregisterComponentsAsync(package.Components);
+        bridgeRouter.RemoveHandlers(package.BridgeHandlers);
+        actionService.Unregister(package.ActionProviders);
+        intentService.Unregister(package.Intents);
+        quickConverterRegistry.Unregister(package.QuickConverters);
+        assistantCommandService.Unregister(package.AssistantCommandHandlers);
+        applicationServices.GetRequiredService<GlanceAssistantSemanticResolverService>().Unregister(package.AssistantSemanticResolvers);
+        await assistantService.UnregisterAsync(package.AssistantProviders);
+        runtimeServices.RemoveModuleProvider(package.Runtime.Services);
+        await package.Runtime.DisposeAsync();
+        _ = loadedPackages.Remove(package);
+        GlanceModuleLoader.RefreshResolutionPaths(loadedPackages.Select(candidate => candidate.ContentDirectory));
+
+        lock (synchronization)
+        {
+            _ = knownPackages.Remove(package.SourcePath);
+        }
+
+        GlanceModuleInstallationStore.DeleteOrQuarantinePackage(package.SourcePath);
+        logger.LogInformation("Uninstalled Glance module package {ModulePackage}", package.SourcePath);
+        return true;
     }
 
     private static async Task<bool> WaitForStablePackageAsync(string packagePath, CancellationToken cancellationToken)
@@ -337,4 +524,44 @@ internal sealed class GlanceModuleManager :
 
         return completion.Task;
     }
+
+    private Task<T> DispatchAsync<T>(Func<Task<T>> action)
+    {
+        if (dispatcherQueue.HasThreadAccess)
+        {
+            return action();
+        }
+
+        TaskCompletionSource<T> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (!dispatcherQueue.TryEnqueue(async () =>
+            {
+                try
+                {
+                    completion.SetResult(await action());
+                }
+                catch (Exception exception)
+                {
+                    completion.SetException(exception);
+                }
+            }))
+        {
+            completion.SetException(new InvalidOperationException("The UI dispatcher queue rejected the module installation."));
+        }
+
+        return completion.Task;
+    }
+
+    private sealed record LoadedModulePackage(string PackageId,
+        string SourcePath,
+        string ContentDirectory,
+        GlanceModuleRuntime Runtime,
+        IReadOnlyList<IGlanceComponent> Components,
+        IReadOnlyList<IGlanceAssistantProvider> AssistantProviders,
+        IReadOnlyList<IGlanceAssistantCommandHandler> AssistantCommandHandlers,
+        IReadOnlyList<IGlanceAssistantSemanticResolver> AssistantSemanticResolvers,
+        IReadOnlyList<IGlanceQuickConverter> QuickConverters,
+        IReadOnlyList<IGlanceApplicationMessageHandler> BridgeHandlers,
+        IReadOnlyList<IGlanceActionProvider> ActionProviders,
+        IReadOnlyList<IGlanceIntent> Intents);
 }

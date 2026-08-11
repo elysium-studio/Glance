@@ -16,9 +16,9 @@ public sealed class VoiceNotesModule :
     {
         _ = services.AddModuleOptions<VoiceNotesSettings>("VoiceNotes", "voice-notes.settings.dat", VoiceNotesJsonContext.Default);
         _ = services.AddSingleton<ModuleResourceTextLocalizer<VoiceNotesModule>>();
-        _ = services.AddSingleton(new VoiceNoteRepository(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "VoiceNotes", "voice-notes.db")));
+        _ = services.AddSingleton(new VoiceNoteRepository(GlanceModuleData.GetPath("VoiceNotes", "voice-notes.db")));
         _ = services.AddSingleton<IVoiceRecordingService>(provider =>
-            new WindowsVoiceRecordingService(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "VoiceNotes"), provider.GetRequiredService<VoiceNoteRepository>()));
+            new WindowsVoiceRecordingService(GlanceModuleData.GetDirectory("VoiceNotes"), provider.GetRequiredService<VoiceNoteRepository>()));
         _ = services.AddSingleton(provider => new VoiceNotesViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<VoiceNotesModule>>(), provider.GetRequiredService<GlanceModuleOptions<VoiceNotesSettings>>().Current));
         _ = services.AddSingleton<VoiceNotesComponent>();
         _ = services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<VoiceNotesComponent>());

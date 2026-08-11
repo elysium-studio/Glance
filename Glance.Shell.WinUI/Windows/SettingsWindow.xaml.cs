@@ -8,8 +8,16 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Graphics;
+using Windows.Storage;
+using Windows.Storage.Pickers;
 
 namespace Glance.Shell.WinUI;
 
@@ -22,6 +30,7 @@ public sealed partial class SettingsWindow :
     private readonly IApplicationLifetime applicationLifetime;
     private readonly AboutViewModel aboutViewModel;
     private readonly ITextLocalizer localizer;
+    private readonly ModuleInstallationService moduleInstallations;
     private readonly IMessenger messenger;
     private readonly Dictionary<ISettingViewModel, NavigationViewItem> navigationItems = [];
     private readonly List<ISettingViewModel> navigationPath = [];
@@ -30,11 +39,13 @@ public sealed partial class SettingsWindow :
     private bool isAboutDialogOpen;
     private bool isClosing;
     private bool isQuitDialogOpen;
+    private bool isRestartDialogOpen;
 
     public SettingsWindow(IMessenger messenger,
         ITextLocalizer localizer,
         IApplicationLifetime applicationLifetime,
-        AboutViewModel aboutViewModel)
+        AboutViewModel aboutViewModel,
+        ModuleInstallationService moduleInstallations)
     {
         InitializeComponent();
 
@@ -42,6 +53,7 @@ public sealed partial class SettingsWindow :
         this.localizer = localizer;
         this.applicationLifetime = applicationLifetime;
         this.aboutViewModel = aboutViewModel;
+        this.moduleInstallations = moduleInstallations;
 
         messenger.Register(this);
         Closed += HandleClosed;
@@ -90,6 +102,218 @@ public sealed partial class SettingsWindow :
             BuildNavigation();
         }
     }
+
+    private async void HandleAddModuleClicked(object sender,
+        RoutedEventArgs args)
+    {
+        FileOpenPicker picker = new()
+        {
+            SuggestedStartLocation = PickerLocationId.Downloads
+        };
+        picker.FileTypeFilter.Add(".glance");
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(this));
+        StorageFile? file = await picker.PickSingleFileAsync();
+
+        if (file is not null)
+        {
+            await InstallModuleFilesAsync((StorageFile[])[file]);
+        }
+    }
+
+    private void HandleModulePackageDragOver(object sender,
+        DragEventArgs args)
+    {
+        if (!IsModuleSettingsVisible() || !args.DataView.Contains(StandardDataFormats.StorageItems))
+        {
+            args.AcceptedOperation = DataPackageOperation.None;
+            ModuleDropOverlay.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        args.AcceptedOperation = DataPackageOperation.Copy;
+        args.DragUIOverride.IsCaptionVisible = true;
+        args.DragUIOverride.Caption = localizer.GetText("ModuleDropTargetText/Text");
+        ModuleDropOverlay.Visibility = Visibility.Visible;
+    }
+
+    private void HandleModulePackageDragLeave(object sender,
+        DragEventArgs args) => ModuleDropOverlay.Visibility = Visibility.Collapsed;
+
+    private async void HandleModulePackageDrop(object sender,
+        DragEventArgs args)
+    {
+        ModuleDropOverlay.Visibility = Visibility.Collapsed;
+
+        if (!IsModuleSettingsVisible() || !args.DataView.Contains(StandardDataFormats.StorageItems))
+        {
+            return;
+        }
+
+        DragOperationDeferral deferral = args.GetDeferral();
+
+        try
+        {
+            IReadOnlyList<IStorageItem> items = await args.DataView.GetStorageItemsAsync();
+            StorageFile[] packages = [.. items.OfType<StorageFile>()
+                .Where(file => string.Equals(file.FileType, ".glance", StringComparison.OrdinalIgnoreCase))];
+
+            if (packages.Length == 0)
+            {
+                ShowModuleInstallStatus(InfoBarSeverity.Error,
+                    localizer.GetText("ModuleInstallInvalidPackageMessage"));
+                return;
+            }
+
+            args.AcceptedOperation = DataPackageOperation.Copy;
+            await InstallModuleFilesAsync(packages);
+        }
+        catch (COMException exception)
+        {
+            ShowModuleInstallStatus(InfoBarSeverity.Error, exception.Message);
+        }
+        finally
+        {
+            deferral.Complete();
+        }
+    }
+
+    private async Task InstallModuleFilesAsync(IEnumerable<StorageFile> files)
+    {
+        AddModuleButton.IsEnabled = false;
+        ModuleInstallInfoBar.IsOpen = false;
+        ModuleInstallResult? lastResult = null;
+        bool restartRequired = false;
+
+        try
+        {
+            foreach (StorageFile file in files)
+            {
+                ModuleInstallResult result = await moduleInstallations.InstallAsync(file.Path);
+
+                if (!result.IsSuccessful)
+                {
+                    ShowModuleInstallStatus(InfoBarSeverity.Error,
+                        string.IsNullOrWhiteSpace(result.ErrorMessage)
+                            ? localizer.GetText("ModuleInstallFailedMessage")
+                            : result.ErrorMessage);
+                    return;
+                }
+
+                lastResult = result;
+                restartRequired |= result.RequiresRestart;
+            }
+
+            if (lastResult is not null)
+            {
+                NavigateToInstalledModule(lastResult);
+                ShowModuleInstallStatus(InfoBarSeverity.Success,
+                    restartRequired
+                        ? localizer.GetText("ModuleUpdateStagedMessage")
+                        : localizer.GetText("ModuleInstalledMessage"));
+
+                if (restartRequired)
+                {
+                    await PromptForModuleUpdateRestartAsync();
+                }
+            }
+        }
+        catch (Exception exception)
+        {
+            ShowModuleInstallStatus(InfoBarSeverity.Error,
+                string.IsNullOrWhiteSpace(exception.Message)
+                    ? localizer.GetText("ModuleInstallFailedMessage")
+                    : exception.Message);
+        }
+        finally
+        {
+            AddModuleButton.IsEnabled = true;
+        }
+    }
+
+    private async Task PromptForModuleUpdateRestartAsync()
+    {
+        if (isRestartDialogOpen || isClosing)
+        {
+            return;
+        }
+
+        isRestartDialogOpen = true;
+
+        try
+        {
+            RestartForModuleUpdateDialog dialog = new(localizer)
+            {
+                XamlRoot = ((FrameworkElement)Content).XamlRoot
+            };
+
+            if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+            {
+                await RestartApplicationAsync();
+            }
+        }
+        finally
+        {
+            isRestartDialogOpen = false;
+        }
+    }
+
+    private async Task RestartApplicationAsync()
+    {
+        string executablePath = Environment.ProcessPath
+            ?? throw new InvalidOperationException("The Glance executable path is not available.");
+
+        ProcessStartInfo startInfo = new(executablePath)
+        {
+            UseShellExecute = false,
+            WorkingDirectory = Path.GetDirectoryName(executablePath) ?? AppContext.BaseDirectory
+        };
+        startInfo.ArgumentList.Add("--restart-after");
+        startInfo.ArgumentList.Add(Environment.ProcessId.ToString(CultureInfo.InvariantCulture));
+        _ = Process.Start(startInfo)
+            ?? throw new InvalidOperationException("Glance could not start the replacement process.");
+
+        isClosing = true;
+        AddModuleButton.IsEnabled = false;
+        Close();
+        await applicationLifetime.ExitAsync();
+    }
+
+    private void NavigateToInstalledModule(ModuleInstallResult result)
+    {
+        ModulesViewModel? modules = ViewModel.OfType<ModulesViewModel>().FirstOrDefault();
+        SettingsCategoryViewModel? category = result.ComponentIds
+            .Select(componentId => modules?.FindCategoryForComponent(componentId))
+            .FirstOrDefault(candidate => candidate is not null);
+
+        if (category is null)
+        {
+            return;
+        }
+
+        List<ISettingViewModel>? path = FindNavigationPath(category);
+
+        if (path is null)
+        {
+            return;
+        }
+
+        if (navigationItems.TryGetValue(category, out NavigationViewItem? item))
+        {
+            SettingsNavigation.SelectedItem = item;
+        }
+
+        Navigate(path);
+    }
+
+    private void ShowModuleInstallStatus(InfoBarSeverity severity,
+        string message)
+    {
+        ModuleInstallInfoBar.Severity = severity;
+        ModuleInstallInfoBar.Message = message;
+        ModuleInstallInfoBar.IsOpen = true;
+    }
+
+    private bool IsModuleSettingsVisible() => navigationPath.FirstOrDefault() is ModulesViewModel;
 
     private void HandleNavigationSelectionChanged(NavigationView sender,
         NavigationViewSelectionChangedEventArgs args)
@@ -254,12 +478,7 @@ public sealed partial class SettingsWindow :
             foreach (ISettingViewModel root in ViewModel)
             {
                 SettingsNavigation.MenuItems.Add(CreateNavigationItem(root));
-
-                if (root is INotifyCollectionChanged observable)
-                {
-                    observable.CollectionChanged += HandleNavigationCollectionChanged;
-                    observedNavigationCollections.Add(observable);
-                }
+                ObserveNavigationChanges(root);
             }
 
             List<ISettingViewModel>? path = RestoreNavigationPath(previousPath);
@@ -327,6 +546,21 @@ public sealed partial class SettingsWindow :
         }
 
         return item;
+    }
+
+    private void ObserveNavigationChanges(ISettingViewModel viewModel)
+    {
+        if (viewModel is INotifyCollectionChanged observable &&
+            !observedNavigationCollections.Contains(observable))
+        {
+            observable.CollectionChanged += HandleNavigationCollectionChanged;
+            observedNavigationCollections.Add(observable);
+        }
+
+        foreach (ISettingViewModel child in viewModel.Children)
+        {
+            ObserveNavigationChanges(child);
+        }
     }
 
     private List<ISettingViewModel>? FindNavigationPath(ISettingViewModel target)
@@ -413,6 +647,15 @@ public sealed partial class SettingsWindow :
         }
 
         ViewModel.NavigateTo(path[^1]);
+        bool isModuleSettingsVisible = path[0] is ModulesViewModel;
+        AddModuleButton.Visibility = isModuleSettingsVisible ? Visibility.Visible : Visibility.Collapsed;
+        ModuleDropOverlay.Visibility = Visibility.Collapsed;
+
+        if (!isModuleSettingsVisible)
+        {
+            ModuleInstallInfoBar.IsOpen = false;
+        }
+
         bool canGoBack = path.Count > 2;
         AppTitleBar.IsBackButtonEnabled = canGoBack;
         AppTitleBar.IsBackButtonVisible = canGoBack;

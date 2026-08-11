@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.IO.Compression;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace Glance.Shell;
 
@@ -29,14 +28,14 @@ public sealed class ModulePackageCache
             throw new FileNotFoundException("The module package could not be found.", fullPackagePath);
         }
 
-        string packageCacheDirectory = Path.Combine(cacheDirectory, HashText(fullPackagePath.ToUpperInvariant()));
+        string packageCacheDirectory = cacheDirectory;
+        string contentHash = HashFile(fullPackagePath);
 
-        if (TryGetCurrentContentDirectory(packageCacheDirectory, package, out string currentContentDirectory))
+        if (TryGetCurrentContentDirectory(packageCacheDirectory, package, contentHash, out string currentContentDirectory))
         {
             return currentContentDirectory;
         }
 
-        string contentHash = HashFile(fullPackagePath);
         string contentDirectory = Path.Combine(packageCacheDirectory, contentHash);
 
         if (!Directory.Exists(contentDirectory))
@@ -50,7 +49,10 @@ public sealed class ModulePackageCache
         return contentDirectory;
     }
 
-    private static bool TryGetCurrentContentDirectory(string packageCacheDirectory, FileInfo package, out string contentDirectory)
+    private static bool TryGetCurrentContentDirectory(string packageCacheDirectory,
+        FileInfo package,
+        string contentHash,
+        out string contentDirectory)
     {
         contentDirectory = string.Empty;
         string statePath = Path.Combine(packageCacheDirectory, StateFileName);
@@ -66,7 +68,8 @@ public sealed class ModulePackageCache
             !long.TryParse(values[0], NumberStyles.None, CultureInfo.InvariantCulture, out long length) ||
             !long.TryParse(values[1], NumberStyles.None, CultureInfo.InvariantCulture, out long lastWriteTimeUtcTicks) ||
             length != package.Length ||
-            lastWriteTimeUtcTicks != package.LastWriteTimeUtc.Ticks)
+            lastWriteTimeUtcTicks != package.LastWriteTimeUtc.Ticks ||
+            !string.Equals(values[2], contentHash, StringComparison.OrdinalIgnoreCase))
         {
             return false;
         }
@@ -174,5 +177,4 @@ public sealed class ModulePackageCache
         return Convert.ToHexString(SHA256.HashData(stream));
     }
 
-    private static string HashText(string value) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
 }

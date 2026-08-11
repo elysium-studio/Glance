@@ -12,6 +12,8 @@ public sealed class GlanceSettings
 
     public List<GlanceModulePreference> Modules { get; set; } = [];
 
+    public List<string> UninstalledModulePackages { get; set; } = [];
+
     public GlancePlacement Placement { get; set; } = GlancePlacement.Top;
 
     public bool IsAssistantEnabled { get; set; } = true;

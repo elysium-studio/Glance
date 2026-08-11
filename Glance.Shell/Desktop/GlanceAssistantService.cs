@@ -219,6 +219,34 @@ public sealed class GlanceAssistantService :
         NotifyPresentationChanged();
     }
 
+    public async Task UnregisterAsync(IEnumerable<IGlanceAssistantProvider> registrations)
+    {
+        HashSet<IGlanceAssistantProvider> removals = [.. registrations];
+        IGlanceAssistantProvider? removedActiveProvider = ActiveProvider is not null && removals.Contains(ActiveProvider)
+            ? ActiveProvider
+            : null;
+
+        if (removedActiveProvider is not null)
+        {
+            await removedActiveProvider.SetEnabledAsync(false);
+        }
+
+        _ = providers.RemoveAll(removals.Contains);
+
+        if (removedActiveProvider is not null)
+        {
+            ActiveProvider = providers.FirstOrDefault();
+
+            if (ActiveProvider is not null && IsEnabled)
+            {
+                await EnableProviderAsync(ActiveProvider);
+            }
+        }
+
+        OnPropertyChanged(nameof(Providers));
+        NotifyPresentationChanged();
+    }
+
     private void HandleActionPresentationRequested(object? sender, GlanceActionPresentationRequestedEventArgs args) => dispatcher.Dispatch(() => dispatcher.Dispatch(() =>
                                                                                                                             {
                                                                                                                                 if (ActiveProvider?.State is not (GlanceAssistantState.ListeningForCommand or GlanceAssistantState.ProcessingCommand))

@@ -16,7 +16,7 @@ public sealed class ScreenCaptureModule :
     {
         _ = services.AddModuleOptions<ScreenCaptureSettings>("ScreenCapture", "screen-capture.settings.dat", ScreenCaptureJsonContext.Default);
         _ = services.AddSingleton<ModuleResourceTextLocalizer<ScreenCaptureModule>>();
-        _ = services.AddSingleton(new ScreenCaptureRepository(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "ScreenCapture", "screen-captures.db")));
+        _ = services.AddSingleton(new ScreenCaptureRepository(GlanceModuleData.GetPath("ScreenCapture", "screen-captures.db")));
         _ = services.AddSingleton<IScreenCaptureService, WindowsScreenCaptureService>();
         _ = services.AddSingleton(provider => new ScreenCaptureViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<ScreenCaptureModule>>(), provider.GetRequiredService<GlanceModuleOptions<ScreenCaptureSettings>>().Current));
         _ = services.AddSingleton<ScreenCaptureComponent>();

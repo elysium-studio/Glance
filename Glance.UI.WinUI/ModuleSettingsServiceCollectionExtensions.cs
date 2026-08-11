@@ -4,6 +4,7 @@ using Elysium.Application.DependencyInjection;
 using Glance.Application.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
+using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -24,7 +25,9 @@ public static class ModuleSettingsServiceCollectionExtensions
             jsonOptions.TypeInfoResolverChain.Add(context);
         }
 
-        WritableOptionsBuilder<TOptions> builder = new(services, sectionPath, filePath);
+        WritableOptionsBuilder<TOptions> builder = new(services,
+            sectionPath,
+            Path.Combine("Modules", sectionPath, filePath));
         _ = builder.UseJson().WithChangeHandler((provider, options, _) =>
         {
             provider.GetRequiredService<GlanceModuleOptions<TOptions>>().Update(options);

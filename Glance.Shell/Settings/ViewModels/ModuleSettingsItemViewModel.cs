@@ -8,6 +8,7 @@ public sealed partial class ModuleSettingsItemViewModel :
     IModulesViewModel
 {
     private readonly Action<ModuleSettingsItemViewModel> navigate;
+    private readonly Func<ModuleSettingsItemViewModel, Task<bool>>? uninstall;
     private bool suppressPersistence;
 
     public ModuleSettingsItemViewModel(string id,
@@ -24,7 +25,8 @@ public sealed partial class ModuleSettingsItemViewModel :
             isEnabled,
             settings,
             navigate,
-            setEnabled)
+            setEnabled,
+            null)
     {
     }
 
@@ -35,7 +37,8 @@ public sealed partial class ModuleSettingsItemViewModel :
         bool isEnabled,
         IEnumerable<IGlanceModuleSettingViewModel> settings,
         Action<ModuleSettingsItemViewModel> navigate,
-        Func<ModuleSettingsItemViewModel, bool, Task<bool>> setEnabled)
+        Func<ModuleSettingsItemViewModel, bool, Task<bool>> setEnabled,
+        Func<ModuleSettingsItemViewModel, Task<bool>>? uninstall = null)
     {
         Id = id;
         DisplayName = displayName;
@@ -46,6 +49,7 @@ public sealed partial class ModuleSettingsItemViewModel :
         IconGlyph = string.IsNullOrEmpty(component?.IconGlyph) ? "\uE8B7" : component.IconGlyph;
         Settings = new ModuleSettingsViewModel(displayName, settings);
         this.navigate = navigate;
+        this.uninstall = uninstall;
         this.isEnabled = isEnabled;
         SetEnabled = setEnabled;
         RefreshSettings();
@@ -69,6 +73,8 @@ public sealed partial class ModuleSettingsItemViewModel :
 
     public bool CanExpand => IsEnabled && HasSettings;
 
+    public bool CanUninstall => uninstall is not null;
+
     public ModuleSettingsViewModel Settings { get; }
 
     private Func<ModuleSettingsItemViewModel, bool, Task<bool>> SetEnabled { get; }
@@ -80,6 +86,8 @@ public sealed partial class ModuleSettingsItemViewModel :
             navigate(this);
         }
     }
+
+    public Task<bool> UninstallAsync() => uninstall?.Invoke(this) ?? Task.FromResult(false);
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanExpand))]

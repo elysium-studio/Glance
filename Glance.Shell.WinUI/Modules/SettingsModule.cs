@@ -16,7 +16,8 @@ public sealed class SettingsModule :
                 provider => new SettingsWindow(provider.GetRequiredService<IMessenger>(),
                     provider.GetRequiredService<ITextLocalizer>(),
                     provider.GetRequiredService<IApplicationLifetime>(),
-                    provider.GetRequiredService<AboutViewModel>()),
+                    provider.GetRequiredService<AboutViewModel>(),
+                    provider.GetRequiredService<ModuleInstallationService>()),
                 provider => new SettingsViewModel(provider,
                     provider.GetRequiredService<IServiceFactory>(),
                     provider.GetRequiredService<IMessenger>(),
@@ -37,6 +38,7 @@ public sealed class SettingsModule :
                     provider.GetRequiredService<IMessenger>(),
                     provider.GetRequiredService<IDisposer>(),
                     provider.GetRequiredService<ModulePreferenceService>(),
+                    provider.GetRequiredService<ModuleInstallationService>(),
                     provider.GetRequiredService<ITextLocalizer>(),
                     provider.GetRequiredService<IEnumerable<IGlanceModuleSettingViewModel>>()))
             .AddViewFor<WindowsView, ISettingViewModel, WindowsViewModel>(ServiceLifetime.Transient,

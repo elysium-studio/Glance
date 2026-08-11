@@ -78,6 +78,25 @@ public sealed class GlanceAssistantSemanticResolverService :
         }
     }
 
+    public void Unregister(IEnumerable<IGlanceAssistantSemanticResolver> registrations)
+    {
+        HashSet<IGlanceAssistantSemanticResolver> removals = [.. registrations];
+        bool activeRemoved;
+
+        lock (synchronization)
+        {
+            _ = resolvers.RemoveAll(removals.Contains);
+            activeRemoved = ActiveResolver is not null && removals.Contains(ActiveResolver);
+        }
+
+        if (activeRemoved)
+        {
+            ActiveResolver = Resolvers.FirstOrDefault();
+        }
+
+        OnPropertyChanged(nameof(Resolvers));
+    }
+
     public async Task SetActiveResolverAsync(string resolverId, CancellationToken cancellationToken = default)
     {
         IGlanceAssistantSemanticResolver? resolver = Resolvers.FirstOrDefault(candidate => string.Equals(candidate.Id, resolverId, StringComparison.OrdinalIgnoreCase));
