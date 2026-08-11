@@ -1,10 +1,10 @@
 using Microsoft.UI;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
@@ -15,9 +15,14 @@ namespace Glance.Shell.WinUI;
 public sealed partial class ModuleSettingsCategoryView :
     UserControl
 {
+    private readonly DispatcherQueue dispatcherQueue;
     private bool isRestartDialogOpen;
 
-    public ModuleSettingsCategoryView() => InitializeComponent();
+    public ModuleSettingsCategoryView()
+    {
+        InitializeComponent();
+        dispatcherQueue = DispatcherQueue;
+    }
 
     public ModuleSettingsCategoryViewModel ViewModel => (ModuleSettingsCategoryViewModel)DataContext;
 
@@ -27,6 +32,7 @@ public sealed partial class ModuleSettingsCategoryView :
     private async void HandleAddModuleClicked(object sender,
         RoutedEventArgs args)
     {
+        ModulesViewModel modules = ViewModel.Modules;
         FileOpenPicker picker = new()
         {
             SuggestedStartLocation = PickerLocationId.Downloads
@@ -38,7 +44,8 @@ public sealed partial class ModuleSettingsCategoryView :
 
         if (file is not null)
         {
-            await InstallModulePathsAsync((string[])[file.Path]);
+            string path = await RunOnDispatcherAsync(() => file.Path);
+            await InstallModulePathsAsync(modules, (string[])[path]);
         }
     }
 
@@ -71,44 +78,49 @@ public sealed partial class ModuleSettingsCategoryView :
         }
 
         DragOperationDeferral deferral = args.GetDeferral();
+        DataPackageView dataView = args.DataView;
+        ModulesViewModel modules = ViewModel.Modules;
         args.AcceptedOperation = DataPackageOperation.Copy;
 
         try
         {
-            IReadOnlyList<IStorageItem> items = await args.DataView.GetStorageItemsAsync();
-            string[] packages = [.. items.OfType<StorageFile>()
-                .Where(file => string.Equals(file.FileType, ".glance", StringComparison.OrdinalIgnoreCase))
-                .Select(file => file.Path)];
+            IReadOnlyList<IStorageItem> items = await dataView.GetStorageItemsAsync();
+            string[] packages = await RunOnDispatcherAsync(() =>
+                items.OfType<StorageFile>()
+                    .Where(file => string.Equals(file.FileType, ".glance", StringComparison.OrdinalIgnoreCase))
+                    .Select(file => file.Path)
+                    .ToArray());
 
             if (packages.Length == 0)
             {
-                ViewModel.Modules.ShowInvalidPackageStatus();
+                modules.ShowInvalidPackageStatus();
                 return;
             }
 
-            await InstallModulePathsAsync(packages);
+            await InstallModulePathsAsync(modules, packages);
         }
-        catch (COMException exception)
+        catch (Exception exception)
         {
-            ViewModel.Modules.ShowInstallFailure(exception.Message);
+            modules.ShowInstallFailure(exception.Message);
         }
         finally
         {
-            deferral.Complete();
+            await RunOnDispatcherAsync(deferral.Complete);
         }
     }
 
-    private async Task InstallModulePathsAsync(IEnumerable<string> paths)
+    private async Task InstallModulePathsAsync(ModulesViewModel modules,
+        IEnumerable<string> paths)
     {
-        ModuleInstallResult? result = await ViewModel.Modules.InstallAsync(paths);
+        ModuleInstallResult? result = await modules.InstallAsync(paths);
 
         if (result?.RequiresRestart == true)
         {
-            await PromptForRestartAsync();
+            await PromptForRestartAsync(modules);
         }
     }
 
-    private async Task PromptForRestartAsync()
+    private Task PromptForRestartAsync(ModulesViewModel modules) => RunTaskOnDispatcherAsync(async () =>
     {
         if (isRestartDialogOpen || XamlRoot is null)
         {
@@ -119,23 +131,107 @@ public sealed partial class ModuleSettingsCategoryView :
 
         try
         {
-            RestartForModuleUpdateDialog dialog = new(ViewModel.Modules.RestartDialogTitle,
-                ViewModel.Modules.RestartDialogMessage,
-                ViewModel.Modules.RestartDialogPrimaryButtonText,
-                ViewModel.Modules.RestartDialogCloseButtonText)
+            RestartForModuleUpdateDialog dialog = new(modules.RestartDialogTitle,
+                modules.RestartDialogMessage,
+                modules.RestartDialogPrimaryButtonText,
+                modules.RestartDialogCloseButtonText)
             {
                 XamlRoot = XamlRoot
             };
 
             if (await dialog.ShowAsync() == ContentDialogResult.Primary)
             {
-                AddModuleButton.IsEnabled = false;
-                await ViewModel.Modules.RestartAsync();
+                await RunOnDispatcherAsync(() => AddModuleButton.IsEnabled = false);
+                await modules.RestartAsync();
             }
         }
         finally
         {
-            isRestartDialogOpen = false;
+            await RunOnDispatcherAsync(() => isRestartDialogOpen = false);
         }
+    });
+
+    private Task RunOnDispatcherAsync(Action action)
+    {
+        if (dispatcherQueue.HasThreadAccess)
+        {
+            action();
+            return Task.CompletedTask;
+        }
+
+        TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (!dispatcherQueue.TryEnqueue(() =>
+            {
+                try
+                {
+                    action();
+                    completion.TrySetResult();
+                }
+                catch (Exception exception)
+                {
+                    completion.TrySetException(exception);
+                }
+            }))
+        {
+            completion.TrySetException(new InvalidOperationException("The module settings dispatcher rejected the operation."));
+        }
+
+        return completion.Task;
+    }
+
+    private Task RunTaskOnDispatcherAsync(Func<Task> action)
+    {
+        if (dispatcherQueue.HasThreadAccess)
+        {
+            return action();
+        }
+
+        TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (!dispatcherQueue.TryEnqueue(async () =>
+            {
+                try
+                {
+                    await action();
+                    completion.TrySetResult();
+                }
+                catch (Exception exception)
+                {
+                    completion.TrySetException(exception);
+                }
+            }))
+        {
+            completion.TrySetException(new InvalidOperationException("The module settings dispatcher rejected the operation."));
+        }
+
+        return completion.Task;
+    }
+
+    private Task<T> RunOnDispatcherAsync<T>(Func<T> action)
+    {
+        if (dispatcherQueue.HasThreadAccess)
+        {
+            return Task.FromResult(action());
+        }
+
+        TaskCompletionSource<T> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (!dispatcherQueue.TryEnqueue(() =>
+            {
+                try
+                {
+                    completion.TrySetResult(action());
+                }
+                catch (Exception exception)
+                {
+                    completion.TrySetException(exception);
+                }
+            }))
+        {
+            completion.TrySetException(new InvalidOperationException("The module settings dispatcher rejected the operation."));
+        }
+
+        return completion.Task;
     }
 }
