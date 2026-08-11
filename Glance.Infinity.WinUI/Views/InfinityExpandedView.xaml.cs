@@ -26,6 +26,12 @@ public sealed partial class InfinityExpandedView :
 
     public string SaveTitleLabel => localizer.GetText("SavePageTitle");
 
+    public void FocusTitleEditor() => _ = DispatcherQueue.TryEnqueue(() =>
+    {
+        _ = TitleEditor.Focus(FocusState.Programmatic);
+        TitleEditor.SelectAll();
+    });
+
     private string ToDisplayText(bool isConnected, string pageTitle) => isConnected
         ? pageTitle
         : localizer.GetText("WaitingForInfinity");

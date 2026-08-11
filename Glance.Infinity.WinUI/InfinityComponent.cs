@@ -11,10 +11,12 @@ public sealed partial class InfinityComponent :
     IGlanceAttentionComponent,
     IGlanceAvailabilityComponent,
     IGlanceInteractionAwareComponent,
+    IGlanceIslandActivationComponent,
     IGlanceExpansionLockComponent,
     IDisposable
 {
     private readonly ITextLocalizer localizer;
+    private readonly InfinityExpandedView expandedView;
     private readonly InfinityViewModel viewModel;
 
     public InfinityComponent(InfinityViewModel viewModel, ModuleResourceTextLocalizer<InfinityModule> localizer)
@@ -23,7 +25,7 @@ public sealed partial class InfinityComponent :
         this.localizer = localizer;
         viewModel.PropertyChanged += HandleViewModelPropertyChanged;
         InfinityCompactView compactView = new(viewModel);
-        InfinityExpandedView expandedView = new(viewModel, localizer);
+        expandedView = new InfinityExpandedView(viewModel, localizer);
 
         CompactContent = compactView;
         ExpandedContent = expandedView;
@@ -55,9 +57,13 @@ public sealed partial class InfinityComponent :
 
     public bool IsExpansionLocked => viewModel.IsEditing;
 
+    public bool RequiresIslandActivation => viewModel.IsEditing;
+
     public event EventHandler? AvailabilityChanged;
 
     public event EventHandler? ExpansionLockChanged;
+
+    public event EventHandler? IslandActivationRequirementChanged;
 
     public void BeginInteraction() => viewModel.BeginInteraction();
 
@@ -77,6 +83,12 @@ public sealed partial class InfinityComponent :
         if (args.PropertyName == nameof(InfinityViewModel.IsEditing))
         {
             ExpansionLockChanged?.Invoke(this, EventArgs.Empty);
+            IslandActivationRequirementChanged?.Invoke(this, EventArgs.Empty);
+
+            if (viewModel.IsEditing)
+            {
+                expandedView.FocusTitleEditor();
+            }
         }
     }
 }

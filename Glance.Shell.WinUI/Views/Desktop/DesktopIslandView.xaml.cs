@@ -38,13 +38,19 @@ public sealed partial class DesktopIslandView :
     private const int InteractionExitDelayMs = 240;
     private const float ModuleReorderEdgeFadeWidth = 32;
     private const double ModuleReorderSideItemMinimumOpacity = 0.68;
+    private const uint NoActivateSetWindowPosition = 0x0010;
+    private const uint NoMoveSetWindowPosition = 0x0002;
+    private const uint NoSizeSetWindowPosition = 0x0001;
     private const int StartupAttentionDelayMs = 2500;
+    private const int TopmostMonitorIntervalMs = 500;
+    private static readonly nint TopmostWindow = new(-1);
 
     private readonly DispatcherQueue dispatcherQueue;
     private DispatcherQueueTimer? attentionExpansionTimer;
     private DispatcherQueueTimer? contextualDragExitTimer;
     private DispatcherQueueTimer? interactionExitTimer;
     private DispatcherQueueTimer? startupAttentionTimer;
+    private DispatcherQueueTimer? topmostMonitorTimer;
     private FrameworkElement? activeContentRouteTarget;
     private Button? pressedButton;
     private ListViewItem? draggedModuleOrderItem;
@@ -66,6 +72,7 @@ public sealed partial class DesktopIslandView :
     private string? droppedContentRouteId;
     private bool isContextualDragActive;
     private int contextualDragSession;
+    private IGlanceIslandActivationComponent? islandActivationComponent;
     private IGlanceExpansionLockComponent? expansionLockComponent;
     private IGlanceInteractionAwareComponent? interactionComponent;
     private IGlanceFooterAppearanceComponent? footerAppearanceComponent;
@@ -135,22 +142,64 @@ public sealed partial class DesktopIslandView :
         (ViewModel.IntentService as GlanceIntentService)?.SetPresentationTargetProvider(GetIntentPresentationTarget);
         Deactivated += HandleIslandDeactivated;
         _ = DispatcherQueue.TryEnqueue(InitializeExpansionState);
+        UpdateIslandActivationComponent();
         UpdateFooterAppearanceComponent();
         ApplyAssistantPresentation(ViewModel.Assistant.IsOverlayVisible);
         ApplyContentRoutePresentation(ViewModel.IsContentRoutePickerVisible);
         ApplyModuleReorderPresentation(ViewModel.IsModuleReorderVisible);
         StartStartupAttentionTimer();
-        _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, KeepIslandNonActivating);
+        StartTopmostMonitor();
+        _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, ApplyIslandActivationMode);
     }
 
     private void HandleIslandOpened(object sender,
-        RoutedEventArgs args) => _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, KeepIslandNonActivating);
+        RoutedEventArgs args) => _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, ApplyIslandActivationMode);
 
-    private void KeepIslandNonActivating()
+    private void ApplyIslandActivationMode()
     {
         int extendedStyle = GetWindowLong(Handle, ExtendedWindowStyleIndex);
-        _ = SetWindowLong(Handle, ExtendedWindowStyleIndex, extendedStyle | NoActivateExtendedWindowStyle);
+        bool requiresActivation = islandActivationComponent?.RequiresIslandActivation == true;
+        int updatedStyle = requiresActivation
+            ? extendedStyle & ~NoActivateExtendedWindowStyle
+            : extendedStyle | NoActivateExtendedWindowStyle;
+        _ = SetWindowLong(Handle, ExtendedWindowStyleIndex, updatedStyle);
+        EnsureIslandTopmost();
+
+        if (requiresActivation)
+        {
+            _ = SetForegroundWindow(Handle);
+        }
     }
+
+    private void StartTopmostMonitor()
+    {
+        topmostMonitorTimer ??= CreateTopmostMonitorTimer();
+        topmostMonitorTimer.Stop();
+        EnsureIslandTopmost();
+        topmostMonitorTimer.Start();
+    }
+
+    private DispatcherQueueTimer CreateTopmostMonitorTimer()
+    {
+        DispatcherQueueTimer timer = DispatcherQueue.CreateTimer();
+        timer.Interval = TimeSpan.FromMilliseconds(TopmostMonitorIntervalMs);
+        timer.IsRepeating = true;
+        timer.Tick += HandleTopmostMonitorTick;
+        return timer;
+    }
+
+    private void StopTopmostMonitor() => topmostMonitorTimer?.Stop();
+
+    private void HandleTopmostMonitorTick(DispatcherQueueTimer sender,
+        object args) => EnsureIslandTopmost();
+
+    private void EnsureIslandTopmost() => _ = SetWindowPos(Handle,
+        TopmostWindow,
+        0,
+        0,
+        0,
+        0,
+        NoActivateSetWindowPosition | NoMoveSetWindowPosition | NoSizeSetWindowPosition);
 
     [LibraryImport("user32.dll", EntryPoint = "GetWindowLongW")]
     private static partial int GetWindowLong(nint window,
@@ -160,6 +209,20 @@ public sealed partial class DesktopIslandView :
     private static partial int SetWindowLong(nint window,
         int index,
         int value);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool SetForegroundWindow(nint window);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool SetWindowPos(nint window,
+        nint insertAfter,
+        int x,
+        int y,
+        int width,
+        int height,
+        uint flags);
 
     private void InitializeExpansionState()
     {
@@ -177,6 +240,7 @@ public sealed partial class DesktopIslandView :
         (ViewModel.IntentService as GlanceIntentService)?.SetPresentationTargetProvider(null);
         Deactivated -= HandleIslandDeactivated;
         ReleasePressedButton();
+        ClearIslandActivationComponent();
         ClearExpansionLockComponent();
         ClearFooterAppearanceComponent();
         EndComponentInteraction();
@@ -184,6 +248,7 @@ public sealed partial class DesktopIslandView :
         StopContextualDragExitTimer();
         StopInteractionExitTimer();
         StopStartupAttentionTimer();
+        StopTopmostMonitor();
         DisposeModuleReorderEdgeFade();
         StaysExpanded = false;
         DismissesOnOutsideClick = false;
@@ -1170,6 +1235,7 @@ public sealed partial class DesktopIslandView :
 
         if (args.PropertyName == nameof(DesktopIslandViewModel.SelectedComponent))
         {
+            UpdateIslandActivationComponent();
             UpdateExpansionLockComponent();
             UpdateComponentInteraction();
             UpdateFooterAppearanceComponent();
@@ -1556,6 +1622,32 @@ public sealed partial class DesktopIslandView :
         interactionComponent = null;
         previousComponent?.EndInteraction();
     }
+
+    private void UpdateIslandActivationComponent()
+    {
+        IGlanceIslandActivationComponent? selectedComponent = ViewModel.SelectedComponent as IGlanceIslandActivationComponent;
+
+        if (ReferenceEquals(islandActivationComponent, selectedComponent))
+        {
+            ApplyIslandActivationMode();
+            return;
+        }
+
+        ClearIslandActivationComponent();
+        islandActivationComponent = selectedComponent;
+        islandActivationComponent?.IslandActivationRequirementChanged += HandleIslandActivationRequirementChanged;
+        ApplyIslandActivationMode();
+    }
+
+    private void ClearIslandActivationComponent()
+    {
+        islandActivationComponent?.IslandActivationRequirementChanged -= HandleIslandActivationRequirementChanged;
+        islandActivationComponent = null;
+        ApplyIslandActivationMode();
+    }
+
+    private void HandleIslandActivationRequirementChanged(object? sender,
+        EventArgs args) => _ = DispatcherQueue.TryEnqueue(ApplyIslandActivationMode);
 
     private void UpdateExpansionLockComponent()
     {
@@ -1977,6 +2069,9 @@ public sealed partial class DesktopIslandView :
         if (contentHandled)
         {
             ViewModel.CompleteContentRouting(true);
+            StaysExpanded = true;
+            DismissesOnOutsideClick = true;
+            ApplyExpansionLock();
             Reveal();
             return;
         }

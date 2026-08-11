@@ -44,6 +44,7 @@
                     TextTrimming="CharacterEllipsis"
                     Visibility="{x:Bind WhenNotEditing(ViewModel.IsEditing), Mode=OneWay}" />
                 <TextBox
+                    x:Name="TitleEditor"
                     Height="32"
                     VerticalAlignment="Center"
                     MaxLength="80"
