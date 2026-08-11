@@ -37,6 +37,7 @@ public sealed partial class SettingsWindow :
     private readonly List<ISettingViewModel> navigationPath = [];
     private readonly List<INotifyCollectionChanged> observedNavigationCollections = [];
     private bool isBuildingNavigation;
+    private bool isNavigationRebuildPending;
     private bool isAboutDialogOpen;
     private bool isClosing;
     private bool isQuitDialogOpen;
@@ -608,13 +609,20 @@ public sealed partial class SettingsWindow :
     private void HandleNavigationCollectionChanged(object? sender,
         NotifyCollectionChangedEventArgs args)
     {
-        if (DispatcherQueue.HasThreadAccess)
+        if (isClosing || isNavigationRebuildPending)
         {
-            BuildNavigation();
+            return;
         }
-        else
+
+        isNavigationRebuildPending = true;
+
+        if (!DispatcherQueue.TryEnqueue(() =>
+            {
+                isNavigationRebuildPending = false;
+                BuildNavigation();
+            }))
         {
-            _ = DispatcherQueue.TryEnqueue(BuildNavigation);
+            isNavigationRebuildPending = false;
         }
     }
 
@@ -645,7 +653,8 @@ public sealed partial class SettingsWindow :
 
     private void ObserveNavigationChanges(ISettingViewModel viewModel)
     {
-        if (viewModel is INotifyCollectionChanged observable &&
+        if (viewModel is not SettingsCategoryViewModel &&
+            viewModel is INotifyCollectionChanged observable &&
             !observedNavigationCollections.Contains(observable))
         {
             observable.CollectionChanged += HandleNavigationCollectionChanged;
@@ -684,7 +693,12 @@ public sealed partial class SettingsWindow :
                 continue;
             }
 
-            path.AddRange(previousPath.Skip(index + 1));
+            if (index < previousPath.Count - 1 &&
+                path[^1].Children.Count > 0)
+            {
+                path.Add(path[^1].Children[0]);
+            }
+
             return path;
         }
 
