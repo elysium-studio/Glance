@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 
 namespace Glance.Shell;
 
-public sealed class SettingsCategoryViewModel :
+public class SettingsCategoryViewModel :
     ObservableCollection<object>,
     ISettingViewModel
 {
@@ -25,7 +25,7 @@ public sealed class SettingsCategoryViewModel :
 
     public string Title { get; }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         if (disposed)
         {

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="Glance.Shell.WinUI.ModuleSettingsCategoryView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:WinUI="using:Elysium.UI.WinUI">
+    <Grid
+        AllowDrop="True"
+        DragLeave="HandleModulePackageDragLeave"
+        DragOver="HandleModulePackageDragOver"
+        Drop="HandleModulePackageDrop">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Button
+            x:Name="AddModuleButton"
+            x:Uid="AddModuleButton"
+            Margin="36,0,36,8"
+            HorizontalAlignment="Right"
+            Click="HandleAddModuleClicked"
+            IsEnabled="{x:Bind ViewModel.Modules.CanInstall, Mode=OneWay}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <FontIcon FontSize="12" Glyph="&#xE710;" />
+                <TextBlock x:Uid="AddModuleButtonLabel" />
+            </StackPanel>
+        </Button>
+        <InfoBar
+            Grid.Row="1"
+            Margin="36,0,36,8"
+            IsClosable="True"
+            IsOpen="{x:Bind ViewModel.Modules.IsInstallStatusOpen, Mode=TwoWay}"
+            Message="{x:Bind ViewModel.Modules.InstallStatusMessage, Mode=OneWay}"
+            Severity="{x:Bind GetSeverity(ViewModel.Modules.InstallStatusKind), Mode=OneWay}" />
+        <ListView
+            Grid.Row="2"
+            Margin="36,0,36,36"
+            ItemsSource="{x:Bind ViewModel}"
+            SelectionMode="None">
+            <ListView.ItemContainerTransitions>
+                <TransitionCollection />
+            </ListView.ItemContainerTransitions>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Margin" Value="0,0,0,4" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ContentControl
+                        HorizontalContentAlignment="Stretch"
+                        Content="{Binding}"
+                        ContentTemplateSelector="{WinUI:ViewTemplateSelector}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <Border
+            x:Name="ModuleDropOverlay"
+            Grid.RowSpan="3"
+            Margin="36,0,36,36"
+            Padding="24"
+            Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+            BorderThickness="2"
+            CornerRadius="8"
+            IsHitTestVisible="False"
+            Visibility="Collapsed">
+            <StackPanel
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Spacing="12">
+                <FontIcon
+                    HorizontalAlignment="Center"
+                    FontSize="32"
+                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                    Glyph="&#xE898;" />
+                <TextBlock
+                    x:Uid="ModuleDropTargetText"
+                    Style="{StaticResource SubtitleTextBlockStyle}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
