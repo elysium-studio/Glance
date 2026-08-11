@@ -260,7 +260,7 @@
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <Setter Property="Width" Value="{StaticResource GlanceModuleReorderItemWidth}" />
-                            <Setter Property="Height" Value="66" />
+                            <Setter Property="Height" Value="72" />
                             <Setter Property="Margin" Value="1,0" />
                             <Setter Property="Padding" Value="0" />
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -270,15 +270,14 @@
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="ApplicationAbstractions:IGlanceComponent">
                             <Border
-                                Margin="2"
+                                Margin="8,8,8,2"
                                 Background="{ThemeResource ControlFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
                                 BorderThickness="1"
                                 CornerRadius="22"
                                 Padding="12,7"
                                 PointerEntered="HandleModuleOrderItemPointerEntered"
-                                PointerExited="HandleModuleOrderItemPointerExited"
-                                ToolTipService.ToolTip="{x:Bind DisplayName}">
+                                PointerExited="HandleModuleOrderItemPointerExited">
                                 <Grid ColumnSpacing="9">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="24" />
@@ -302,7 +301,8 @@
                                             Foreground="{Binding Converter={StaticResource GlanceModuleAccentBrushConverter}}"
                                             Text="{Binding DisplayName, Converter={StaticResource UppercaseTextConverter}}"
                                             TextTrimming="CharacterEllipsis"
-                                            TextWrapping="NoWrap" />
+                                            TextWrapping="NoWrap"
+                                            ToolTipService.ToolTip="{x:Bind DisplayName}" />
                                         <StackPanel Spacing="3">
                                             <Border
                                                 Width="42"
@@ -345,25 +345,29 @@
                                         x:Name="RemoveModuleButton"
                                         x:Uid="RemoveModuleButton"
                                         Grid.ColumnSpan="3"
-                                        Width="24"
-                                        Height="24"
-                                        Margin="0,-3,-3,0"
+                                        Width="30"
+                                        Height="30"
+                                        Margin="0,-13,-16,0"
                                         Padding="0"
                                         HorizontalAlignment="Right"
                                         VerticalAlignment="Top"
-                                        Background="{ThemeResource ControlFillColorDefaultBrush}"
-                                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                        Background="{ThemeResource SystemFillColorCriticalBrush}"
+                                        BorderBrush="#66FFFFFF"
                                         BorderThickness="1"
                                         Click="HandleRemoveModuleClicked"
                                         Content="&#xE74D;"
-                                        CornerRadius="12"
+                                        CornerRadius="15"
                                         FontFamily="Segoe Fluent Icons"
-                                        FontSize="11"
-                                        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                        FontSize="13"
+                                        Foreground="White"
                                         IsHitTestVisible="False"
                                         Opacity="0"
-                                        Style="{StaticResource SubtleButtonStyle}"
-                                        Tag="{x:Bind Id}" />
+                                        Tag="{x:Bind Id}"
+                                        Translation="0,0,16">
+                                        <Button.Shadow>
+                                            <ThemeShadow />
+                                        </Button.Shadow>
+                                    </Button>
                                 </Grid>
                             </Border>
                         </DataTemplate>
