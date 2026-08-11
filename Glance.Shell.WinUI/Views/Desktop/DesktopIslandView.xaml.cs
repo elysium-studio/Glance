@@ -31,26 +31,18 @@ public sealed partial class DesktopIslandView :
     DesktopIsland
 {
     private const string AssistantContinuumAnimationKey = "DesktopIsland.Assistant.Continuum";
-    private const int ExtendedWindowStyleIndex = -20;
-    private const int NoActivateExtendedWindowStyle = 0x08000000;
     private const int AttentionExpansionDurationMs = 4000;
     private const int ContextualDragExitDelayMs = 160;
     private const int InteractionExitDelayMs = 240;
     private const float ModuleReorderEdgeFadeWidth = 32;
     private const double ModuleReorderSideItemMinimumOpacity = 0.68;
-    private const uint NoActivateSetWindowPosition = 0x0010;
-    private const uint NoMoveSetWindowPosition = 0x0002;
-    private const uint NoSizeSetWindowPosition = 0x0001;
     private const int StartupAttentionDelayMs = 2500;
-    private const int TopmostMonitorIntervalMs = 500;
-    private static readonly nint TopmostWindow = new(-1);
 
     private readonly DispatcherQueue dispatcherQueue;
     private DispatcherQueueTimer? attentionExpansionTimer;
     private DispatcherQueueTimer? contextualDragExitTimer;
     private DispatcherQueueTimer? interactionExitTimer;
     private DispatcherQueueTimer? startupAttentionTimer;
-    private DispatcherQueueTimer? topmostMonitorTimer;
     private FrameworkElement? activeContentRouteTarget;
     private Button? pressedButton;
     private ListViewItem? draggedModuleOrderItem;
@@ -148,81 +140,14 @@ public sealed partial class DesktopIslandView :
         ApplyContentRoutePresentation(ViewModel.IsContentRoutePickerVisible);
         ApplyModuleReorderPresentation(ViewModel.IsModuleReorderVisible);
         StartStartupAttentionTimer();
-        StartTopmostMonitor();
         _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, ApplyIslandActivationMode);
     }
 
     private void HandleIslandOpened(object sender,
         RoutedEventArgs args) => _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, ApplyIslandActivationMode);
 
-    private void ApplyIslandActivationMode()
-    {
-        int extendedStyle = GetWindowLong(Handle, ExtendedWindowStyleIndex);
-        bool requiresActivation = islandActivationComponent?.RequiresIslandActivation == true;
-        int updatedStyle = requiresActivation
-            ? extendedStyle & ~NoActivateExtendedWindowStyle
-            : extendedStyle | NoActivateExtendedWindowStyle;
-        _ = SetWindowLong(Handle, ExtendedWindowStyleIndex, updatedStyle);
-        EnsureIslandTopmost();
-
-        if (requiresActivation)
-        {
-            _ = SetForegroundWindow(Handle);
-        }
-    }
-
-    private void StartTopmostMonitor()
-    {
-        topmostMonitorTimer ??= CreateTopmostMonitorTimer();
-        topmostMonitorTimer.Stop();
-        EnsureIslandTopmost();
-        topmostMonitorTimer.Start();
-    }
-
-    private DispatcherQueueTimer CreateTopmostMonitorTimer()
-    {
-        DispatcherQueueTimer timer = DispatcherQueue.CreateTimer();
-        timer.Interval = TimeSpan.FromMilliseconds(TopmostMonitorIntervalMs);
-        timer.IsRepeating = true;
-        timer.Tick += HandleTopmostMonitorTick;
-        return timer;
-    }
-
-    private void StopTopmostMonitor() => topmostMonitorTimer?.Stop();
-
-    private void HandleTopmostMonitorTick(DispatcherQueueTimer sender,
-        object args) => EnsureIslandTopmost();
-
-    private void EnsureIslandTopmost() => _ = SetWindowPos(Handle,
-        TopmostWindow,
-        0,
-        0,
-        0,
-        0,
-        NoActivateSetWindowPosition | NoMoveSetWindowPosition | NoSizeSetWindowPosition);
-
-    [LibraryImport("user32.dll", EntryPoint = "GetWindowLongW")]
-    private static partial int GetWindowLong(nint window,
-        int index);
-
-    [LibraryImport("user32.dll", EntryPoint = "SetWindowLongW")]
-    private static partial int SetWindowLong(nint window,
-        int index,
-        int value);
-
-    [LibraryImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool SetForegroundWindow(nint window);
-
-    [LibraryImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool SetWindowPos(nint window,
-        nint insertAfter,
-        int x,
-        int y,
-        int width,
-        int height,
-        uint flags);
+    private void ApplyIslandActivationMode() =>
+        AllowsActivation = islandActivationComponent?.RequiresIslandActivation == true;
 
     private void InitializeExpansionState()
     {
@@ -248,7 +173,6 @@ public sealed partial class DesktopIslandView :
         StopContextualDragExitTimer();
         StopInteractionExitTimer();
         StopStartupAttentionTimer();
-        StopTopmostMonitor();
         DisposeModuleReorderEdgeFade();
         StaysExpanded = false;
         DismissesOnOutsideClick = false;
