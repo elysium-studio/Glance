@@ -8,41 +8,41 @@
     <Window.SystemBackdrop>
         <MicaBackdrop />
     </Window.SystemBackdrop>
-    <Window.Resources>
-        <DataTemplate x:Key="DefaultSettingsContentTemplate" x:DataType="Shell:ISettingViewModel">
-            <ListView
-                Margin="36,0,36,36"
-                ItemsSource="{x:Bind}"
-                SelectionMode="None">
-                <ListView.ItemContainerTransitions>
-                    <TransitionCollection />
-                </ListView.ItemContainerTransitions>
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="Margin" Value="0,0,0,4" />
-                    </Style>
-                </ListView.ItemContainerStyle>
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <ContentControl
-                            HorizontalContentAlignment="Stretch"
-                            Content="{Binding}"
-                            ContentTemplateSelector="{WinUI:ViewTemplateSelector}" />
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </DataTemplate>
-        <DataTemplate x:Key="ModuleSettingsCategoryTemplate">
-            <Local:ModuleSettingsCategoryView />
-        </DataTemplate>
-        <Local:SettingsContentTemplateSelector
-            x:Key="SettingsContentTemplateSelector"
-            DefaultTemplate="{StaticResource DefaultSettingsContentTemplate}"
-            ModuleSettingsCategoryTemplate="{StaticResource ModuleSettingsCategoryTemplate}" />
-    </Window.Resources>
     <Grid Loaded="HandleLoaded">
+        <Grid.Resources>
+            <DataTemplate x:Key="DefaultSettingsContentTemplate" x:DataType="Shell:ISettingViewModel">
+                <ListView
+                    Margin="36,0,36,36"
+                    ItemsSource="{x:Bind}"
+                    SelectionMode="None">
+                    <ListView.ItemContainerTransitions>
+                        <TransitionCollection />
+                    </ListView.ItemContainerTransitions>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0,0,0,4" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ContentControl
+                                HorizontalContentAlignment="Stretch"
+                                Content="{Binding}"
+                                ContentTemplateSelector="{WinUI:ViewTemplateSelector}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </DataTemplate>
+            <DataTemplate x:Key="ModuleSettingsCategoryTemplate">
+                <Local:ModuleSettingsCategoryView />
+            </DataTemplate>
+            <Local:SettingsContentTemplateSelector
+                x:Key="SettingsContentTemplateSelector"
+                DefaultTemplate="{StaticResource DefaultSettingsContentTemplate}"
+                ModuleSettingsCategoryTemplate="{StaticResource ModuleSettingsCategoryTemplate}" />
+        </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
