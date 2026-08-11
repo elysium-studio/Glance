@@ -431,7 +431,7 @@ internal sealed class GlanceModuleManager :
 
         string[] componentIds = [.. package.Components.Select(component => component.Id)];
         installations.Unregister(componentIds);
-        await preferences.UnregisterComponentsAsync(package.Components);
+        await DispatchAsync(() => preferences.UnregisterComponentsAsync(package.Components));
         bridgeRouter.RemoveHandlers(package.BridgeHandlers);
         actionService.Unregister(package.ActionProviders);
         intentService.Unregister(package.Intents);
