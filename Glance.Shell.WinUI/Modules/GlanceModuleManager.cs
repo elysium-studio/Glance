@@ -281,6 +281,14 @@ internal sealed class GlanceModuleManager :
 
             await DispatchAsync(async () =>
             {
+                lock (synchronization)
+                {
+                    if (knownPackages.Contains(packagePath))
+                    {
+                        return;
+                    }
+                }
+
                 string installedPackagePath = GlanceModuleInstallationStore.NormalizePackage(packagePath);
                 string packageId = GlanceModuleInstallationStore.GetPackageId(installedPackagePath);
                 GlanceModuleLoadResult? result = GlanceModuleLoader.LoadPackage(installedPackagePath);

@@ -23,7 +23,8 @@ namespace Glance.Shell.WinUI;
 
 public sealed partial class SettingsWindow :
     Window,
-    IRecipient<SettingsNavigationRequestedEventArgs>
+    IRecipient<SettingsNavigationRequestedEventArgs>,
+    IRecipient<ModuleUninstalledEventArgs>
 {
     private const int WindowWidth = 1100;
     private const int WindowHeight = 680;
@@ -102,6 +103,15 @@ public sealed partial class SettingsWindow :
             BuildNavigation();
         }
     }
+
+    public void Receive(ModuleUninstalledEventArgs message) => _ = RunOnDispatcherAsync(() =>
+    {
+        if (!isClosing)
+        {
+            ShowModuleInstallStatus(InfoBarSeverity.Warning,
+                localizer.GetText("ModuleRemovedMessage", string.Join(", ", message.DisplayNames)));
+        }
+    });
 
     private async void HandleAddModuleClicked(object sender,
         RoutedEventArgs args)
@@ -211,14 +221,15 @@ public sealed partial class SettingsWindow :
             {
                 ModuleInstallResult installedResult = lastResult;
                 bool requiresRestart = restartRequired;
+                string installedModuleNames = ResolveInstalledModuleNames(installedResult);
 
                 await RunOnDispatcherAsync(() =>
                 {
                     NavigateToInstalledModule(installedResult);
                     ShowModuleInstallStatus(InfoBarSeverity.Success,
                         requiresRestart
-                            ? localizer.GetText("ModuleUpdateStagedMessage")
-                            : localizer.GetText("ModuleInstalledMessage"));
+                            ? localizer.GetText("ModuleUpdateStagedMessage", installedModuleNames)
+                            : localizer.GetText("ModuleInstalledMessage", installedModuleNames));
                 });
 
                 if (requiresRestart)
@@ -378,6 +389,14 @@ public sealed partial class SettingsWindow :
         }
 
         Navigate(path);
+    }
+
+    private string ResolveInstalledModuleNames(ModuleInstallResult result)
+    {
+        ModulesViewModel? modules = ViewModel.OfType<ModulesViewModel>().FirstOrDefault();
+
+        return string.Join(", ", result.ComponentIds.Select(componentId =>
+            modules?.FindDisplayNameForComponent(componentId) ?? componentId));
     }
 
     private void ShowModuleInstallStatus(InfoBarSeverity severity,

@@ -130,15 +130,22 @@ internal static partial class GlanceModuleLoader
 
         try
         {
-            if (!DynamicLoader.TryLoadPri(Path.ChangeExtension(path, ".pri")))
+            AssemblyName assemblyName = AssemblyName.GetAssemblyName(path);
+            Assembly? existingAssembly = AssemblyLoadContext.Default.Assemblies.FirstOrDefault(candidate =>
+                AssemblyName.ReferenceMatchesDefinition(candidate.GetName(), assemblyName));
+
+            if (existingAssembly is null && !DynamicLoader.TryLoadPri(Path.ChangeExtension(path, ".pri")))
             {
                 return modules;
             }
 
-            AssemblyName assemblyName = AssemblyName.GetAssemblyName(path);
-            Assembly assembly = AssemblyLoadContext.Default.Assemblies.FirstOrDefault(candidate => AssemblyName.ReferenceMatchesDefinition(candidate.GetName(), assemblyName)) ?? AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
-            RegisterNativeLibraryResolver(assembly);
-            RegisterXamlMetadataProviders(assembly);
+            Assembly assembly = existingAssembly ?? AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
+
+            if (existingAssembly is null)
+            {
+                RegisterNativeLibraryResolver(assembly);
+                RegisterXamlMetadataProviders(assembly);
+            }
 
             foreach (Type type in GetLoadableTypes(assembly).Where(type => !type.IsAbstract && typeof(IGlanceModule).IsAssignableFrom(type)))
             {

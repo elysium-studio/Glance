@@ -13,8 +13,9 @@
   <data name="ModuleDropTargetText.Text" xml:space="preserve"><value>Drop to install this module</value></data>
   <data name="ModuleInstallInvalidPackageMessage" xml:space="preserve"><value>Drop a valid .glance module package.</value></data>
   <data name="ModuleInstallFailedMessage" xml:space="preserve"><value>The module could not be installed.</value></data>
-  <data name="ModuleInstalledMessage" xml:space="preserve"><value>The module was installed and added to its module group.</value></data>
-  <data name="ModuleUpdateStagedMessage" xml:space="preserve"><value>The module update is ready and will be applied the next time Glance starts.</value></data>
+  <data name="ModuleInstalledMessage" xml:space="preserve"><value>{0} was installed and added to its module group.</value></data>
+  <data name="ModuleUpdateStagedMessage" xml:space="preserve"><value>The update for {0} is ready and will be applied the next time Glance starts.</value></data>
+  <data name="ModuleRemovedMessage" xml:space="preserve"><value>{0} was removed from Glance.</value></data>
   <data name="ModuleUpdateRestartDialogTitle" xml:space="preserve"><value>Restart Glance to update?</value></data>
   <data name="ModuleUpdateRestartDialogMessage" xml:space="preserve"><value>The module update is ready. Restart Glance now to use the new version, or restart later when it is convenient.</value></data>
   <data name="ModuleUpdateRestartDialogPrimaryButton" xml:space="preserve"><value>Restart now</value></data>

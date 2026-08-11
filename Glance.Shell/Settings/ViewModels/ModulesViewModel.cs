@@ -63,6 +63,11 @@ public sealed partial class ModulesViewModel :
         .FirstOrDefault(category => category.OfType<ModuleSettingsItemViewModel>()
             .Any(item => string.Equals(item.Id, componentId, StringComparison.OrdinalIgnoreCase)));
 
+    public string? FindDisplayNameForComponent(string componentId) => categories.Values
+        .SelectMany(category => category.OfType<ModuleSettingsItemViewModel>())
+        .FirstOrDefault(item => string.Equals(item.Id, componentId, StringComparison.OrdinalIgnoreCase))
+        ?.DisplayName;
+
     public override void Dispose()
     {
         preferences.ComponentsAdded -= HandleComponentsAdded;
@@ -145,6 +150,10 @@ public sealed partial class ModulesViewModel :
         GlanceComponentsRemovedEventArgs args)
     {
         HashSet<string> ids = [with(StringComparer.OrdinalIgnoreCase), .. args.Components.Select(component => component.Id)];
+        string[] displayNames = [.. categories.Values
+            .SelectMany(category => category.OfType<ModuleSettingsItemViewModel>())
+            .Where(item => ids.Contains(item.Id))
+            .Select(item => item.DisplayName)];
 
         foreach (SettingsCategoryViewModel category in categories.Values.ToArray())
         {
@@ -159,6 +168,11 @@ public sealed partial class ModulesViewModel :
                 _ = Remove(category);
                 _ = categories.Remove(category.Id);
             }
+        }
+
+        if (displayNames.Length > 0)
+        {
+            _ = Messenger.Send(new ModuleUninstalledEventArgs(displayNames));
         }
     }
 
