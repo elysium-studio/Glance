@@ -36,7 +36,6 @@ public sealed partial class DesktopIslandView :
     private const int AttentionExpansionDurationMs = 4000;
     private const int ContextualDragExitDelayMs = 160;
     private const int InteractionExitDelayMs = 240;
-    private const int ModuleReorderRemoveButtonDurationMs = 140;
     private const float ModuleReorderEdgeFadeWidth = 32;
     private const double ModuleReorderSideItemMinimumOpacity = 0.68;
     private const int StartupAttentionDelayMs = 2500;
@@ -1231,7 +1230,6 @@ public sealed partial class DesktopIslandView :
         if (sender is FrameworkElement element && !ReferenceEquals(element, draggedModuleOrderItem))
         {
             FluentMotion.PlayRouteTargetHover(element);
-            SetModuleOrderRemoveButtonState(element, true);
         }
     }
 
@@ -1241,54 +1239,7 @@ public sealed partial class DesktopIslandView :
         if (sender is FrameworkElement element && !ReferenceEquals(element, draggedModuleOrderItem))
         {
             FluentMotion.PlayRouteTargetRelease(element);
-            SetModuleOrderRemoveButtonState(element, false);
         }
-    }
-
-    private void HandleRemoveModuleClicked(object sender,
-        RoutedEventArgs args)
-    {
-        if (sender is Button { Tag: string componentId } button)
-        {
-            button.IsHitTestVisible = false;
-            ViewModel.RemoveModuleFromOrder(componentId);
-            UpdateModuleReorderScrollButtons(GetModuleReorderScrollViewer());
-        }
-    }
-
-    private void SetModuleOrderRemoveButtonState(FrameworkElement element,
-        bool isVisible)
-    {
-        Button? button = FindVisualDescendant<Button>(element);
-
-        if (button?.Tag is not string)
-        {
-            return;
-        }
-
-        bool canRemove = isVisible && ViewModel.ModuleOrder.Count > 1;
-        button.IsHitTestVisible = canRemove;
-        Visual visual = ElementCompositionPreview.GetElementVisual(button);
-        Compositor buttonCompositor = visual.Compositor;
-        CubicBezierEasingFunction easing = buttonCompositor.CreateCubicBezierEasingFunction(
-            new Vector2(0.16f, 1),
-            new Vector2(0.3f, 1));
-        float targetOpacity = canRemove ? 1 : 0;
-        float targetScale = canRemove ? 1 : 0.82f;
-        visual.CenterPoint = new Vector3((float)button.ActualWidth / 2,
-            (float)button.ActualHeight / 2,
-            0);
-
-        ScalarKeyFrameAnimation opacity = buttonCompositor.CreateScalarKeyFrameAnimation();
-        opacity.InsertKeyFrame(1, targetOpacity, easing);
-        opacity.Duration = TimeSpan.FromMilliseconds(ModuleReorderRemoveButtonDurationMs);
-
-        Vector3KeyFrameAnimation scale = buttonCompositor.CreateVector3KeyFrameAnimation();
-        scale.InsertKeyFrame(1, new Vector3(targetScale, targetScale, 1), easing);
-        scale.Duration = TimeSpan.FromMilliseconds(ModuleReorderRemoveButtonDurationMs);
-
-        visual.StartAnimation(nameof(Visual.Opacity), opacity);
-        visual.StartAnimation(nameof(Visual.Scale), scale);
     }
 
     private void HandleModuleReorderDragStarting(object sender,
