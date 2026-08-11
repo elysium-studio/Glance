@@ -116,7 +116,7 @@ public sealed partial class SettingsWindow :
 
         if (file is not null)
         {
-            await InstallModuleFilesAsync((StorageFile[])[file]);
+            await InstallModulePathsAsync((string[])[file.Path]);
         }
     }
 
@@ -150,52 +150,56 @@ public sealed partial class SettingsWindow :
         }
 
         DragOperationDeferral deferral = args.GetDeferral();
+        args.AcceptedOperation = DataPackageOperation.Copy;
 
         try
         {
             IReadOnlyList<IStorageItem> items = await args.DataView.GetStorageItemsAsync();
-            StorageFile[] packages = [.. items.OfType<StorageFile>()
-                .Where(file => string.Equals(file.FileType, ".glance", StringComparison.OrdinalIgnoreCase))];
+            string[] packages = [.. items.OfType<StorageFile>()
+                .Where(file => string.Equals(file.FileType, ".glance", StringComparison.OrdinalIgnoreCase))
+                .Select(file => file.Path)];
 
             if (packages.Length == 0)
             {
-                ShowModuleInstallStatus(InfoBarSeverity.Error,
-                    localizer.GetText("ModuleInstallInvalidPackageMessage"));
+                await RunOnDispatcherAsync(() => ShowModuleInstallStatus(InfoBarSeverity.Error,
+                    localizer.GetText("ModuleInstallInvalidPackageMessage")));
                 return;
             }
 
-            args.AcceptedOperation = DataPackageOperation.Copy;
-            await InstallModuleFilesAsync(packages);
+            await InstallModulePathsAsync(packages);
         }
         catch (COMException exception)
         {
-            ShowModuleInstallStatus(InfoBarSeverity.Error, exception.Message);
+            await RunOnDispatcherAsync(() => ShowModuleInstallStatus(InfoBarSeverity.Error, exception.Message));
         }
         finally
         {
-            deferral.Complete();
+            await RunOnDispatcherAsync(deferral.Complete);
         }
     }
 
-    private async Task InstallModuleFilesAsync(IEnumerable<StorageFile> files)
+    private async Task InstallModulePathsAsync(IEnumerable<string> paths)
     {
-        AddModuleButton.IsEnabled = false;
-        ModuleInstallInfoBar.IsOpen = false;
+        await RunOnDispatcherAsync(() =>
+        {
+            AddModuleButton.IsEnabled = false;
+            ModuleInstallInfoBar.IsOpen = false;
+        });
         ModuleInstallResult? lastResult = null;
         bool restartRequired = false;
 
         try
         {
-            foreach (StorageFile file in files)
+            foreach (string path in paths)
             {
-                ModuleInstallResult result = await moduleInstallations.InstallAsync(file.Path);
+                ModuleInstallResult result = await moduleInstallations.InstallAsync(path);
 
                 if (!result.IsSuccessful)
                 {
-                    ShowModuleInstallStatus(InfoBarSeverity.Error,
+                    await RunOnDispatcherAsync(() => ShowModuleInstallStatus(InfoBarSeverity.Error,
                         string.IsNullOrWhiteSpace(result.ErrorMessage)
                             ? localizer.GetText("ModuleInstallFailedMessage")
-                            : result.ErrorMessage);
+                            : result.ErrorMessage));
                     return;
                 }
 
@@ -205,13 +209,19 @@ public sealed partial class SettingsWindow :
 
             if (lastResult is not null)
             {
-                NavigateToInstalledModule(lastResult);
-                ShowModuleInstallStatus(InfoBarSeverity.Success,
-                    restartRequired
-                        ? localizer.GetText("ModuleUpdateStagedMessage")
-                        : localizer.GetText("ModuleInstalledMessage"));
+                ModuleInstallResult installedResult = lastResult;
+                bool requiresRestart = restartRequired;
 
-                if (restartRequired)
+                await RunOnDispatcherAsync(() =>
+                {
+                    NavigateToInstalledModule(installedResult);
+                    ShowModuleInstallStatus(InfoBarSeverity.Success,
+                        requiresRestart
+                            ? localizer.GetText("ModuleUpdateStagedMessage")
+                            : localizer.GetText("ModuleInstalledMessage"));
+                });
+
+                if (requiresRestart)
                 {
                     await PromptForModuleUpdateRestartAsync();
                 }
@@ -219,14 +229,14 @@ public sealed partial class SettingsWindow :
         }
         catch (Exception exception)
         {
-            ShowModuleInstallStatus(InfoBarSeverity.Error,
+            await RunOnDispatcherAsync(() => ShowModuleInstallStatus(InfoBarSeverity.Error,
                 string.IsNullOrWhiteSpace(exception.Message)
                     ? localizer.GetText("ModuleInstallFailedMessage")
-                    : exception.Message);
+                    : exception.Message));
         }
         finally
         {
-            AddModuleButton.IsEnabled = true;
+            await RunOnDispatcherAsync(() => AddModuleButton.IsEnabled = true);
         }
     }
 
@@ -241,12 +251,7 @@ public sealed partial class SettingsWindow :
 
         try
         {
-            RestartForModuleUpdateDialog dialog = new(localizer)
-            {
-                XamlRoot = ((FrameworkElement)Content).XamlRoot
-            };
-
-            if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+            if (await ShowModuleUpdateRestartDialogAsync() == ContentDialogResult.Primary)
             {
                 await RestartApplicationAsync();
             }
@@ -272,10 +277,80 @@ public sealed partial class SettingsWindow :
         _ = Process.Start(startInfo)
             ?? throw new InvalidOperationException("Glance could not start the replacement process.");
 
-        isClosing = true;
-        AddModuleButton.IsEnabled = false;
-        Close();
+        await RunOnDispatcherAsync(() =>
+        {
+            isClosing = true;
+            AddModuleButton.IsEnabled = false;
+            Close();
+        });
         await applicationLifetime.ExitAsync();
+    }
+
+    private Task<ContentDialogResult> ShowModuleUpdateRestartDialogAsync()
+    {
+        TaskCompletionSource<ContentDialogResult> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        void ShowDialog()
+        {
+            RestartForModuleUpdateDialog dialog = new(localizer)
+            {
+                XamlRoot = ((FrameworkElement)Content).XamlRoot
+            };
+
+            _ = CompleteAsync();
+
+            async Task CompleteAsync()
+            {
+                try
+                {
+                    completion.TrySetResult(await dialog.ShowAsync());
+                }
+                catch (Exception exception)
+                {
+                    completion.TrySetException(exception);
+                }
+            }
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            ShowDialog();
+        }
+        else if (!DispatcherQueue.TryEnqueue(ShowDialog))
+        {
+            completion.TrySetException(new InvalidOperationException("The settings dispatcher rejected the module restart dialog."));
+        }
+
+        return completion.Task;
+    }
+
+    private Task RunOnDispatcherAsync(Action action)
+    {
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            action();
+            return Task.CompletedTask;
+        }
+
+        TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (!DispatcherQueue.TryEnqueue(() =>
+            {
+                try
+                {
+                    action();
+                    completion.TrySetResult();
+                }
+                catch (Exception exception)
+                {
+                    completion.TrySetException(exception);
+                }
+            }))
+        {
+            completion.TrySetException(new InvalidOperationException("The settings dispatcher rejected the operation."));
+        }
+
+        return completion.Task;
     }
 
     private void NavigateToInstalledModule(ModuleInstallResult result)
