@@ -16,26 +16,20 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <Grid RowSpacing="2">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="20" />
-                            <RowDefinition Height="4" />
-                            <RowDefinition Height="18" />
-                        </Grid.RowDefinitions>
+                    <StackPanel VerticalAlignment="Center" Spacing="1">
                         <Controls:MarqueeTextBlock
                             Height="20"
                             FontSize="14"
                             FontWeight="SemiBold"
                             Text="{x:Bind Name, Mode=OneWay}"
                             ToolTipService.ToolTip="{x:Bind Name, Mode=OneWay}" />
-                        <ProgressBar Grid.Row="1" Height="3" Maximum="100" Value="{x:Bind Progress, Mode=OneWay}" />
-                        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="6">
+                        <StackPanel Height="16" VerticalAlignment="Center" Orientation="Horizontal" Spacing="6">
                             <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind StateText, Mode=OneWay}" />
                             <TextBlock Foreground="{ThemeResource TextFillColorTertiaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="&#x2022;" />
                             <TextBlock Foreground="{ThemeResource GlanceTorrentDownloadBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind DownloadSpeedText, Mode=OneWay}" />
                             <TextBlock Foreground="{ThemeResource TextFillColorTertiaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind ProgressText, Mode=OneWay}" />
                         </StackPanel>
-                    </Grid>
+                    </StackPanel>
                     <Button
                         Grid.Column="1"
                         Width="32"
