@@ -2,9 +2,8 @@ using Elysium.Platform.Windows;
 using System;
 using System.Diagnostics;
 using System.Globalization;
-using Velopack;
 using Microsoft.Windows.AppLifecycle;
-using System.Threading.Tasks;
+using Velopack;
 
 namespace Glance.Shell.WinUI;
 
@@ -13,14 +12,15 @@ public static class Start
     private const string RestartAfterArgument = "--restart-after";
 
     [STAThread]
-    public static async Task Main(string[] args)
+    public static void Main(string[] args)
     {
         WaitForRestartSource(args);
         AppActivationArguments activation = AppInstance.GetCurrent().GetActivatedEventArgs();
         AppInstance instance = AppInstance.FindOrRegisterForKey($"{Environment.UserName}.Glance");
+
         if (!instance.IsCurrent)
         {
-            await instance.RedirectActivationToAsync(activation);
+            instance.RedirectActivationToAsync(activation).GetAwaiter().GetResult();
             return;
         }
 
