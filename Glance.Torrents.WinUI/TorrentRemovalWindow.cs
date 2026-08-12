@@ -29,13 +29,14 @@ internal sealed class TorrentRemovalWindow
     private readonly Border smokeLayer;
     private readonly Window window;
     private bool closed;
+    private TorrentRemovalChoice selectedChoice = TorrentRemovalChoice.Cancel;
 
     private TorrentRemovalWindow(ModuleResourceTextLocalizer<TorrentModule> localizer,
         WindowId ownerWindowId)
     {
         TextBlock description = new()
         {
-            Width = 480,
+            Width = 600,
             Text = localizer.GetText("RemoveDescription"),
             TextWrapping = TextWrapping.Wrap,
             Style = Microsoft.UI.Xaml.Application.Current.Resources["BodyTextBlockStyle"] as Style
@@ -49,8 +50,10 @@ internal sealed class TorrentRemovalWindow
             CloseButtonText = localizer.GetText("Cancel"),
             DefaultButton = ContentDialogButton.Close
         };
-        dialog.Resources["ContentDialogMaxWidth"] = 560d;
+        dialog.Resources["ContentDialogMaxWidth"] = 680d;
         dialog.Resources["ContentDialogSmokeFill"] = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
+        dialog.PrimaryButtonClick += HandlePrimaryButtonClick;
+        dialog.SecondaryButtonClick += HandleSecondaryButtonClick;
         dialog.Closing += HandleDialogClosing;
 
         smokeLayer = new Border
@@ -113,13 +116,8 @@ internal sealed class TorrentRemovalWindow
         {
             AnimateSmoke(1);
             dialog.XamlRoot = root.XamlRoot;
-            ContentDialogResult result = await dialog.ShowAsync(ContentDialogPlacement.InPlace);
-            completion.TrySetResult(result switch
-            {
-                ContentDialogResult.Primary => TorrentRemovalChoice.RemoveFromList,
-                ContentDialogResult.Secondary => TorrentRemovalChoice.RemoveAndDeleteData,
-                _ => TorrentRemovalChoice.Cancel
-            });
+            _ = await dialog.ShowAsync(ContentDialogPlacement.InPlace);
+            completion.TrySetResult(selectedChoice);
         }
         catch (Exception exception)
         {
@@ -133,6 +131,12 @@ internal sealed class TorrentRemovalWindow
 
     private void HandleDialogClosing(ContentDialog sender,
         ContentDialogClosingEventArgs args) => AnimateSmoke(0);
+
+    private void HandlePrimaryButtonClick(ContentDialog sender,
+        ContentDialogButtonClickEventArgs args) => selectedChoice = TorrentRemovalChoice.RemoveFromList;
+
+    private void HandleSecondaryButtonClick(ContentDialog sender,
+        ContentDialogButtonClickEventArgs args) => selectedChoice = TorrentRemovalChoice.RemoveAndDeleteData;
 
     private void HandleWindowClosed(object sender,
         WindowEventArgs args)
@@ -163,6 +167,8 @@ internal sealed class TorrentRemovalWindow
         }
 
         closed = true;
+        dialog.PrimaryButtonClick -= HandlePrimaryButtonClick;
+        dialog.SecondaryButtonClick -= HandleSecondaryButtonClick;
         dialog.Closing -= HandleDialogClosing;
         window.Closed -= HandleWindowClosed;
         window.Close();
