@@ -27,8 +27,7 @@ public sealed class GlanceIntentService(ModulePreferenceService modulePreference
                 .. intents.Values
                     .Where(intent => activeComponents.Contains(intent.Descriptor.TargetComponentId) && intent.CanHandle(kind))
                     .Select(intent => intent.Descriptor)
-                    .OrderByDescending(intent => intent.MatchPriority)
-                    .ThenBy(intent => intent.DisplayName)
+                    .OrderBy(intent => intent.DisplayName)
             ];
         }
     }
@@ -42,8 +41,7 @@ public sealed class GlanceIntentService(ModulePreferenceService modulePreference
                 .. intents.Values
                     .Where(intent => modulePreferences.IsEnabled(intent.Descriptor.TargetComponentId) && intent.CanHandle(context))
                     .Select(intent => intent.Descriptor)
-                    .OrderByDescending(intent => intent.MatchPriority)
-                    .ThenBy(intent => intent.DisplayName)
+                    .OrderBy(intent => intent.DisplayName)
             ];
         }
     }

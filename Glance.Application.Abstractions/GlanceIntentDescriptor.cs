@@ -5,5 +5,4 @@ public sealed record GlanceIntentDescriptor(string Id,
     string DisplayName,
     string Description,
     string Glyph,
-    string GlyphFontFamily = "Segoe Fluent Icons",
-    int MatchPriority = 0);
+    string GlyphFontFamily = "Segoe Fluent Icons");

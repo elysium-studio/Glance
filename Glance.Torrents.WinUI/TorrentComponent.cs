@@ -58,7 +58,7 @@ public sealed class TorrentComponent : IGlanceComponent, IGlanceConnectedAnimati
     public object CompactAnimationElement { get; }
     public object ExpandedAnimationElement { get; }
     public bool IsAttentionEnabledByDefault => false;
-    public GlanceIntentDescriptor Descriptor => new("Torrent.Add", Id, localizer.GetText("RouteDisplayName"), localizer.GetText("RouteDescription"), IconGlyph, MatchPriority: 100);
+    public GlanceIntentDescriptor Descriptor => new("Torrent.Add", Id, localizer.GetText("RouteDisplayName"), localizer.GetText("RouteDescription"), IconGlyph);
 
     public bool CanHandle(GlanceContentKind kind) => kind is GlanceContentKind.FilesAndFolders or GlanceContentKind.Text or GlanceContentKind.WebLink;
     public bool CanHandle(GlanceContentContext context) => TorrentInput.TryCreate(context, out _);

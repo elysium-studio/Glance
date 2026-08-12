@@ -50,14 +50,24 @@ public sealed class GlanceIntentServiceTests
     }
 
     [Fact]
-    public void MoreSpecificIntentIsReturnedBeforeGenericIntent()
+    public void DescriptorRetainsModuleBinaryConstructorContract()
+    {
+        Type[] parameterTypes = Enumerable.Repeat(typeof(string), 6).ToArray();
+
+        Assert.NotNull(typeof(GlanceIntentDescriptor).GetConstructor(parameterTypes));
+    }
+
+    [Fact]
+    public void ContextReturnsEveryCompatibleRouteForTheSelector()
     {
         GlanceIntentService service = CreateService(new TestComponent("Torrent"));
-        TestIntent generic = new("Generic.Share", "Torrent", GlanceContentKind.WebLink);
-        TestIntent specific = new("Torrent.Add", "Torrent", GlanceContentKind.WebLink, 100);
-        service.Register([generic, specific]);
+        TestIntent torrent = new("Torrent.Add", "Torrent", GlanceContentKind.FilesAndFolders);
+        TestIntent shelf = new("DropShelf.Share", "Torrent", GlanceContentKind.FilesAndFolders);
+        service.Register([torrent, shelf]);
+        GlanceContentContext context = new(GlanceContentKind.FilesAndFolders,
+            [new GlanceStorageItem("sample.torrent", "sample.torrent", false)]);
 
-        Assert.Equal([specific.Descriptor, generic.Descriptor], service.GetIntents(GlanceContentKind.WebLink));
+        Assert.Equal(2, service.GetIntents(context).Count);
     }
 
     private static GlanceIntentService CreateService(IGlanceComponent component)
@@ -69,11 +79,10 @@ public sealed class GlanceIntentServiceTests
 
     private sealed class TestIntent(string id,
         string targetComponentId,
-        GlanceContentKind kind,
-        int matchPriority = 0) :
+        GlanceContentKind kind) :
         IGlanceIntent
     {
-        public GlanceIntentDescriptor Descriptor { get; } = new(id, targetComponentId, id, id, "\uE718", MatchPriority: matchPriority);
+        public GlanceIntentDescriptor Descriptor { get; } = new(id, targetComponentId, id, id, "\uE718");
 
         public GlanceContentContext? Context { get; private set; }
 
