@@ -11,12 +11,15 @@ public sealed class TorrentAddCoordinator(ITorrentEngineService engine) : IAsync
 
     public async Task<TorrentMetadataSession> PrepareAsync(TorrentInput input,
         string downloadPath,
-        TimeSpan timeout,
+        TimeSpan magnetMetadataTimeout,
         CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != 0, this);
         using CancellationTokenSource linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, disposalCancellation.Token);
-        TorrentMetadataSession session = await engine.ResolveMetadataAsync(input, downloadPath, timeout, linked.Token);
+        TorrentMetadataSession session = await engine.ResolveMetadataAsync(input,
+            downloadPath,
+            magnetMetadataTimeout,
+            linked.Token);
         await synchronization.WaitAsync(linked.Token);
 
         try

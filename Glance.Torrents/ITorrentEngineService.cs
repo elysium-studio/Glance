@@ -12,7 +12,7 @@ public interface ITorrentEngineService : IAsyncDisposable
 
     Task<TorrentMetadataSession> ResolveMetadataAsync(TorrentInput input,
         string downloadPath,
-        TimeSpan timeout,
+        TimeSpan magnetMetadataTimeout,
         CancellationToken cancellationToken = default);
 
     Task ConfirmAsync(string sessionId,

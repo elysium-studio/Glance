@@ -66,11 +66,20 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
         }
     }
 
-    public async Task<TorrentMetadataSession> ResolveMetadataAsync(TorrentInput input, string downloadPath, TimeSpan timeout, CancellationToken cancellationToken = default)
+    public async Task<TorrentMetadataSession> ResolveMetadataAsync(TorrentInput input,
+        string downloadPath,
+        TimeSpan magnetMetadataTimeout,
+        CancellationToken cancellationToken = default)
     {
         ClientEngine current = GetEngine();
-        using CancellationTokenSource timeoutCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, disposalCancellation.Token);
-        timeoutCancellation.CancelAfter(timeout);
+        using CancellationTokenSource operationCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
+            disposalCancellation.Token);
+
+        if (input.Kind == TorrentInputKind.MagnetLink)
+        {
+            operationCancellation.CancelAfter(magnetMetadataTimeout);
+        }
+
         try
         {
             byte[] bytes;
@@ -78,17 +87,17 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
             if (input.Kind == TorrentInputKind.TorrentFile)
             {
                 if (!TorrentInputValidator.IsValidTorrentPath(input.Value)) throw new ArgumentException("A valid .torrent file is required.", nameof(input));
-                bytes = await File.ReadAllBytesAsync(input.Value, timeoutCancellation.Token);
+                bytes = await File.ReadAllBytesAsync(input.Value, operationCancellation.Token);
             }
             else
             {
                 MagnetLink magnet = MagnetLink.Parse(input.Value);
-                bytes = (await current.DownloadMetadataAsync(magnet, timeoutCancellation.Token)).ToArray();
+                bytes = (await current.DownloadMetadataAsync(magnet, operationCancellation.Token)).ToArray();
             }
 
-            timeoutCancellation.Token.ThrowIfCancellationRequested();
+            operationCancellation.Token.ThrowIfCancellationRequested();
             Torrent torrent = await Task.Run(() => Torrent.Load(bytes),
-                timeoutCancellation.Token).WaitAsync(timeoutCancellation.Token);
+                operationCancellation.Token).WaitAsync(operationCancellation.Token);
             string id = torrent.InfoHashes.V1OrV2.ToHex();
             string sessionId = Guid.NewGuid().ToString("N");
             TorrentMetadataSession session = new(sessionId, id, input, torrent.Name, torrent.Size,
@@ -98,11 +107,11 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
             if (!pending.TryAdd(sessionId, new PendingMetadata(session, bytes))) throw new InvalidOperationException("Could not create the torrent confirmation session.");
             return session;
         }
-        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested && !disposalCancellation.IsCancellationRequested)
+        catch (OperationCanceledException) when (input.Kind == TorrentInputKind.MagnetLink &&
+            !cancellationToken.IsCancellationRequested &&
+            !disposalCancellation.IsCancellationRequested)
         {
-            throw new TimeoutException(input.Kind == TorrentInputKind.TorrentFile
-                ? "The torrent file took too long to read."
-                : "Magnet metadata retrieval timed out.");
+            throw new TimeoutException("Magnet metadata retrieval timed out.");
         }
     }
 

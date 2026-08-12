@@ -110,12 +110,9 @@ internal sealed class TorrentConfirmationWindow
     {
         try
         {
-            TimeSpan timeout = input.Kind == TorrentInputKind.TorrentFile
-                ? TimeSpan.FromSeconds(5)
-                : TimeSpan.FromSeconds(45);
             session = await coordinator.PrepareAsync(input,
                 downloadPath,
-                timeout,
+                TimeSpan.FromSeconds(45),
                 cancellation.Token);
             viewModel = new TorrentConfirmationViewModel();
             viewModel.Load(session);
