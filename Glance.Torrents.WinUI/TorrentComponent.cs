@@ -31,7 +31,7 @@ public sealed class TorrentComponent : IGlanceComponent, IGlanceConnectedAnimati
         this.attention = attention;
         this.localizer = localizer;
         TorrentCompactView compact = new(viewModel);
-        expandedView = new TorrentExpandedView(viewModel);
+        expandedView = new TorrentExpandedView(viewModel, localizer);
         dispatcher = compact.DispatcherQueue;
         CompactContent = compact;
         ExpandedContent = expandedView;
@@ -40,8 +40,8 @@ public sealed class TorrentComponent : IGlanceComponent, IGlanceConnectedAnimati
         engine.SnapshotUpdated += HandleSnapshotUpdated;
         engine.TorrentCompleted += HandleTorrentCompleted;
         options.Changed += HandleOptionsChanged;
-        expandedView.PauseRequested += HandlePauseRequested;
-        expandedView.ResumeRequested += HandleResumeRequested;
+        expandedView.PauseAllRequested += HandlePauseAllRequested;
+        expandedView.ResumeAllRequested += HandleResumeAllRequested;
         expandedView.RemoveRequested += HandleRemoveRequested;
         initialization = engine.InitializeAsync(cancellation.Token);
     }
@@ -98,8 +98,20 @@ public sealed class TorrentComponent : IGlanceComponent, IGlanceConnectedAnimati
     {
         try { await initialization; await engine.ApplySettingsAsync(settings, cancellation.Token); } catch (OperationCanceledException) { }
     }
-    private async void HandlePauseRequested(object? sender, string id) { try { await engine.PauseAsync(id); } catch { } }
-    private async void HandleResumeRequested(object? sender, string id) { try { await engine.ResumeAsync(id); } catch { } }
+    private async void HandlePauseAllRequested(object? sender, EventArgs args)
+    {
+        foreach (string id in viewModel.GetPausableIds())
+        {
+            try { await engine.PauseAsync(id); } catch { }
+        }
+    }
+    private async void HandleResumeAllRequested(object? sender, EventArgs args)
+    {
+        foreach (string id in viewModel.GetResumableIds())
+        {
+            try { await engine.ResumeAsync(id); } catch { }
+        }
+    }
     private async void HandleRemoveRequested(object? sender, string id)
     {
         ContentDialog dialog = new()
@@ -125,8 +137,8 @@ public sealed class TorrentComponent : IGlanceComponent, IGlanceConnectedAnimati
         engine.SnapshotUpdated -= HandleSnapshotUpdated;
         engine.TorrentCompleted -= HandleTorrentCompleted;
         options.Changed -= HandleOptionsChanged;
-        expandedView.PauseRequested -= HandlePauseRequested;
-        expandedView.ResumeRequested -= HandleResumeRequested;
+        expandedView.PauseAllRequested -= HandlePauseAllRequested;
+        expandedView.ResumeAllRequested -= HandleResumeAllRequested;
         expandedView.RemoveRequested -= HandleRemoveRequested;
         await coordinator.DisposeAsync();
         promptLock.Dispose();

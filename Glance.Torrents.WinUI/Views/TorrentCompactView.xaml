@@ -1,15 +1,56 @@
-<UserControl x:Class="Glance.Torrents.WinUI.TorrentCompactView" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <UserControl.Resources><ResourceDictionary Source="../Themes/Torrent.xaml" /></UserControl.Resources>
+<UserControl
+    x:Class="Glance.Torrents.WinUI.TorrentCompactView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Controls="using:Elysium.UI.Controls.WinUI"
+    xmlns:core="using:Glance.Torrents">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/Torrent.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <DataTemplate x:Key="CompactTorrentTemplate" x:DataType="core:TorrentItemViewModel">
+                <Grid Margin="2,0,0,0" ColumnSpacing="6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Controls:MarqueeTextBlock
+                        Height="20"
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        FontWeight="SemiBold"
+                        Text="{x:Bind Name, Mode=OneWay}" />
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="6">
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind ProgressText, Mode=OneWay}" />
+                        <TextBlock Foreground="{ThemeResource GlanceTorrentDownloadBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind DownloadSpeedText, Mode=OneWay}" />
+                    </StackPanel>
+                </Grid>
+            </DataTemplate>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid Padding="12,4" ColumnSpacing="8">
-        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
         <Grid x:Name="StatusIndicator" Width="28" Height="28">
             <FontIcon FontFamily="Segoe Fluent Icons" FontSize="24" Foreground="{ThemeResource GlanceTorrentIconBrush}" Glyph="&#xE896;" />
         </Grid>
-        <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
-            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.ActiveCount, Mode=OneWay}" />
-            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="active" />
-            <FontIcon FontSize="10" Foreground="{ThemeResource GlanceTorrentDownloadBrush}" Glyph="&#xE74B;" />
-            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.TotalDownloadSpeedText, Mode=OneWay}" />
-        </StackPanel>
+        <Controls:MarqueeTextBlock
+            Grid.Column="1"
+            Height="20"
+            VerticalAlignment="Center"
+            FontSize="14"
+            FontWeight="SemiBold"
+            Text="{x:Bind ViewModel.CompactSummary, Mode=OneWay}"
+            Visibility="{x:Bind WhenEmpty(ViewModel.HasTorrents), Mode=OneWay}" />
+        <Controls:CompactFlipView
+            Grid.Column="1"
+            Margin="-22,0,0,0"
+            Background="Transparent"
+            ItemTemplate="{StaticResource CompactTorrentTemplate}"
+            ItemsSource="{x:Bind ViewModel.Torrents}"
+            Visibility="{x:Bind WhenPopulated(ViewModel.HasTorrents), Mode=OneWay}" />
     </Grid>
 </UserControl>

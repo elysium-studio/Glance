@@ -13,4 +13,6 @@ public sealed partial class TorrentCompactView : UserControl
 
     public TorrentsViewModel ViewModel { get; }
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
+    private Visibility WhenEmpty(bool hasTorrents) => hasTorrents ? Visibility.Collapsed : Visibility.Visible;
+    private Visibility WhenPopulated(bool hasTorrents) => hasTorrents ? Visibility.Visible : Visibility.Collapsed;
 }

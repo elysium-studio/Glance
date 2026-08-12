@@ -5,6 +5,7 @@
     <RootNamespace>Glance.Torrents.WinUI</RootNamespace>
     <UseWinUI>true</UseWinUI>
     <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
+    <EnablePreviewFeatures>true</EnablePreviewFeatures>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -19,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Elysium.Platform.Windows" Version="$(ElysiumVersion)" />
+    <PackageReference Include="Elysium.UI.Controls.WinUI" Version="$(ElysiumVersion)" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
     <PackageReference Include="MonoTorrent" Version="3.0.2" />

@@ -59,9 +59,11 @@ public sealed partial class TorrentItemViewModel : ObservableObject
 public sealed partial class TorrentsViewModel : ObservableObject
 {
     [ObservableProperty] private int activeCount;
-    [ObservableProperty] private string compactSummary = "No active downloads";
+    [ObservableProperty] private string compactSummary = "No downloads";
     [ObservableProperty] private string totalDownloadSpeedText = "0 B/s";
     [ObservableProperty] private bool hasTorrents;
+    [ObservableProperty] private bool canPauseAll;
+    [ObservableProperty] private bool canResumeAll;
 
     public ObservableCollection<TorrentItemViewModel> Torrents { get; } = [];
 
@@ -90,14 +92,24 @@ public sealed partial class TorrentsViewModel : ObservableObject
         }
     }
 
+    public IReadOnlyList<string> GetPausableIds() =>
+        [.. Torrents.Where(item => item.CanPause).Select(item => item.Id)];
+
+    public IReadOnlyList<string> GetResumableIds() =>
+        [.. Torrents.Where(item => item.CanResume).Select(item => item.Id)];
+
     private void RefreshAggregate()
     {
         ActiveCount = Torrents.Count(item => item.State is TorrentDownloadState.Downloading or TorrentDownloadState.Checking or TorrentDownloadState.RetrievingMetadata);
         long aggregateSpeed = Torrents.Where(item => item.State == TorrentDownloadState.Downloading)
             .Sum(item => item.DownloadSpeed);
         TotalDownloadSpeedText = TorrentItemViewModel.FormatRate(aggregateSpeed);
-        CompactSummary = ActiveCount == 0 ? "No active downloads" : $"{ActiveCount} active · {TotalDownloadSpeedText}";
+        CompactSummary = Torrents.Count == 0
+            ? "No downloads"
+            : $"{Torrents.Count} {(Torrents.Count == 1 ? "download" : "downloads")} · {TotalDownloadSpeedText}";
         HasTorrents = Torrents.Count > 0;
+        CanPauseAll = Torrents.Any(item => item.CanPause);
+        CanResumeAll = !CanPauseAll && Torrents.Any(item => item.CanResume);
     }
 
 }

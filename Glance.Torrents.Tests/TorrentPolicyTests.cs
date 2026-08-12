@@ -44,6 +44,21 @@ public sealed class TorrentPolicyTests
         Assert.Equal(2, viewModel.ActiveCount);
         Assert.Equal("3 KB/s", viewModel.TotalDownloadSpeedText);
         Assert.True(viewModel.Torrents[0].CanPause);
+        Assert.True(viewModel.CanPauseAll);
+        Assert.False(viewModel.CanResumeAll);
+        Assert.Equal(["a", "b"], viewModel.GetPausableIds());
+    }
+
+    [Fact]
+    public void GlobalResumeIsAvailableOnlyWhenNothingCanPause()
+    {
+        TorrentsViewModel viewModel = new();
+        viewModel.Update(Snapshot("a", TorrentDownloadState.Paused, 0));
+        viewModel.Update(Snapshot("b", TorrentDownloadState.Stopped, 0));
+
+        Assert.False(viewModel.CanPauseAll);
+        Assert.True(viewModel.CanResumeAll);
+        Assert.Equal(["a", "b"], viewModel.GetResumableIds());
     }
 
     private static TorrentTransferSnapshot Snapshot(string id, TorrentDownloadState state, long speed) => new(id, id, state, 50, speed, 0, 1, 5, 0, 10, TimeSpan.Zero);
