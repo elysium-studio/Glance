@@ -43,7 +43,7 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
     public event EventHandler<TorrentSnapshotEventArgs>? SnapshotUpdated;
     public event EventHandler<TorrentCompletedEventArgs>? TorrentCompleted;
 
-    public IReadOnlyCollection<string> ActiveTorrentIds => downloads.Keys.ToArray();
+    public IReadOnlyCollection<string> ActiveTorrentIds => [.. downloads.Keys];
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
@@ -74,33 +74,35 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
         try
         {
             byte[] bytes;
-            Torrent torrent;
+
             if (input.Kind == TorrentInputKind.TorrentFile)
             {
                 if (!TorrentInputValidator.IsValidTorrentPath(input.Value)) throw new ArgumentException("A valid .torrent file is required.", nameof(input));
                 bytes = await File.ReadAllBytesAsync(input.Value, timeoutCancellation.Token);
-                torrent = await Torrent.LoadAsync(bytes);
             }
             else
             {
                 MagnetLink magnet = MagnetLink.Parse(input.Value);
                 bytes = (await current.DownloadMetadataAsync(magnet, timeoutCancellation.Token)).ToArray();
-                torrent = await Torrent.LoadAsync(bytes);
             }
 
             timeoutCancellation.Token.ThrowIfCancellationRequested();
+            Torrent torrent = await Task.Run(() => Torrent.Load(bytes),
+                timeoutCancellation.Token).WaitAsync(timeoutCancellation.Token);
             string id = torrent.InfoHashes.V1OrV2.ToHex();
             string sessionId = Guid.NewGuid().ToString("N");
             TorrentMetadataSession session = new(sessionId, id, input, torrent.Name, torrent.Size,
-                torrent.Files.Select(file => new TorrentMetadataFile(file.Path, file.Length)).ToArray(),
-                torrent.AnnounceUrls.SelectMany(tier => tier).Distinct(StringComparer.OrdinalIgnoreCase).ToArray(),
+                [.. torrent.Files.Select(file => new TorrentMetadataFile(file.Path, file.Length))],
+                [.. torrent.AnnounceUrls.SelectMany(tier => tier).Distinct(StringComparer.OrdinalIgnoreCase)],
                 downloadPath);
             if (!pending.TryAdd(sessionId, new PendingMetadata(session, bytes))) throw new InvalidOperationException("Could not create the torrent confirmation session.");
             return session;
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested && !disposalCancellation.IsCancellationRequested)
         {
-            throw new TimeoutException("Torrent metadata retrieval timed out.");
+            throw new TimeoutException(input.Kind == TorrentInputKind.TorrentFile
+                ? "The torrent file took too long to read."
+                : "Magnet metadata retrieval timed out.");
         }
     }
 
@@ -113,11 +115,11 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
         await File.WriteAllBytesAsync(cachedMetadata, value.Metadata, cancellationToken);
         TorrentManager manager = await GetEngine().AddAsync(cachedMetadata, value.Session.DownloadPath, CreateTorrentSettings(options.Current));
         HashSet<string> selection = new(selectedFiles, StringComparer.OrdinalIgnoreCase);
-        foreach (var file in manager.Files)
+        foreach (ITorrentManagerFile file in manager.Files)
         {
             await manager.SetFilePriorityAsync(file, selection.Contains(file.Path) ? Priority.Normal : Priority.DoNotDownload);
         }
-        TorrentPersistedDownload persisted = new(value.Session.TorrentId, value.Session.Input, value.Session.DownloadPath, selection.ToArray(), false, false);
+        TorrentPersistedDownload persisted = new(value.Session.TorrentId, value.Session.Input, value.Session.DownloadPath, [.. selection], false, false);
         ManagedDownload managed = new(manager, persisted);
         if (!downloads.TryAdd(persisted.Id, managed))
         {
@@ -226,7 +228,7 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
                 HashSet<string> selection = new(persisted.SelectedFiles, StringComparer.OrdinalIgnoreCase);
                 if (manager.HasMetadata)
                 {
-                    foreach (var file in manager.Files) await manager.SetFilePriorityAsync(file, selection.Contains(file.Path) ? Priority.Normal : Priority.DoNotDownload);
+                    foreach (ITorrentManagerFile file in manager.Files) await manager.SetFilePriorityAsync(file, selection.Contains(file.Path) ? Priority.Normal : Priority.DoNotDownload);
                 }
                 ManagedDownload managed = new(manager, persisted);
                 downloads[persisted.Id] = managed;
@@ -334,7 +336,7 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
     {
         Directory.CreateDirectory(rootPath);
         string temporary = statePath + ".tmp";
-        TorrentStateDocument state = new(downloads.Values.Select(value => value.Persisted).ToArray());
+        TorrentStateDocument state = new([.. downloads.Values.Select(value => value.Persisted)]);
         await using (FileStream stream = File.Create(temporary))
         {
             await JsonSerializer.SerializeAsync(stream, state, TorrentJsonContext.Default.TorrentStateDocument, cancellationToken);
