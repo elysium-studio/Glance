@@ -282,7 +282,7 @@ internal sealed class TorrentConfirmationWindow
         {
             Content = localizer.GetText("Browse"),
             Margin = new Thickness(12, 0, 0, 0),
-            MinWidth = 88
+            Width = 132
         };
         browseButton.Click += HandleBrowseClicked;
         Grid.SetRow(browseButton, 1);
@@ -371,8 +371,7 @@ internal sealed class TorrentConfirmationWindow
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center
         };
-        selectAll.Checked += HandleSelectAllChanged;
-        selectAll.Unchecked += HandleSelectAllChanged;
+        selectAll.Click += HandleSelectAllClicked;
         header.Children.Add(selectAll);
 
         TextBlock nameHeader = new()
@@ -472,15 +471,17 @@ internal sealed class TorrentConfirmationWindow
         }
     }
 
-    private void HandleSelectAllChanged(object sender,
+    private void HandleSelectAllClicked(object sender,
         RoutedEventArgs args)
     {
-        if (isUpdatingSelectAll || ((CheckBox)sender).IsChecked is not bool isSelected)
+        if (isUpdatingSelectAll || viewModel is null)
         {
             return;
         }
 
+        bool isSelected = viewModel.Files.Any(file => !file.IsSelected);
         isUpdatingSelectAll = true;
+        ((CheckBox)sender).IsChecked = isSelected;
 
         foreach (CheckBox checkBox in fileSelectionControls)
         {
