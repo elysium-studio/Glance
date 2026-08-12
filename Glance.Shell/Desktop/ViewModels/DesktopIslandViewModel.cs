@@ -401,25 +401,8 @@ public sealed partial class DesktopIslandViewModel :
 
     private void HandleActiveComponentsChanged(object? sender, EventArgs args) => dispatcher.Dispatch(ApplyPreferences);
 
-    private void HandleComponentsAdded(object? sender, GlanceComponentsAddedEventArgs args) => dispatcher.Dispatch(() =>
-                                                                                                    {
-                                                                                                        ApplyPreferences();
-
-                                                                                                        string? componentId = args.Components
-                                                                                                            .Select(component => component.Id)
-                                                                                                            .FirstOrDefault(id => components.Any(component => string.Equals(component.Id, id, StringComparison.OrdinalIgnoreCase)));
-
-                                                                                                        if (componentId is null)
-                                                                                                        {
-                                                                                                            return;
-                                                                                                        }
-
-                                                                                                        SelectedIndex = components
-                                                                                                            .Select((component, index) => (component, index))
-                                                                                                            .First(item => string.Equals(item.component.Id, componentId, StringComparison.OrdinalIgnoreCase))
-                                                                                                            .index;
-                                                                                                        IsOpen = true;
-                                                                                                    });
+    private void HandleComponentsAdded(object? sender,
+        GlanceComponentsAddedEventArgs args) => dispatcher.Dispatch(ApplyPreferences);
 
     private void ApplyPreferences()
     {
