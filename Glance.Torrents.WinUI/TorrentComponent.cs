@@ -3,7 +3,6 @@ using Glance.UI.WinUI;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI;
 using Microsoft.UI.Dispatching;
-using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.Torrents.WinUI;
 
@@ -243,25 +242,24 @@ public sealed class TorrentComponent :
     {
         try
         {
-            ContentDialog dialog = new()
-            {
-                XamlRoot = expandedView.XamlRoot,
-                Title = localizer.GetText("RemoveTitle"),
-                Content = localizer.GetText("RemoveDescription"),
-                PrimaryButtonText = localizer.GetText("RemoveListOnly"),
-                SecondaryButtonText = localizer.GetText("RemoveAndDelete"),
-                CloseButtonText = localizer.GetText("Cancel"),
-                DefaultButton = ContentDialogButton.Close
-            };
-            ContentDialogResult result = await dialog.ShowAsync();
+            WindowId? ownerWindowId = await RunOnDispatcherAsync(() => expandedView.XamlRoot?.ContentIslandEnvironment.AppWindowId);
 
-            if (result == ContentDialogResult.None)
+            if (ownerWindowId is not WindowId windowId)
+            {
+                return;
+            }
+
+            Task<TorrentRemovalChoice> removalTask = await RunOnDispatcherAsync(() => TorrentRemovalWindow.ShowAsync(localizer,
+                windowId));
+            TorrentRemovalChoice result = await removalTask.WaitAsync(cancellationToken);
+
+            if (result == TorrentRemovalChoice.Cancel)
             {
                 return;
             }
 
             await engine.RemoveAsync(torrentId,
-                result == ContentDialogResult.Secondary);
+                result == TorrentRemovalChoice.RemoveAndDeleteData);
             viewModel.Remove(torrentId);
         }
         catch (Exception exception)
