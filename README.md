@@ -22,7 +22,7 @@ The island remains at the top or bottom of the desktop in a compact state, expan
 - **Colour Picker** — sample a screen colour, retain recent colours in SQLite, and copy HEX, RGB, or HSL values.
 - **Screen Capture** — capture a region, a window, one display, or all displays to the Captures folder with metadata indexed in SQLite.
 - **Screen Lens** — select any area of the screen and extract its text locally with Windows OCR.
-- **Privacy Controls** — monitor the default microphone state and mute or unmute it globally.
+- **Privacy Controls** — see when the camera or default microphone is in use, mute or unmute the microphone globally, and open camera privacy settings.
 - **Removable Devices** — view connected removable storage, inspect capacity, open it in Explorer, and request safe ejection. Multiple devices are presented as pages within the module.
 - **Bluetooth Devices** — see connected Bluetooth accessories and their available battery levels. Newly connected or newly low-battery devices can automatically request attention.
 - **Keep Awake** — prevent automatic system sleep until you explicitly stop the module.

@@ -6,6 +6,7 @@ namespace Glance.PrivacyControls;
 public sealed partial class PrivacyControlsViewModel :
     ObservableObject
 {
+    private readonly ICameraUsageService cameraUsageService;
     private readonly IMicrophoneService microphoneService;
     private readonly ITextLocalizer localizer;
 
@@ -24,29 +25,41 @@ public sealed partial class PrivacyControlsViewModel :
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(StatusText))]
+    [NotifyPropertyChangedFor(nameof(StatusGlyph))]
     private bool isActive;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StatusText))]
+    [NotifyPropertyChangedFor(nameof(StatusGlyph))]
+    private bool isCameraActive;
+
     public PrivacyControlsViewModel(IMicrophoneService microphoneService,
+        ICameraUsageService cameraUsageService,
         ITextLocalizer localizer)
     {
         this.microphoneService = microphoneService;
+        this.cameraUsageService = cameraUsageService;
         this.localizer = localizer;
         deviceName = localizer.GetText("NoMicrophone");
 
         Refresh();
     }
 
-    public string StatusText => !IsAvailable
-        ? localizer.GetText("NoMicrophone")
-        : IsMuted
-            ? localizer.GetText("MicrophoneMuted")
-            : IsActive
-                ? localizer.GetText("MicrophoneActive")
-                : localizer.GetText("MicrophoneReady");
+    public string StatusText => (IsActive, IsCameraActive) switch
+    {
+        (true, true) => localizer.GetText("MicrophoneAndCameraActive"),
+        (false, true) => localizer.GetText("CameraActive"),
+        (true, false) => localizer.GetText("MicrophoneActive"),
+        _ when !IsAvailable => localizer.GetText("NoMicrophone"),
+        _ when IsMuted => localizer.GetText("MicrophoneMuted"),
+        _ => localizer.GetText("MicrophoneReady")
+    };
+
+    public string StatusGlyph => IsCameraActive ? "\uE722" : "\uE720";
 
     public string ToggleGlyph => IsMuted ? "\uE74F" : "\uE720";
 
-    public void Refresh() => Update(microphoneService.GetState());
+    public void Refresh() => Update(microphoneService.GetState(), cameraUsageService.IsInUse());
 
     public void ToggleMute()
     {
@@ -56,19 +69,15 @@ public sealed partial class PrivacyControlsViewModel :
         }
     }
 
-    public void Update(MicrophoneState state)
+    public void Update(MicrophoneState state,
+        bool isCameraInUse)
     {
-        double level = state.IsAvailable && !state.IsMuted
-            ? NormalizeLevel(state.PeakLevel)
-            : 0;
-
         DeviceName = state.IsAvailable
             ? state.DeviceName
             : localizer.GetText("NoMicrophone");
         IsAvailable = state.IsAvailable;
         IsMuted = state.IsMuted;
-        IsActive = level >= 0.08;
+        IsActive = state.IsAvailable && state.IsInUse;
+        IsCameraActive = isCameraInUse;
     }
-
-    private static double NormalizeLevel(double level) => Math.Clamp(Math.Pow(Math.Clamp(level, 0, 1), 0.45) * 1.15, 0, 1);
 }

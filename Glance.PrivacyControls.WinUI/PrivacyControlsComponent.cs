@@ -33,7 +33,7 @@ public sealed partial class PrivacyControlsComponent :
         ExpandedAnimationElement = expandedView.ConnectedAnimationElement;
 
         timer = DispatcherQueue.GetForCurrentThread().CreateTimer();
-        timer.Interval = TimeSpan.FromMilliseconds(200);
+        timer.Interval = TimeSpan.FromSeconds(2);
         timer.IsRepeating = true;
         timer.Tick += HandleTick;
         timer.Start();

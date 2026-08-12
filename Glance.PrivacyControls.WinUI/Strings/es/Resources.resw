@@ -5,11 +5,15 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="ModuleDisplayName" xml:space="preserve"><value>Controles de privacidad</value></data>
-  <data name="ModuleDescription" xml:space="preserve"><value>Supervisa y silencia el micrófono.</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Supervisa el uso de la cámara y el micrófono, y silencia el micrófono.</value></data>
   <data name="NoMicrophone" xml:space="preserve"><value>Sin micrófono</value></data>
   <data name="MicrophoneMuted" xml:space="preserve"><value>Silenciado</value></data>
   <data name="MicrophoneActive" xml:space="preserve"><value>Activo</value></data>
+  <data name="CameraActive" xml:space="preserve"><value>Cámara activa</value></data>
+  <data name="MicrophoneAndCameraActive" xml:space="preserve"><value>Micrófono y cámara activos</value></data>
   <data name="MicrophoneReady" xml:space="preserve"><value>Listo</value></data>
+  <data name="OpenCameraSettingsButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Abrir la configuración de privacidad de la cámara</value></data>
+  <data name="OpenCameraSettingsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Abrir la configuración de privacidad de la cámara</value></data>
   <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Silenciar o activar el micrófono</value></data>
   <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Silenciar o activar el micrófono</value></data>
 </root>

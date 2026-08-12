@@ -22,7 +22,7 @@
                 FontFamily="Segoe Fluent Icons"
                 FontSize="24"
                 Foreground="{ThemeResource GlancePrivacyControlsIconBrush}"
-                Glyph="&#xE720;" />
+                Glyph="{x:Bind ViewModel.StatusGlyph, Mode=OneWay}" />
         </Grid>
         <TextBlock
             Grid.Column="1"

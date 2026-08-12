@@ -25,7 +25,7 @@
                 FontFamily="Segoe Fluent Icons"
                 FontSize="30"
                 Foreground="{ThemeResource GlancePrivacyControlsIconBrush}"
-                Glyph="&#xE720;" />
+                Glyph="{x:Bind ViewModel.StatusGlyph, Mode=OneWay}" />
         </Grid>
         <Grid
             Grid.Column="1"
@@ -57,23 +57,43 @@
                 Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind ViewModel.StatusText, Mode=OneWay}" />
         </Grid>
-        <Button
-            x:Uid="ToggleMuteButton"
+        <StackPanel
             Grid.Column="2"
             VerticalAlignment="Center"
-            Click="{x:Bind ViewModel.ToggleMute}"
-            Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}"
-            IsEnabled="{x:Bind ViewModel.IsAvailable, Mode=OneWay}">
-            <Button.Style>
-                <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
-                    <Setter Property="Width" Value="36" />
-                    <Setter Property="Height" Value="36" />
-                    <Setter Property="Padding" Value="0" />
-                    <Setter Property="CornerRadius" Value="18" />
-                    <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                    <Setter Property="FontSize" Value="16" />
-                </Style>
-            </Button.Style>
-        </Button>
+            Orientation="Horizontal"
+            Spacing="8">
+            <Button
+                x:Uid="OpenCameraSettingsButton"
+                Click="{x:Bind OpenCameraSettings}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                        <Setter Property="Width" Value="36" />
+                        <Setter Property="Height" Value="36" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="CornerRadius" Value="18" />
+                        <Setter Property="Content" Value="&#xE722;" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="16" />
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Button
+                x:Uid="ToggleMuteButton"
+                Click="{x:Bind ViewModel.ToggleMute}"
+                Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}"
+                IsEnabled="{x:Bind ViewModel.IsAvailable, Mode=OneWay}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+                        <Setter Property="Width" Value="36" />
+                        <Setter Property="Height" Value="36" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="CornerRadius" Value="18" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="16" />
+                    </Style>
+                </Button.Style>
+            </Button>
+        </StackPanel>
     </Grid>
 </UserControl>

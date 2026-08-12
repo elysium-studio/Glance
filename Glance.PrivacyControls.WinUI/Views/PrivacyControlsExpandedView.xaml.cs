@@ -1,6 +1,8 @@
 using Glance.UI.WinUI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
+using Windows.System;
 
 namespace Glance.PrivacyControls.WinUI;
 
@@ -24,4 +26,7 @@ public sealed partial class PrivacyControlsExpandedView :
     public string Title => localizer.GetText("ModuleDisplayName");
 
     private string ToUpper(string value) => value.ToUpperInvariant();
+
+    private async void OpenCameraSettings() =>
+        await Launcher.LaunchUriAsync(new Uri("ms-settings:privacy-webcam"));
 }

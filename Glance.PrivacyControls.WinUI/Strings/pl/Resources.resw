@@ -5,11 +5,15 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="ModuleDisplayName" xml:space="preserve"><value>Kontrola prywatności</value></data>
-  <data name="ModuleDescription" xml:space="preserve"><value>Monitoruj i wyciszaj mikrofon.</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Monitoruj użycie kamery i mikrofonu oraz wyciszaj mikrofon.</value></data>
   <data name="NoMicrophone" xml:space="preserve"><value>Brak mikrofonu</value></data>
   <data name="MicrophoneMuted" xml:space="preserve"><value>Wyciszony</value></data>
   <data name="MicrophoneActive" xml:space="preserve"><value>Aktywny</value></data>
+  <data name="CameraActive" xml:space="preserve"><value>Kamera aktywna</value></data>
+  <data name="MicrophoneAndCameraActive" xml:space="preserve"><value>Mikrofon i kamera aktywne</value></data>
   <data name="MicrophoneReady" xml:space="preserve"><value>Gotowy</value></data>
+  <data name="OpenCameraSettingsButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Otwórz ustawienia prywatności kamery</value></data>
+  <data name="OpenCameraSettingsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Otwórz ustawienia prywatności kamery</value></data>
   <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Wycisz lub włącz mikrofon</value></data>
   <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Wycisz lub włącz mikrofon</value></data>
 </root>

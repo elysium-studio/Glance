@@ -5,11 +5,15 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="ModuleDisplayName" xml:space="preserve"><value>Privacy controls</value></data>
-  <data name="ModuleDescription" xml:space="preserve"><value>Monitor and mute your microphone.</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Monitor camera and microphone use, and mute your microphone.</value></data>
   <data name="NoMicrophone" xml:space="preserve"><value>No microphone</value></data>
   <data name="MicrophoneMuted" xml:space="preserve"><value>Muted</value></data>
   <data name="MicrophoneActive" xml:space="preserve"><value>Active</value></data>
+  <data name="CameraActive" xml:space="preserve"><value>Camera active</value></data>
+  <data name="MicrophoneAndCameraActive" xml:space="preserve"><value>Microphone and camera active</value></data>
   <data name="MicrophoneReady" xml:space="preserve"><value>Ready</value></data>
+  <data name="OpenCameraSettingsButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Open camera privacy settings</value></data>
+  <data name="OpenCameraSettingsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Open camera privacy settings</value></data>
   <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Mute or unmute microphone</value></data>
   <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Mute or unmute microphone</value></data>
 </root>

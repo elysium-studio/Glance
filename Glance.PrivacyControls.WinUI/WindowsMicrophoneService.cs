@@ -28,10 +28,8 @@ public sealed class WindowsMicrophoneService :
             }
 
             bool isMuted = device.AudioEndpointVolume.Mute;
-            double peakLevel = isMuted
-                ? 0
-                : device.AudioMeterInformation.MasterPeakValue;
-            return new MicrophoneState(device.FriendlyName, true, isMuted, peakLevel);
+            bool isInUse = WindowsCapabilityUsageReader.IsInUse("microphone");
+            return new MicrophoneState(device.FriendlyName, true, isMuted, isInUse);
         }
         catch (Exception)
         {

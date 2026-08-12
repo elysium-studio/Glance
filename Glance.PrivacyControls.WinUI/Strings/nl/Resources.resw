@@ -5,11 +5,15 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="ModuleDisplayName" xml:space="preserve"><value>Privacybediening</value></data>
-  <data name="ModuleDescription" xml:space="preserve"><value>Bewaak en demp je microfoon.</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Controleer het gebruik van camera en microfoon en demp de microfoon.</value></data>
   <data name="NoMicrophone" xml:space="preserve"><value>Geen microfoon</value></data>
   <data name="MicrophoneMuted" xml:space="preserve"><value>Gedempt</value></data>
   <data name="MicrophoneActive" xml:space="preserve"><value>Actief</value></data>
+  <data name="CameraActive" xml:space="preserve"><value>Camera actief</value></data>
+  <data name="MicrophoneAndCameraActive" xml:space="preserve"><value>Microfoon en camera actief</value></data>
   <data name="MicrophoneReady" xml:space="preserve"><value>Gereed</value></data>
+  <data name="OpenCameraSettingsButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Privacy-instellingen voor camera openen</value></data>
+  <data name="OpenCameraSettingsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Privacy-instellingen voor camera openen</value></data>
   <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Microfoon dempen of inschakelen</value></data>
   <data name="ToggleMuteButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Microfoon dempen of inschakelen</value></data>
 </root>
