@@ -20,6 +20,8 @@
   <data name="RemoveListOnly" xml:space="preserve"><value>Remove from list</value></data>
   <data name="RemoveAndDelete" xml:space="preserve"><value>Remove and delete data</value></data>
   <data name="NoDownloads" xml:space="preserve"><value>No downloads</value></data>
+  <data name="ReadyToDownload" xml:space="preserve"><value>Ready to download</value></data>
+  <data name="DropInstruction" xml:space="preserve"><value>Drop a torrent file or magnet link here</value></data>
   <data name="PauseAll" xml:space="preserve"><value>Pause all downloads</value></data>
   <data name="ResumeAll" xml:space="preserve"><value>Resume all downloads</value></data>
 </root>

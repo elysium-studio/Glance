@@ -18,7 +18,8 @@ public sealed partial class TorrentExpandedView : UserControl
     public TorrentsViewModel ViewModel { get; }
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
     public string UpperTitle => localizer.GetText("ModuleDisplayName").ToUpperInvariant();
-    public string NoDownloadsLabel => localizer.GetText("NoDownloads");
+    public string ReadyLabel => localizer.GetText("ReadyToDownload");
+    public string DropInstructionLabel => localizer.GetText("DropInstruction");
     public string PauseAllLabel => localizer.GetText("PauseAll");
     public string ResumeAllLabel => localizer.GetText("ResumeAll");
     public string RemoveLabel => localizer.GetText("RemoveListOnly");
