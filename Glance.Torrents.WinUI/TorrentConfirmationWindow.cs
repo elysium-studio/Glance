@@ -2,6 +2,7 @@ using Elysium.Platform.Windows;
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -21,6 +22,7 @@ internal sealed class TorrentConfirmationWindow
     private readonly TaskCompletionSource<TorrentConfirmationResult?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly CancellationTokenSource cancellation = new();
     private readonly TorrentAddCoordinator coordinator;
+    private readonly DispatcherQueue dispatcherQueue;
     private readonly TorrentInput input;
     private readonly string downloadPath;
     private readonly ModuleResourceTextLocalizer<TorrentModule> localizer;
@@ -61,6 +63,7 @@ internal sealed class TorrentConfirmationWindow
         dialog.Resources["ContentDialogSmokeFill"] = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
         smokeLayer = new Border { Background = ResolveSmokeBrush(), IsHitTestVisible = false, Opacity = 0 };
         root = new Grid { Background = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0)) };
+        dispatcherQueue = root.DispatcherQueue;
         root.Children.Add(smokeLayer);
         root.Children.Add(dialog);
         root.Loaded += HandleRootLoaded;
@@ -110,23 +113,62 @@ internal sealed class TorrentConfirmationWindow
     {
         try
         {
-            session = await coordinator.PrepareAsync(input,
+            TorrentMetadataSession preparedSession = await coordinator.PrepareAsync(input,
                 downloadPath,
                 TimeSpan.FromSeconds(45),
                 cancellation.Token);
-            viewModel = new TorrentConfirmationViewModel();
-            viewModel.Load(session);
-            RenderMetadata(viewModel);
-            dialog.IsPrimaryButtonEnabled = true;
+
+            await RunOnDispatcherAsync(() =>
+            {
+                session = preparedSession;
+                viewModel = new TorrentConfirmationViewModel();
+                viewModel.Load(preparedSession);
+                RenderMetadata(viewModel);
+                dialog.IsPrimaryButtonEnabled = true;
+            });
         }
-        catch (OperationCanceledException) { }
+        catch (OperationCanceledException)
+        {
+        }
         catch (Exception exception)
         {
-            progress.IsActive = false;
-            progress.Visibility = Visibility.Collapsed;
-            status.Text = exception.Message;
-            status.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 196, 43, 28));
+            await RunOnDispatcherAsync(() =>
+            {
+                progress.IsActive = false;
+                progress.Visibility = Visibility.Collapsed;
+                status.Text = exception.Message;
+                status.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 196, 43, 28));
+            });
         }
+    }
+
+    private Task RunOnDispatcherAsync(Action action)
+    {
+        if (dispatcherQueue.HasThreadAccess)
+        {
+            action();
+            return Task.CompletedTask;
+        }
+
+        TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (!dispatcherQueue.TryEnqueue(() =>
+        {
+            try
+            {
+                action();
+                completion.TrySetResult();
+            }
+            catch (Exception exception)
+            {
+                completion.TrySetException(exception);
+            }
+        }))
+        {
+            completion.TrySetException(new InvalidOperationException("The Torrent confirmation overlay is unavailable."));
+        }
+
+        return completion.Task;
     }
 
     private void RenderMetadata(TorrentConfirmationViewModel model)
