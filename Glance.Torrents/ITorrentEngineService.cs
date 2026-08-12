@@ -17,6 +17,7 @@ public interface ITorrentEngineService : IAsyncDisposable
 
     Task ConfirmAsync(string sessionId,
         IReadOnlyCollection<string> selectedFiles,
+        string downloadPath,
         CancellationToken cancellationToken = default);
 
     Task CancelMetadataAsync(string sessionId);

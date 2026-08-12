@@ -16,6 +16,7 @@
   <data name="Files" xml:space="preserve"><value>Files</value></data>
   <data name="SelectedSize" xml:space="preserve"><value>Selected size</value></data>
   <data name="DownloadTo" xml:space="preserve"><value>Download to</value></data>
+  <data name="Browse" xml:space="preserve"><value>Browse</value></data>
   <data name="FileName" xml:space="preserve"><value>File name</value></data>
   <data name="FileSize" xml:space="preserve"><value>Size</value></data>
   <data name="RemoveTitle" xml:space="preserve"><value>Remove torrent?</value></data>

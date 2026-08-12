@@ -42,6 +42,7 @@ public sealed class TorrentAddCoordinator(ITorrentEngineService engine) : IAsync
 
     public async Task ConfirmAsync(TorrentMetadataSession session,
         IReadOnlyCollection<string> selectedFiles,
+        string downloadPath,
         CancellationToken cancellationToken = default)
     {
         if (selectedFiles.Count == 0)
@@ -49,7 +50,15 @@ public sealed class TorrentAddCoordinator(ITorrentEngineService engine) : IAsync
             throw new InvalidOperationException("Select at least one file to download.");
         }
 
-        await engine.ConfirmAsync(session.SessionId, selectedFiles, cancellationToken);
+        if (string.IsNullOrWhiteSpace(downloadPath))
+        {
+            throw new InvalidOperationException("Choose a download folder.");
+        }
+
+        await engine.ConfirmAsync(session.SessionId,
+            selectedFiles,
+            downloadPath,
+            cancellationToken);
         Forget(session);
     }
 

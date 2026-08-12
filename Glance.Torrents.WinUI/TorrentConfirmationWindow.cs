@@ -8,6 +8,8 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
+using Windows.Storage;
+using Windows.Storage.Pickers;
 using WinRT;
 using WinRT.Interop;
 using WinUIEx;
@@ -16,7 +18,8 @@ using PlatformWindowExtensions = Elysium.Platform.Windows.WindowExtensions;
 namespace Glance.Torrents.WinUI;
 
 internal sealed record TorrentConfirmationResult(TorrentMetadataSession Session,
-    IReadOnlyList<string> SelectedFiles);
+    IReadOnlyList<string> SelectedFiles,
+    string DownloadPath);
 
 internal sealed class TorrentConfirmationWindow
 {
@@ -26,7 +29,8 @@ internal sealed class TorrentConfirmationWindow
     private readonly Grid details = new() { Width = 600, MaxHeight = 560 };
     private readonly DispatcherQueue dispatcherQueue;
     private readonly ContentDialog dialog;
-    private readonly string downloadPath;
+    private string downloadPath;
+    private readonly TextBlock downloadPathText = new();
     private readonly List<CheckBox> fileSelectionControls = [];
     private readonly TorrentInput input;
     private readonly ModuleResourceTextLocalizer<TorrentModule> localizer;
@@ -240,36 +244,50 @@ internal sealed class TorrentConfirmationWindow
         summary.Children.Add(new TextBlock
         {
             Text = model.Name,
-            FontSize = 20,
-            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            Style = ResolveStyle("BodyStrongTextBlockStyle"),
             TextWrapping = TextWrapping.Wrap
         });
         summary.Children.Add(new TextBlock
         {
-            Text = $"{model.SourceType} \u00B7 {FormatSize(model.TotalSize)} \u00B7 {model.Files.Count} {(model.Files.Count == 1 ? "file" : "files")}",
+            Text = $"{FormatSize(model.TotalSize)} \u00B7 {model.Files.Count} {(model.Files.Count == 1 ? "file" : "files")}",
             Foreground = ResolveBrush("TextFillColorSecondaryBrush")
         });
         Grid.SetRow(summary, 0);
         details.Children.Add(summary);
 
-        StackPanel destination = new()
+        Grid destination = new()
         {
-            Spacing = 4,
             Margin = new Thickness(0, 16, 0, 0)
         };
-        destination.Children.Add(new TextBlock
+        destination.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        destination.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        destination.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        destination.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        TextBlock destinationLabel = new()
         {
             Text = localizer.GetText("DownloadTo"),
-            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
-        });
-        TextBlock destinationPath = new()
-        {
-            Text = model.DownloadPath,
-            Foreground = ResolveBrush("TextFillColorSecondaryBrush"),
-            TextTrimming = TextTrimming.CharacterEllipsis
+            Style = ResolveStyle("BodyStrongTextBlockStyle"),
+            Margin = new Thickness(0, 0, 0, 4)
         };
-        ToolTipService.SetToolTip(destinationPath, model.DownloadPath);
-        destination.Children.Add(destinationPath);
+        Grid.SetColumnSpan(destinationLabel, 2);
+        destination.Children.Add(destinationLabel);
+        downloadPathText.Text = model.DownloadPath;
+        downloadPathText.Foreground = ResolveBrush("TextFillColorSecondaryBrush");
+        downloadPathText.TextTrimming = TextTrimming.CharacterEllipsis;
+        downloadPathText.VerticalAlignment = VerticalAlignment.Center;
+        ToolTipService.SetToolTip(downloadPathText, model.DownloadPath);
+        Grid.SetRow(downloadPathText, 1);
+        destination.Children.Add(downloadPathText);
+        Button browseButton = new()
+        {
+            Content = localizer.GetText("Browse"),
+            Margin = new Thickness(12, 0, 0, 0),
+            MinWidth = 88
+        };
+        browseButton.Click += HandleBrowseClicked;
+        Grid.SetRow(browseButton, 1);
+        Grid.SetColumn(browseButton, 1);
+        destination.Children.Add(browseButton);
         Grid.SetRow(destination, 1);
         details.Children.Add(destination);
 
@@ -344,7 +362,12 @@ internal sealed class TorrentConfirmationWindow
         header.Background = ResolveBrush("SubtleFillColorSecondaryBrush");
         selectAll = new CheckBox
         {
+            Content = string.Empty,
             IsThreeState = true,
+            Width = 32,
+            Height = 32,
+            MinWidth = 32,
+            Padding = new Thickness(0),
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center
         };
@@ -379,8 +402,13 @@ internal sealed class TorrentConfirmationWindow
         row.MinHeight = 40;
         CheckBox check = new()
         {
+            Content = string.Empty,
             IsChecked = file.IsSelected,
             Tag = file,
+            Width = 32,
+            Height = 32,
+            MinWidth = 32,
+            Padding = new Thickness(0),
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center
         };
@@ -463,6 +491,25 @@ internal sealed class TorrentConfirmationWindow
         UpdateSelectedSize();
     }
 
+    private async void HandleBrowseClicked(object sender,
+        RoutedEventArgs args)
+    {
+        FolderPicker picker = new();
+        picker.FileTypeFilter.Add("*");
+        InitializeWithWindow.Initialize(picker,
+            WindowNative.GetWindowHandle(window));
+        StorageFolder? folder = await picker.PickSingleFolderAsync();
+
+        if (folder is null)
+        {
+            return;
+        }
+
+        downloadPath = folder.Path;
+        downloadPathText.Text = downloadPath;
+        ToolTipService.SetToolTip(downloadPathText, downloadPath);
+    }
+
     private void UpdateSelectedSize()
     {
         if (viewModel is null)
@@ -499,7 +546,8 @@ internal sealed class TorrentConfirmationWindow
 
         confirmed = true;
         _ = completion.TrySetResult(new TorrentConfirmationResult(session,
-            viewModel.GetSelectedFiles()));
+            viewModel.GetSelectedFiles(),
+            downloadPath));
     }
 
     private void HandleWindowClosed(object sender,
@@ -553,6 +601,10 @@ internal sealed class TorrentConfirmationWindow
     private static Brush ResolveBrush(string resourceKey) => Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue(resourceKey, out object value) && value is Brush brush
         ? brush
         : new SolidColorBrush(Windows.UI.Color.FromArgb(32, 255, 255, 255));
+
+    private static Style? ResolveStyle(string resourceKey) => Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue(resourceKey, out object value)
+        ? value as Style
+        : null;
 
     private static string FormatSize(long bytes) => bytes switch
     {

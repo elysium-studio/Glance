@@ -115,20 +115,30 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
         }
     }
 
-    public async Task ConfirmAsync(string sessionId, IReadOnlyCollection<string> selectedFiles, CancellationToken cancellationToken = default)
+    public async Task ConfirmAsync(string sessionId,
+        IReadOnlyCollection<string> selectedFiles,
+        string downloadPath,
+        CancellationToken cancellationToken = default)
     {
         if (!pending.TryRemove(sessionId, out PendingMetadata? value)) throw new InvalidOperationException("The torrent confirmation has expired.");
         if (downloads.ContainsKey(value.Session.TorrentId)) throw new InvalidOperationException("This torrent is already in Glance.");
-        Directory.CreateDirectory(value.Session.DownloadPath);
+        Directory.CreateDirectory(downloadPath);
         string cachedMetadata = Path.Combine(metadataPath, $"{value.Session.TorrentId}.torrent");
         await File.WriteAllBytesAsync(cachedMetadata, value.Metadata, cancellationToken);
-        TorrentManager manager = await GetEngine().AddAsync(cachedMetadata, value.Session.DownloadPath, CreateTorrentSettings(options.Current));
+        TorrentManager manager = await GetEngine().AddAsync(cachedMetadata,
+            downloadPath,
+            CreateTorrentSettings(options.Current));
         HashSet<string> selection = new(selectedFiles, StringComparer.OrdinalIgnoreCase);
         foreach (ITorrentManagerFile file in manager.Files)
         {
             await manager.SetFilePriorityAsync(file, selection.Contains(file.Path) ? Priority.Normal : Priority.DoNotDownload);
         }
-        TorrentPersistedDownload persisted = new(value.Session.TorrentId, value.Session.Input, value.Session.DownloadPath, [.. selection], false, false);
+        TorrentPersistedDownload persisted = new(value.Session.TorrentId,
+            value.Session.Input,
+            downloadPath,
+            [.. selection],
+            false,
+            false);
         ManagedDownload managed = new(manager, persisted);
         if (!downloads.TryAdd(persisted.Id, managed))
         {

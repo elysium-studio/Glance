@@ -15,7 +15,6 @@ public sealed partial class TorrentConfirmationViewModel : ObservableObject
     [ObservableProperty] private bool isLoading = true;
     [ObservableProperty] private string? errorMessage;
     [ObservableProperty] private string name = string.Empty;
-    [ObservableProperty] private string sourceType = string.Empty;
     [ObservableProperty] private string downloadPath = string.Empty;
     [ObservableProperty] private long totalSize;
     [ObservableProperty] private long selectedSize;
@@ -26,7 +25,6 @@ public sealed partial class TorrentConfirmationViewModel : ObservableObject
     public void Load(TorrentMetadataSession session)
     {
         Name = session.Name;
-        SourceType = session.Input.Kind == TorrentInputKind.MagnetLink ? "Magnet link" : "Torrent file";
         DownloadPath = session.DownloadPath;
         TotalSize = session.TotalSize;
         Files.Clear();

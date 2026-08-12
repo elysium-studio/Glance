@@ -163,6 +163,7 @@ public sealed class TorrentComponent :
 
             await coordinator.ConfirmAsync(result.Session,
                 result.SelectedFiles,
+                result.DownloadPath,
                 linkedCancellation.Token);
             return true;
         }
