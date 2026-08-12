@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Network Speed</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>See live download and upload speeds with performance graphs.</value></data>
+  <data name="NetworkAdapterDisplayName" xml:space="preserve"><value>Network</value></data>
+  <data name="NetworkAdapterDescription" xml:space="preserve"><value>See the current adapter, connection, IP address, and link speed.</value></data>
+  <data name="NoNetworkAdaptersText.Text" xml:space="preserve"><value>No network adapters</value></data>
+  <data name="Disconnected" xml:space="preserve"><value>Disconnected</value></data>
+  <data name="UnknownNetwork" xml:space="preserve"><value>Connected network</value></data>
+  <data name="NoIpAddress" xml:space="preserve"><value>No IPv4 address</value></data>
+  <data name="WiFiConnection" xml:space="preserve"><value>Wi-Fi</value></data>
+  <data name="EthernetConnection" xml:space="preserve"><value>Ethernet</value></data>
+  <data name="CellularConnection" xml:space="preserve"><value>Cellular</value></data>
+  <data name="VpnConnection" xml:space="preserve"><value>VPN</value></data>
+  <data name="OtherConnection" xml:space="preserve"><value>Network</value></data>
+  <data name="DownloadLabel.Text" xml:space="preserve"><value>DOWNLOAD</value></data>
+  <data name="UploadLabel.Text" xml:space="preserve"><value>UPLOAD</value></data>
+  <data name="OpenNetworkSettingsButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Open network settings</value></data>
+  <data name="OpenNetworkSettingsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Open network settings</value></data>
+</root>

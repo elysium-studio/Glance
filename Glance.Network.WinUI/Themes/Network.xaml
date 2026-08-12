@@ -1,0 +1,22 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Default">
+            <SolidColorBrush x:Key="GlanceNetworkIconBrush" Color="#56C7FF" />
+            <SolidColorBrush x:Key="GlanceNetworkDownloadBrush" Color="#56C7FF" />
+            <SolidColorBrush x:Key="GlanceNetworkUploadBrush" Color="#FFB15C" />
+            <SolidColorBrush x:Key="GlanceNetworkGraphGridBrush" Color="#243A648D" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="GlanceNetworkIconBrush" Color="#006A99" />
+            <SolidColorBrush x:Key="GlanceNetworkDownloadBrush" Color="#006A99" />
+            <SolidColorBrush x:Key="GlanceNetworkUploadBrush" Color="#A04400" />
+            <SolidColorBrush x:Key="GlanceNetworkGraphGridBrush" Color="#24405A6A" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="HighContrast">
+            <StaticResource x:Key="GlanceNetworkIconBrush" ResourceKey="SystemColorWindowTextColorBrush" />
+            <StaticResource x:Key="GlanceNetworkDownloadBrush" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="GlanceNetworkUploadBrush" ResourceKey="SystemColorWindowTextColorBrush" />
+            <StaticResource x:Key="GlanceNetworkGraphGridBrush" ResourceKey="SystemColorGrayTextColorBrush" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

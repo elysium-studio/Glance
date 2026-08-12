@@ -126,6 +126,15 @@
   <Project Path="Glance.Media.Tests/Glance.Media.Tests.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.Network.WinUI/Glance.Network.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Network/Glance.Network.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Network.Tests/Glance.Network.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.Power.WinUI/Glance.Power.WinUI.csproj">
     <Platform Project="x64" />
   </Project>

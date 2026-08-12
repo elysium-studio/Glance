@@ -14,6 +14,7 @@ public sealed class LocalizationResourceTests
         "DropShelf",
         "FocusSession",
         "Media",
+        "Network",
         "Power",
         "Shell",
         "Stash",

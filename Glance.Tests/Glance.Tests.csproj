@@ -22,6 +22,7 @@
     <None Include="..\Glance.DropShelf.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\DropShelf\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\Glance.FocusSession.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\FocusSession\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\Glance.Media.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\Media\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\Glance.Network.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\Network\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\Glance.Power.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\Power\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\Glance.Shell.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\Shell\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\Glance.Stash.WinUI\Strings\**\Resources.resw" Link="LocalizationResources\Stash\%(RecursiveDir)Resources.resw" CopyToOutputDirectory="PreserveNewest" />

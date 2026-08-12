@@ -1,0 +1,35 @@
+<UserControl
+    x:Class="Glance.Network.WinUI.NetworkCompactView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Themes/Network.xaml" />
+    </UserControl.Resources>
+    <Grid Padding="12,4" ColumnSpacing="8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid x:Name="StatusIndicator" Width="28" Height="28">
+            <FontIcon
+                Width="24"
+                Height="24"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="24"
+                Foreground="{ThemeResource GlanceNetworkIconBrush}"
+                Glyph="&#xE701;" />
+        </Grid>
+        <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="12">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+                <FontIcon FontSize="10" Foreground="{ThemeResource GlanceNetworkDownloadBrush}" Glyph="&#xE74B;" />
+                <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.DownloadText, Mode=OneWay}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="4">
+                <FontIcon FontSize="10" Foreground="{ThemeResource GlanceNetworkUploadBrush}" Glyph="&#xE74A;" />
+                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind ViewModel.UploadText, Mode=OneWay}" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>
