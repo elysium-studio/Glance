@@ -198,6 +198,13 @@ internal static class GlanceModuleInstallationStore
             return false;
         }
 
+        // File.Copy preserves this timestamp. Avoid rereading every bundled package
+        // during normal startup; fall back to byte comparison for ambiguous files.
+        if (first.LastWriteTimeUtc == second.LastWriteTimeUtc)
+        {
+            return true;
+        }
+
         using FileStream firstStream = first.OpenRead();
         using FileStream secondStream = second.OpenRead();
         Span<byte> firstBuffer = stackalloc byte[8192];

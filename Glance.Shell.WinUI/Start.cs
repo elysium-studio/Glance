@@ -31,9 +31,6 @@ public static class Start
                 .Run();
         }
 
-        GlanceModuleInstallationStore.PrepareForStartup();
-        GlanceModuleLoader.Initialize();
-
 #pragma warning disable CA1806
         Microsoft.UI.Xaml.Application.Start(_ => new App());
 #pragma warning restore CA1806

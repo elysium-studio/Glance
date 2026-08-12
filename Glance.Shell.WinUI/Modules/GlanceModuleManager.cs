@@ -55,7 +55,6 @@ internal sealed class GlanceModuleManager :
         installations.ConfigureInstaller(InstallPackageAsync);
 
         _ = Directory.CreateDirectory(GlanceModuleLoader.UserModulesDirectory);
-        GlanceModuleInstallationStore.RemoveSuppressedPackages(settings.UninstalledModulePackages);
         watchers = (FileSystemWatcher[])[.. GlanceModuleLoader.ModuleDirectories
             .Where(Directory.Exists)
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -66,7 +65,7 @@ internal sealed class GlanceModuleManager :
     {
         foreach (GlanceModuleLoadResult result in GlanceModuleLoader.Load())
         {
-            InstallAsync(result).GetAwaiter().GetResult();
+            _ = InstallAsync(result).GetAwaiter().GetResult();
         }
     }
 

@@ -24,6 +24,7 @@ internal static partial class GlanceModuleLoader
     private static readonly List<object> xamlMetadataProviderTokens = [];
     private static Dictionary<string, string> moduleAssemblyPaths = [with(StringComparer.OrdinalIgnoreCase)];
     private static Dictionary<string, string> moduleNativeLibraryPaths = [with(StringComparer.OrdinalIgnoreCase)];
+    private static IReadOnlyList<ModuleSource>? startupSources;
     private static bool resolverRegistered;
 
     public static string UserModulesDirectory => GlanceModuleInstallationStore.RootDirectory;
@@ -35,15 +36,46 @@ internal static partial class GlanceModuleLoader
         IReadOnlyList<ModuleSource> sources = DiscoverSources();
         RegisterAssemblyPaths(sources.Select(source => source.ContentDirectory));
         RegisterResolver();
+
+        lock (synchronization)
+        {
+            startupSources = sources;
+        }
     }
 
-    public static IReadOnlyList<GlanceModuleLoadResult> Load()
+    public static IEnumerable<GlanceModuleLoadResult> Load()
     {
-        IReadOnlyList<ModuleSource> sources = DiscoverSources();
-        RegisterAssemblyPaths(sources.Select(source => source.ContentDirectory), true);
-        RegisterResolver();
+        IReadOnlyList<ModuleSource> sources = GetStartupSources();
 
-        return (GlanceModuleLoadResult[])[.. sources.Select(source => Load(source, false)).Where(result => result.Modules.Count > 0)];
+        foreach (ModuleSource source in sources)
+        {
+            GlanceModuleLoadResult result = Load(source, false);
+
+            if (result.Modules.Count > 0)
+            {
+                yield return result;
+            }
+        }
+    }
+
+    private static IReadOnlyList<ModuleSource> GetStartupSources()
+    {
+        IReadOnlyList<ModuleSource>? sources;
+
+        lock (synchronization)
+        {
+            sources = startupSources;
+            startupSources = null;
+        }
+
+        if (sources is null)
+        {
+            sources = DiscoverSources();
+            RegisterAssemblyPaths(sources.Select(source => source.ContentDirectory), true);
+            RegisterResolver();
+        }
+
+        return sources;
     }
 
     public static GlanceModuleLoadResult? LoadPackage(string packagePath)

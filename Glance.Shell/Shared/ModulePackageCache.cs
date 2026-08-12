@@ -30,13 +30,15 @@ public sealed class ModulePackageCache
         }
 
         string packageCacheDirectory = cacheDirectory;
-        string contentHash = HashFile(fullPackagePath);
 
-        if (TryGetCurrentContentDirectory(packageCacheDirectory, package, contentHash, out string currentContentDirectory))
+        // Package staging preserves length and last-write time, so the state file is
+        // the fast path. Hashing large unchanged packages on every launch is costly.
+        if (TryGetCurrentContentDirectory(packageCacheDirectory, package, out string currentContentDirectory))
         {
             return currentContentDirectory;
         }
 
+        string contentHash = HashFile(fullPackagePath);
         string contentDirectory = Path.Combine(packageCacheDirectory, contentHash);
 
         Extract(fullPackagePath, packageCacheDirectory, contentDirectory);
@@ -49,7 +51,6 @@ public sealed class ModulePackageCache
 
     private static bool TryGetCurrentContentDirectory(string packageCacheDirectory,
         FileInfo package,
-        string contentHash,
         out string contentDirectory)
     {
         contentDirectory = string.Empty;
@@ -66,8 +67,7 @@ public sealed class ModulePackageCache
             !long.TryParse(values[0], NumberStyles.None, CultureInfo.InvariantCulture, out long length) ||
             !long.TryParse(values[1], NumberStyles.None, CultureInfo.InvariantCulture, out long lastWriteTimeUtcTicks) ||
             length != package.Length ||
-            lastWriteTimeUtcTicks != package.LastWriteTimeUtc.Ticks ||
-            !string.Equals(values[2], contentHash, StringComparison.OrdinalIgnoreCase))
+            lastWriteTimeUtcTicks != package.LastWriteTimeUtc.Ticks)
         {
             return false;
         }

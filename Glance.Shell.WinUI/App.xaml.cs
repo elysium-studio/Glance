@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,6 +25,7 @@ public sealed partial class App
     private IHost? host;
     private GlanceModuleManager? moduleManager;
     private Task? shutdownTask;
+    private Task? startupModulesTask;
     private Task? startupNavigationTask;
 
     public App() => InitializeComponent();
@@ -47,10 +49,11 @@ public sealed partial class App
         ViewModelExtension.DefaultProvider = runtimeServices;
 
         moduleManager = new GlanceModuleManager(host.Services, runtimeServices, applicationDispatcherQueue, host.Services.GetRequiredService<ILogger<GlanceModuleManager>>());
-        moduleManager.LoadStartupModules();
-
         _ = host.Services.GetRequiredKeyedService<DesktopIslandView>("DesktopIslandView");
-        moduleManager.StartWatching();
+        startupModulesTask = InitializeStartupModulesAsync(moduleManager,
+            applicationDispatcherQueue,
+            (string[])[.. host.Services.GetRequiredService<GlanceSettings>().UninstalledModulePackages],
+            host.Services.GetRequiredService<ILogger<App>>());
 
         if (host.Services.GetRequiredService<GlanceSettings>().ShowSetupOnStartup)
         {
@@ -71,6 +74,12 @@ public sealed partial class App
     {
         GlanceModuleManager? currentModuleManager = moduleManager;
         IHost? currentHost = host;
+
+        if (startupModulesTask is not null)
+        {
+            await startupModulesTask;
+            startupModulesTask = null;
+        }
 
         if (currentModuleManager is not null)
         {
@@ -143,5 +152,55 @@ public sealed partial class App
         {
             logger.LogError(exception, "Failed to navigate to the startup setup tour");
         }
+    }
+
+    private static async Task InitializeStartupModulesAsync(GlanceModuleManager moduleManager,
+        DispatcherQueue dispatcherQueue,
+        IReadOnlyList<string> suppressedPackageIds,
+        ILogger logger)
+    {
+        try
+        {
+            await Task.Run(() =>
+            {
+                GlanceModuleInstallationStore.PrepareForStartup();
+                GlanceModuleInstallationStore.RemoveSuppressedPackages(suppressedPackageIds);
+                GlanceModuleLoader.Initialize();
+            });
+
+            await EnqueueAsync(dispatcherQueue, () =>
+            {
+                moduleManager.LoadStartupModules();
+                moduleManager.StartWatching();
+            });
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Failed to initialize startup modules");
+        }
+    }
+
+    private static Task EnqueueAsync(DispatcherQueue dispatcherQueue,
+        Action callback)
+    {
+        TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (!dispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+        {
+            try
+            {
+                callback();
+                completion.SetResult();
+            }
+            catch (Exception exception)
+            {
+                completion.SetException(exception);
+            }
+        }))
+        {
+            completion.SetException(new InvalidOperationException("The application dispatcher rejected module startup"));
+        }
+
+        return completion.Task;
     }
 }
