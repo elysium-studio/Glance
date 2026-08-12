@@ -53,6 +53,10 @@
             Enabled="false"
             DisplayName="Glance" />
         </desktop:Extension>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="torrent"><uap:DisplayName>BitTorrent file</uap:DisplayName><uap:SupportedFileTypes><uap:FileType>.torrent</uap:FileType></uap:SupportedFileTypes></uap:FileTypeAssociation>
+        </uap:Extension>
+        <uap:Extension Category="windows.protocol"><uap:Protocol Name="magnet"><uap:DisplayName>Magnet link</uap:DisplayName></uap:Protocol></uap:Extension>
       </Extensions>
     </Application>
   </Applications>

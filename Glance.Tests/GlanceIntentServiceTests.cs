@@ -49,6 +49,17 @@ public sealed class GlanceIntentServiceTests
         Assert.Equal("Stash", invoked?.TargetComponentId);
     }
 
+    [Fact]
+    public void MoreSpecificIntentIsReturnedBeforeGenericIntent()
+    {
+        GlanceIntentService service = CreateService(new TestComponent("Torrent"));
+        TestIntent generic = new("Generic.Share", "Torrent", GlanceContentKind.WebLink);
+        TestIntent specific = new("Torrent.Add", "Torrent", GlanceContentKind.WebLink, 100);
+        service.Register([generic, specific]);
+
+        Assert.Equal([specific.Descriptor, generic.Descriptor], service.GetIntents(GlanceContentKind.WebLink));
+    }
+
     private static GlanceIntentService CreateService(IGlanceComponent component)
     {
         GlanceSettings settings = new();
@@ -58,10 +69,11 @@ public sealed class GlanceIntentServiceTests
 
     private sealed class TestIntent(string id,
         string targetComponentId,
-        GlanceContentKind kind) :
+        GlanceContentKind kind,
+        int matchPriority = 0) :
         IGlanceIntent
     {
-        public GlanceIntentDescriptor Descriptor { get; } = new(id, targetComponentId, id, id, "\uE718");
+        public GlanceIntentDescriptor Descriptor { get; } = new(id, targetComponentId, id, id, "\uE718", MatchPriority: matchPriority);
 
         public GlanceContentContext? Context { get; private set; }
 

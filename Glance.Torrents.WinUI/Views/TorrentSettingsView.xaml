@@ -1,0 +1,25 @@
+<UserControl x:Class="Glance.Torrents.WinUI.TorrentSettingsView" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel Spacing="16">
+        <StackPanel Spacing="8">
+            <TextBlock Text="Download location" FontWeight="SemiBold" />
+            <Grid ColumnSpacing="8"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox Text="{Binding DownloadPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True"/><Button Grid.Column="1" Content="Browse…" Click="BrowseClicked"/></Grid>
+            <TextBlock Text="Changing this affects new downloads only. Active downloads are never moved." Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap"/>
+        </StackPanel>
+        <Grid ColumnSpacing="12" RowSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+            <NumberBox Header="Maximum download speed (KB/s)" Value="{Binding MaximumDownloadKilobytesPerSecond, Mode=TwoWay}" Minimum="0" SpinButtonPlacementMode="Compact"/>
+            <NumberBox Grid.Column="1" Header="Maximum upload speed (KB/s)" Value="{Binding MaximumUploadKilobytesPerSecond, Mode=TwoWay}" Minimum="0" SpinButtonPlacementMode="Compact"/>
+            <NumberBox Grid.Row="1" Header="Connections per download" Value="{Binding MaximumPeersPerTorrent, Mode=TwoWay}" Minimum="0" Maximum="10000" SpinButtonPlacementMode="Compact"/>
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="0 means unlimited for speed limits. 0 connections uses MonoTorrent's safe default." Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+        </Grid>
+        <ToggleSwitch Header="Continue seeding completed downloads" IsOn="{Binding ContinueSeeding, Mode=TwoWay}"/>
+        <Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+            <NumberBox Header="Stop at share ratio" Value="{Binding SeedingRatioLimit, Mode=TwoWay}" Minimum="0" SmallChange="0.1" SpinButtonPlacementMode="Compact"/>
+            <NumberBox Grid.Column="1" Header="Stop after seeding (minutes)" Value="{Binding SeedingTimeLimitMinutes, Mode=TwoWay}" Minimum="0" SpinButtonPlacementMode="Compact"/>
+        </Grid>
+        <TextBlock Text="0 disables that seeding limit." Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}"/>
+        <ComboBox Header="When both seeding limits are set" SelectedIndex="{Binding SeedingLimitModeIndex, Mode=TwoWay}" HorizontalAlignment="Stretch"><ComboBoxItem Content="Stop when either limit is reached"/><ComboBoxItem Content="Stop only when both limits are reached"/></ComboBox>
+        <ToggleSwitch Header="Bring Torrent into view when a download completes" IsOn="{Binding RequestAttentionOnCompletion, Mode=TwoWay}" OffContent="Off by default"/>
+        <TextBlock Text="{Binding ValidationMessage}" Foreground="{ThemeResource SystemFillColorCriticalBrush}" TextWrapping="Wrap"/>
+        <Button Content="Save Torrent settings" HorizontalAlignment="Left" Click="SaveClicked"/>
+    </StackPanel>
+</UserControl>

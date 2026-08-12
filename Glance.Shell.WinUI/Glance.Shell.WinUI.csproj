@@ -87,6 +87,7 @@
 		<GlanceModuleProject Include="..\Glance.SystemMonitor.WinUI\Glance.SystemMonitor.WinUI.csproj" />
 		<GlanceModuleProject Include="..\Glance.ThemeSwitcher.WinUI\Glance.ThemeSwitcher.WinUI.csproj" />
 		<GlanceModuleProject Include="..\Glance.Timer.WinUI\Glance.Timer.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.Torrents.WinUI\Glance.Torrents.WinUI.csproj" />
 		<GlanceModuleProject Include="..\Glance.VoiceNotes.WinUI\Glance.VoiceNotes.WinUI.csproj" />
 		<GlanceModuleProject Include="..\Glance.Weather.WinUI\Glance.Weather.WinUI.csproj" />
 		<GlanceModuleProject Include="..\Glance.WorldClock.WinUI\Glance.WorldClock.WinUI.csproj" />
@@ -246,6 +247,9 @@
 			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Timer.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Timer.*">
 				<ModuleName>Timer</ModuleName>
 			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Torrents.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.Torrents.*;$(MSBuildProjectDirectory)\..\Glance.Torrents.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\MonoTorrent*.dll;$(MSBuildProjectDirectory)\..\Glance.Torrents.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Mono.Nat.dll;$(MSBuildProjectDirectory)\..\Glance.Torrents.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\ReusableTasks.dll">
+				<ModuleName>Torrent</ModuleName>
+			</GlanceModuleBuildFile>
 			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.VoiceNotes.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.VoiceNotes.*">
 				<ModuleName>VoiceNotes</ModuleName>
 			</GlanceModuleBuildFile>
@@ -294,6 +298,7 @@
 		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\SystemMonitor" ArchivePath="$(OutDir)Modules\SystemMonitor.glance" />
 		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ThemeSwitcher" ArchivePath="$(OutDir)Modules\ThemeSwitcher.glance" />
 		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Timer" ArchivePath="$(OutDir)Modules\Timer.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Torrent" ArchivePath="$(OutDir)Modules\Torrent.glance" />
 		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\VoiceNotes" ArchivePath="$(OutDir)Modules\VoiceNotes.glance" />
 		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Weather" ArchivePath="$(OutDir)Modules\Weather.glance" />
 		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\WorldClock" ArchivePath="$(OutDir)Modules\WorldClock.glance" />
@@ -333,6 +338,7 @@
 			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)SystemMonitor.glance" TargetPath="Modules\SystemMonitor.glance" />
 			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)ThemeSwitcher.glance" TargetPath="Modules\ThemeSwitcher.glance" />
 			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)Timer.glance" TargetPath="Modules\Timer.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)Torrent.glance" TargetPath="Modules\Torrent.glance" />
 			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)VoiceNotes.glance" TargetPath="Modules\VoiceNotes.glance" />
 			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)Weather.glance" TargetPath="Modules\Weather.glance" />
 			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)WorldClock.glance" TargetPath="Modules\WorldClock.glance" />
@@ -351,7 +357,7 @@
 	<Target Name="ArrangeGlanceModulesInPublishOutput" AfterTargets="Publish" DependsOnTargets="CopyPriAndXbfToPublish">
 		<ItemGroup>
 			<GlanceModulePublishFile Include="$(OutDir)Modules\*.glance" />
-			<GlanceModulePublishRootFile Include="$(PublishDir)Glance.Assistant.*;$(PublishDir)Glance.AppMixer.*;$(PublishDir)Glance.AudioSwitcher.*;$(PublishDir)Glance.Clipboard.*;$(PublishDir)Glance.ColorPicker.*;$(PublishDir)Glance.DevicePresence.*;$(PublishDir)Glance.DropShelf.*;$(PublishDir)Glance.FocusSession.*;$(PublishDir)Glance.Infinity.*;$(PublishDir)Glance.KeepAwake.*;$(PublishDir)Glance.Magnifier.*;$(PublishDir)Glance.Media.*;$(PublishDir)Glance.Network.*;$(PublishDir)Glance.Power.*;$(PublishDir)Glance.Presence.*;$(PublishDir)Glance.PrivacyControls.*;$(PublishDir)Glance.QuickConvert.*;$(PublishDir)Glance.Reminders.*;$(PublishDir)Glance.RemovableDevices.*;$(PublishDir)Glance.ScreenCapture.*;$(PublishDir)Glance.ScreenRecorder.*;$(PublishDir)Glance.ScreenLens.*;$(PublishDir)Glance.Stopwatch.*;$(PublishDir)Glance.Stash.*;$(PublishDir)Glance.SystemMonitor.*;$(PublishDir)Glance.ThemeSwitcher.*;$(PublishDir)Glance.Timer.*;$(PublishDir)Glance.VoiceNotes.*;$(PublishDir)Glance.Weather.*;$(PublishDir)Glance.WorldClock.*" />
+			<GlanceModulePublishRootFile Include="$(PublishDir)Glance.Assistant.*;$(PublishDir)Glance.AppMixer.*;$(PublishDir)Glance.AudioSwitcher.*;$(PublishDir)Glance.Clipboard.*;$(PublishDir)Glance.ColorPicker.*;$(PublishDir)Glance.DevicePresence.*;$(PublishDir)Glance.DropShelf.*;$(PublishDir)Glance.FocusSession.*;$(PublishDir)Glance.Infinity.*;$(PublishDir)Glance.KeepAwake.*;$(PublishDir)Glance.Magnifier.*;$(PublishDir)Glance.Media.*;$(PublishDir)Glance.Network.*;$(PublishDir)Glance.Power.*;$(PublishDir)Glance.Presence.*;$(PublishDir)Glance.PrivacyControls.*;$(PublishDir)Glance.QuickConvert.*;$(PublishDir)Glance.Reminders.*;$(PublishDir)Glance.RemovableDevices.*;$(PublishDir)Glance.ScreenCapture.*;$(PublishDir)Glance.ScreenRecorder.*;$(PublishDir)Glance.ScreenLens.*;$(PublishDir)Glance.Stopwatch.*;$(PublishDir)Glance.Stash.*;$(PublishDir)Glance.SystemMonitor.*;$(PublishDir)Glance.ThemeSwitcher.*;$(PublishDir)Glance.Timer.*;$(PublishDir)Glance.Torrents.*;$(PublishDir)MonoTorrent*.dll;$(PublishDir)Mono.Nat.dll;$(PublishDir)ReusableTasks.dll;$(PublishDir)Glance.VoiceNotes.*;$(PublishDir)Glance.Weather.*;$(PublishDir)Glance.WorldClock.*" />
 		</ItemGroup>
 		<RemoveDir Directories="$(PublishDir)Modules" />
 		<Copy SourceFiles="@(GlanceModulePublishFile)" DestinationFolder="$(PublishDir)Modules" SkipUnchangedFiles="true" />

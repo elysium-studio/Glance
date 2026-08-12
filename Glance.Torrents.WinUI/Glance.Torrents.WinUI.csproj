@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net11.0-windows10.0.22000.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>Glance.Torrents.WinUI</RootNamespace>
+    <UseWinUI>true</UseWinUI>
+    <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <Platforms>AnyCPU;x64</Platforms>
+    <DefaultLanguage>en</DefaultLanguage>
+  </PropertyGroup>
+  <ItemGroup>
+    <PRIResource Include="Strings\**\*.resw" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Themes\Torrent.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Elysium.Platform.Windows" Version="$(ElysiumVersion)" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
+    <PackageReference Include="MonoTorrent" Version="3.0.2" />
+    <PackageReference Include="WinUIEx" Version="2.9.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Glance.Application.Abstractions\Glance.Application.Abstractions.csproj" />
+    <ProjectReference Include="..\Glance.Torrents\Glance.Torrents.csproj" />
+    <ProjectReference Include="..\Glance.UI.WinUI\Glance.UI.WinUI.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Themes\Torrent.xaml"><Generator>MSBuild:Compile</Generator></Page>
+  </ItemGroup>
+</Project>

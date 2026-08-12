@@ -3,6 +3,8 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using Velopack;
+using Microsoft.Windows.AppLifecycle;
+using System.Threading.Tasks;
 
 namespace Glance.Shell.WinUI;
 
@@ -11,14 +13,14 @@ public static class Start
     private const string RestartAfterArgument = "--restart-after";
 
     [STAThread]
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         WaitForRestartSource(args);
-
-        using SingleInstanceGuard? instanceGuard = SingleInstanceGuard.TryAcquire($"{Environment.UserName}.Glance");
-
-        if (instanceGuard is null)
+        AppActivationArguments activation = AppInstance.GetCurrent().GetActivatedEventArgs();
+        AppInstance instance = AppInstance.FindOrRegisterForKey($"{Environment.UserName}.Glance");
+        if (!instance.IsCurrent)
         {
+            await instance.RedirectActivationToAsync(activation);
             return;
         }
 
@@ -32,7 +34,7 @@ public static class Start
         }
 
 #pragma warning disable CA1806
-        Microsoft.UI.Xaml.Application.Start(_ => new App());
+        Microsoft.UI.Xaml.Application.Start(_ => new App(instance, activation));
 #pragma warning restore CA1806
     }
 

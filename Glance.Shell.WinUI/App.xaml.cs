@@ -3,14 +3,19 @@ using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
 using Elysium.Presentation.Abstractions;
 using Elysium.UI.WinUI;
+using Glance.Application.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Microsoft.Windows.AppLifecycle;
+using Windows.ApplicationModel.Activation;
+using Windows.Storage;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using IApplicationLifetime = Elysium.Application.Abstractions.IApplicationLifetime;
@@ -27,10 +32,18 @@ public sealed partial class App
     private Task? shutdownTask;
     private Task? startupModulesTask;
     private Task? startupNavigationTask;
+    private readonly AppInstance appInstance;
+    private readonly AppActivationArguments initialActivation;
 
-    public App() => InitializeComponent();
+    public App(AppInstance appInstance, AppActivationArguments initialActivation)
+    {
+        this.appInstance = appInstance;
+        this.initialActivation = initialActivation;
+        appInstance.Activated += HandleAppActivated;
+        InitializeComponent();
+    }
 
-    protected override void OnLaunched(LaunchActivatedEventArgs args)
+    protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
         string applicationData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance");
         GlanceModuleDataMigration.Migrate(applicationData);
@@ -54,6 +67,7 @@ public sealed partial class App
             applicationDispatcherQueue,
             (string[])[.. host.Services.GetRequiredService<GlanceSettings>().UninstalledModulePackages],
             host.Services.GetRequiredService<ILogger<App>>());
+        _ = RouteActivationAsync(initialActivation);
 
         if (host.Services.GetRequiredService<GlanceSettings>().ShowSetupOnStartup)
         {
@@ -72,6 +86,7 @@ public sealed partial class App
 
     private async Task ShutdownCoreAsync()
     {
+        appInstance.Activated -= HandleAppActivated;
         GlanceModuleManager? currentModuleManager = moduleManager;
         IHost? currentHost = host;
 
@@ -100,6 +115,40 @@ public sealed partial class App
         }
 
         Current.Exit();
+    }
+
+    private void HandleAppActivated(object? sender, AppActivationArguments args)
+    {
+        DispatcherQueue? queue = dispatcherQueue;
+        if (queue is null) return;
+        _ = queue.TryEnqueue(() => _ = RouteActivationAsync(args));
+    }
+
+    private async Task RouteActivationAsync(AppActivationArguments activation)
+    {
+        try
+        {
+            if (startupModulesTask is not null) await startupModulesTask;
+            IHost? currentHost = host;
+            if (currentHost is null) return;
+            GlanceContentContext? context = activation.Kind switch
+            {
+                ExtendedActivationKind.File when activation.Data is IFileActivatedEventArgs fileArgs => new GlanceContentContext(
+                    GlanceContentKind.FilesAndFolders,
+                    fileArgs.Files.OfType<IStorageItem>().Select(item => new GlanceStorageItem(item.Path, item.Name, item is StorageFolder)).ToArray()),
+                ExtendedActivationKind.Protocol when activation.Data is IProtocolActivatedEventArgs protocolArgs => new GlanceContentContext(
+                    GlanceContentKind.WebLink, [], protocolArgs.Uri.AbsoluteUri),
+                _ => null
+            };
+            if (context is null) return;
+            IGlanceIntentService intents = currentHost.Services.GetRequiredService<IGlanceIntentService>();
+            GlanceIntentDescriptor? intent = intents.GetIntents(context).FirstOrDefault();
+            if (intent is not null) _ = await intents.InvokeAsync(intent.Id, context);
+        }
+        catch (Exception exception)
+        {
+            host?.Services.GetService<ILogger<App>>()?.LogError(exception, "Failed to route application activation");
+        }
     }
 
     private Task CompleteShutdownAsync(IHost currentHost)

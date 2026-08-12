@@ -258,6 +258,15 @@
   <Project Path="Glance.Timer.Tests/Glance.Timer.Tests.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.Torrents/Glance.Torrents.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Torrents.WinUI/Glance.Torrents.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Torrents.Tests/Glance.Torrents.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.UI.WinUI/Glance.UI.WinUI.csproj">
     <Platform Project="x64" />
   </Project>
