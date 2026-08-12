@@ -15,6 +15,9 @@
   <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
   <data name="Files" xml:space="preserve"><value>Files</value></data>
   <data name="SelectedSize" xml:space="preserve"><value>Selected size</value></data>
+  <data name="DownloadTo" xml:space="preserve"><value>Download to</value></data>
+  <data name="FileName" xml:space="preserve"><value>File name</value></data>
+  <data name="FileSize" xml:space="preserve"><value>Size</value></data>
   <data name="RemoveTitle" xml:space="preserve"><value>Remove torrent?</value></data>
   <data name="RemoveDescription" xml:space="preserve"><value>Removing from the list keeps downloaded files. Deleting data permanently removes downloaded content.</value></data>
   <data name="RemoveListOnly" xml:space="preserve"><value>Remove from list</value></data>
