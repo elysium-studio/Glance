@@ -61,11 +61,21 @@ internal sealed class GlanceModuleManager :
             .Select(CreateWatcher)];
     }
 
-    public void LoadStartupModules()
+    public async Task LoadStartupModulesAsync()
     {
-        foreach (GlanceModuleLoadResult result in GlanceModuleLoader.Load())
+        using IEnumerator<GlanceModuleLoadResult> results = GlanceModuleLoader.Load().GetEnumerator();
+
+        while (await DispatchAsync(async () =>
         {
-            _ = InstallAsync(result).GetAwaiter().GetResult();
+            if (!results.MoveNext())
+            {
+                return false;
+            }
+
+            _ = await InstallAsync(results.Current);
+            return true;
+        }, DispatcherQueuePriority.Low).ConfigureAwait(false))
+        {
         }
     }
 
@@ -532,7 +542,8 @@ internal sealed class GlanceModuleManager :
         return completion.Task;
     }
 
-    private Task<T> DispatchAsync<T>(Func<Task<T>> action)
+    private Task<T> DispatchAsync<T>(Func<Task<T>> action,
+        DispatcherQueuePriority priority = DispatcherQueuePriority.Normal)
     {
         if (dispatcherQueue.HasThreadAccess)
         {
@@ -541,7 +552,7 @@ internal sealed class GlanceModuleManager :
 
         TaskCompletionSource<T> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        if (!dispatcherQueue.TryEnqueue(async () =>
+        if (!dispatcherQueue.TryEnqueue(priority, async () =>
             {
                 try
                 {

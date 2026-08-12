@@ -51,7 +51,6 @@ public sealed partial class App
         moduleManager = new GlanceModuleManager(host.Services, runtimeServices, applicationDispatcherQueue, host.Services.GetRequiredService<ILogger<GlanceModuleManager>>());
         _ = host.Services.GetRequiredKeyedService<DesktopIslandView>("DesktopIslandView");
         startupModulesTask = InitializeStartupModulesAsync(moduleManager,
-            applicationDispatcherQueue,
             (string[])[.. host.Services.GetRequiredService<GlanceSettings>().UninstalledModulePackages],
             host.Services.GetRequiredService<ILogger<App>>());
 
@@ -155,7 +154,6 @@ public sealed partial class App
     }
 
     private static async Task InitializeStartupModulesAsync(GlanceModuleManager moduleManager,
-        DispatcherQueue dispatcherQueue,
         IReadOnlyList<string> suppressedPackageIds,
         ILogger logger)
     {
@@ -166,13 +164,10 @@ public sealed partial class App
                 GlanceModuleInstallationStore.PrepareForStartup();
                 GlanceModuleInstallationStore.RemoveSuppressedPackages(suppressedPackageIds);
                 GlanceModuleLoader.Initialize();
-            });
+            }).ConfigureAwait(false);
 
-            await EnqueueAsync(dispatcherQueue, () =>
-            {
-                moduleManager.LoadStartupModules();
-                moduleManager.StartWatching();
-            });
+            await moduleManager.LoadStartupModulesAsync().ConfigureAwait(false);
+            moduleManager.StartWatching();
         }
         catch (Exception exception)
         {
@@ -180,27 +175,4 @@ public sealed partial class App
         }
     }
 
-    private static Task EnqueueAsync(DispatcherQueue dispatcherQueue,
-        Action callback)
-    {
-        TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        if (!dispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
-        {
-            try
-            {
-                callback();
-                completion.SetResult();
-            }
-            catch (Exception exception)
-            {
-                completion.SetException(exception);
-            }
-        }))
-        {
-            completion.SetException(new InvalidOperationException("The application dispatcher rejected module startup"));
-        }
-
-        return completion.Task;
-    }
 }
