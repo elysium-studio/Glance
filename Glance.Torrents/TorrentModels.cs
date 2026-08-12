@@ -48,7 +48,10 @@ public sealed record TorrentPersistedDownload(string Id,
     string DownloadPath,
     IReadOnlyList<string> SelectedFiles,
     bool WasPaused,
-    bool CompletionNotified);
+    bool CompletionNotified,
+    string? InfoHash = null,
+    string? DisplayName = null,
+    bool CreateContainingDirectory = true);
 
 public sealed record TorrentStateDocument(IReadOnlyList<TorrentPersistedDownload> Downloads);
 

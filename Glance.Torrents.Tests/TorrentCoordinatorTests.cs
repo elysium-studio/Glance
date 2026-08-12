@@ -25,13 +25,14 @@ public sealed class TorrentCoordinatorTests
     }
 
     [Fact]
-    public async Task DuplicateTorrentIsRejectedAndCleaned()
+    public async Task DuplicateTorrentCreatesAnotherConfirmationSession()
     {
         FakeEngine engine = new();
         await using TorrentAddCoordinator coordinator = new(engine);
-        _ = await coordinator.PrepareAsync(Input(), "downloads", TimeSpan.FromSeconds(1));
-        await Assert.ThrowsAsync<InvalidOperationException>(() => coordinator.PrepareAsync(Input(), "downloads", TimeSpan.FromSeconds(1)));
-        Assert.Single(engine.CancelledSessions);
+        TorrentMetadataSession first = await coordinator.PrepareAsync(Input(), "downloads", TimeSpan.FromSeconds(1));
+        TorrentMetadataSession second = await coordinator.PrepareAsync(Input(), "downloads", TimeSpan.FromSeconds(1));
+        Assert.NotEqual(first.SessionId, second.SessionId);
+        Assert.Empty(engine.CancelledSessions);
     }
 
     [Fact]
@@ -71,8 +72,8 @@ public sealed class TorrentCoordinatorTests
     {
         private int sequence;
         public Func<CancellationToken, Task<TorrentMetadataSession>>? Resolve { get; init; }
-        public event EventHandler<TorrentSnapshotEventArgs>? SnapshotUpdated;
-        public event EventHandler<TorrentCompletedEventArgs>? TorrentCompleted;
+        public event EventHandler<TorrentSnapshotEventArgs>? SnapshotUpdated { add { } remove { } }
+        public event EventHandler<TorrentCompletedEventArgs>? TorrentCompleted { add { } remove { } }
         public IReadOnlyCollection<string> ActiveTorrentIds { get; init; } = [];
         public string? ConfirmedSession { get; private set; }
         public IReadOnlyCollection<string>? SelectedFiles { get; private set; }

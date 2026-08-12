@@ -21,8 +21,8 @@
   <data name="FileSize" xml:space="preserve"><value>Size</value></data>
   <data name="RemoveTitle" xml:space="preserve"><value>Remove torrent?</value></data>
   <data name="RemoveDescription" xml:space="preserve"><value>Removing from the list keeps downloaded files. Deleting data permanently removes downloaded content.</value></data>
-  <data name="RemoveListOnly" xml:space="preserve"><value>Remove from list</value></data>
-  <data name="RemoveAndDelete" xml:space="preserve"><value>Remove and delete data</value></data>
+  <data name="RemoveListOnly" xml:space="preserve"><value>Remove torrent</value></data>
+  <data name="RemoveAndDelete" xml:space="preserve"><value>Remove torrent and files</value></data>
   <data name="NoDownloads" xml:space="preserve"><value>No downloads</value></data>
   <data name="ReadyToDownload" xml:space="preserve"><value>Ready to download</value></data>
   <data name="DropInstruction" xml:space="preserve"><value>Drop a torrent file or magnet link here</value></data>

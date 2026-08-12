@@ -173,7 +173,14 @@ public sealed class TorrentComponent :
     }
 
     private void HandleSnapshotUpdated(object? sender,
-        TorrentSnapshotEventArgs args) => _ = dispatcherQueue.TryEnqueue(() => viewModel.Update(args.Snapshot));
+        TorrentSnapshotEventArgs args) => _ = dispatcherQueue.TryEnqueue(() =>
+        {
+            if (engine.ActiveTorrentIds.Contains(args.Snapshot.Id,
+                StringComparer.OrdinalIgnoreCase))
+            {
+                viewModel.Update(args.Snapshot);
+            }
+        });
 
     private void HandleTorrentCompleted(object? sender,
         TorrentCompletedEventArgs args)
@@ -260,7 +267,11 @@ public sealed class TorrentComponent :
 
             await engine.RemoveAsync(torrentId,
                 result == TorrentRemovalChoice.RemoveAndDeleteData);
-            viewModel.Remove(torrentId);
+            _ = await RunOnDispatcherAsync(() =>
+            {
+                viewModel.Remove(torrentId);
+                return true;
+            });
         }
         catch (Exception exception)
         {

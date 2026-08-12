@@ -5,7 +5,6 @@ public sealed class TorrentAddCoordinator(ITorrentEngineService engine) : IAsync
     private readonly CancellationTokenSource disposalCancellation = new();
     private readonly ITorrentEngineService engine = engine;
     private readonly SemaphoreSlim synchronization = new(1, 1);
-    private readonly HashSet<string> pendingTorrentIds = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> pendingSessions = new(StringComparer.OrdinalIgnoreCase);
     private int disposed;
 
@@ -24,13 +23,6 @@ public sealed class TorrentAddCoordinator(ITorrentEngineService engine) : IAsync
 
         try
         {
-            if (engine.ActiveTorrentIds.Contains(session.TorrentId, StringComparer.OrdinalIgnoreCase) ||
-                !pendingTorrentIds.Add(session.TorrentId))
-            {
-                await engine.CancelMetadataAsync(session.SessionId);
-                throw new InvalidOperationException("This torrent is already in Glance.");
-            }
-
             _ = pendingSessions.Add(session.SessionId);
             return session;
         }
@@ -83,7 +75,6 @@ public sealed class TorrentAddCoordinator(ITorrentEngineService engine) : IAsync
         {
             sessions = [.. pendingSessions];
             pendingSessions.Clear();
-            pendingTorrentIds.Clear();
         }
         finally
         {
@@ -102,6 +93,5 @@ public sealed class TorrentAddCoordinator(ITorrentEngineService engine) : IAsync
     private void Forget(TorrentMetadataSession session)
     {
         _ = pendingSessions.Remove(session.SessionId);
-        _ = pendingTorrentIds.Remove(session.TorrentId);
     }
 }

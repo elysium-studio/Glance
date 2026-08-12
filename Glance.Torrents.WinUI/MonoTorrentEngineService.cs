@@ -10,8 +10,15 @@ namespace Glance.Torrents.WinUI;
 public sealed class MonoTorrentEngineService : ITorrentEngineService
 {
     private sealed record PendingMetadata(TorrentMetadataSession Session, byte[] Metadata);
-    private sealed class ManagedDownload(TorrentManager manager, TorrentPersistedDownload persisted)
+    private sealed record DownloadTarget(string Id,
+        string DisplayName,
+        string SavePath,
+        bool CreateContainingDirectory);
+    private sealed class ManagedDownload(ClientEngine client,
+        TorrentManager manager,
+        TorrentPersistedDownload persisted)
     {
+        public ClientEngine Client { get; } = client;
         public TorrentManager Manager { get; } = manager;
         public TorrentPersistedDownload Persisted { get; set; } = persisted;
         public DateTimeOffset? SeedingStarted { get; set; }
@@ -20,6 +27,7 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
     private readonly GlanceModuleOptions<CoreSettings> options;
     private readonly ConcurrentDictionary<string, PendingMetadata> pending = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, ManagedDownload> downloads = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<ClientEngine, string> clients = new();
     private readonly SemaphoreSlim lifecycle = new(1, 1);
     private readonly CancellationTokenSource disposalCancellation = new();
     private readonly string rootPath;
@@ -55,7 +63,8 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
             Directory.CreateDirectory(cachePath);
             Directory.CreateDirectory(metadataPath);
             CoreSettings settings = CoreSettings.Normalize(options.Current);
-            engine = new ClientEngine(CreateEngineSettings(settings));
+            engine = CreateClient(settings,
+                cachePath);
             await RestoreAsync(settings, cancellationToken);
             snapshotTimer = new PeriodicTimer(TimeSpan.FromSeconds(1));
             snapshotWorker = RunSnapshotLoopAsync(snapshotTimer, disposalCancellation.Token);
@@ -121,29 +130,42 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
         CancellationToken cancellationToken = default)
     {
         if (!pending.TryRemove(sessionId, out PendingMetadata? value)) throw new InvalidOperationException("The torrent confirmation has expired.");
-        if (downloads.ContainsKey(value.Session.TorrentId)) throw new InvalidOperationException("This torrent is already in Glance.");
-        Directory.CreateDirectory(downloadPath);
-        string cachedMetadata = Path.Combine(metadataPath, $"{value.Session.TorrentId}.torrent");
+        Torrent torrent = Torrent.Load(value.Metadata);
+        DownloadTarget target = ResolveDownloadTarget(value.Session.TorrentId,
+            torrent.Name,
+            downloadPath);
+        Directory.CreateDirectory(target.SavePath);
+        string cachedMetadata = Path.Combine(metadataPath, $"{target.Id}.torrent");
         await File.WriteAllBytesAsync(cachedMetadata, value.Metadata, cancellationToken);
-        TorrentManager manager = await GetEngine().AddAsync(cachedMetadata,
-            downloadPath,
-            CreateTorrentSettings(options.Current));
+        ClientEngine client = GetAvailableClient(torrent.InfoHashes,
+            options.Current,
+            target.Id);
+        await RebalanceClientLimitsAsync(options.Current);
+        TorrentManager manager = await client.AddAsync(cachedMetadata,
+            target.SavePath,
+            CreateTorrentSettings(options.Current,
+                target.CreateContainingDirectory));
         HashSet<string> selection = new(selectedFiles, StringComparer.OrdinalIgnoreCase);
         foreach (ITorrentManagerFile file in manager.Files)
         {
             await manager.SetFilePriorityAsync(file, selection.Contains(file.Path) ? Priority.Normal : Priority.DoNotDownload);
         }
-        TorrentPersistedDownload persisted = new(value.Session.TorrentId,
+        TorrentPersistedDownload persisted = new(target.Id,
             value.Session.Input,
-            downloadPath,
+            target.SavePath,
             [.. selection],
             false,
-            false);
-        ManagedDownload managed = new(manager, persisted);
+            false,
+            value.Session.TorrentId,
+            target.DisplayName,
+            target.CreateContainingDirectory);
+        ManagedDownload managed = new(client,
+            manager,
+            persisted);
         if (!downloads.TryAdd(persisted.Id, managed))
         {
-            _ = await GetEngine().RemoveAsync(manager, RemoveMode.CacheDataOnly);
-            throw new InvalidOperationException("This torrent is already in Glance.");
+            _ = await client.RemoveAsync(manager, RemoveMode.CacheDataOnly);
+            throw new InvalidOperationException("Could not register the torrent download.");
         }
         manager.TorrentStateChanged += HandleTorrentStateChanged;
         await SaveStateAsync(cancellationToken);
@@ -180,18 +202,26 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
         if (!downloads.TryRemove(torrentId, out ManagedDownload? managed)) return;
         managed.Manager.TorrentStateChanged -= HandleTorrentStateChanged;
         await managed.Manager.StopAsync(TimeSpan.FromSeconds(2));
-        _ = await GetEngine().RemoveAsync(managed.Manager, deleteData ? RemoveMode.CacheDataAndDownloadedData : RemoveMode.CacheDataOnly);
+        _ = await managed.Client.RemoveAsync(managed.Manager,
+            deleteData ? RemoveMode.CacheDataAndDownloadedData : RemoveMode.CacheDataOnly);
+
+        if (!ReferenceEquals(managed.Client, engine) && managed.Client.Torrents.Count == 0 && clients.TryRemove(managed.Client, out _))
+        {
+            managed.Client.Dispose();
+            await RebalanceClientLimitsAsync(options.Current);
+        }
+
         await SaveStateAsync();
     }
 
     public async Task ApplySettingsAsync(CoreSettings settings, CancellationToken cancellationToken = default)
     {
         settings = CoreSettings.Normalize(settings);
-        ClientEngine current = GetEngine();
-        await current.UpdateSettingsAsync(CreateEngineSettings(settings));
+        await RebalanceClientLimitsAsync(settings);
         foreach (ManagedDownload managed in downloads.Values)
         {
-            await managed.Manager.UpdateSettingsAsync(CreateTorrentSettings(settings));
+            await managed.Manager.UpdateSettingsAsync(CreateTorrentSettings(settings,
+                managed.Persisted.CreateContainingDirectory));
         }
     }
 
@@ -211,10 +241,17 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
             if (engine is not null)
             {
                 await SaveStateAsync();
-                await engine.StopAllAsync(TimeSpan.FromSeconds(2));
                 foreach (ManagedDownload managed in downloads.Values) managed.Manager.TorrentStateChanged -= HandleTorrentStateChanged;
+                foreach (ClientEngine client in clients.Keys)
+                {
+                    await client.StopAllAsync(TimeSpan.FromSeconds(2));
+                }
                 downloads.Clear();
-                engine.Dispose();
+                foreach (ClientEngine client in clients.Keys)
+                {
+                    client.Dispose();
+                }
+                clients.Clear();
                 engine = null;
             }
         }
@@ -241,16 +278,39 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
             try
             {
                 string cachedMetadata = Path.Combine(metadataPath, $"{persisted.Id}.torrent");
+                Torrent? torrent = File.Exists(cachedMetadata)
+                    ? Torrent.Load(cachedMetadata)
+                    : null;
+                MagnetLink? magnet = torrent is null
+                    ? MagnetLink.Parse(persisted.Input.Value)
+                    : null;
+                InfoHashes infoHashes = torrent?.InfoHashes ?? magnet!.InfoHashes;
+                ClientEngine client = GetAvailableClient(infoHashes,
+                    settings,
+                    persisted.Id);
                 TorrentManager manager = File.Exists(cachedMetadata)
-                    ? await GetEngine().AddAsync(cachedMetadata, persisted.DownloadPath, CreateTorrentSettings(settings))
-                    : await GetEngine().AddAsync(MagnetLink.Parse(persisted.Input.Value), persisted.DownloadPath, CreateTorrentSettings(settings));
+                    ? await client.AddAsync(cachedMetadata,
+                        persisted.DownloadPath,
+                        CreateTorrentSettings(settings,
+                            persisted.CreateContainingDirectory))
+                    : await client.AddAsync(magnet!,
+                        persisted.DownloadPath,
+                        CreateTorrentSettings(settings,
+                            persisted.CreateContainingDirectory));
                 HashSet<string> selection = new(persisted.SelectedFiles, StringComparer.OrdinalIgnoreCase);
                 if (manager.HasMetadata)
                 {
                     foreach (ITorrentManagerFile file in manager.Files) await manager.SetFilePriorityAsync(file, selection.Contains(file.Path) ? Priority.Normal : Priority.DoNotDownload);
                 }
-                ManagedDownload managed = new(manager, persisted);
-                downloads[persisted.Id] = managed;
+                TorrentPersistedDownload restored = persisted with
+                {
+                    InfoHash = persisted.InfoHash ?? infoHashes.V1OrV2.ToHex(),
+                    DisplayName = persisted.DisplayName ?? torrent?.Name ?? magnet?.Name ?? "Torrent download"
+                };
+                ManagedDownload managed = new(client,
+                    manager,
+                    restored);
+                downloads[restored.Id] = managed;
                 manager.TorrentStateChanged += HandleTorrentStateChanged;
                 if (persisted.WasPaused) await manager.PauseAsync(); else await manager.StartAsync();
                 Publish(managed);
@@ -260,6 +320,8 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
                 // One damaged entry must not prevent the remaining downloads from being restored.
             }
         }
+
+        await RebalanceClientLimitsAsync(settings);
     }
 
     private async Task RunSnapshotLoopAsync(PeriodicTimer timer, CancellationToken cancellationToken)
@@ -302,7 +364,9 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
         TorrentDownloadState state = MapState(manager.State, manager.Error);
         long selectedSize = manager.HasMetadata ? manager.Files.Where(file => file.Priority != Priority.DoNotDownload).Sum(file => file.Length) : 0;
         TorrentTransferSnapshot snapshot = new(managed.Persisted.Id,
-            manager.HasMetadata ? manager.Torrent?.Name ?? "Torrent download" : manager.MagnetLink?.Name ?? "Magnet download",
+            managed.Persisted.DisplayName ?? (manager.HasMetadata
+                ? manager.Torrent?.Name ?? "Torrent download"
+                : manager.MagnetLink?.Name ?? "Magnet download"),
             state,
             manager.HasMetadata ? manager.PartialProgress : 0,
             manager.Monitor.DownloadRate,
@@ -335,20 +399,83 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
             _ => TorrentDownloadState.Queued
         };
 
-    private EngineSettings CreateEngineSettings(CoreSettings settings) => new EngineSettingsBuilder
+    private ClientEngine CreateClient(CoreSettings settings,
+        string clientCachePath)
     {
-        CacheDirectory = cachePath,
+        Directory.CreateDirectory(clientCachePath);
+        ClientEngine client = new(CreateEngineSettings(settings,
+            clientCachePath,
+            clients.Count + 1));
+        clients[client] = clientCachePath;
+        return client;
+    }
+
+    private ClientEngine GetAvailableClient(InfoHashes infoHashes,
+        CoreSettings settings,
+        string instanceId)
+    {
+        ClientEngine? available = clients.Keys.FirstOrDefault(client => !client.Contains(infoHashes));
+        return available ?? CreateClient(settings,
+            Path.Combine(cachePath, instanceId));
+    }
+
+    private async Task RebalanceClientLimitsAsync(CoreSettings settings)
+    {
+        settings = CoreSettings.Normalize(settings);
+        KeyValuePair<ClientEngine, string>[] currentClients = [.. clients];
+        int clientCount = Math.Max(1, currentClients.Length);
+
+        foreach ((ClientEngine client, string clientCachePath) in currentClients)
+        {
+            await client.UpdateSettingsAsync(CreateEngineSettings(settings,
+                clientCachePath,
+                clientCount));
+        }
+    }
+
+    private DownloadTarget ResolveDownloadTarget(string infoHash,
+        string torrentName,
+        string downloadPath)
+    {
+        HashSet<string> activeNames = new(downloads.Values
+            .Where(download => string.Equals(download.Persisted.InfoHash,
+                infoHash,
+                StringComparison.OrdinalIgnoreCase))
+            .Select(download => download.Persisted.DisplayName ?? string.Empty),
+            StringComparer.OrdinalIgnoreCase);
+        string displayName = TorrentDuplicateNaming.GetAvailableName(torrentName,
+            candidate => activeNames.Contains(candidate) ||
+                Directory.Exists(Path.Combine(downloadPath, candidate)) ||
+                File.Exists(Path.Combine(downloadPath, candidate)));
+        bool isOriginalName = string.Equals(displayName,
+            torrentName,
+            StringComparison.Ordinal);
+
+        return new DownloadTarget($"{infoHash}-{Guid.NewGuid():N}",
+            displayName,
+            isOriginalName ? downloadPath : Path.Combine(downloadPath, displayName),
+            isOriginalName);
+    }
+
+    private static EngineSettings CreateEngineSettings(CoreSettings settings,
+        string clientCachePath,
+        int clientCount) => new EngineSettingsBuilder
+    {
+        CacheDirectory = clientCachePath,
         AutoSaveLoadDhtCache = true,
         AutoSaveLoadFastResume = true,
         AutoSaveLoadMagnetLinkMetadata = true,
-        MaximumDownloadRate = ToBytesPerSecond(settings.MaximumDownloadKilobytesPerSecond),
-        MaximumUploadRate = ToBytesPerSecond(settings.MaximumUploadKilobytesPerSecond)
+        MaximumDownloadRate = DivideLimit(ToBytesPerSecond(settings.MaximumDownloadKilobytesPerSecond),
+            clientCount),
+        MaximumUploadRate = DivideLimit(ToBytesPerSecond(settings.MaximumUploadKilobytesPerSecond),
+            clientCount)
     }.ToSettings();
 
-    private static MonoTorrent.Client.TorrentSettings CreateTorrentSettings(CoreSettings settings) => new TorrentSettingsBuilder
+    private static MonoTorrent.Client.TorrentSettings CreateTorrentSettings(CoreSettings settings,
+        bool createContainingDirectory = true) => new TorrentSettingsBuilder
     {
         MaximumConnections = settings.MaximumPeersPerTorrent == 0 ? 60 : settings.MaximumPeersPerTorrent,
-        CreateContainingDirectory = true
+        CreateContainingDirectory = createContainingDirectory
     }.ToSettings();
 
     private async Task SaveStateAsync(CancellationToken cancellationToken = default)
@@ -365,5 +492,6 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
 
     private ClientEngine GetEngine() => engine ?? throw new InvalidOperationException("The torrent engine has not been initialized.");
     private ManagedDownload GetDownload(string id) => downloads.TryGetValue(id, out ManagedDownload? value) ? value : throw new KeyNotFoundException("Torrent not found.");
+    private static int DivideLimit(int limit, int divisor) => limit == 0 ? 0 : Math.Max(1, limit / Math.Max(1, divisor));
     private static int ToBytesPerSecond(int kilobytes) => kilobytes <= 0 ? 0 : (int)Math.Min(int.MaxValue, kilobytes * 1024L);
 }
