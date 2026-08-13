@@ -12,5 +12,32 @@
         "releaseNotes":  [
 
                          ]
+    },
+    {
+        "version":  "0.1.2-preview",
+        "date":  "2026-08-13",
+        "releaseNotes":  [
+                             "Added the Torrent module, powered by MonoTorrent, for focused downloads inside Glance.",
+                             "Open .torrent files and magnet links directly with Glance, or add them through drag and drop, paste, and the contextual module picker.",
+                             "Review torrent metadata before downloading, including name, total size, file count, individual files, trackers, destination, and validation errors.",
+                             "Choose which files to download and see the selected size before confirmation.",
+                             "Track live progress, download and upload speed, peer count, metadata retrieval, and download state.",
+                             "Pause or resume all downloads from the island and safely remove entries with separate options for keeping or deleting downloaded data.",
+                             "Restore active downloads, metadata, and fast-resume state after restarting Glance, with safe asynchronous shutdown.",
+                             "Handle repeated torrent additions using familiar numbered folder names instead of blocking duplicate downloads.",
+                             "Configure destination, download and upload limits, connection limits, seeding behaviour, ratio and time limits, and optional completion attention.",
+                             "Added dedicated compact and expanded Torrent experiences, desktop confirmation and removal overlays, localized UI, and packaged MonoTorrent runtime dependencies.",
+                             "Added Network Speed with live download and upload readings and performance graphs.",
+                             "Added Network details for the current connection type, adapter, IPv4 address, link speed, and direct access to Windows network settings.",
+                             "Added camera and microphone usage monitoring, microphone mute control, and camera privacy settings access.",
+                             "Greatly reduced startup blocking by loading modules responsively while keeping the first island module stable as the rest arrive.",
+                             "Restored file drag-and-drop and contextual routing, and improved island activation, dismissal, and topmost behaviour.",
+                             "Restored the previously selected module after returning from Infinity.",
+                             "Eliminated App Mixer process-query exception storms caused by inaccessible or short-lived audio processes.",
+                             "Improved module settings with Fluent cards, consistent control sizing, immediate saving, correctly placed validation messages, and aligned breadcrumb chevrons.",
+                             "Refined Torrent compact and expanded layouts, metadata and file selection, removal actions, duplicate handling, and settings.",
+                             "Added the Voice Notes three-line empty state and updated localized no-recording messages.",
+                             "Expanded tests for Torrent validation, restoration, seeding policy, runtime limits, duplicate naming, completion attention, disposal, and shell intent compatibility."
+                         ]
     }
 ]
