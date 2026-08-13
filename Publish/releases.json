@@ -48,5 +48,15 @@
                              "Glance now requires Windows 11 build 22000 or later across project targets, package manifests, and direct installer startup.",
                              "Fixed a Voice Notes localization resource crash that could occur while modules were loaded or browsed in Settings."
                          ]
+    },
+    {
+        "version":  "0.1.4-preview",
+        "date":  "2026-08-13",
+        "releaseNotes":  [
+                             "Fixed a shutdown crash by disposing module-owned WinUI windows and controls on the application UI thread, with idempotent Color Picker teardown.",
+                             "Stabilized startup module presentation by loading enabled modules in the saved order, keeping the first configured module selected while the rest load.",
+                             "Completed module installation and removal localization across every supported language.",
+                             "Resolved repository-enforced syntax diagnostics and restored a warning-free full solution build."
+                         ]
     }
 ]
