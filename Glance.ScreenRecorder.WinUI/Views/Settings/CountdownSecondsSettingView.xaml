@@ -8,6 +8,7 @@
     Unloaded="{x:Bind ViewModel.Deactivate}">
     <CommunityToolkit:SettingsCard x:Uid="CountdownSecondsSettingCard">
         <NumberBox
+            Width="160"
             Minimum="0"
             Maximum="10"
             SmallChange="1"

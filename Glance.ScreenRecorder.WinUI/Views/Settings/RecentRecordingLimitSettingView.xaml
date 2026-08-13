@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <UserControl
-    x:Class="Glance.ScreenRecorder.WinUI.RecentRecordingLimitSettingView"
+    x:Class="Glance.ScreenRecorder.WinUI.ScreenRecorderRecentRecordingLimitSettingView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:CommunityToolkit="using:CommunityToolkit.WinUI.Controls"
@@ -8,6 +8,7 @@
     Unloaded="{x:Bind ViewModel.Deactivate}">
     <CommunityToolkit:SettingsCard x:Uid="RecentRecordingLimitSettingCard">
         <NumberBox
+            Width="160"
             Minimum="1"
             Maximum="12"
             SmallChange="1"

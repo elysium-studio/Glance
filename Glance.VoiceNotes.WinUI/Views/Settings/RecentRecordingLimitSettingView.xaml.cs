@@ -2,10 +2,10 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.VoiceNotes.WinUI;
 
-public sealed partial class RecentRecordingLimitSettingView :
+public sealed partial class VoiceNotesRecentRecordingLimitSettingView :
     UserControl
 {
-    public RecentRecordingLimitSettingView() => InitializeComponent();
+    public VoiceNotesRecentRecordingLimitSettingView() => InitializeComponent();
 
-    public RecentRecordingLimitSettingViewModel ViewModel => (RecentRecordingLimitSettingViewModel)DataContext;
+    public VoiceNotesRecentRecordingLimitSettingViewModel ViewModel => (VoiceNotesRecentRecordingLimitSettingViewModel)DataContext;
 }

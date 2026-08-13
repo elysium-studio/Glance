@@ -11,7 +11,7 @@ public sealed partial class TorrentSettingsView : UserControl
 {
     public TorrentSettingsView() => InitializeComponent();
 
-    private async void BrowseClicked(object sender, RoutedEventArgs args)
+    private async void ChooseFolderClicked(object sender, RoutedEventArgs args)
     {
         if (DataContext is not TorrentSettingsViewModel viewModel || XamlRoot is null) return;
         FolderPicker picker = new();
@@ -21,10 +21,5 @@ public sealed partial class TorrentSettingsView : UserControl
         InitializeWithWindow.Initialize(picker, hwnd);
         StorageFolder? folder = await picker.PickSingleFolderAsync();
         if (folder is not null) viewModel.DownloadPath = folder.Path;
-    }
-
-    private async void SaveClicked(object sender, RoutedEventArgs args)
-    {
-        if (DataContext is TorrentSettingsViewModel viewModel) _ = await viewModel.SaveAsync();
     }
 }

@@ -3,7 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.Shell.WinUI;
 
-public sealed class SettingsContentTemplateSelector :
+public sealed partial class SettingsContentTemplateSelector :
     DataTemplateSelector
 {
     public DataTemplate? DefaultTemplate { get; set; }

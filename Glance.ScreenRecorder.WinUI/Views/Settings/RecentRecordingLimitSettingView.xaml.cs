@@ -2,10 +2,10 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Glance.ScreenRecorder.WinUI;
 
-public sealed partial class RecentRecordingLimitSettingView :
+public sealed partial class ScreenRecorderRecentRecordingLimitSettingView :
     UserControl
 {
-    public RecentRecordingLimitSettingView() => InitializeComponent();
+    public ScreenRecorderRecentRecordingLimitSettingView() => InitializeComponent();
 
-    public RecentRecordingLimitSettingViewModel ViewModel => (RecentRecordingLimitSettingViewModel)DataContext;
+    public ScreenRecorderRecentRecordingLimitSettingViewModel ViewModel => (ScreenRecorderRecentRecordingLimitSettingViewModel)DataContext;
 }

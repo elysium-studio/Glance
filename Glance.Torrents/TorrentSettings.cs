@@ -20,8 +20,6 @@ public sealed class TorrentSettings
 
     public TorrentSeedingLimitMode SeedingLimitMode { get; set; } = TorrentSeedingLimitMode.Either;
 
-    public bool RequestAttentionOnCompletion { get; set; }
-
     public static TorrentSettings Normalize(TorrentSettings settings) => new()
     {
         DefaultDownloadPath = string.IsNullOrWhiteSpace(settings.DefaultDownloadPath) ? null : settings.DefaultDownloadPath.Trim(),
@@ -31,8 +29,7 @@ public sealed class TorrentSettings
         ContinueSeeding = settings.ContinueSeeding,
         SeedingRatioLimit = Math.Max(0, settings.SeedingRatioLimit),
         SeedingTimeLimitMinutes = Math.Max(0, settings.SeedingTimeLimitMinutes),
-        SeedingLimitMode = Enum.IsDefined(settings.SeedingLimitMode) ? settings.SeedingLimitMode : TorrentSeedingLimitMode.Either,
-        RequestAttentionOnCompletion = settings.RequestAttentionOnCompletion
+        SeedingLimitMode = Enum.IsDefined(settings.SeedingLimitMode) ? settings.SeedingLimitMode : TorrentSeedingLimitMode.Either
     };
 }
 

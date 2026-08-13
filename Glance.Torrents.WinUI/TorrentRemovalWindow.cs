@@ -55,6 +55,7 @@ internal sealed class TorrentRemovalWindow
         dialog.PrimaryButtonClick += HandlePrimaryButtonClick;
         dialog.SecondaryButtonClick += HandleSecondaryButtonClick;
         dialog.Closing += HandleDialogClosing;
+        dialog.Opened += HandleDialogOpened;
 
         smokeLayer = new Border
         {
@@ -132,6 +133,9 @@ internal sealed class TorrentRemovalWindow
     private void HandleDialogClosing(ContentDialog sender,
         ContentDialogClosingEventArgs args) => AnimateSmoke(0);
 
+    private static void HandleDialogOpened(ContentDialog sender,
+        ContentDialogOpenedEventArgs args) => SetActionButtonMinimumWidth(sender);
+
     private void HandlePrimaryButtonClick(ContentDialog sender,
         ContentDialogButtonClickEventArgs args) => selectedChoice = TorrentRemovalChoice.RemoveFromList;
 
@@ -170,8 +174,24 @@ internal sealed class TorrentRemovalWindow
         dialog.PrimaryButtonClick -= HandlePrimaryButtonClick;
         dialog.SecondaryButtonClick -= HandleSecondaryButtonClick;
         dialog.Closing -= HandleDialogClosing;
+        dialog.Opened -= HandleDialogOpened;
         window.Closed -= HandleWindowClosed;
         window.Close();
+    }
+
+    private static void SetActionButtonMinimumWidth(DependencyObject parent)
+    {
+        for (int index = 0; index < VisualTreeHelper.GetChildrenCount(parent); index++)
+        {
+            DependencyObject child = VisualTreeHelper.GetChild(parent, index);
+
+            if (child is Button button)
+            {
+                button.MinWidth = 132;
+            }
+
+            SetActionButtonMinimumWidth(child);
+        }
     }
 
     private static Brush ResolveSmokeBrush() => Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("SmokeFillColorDefaultBrush", out object value) && value is Brush brush

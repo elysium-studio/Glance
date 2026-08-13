@@ -184,14 +184,9 @@ public sealed class TorrentComponent :
 
     private void HandleTorrentCompleted(object? sender,
         TorrentCompletedEventArgs args)
-    {
-        if (options.Current.RequestAttentionOnCompletion)
-        {
-            attentionService.RequestAttention(Id,
-                GlanceAttentionLevel.Default,
-                true);
-        }
-    }
+        => attentionService.RequestAttention(Id,
+            GlanceAttentionLevel.Default,
+            true);
 
     private void HandleOptionsChanged(object? sender,
         GlanceModuleOptionsChangedEventArgs<TorrentSettings> args) => _ = ApplySettingsAsync(args.Options);

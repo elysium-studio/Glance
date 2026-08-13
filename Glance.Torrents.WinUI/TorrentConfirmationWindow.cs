@@ -80,6 +80,7 @@ internal sealed class TorrentConfirmationWindow
             IsPrimaryButtonEnabled = false
         };
         dialog.PrimaryButtonClick += HandlePrimaryButtonClick;
+        dialog.Opened += HandleDialogOpened;
         dialog.Resources["ContentDialogMaxWidth"] = 680d;
         dialog.Resources["ContentDialogSmokeFill"] = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
 
@@ -278,16 +279,16 @@ internal sealed class TorrentConfirmationWindow
         ToolTipService.SetToolTip(downloadPathText, model.DownloadPath);
         Grid.SetRow(downloadPathText, 1);
         destination.Children.Add(downloadPathText);
-        Button browseButton = new()
+        Button chooseFolderButton = new()
         {
-            Content = localizer.GetText("Browse"),
+            Content = localizer.GetText("ChooseFolder"),
             Margin = new Thickness(12, 0, 0, 0),
-            Width = 132
+            MinWidth = 132
         };
-        browseButton.Click += HandleBrowseClicked;
-        Grid.SetRow(browseButton, 1);
-        Grid.SetColumn(browseButton, 1);
-        destination.Children.Add(browseButton);
+        chooseFolderButton.Click += HandleChooseFolderClicked;
+        Grid.SetRow(chooseFolderButton, 1);
+        Grid.SetColumn(chooseFolderButton, 1);
+        destination.Children.Add(chooseFolderButton);
         Grid.SetRow(destination, 1);
         details.Children.Add(destination);
 
@@ -492,7 +493,7 @@ internal sealed class TorrentConfirmationWindow
         UpdateSelectedSize();
     }
 
-    private async void HandleBrowseClicked(object sender,
+    private async void HandleChooseFolderClicked(object sender,
         RoutedEventArgs args)
     {
         FolderPicker picker = new();
@@ -574,6 +575,7 @@ internal sealed class TorrentConfirmationWindow
         {
             closed = true;
             dialog.PrimaryButtonClick -= HandlePrimaryButtonClick;
+            dialog.Opened -= HandleDialogOpened;
             window.Closed -= HandleWindowClosed;
             window.Close();
         }
@@ -606,6 +608,24 @@ internal sealed class TorrentConfirmationWindow
     private static Style? ResolveStyle(string resourceKey) => Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue(resourceKey, out object value)
         ? value as Style
         : null;
+
+    private void HandleDialogOpened(ContentDialog sender,
+        ContentDialogOpenedEventArgs args) => SetActionButtonMinimumWidth(sender);
+
+    private static void SetActionButtonMinimumWidth(DependencyObject parent)
+    {
+        for (int index = 0; index < VisualTreeHelper.GetChildrenCount(parent); index++)
+        {
+            DependencyObject child = VisualTreeHelper.GetChild(parent, index);
+
+            if (child is Button button)
+            {
+                button.MinWidth = 132;
+            }
+
+            SetActionButtonMinimumWidth(child);
+        }
+    }
 
     private static string FormatSize(long bytes) => bytes switch
     {

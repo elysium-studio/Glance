@@ -8,6 +8,7 @@
     Unloaded="{x:Bind ViewModel.Deactivate}">
     <CommunityToolkit:SettingsCard x:Uid="TimerDefaultDurationSettingCard">
         <NumberBox
+            Width="160"
             Minimum="1"
             Maximum="1440"
             SmallChange="1"

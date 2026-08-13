@@ -6,17 +6,18 @@
     xmlns:CommunityToolkit="using:CommunityToolkit.WinUI.Controls"
     Loaded="{x:Bind ViewModel.Activate}"
     Unloaded="{x:Bind ViewModel.Deactivate}">
-    <CommunityToolkit:SettingsCard x:Uid="WeatherLocationSettingCard">
-        <StackPanel Width="240" Spacing="8">
+    <StackPanel Spacing="4">
+        <CommunityToolkit:SettingsCard x:Uid="WeatherLocationSettingCard">
             <TextBox
                 x:Uid="WeatherLocationTextBox"
+                Width="240"
                 HorizontalAlignment="Stretch"
                 Text="{x:Bind ViewModel.Value, Mode=TwoWay}" />
-            <InfoBar
-                IsClosable="False"
-                IsOpen="{x:Bind ViewModel.HasValidationError, Mode=OneWay}"
-                Message="{x:Bind ViewModel.ValidationMessage, Mode=OneWay}"
-                Severity="Warning" />
-        </StackPanel>
-    </CommunityToolkit:SettingsCard>
+        </CommunityToolkit:SettingsCard>
+        <InfoBar
+            IsClosable="False"
+            IsOpen="{x:Bind ViewModel.HasValidationError, Mode=OneWay}"
+            Message="{x:Bind ViewModel.ValidationMessage, Mode=OneWay}"
+            Severity="Warning" />
+    </StackPanel>
 </UserControl>

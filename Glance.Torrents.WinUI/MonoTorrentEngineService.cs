@@ -200,10 +200,14 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
     public async Task RemoveAsync(string torrentId, bool deleteData)
     {
         if (!downloads.TryRemove(torrentId, out ManagedDownload? managed)) return;
+        string? ownedDownloadDirectory = deleteData
+            ? GetOwnedDownloadDirectory(managed)
+            : null;
         managed.Manager.TorrentStateChanged -= HandleTorrentStateChanged;
         await managed.Manager.StopAsync(TimeSpan.FromSeconds(2));
         _ = await managed.Client.RemoveAsync(managed.Manager,
             deleteData ? RemoveMode.CacheDataAndDownloadedData : RemoveMode.CacheDataOnly);
+        DeleteEmptyDirectoryTree(ownedDownloadDirectory);
 
         if (!ReferenceEquals(managed.Client, engine) && managed.Client.Torrents.Count == 0 && clients.TryRemove(managed.Client, out _))
         {
@@ -488,6 +492,92 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
             await JsonSerializer.SerializeAsync(stream, state, TorrentJsonContext.Default.TorrentStateDocument, cancellationToken);
         }
         File.Move(temporary, statePath, true);
+    }
+
+    private static string? GetOwnedDownloadDirectory(ManagedDownload managed)
+    {
+        string savePath = Path.GetFullPath(managed.Manager.SavePath);
+        string? containingDirectory = managed.Manager.ContainingDirectory;
+
+        if (!managed.Persisted.CreateContainingDirectory)
+        {
+            string directoryName = Path.GetFileName(savePath.TrimEnd(Path.DirectorySeparatorChar,
+                Path.AltDirectorySeparatorChar));
+            return !string.IsNullOrWhiteSpace(managed.Persisted.DisplayName) &&
+                string.Equals(directoryName,
+                    managed.Persisted.DisplayName,
+                    StringComparison.OrdinalIgnoreCase)
+                ? savePath
+                : null;
+        }
+
+        if (string.IsNullOrWhiteSpace(containingDirectory))
+        {
+            return null;
+        }
+
+        string candidate = Path.GetFullPath(containingDirectory);
+        string relativePath = Path.GetRelativePath(savePath,
+            candidate);
+        return relativePath != "." &&
+            relativePath != ".." &&
+            !relativePath.StartsWith($"..{Path.DirectorySeparatorChar}",
+                StringComparison.Ordinal) &&
+            !Path.IsPathRooted(relativePath)
+            ? candidate
+            : null;
+    }
+
+    private static void DeleteEmptyDirectoryTree(string? rootPath)
+    {
+        if (string.IsNullOrWhiteSpace(rootPath) || !Directory.Exists(rootPath))
+        {
+            return;
+        }
+
+        string[] directories;
+
+        try
+        {
+            directories = Directory.GetDirectories(rootPath,
+                "*",
+                SearchOption.AllDirectories);
+        }
+        catch (IOException)
+        {
+            return;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return;
+        }
+
+        foreach (string directory in directories.OrderByDescending(path => path.Length))
+        {
+            DeleteDirectoryIfEmpty(directory);
+        }
+
+        DeleteDirectoryIfEmpty(rootPath);
+    }
+
+    private static void DeleteDirectoryIfEmpty(string path)
+    {
+        try
+        {
+            if (!Directory.EnumerateFileSystemEntries(path).Any())
+            {
+                Directory.Delete(path);
+            }
+        }
+        catch (DirectoryNotFoundException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
     }
 
     private ClientEngine GetEngine() => engine ?? throw new InvalidOperationException("The torrent engine has not been initialized.");
