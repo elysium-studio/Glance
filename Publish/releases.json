@@ -58,5 +58,20 @@
                              "Completed module installation and removal localization across every supported language.",
                              "Resolved repository-enforced syntax diagnostics and restored a warning-free full solution build."
                          ]
+    },
+    {
+        "version":  "0.1.5-preview",
+        "date":  "2026-08-13",
+        "releaseNotes":  [
+                             "Added System Indicators, a transient module for volume and mute, display brightness, Caps Lock, Num Lock, Scroll Lock, and airplane mode.",
+                             "System indicators now appear temporarily without entering module paging or ordering, preserve the current expanded state, block background scrolling, and dismiss automatically.",
+                             "Added a synchronized Fluent push transition between the active module and temporary system indicators.",
+                             "Added compact and expanded loading shimmer placeholders that keep module content and the footer hidden until every startup module is ready, then cross-fade into the settled first module.",
+                             "Restored live GPU usage to System Monitor in compact and expanded views and removed redundant network throughput now covered by Network Speed.",
+                             "Refined Network Speed and System Monitor spacing and metric layouts for closer alignment with the rest of Glance.",
+                             "Rebalanced module accent colours across Audio Switcher, Drop Shelf, Presence, Quick Convert, Screen Lens, System Monitor, Torrent, World Clock, and System Indicators.",
+                             "Added automatic background update checking and downloading, with localized update-ready notifications and safe restart-to-apply behaviour for direct Glance installations.",
+                             "Extended the module contract, preference handling, documentation, packaging, and tests for transient components and System Indicators."
+                         ]
     }
 ]
