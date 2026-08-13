@@ -1,138 +1,163 @@
 # Glance
 
-Glance is a lightweight Windows desktop companion that keeps useful controls and live information within reach without becoming another full-sized application window. It is built with WinUI 3 and centred around the [`DesktopIsland`](https://github.com/elysium-studio/Elysium) control from Elysium.
+Glance is a lightweight Windows companion that keeps useful controls, live information, and quick actions close at hand. It presents each feature as a module with a compact view for everyday use and an expanded view for more detail and controls.
 
-The island remains at the top or bottom of the desktop in a compact state, expands when it is needed, and allows modules to request attention when something important happens. Modules can be enabled, disabled, and reordered from Settings.
+Modules can be enabled, disabled, reordered, and configured independently.
 
 ## Modules
 
-- **Stopwatch** — start, pause, and reset an elapsed-time counter.
-- **Timer** — adjust a countdown, pause or resume it, and receive an alert when it finishes.
-- **Media** — view the current track, album artwork, playback state, and media controls.
-- **System Monitor** — follow CPU, memory, and network activity at a glance.
-- **Power** — view AC or battery state and battery percentage where available.
-- **Clipboard** — browse recent clipboard entries stored in a module-owned SQLite database and copy, remove, or send an entry to the focused application.
-- **Stash** — drag in text or links for later, browse saved items, copy them back, or open saved links. Its history is stored in a module-owned SQLite database.
-- **Reminders** — create, edit, prioritise, and page through reminders stored in SQLite, with timely attention as due dates approach.
-- **Drop Shelf** — temporarily collect files and folders, then drag them together to another location.
-- **Focus Session** — run a focused work session with a clear remaining-time display.
-- **Audio Switcher** — move quickly between available playback devices.
-- **App Mixer** — control the volume and mute state of each application playing sound.
-- **Voice Notes** — record short audio notes and revisit recordings indexed in a module-owned SQLite database.
-- **Colour Picker** — sample a screen colour, retain recent colours in SQLite, and copy HEX, RGB, or HSL values.
-- **Screen Capture** — capture a region, a window, one display, or all displays to the Captures folder with metadata indexed in SQLite.
-- **Screen Lens** — select any area of the screen and extract its text locally with Windows OCR.
-- **Privacy Controls** — see when the camera or default microphone is in use, mute or unmute the microphone globally, and open camera privacy settings.
-- **Removable Devices** — view connected removable storage, inspect capacity, open it in Explorer, and request safe ejection. Multiple devices are presented as pages within the module.
-- **Bluetooth Devices** — see connected Bluetooth accessories and their available battery levels. Newly connected or newly low-battery devices can automatically request attention.
-- **Keep Awake** — prevent automatic system sleep until you explicitly stop the module.
-- **Magnifier** — view the current Windows Magnifier zoom level and control magnification from the expanded island.
-- **Presence** — maintain an active session by sending an F15 input pulse only after four minutes of genuine inactivity.
-- **Theme Switcher** — switch Windows between light and dark themes manually, or follow local sunrise and sunset with an animated radial transition.
-- **Weather** — view current OpenWeather conditions against composition-driven sun, cloud, rain, snow, fog, heat, and thunderstorm scenes.
-- **World Clock** — view local time and page through London, New York, Tokyo, and Sydney in 12-hour or 24-hour format.
+Glance includes modules for:
 
-## Architecture
+- **Time and productivity:** Stopwatch, Timer, Focus Session, Reminders, Keep Awake, Presence, World Clock, Clipboard, Stash, Drop Shelf, and Torrent.
+- **Media and capture:** Media, Audio Switcher, App Mixer, Voice Notes, Screen Capture, Screen Recorder, Screen Lens, Colour Picker, and Quick Convert.
+- **System and devices:** System Monitor, Network Speed, Network details, Power, Privacy Controls, Removable Devices, Bluetooth Devices, Magnifier, and Theme Switcher.
+- **Information:** Weather.
 
-Each feature is an independent pair of projects:
+## Build Glance
 
-- `Glance.<Module>` contains the platform-neutral state and view-model logic.
-- `Glance.<Module>.WinUI` contains the Windows integration, views, theme resources, and localized strings.
+### Requirements
 
-Modules implement `IGlanceModule` and are discovered recursively from the `Modules` application directory at startup. Each built-in module is published as one `Modules/<Module>.glance` package containing its domain assembly, WinUI assembly, private dependencies, symbols, and PRI resources. Shared application and framework dependencies, including `Glance.UI.WinUI`, remain beside `Glance.exe`.
+- Windows 10 version 1809 or later.
+- Visual Studio with the .NET desktop and Windows application development workloads, or the equivalent command-line build tools.
+- The .NET 11 preview SDK.
+- An x64 machine or build environment.
+- Access to the package sources configured in `NuGet.config`.
 
-The shell has no compile-time reference to the presentation assemblies of its built-in modules. It expands new packages into Glance's private module cache, loads each module's PRI, registers its generated WinUI XAML metadata provider, discovers `IGlanceModule` implementations, and then lets the module register its own services. Each package receives an isolated service provider and lifecycle; application services are available only as shared parent services. Unchanged packages reuse the existing cache without being extracted or hashed again. The built-in modules therefore use the same runtime path as an independently supplied module. Unit tests are kept in matching `Glance.<Module>.Tests` projects.
+Clone the repository, restore the packages, and build the x64 solution:
 
-Glance consumes Elysium through NuGet package references, using the shared version declared in `Directory.Build.props`.
-
-## Third-party modules
-
-A third-party module can be installed from the **Modules** settings page by dragging in its `.glance` package or choosing **Add module**. Glance gives every module its own directory:
-
-```text
-%LOCALAPPDATA%/Glance/Modules/
-  Example/
-    Example.glance
-    example.settings.dat
-    Runtime/
-      state.dat
-      <SHA-256 content hash>/
-        Example.Glance.WinUI.dll
-        Example.Glance.WinUI.pri
+```powershell
+git clone https://github.com/elysium-studio/Glance.git
+cd Glance
+dotnet restore Glance.slnx
+dotnet build Glance.slnx -c Debug -p:Platform=x64
 ```
 
-A `.glance` file is a ZIP container with the module files at its root:
+The application project is `Glance.Shell.WinUI`. Open `Glance.slnx` in Visual Studio and select the `x64` platform to build or debug it there.
+
+Run the tests with:
+
+```powershell
+dotnet test Glance.slnx -c Debug -p:Platform=x64
+```
+
+## Build a module
+
+A typical module uses three projects:
+
+```text
+Glance.Example/             Models, settings, contracts, and view models
+Glance.Example.WinUI/       Windows services, registration, resources, and views
+Glance.Example.Tests/       Unit tests for platform-independent behaviour
+```
+
+Use an existing small module such as `Glance.Stopwatch` as a reference for the complete structure.
+
+### 1. Create the views and component
+
+The WinUI project targets the same framework as Glance and enables compiled WinUI resources:
+
+```xml
+<PropertyGroup>
+  <TargetFramework>net11.0-windows10.0.22000.0</TargetFramework>
+  <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+  <UseWinUI>true</UseWinUI>
+  <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
+  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  <Platforms>AnyCPU;x64</Platforms>
+</PropertyGroup>
+```
+
+Implement `IGlanceComponent` and provide compact and expanded WinUI content:
+
+```csharp
+using Glance.Application.Abstractions;
+
+public sealed class ExampleComponent : IGlanceComponent
+{
+    public string Id => "Example";
+    public string DisplayName => "Example";
+    public string Description => "A short description of the module.";
+    public string SettingsCategory => GlanceModuleCategories.Productivity;
+    public string IconGlyph => "\uE946";
+    public int Order => 100;
+
+    public object CompactContent { get; } = new ExampleCompactView();
+    public object ExpandedContent { get; } = new ExampleExpandedView();
+}
+```
+
+Keep UI text in `Strings/<language>/Resources.resw` and module brushes or styles in a theme resource dictionary. Put platform-independent state and view-model logic in the non-WinUI project so it can be tested without starting the application.
+
+### 2. Register the module
+
+Create a public, parameterless `IGlanceModule` implementation in the WinUI assembly. Register the component and any module-owned services with dependency injection:
+
+```csharp
+using Glance.Application.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+
+public sealed class ExampleModule : IGlanceModule
+{
+    public void Register(IServiceCollection services)
+    {
+        services.AddSingleton<ExampleComponent>();
+        services.AddSingleton<IGlanceComponent>(provider =>
+            provider.GetRequiredService<ExampleComponent>());
+    }
+}
+```
+
+Optional contracts add more integration without shell-specific code:
+
+- `IGlanceModuleSettingViewModel` adds module settings.
+- `IGlanceAttentionComponent` allows the module to request the user's attention, subject to permission.
+- `IGlanceIntent` lets the module accept contextual files, text, links, or other content.
+- `IGlanceActionProvider` exposes commands to the application action system.
+- `IDisposable` or `IAsyncDisposable` provides deterministic cleanup.
+
+### 3. Package the module
+
+A `.glance` package is a ZIP archive whose files are stored at its root. Include the WinUI assembly and matching PRI file, the platform-independent assembly, and every private runtime dependency:
 
 ```text
 Example.glance
-  Example.Glance.WinUI.dll
-  Example.Glance.WinUI.pri
-  Example.Glance.dll
-  Example.Dependency.dll
+  Glance.Example.WinUI.dll
+  Glance.Example.WinUI.pri
+  Glance.Example.dll
+  Example.PrivateDependency.dll
 ```
 
-Unpacked module directories remain supported for development:
+The WinUI DLL and PRI filenames must share the same base name. Do not package shared Glance, WinUI, Elysium, or Microsoft Extensions assemblies supplied by the host.
 
-```text
-%LOCALAPPDATA%/Glance/Modules/
-  Example/
-    Example.Glance.WinUI.dll
-    Example.Glance.WinUI.pri
-    Example.Glance.dll
-    Example.Dependency.dll
-```
-
-Built-in packages continue to be produced under the `Modules` directory beside `Glance.exe`. At startup Glance atomically stages new or updated built-in packages into their per-module directories. New user packages are activated while Glance is running and their advertised category determines which settings group is shown after installation. Replacing an already loaded package stages the update for the next launch because WinUI module assemblies and PRI resources cannot be safely replaced inside the default load context.
-
-The original package remains intact beside the module's settings and data. Runtime contents are extracted into `Runtime/<SHA-256 content hash>` and switched through `Runtime/state.dat`, so a package update never overwrites the active generation. The entry assembly and PRI must have the same base filename. Glance does not require the assembly name to begin with `Glance` or to be known when the application is compiled.
-
-The module's WinUI project must:
-
-- Reference the matching `Glance.Application.Abstractions` contract and expose a public, parameterless `IGlanceModule` implementation.
-- Implement `IGlanceAttentionComponent` on any component that requests attention. Glance then exposes a per-module permission and blocks requests when the user turns it off.
-- Implement `IGlanceIntent` to advertise an action to other modules, then register that implementation with `services.AddSingleton<IGlanceIntent, YourIntent>()`. The descriptor supplies the target component, localized label, description, glyph, and glyph font; `CanHandle` declares the supported content kinds.
-- Implement `IGlanceActionProvider` to advertise assistant-ready commands, typed parameters, confirmation requirements, availability, and whether a successful command should present the module in compact or expanded mode. Register the same component or a dedicated provider as `IGlanceActionProvider`. Glance automatically advertises `<ComponentId>.Show` for every enabled module, so an assistant can always bring a module into view even when it exposes no specialised commands.
-- Implement `IGlanceAssistantSemanticResolver` to supply an alternative command-understanding engine. A resolver receives the user's transcript and the live action catalog, then returns an action identifier and JSON arguments. It can be shipped as a background-only `.glance` package with no component or XAML view. Register it with `services.AddSingleton<IGlanceAssistantSemanticResolver, YourResolver>()`; users can then select it under **Command understanding** in Glance settings.
-- Set `UseWinUI` to `true`.
-- Set `DisableEmbeddedXbf` to `false` so compiled XAML is embedded in the module PRI.
-- Set `CopyLocalLockFileAssemblies` to `true`, or otherwise include every private runtime dependency in the module directory.
-- Target x64 and a framework compatible with Glance's .NET 11 preview and Windows App SDK 2.2 runtime.
-- Keep shared Glance, Elysium, WinUI, and Microsoft Extensions contract assemblies out of the module bundle so the host-provided versions are used.
-
-Modules run with the same trust as Glance itself. Service isolation controls module lifetimes and registration collisions; it is not a security sandbox. Only install modules from sources you trust.
-
-The application-level `IGlanceActionService` is the provider-neutral boundary for voice and AI assistants. The selected `IGlanceAssistantSemanticResolver` reads the currently available `GlanceActionDescriptor` values, chooses an action, and supplies a JSON argument object. Glance validates and invokes that selection through the action service. Speech recognition and command understanding are separately selectable, so a resolver package can use another local model, a remote service, or a future Windows AI API without changing any feature module.
-
-## Settings
-
-Settings follow the same Elysium application and navigation structure used by [Infinity](https://github.com/elysium-studio/Infinity). They currently provide:
-
-- Drag-and-drop module ordering
-- Per-module enable and disable switches
-- Per-module attention permissions for modules that can bring themselves into view
-- Top or bottom desktop-island placement
-- Start Glance with Windows
-
-## Building
-
-Glance targets Windows with .NET 11 preview and WinUI 3. Open `Glance.slnx` in Visual Studio or build the x64 solution from the command line:
+One simple packaging command is:
 
 ```powershell
-dotnet build Glance.slnx -p:Platform=x64
+Compress-Archive -Path .\ModuleOutput\* -DestinationPath .\Example.zip
+Rename-Item .\Example.zip Example.glance
 ```
 
-The application entry point is `Glance.Shell.WinUI`.
+Modules run with the same permissions as Glance and are not sandboxed. Only install packages from sources you trust.
 
-## Releasing
+### 4. Add the module
 
-Glance uses the same release model as Infinity: Velopack produces the directly distributed installer and update feed, while a separately generated MSIX upload is used for Microsoft Store releases. Store-packaged builds detect their package identity and do not initialise Velopack at runtime.
+To install a completed package:
 
-Release builds remain self-contained managed .NET applications rather than using Native AOT. Glance discovers its `Modules/*.glance` packages at runtime, so those packages must remain available for module loading.
+1. Open **Settings**.
+2. Open **Modules**.
+3. Select **Add module** and choose the `.glance` file, or drag the package onto the module page.
+4. Enable and configure the module after it appears in the list.
 
-Copy `publish.local.example.json` to the ignored `publish.local.json`, fill in the credentials and Store identity values, then run:
+Installed packages and their private runtime cache are stored under `%LOCALAPPDATA%\Glance\Modules`.
 
-```powershell
-.\publish.ps1
-```
+To ship a module as part of this repository:
 
-Useful alternatives include `-SkipMicrosoftStore`, `-MicrosoftStorePackageOnly`, `-MicrosoftStoreDraft`, and `-GitReleaseOnly`. The script supports Azure Trusted Signing, SFTP update-feed upload, GitHub releases, and Partner Center submission. See [`Store/README.md`](Store/README.md) for the Microsoft Store prerequisites and servicing model.
+1. Add its domain, WinUI, and test projects to `Glance.slnx`.
+2. Add the WinUI project to `GlanceModuleProject` in `Glance.Shell.WinUI/Glance.Shell.WinUI.csproj`.
+3. Add its output files and private dependencies to `GlanceModuleBuildFile` with the correct `ModuleName`.
+4. Add its staging directory and `CreateGlanceModulePackage` entry.
+5. Add the generated package to `GlanceModulePackage` so it is included in build, publish, and installer output.
+6. Build the full solution and inspect the generated `Modules/<Name>.glance` archive before committing it.
+
+## Licence and third-party software
+
+See `THIRD-PARTY-NOTICES.md` for third-party components and their licences.
