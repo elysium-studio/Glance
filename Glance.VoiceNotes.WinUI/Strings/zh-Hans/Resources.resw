@@ -11,7 +11,7 @@
   <data name="RecordingUnavailable" xml:space="preserve"><value>麦克风不可用</value></data>
   <data name="RecordButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>开始或停止录音</value></data>
   <data name="RecordButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>开始或停止录音</value></data>
-  <data name="NoRecordingsText.Text" xml:space="preserve"><value>没有最近录音</value></data>
+  <data name="NoRecordingsText.Text" xml:space="preserve"><value>没有录音</value></data>
   <data name="DeleteRecordingMenuItem.Text" xml:space="preserve"><value>删除录音</value></data>
   <data name="RecentRecordingLimitSettingCard.Header" xml:space="preserve">
     <value>Recent recordings</value>

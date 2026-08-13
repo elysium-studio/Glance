@@ -25,6 +25,8 @@ public sealed partial class VoiceNotesExpandedView :
 
     public string Title => localizer.GetText("ModuleDisplayName");
 
+    public string NoRecordings => localizer.GetText("NoRecordingsText.Text");
+
     private void ToggleRecording()
     {
         ViewModel.ToggleRecording();

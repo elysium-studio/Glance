@@ -4,6 +4,7 @@ using NAudio.CoreAudioApi.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -75,7 +76,12 @@ public sealed class WindowsAudioApplicationService :
 
                 try
                 {
-                    SessionIdentity identity = GetSessionIdentity(session, parentProcessIds);
+                    SessionIdentity? identity = GetSessionIdentity(session, parentProcessIds);
+
+                    if (identity is null)
+                    {
+                        continue;
+                    }
 
                     if (IsGlanceSession(session, identity))
                     {
@@ -132,7 +138,12 @@ public sealed class WindowsAudioApplicationService :
 
                     try
                     {
-                        SessionIdentity identity = GetSessionIdentity(session, parentProcessIds);
+                        SessionIdentity? identity = GetSessionIdentity(session, parentProcessIds);
+
+                        if (identity is null)
+                        {
+                            continue;
+                        }
 
                         if (IsGlanceSession(session, identity))
                         {
@@ -177,7 +188,7 @@ public sealed class WindowsAudioApplicationService :
         SessionIdentity identity) => !session.IsSystemSoundsSession &&
         (session.GetProcessID == (uint)Environment.ProcessId || identity.ProcessId == Environment.ProcessId);
 
-    private static SessionIdentity GetSessionIdentity(AudioSessionControl session,
+    private static SessionIdentity? GetSessionIdentity(AudioSessionControl session,
         IReadOnlyDictionary<int, int> parentProcessIds)
     {
         if (session.IsSystemSoundsSession || session.GetProcessID == 0)
@@ -187,25 +198,27 @@ public sealed class WindowsAudioApplicationService :
 
         int processId = checked((int)session.GetProcessID);
 
-        using Process process = Process.GetProcessById(processId);
+        if (!TryGetProcess(processId, out ResolvedProcess process))
+        {
+            return null;
+        }
+
         string processName = process.ProcessName;
         bool isWebViewHost = IsWebViewHost(processName);
         ResolvedProcess resolvedProcess = isWebViewHost
             ? ResolveOwningProcess(processId, processName, parentProcessIds)
-            : new ResolvedProcess(processId, processName);
+            : process;
         string id = isWebViewHost && resolvedProcess.ProcessId != processId
             ? TryGetPackageFamilyName(resolvedProcess.ProcessId) ?? resolvedProcess.ProcessName.ToLowerInvariant()
             : resolvedProcess.ProcessName.ToLowerInvariant();
         string displayName = GetDisplayName(session,
-            resolvedProcess.ProcessId,
-            resolvedProcess.ProcessName,
+            resolvedProcess,
             isWebViewHost && resolvedProcess.ProcessId != processId);
         return new SessionIdentity(resolvedProcess.ProcessId, id, resolvedProcess.ProcessName, displayName);
     }
 
     private static string GetDisplayName(AudioSessionControl session,
-        int processId,
-        string fallback,
+        ResolvedProcess process,
         bool preferProcessIdentity)
     {
         if (!preferProcessIdentity && IsUsableSessionDisplayName(session.DisplayName))
@@ -215,8 +228,9 @@ public sealed class WindowsAudioApplicationService :
 
         try
         {
-            using Process process = Process.GetProcessById(processId);
-            string? description = process.MainModule?.FileVersionInfo.FileDescription;
+            string? description = string.IsNullOrWhiteSpace(process.ExecutablePath)
+                ? null
+                : FileVersionInfo.GetVersionInfo(process.ExecutablePath).FileDescription;
 
             if (!string.IsNullOrWhiteSpace(description) && !IsWebViewDisplayName(description))
             {
@@ -229,7 +243,7 @@ public sealed class WindowsAudioApplicationService :
 
         return IsUsableSessionDisplayName(session.DisplayName) && !IsWebViewDisplayName(session.DisplayName)
             ? session.DisplayName
-            : Humanize(fallback);
+            : Humanize(process.ProcessName);
     }
 
     private static bool IsUsableSessionDisplayName(string? displayName) =>
@@ -247,7 +261,9 @@ public sealed class WindowsAudioApplicationService :
         string processName,
         IReadOnlyDictionary<int, int> parentProcessIds)
     {
-        ResolvedProcess resolvedProcess = new(processId, processName);
+        ResolvedProcess resolvedProcess = TryGetProcess(processId, out ResolvedProcess process)
+            ? process
+            : new ResolvedProcess(processId, processName, string.Empty);
         HashSet<int> visitedProcessIds = [processId];
 
         for (int depth = 0; depth < MaximumProcessDepth && IsWebViewHost(resolvedProcess.ProcessName); depth++)
@@ -259,12 +275,11 @@ public sealed class WindowsAudioApplicationService :
                 break;
             }
 
-            try
+            if (TryGetProcess(parentProcessId, out ResolvedProcess parentProcess))
             {
-                using Process parentProcess = Process.GetProcessById(parentProcessId);
-                resolvedProcess = new ResolvedProcess(parentProcessId, parentProcess.ProcessName);
+                resolvedProcess = parentProcess;
             }
-            catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or System.ComponentModel.Win32Exception)
+            else
             {
                 break;
             }
@@ -314,6 +329,44 @@ public sealed class WindowsAudioApplicationService :
         }
 
         return parentProcessIds;
+    }
+
+    private static bool TryGetProcess(int processId,
+        out ResolvedProcess process)
+    {
+        process = null!;
+        nint processHandle = OpenProcess(ProcessQueryLimitedInformation, false, checked((uint)processId));
+
+        if (processHandle == 0)
+        {
+            return false;
+        }
+
+        try
+        {
+            uint pathLength = 32768;
+            StringBuilder executablePath = new(checked((int)pathLength));
+
+            if (!QueryFullProcessImageName(processHandle, 0, executablePath, ref pathLength))
+            {
+                return false;
+            }
+
+            string path = executablePath.ToString();
+            string processName = Path.GetFileNameWithoutExtension(path);
+
+            if (string.IsNullOrWhiteSpace(processName))
+            {
+                return false;
+            }
+
+            process = new ResolvedProcess(processId, processName, path);
+            return true;
+        }
+        finally
+        {
+            _ = CloseHandle(processHandle);
+        }
     }
 
     private static string? TryGetPackageFamilyName(int processId)
@@ -386,9 +439,8 @@ public sealed class WindowsAudioApplicationService :
 
         foreach (int processId in processIds)
         {
-            try
+            if (TryGetProcess(processId, out ResolvedProcess process))
             {
-                using Process process = Process.GetProcessById(processId);
                 string processName = process.ProcessName;
                 _ = processNames.Add(processName);
 
@@ -398,9 +450,6 @@ public sealed class WindowsAudioApplicationService :
                     _ = resolvedProcessIds.Add(resolvedProcess.ProcessId);
                     _ = processNames.Add(resolvedProcess.ProcessName);
                 }
-            }
-            catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or System.ComponentModel.Win32Exception)
-            {
             }
         }
 
@@ -453,6 +502,13 @@ public sealed class WindowsAudioApplicationService :
         [MarshalAs(UnmanagedType.Bool)] bool inheritHandle,
         uint processId);
 
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool QueryFullProcessImageName(nint process,
+        uint flags,
+        StringBuilder executablePath,
+        ref uint executablePathLength);
+
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
     private static extern int GetPackageFamilyName(nint process,
         ref uint packageFamilyNameLength,
@@ -485,7 +541,8 @@ public sealed class WindowsAudioApplicationService :
         string DisplayName);
 
     private sealed record ResolvedProcess(int ProcessId,
-        string ProcessName);
+        string ProcessName,
+        string ExecutablePath);
 
     private sealed record SessionSnapshot(string Id,
         int ProcessId,
