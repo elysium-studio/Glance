@@ -26,7 +26,7 @@ internal static partial class PackageIdentity
         }
     }
 
-    public static bool IsExternalLocation => IsPackaged && OperatingSystem.IsWindowsVersionAtLeast(10, 0, 19041) && !string.IsNullOrWhiteSpace(Package.Current.EffectiveExternalPath);
+    public static bool IsExternalLocation => IsPackaged && OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000) && !string.IsNullOrWhiteSpace(Package.Current.EffectiveExternalPath);
 
     public static bool IsFullPackage => IsPackaged && !IsExternalLocation;
 

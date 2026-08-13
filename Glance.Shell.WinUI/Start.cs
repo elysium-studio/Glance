@@ -2,6 +2,7 @@ using Elysium.Platform.Windows;
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using Microsoft.Windows.AppLifecycle;
 using Velopack;
 
@@ -9,20 +10,13 @@ namespace Glance.Shell.WinUI;
 
 public static class Start
 {
+    private const uint MessageBoxIconError = 0x00000010;
     private const string RestartAfterArgument = "--restart-after";
 
     [STAThread]
     public static void Main(string[] args)
     {
         WaitForRestartSource(args);
-        AppActivationArguments activation = AppInstance.GetCurrent().GetActivatedEventArgs();
-        AppInstance instance = AppInstance.FindOrRegisterForKey($"{Environment.UserName}.Glance");
-
-        if (!instance.IsCurrent)
-        {
-            instance.RedirectActivationToAsync(activation).GetAwaiter().GetResult();
-            return;
-        }
 
         if (!PackageIdentity.IsFullPackage)
         {
@@ -31,6 +25,24 @@ public static class Start
                 .OnAfterUpdateFastCallback(ExternalPackageIdentity.Register)
                 .OnBeforeUninstallFastCallback(UninstallCleanup.Run)
                 .Run();
+        }
+
+        if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000))
+        {
+            _ = MessageBoxW(0,
+                "Glance requires Windows 11, build 22000 or later. Windows 10 is not supported.",
+                "Glance requires Windows 11",
+                MessageBoxIconError);
+            return;
+        }
+
+        AppActivationArguments activation = AppInstance.GetCurrent().GetActivatedEventArgs();
+        AppInstance instance = AppInstance.FindOrRegisterForKey($"{Environment.UserName}.Glance");
+
+        if (!instance.IsCurrent)
+        {
+            instance.RedirectActivationToAsync(activation).GetAwaiter().GetResult();
+            return;
         }
 
 #pragma warning disable CA1806
@@ -63,4 +75,10 @@ public static class Start
         {
         }
     }
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+    private static extern int MessageBoxW(nint window,
+        string text,
+        string caption,
+        uint type);
 }

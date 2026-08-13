@@ -17,7 +17,7 @@ Glance includes modules for:
 
 ### Requirements
 
-- Windows 10 version 1809 or later.
+- Windows 11 build 22000 or later. Windows 10 is not supported.
 - Visual Studio with the .NET desktop and Windows application development workloads, or the equivalent command-line build tools.
 - The .NET 11 preview SDK.
 - An x64 machine or build environment.
@@ -59,7 +59,7 @@ The WinUI project targets the same framework as Glance and enables compiled WinU
 ```xml
 <PropertyGroup>
   <TargetFramework>net11.0-windows10.0.22000.0</TargetFramework>
-  <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+  <TargetPlatformMinVersion>10.0.22000.0</TargetPlatformMinVersion>
   <UseWinUI>true</UseWinUI>
   <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
   <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>

@@ -13,6 +13,11 @@ internal static class ExternalPackageIdentity
 
     public static void Register(SemanticVersion version)
     {
+        if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000))
+        {
+            return;
+        }
+
         string packagePath = Path.Combine(AppContext.BaseDirectory, IdentityPackageFileName);
 
         if (!File.Exists(packagePath) || HasMatchingRegistration())
@@ -41,7 +46,7 @@ internal static class ExternalPackageIdentity
 
     private static bool HasMatchingRegistration()
     {
-        if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 19041))
+        if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000))
         {
             return false;
         }
