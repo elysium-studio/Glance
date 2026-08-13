@@ -20,8 +20,7 @@ public sealed class SystemMonitorViewModelTests
         Assert.Equal("CalculatingMemory", viewModel.MemoryDetail);
         Assert.Equal("0%", viewModel.CpuText);
         Assert.Equal("0%", viewModel.MemoryText);
-        Assert.Equal("0 KB/s", viewModel.DownloadText);
-        Assert.Equal("0 KB/s", viewModel.UploadText);
+        Assert.Equal("0%", viewModel.GpuText);
     }
 
     [Fact]
@@ -29,26 +28,26 @@ public sealed class SystemMonitorViewModelTests
     {
         SystemMonitorViewModel viewModel = CreateViewModel();
 
-        viewModel.Update(42.4, 67.8, 0, 0, 0, 0);
+        viewModel.Update(42.4, 67.8, 0, 0, 26.2);
 
         Assert.Equal(42.4, viewModel.CpuUsage);
         Assert.Equal(67.8, viewModel.MemoryUsage);
+        Assert.Equal(26.2, viewModel.GpuUsage);
         Assert.Equal("42%", viewModel.CpuText);
         Assert.Equal("68%", viewModel.MemoryText);
+        Assert.Equal("26%", viewModel.GpuText);
     }
 
     [Fact]
-    public void Update_RaisesOneMetricsUpdatedEventWithNumericNetworkValues()
+    public void Update_RaisesOneMetricsUpdatedEvent()
     {
         SystemMonitorViewModel viewModel = CreateViewModel();
         int updateCount = 0;
         viewModel.MetricsUpdated += (_, _) => updateCount++;
 
-        viewModel.Update(42.4, 67.8, 0, 0, 2048, 1024);
+        viewModel.Update(42.4, 67.8, 0, 0, 25);
 
         Assert.Equal(1, updateCount);
-        Assert.Equal(2048, viewModel.DownloadBytesPerSecond);
-        Assert.Equal(1024, viewModel.UploadBytesPerSecond);
     }
 
     [Fact]
@@ -57,37 +56,9 @@ public sealed class SystemMonitorViewModelTests
         SystemMonitorViewModel viewModel = CreateViewModel();
         const ulong gigabyte = 1024UL * 1024UL * 1024UL;
 
-        viewModel.Update(0, 0, 6 * gigabyte, 16 * gigabyte, 0, 0);
+        viewModel.Update(0, 0, 6 * gigabyte, 16 * gigabyte, 0);
 
         Assert.Equal("MemoryUsageFormat(6.0 GB,16.0 GB)", viewModel.MemoryDetail);
-    }
-
-    [Theory]
-    [InlineData(512, "512 B/s")]
-    [InlineData(1024, "1 KB/s")]
-    [InlineData(1536, "2 KB/s")]
-    [InlineData(1048576, "1.0 MB/s")]
-    [InlineData(2621440, "2.5 MB/s")]
-    public void Update_FormatsDownloadRate(double bytesPerSecond, string expected)
-    {
-        SystemMonitorViewModel viewModel = CreateViewModel();
-
-        viewModel.Update(0, 0, 0, 0, bytesPerSecond, 0);
-
-        Assert.Equal(expected, viewModel.DownloadText);
-    }
-
-    [Theory]
-    [InlineData(128, "128 B/s")]
-    [InlineData(10240, "10 KB/s")]
-    [InlineData(1572864, "1.5 MB/s")]
-    public void Update_FormatsUploadRate(double bytesPerSecond, string expected)
-    {
-        SystemMonitorViewModel viewModel = CreateViewModel();
-
-        viewModel.Update(0, 0, 0, 0, 0, bytesPerSecond);
-
-        Assert.Equal(expected, viewModel.UploadText);
     }
 
     private static SystemMonitorViewModel CreateViewModel() => new(new TestTextLocalizer());

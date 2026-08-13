@@ -103,4 +103,9 @@
   <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Cancel module reordering</value></data>
   <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Done</value></data>
   <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Save module order</value></data>
+  <data name="UpdateReadyToastDismissButton" xml:space="preserve"><value>Dismiss</value></data>
+  <data name="UpdateReadyToastDownloaded" xml:space="preserve"><value>Glance {0} has been downloaded.</value></data>
+  <data name="UpdateReadyToastRestartButton" xml:space="preserve"><value>Restart</value></data>
+  <data name="UpdateReadyToastRestartRequired" xml:space="preserve"><value>Restart to finish updating.</value></data>
+  <data name="UpdateReadyToastTitle" xml:space="preserve"><value>Update ready</value></data>
 </root>

@@ -10,7 +10,7 @@ Glance includes modules for:
 
 - **Time and productivity:** Stopwatch, Timer, Focus Session, Reminders, Keep Awake, Presence, World Clock, Clipboard, Stash, Drop Shelf, and Torrent.
 - **Media and capture:** Media, Audio Switcher, App Mixer, Voice Notes, Screen Capture, Screen Recorder, Screen Lens, Colour Picker, and Quick Convert.
-- **System and devices:** System Monitor, Network Speed, Network details, Power, Privacy Controls, Removable Devices, Bluetooth Devices, Magnifier, and Theme Switcher.
+- **System and devices:** System Monitor, System Indicators, Network Speed, Network details, Power, Privacy Controls, Removable Devices, Bluetooth Devices, Magnifier, and Theme Switcher.
 - **Information:** Weather.
 
 ## Build Glance
@@ -111,6 +111,7 @@ Optional contracts add more integration without shell-specific code:
 
 - `IGlanceModuleSettingViewModel` adds module settings.
 - `IGlanceAttentionComponent` allows the module to request the user's attention, subject to permission.
+- `IGlanceTransientComponent` presents short-lived content without adding it to paging or module ordering.
 - `IGlanceIntent` lets the module accept contextual files, text, links, or other content.
 - `IGlanceActionProvider` exposes commands to the application action system.
 - `IDisposable` or `IAsyncDisposable` provides deterministic cleanup.

@@ -103,4 +103,9 @@
   <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>[Cäncél mödülé réördérïng]</value></data>
   <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Döné]</value></data>
   <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>[Sävé mödülé ördér]</value></data>
+  <data name="UpdateReadyToastDismissButton" xml:space="preserve"><value>[!! Ðîšɱîšš ~~~ !!]</value></data>
+  <data name="UpdateReadyToastDownloaded" xml:space="preserve"><value>[!! Glance {0} ħàš ƀëëñ ðôŵñļôàðëð. ~~~~~~~~~~ !!]</value></data>
+  <data name="UpdateReadyToastRestartButton" xml:space="preserve"><value>[!! Ŕëšţàŕţ ~~~ !!]</value></data>
+  <data name="UpdateReadyToastRestartRequired" xml:space="preserve"><value>[!! Ŕëšţàŕţ ţô ƒîñîšħ ûþðàţîñĝ. ~~~~~~~~~ !!]</value></data>
+  <data name="UpdateReadyToastTitle" xml:space="preserve"><value>[!! Ûþðàţë ŕëàðÿ ~~~~ !!]</value></data>
 </root>

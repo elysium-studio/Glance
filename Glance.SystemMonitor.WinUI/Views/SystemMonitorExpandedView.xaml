@@ -124,91 +124,48 @@
                 </Grid>
             </Border>
             <Border
-                x:Name="NetworkMetric"
+                x:Name="GpuMetric"
                 Grid.Column="2"
                 Background="{ThemeResource ControlFillColorSecondaryBrush}"
                 CornerRadius="{StaticResource OverlayCornerRadius}">
                 <Grid>
                     <local:SystemMetricGraph
-                        x:Name="NetworkGraph"
+                        x:Name="GpuGraph"
                         Margin="6,26,6,6"
                         GridStroke="{ThemeResource GlanceSystemGraphGridBrush}"
-                        Maximum="0"
-                        PrimaryStroke="{ThemeResource GlanceSystemNetworkDownloadGraphBrush}"
-                        SecondaryStroke="{ThemeResource GlanceSystemNetworkUploadGraphBrush}"
+                        PrimaryStroke="{ThemeResource GlanceSystemGpuGraphBrush}"
                         Visibility="{x:Bind WhenShowingCharts(ShowPerformanceCharts), Mode=OneWay}" />
-                    <Grid
-                        Margin="8,5"
-                        Visibility="{x:Bind WhenShowingCharts(ShowPerformanceCharts), Mode=OneWay}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <TextBlock
-                            x:Uid="NetworkLabel"
-                            FontWeight="SemiBold"
-                            Foreground="{ThemeResource GlanceSystemNetworkDownloadGraphBrush}"
-                            Style="{StaticResource CaptionTextBlockStyle}" />
-                        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="3">
-                            <FontIcon
-                                Margin="0,1,0,0"
-                                VerticalAlignment="Center"
-                                FontSize="10"
-                                Foreground="{ThemeResource GlanceSystemNetworkDownloadGraphBrush}"
-                                Glyph="&#xE74B;" />
-                            <TextBlock
-                                FontWeight="SemiBold"
-                                Style="{StaticResource CaptionTextBlockStyle}"
-                                Text="{x:Bind ViewModel.DownloadText, Mode=OneWay}" />
-                        </StackPanel>
-                        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="3">
-                            <FontIcon
-                                Margin="0,1,0,0"
-                                VerticalAlignment="Center"
-                                FontSize="10"
-                                Foreground="{ThemeResource GlanceSystemNetworkUploadGraphBrush}"
-                                Glyph="&#xE74A;" />
-                            <TextBlock
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Style="{StaticResource CaptionTextBlockStyle}"
-                                Text="{x:Bind ViewModel.UploadText, Mode=OneWay}" />
-                        </StackPanel>
-                    </Grid>
                     <StackPanel
-                        Margin="8,5"
-                        VerticalAlignment="Center"
+                        Margin="8,6"
                         Spacing="1"
+                        Visibility="{x:Bind WhenShowingCharts(ShowPerformanceCharts), Mode=OneWay}">
+                        <TextBlock
+                            x:Uid="GpuLabel"
+                            FontWeight="SemiBold"
+                            Foreground="{ThemeResource GlanceSystemGpuGraphBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}" />
+                        <TextBlock
+                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                            Text="{x:Bind ViewModel.GpuText, Mode=OneWay}" />
+                    </StackPanel>
+                    <StackPanel
+                        Margin="8,6"
+                        VerticalAlignment="Center"
+                        Spacing="3"
                         Visibility="{x:Bind WhenHidingCharts(ShowPerformanceCharts), Mode=OneWay}">
                         <TextBlock
-                            x:Uid="NetworkLabel"
+                            x:Uid="GpuLabel"
                             FontWeight="SemiBold"
-                            Foreground="{ThemeResource GlanceSystemNetworkDownloadGraphBrush}"
+                            Foreground="{ThemeResource GlanceSystemGpuGraphBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}" />
-                        <StackPanel Orientation="Horizontal" Spacing="3">
-                            <FontIcon
-                                Margin="0,1,0,0"
-                                VerticalAlignment="Center"
-                                FontSize="10"
-                                Foreground="{ThemeResource GlanceSystemNetworkDownloadGraphBrush}"
-                                Glyph="&#xE74B;" />
-                            <TextBlock
-                                FontWeight="SemiBold"
-                                Style="{StaticResource CaptionTextBlockStyle}"
-                                Text="{x:Bind ViewModel.DownloadText, Mode=OneWay}" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Spacing="3">
-                            <FontIcon
-                                Margin="0,1,0,0"
-                                VerticalAlignment="Center"
-                                FontSize="10"
-                                Foreground="{ThemeResource GlanceSystemNetworkUploadGraphBrush}"
-                                Glyph="&#xE74A;" />
-                            <TextBlock
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Style="{StaticResource CaptionTextBlockStyle}"
-                                Text="{x:Bind ViewModel.UploadText, Mode=OneWay}" />
-                        </StackPanel>
+                        <TextBlock
+                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                            Text="{x:Bind ViewModel.GpuText, Mode=OneWay}" />
+                        <ProgressBar
+                            Height="3"
+                            Foreground="{ThemeResource GlanceSystemGpuGraphBrush}"
+                            Maximum="100"
+                            Value="{x:Bind ViewModel.GpuUsage, Mode=OneWay}" />
                     </StackPanel>
                 </Grid>
             </Border>

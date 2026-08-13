@@ -24,33 +24,26 @@ public sealed partial class SystemMonitorViewModel(ITextLocalizer localizer) :
     private string memoryDetail = localizer.GetText("CalculatingMemory");
 
     [ObservableProperty]
-    private string downloadText = "0 KB/s";
+    private double gpuUsage;
 
     [ObservableProperty]
-    private string uploadText = "0 KB/s";
+    private string gpuText = "0%";
 
     public event EventHandler? MetricsUpdated;
-
-    public double DownloadBytesPerSecond { get; private set; }
-
-    public double UploadBytesPerSecond { get; private set; }
 
     public void Update(double cpu,
         double memory,
         ulong usedBytes,
         ulong totalBytes,
-        double downloadBytesPerSecond,
-        double uploadBytesPerSecond)
+        double gpu)
     {
         CpuUsage = cpu;
         MemoryUsage = memory;
+        GpuUsage = gpu;
         CpuText = $"{cpu:0}%";
         MemoryText = $"{memory:0}%";
+        GpuText = $"{gpu:0}%";
         MemoryDetail = localizer.GetText("MemoryUsageFormat", FormatBytes(usedBytes), FormatBytes(totalBytes));
-        DownloadText = FormatRate(downloadBytesPerSecond);
-        UploadText = FormatRate(uploadBytesPerSecond);
-        DownloadBytesPerSecond = downloadBytesPerSecond;
-        UploadBytesPerSecond = uploadBytesPerSecond;
         MetricsUpdated?.Invoke(this, EventArgs.Empty);
     }
 
@@ -60,10 +53,4 @@ public sealed partial class SystemMonitorViewModel(ITextLocalizer localizer) :
         return $"{bytes / gigabyte:0.0} GB";
     }
 
-    private static string FormatRate(double bytesPerSecond) => bytesPerSecond switch
-    {
-        >= 1024d * 1024d => $"{bytesPerSecond / (1024d * 1024d):0.0} MB/s",
-        >= 1024d => $"{bytesPerSecond / 1024d:0} KB/s",
-        _ => $"{bytesPerSecond:0} B/s"
-    };
 }

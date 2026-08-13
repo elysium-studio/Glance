@@ -17,6 +17,7 @@ public static class FluentMotion
     private static readonly TimeSpan RouteTargetHoverDuration = TimeSpan.FromMilliseconds(140);
     private static readonly TimeSpan RouteTargetReleaseDuration = TimeSpan.FromMilliseconds(180);
     private static readonly TimeSpan SemanticZoomDuration = TimeSpan.FromMilliseconds(340);
+    private static readonly TimeSpan TransientPushDuration = TimeSpan.FromMilliseconds(250);
 
     public static void PlayButtonPress(FrameworkElement element) => PlayScale(element, 0.94f, ButtonPressDuration);
 
@@ -300,6 +301,51 @@ public static class FluentMotion
             companionTranslation.Duration = RoutePushDuration;
             companionVisual.StartAnimation("Translation.Y", companionTranslation);
         }
+
+        batch.Completed += (_, _) => incoming.DispatcherQueue.TryEnqueue(() => completed());
+        batch.End();
+    }
+
+    public static void PlayTransientPushTransition(FrameworkElement outgoing,
+        FrameworkElement incoming,
+        bool showingTransient,
+        Action completed)
+    {
+        ElementCompositionPreview.SetIsTranslationEnabled(outgoing, true);
+        ElementCompositionPreview.SetIsTranslationEnabled(incoming, true);
+
+        Visual outgoingVisual = ElementCompositionPreview.GetElementVisual(outgoing);
+        Visual incomingVisual = ElementCompositionPreview.GetElementVisual(incoming);
+        Compositor compositor = outgoingVisual.Compositor;
+        CubicBezierEasingFunction easing = compositor.CreateCubicBezierEasingFunction(Vector2.Zero,
+            new Vector2(0, 1));
+        float distance = (float)Math.Max(outgoing.ActualHeight, incoming.ActualHeight);
+        float outgoingOffset = showingTransient ? distance : -distance;
+        float incomingOffset = -outgoingOffset;
+
+        outgoingVisual.StopAnimation(nameof(Visual.Opacity));
+        incomingVisual.StopAnimation(nameof(Visual.Opacity));
+        outgoingVisual.StopAnimation("Translation.Y");
+        incomingVisual.StopAnimation("Translation.Y");
+        outgoingVisual.Opacity = 1;
+        incomingVisual.Opacity = 1;
+        outgoingVisual.Properties.InsertVector3("Translation", Vector3.Zero);
+        incomingVisual.Properties.InsertVector3("Translation", new Vector3(0, incomingOffset, 0));
+
+        CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+
+        ScalarKeyFrameAnimation outgoingTranslation = compositor.CreateScalarKeyFrameAnimation();
+        outgoingTranslation.InsertKeyFrame(0, 0);
+        outgoingTranslation.InsertKeyFrame(1, outgoingOffset, easing);
+        outgoingTranslation.Duration = TransientPushDuration;
+
+        ScalarKeyFrameAnimation incomingTranslation = compositor.CreateScalarKeyFrameAnimation();
+        incomingTranslation.InsertKeyFrame(0, incomingOffset);
+        incomingTranslation.InsertKeyFrame(1, 0, easing);
+        incomingTranslation.Duration = TransientPushDuration;
+
+        outgoingVisual.StartAnimation("Translation.Y", outgoingTranslation);
+        incomingVisual.StartAnimation("Translation.Y", incomingTranslation);
 
         batch.Completed += (_, _) => incoming.DispatcherQueue.TryEnqueue(() => completed());
         batch.End();

@@ -39,6 +39,16 @@
                     Style="{StaticResource CaptionTextBlockStyle}"
                     Text="{x:Bind ViewModel.MemoryText, Mode=OneWay}" />
             </StackPanel>
+            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
+                <TextBlock
+                    x:Uid="GpuLabel"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}" />
+                <TextBlock
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.GpuText, Mode=OneWay}" />
+            </StackPanel>
         </StackPanel>
     </Grid>
 </UserControl>

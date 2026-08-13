@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>System Indicators</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Shows temporary island indicators for volume, brightness, lock keys, and airplane mode.</value></data>
+  <data name="VolumeTitle" xml:space="preserve"><value>Volume</value></data>
+  <data name="BrightnessTitle" xml:space="preserve"><value>Brightness</value></data>
+  <data name="CapsLockTitle" xml:space="preserve"><value>Caps Lock</value></data>
+  <data name="NumLockTitle" xml:space="preserve"><value>Num Lock</value></data>
+  <data name="ScrollLockTitle" xml:space="preserve"><value>Scroll Lock</value></data>
+  <data name="AirplaneModeTitle" xml:space="preserve"><value>Airplane mode</value></data>
+  <data name="OnText" xml:space="preserve"><value>On</value></data>
+  <data name="OffText" xml:space="preserve"><value>Off</value></data>
+  <data name="MutedText" xml:space="preserve"><value>Muted</value></data>
+  <data name="PercentText" xml:space="preserve"><value>{0}%</value></data>
+  <data name="VolumeDetail" xml:space="preserve"><value>System sound level</value></data>
+  <data name="VolumeMutedDetail" xml:space="preserve"><value>System sound is muted</value></data>
+  <data name="BrightnessDetail" xml:space="preserve"><value>Built-in display brightness</value></data>
+  <data name="CapsLockOnDetail" xml:space="preserve"><value>Letters will be uppercase</value></data>
+  <data name="CapsLockOffDetail" xml:space="preserve"><value>Letters will be lowercase</value></data>
+  <data name="NumLockOnDetail" xml:space="preserve"><value>Number pad is enabled</value></data>
+  <data name="NumLockOffDetail" xml:space="preserve"><value>Number pad is disabled</value></data>
+  <data name="ScrollLockOnDetail" xml:space="preserve"><value>Scroll Lock is enabled</value></data>
+  <data name="ScrollLockOffDetail" xml:space="preserve"><value>Scroll Lock is disabled</value></data>
+  <data name="AirplaneModeOnDetail" xml:space="preserve"><value>Wireless radios are disabled</value></data>
+  <data name="AirplaneModeOffDetail" xml:space="preserve"><value>Wireless radios are available</value></data>
+</root>

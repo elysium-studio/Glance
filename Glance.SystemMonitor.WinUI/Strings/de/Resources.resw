@@ -8,7 +8,7 @@
     <value>Systemmonitor</value>
   </data>
   <data name="ModuleDescription" xml:space="preserve">
-    <value>Zeigt die aktuelle Prozessor-, Speicher- und Netzwerkauslastung.</value>
+    <value>Zeigt die aktuelle Prozessor-, Speicher- und GPU-Auslastung.</value>
   </data>
   <data name="CalculatingMemory" xml:space="preserve">
     <value>Speicher wird berechnet</value>
@@ -25,8 +25,8 @@
   <data name="MemoryLabel.Text" xml:space="preserve">
     <value>ARBEITSSPEICHER</value>
   </data>
-  <data name="NetworkLabel.Text" xml:space="preserve">
-    <value>NETZWERK</value>
+  <data name="GpuLabel.Text" xml:space="preserve">
+    <value>GPU</value>
   </data>
   <data name="RefreshIntervalSettingCard.Header" xml:space="preserve">
     <value>Refresh interval</value>
@@ -38,6 +38,6 @@
     <value>Leistungsdiagramme</value>
   </data>
   <data name="PerformanceChartsSettingCard.Description" xml:space="preserve">
-    <value>Live-Verlauf für CPU-, Arbeitsspeicher- und Netzwerkauslastung anzeigen.</value>
+    <value>Live-Verlauf für CPU-, Arbeitsspeicher- und GPU-Auslastung anzeigen.</value>
   </data>
 </root>

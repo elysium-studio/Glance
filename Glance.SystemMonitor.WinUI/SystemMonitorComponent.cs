@@ -71,6 +71,7 @@ public sealed partial class SystemMonitorComponent :
         timer.Stop();
         timer.Tick -= HandleTick;
         options.Changed -= HandleOptionsChanged;
+        metricsReader.Dispose();
     }
 
     private void HandleTick(DispatcherQueueTimer sender, object args) => UpdateMetrics();
@@ -88,6 +89,6 @@ public sealed partial class SystemMonitorComponent :
     private void UpdateMetrics()
     {
         SystemMetrics metrics = metricsReader.Read();
-        viewModel.Update(metrics.CpuUsage, metrics.MemoryUsage, metrics.UsedMemory, metrics.TotalMemory, metrics.DownloadBytesPerSecond, metrics.UploadBytesPerSecond);
+        viewModel.Update(metrics.CpuUsage, metrics.MemoryUsage, metrics.UsedMemory, metrics.TotalMemory, metrics.GpuUsage);
     }
 }

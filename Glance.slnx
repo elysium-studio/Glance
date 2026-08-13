@@ -237,6 +237,15 @@
   <Project Path="Glance.SystemMonitor.Tests/Glance.SystemMonitor.Tests.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.SystemIndicators.WinUI/Glance.SystemIndicators.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.SystemIndicators/Glance.SystemIndicators.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.SystemIndicators.Tests/Glance.SystemIndicators.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.Tests/Glance.Tests.csproj">
     <Platform Project="x64" />
   </Project>

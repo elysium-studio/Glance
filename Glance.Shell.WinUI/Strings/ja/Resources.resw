@@ -103,4 +103,9 @@
   <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>モジュールの並べ替えをキャンセル</value></data>
   <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>完了</value></data>
   <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>モジュールの順序を保存</value></data>
+  <data name="UpdateReadyToastDismissButton" xml:space="preserve"><value>閉じる</value></data>
+  <data name="UpdateReadyToastDownloaded" xml:space="preserve"><value>Glance {0} がダウンロードされました。</value></data>
+  <data name="UpdateReadyToastRestartButton" xml:space="preserve"><value>再起動</value></data>
+  <data name="UpdateReadyToastRestartRequired" xml:space="preserve"><value>再起動してアップデートを完了します。</value></data>
+  <data name="UpdateReadyToastTitle" xml:space="preserve"><value>アップデートの準備ができました</value></data>
 </root>

@@ -1,21 +1,21 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Default">
-            <SolidColorBrush x:Key="GlanceScreenLensIconBrush" Color="#FF55D6BE" />
-            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FF55D6BE" />
-            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E655D6BE" />
-            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CC55D6BE" />
+            <SolidColorBrush x:Key="GlanceScreenLensIconBrush" Color="#FFF093D0" />
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FFF093D0" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E6F093D0" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CCF093D0" />
             <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#28FFFFFF" />
-            <SolidColorBrush x:Key="AccentButtonForeground" Color="#FF07251F" />
-            <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FF07251F" />
-            <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#FF07251F" />
+            <SolidColorBrush x:Key="AccentButtonForeground" Color="#FF2B1022" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FF2B1022" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#FF2B1022" />
             <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#66FFFFFF" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
-            <SolidColorBrush x:Key="GlanceScreenLensIconBrush" Color="#FF087C69" />
-            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FF087C69" />
-            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E6087C69" />
-            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CC087C69" />
+            <SolidColorBrush x:Key="GlanceScreenLensIconBrush" Color="#FF963568" />
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FF963568" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E6963568" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CC963568" />
             <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#28000000" />
             <SolidColorBrush x:Key="AccentButtonForeground" Color="#FFFFFFFF" />
             <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FFFFFFFF" />

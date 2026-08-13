@@ -1,5 +1,19 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <SolidColorBrush x:Key="GlanceTorrentIconBrush" Color="#5ED6A7" />
-    <SolidColorBrush x:Key="GlanceTorrentDownloadBrush" Color="#55BDEB" />
-    <SolidColorBrush x:Key="GlanceTorrentUploadBrush" Color="#D7A7FF" />
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Default">
+            <SolidColorBrush x:Key="GlanceTorrentIconBrush" Color="#A8DC63" />
+            <SolidColorBrush x:Key="GlanceTorrentDownloadBrush" Color="#55BDEB" />
+            <SolidColorBrush x:Key="GlanceTorrentUploadBrush" Color="#D7A7FF" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="GlanceTorrentIconBrush" Color="#4D7500" />
+            <SolidColorBrush x:Key="GlanceTorrentDownloadBrush" Color="#006A91" />
+            <SolidColorBrush x:Key="GlanceTorrentUploadBrush" Color="#7135A3" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="HighContrast">
+            <StaticResource x:Key="GlanceTorrentIconBrush" ResourceKey="SystemColorWindowTextColorBrush" />
+            <StaticResource x:Key="GlanceTorrentDownloadBrush" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="GlanceTorrentUploadBrush" ResourceKey="SystemColorHighlightColorBrush" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

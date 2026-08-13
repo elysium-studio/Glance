@@ -103,4 +103,9 @@
   <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>取消模块重新排列</value></data>
   <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>完成</value></data>
   <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>保存模块顺序</value></data>
+  <data name="UpdateReadyToastDismissButton" xml:space="preserve"><value>关闭</value></data>
+  <data name="UpdateReadyToastDownloaded" xml:space="preserve"><value>Glance {0} 已下载。</value></data>
+  <data name="UpdateReadyToastRestartButton" xml:space="preserve"><value>重新启动</value></data>
+  <data name="UpdateReadyToastRestartRequired" xml:space="preserve"><value>重新启动以完成更新。</value></data>
+  <data name="UpdateReadyToastTitle" xml:space="preserve"><value>更新准备就绪</value></data>
 </root>

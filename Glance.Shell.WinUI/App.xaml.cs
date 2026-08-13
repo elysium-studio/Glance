@@ -52,7 +52,7 @@ public sealed partial class App
 
         host = Host.CreateDefaultBuilder().UseWritableContentRoot(applicationData).ConfigureServices(services => _ = services
                     .AddSingleton<IApplicationLifetime>(new ApplicationLifetime(ShutdownAsync))
-                    .AddApplication().AddPresentation().AddModules(new ApplicationModule(applicationData, applicationDispatcherQueue), new ConfigurationModule(), new LocalizationModule(), new NavigationModule(), new DesktopModule(), new BridgeModule(), new SettingsModule(), new GlanceSettingsModule(), new ModulesSettingsModule(), new SetupTourModule(), new WindowsSettingsModule()))
+                    .AddApplication().AddPresentation().AddModules(new ApplicationModule(applicationData, applicationDispatcherQueue), new ConfigurationModule(), new LocalizationModule(), new NavigationModule(), new DesktopModule(), new BridgeModule(), new SettingsModule(), new GlanceSettingsModule(), new ModulesSettingsModule(), new SetupTourModule(), new UpdateModule(), new WindowsSettingsModule()))
             .Build();
 
         host.Start();
@@ -62,9 +62,11 @@ public sealed partial class App
         ViewModelExtension.DefaultProvider = runtimeServices;
 
         moduleManager = new GlanceModuleManager(host.Services, runtimeServices, applicationDispatcherQueue, host.Services.GetRequiredService<ILogger<GlanceModuleManager>>());
-        _ = host.Services.GetRequiredKeyedService<DesktopIslandView>("DesktopIslandView");
+        DesktopIslandView desktopIslandView = host.Services.GetRequiredKeyedService<DesktopIslandView>("DesktopIslandView");
         startupModulesTask = InitializeStartupModulesAsync(moduleManager,
             (string[])[.. host.Services.GetRequiredService<GlanceSettings>().UninstalledModulePackages],
+            applicationDispatcherQueue,
+            desktopIslandView.ViewModel,
             host.Services.GetRequiredService<ILogger<App>>());
         _ = RouteActivationAsync(initialActivation);
 
@@ -204,6 +206,8 @@ public sealed partial class App
 
     private static async Task InitializeStartupModulesAsync(GlanceModuleManager moduleManager,
         IReadOnlyList<string> suppressedPackageIds,
+        DispatcherQueue dispatcherQueue,
+        DesktopIslandViewModel islandViewModel,
         ILogger logger)
     {
         try
@@ -222,6 +226,27 @@ public sealed partial class App
         {
             logger.LogError(exception, "Failed to initialize startup modules");
         }
+        finally
+        {
+            await CompleteModuleLoadingAsync(dispatcherQueue, islandViewModel).ConfigureAwait(false);
+        }
+    }
+
+    private static Task CompleteModuleLoadingAsync(DispatcherQueue dispatcherQueue,
+        DesktopIslandViewModel islandViewModel)
+    {
+        TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (!dispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+        {
+            islandViewModel.CompleteModuleLoading();
+            completion.SetResult();
+        }))
+        {
+            completion.SetException(new InvalidOperationException("The UI dispatcher rejected the module loading completion."));
+        }
+
+        return completion.Task;
     }
 
 }

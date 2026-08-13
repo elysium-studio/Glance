@@ -7,9 +7,9 @@
     xmlns:Local="using:Glance.Shell.WinUI"
     xmlns:WinUI="using:Elysium.UI.WinUI"
     CompactHeight="52"
-    CompactWidth="{x:Bind ToCompactWidth(ViewModel.Assistant.IsAvailable), Mode=OneWay}"
+    CompactWidth="{x:Bind ToCompactWidth(ViewModel.Assistant.IsAvailable, ViewModel.Assistant.IsEnabled, ViewModel.IsLoadingModules, ViewModel.IsTransientPresentationActive), Mode=OneWay}"
     AllowDrop="True"
-    BackgroundContent="{x:Bind ToBackgroundContent(ViewModel.SelectedComponent), Mode=OneWay}"
+    BackgroundContent="{x:Bind ToBackgroundContent(ViewModel.SelectedComponent, ViewModel.IsLoadingModules, ViewModel.IsTransientPresentationActive), Mode=OneWay}"
     DataContext="{WinUI:ViewModel Key=DesktopIslandView}"
     DragEnter="{x:Bind HandleDragEnter}"
     DragLeave="{x:Bind HandleDragLeave}"
@@ -38,9 +38,15 @@
                 <ColumnDefinition Width="228" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <ContentPresenter
-                x:Name="CompactPresenter"
-                Content="{x:Bind ViewModel.SelectedComponent.CompactContent, Mode=OneWay}" />
+            <Grid Visibility="{x:Bind WhenModulesLoaded(ViewModel.IsLoadingModules), Mode=OneWay}">
+                <ContentPresenter
+                    x:Name="CompactPresenter"
+                    Content="{x:Bind ViewModel.SelectedComponent.CompactContent, Mode=OneWay}" />
+                <ContentPresenter
+                    x:Name="TransientCompactPresenter"
+                    Content="{x:Bind ViewModel.TransientComponent.CompactContent, Mode=OneWay}"
+                    Visibility="Collapsed" />
+            </Grid>
             <ContentControl
                 x:Name="CompactAssistantIndicator"
                 Grid.Column="1"
@@ -48,7 +54,10 @@
                 VerticalAlignment="Center"
                 Content="{x:Bind ViewModel.Assistant.CompactIndicatorContent, Mode=OneWay}"
                 Foreground="{StaticResource GlanceDefaultAssistantIndicatorForegroundBrush}"
-                Visibility="{x:Bind WhenAvailable(ViewModel.Assistant.IsAvailable), Mode=OneWay}" />
+                Visibility="{x:Bind WhenAssistantAvailable(ViewModel.Assistant.IsAvailable, ViewModel.Assistant.IsEnabled, ViewModel.IsLoadingModules, ViewModel.IsTransientPresentationActive), Mode=OneWay}" />
+            <Local:ModuleLoadingView
+                x:Name="CompactModuleLoadingView"
+                Grid.ColumnSpan="2" />
         </Grid>
     </Controls:DesktopIsland.CompactContent>
     <Controls:DesktopIsland.ExpandedContent>
@@ -56,9 +65,18 @@
             <Grid
                 x:Name="ExpandedModuleSurface"
                 Visibility="Visible">
-                <ContentPresenter
-                    x:Name="ExpandedPresenter"
-                    Content="{x:Bind ViewModel.SelectedComponent.ExpandedContent, Mode=OneWay}" />
+                <Grid Visibility="{x:Bind WhenModulesLoaded(ViewModel.IsLoadingModules), Mode=OneWay}">
+                    <ContentPresenter
+                        x:Name="ExpandedPresenter"
+                        Content="{x:Bind ViewModel.SelectedComponent.ExpandedContent, Mode=OneWay}" />
+                    <ContentPresenter
+                        x:Name="TransientExpandedPresenter"
+                        Content="{x:Bind ViewModel.TransientComponent.ExpandedContent, Mode=OneWay}"
+                        Visibility="Collapsed" />
+                </Grid>
+                <Local:ModuleLoadingView
+                    x:Name="ExpandedModuleLoadingView"
+                    IsExpanded="True" />
                 <StackPanel
                     x:Name="Footer"
                     Height="24"
@@ -66,7 +84,8 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Bottom"
                     Orientation="Horizontal"
-                    Spacing="6">
+                    Spacing="6"
+                    Visibility="{x:Bind WhenPrimaryContentVisible(ViewModel.IsLoadingModules, ViewModel.IsTransientPresentationActive), Mode=OneWay}">
                     <PipsPager
                         x:Name="ComponentPager"
                         Height="24"

@@ -6,7 +6,7 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Network.xaml" />
     </UserControl.Resources>
-    <Grid Padding="24,12,24,36" ColumnSpacing="16">
+    <Grid Padding="20,10,20,26" ColumnSpacing="18">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
@@ -31,11 +31,11 @@
                 <Grid>
                     <local:NetworkMetricGraph
                         x:Name="DownloadGraph"
-                        Margin="8,24,8,8"
+                        Margin="6,26,6,6"
                         Maximum="0"
                         GridStroke="{ThemeResource GlanceNetworkGraphGridBrush}"
                         PrimaryStroke="{ThemeResource GlanceNetworkDownloadBrush}" />
-                    <StackPanel Margin="8" Spacing="4">
+                    <StackPanel Margin="8,6" Spacing="1">
                         <TextBlock x:Uid="DownloadLabel" FontWeight="SemiBold" Foreground="{ThemeResource GlanceNetworkDownloadBrush}" Style="{StaticResource CaptionTextBlockStyle}" />
                         <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.DownloadText, Mode=OneWay}" />
                     </StackPanel>
@@ -45,11 +45,11 @@
                 <Grid>
                     <local:NetworkMetricGraph
                         x:Name="UploadGraph"
-                        Margin="8,24,8,8"
+                        Margin="6,26,6,6"
                         Maximum="0"
                         GridStroke="{ThemeResource GlanceNetworkGraphGridBrush}"
                         PrimaryStroke="{ThemeResource GlanceNetworkUploadBrush}" />
-                    <StackPanel Margin="8" Spacing="4">
+                    <StackPanel Margin="8,6" Spacing="1">
                         <TextBlock x:Uid="UploadLabel" FontWeight="SemiBold" Foreground="{ThemeResource GlanceNetworkUploadBrush}" Style="{StaticResource CaptionTextBlockStyle}" />
                         <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.UploadText, Mode=OneWay}" />
                     </StackPanel>

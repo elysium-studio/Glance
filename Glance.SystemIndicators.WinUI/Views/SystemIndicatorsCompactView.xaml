@@ -1,0 +1,32 @@
+<UserControl
+    x:Class="Glance.SystemIndicators.WinUI.SystemIndicatorsCompactView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Controls="using:Elysium.UI.Controls.WinUI">
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Themes/SystemIndicators.xaml" />
+    </UserControl.Resources>
+    <Grid Padding="12,4" ColumnSpacing="8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid Width="28" Height="28">
+            <FontIcon
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="23"
+                Foreground="{ThemeResource GlanceSystemIndicatorsIconBrush}"
+                Glyph="{x:Bind ViewModel.Glyph, Mode=OneWay}" />
+        </Grid>
+        <Controls:MarqueeTextBlock
+            Grid.Column="1"
+            Height="20"
+            VerticalAlignment="Center"
+            FontSize="14"
+            FontWeight="SemiBold"
+            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+            Text="{x:Bind ViewModel.CompactText, Mode=OneWay}" />
+    </Grid>
+</UserControl>

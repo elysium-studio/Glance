@@ -1,19 +1,16 @@
 using System;
-using System.Diagnostics;
-using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 
 namespace Glance.SystemMonitor.WinUI;
 
-internal sealed class SystemMetricsReader
+internal sealed class SystemMetricsReader :
+    IDisposable
 {
+    private readonly GpuUsageReader gpuUsageReader = new();
     private ulong previousIdle;
     private ulong previousKernel;
     private ulong previousUser;
     private bool hasPreviousSample;
-    private ulong previousBytesReceived;
-    private ulong previousBytesSent;
-    private long previousNetworkTimestamp;
 
     public SystemMetrics Read()
     {
@@ -25,7 +22,7 @@ internal sealed class SystemMetricsReader
 
         if (!GlobalMemoryStatusEx(ref status))
         {
-            return new SystemMetrics(cpu, 0, 0, 0, 0, 0);
+            return new SystemMetrics(cpu, 0, 0, 0, gpuUsageReader.Read());
         }
 
         ulong used = status.TotalPhysical - status.AvailablePhysical;
@@ -33,59 +30,10 @@ internal sealed class SystemMetricsReader
             ? 0
             : used * 100d / status.TotalPhysical;
 
-        (double download, double upload) = ReadNetworkUsage();
-
-        return new SystemMetrics(cpu, memory, used, status.TotalPhysical, download, upload);
+        return new SystemMetrics(cpu, memory, used, status.TotalPhysical, gpuUsageReader.Read());
     }
 
-    private (double Download, double Upload) ReadNetworkUsage()
-    {
-        ulong bytesReceived = 0;
-        ulong bytesSent = 0;
-
-        foreach (NetworkInterface networkInterface in NetworkInterface.GetAllNetworkInterfaces())
-        {
-            if (networkInterface.OperationalStatus != OperationalStatus.Up ||
-                networkInterface.NetworkInterfaceType == NetworkInterfaceType.Loopback)
-            {
-                continue;
-            }
-
-            try
-            {
-                IPv4InterfaceStatistics statistics = networkInterface.GetIPv4Statistics();
-                bytesReceived += (ulong)Math.Max(0, statistics.BytesReceived);
-                bytesSent += (ulong)Math.Max(0, statistics.BytesSent);
-            }
-            catch (NetworkInformationException)
-            {
-            }
-        }
-
-        long timestamp = Stopwatch.GetTimestamp();
-
-        if (previousNetworkTimestamp == 0)
-        {
-            previousBytesReceived = bytesReceived;
-            previousBytesSent = bytesSent;
-            previousNetworkTimestamp = timestamp;
-            return (0, 0);
-        }
-
-        double elapsed = Stopwatch.GetElapsedTime(previousNetworkTimestamp, timestamp).TotalSeconds;
-        double download = elapsed <= 0 || bytesReceived < previousBytesReceived
-            ? 0
-            : (bytesReceived - previousBytesReceived) / elapsed;
-        double upload = elapsed <= 0 || bytesSent < previousBytesSent
-            ? 0
-            : (bytesSent - previousBytesSent) / elapsed;
-
-        previousBytesReceived = bytesReceived;
-        previousBytesSent = bytesSent;
-        previousNetworkTimestamp = timestamp;
-
-        return (download, upload);
-    }
+    public void Dispose() => gpuUsageReader.Dispose();
 
     private double ReadCpuUsage()
     {
@@ -157,5 +105,4 @@ internal readonly record struct SystemMetrics(double CpuUsage,
     double MemoryUsage,
     ulong UsedMemory,
     ulong TotalMemory,
-    double DownloadBytesPerSecond,
-    double UploadBytesPerSecond);
+    double GpuUsage);

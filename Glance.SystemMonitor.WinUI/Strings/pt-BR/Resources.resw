@@ -8,7 +8,7 @@
     <value>Monitor do sistema</value>
   </data>
   <data name="ModuleDescription" xml:space="preserve">
-    <value>Veja em tempo real o uso do processador, da memória e da rede.</value>
+    <value>Veja em tempo real o uso do processador, da memória e da GPU.</value>
   </data>
   <data name="CalculatingMemory" xml:space="preserve">
     <value>Calculando memória</value>
@@ -25,8 +25,8 @@
   <data name="MemoryLabel.Text" xml:space="preserve">
     <value>MEMÓRIA</value>
   </data>
-  <data name="NetworkLabel.Text" xml:space="preserve">
-    <value>REDE</value>
+  <data name="GpuLabel.Text" xml:space="preserve">
+    <value>GPU</value>
   </data>
   <data name="RefreshIntervalSettingCard.Header" xml:space="preserve">
     <value>Refresh interval</value>
@@ -38,6 +38,6 @@
     <value>Gráficos de desempenho</value>
   </data>
   <data name="PerformanceChartsSettingCard.Description" xml:space="preserve">
-    <value>Mostrar o histórico em tempo real de CPU, memória e rede.</value>
+    <value>Mostrar o histórico em tempo real de CPU, memória e GPU.</value>
   </data>
 </root>

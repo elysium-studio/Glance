@@ -26,6 +26,12 @@ public sealed partial class DesktopIslandViewModel :
     private bool isModuleReorderVisible;
 
     [ObservableProperty]
+    private bool isLoadingModules = true;
+
+    [ObservableProperty]
+    private bool isTransientPresentationActive;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsPinned))]
     private GlanceExpansionMode expansionMode;
 
@@ -52,6 +58,10 @@ public sealed partial class DesktopIslandViewModel :
     private readonly ModulePreferenceService modulePreferences;
     private readonly INavigator navigator;
     private readonly IWritableOptions<GlanceSettings> settingsWriter;
+    private readonly HashSet<IGlanceTransientComponent> transientComponents = [];
+    private bool transientExpansionLocked;
+    private bool transientPreviousExpanded;
+    private bool transientPreviousOpen;
 
     public DesktopIslandViewModel(IServiceProvider provider,
         IServiceFactory factory,
@@ -87,7 +97,9 @@ public sealed partial class DesktopIslandViewModel :
         intentService.IntentInvoked += HandleIntentInvoked;
         modulePreferences.ActiveComponentsChanged += HandleActiveComponentsChanged;
         modulePreferences.ComponentsAdded += HandleComponentsAdded;
+        modulePreferences.ComponentsRemoved += HandleComponentsRemoved;
         modulePreferences.PreferencesChanged += HandlePreferencesChanged;
+        TrackTransientComponents(modulePreferences.GetTransientComponents());
         Activate();
     }
 
@@ -100,6 +112,10 @@ public sealed partial class DesktopIslandViewModel :
     public ObservableCollection<IGlanceComponent> ModuleOrder { get; } = [];
 
     public IReadOnlyList<GlanceContentRoute> ContentRoutes { get; private set; } = [];
+
+    public IGlanceTransientComponent? TransientComponent { get; private set; }
+
+    public bool IsTransientExpansionLocked => TransientComponent is not null && transientExpansionLocked;
 
     public bool IsContentRoutePickerVisible { get; private set; }
 
@@ -150,6 +166,8 @@ public sealed partial class DesktopIslandViewModel :
     public void MoveNext() => Move(1);
 
     public void MovePrevious() => Move(-1);
+
+    public void CompleteModuleLoading() => IsLoadingModules = false;
 
     public void BeginModuleReorder()
     {
@@ -363,7 +381,7 @@ public sealed partial class DesktopIslandViewModel :
 
     public void Move(int offset)
     {
-        if (components.Count < 2)
+        if (TransientComponent is not null || components.Count < 2)
         {
             return;
         }
@@ -378,7 +396,9 @@ public sealed partial class DesktopIslandViewModel :
         IntentService.IntentInvoked -= HandleIntentInvoked;
         modulePreferences.ActiveComponentsChanged -= HandleActiveComponentsChanged;
         modulePreferences.ComponentsAdded -= HandleComponentsAdded;
+        modulePreferences.ComponentsRemoved -= HandleComponentsRemoved;
         modulePreferences.PreferencesChanged -= HandlePreferencesChanged;
+        UntrackTransientComponents([.. transientComponents]);
         base.Dispose();
     }
 
@@ -402,10 +422,34 @@ public sealed partial class DesktopIslandViewModel :
     private void HandleActiveComponentsChanged(object? sender, EventArgs args) => dispatcher.Dispatch(ApplyPreferences);
 
     private void HandleComponentsAdded(object? sender,
-        GlanceComponentsAddedEventArgs args) => dispatcher.Dispatch(ApplyPreferences);
+        GlanceComponentsAddedEventArgs args) => dispatcher.Dispatch(() =>
+        {
+            TrackTransientComponents(args.Components.OfType<IGlanceTransientComponent>());
+            ApplyPreferences();
+        });
+
+    private void HandleComponentsRemoved(object? sender,
+        GlanceComponentsRemovedEventArgs args) => dispatcher.Dispatch(() =>
+        {
+            IGlanceTransientComponent[] removed = [.. args.Components.OfType<IGlanceTransientComponent>()];
+            UntrackTransientComponents(removed);
+
+            if (TransientComponent is not null && removed.Contains(TransientComponent))
+            {
+                DismissTransientPresentation();
+                CompleteTransientPresentationDismissal();
+            }
+
+            ApplyPreferences();
+        });
 
     private void ApplyPreferences()
     {
+        if (TransientComponent is not null && !modulePreferences.IsEnabled(TransientComponent.Id))
+        {
+            DismissTransientPresentation();
+        }
+
         string? selectedId = SelectedComponent?.Id;
         int previousSelectedIndex = SelectedIndex;
         IReadOnlyList<IGlanceComponent> activeComponents =
@@ -467,6 +511,108 @@ public sealed partial class DesktopIslandViewModel :
         OnPropertyChanged(nameof(HasMultipleComponents));
         OnPropertyChanged(nameof(ComponentCount));
         OnPropertyChanged(nameof(PageText));
+    }
+
+    private void TrackTransientComponents(IEnumerable<IGlanceTransientComponent> components)
+    {
+        foreach (IGlanceTransientComponent component in components)
+        {
+            if (!transientComponents.Add(component))
+            {
+                continue;
+            }
+
+            component.PresentationRequested += HandleTransientPresentationRequested;
+            component.DismissalRequested += HandleTransientDismissalRequested;
+        }
+    }
+
+    private void UntrackTransientComponents(IEnumerable<IGlanceTransientComponent> components)
+    {
+        foreach (IGlanceTransientComponent component in components)
+        {
+            component.PresentationRequested -= HandleTransientPresentationRequested;
+            component.DismissalRequested -= HandleTransientDismissalRequested;
+            _ = transientComponents.Remove(component);
+        }
+    }
+
+    private void HandleTransientPresentationRequested(object? sender,
+        GlanceTransientPresentationRequestedEventArgs args) => dispatcher.Dispatch(() =>
+        {
+            if (sender is not IGlanceTransientComponent component ||
+                !transientComponents.Contains(component) ||
+                !modulePreferences.IsEnabled(component.Id))
+            {
+                return;
+            }
+
+            bool isActivating = TransientComponent is null;
+
+            if (isActivating)
+            {
+                transientPreviousOpen = IsOpen;
+                transientPreviousExpanded = IsExpanded;
+                transientExpansionLocked = IsExpanded || args.Expand;
+            }
+            else if (args.Expand && !transientExpansionLocked)
+            {
+                transientExpansionLocked = true;
+                OnPropertyChanged(nameof(IsTransientExpansionLocked));
+            }
+
+            if (!ReferenceEquals(TransientComponent, component))
+            {
+                TransientComponent = component;
+                OnPropertyChanged(nameof(TransientComponent));
+            }
+
+            if (!IsTransientPresentationActive)
+            {
+                IsTransientPresentationActive = true;
+                OnPropertyChanged(nameof(IsTransientExpansionLocked));
+            }
+
+            IsOpen = true;
+
+            if (args.Expand)
+            {
+                IsExpanded = true;
+            }
+        });
+
+    private void HandleTransientDismissalRequested(object? sender,
+        EventArgs args) => dispatcher.Dispatch(() =>
+        {
+            if (ReferenceEquals(sender, TransientComponent))
+            {
+                DismissTransientPresentation();
+            }
+        });
+
+    private void DismissTransientPresentation()
+    {
+        if (TransientComponent is null || !IsTransientPresentationActive)
+        {
+            return;
+        }
+
+        IsTransientPresentationActive = false;
+    }
+
+    public void CompleteTransientPresentationDismissal()
+    {
+        if (TransientComponent is null || IsTransientPresentationActive)
+        {
+            return;
+        }
+
+        TransientComponent = null;
+        OnPropertyChanged(nameof(TransientComponent));
+        transientExpansionLocked = false;
+        OnPropertyChanged(nameof(IsTransientExpansionLocked));
+        IsOpen = transientPreviousOpen;
+        IsExpanded = IsPinned || transientPreviousExpanded;
     }
 
     private void HandleAttentionRequested(object? sender, GlanceAttentionRequest request)

@@ -34,6 +34,7 @@ public sealed partial class DesktopIslandView :
     private const int AttentionExpansionDurationMs = 4000;
     private const int ContextualDragExitDelayMs = 160;
     private const int InteractionExitDelayMs = 240;
+    private const int ModuleLoadingCrossFadeDurationMs = 360;
     private const float ModuleReorderEdgeFadeWidth = 32;
     private const double ModuleReorderSideItemMinimumOpacity = 0.68;
     private const int StartupAttentionDelayMs = 2500;
@@ -75,6 +76,8 @@ public sealed partial class DesktopIslandView :
     private int assistantPresentationTransition;
     private int contentRoutePresentationTransition;
     private int moduleReorderPresentationTransition;
+    private int moduleLoadingTransition;
+    private int transientPresentationTransition;
     private int previousIndex;
     private bool skipNextConnectedExpansion;
 
@@ -115,13 +118,48 @@ public sealed partial class DesktopIslandView :
 
     public Visibility WhenAvailable(bool isAvailable) => isAvailable ? Visibility.Visible : Visibility.Collapsed;
 
+    public Visibility WhenModulesLoaded(bool isLoadingModules) => isLoadingModules
+        ? Visibility.Collapsed
+        : Visibility.Visible;
+
     public Visibility WhenRoutePickerVisible(bool isVisible) => isVisible ? Visibility.Visible : Visibility.Collapsed;
 
     public Visibility WhenRoutePickerHidden(bool isVisible) => isVisible ? Visibility.Collapsed : Visibility.Visible;
 
-    public double ToCompactWidth(bool isAssistantAvailable) => isAssistantAvailable ? 268 : 228;
+    public double ToCompactWidth(bool isAssistantAvailable,
+        bool isAssistantEnabled,
+        bool isLoadingModules,
+        bool isTransientPresentationActive) => !isLoadingModules &&
+            !isTransientPresentationActive &&
+            isAssistantAvailable &&
+            isAssistantEnabled
+                ? 268
+                : 228;
 
-    public object? ToBackgroundContent(IGlanceComponent? component) => (component as IGlanceBackgroundComponent)?.BackgroundContent;
+    public Visibility WhenAssistantAvailable(bool isAssistantAvailable,
+        bool isAssistantEnabled,
+        bool isLoadingModules,
+        bool isTransientPresentationActive) => !isLoadingModules &&
+        !isTransientPresentationActive &&
+        isAssistantAvailable &&
+        isAssistantEnabled
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+
+    public Visibility WhenPrimaryContentVisible(bool isLoadingModules,
+        bool isTransientPresentationActive) => isLoadingModules || isTransientPresentationActive
+        ? Visibility.Collapsed
+        : Visibility.Visible;
+
+    public object? ToBackgroundContent(IGlanceComponent? component,
+        bool isLoadingModules,
+        bool isTransientPresentationActive) => isLoadingModules || isTransientPresentationActive
+            ? null
+            : (component as IGlanceBackgroundComponent)?.BackgroundContent;
+
+    private object? GetModuleBackgroundContent() => ToBackgroundContent(ViewModel.SelectedComponent,
+        ViewModel.IsLoadingModules,
+        ViewModel.IsTransientPresentationActive);
 
     private void HandleLoaded(object sender, RoutedEventArgs args)
     {
@@ -139,6 +177,7 @@ public sealed partial class DesktopIslandView :
         ApplyAssistantPresentation(ViewModel.Assistant.IsOverlayVisible);
         ApplyContentRoutePresentation(ViewModel.IsContentRoutePickerVisible);
         ApplyModuleReorderPresentation(ViewModel.IsModuleReorderVisible);
+        InitializeModuleLoadingPresentation();
         StartStartupAttentionTimer();
         _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, ApplyIslandActivationMode);
     }
@@ -157,6 +196,8 @@ public sealed partial class DesktopIslandView :
 
     private void HandleUnloaded(object sender, RoutedEventArgs args)
     {
+        moduleLoadingTransition++;
+        transientPresentationTransition++;
         ViewModel.PropertyChanged -= HandleViewModelPropertyChanged;
         ViewModel.AttentionReceived -= HandleAttentionReceived;
         ViewModel.Assistant.PropertyChanged -= HandleAssistantPropertyChanged;
@@ -178,6 +219,255 @@ public sealed partial class DesktopIslandView :
         DismissesOnOutsideClick = false;
         assistantPresentationTransition++;
         moduleReorderPresentationTransition++;
+    }
+
+    private void InitializeModuleLoadingPresentation()
+    {
+        if (!IsLoaded)
+        {
+            return;
+        }
+
+        if (ViewModel.IsLoadingModules)
+        {
+            ShowModuleLoadingPresentation();
+            return;
+        }
+
+        HideModuleLoadingPresentation();
+    }
+
+    private void ShowModuleLoadingPresentation()
+    {
+        moduleLoadingTransition++;
+        CompactModuleLoadingView.Visibility = Visibility.Visible;
+        ExpandedModuleLoadingView.Visibility = Visibility.Visible;
+        FluentMotion.SetOpacity(CompactModuleLoadingView, 1);
+        FluentMotion.SetOpacity(ExpandedModuleLoadingView, 1);
+    }
+
+    private void HideModuleLoadingPresentation()
+    {
+        CompactModuleLoadingView.Visibility = Visibility.Collapsed;
+        ExpandedModuleLoadingView.Visibility = Visibility.Collapsed;
+        FluentMotion.SetOpacity(CompactModuleLoadingView, 1);
+        FluentMotion.SetOpacity(ExpandedModuleLoadingView, 1);
+        FluentMotion.SetOpacity(CompactPresenter, 1);
+        FluentMotion.SetOpacity(ExpandedPresenter, 1);
+        FluentMotion.SetOpacity(TransientCompactPresenter, 1);
+        FluentMotion.SetOpacity(TransientExpandedPresenter, 1);
+        FluentMotion.SetOpacity(CompactAssistantIndicator, 1);
+        FluentMotion.SetOpacity(Footer, 1);
+        ApplyTransientPresentation(ViewModel.IsTransientPresentationActive);
+
+        if (GetTemplateChild("PART_BackgroundContent") is FrameworkElement background)
+        {
+            FluentMotion.SetOpacity(background, 1);
+        }
+    }
+
+    private void TransitionTransientPresentation(bool showTransient,
+        bool allowLayoutRetry = true)
+    {
+        int transition = ++transientPresentationTransition;
+
+        if (ViewModel.IsLoadingModules)
+        {
+            ApplyTransientPresentation(showTransient);
+
+            if (!showTransient)
+            {
+                ViewModel.CompleteTransientPresentationDismissal();
+            }
+
+            return;
+        }
+
+        FrameworkElement outgoing = ViewModel.IsExpanded
+            ? showTransient ? ExpandedPresenter : TransientExpandedPresenter
+            : showTransient ? CompactPresenter : TransientCompactPresenter;
+        FrameworkElement incoming = ViewModel.IsExpanded
+            ? showTransient ? TransientExpandedPresenter : ExpandedPresenter
+            : showTransient ? TransientCompactPresenter : CompactPresenter;
+
+        outgoing.Visibility = Visibility.Visible;
+        incoming.Visibility = Visibility.Visible;
+        Footer.Visibility = Visibility.Collapsed;
+        CompactAssistantIndicator.Visibility = Visibility.Collapsed;
+        UpdateLayout();
+
+        if (!IsInElementTree(outgoing) ||
+            !IsInElementTree(incoming) ||
+            outgoing.ActualWidth <= 0 ||
+            outgoing.ActualHeight <= 0 ||
+            incoming.ActualWidth <= 0 ||
+            incoming.ActualHeight <= 0)
+        {
+            if (allowLayoutRetry)
+            {
+                _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+                {
+                    if (transition == transientPresentationTransition &&
+                        showTransient == ViewModel.IsTransientPresentationActive)
+                    {
+                        TransitionTransientPresentation(showTransient, false);
+                    }
+                });
+                return;
+            }
+
+            CompleteTransientPresentationTransition(transition, showTransient);
+            return;
+        }
+
+        FluentMotion.PlayTransientPushTransition(outgoing,
+            incoming,
+            showTransient,
+            () => CompleteTransientPresentationTransition(transition, showTransient));
+    }
+
+    private void CompleteTransientPresentationTransition(int transition,
+        bool showTransient)
+    {
+        if (transition != transientPresentationTransition ||
+            showTransient != ViewModel.IsTransientPresentationActive)
+        {
+            return;
+        }
+
+        ApplyTransientPresentation(showTransient);
+
+        if (!showTransient)
+        {
+            ViewModel.CompleteTransientPresentationDismissal();
+            BackgroundContent = GetModuleBackgroundContent();
+        }
+    }
+
+    private void ApplyTransientPresentation(bool showTransient)
+    {
+        SetPresenterState(CompactPresenter, !showTransient);
+        SetPresenterState(ExpandedPresenter, !showTransient);
+        SetPresenterState(TransientCompactPresenter, showTransient);
+        SetPresenterState(TransientExpandedPresenter, showTransient);
+        Footer.Visibility = WhenPrimaryContentVisible(ViewModel.IsLoadingModules, showTransient);
+        CompactAssistantIndicator.Visibility = WhenAssistantAvailable(ViewModel.Assistant.IsAvailable,
+            ViewModel.Assistant.IsEnabled,
+            ViewModel.IsLoadingModules,
+            showTransient);
+    }
+
+    private static void SetPresenterState(FrameworkElement presenter,
+        bool isVisible)
+    {
+        if (isVisible)
+        {
+            presenter.Visibility = Visibility.Visible;
+        }
+
+        FluentMotion.SetContentPresentationState(presenter, isVisible);
+
+        if (!isVisible)
+        {
+            presenter.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private void PlayModuleLoadingCompletionTransition(int transition)
+    {
+        if (!IsLoaded || transition != moduleLoadingTransition)
+        {
+            return;
+        }
+
+        CompactModuleLoadingView.Visibility = Visibility.Visible;
+        ExpandedModuleLoadingView.Visibility = Visibility.Visible;
+        bool isTransientPresentationActive = ViewModel.IsTransientPresentationActive;
+        FrameworkElement compactIncoming = isTransientPresentationActive ? TransientCompactPresenter : CompactPresenter;
+        FrameworkElement expandedIncoming = isTransientPresentationActive ? TransientExpandedPresenter : ExpandedPresenter;
+        compactIncoming.Visibility = Visibility.Visible;
+        expandedIncoming.Visibility = Visibility.Visible;
+
+        if (!isTransientPresentationActive)
+        {
+            Footer.Visibility = Visibility.Visible;
+        }
+
+        UpdateLayout();
+
+        FrameworkElement? background = GetTemplateChild("PART_BackgroundContent") as FrameworkElement;
+        Visual compactLoadingVisual = ElementCompositionPreview.GetElementVisual(CompactModuleLoadingView);
+        Visual expandedLoadingVisual = ElementCompositionPreview.GetElementVisual(ExpandedModuleLoadingView);
+        Visual compactPresenterVisual = ElementCompositionPreview.GetElementVisual(compactIncoming);
+        Visual expandedPresenterVisual = ElementCompositionPreview.GetElementVisual(expandedIncoming);
+        Visual assistantIndicatorVisual = ElementCompositionPreview.GetElementVisual(CompactAssistantIndicator);
+        Visual footerVisual = ElementCompositionPreview.GetElementVisual(Footer);
+        Visual? backgroundVisual = background is null ? null : ElementCompositionPreview.GetElementVisual(background);
+        Compositor compositor = compactLoadingVisual.Compositor;
+        CubicBezierEasingFunction entranceEasing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.1f, 0.9f), new Vector2(0.2f, 1));
+        CubicBezierEasingFunction exitEasing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.7f, 0), new Vector2(1, 0.5f));
+        TimeSpan duration = TimeSpan.FromMilliseconds(ModuleLoadingCrossFadeDurationMs);
+
+        SetOpacity(compactLoadingVisual, 1);
+        SetOpacity(expandedLoadingVisual, 1);
+        SetOpacity(compactPresenterVisual, 0);
+        SetOpacity(expandedPresenterVisual, 0);
+        if (!isTransientPresentationActive)
+        {
+            SetOpacity(assistantIndicatorVisual, 0);
+            SetOpacity(footerVisual, 0);
+        }
+
+        if (backgroundVisual is not null)
+        {
+            SetOpacity(backgroundVisual, 0);
+        }
+
+        CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+        StartOpacityAnimation(compositor, compactLoadingVisual, 1, 0, duration, exitEasing);
+        StartOpacityAnimation(compositor, expandedLoadingVisual, 1, 0, duration, exitEasing);
+        StartOpacityAnimation(compositor, compactPresenterVisual, 0, 1, duration, entranceEasing);
+        StartOpacityAnimation(compositor, expandedPresenterVisual, 0, 1, duration, entranceEasing);
+        if (!isTransientPresentationActive)
+        {
+            StartOpacityAnimation(compositor, assistantIndicatorVisual, 0, 1, duration, entranceEasing);
+            StartOpacityAnimation(compositor, footerVisual, 0, 1, duration, entranceEasing);
+        }
+
+        if (backgroundVisual is not null)
+        {
+            StartOpacityAnimation(compositor, backgroundVisual, 0, 1, duration, entranceEasing);
+        }
+
+        batch.Completed += (_, _) => DispatcherQueue.TryEnqueue(() =>
+        {
+            if (transition == moduleLoadingTransition && !ViewModel.IsLoadingModules)
+            {
+                HideModuleLoadingPresentation();
+            }
+        });
+        batch.End();
+    }
+
+    private static void StartOpacityAnimation(Compositor compositor,
+        Visual visual,
+        float from,
+        float to,
+        TimeSpan duration,
+        CompositionEasingFunction easing)
+    {
+        ScalarKeyFrameAnimation animation = compositor.CreateScalarKeyFrameAnimation();
+        animation.InsertKeyFrame(0, from);
+        animation.InsertKeyFrame(1, to, easing);
+        animation.Duration = duration;
+        visual.StartAnimation(nameof(Visual.Opacity), animation);
+    }
+
+    private static void SetOpacity(Visual visual,
+        float opacity)
+    {
+        visual.StopAnimation(nameof(Visual.Opacity));
+        visual.Opacity = opacity;
     }
 
     private void StartStartupAttentionTimer()
@@ -310,7 +600,7 @@ public sealed partial class DesktopIslandView :
 
         if (!showAssistant)
         {
-            BackgroundContent = ToBackgroundContent(ViewModel.SelectedComponent);
+            BackgroundContent = GetModuleBackgroundContent();
         }
 
         if (!IsInElementTree(outgoing) ||
@@ -385,7 +675,7 @@ public sealed partial class DesktopIslandView :
         FluentMotion.SetContentPresentationState(AssistantOverlayPresenter, showAssistant);
         ExpandedModuleSurface.Visibility = showAssistant ? Visibility.Collapsed : Visibility.Visible;
         AssistantOverlayPresenter.Visibility = showAssistant ? Visibility.Visible : Visibility.Collapsed;
-        BackgroundContent = showAssistant ? null : ToBackgroundContent(ViewModel.SelectedComponent);
+        BackgroundContent = showAssistant ? null : GetModuleBackgroundContent();
     }
 
     private void CompleteAssistantPresentationExit()
@@ -493,7 +783,7 @@ public sealed partial class DesktopIslandView :
 
         if (!showRoutes)
         {
-            BackgroundContent = ToBackgroundContent(ViewModel.SelectedComponent);
+            BackgroundContent = GetModuleBackgroundContent();
         }
 
         if (!IsInElementTree(outgoing) ||
@@ -564,7 +854,7 @@ public sealed partial class DesktopIslandView :
         FluentMotion.SetContentPresentationState(ContentRoutePicker, showRoutes);
         ExpandedModuleSurface.Visibility = showRoutes ? Visibility.Collapsed : Visibility.Visible;
         ContentRoutePicker.Visibility = showRoutes ? Visibility.Visible : Visibility.Collapsed;
-        BackgroundContent = showRoutes ? null : ToBackgroundContent(ViewModel.SelectedComponent);
+        BackgroundContent = showRoutes ? null : GetModuleBackgroundContent();
     }
 
     private void ShowModuleReorderPresentation()
@@ -616,7 +906,7 @@ public sealed partial class DesktopIslandView :
 
         if (!showReorder)
         {
-            BackgroundContent = ToBackgroundContent(ViewModel.SelectedComponent);
+            BackgroundContent = GetModuleBackgroundContent();
         }
 
         UpdateLayout();
@@ -1042,7 +1332,7 @@ public sealed partial class DesktopIslandView :
         FluentMotion.SetContentPresentationState(ModuleReorderSurface, showReorder);
         ExpandedModuleSurface.Visibility = showReorder ? Visibility.Collapsed : Visibility.Visible;
         ModuleReorderSurface.Visibility = showReorder ? Visibility.Visible : Visibility.Collapsed;
-        BackgroundContent = showReorder ? null : ToBackgroundContent(ViewModel.SelectedComponent);
+        BackgroundContent = showReorder ? null : GetModuleBackgroundContent();
     }
 
     private void CompleteModuleReorderPresentationExit()
@@ -1167,6 +1457,57 @@ public sealed partial class DesktopIslandView :
             if (isAssistantPresentationRequested || isContentRoutePresentationRequested || isModuleReorderPresentationRequested)
             {
                 BackgroundContent = null;
+            }
+
+            return;
+        }
+
+        if (args.PropertyName == nameof(DesktopIslandViewModel.IsTransientPresentationActive))
+        {
+            ApplyExpansionLock();
+            bool showTransient = ViewModel.IsTransientPresentationActive;
+
+            if (showTransient)
+            {
+                BackgroundContent = null;
+            }
+
+            Footer.Visibility = Visibility.Collapsed;
+            CompactAssistantIndicator.Visibility = Visibility.Collapsed;
+            _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low,
+                () => TransitionTransientPresentation(showTransient));
+            return;
+        }
+
+        if (args.PropertyName == nameof(DesktopIslandViewModel.IsTransientExpansionLocked))
+        {
+            ApplyExpansionLock();
+            return;
+        }
+
+        if (args.PropertyName == nameof(DesktopIslandViewModel.IsLoadingModules))
+        {
+            BackgroundContent = ViewModel.IsLoadingModules ||
+                isAssistantPresentationRequested ||
+                isContentRoutePresentationRequested ||
+                isModuleReorderPresentationRequested
+                    ? null
+                    : GetModuleBackgroundContent();
+
+            if (ViewModel.IsLoadingModules)
+            {
+                ShowModuleLoadingPresentation();
+            }
+            else
+            {
+                int transition = ++moduleLoadingTransition;
+                _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+                {
+                    if (transition == moduleLoadingTransition && !ViewModel.IsLoadingModules)
+                    {
+                        PlayModuleLoadingCompletionTransition(transition);
+                    }
+                });
             }
 
             return;
@@ -1603,6 +1944,7 @@ public sealed partial class DesktopIslandView :
 
     private void ApplyExpansionLock() => IsExpansionLocked = ViewModel.IsPinned ||
             ViewModel.IsModuleReorderVisible ||
+            ViewModel.IsTransientExpansionLocked ||
             expansionLockComponent?.IsExpansionLocked == true;
 
     private void HandleIslandDeactivated(object? sender, EventArgs args)
@@ -1688,6 +2030,12 @@ public sealed partial class DesktopIslandView :
 
     private void HandlePointerWheelChanged(object sender, PointerRoutedEventArgs args)
     {
+        if (ViewModel.TransientComponent is not null)
+        {
+            args.Handled = true;
+            return;
+        }
+
         if (ViewModel.IsModuleReorderVisible)
         {
             return;

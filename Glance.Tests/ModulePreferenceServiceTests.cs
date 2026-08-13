@@ -161,6 +161,26 @@ public sealed class ModulePreferenceServiceTests
         Assert.Equal(1, writer.WriteCount);
     }
 
+    [Fact]
+    public async Task TransientComponentCanBeConfiguredButIsNeverPagedOrOrdered()
+    {
+        GlanceSettings settings = new();
+        TestWritableOptions writer = new(settings);
+        TestComponent weather = new("Weather");
+        TestTransientComponent indicators = new("SystemIndicators");
+        ModulePreferenceService service = new([weather, indicators], settings, writer);
+
+        Assert.Equal(weather, Assert.Single(service.GetActiveComponents()));
+        Assert.Equal(indicators, Assert.Single(service.GetTransientComponents()));
+        Assert.Equal(["Weather", "SystemIndicators"], service.GetPreferences().Select(item => item.Id));
+        Assert.True(indicators.IsPresentationEnabled);
+
+        Assert.True(await service.SetEnabledAsync(indicators.Id, false));
+        Assert.False(service.IsEnabled(indicators.Id));
+        Assert.False(indicators.IsPresentationEnabled);
+        Assert.Equal(weather, Assert.Single(service.GetActiveComponents()));
+    }
+
     private sealed class TestComponent(string id) :
         IGlanceComponent
     {
@@ -207,6 +227,32 @@ public sealed class ModulePreferenceServiceTests
             IsAvailable = value;
             AvailabilityChanged?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    private sealed class TestTransientComponent(string id) :
+        IGlanceTransientComponent
+    {
+        public event EventHandler<GlanceTransientPresentationRequestedEventArgs>? PresentationRequested;
+
+        public event EventHandler? DismissalRequested;
+
+        public bool IsPresentationEnabled { get; set; }
+
+        public string Id { get; } = id;
+
+        public string DisplayName => Id;
+
+        public string Description => string.Empty;
+
+        public int Order => 0;
+
+        public object CompactContent { get; } = new();
+
+        public object ExpandedContent { get; } = new();
+
+        public void Present() => PresentationRequested?.Invoke(this, new GlanceTransientPresentationRequestedEventArgs());
+
+        public void Dismiss() => DismissalRequested?.Invoke(this, EventArgs.Empty);
     }
 
     private sealed class TestAttentionComponent(string id, bool isAttentionEnabledByDefault) :

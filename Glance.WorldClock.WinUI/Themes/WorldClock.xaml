@@ -1,10 +1,10 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Default">
-            <SolidColorBrush x:Key="GlanceWorldClockIconBrush" Color="#64D8CB" />
+            <SolidColorBrush x:Key="GlanceWorldClockIconBrush" Color="#FFB267" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
-            <SolidColorBrush x:Key="GlanceWorldClockIconBrush" Color="#087F72" />
+            <SolidColorBrush x:Key="GlanceWorldClockIconBrush" Color="#914A00" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <StaticResource x:Key="GlanceWorldClockIconBrush" ResourceKey="SystemColorWindowTextColorBrush" />

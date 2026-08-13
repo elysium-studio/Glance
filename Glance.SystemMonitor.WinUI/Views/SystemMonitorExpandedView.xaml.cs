@@ -31,7 +31,7 @@ public sealed partial class SystemMonitorExpandedView :
     {
         CpuGraph.SampleInterval = interval;
         MemoryGraph.SampleInterval = interval;
-        NetworkGraph.SampleInterval = interval;
+        GpuGraph.SampleInterval = interval;
     }
 
     private void HandleMetricsUpdated(object? sender, EventArgs args) => AddCurrentSample();
@@ -40,7 +40,7 @@ public sealed partial class SystemMonitorExpandedView :
     {
         CpuGraph.AddSample(ViewModel.CpuUsage);
         MemoryGraph.AddSample(ViewModel.MemoryUsage);
-        NetworkGraph.AddSample(ViewModel.DownloadBytesPerSecond, ViewModel.UploadBytesPerSecond);
+        GpuGraph.AddSample(ViewModel.GpuUsage);
     }
 
     private Visibility WhenShowingCharts(bool value) => value ? Visibility.Visible : Visibility.Collapsed;

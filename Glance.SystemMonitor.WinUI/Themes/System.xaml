@@ -1,35 +1,32 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Default">
-            <SolidColorBrush x:Key="GlanceSystemIconBrush" Color="#61C9A8" />
-            <SolidColorBrush x:Key="GlanceSystemCpuGraphBrush" Color="#61C9A8" />
+            <SolidColorBrush x:Key="GlanceSystemIconBrush" Color="#A9B7FF" />
+            <SolidColorBrush x:Key="GlanceSystemCpuGraphBrush" Color="#A9B7FF" />
             <SolidColorBrush x:Key="GlanceSystemMemoryGraphBrush" Color="#BCA7FF" />
-            <SolidColorBrush x:Key="GlanceSystemNetworkDownloadGraphBrush" Color="#56C7FF" />
-            <SolidColorBrush x:Key="GlanceSystemNetworkUploadGraphBrush" Color="#FFB15C" />
+            <SolidColorBrush x:Key="GlanceSystemGpuGraphBrush" Color="#56C7FF" />
             <SolidColorBrush x:Key="GlanceSystemGraphGridBrush" Color="#18FFFFFF" />
-            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FF61C9A8" />
-            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E661C9A8" />
-            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CC61C9A8" />
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FFA9B7FF" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E6A9B7FF" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CCA9B7FF" />
             <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#28FFFFFF" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
-            <SolidColorBrush x:Key="GlanceSystemIconBrush" Color="#087E62" />
-            <SolidColorBrush x:Key="GlanceSystemCpuGraphBrush" Color="#087E62" />
+            <SolidColorBrush x:Key="GlanceSystemIconBrush" Color="#4053A4" />
+            <SolidColorBrush x:Key="GlanceSystemCpuGraphBrush" Color="#4053A4" />
             <SolidColorBrush x:Key="GlanceSystemMemoryGraphBrush" Color="#6548B5" />
-            <SolidColorBrush x:Key="GlanceSystemNetworkDownloadGraphBrush" Color="#006A99" />
-            <SolidColorBrush x:Key="GlanceSystemNetworkUploadGraphBrush" Color="#A04400" />
+            <SolidColorBrush x:Key="GlanceSystemGpuGraphBrush" Color="#006A99" />
             <SolidColorBrush x:Key="GlanceSystemGraphGridBrush" Color="#18000000" />
-            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FF087E62" />
-            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E6087E62" />
-            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CC087E62" />
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FF4053A4" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#E64053A4" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#CC4053A4" />
             <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#28FFFFFF" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <StaticResource x:Key="GlanceSystemIconBrush" ResourceKey="SystemColorWindowTextColorBrush" />
             <StaticResource x:Key="GlanceSystemCpuGraphBrush" ResourceKey="SystemColorHighlightColorBrush" />
             <StaticResource x:Key="GlanceSystemMemoryGraphBrush" ResourceKey="SystemColorHighlightColorBrush" />
-            <StaticResource x:Key="GlanceSystemNetworkDownloadGraphBrush" ResourceKey="SystemColorHighlightColorBrush" />
-            <StaticResource x:Key="GlanceSystemNetworkUploadGraphBrush" ResourceKey="SystemColorWindowTextColorBrush" />
+            <StaticResource x:Key="GlanceSystemGpuGraphBrush" ResourceKey="SystemColorHighlightColorBrush" />
             <StaticResource x:Key="GlanceSystemGraphGridBrush" ResourceKey="SystemColorGrayTextColorBrush" />
             <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemColorHighlightColorBrush" />
             <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="SystemColorHighlightColorBrush" />

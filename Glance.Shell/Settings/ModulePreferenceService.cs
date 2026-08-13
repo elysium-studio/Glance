@@ -16,6 +16,7 @@ public sealed class ModulePreferenceService
         this.settings = settings;
         this.writer = writer;
         Normalize();
+        ApplyTransientComponentStates();
         TrackAvailability(allComponents);
     }
 
@@ -32,7 +33,10 @@ public sealed class ModulePreferenceService
             .Select(preference => allComponents.FirstOrDefault(component =>
                 string.Equals(component.Id, preference.Id, StringComparison.OrdinalIgnoreCase)))
             .OfType<IGlanceComponent>()
+            .Where(component => component is not IGlanceTransientComponent)
             .Where(IsAvailable)];
+
+    public IReadOnlyList<IGlanceTransientComponent> GetTransientComponents() => [.. allComponents.OfType<IGlanceTransientComponent>()];
 
     public IReadOnlyList<GlanceModulePreference> GetPreferences() => [.. settings.Modules
             .Where(preference => GetComponent(preference.Id) is not null)
@@ -96,6 +100,8 @@ public sealed class ModulePreferenceService
             settingsChanged = true;
         }
 
+        ApplyTransientComponentStates(components.OfType<IGlanceTransientComponent>());
+
         PreferencesChanged?.Invoke(this, EventArgs.Empty);
         ComponentsAdded?.Invoke(this, new GlanceComponentsAddedEventArgs(components, createSettings));
 
@@ -115,12 +121,15 @@ public sealed class ModulePreferenceService
             return true;
         }
 
-        if (!isEnabled && settings.Modules.Count(item => item.IsEnabled) <= 1)
+        if (!isEnabled &&
+            GetComponent(id) is not IGlanceTransientComponent &&
+            settings.Modules.Count(item => item.IsEnabled && GetComponent(item.Id) is not IGlanceTransientComponent) <= 1)
         {
             return false;
         }
 
         preference.IsEnabled = isEnabled;
+        ApplyTransientComponentState(id, isEnabled);
         await SaveAsync();
         return true;
     }
@@ -153,6 +162,11 @@ public sealed class ModulePreferenceService
         foreach (IGlanceAvailabilityComponent component in components.OfType<IGlanceAvailabilityComponent>())
         {
             component.AvailabilityChanged -= HandleComponentAvailabilityChanged;
+        }
+
+        foreach (IGlanceTransientComponent component in components.OfType<IGlanceTransientComponent>())
+        {
+            component.IsPresentationEnabled = false;
         }
 
         _ = allComponents.RemoveAll(component => ids.Contains(component.Id));
@@ -198,6 +212,25 @@ public sealed class ModulePreferenceService
             {
                 settings.Modules.Add(new GlanceModulePreference { Id = component.Id });
             }
+        }
+    }
+
+    private void ApplyTransientComponentStates() => ApplyTransientComponentStates(allComponents.OfType<IGlanceTransientComponent>());
+
+    private void ApplyTransientComponentStates(IEnumerable<IGlanceTransientComponent> components)
+    {
+        foreach (IGlanceTransientComponent component in components)
+        {
+            component.IsPresentationEnabled = IsEnabled(component.Id);
+        }
+    }
+
+    private void ApplyTransientComponentState(string id,
+        bool isEnabled)
+    {
+        if (GetComponent(id) is IGlanceTransientComponent component)
+        {
+            component.IsPresentationEnabled = isEnabled;
         }
     }
 
