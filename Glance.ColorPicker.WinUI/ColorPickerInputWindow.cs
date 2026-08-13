@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Windows.Graphics;
 using Windows.UI;
 using WinRT;
@@ -28,6 +29,7 @@ internal sealed partial class ColorPickerInputWindow :
 
     private readonly PickerInputSurface inputSurface = new();
     private readonly Window window;
+    private int disposed;
     private bool isPointerPressed;
     private bool isVisible;
 
@@ -94,6 +96,11 @@ internal sealed partial class ColorPickerInputWindow :
 
     public void Dispose()
     {
+        if (Interlocked.Exchange(ref disposed, 1) != 0)
+        {
+            return;
+        }
+
         Hide();
         inputSurface.PointerPressed -= HandlePointerPressed;
         inputSurface.PointerReleased -= HandlePointerReleased;

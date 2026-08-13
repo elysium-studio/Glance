@@ -43,9 +43,9 @@ internal static partial class GlanceModuleLoader
         }
     }
 
-    public static IEnumerable<GlanceModuleLoadResult> Load()
+    public static IEnumerable<GlanceModuleLoadResult> Load(IReadOnlyList<string>? preferredPackageOrder = null)
     {
-        IReadOnlyList<ModuleSource> sources = GetStartupSources();
+        IReadOnlyList<ModuleSource> sources = OrderSources(GetStartupSources(), preferredPackageOrder);
 
         foreach (ModuleSource source in sources)
         {
@@ -56,6 +56,24 @@ internal static partial class GlanceModuleLoader
                 yield return result;
             }
         }
+    }
+
+    private static IReadOnlyList<ModuleSource> OrderSources(IReadOnlyList<ModuleSource> sources,
+        IReadOnlyList<string>? preferredPackageOrder)
+    {
+        if (preferredPackageOrder is null || preferredPackageOrder.Count == 0)
+        {
+            return sources;
+        }
+
+        Dictionary<string, int> order = preferredPackageOrder
+            .Select((id, index) => (id, index))
+            .GroupBy(item => item.id, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First().index, StringComparer.OrdinalIgnoreCase);
+
+        return (ModuleSource[])[.. sources
+            .OrderBy(source => order.GetValueOrDefault(Path.GetFileNameWithoutExtension(source.SourcePath), int.MaxValue))
+            .ThenBy(source => source.SourcePath, StringComparer.OrdinalIgnoreCase)];
     }
 
     private static IReadOnlyList<ModuleSource> GetStartupSources()

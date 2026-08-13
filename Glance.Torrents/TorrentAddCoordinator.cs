@@ -90,8 +90,5 @@ public sealed class TorrentAddCoordinator(ITorrentEngineService engine) : IAsync
         synchronization.Dispose();
     }
 
-    private void Forget(TorrentMetadataSession session)
-    {
-        _ = pendingSessions.Remove(session.SessionId);
-    }
+    private void Forget(TorrentMetadataSession session) => _ = pendingSessions.Remove(session.SessionId);
 }

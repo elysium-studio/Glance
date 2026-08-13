@@ -8,6 +8,18 @@
   <data name="SettingsButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Séttïngs]</value></data>
   <data name="GlanceSectionTitle.Text" xml:space="preserve"><value>[Glance]</value></data>
   <data name="ModulesSectionTitle.Text" xml:space="preserve"><value>[Mødülés]</value></data>
+  <data name="AddModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>[Ådd módülé]</value></data>
+  <data name="AddModuleButtonLabel.Text" xml:space="preserve"><value>[Ådd módülé]</value></data>
+  <data name="ModuleDropTargetText.Text" xml:space="preserve"><value>[Drøp tø ïnståll thïs módülé]</value></data>
+  <data name="ModuleInstallInvalidPackageMessage" xml:space="preserve"><value>[Drøp å vålïd .glance módülé påckågé.]</value></data>
+  <data name="ModuleInstallFailedMessage" xml:space="preserve"><value>[Thé módülé cøüld nøt bé ïnstålléd.]</value></data>
+  <data name="ModuleInstalledMessage" xml:space="preserve"><value>[{0} wås ïnstålléd ånd åddéd tø ïts módülé grøüp.]</value></data>
+  <data name="ModuleUpdateStagedMessage" xml:space="preserve"><value>[Thé üpdåté før {0} ïs réådy ånd wïll bé åpplïéd thé néxt tïmé Glance stårts.]</value></data>
+  <data name="ModuleRemovedMessage" xml:space="preserve"><value>[{0} wås rémøvéd frøm Glance.]</value></data>
+  <data name="ModuleUpdateRestartDialogTitle" xml:space="preserve"><value>[Réstårt Glance tø üpdåté?]</value></data>
+  <data name="ModuleUpdateRestartDialogMessage" xml:space="preserve"><value>[Thé módülé üpdåté ïs réådy. Réstårt Glance nøw tø üsé thé néw vérsïøn, ør réstårt låtér whén ït ïs cønvénïént.]</value></data>
+  <data name="ModuleUpdateRestartDialogPrimaryButton" xml:space="preserve"><value>[Réstårt nøw]</value></data>
+  <data name="ModuleUpdateRestartDialogCloseButton" xml:space="preserve"><value>[Låtér]</value></data>
   <data name="WindowsSectionTitle.Text" xml:space="preserve"><value>[Wïndøws]</value></data>
   <data name="AppearanceAndBehaviourSettingsTitle" xml:space="preserve"><value>[Åppéåråncé ånd béhåvïøür]</value></data>
   <data name="SpeechAndCommandsSettingsTitle" xml:space="preserve"><value>[Spééch ånd cømmånds]</value></data>
@@ -37,6 +49,13 @@
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>[Stop keeping island expanded]</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>[Ålløw åtténtïøn]</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>[Lét thïs módülé brïng ïtsélf ïntø vïéw whén søméthïng nééds yøür åtténtïøn]</value></data>
+  <data name="UninstallModuleDialogTitle" xml:space="preserve"><value>[Ünïnståll {0}?]</value></data>
+  <data name="UninstallModuleDialogMessage" xml:space="preserve"><value>[{0} wïll bé rémøvéd frøm Glance ïmmédïåtély.]</value></data>
+  <data name="UninstallModuleDialogDataMessage" xml:space="preserve"><value>[Ïts påckågé, séttïngs, såvéd dåtå, ånd rüntïmé fïlés wïll bé délétéd.]</value></data>
+  <data name="UninstallModuleDialogPrimaryButton" xml:space="preserve"><value>[Ünïnståll]</value></data>
+  <data name="UninstallModuleDialogCloseButton" xml:space="preserve"><value>[Cåncél]</value></data>
+  <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>[Ünïnståll módülé]</value></data>
+  <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Ünïnståll]</value></data>
   <data name="AboutNavigationItem.Content" xml:space="preserve"><value>[!! Àƀôûţ ~~~ !!]</value></data>
   <data name="AboutDialogTitle" xml:space="preserve"><value>[!! Àƀôûţ ~~~ !!]</value></data>
   <data name="AboutDialogCloseButton" xml:space="preserve"><value>[Çløsé]</value></data>

@@ -1,6 +1,7 @@
 using Microsoft.UI.Dispatching;
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Glance.ColorPicker.WinUI;
 
@@ -12,6 +13,7 @@ public sealed partial class WindowsColorPickerService :
     private readonly DispatcherQueueTimer trackingTimer;
     private CursorColorPreviewWindow? cursorPreviewWindow;
     private ColorPickerInputWindow? inputWindow;
+    private int disposed;
 
     public WindowsColorPickerService()
     {
@@ -55,10 +57,23 @@ public sealed partial class WindowsColorPickerService :
 
     public void Dispose()
     {
+        if (Interlocked.Exchange(ref disposed, 1) != 0)
+        {
+            return;
+        }
+
         trackingTimer.Stop();
         trackingTimer.Tick -= HandleTrackingTick;
-        inputWindow?.Dispose();
+
+        if (inputWindow is not null)
+        {
+            inputWindow.Picked -= HandlePicked;
+            inputWindow.Dispose();
+            inputWindow = null;
+        }
+
         cursorPreviewWindow?.Dispose();
+        cursorPreviewWindow = null;
     }
 
     private void HandleTrackingTick(DispatcherQueueTimer sender, object args)

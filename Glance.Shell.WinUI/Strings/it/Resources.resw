@@ -8,6 +8,18 @@
   <data name="SettingsButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Impostazioni</value></data>
   <data name="GlanceSectionTitle.Text" xml:space="preserve"><value>Glance</value></data>
   <data name="ModulesSectionTitle.Text" xml:space="preserve"><value>Moduli</value></data>
+  <data name="AddModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Aggiungi modulo</value></data>
+  <data name="AddModuleButtonLabel.Text" xml:space="preserve"><value>Aggiungi modulo</value></data>
+  <data name="ModuleDropTargetText.Text" xml:space="preserve"><value>Rilascia per installare questo modulo</value></data>
+  <data name="ModuleInstallInvalidPackageMessage" xml:space="preserve"><value>Rilascia un pacchetto modulo .glance valido.</value></data>
+  <data name="ModuleInstallFailedMessage" xml:space="preserve"><value>Impossibile installare il modulo.</value></data>
+  <data name="ModuleInstalledMessage" xml:space="preserve"><value>{0} è stato installato e aggiunto al relativo gruppo di moduli.</value></data>
+  <data name="ModuleUpdateStagedMessage" xml:space="preserve"><value>L’aggiornamento per {0} è pronto e verrà applicato al prossimo avvio di Glance.</value></data>
+  <data name="ModuleRemovedMessage" xml:space="preserve"><value>{0} è stato rimosso da Glance.</value></data>
+  <data name="ModuleUpdateRestartDialogTitle" xml:space="preserve"><value>Riavviare Glance per aggiornare?</value></data>
+  <data name="ModuleUpdateRestartDialogMessage" xml:space="preserve"><value>L’aggiornamento del modulo è pronto. Riavvia Glance ora per usare la nuova versione oppure riavvialo più tardi quando preferisci.</value></data>
+  <data name="ModuleUpdateRestartDialogPrimaryButton" xml:space="preserve"><value>Riavvia ora</value></data>
+  <data name="ModuleUpdateRestartDialogCloseButton" xml:space="preserve"><value>Più tardi</value></data>
   <data name="WindowsSectionTitle.Text" xml:space="preserve"><value>Windows</value></data>
   <data name="AppearanceAndBehaviourSettingsTitle" xml:space="preserve"><value>Aspetto e comportamento</value></data>
   <data name="SpeechAndCommandsSettingsTitle" xml:space="preserve"><value>Voce e comandi</value></data>
@@ -37,6 +49,13 @@
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Non mantenere più l’isola espansa</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>Consenti avvisi</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>Consenti al modulo di mostrarsi quando qualcosa richiede la tua attenzione</value></data>
+  <data name="UninstallModuleDialogTitle" xml:space="preserve"><value>Disinstallare {0}?</value></data>
+  <data name="UninstallModuleDialogMessage" xml:space="preserve"><value>{0} verrà rimosso immediatamente da Glance.</value></data>
+  <data name="UninstallModuleDialogDataMessage" xml:space="preserve"><value>Il pacchetto, le impostazioni, i dati salvati e i file di runtime verranno eliminati.</value></data>
+  <data name="UninstallModuleDialogPrimaryButton" xml:space="preserve"><value>Disinstalla</value></data>
+  <data name="UninstallModuleDialogCloseButton" xml:space="preserve"><value>Annulla</value></data>
+  <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Disinstalla modulo</value></data>
+  <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Disinstalla</value></data>
   <data name="AboutNavigationItem.Content" xml:space="preserve"><value>Circa</value></data>
   <data name="AboutDialogTitle" xml:space="preserve"><value>Circa</value></data>
   <data name="AboutDialogCloseButton" xml:space="preserve"><value>Chiudi</value></data>

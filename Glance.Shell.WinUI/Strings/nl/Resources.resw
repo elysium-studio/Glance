@@ -8,6 +8,18 @@
   <data name="SettingsButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Instellingen</value></data>
   <data name="GlanceSectionTitle.Text" xml:space="preserve"><value>Glance</value></data>
   <data name="ModulesSectionTitle.Text" xml:space="preserve"><value>Modules</value></data>
+  <data name="AddModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Module toevoegen</value></data>
+  <data name="AddModuleButtonLabel.Text" xml:space="preserve"><value>Module toevoegen</value></data>
+  <data name="ModuleDropTargetText.Text" xml:space="preserve"><value>Laat los om deze module te installeren</value></data>
+  <data name="ModuleInstallInvalidPackageMessage" xml:space="preserve"><value>Zet een geldig .glance-modulepakket neer.</value></data>
+  <data name="ModuleInstallFailedMessage" xml:space="preserve"><value>De module kan niet worden geïnstalleerd.</value></data>
+  <data name="ModuleInstalledMessage" xml:space="preserve"><value>{0} is geïnstalleerd en aan de bijbehorende modulegroep toegevoegd.</value></data>
+  <data name="ModuleUpdateStagedMessage" xml:space="preserve"><value>De update voor {0} is gereed en wordt toegepast wanneer Glance de volgende keer wordt gestart.</value></data>
+  <data name="ModuleRemovedMessage" xml:space="preserve"><value>{0} is uit Glance verwijderd.</value></data>
+  <data name="ModuleUpdateRestartDialogTitle" xml:space="preserve"><value>Glance opnieuw starten om bij te werken?</value></data>
+  <data name="ModuleUpdateRestartDialogMessage" xml:space="preserve"><value>De module-update is gereed. Start Glance nu opnieuw om de nieuwe versie te gebruiken, of later wanneer het uitkomt.</value></data>
+  <data name="ModuleUpdateRestartDialogPrimaryButton" xml:space="preserve"><value>Nu opnieuw starten</value></data>
+  <data name="ModuleUpdateRestartDialogCloseButton" xml:space="preserve"><value>Later</value></data>
   <data name="WindowsSectionTitle.Text" xml:space="preserve"><value>Windows</value></data>
   <data name="AppearanceAndBehaviourSettingsTitle" xml:space="preserve"><value>Uiterlijk en gedrag</value></data>
   <data name="SpeechAndCommandsSettingsTitle" xml:space="preserve"><value>Spraak en opdrachten</value></data>
@@ -37,6 +49,13 @@
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Eiland niet meer uitgevouwen houden</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>Aandacht toestaan</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>Sta toe dat deze module in beeld komt wanneer iets je aandacht nodig heeft</value></data>
+  <data name="UninstallModuleDialogTitle" xml:space="preserve"><value>{0} verwijderen?</value></data>
+  <data name="UninstallModuleDialogMessage" xml:space="preserve"><value>{0} wordt onmiddellijk uit Glance verwijderd.</value></data>
+  <data name="UninstallModuleDialogDataMessage" xml:space="preserve"><value>Het pakket, de instellingen, opgeslagen gegevens en runtimebestanden worden verwijderd.</value></data>
+  <data name="UninstallModuleDialogPrimaryButton" xml:space="preserve"><value>Verwijderen</value></data>
+  <data name="UninstallModuleDialogCloseButton" xml:space="preserve"><value>Annuleren</value></data>
+  <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Module verwijderen</value></data>
+  <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Verwijderen</value></data>
   <data name="AboutNavigationItem.Content" xml:space="preserve"><value>Over</value></data>
   <data name="AboutDialogTitle" xml:space="preserve"><value>Over</value></data>
   <data name="AboutDialogCloseButton" xml:space="preserve"><value>Sluiten</value></data>

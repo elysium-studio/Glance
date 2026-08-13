@@ -52,7 +52,7 @@ public sealed class GlanceIntentServiceTests
     [Fact]
     public void DescriptorRetainsModuleBinaryConstructorContract()
     {
-        Type[] parameterTypes = Enumerable.Repeat(typeof(string), 6).ToArray();
+        Type[] parameterTypes = [.. Enumerable.Repeat(typeof(string), 6)];
 
         Assert.NotNull(typeof(GlanceIntentDescriptor).GetConstructor(parameterTypes));
     }

@@ -44,7 +44,7 @@ public sealed partial class TorrentConfirmationViewModel : ObservableObject
         ErrorMessage = null;
     }
 
-    public IReadOnlyList<string> GetSelectedFiles() => Files.Where(file => file.IsSelected).Select(file => file.Path).ToArray();
+    public IReadOnlyList<string> GetSelectedFiles() => [.. Files.Where(file => file.IsSelected).Select(file => file.Path)];
 
     private void RefreshSelectedSize() => SelectedSize = Files.Where(file => file.IsSelected).Sum(file => file.Size);
 }

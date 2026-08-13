@@ -63,7 +63,10 @@ internal sealed class GlanceModuleManager :
 
     public async Task LoadStartupModulesAsync()
     {
-        using IEnumerator<GlanceModuleLoadResult> results = GlanceModuleLoader.Load().GetEnumerator();
+        string[] preferredPackageOrder = [.. settings.Modules
+            .OrderByDescending(preference => preference.IsEnabled)
+            .Select(preference => preference.Id)];
+        using IEnumerator<GlanceModuleLoadResult> results = GlanceModuleLoader.Load(preferredPackageOrder).GetEnumerator();
 
         while (await DispatchAsync(async () =>
         {
@@ -120,7 +123,7 @@ internal sealed class GlanceModuleManager :
 
         foreach (LoadedModulePackage package in loadedPackages.AsEnumerable().Reverse())
         {
-            await package.Runtime.DisposeAsync();
+            await DisposeRuntimeAsync(package.Runtime);
         }
     }
 
@@ -457,7 +460,7 @@ internal sealed class GlanceModuleManager :
         applicationServices.GetRequiredService<GlanceAssistantSemanticResolverService>().Unregister(package.AssistantSemanticResolvers);
         await assistantService.UnregisterAsync(package.AssistantProviders);
         runtimeServices.RemoveModuleProvider(package.Runtime.Services);
-        await package.Runtime.DisposeAsync();
+        await DisposeRuntimeAsync(package.Runtime);
         _ = loadedPackages.Remove(package);
         GlanceModuleLoader.RefreshResolutionPaths(loadedPackages.Select(candidate => candidate.ContentDirectory));
 
@@ -541,6 +544,9 @@ internal sealed class GlanceModuleManager :
 
         return completion.Task;
     }
+
+    private Task DisposeRuntimeAsync(GlanceModuleRuntime runtime) =>
+        DispatchAsync(() => runtime.DisposeAsync().AsTask());
 
     private Task<T> DispatchAsync<T>(Func<Task<T>> action,
         DispatcherQueuePriority priority = DispatcherQueuePriority.Normal)

@@ -134,7 +134,7 @@ public sealed partial class App
             {
                 ExtendedActivationKind.File when activation.Data is IFileActivatedEventArgs fileArgs => new GlanceContentContext(
                     GlanceContentKind.FilesAndFolders,
-                    fileArgs.Files.OfType<IStorageItem>().Select(item => new GlanceStorageItem(item.Path, item.Name, item is StorageFolder)).ToArray()),
+                    (GlanceStorageItem[])[.. fileArgs.Files.OfType<IStorageItem>().Select(item => new GlanceStorageItem(item.Path, item.Name, item is StorageFolder))]),
                 ExtendedActivationKind.Protocol when activation.Data is IProtocolActivatedEventArgs protocolArgs => new GlanceContentContext(
                     GlanceContentKind.WebLink, [], protocolArgs.Uri.AbsoluteUri),
                 _ => null

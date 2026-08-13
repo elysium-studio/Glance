@@ -51,10 +51,9 @@ public sealed class NetworkSnapshotReader
     private static NetworkInterface? FindActiveInterface(ConnectionProfile? profile)
     {
         Guid? adapterId = profile?.NetworkAdapter?.NetworkAdapterId;
-        NetworkInterface[] candidates = NetworkInterface.GetAllNetworkInterfaces()
+        NetworkInterface[] candidates = [.. NetworkInterface.GetAllNetworkInterfaces()
             .Where(item => item.OperationalStatus == OperationalStatus.Up &&
-                           item.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-            .ToArray();
+                           item.NetworkInterfaceType != NetworkInterfaceType.Loopback)];
 
         if (adapterId is Guid id)
         {

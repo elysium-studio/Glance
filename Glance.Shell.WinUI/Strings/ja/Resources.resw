@@ -8,6 +8,18 @@
   <data name="SettingsButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>設定</value></data>
   <data name="GlanceSectionTitle.Text" xml:space="preserve"><value>Glance</value></data>
   <data name="ModulesSectionTitle.Text" xml:space="preserve"><value>モジュール</value></data>
+  <data name="AddModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>モジュールを追加</value></data>
+  <data name="AddModuleButtonLabel.Text" xml:space="preserve"><value>モジュールを追加</value></data>
+  <data name="ModuleDropTargetText.Text" xml:space="preserve"><value>ドロップしてこのモジュールをインストール</value></data>
+  <data name="ModuleInstallInvalidPackageMessage" xml:space="preserve"><value>有効な .glance モジュール パッケージをドロップしてください。</value></data>
+  <data name="ModuleInstallFailedMessage" xml:space="preserve"><value>モジュールをインストールできませんでした。</value></data>
+  <data name="ModuleInstalledMessage" xml:space="preserve"><value>{0} をインストールし、モジュール グループに追加しました。</value></data>
+  <data name="ModuleUpdateStagedMessage" xml:space="preserve"><value>{0} の更新を準備しました。次回 Glance を起動したときに適用されます。</value></data>
+  <data name="ModuleRemovedMessage" xml:space="preserve"><value>{0} を Glance から削除しました。</value></data>
+  <data name="ModuleUpdateRestartDialogTitle" xml:space="preserve"><value>更新のため Glance を再起動しますか?</value></data>
+  <data name="ModuleUpdateRestartDialogMessage" xml:space="preserve"><value>モジュールの更新を準備しました。新しいバージョンを使用するには今すぐ Glance を再起動するか、都合のよいときに後で再起動してください。</value></data>
+  <data name="ModuleUpdateRestartDialogPrimaryButton" xml:space="preserve"><value>今すぐ再起動</value></data>
+  <data name="ModuleUpdateRestartDialogCloseButton" xml:space="preserve"><value>後で</value></data>
   <data name="WindowsSectionTitle.Text" xml:space="preserve"><value>Windows</value></data>
   <data name="AppearanceAndBehaviourSettingsTitle" xml:space="preserve"><value>外観と動作</value></data>
   <data name="SpeechAndCommandsSettingsTitle" xml:space="preserve"><value>音声とコマンド</value></data>
@@ -37,6 +49,13 @@
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>アイランドの固定展開を解除</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>注意喚起を許可</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>注意が必要なときに、このモジュールを自動的に表示します</value></data>
+  <data name="UninstallModuleDialogTitle" xml:space="preserve"><value>{0} をアンインストールしますか?</value></data>
+  <data name="UninstallModuleDialogMessage" xml:space="preserve"><value>{0} は Glance から直ちに削除されます。</value></data>
+  <data name="UninstallModuleDialogDataMessage" xml:space="preserve"><value>パッケージ、設定、保存データ、ランタイム ファイルが削除されます。</value></data>
+  <data name="UninstallModuleDialogPrimaryButton" xml:space="preserve"><value>アンインストール</value></data>
+  <data name="UninstallModuleDialogCloseButton" xml:space="preserve"><value>キャンセル</value></data>
+  <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>モジュールをアンインストール</value></data>
+  <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>アンインストール</value></data>
   <data name="AboutNavigationItem.Content" xml:space="preserve"><value>について</value></data>
   <data name="AboutDialogTitle" xml:space="preserve"><value>について</value></data>
   <data name="AboutDialogCloseButton" xml:space="preserve"><value>閉じる</value></data>

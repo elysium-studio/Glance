@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Windows.Graphics;
 using WinRT;
 using WinRT.Interop;
@@ -31,6 +32,7 @@ internal sealed partial class CursorColorPreviewWindow :
 
     private readonly Border colorPreview;
     private readonly Window window = new();
+    private int disposed;
     private bool isVisible;
 
     public CursorColorPreviewWindow()
@@ -107,6 +109,11 @@ internal sealed partial class CursorColorPreviewWindow :
 
     public void Dispose()
     {
+        if (Interlocked.Exchange(ref disposed, 1) != 0)
+        {
+            return;
+        }
+
         Hide();
         window.Close();
     }
