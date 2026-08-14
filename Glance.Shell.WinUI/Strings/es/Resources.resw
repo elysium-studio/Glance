@@ -108,4 +108,8 @@
   <data name="UpdateReadyToastRestartButton" xml:space="preserve"><value>Reiniciar</value></data>
   <data name="UpdateReadyToastRestartRequired" xml:space="preserve"><value>Reinicie para finalizar la actualización.</value></data>
   <data name="UpdateReadyToastTitle" xml:space="preserve"><value>Actualización lista</value></data>
+  <data name="GlanceDisplayLocationCard.Header" xml:space="preserve"><value>Display location</value></data>
+  <data name="GlanceDisplayLocationCard.Description" xml:space="preserve"><value>Choose whether Glance floats at the screen edge or sits in the Windows taskbar</value></data>
+  <data name="GlanceDisplayLocationDesktopEdgeOption.Content" xml:space="preserve"><value>Screen edge</value></data>
+  <data name="GlanceDisplayLocationTaskbarOption.Content" xml:space="preserve"><value>Taskbar</value></data>
 </root>

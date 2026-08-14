@@ -112,6 +112,11 @@ public sealed partial class DesktopIslandView :
         };
     }
 
+    public DesktopIslandHostMode ToHostMode(int index) =>
+        (GlanceDisplayLocation)index == GlanceDisplayLocation.Taskbar
+            ? DesktopIslandHostMode.Taskbar
+            : DesktopIslandHostMode.Floating;
+
     public Visibility WhenPinned(bool isPinned) => isPinned ? Visibility.Visible : Visibility.Collapsed;
 
     public Visibility WhenNotPinned(bool isPinned) => isPinned ? Visibility.Collapsed : Visibility.Visible;

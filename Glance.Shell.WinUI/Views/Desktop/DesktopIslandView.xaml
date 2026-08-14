@@ -11,6 +11,7 @@
     AllowDrop="True"
     BackgroundContent="{x:Bind ToBackgroundContent(ViewModel.SelectedComponent, ViewModel.IsLoadingModules, ViewModel.IsTransientPresentationActive), Mode=OneWay}"
     DataContext="{WinUI:ViewModel Key=DesktopIslandView}"
+    HostMode="{x:Bind ToHostMode(ViewModel.DisplayLocationIndex), Mode=OneWay}"
     DragEnter="{x:Bind HandleDragEnter}"
     DragLeave="{x:Bind HandleDragLeave}"
     DragOver="{x:Bind HandleDragOver}"

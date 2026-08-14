@@ -108,4 +108,8 @@
   <data name="UpdateReadyToastRestartButton" xml:space="preserve"><value>[!! Ŕëšţàŕţ ~~~ !!]</value></data>
   <data name="UpdateReadyToastRestartRequired" xml:space="preserve"><value>[!! Ŕëšţàŕţ ţô ƒîñîšħ ûþðàţîñĝ. ~~~~~~~~~ !!]</value></data>
   <data name="UpdateReadyToastTitle" xml:space="preserve"><value>[!! Ûþðàţë ŕëàðÿ ~~~~ !!]</value></data>
+<data name="GlanceDisplayLocationCard.Header" xml:space="preserve"><value>[Ðïşþļåý ļøçåţïøñ]</value></data>
+  <data name="GlanceDisplayLocationCard.Description" xml:space="preserve"><value>[Çhøøşé whéţhér Glance fļøåţş åţ ţhé şçrééñ éðĝé ør şïţş ïñ ţhé Wïñðøwş ţåşķþår]</value></data>
+  <data name="GlanceDisplayLocationDesktopEdgeOption.Content" xml:space="preserve"><value>[Şçrééñ éðĝé]</value></data>
+  <data name="GlanceDisplayLocationTaskbarOption.Content" xml:space="preserve"><value>[Ţåşķþår]</value></data>
 </root>
