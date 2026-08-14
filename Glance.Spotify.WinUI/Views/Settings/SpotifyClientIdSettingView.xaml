@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="Glance.Spotify.WinUI.SpotifyClientIdSettingView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:CommunityToolkit="using:CommunityToolkit.WinUI.Controls"
+    Loaded="{x:Bind ViewModel.Activate}"
+    Unloaded="{x:Bind ViewModel.Deactivate}">
+    <CommunityToolkit:SettingsExpander
+        x:Uid="SpotifySetupExpander"
+        IsExpanded="True">
+        <CommunityToolkit:SettingsExpander.Items>
+            <CommunityToolkit:SettingsCard x:Uid="SpotifyDashboardCard">
+                <Button
+                    x:Uid="OpenDashboardButton"
+                    MinWidth="132"
+                    Click="HandleOpenDashboard" />
+            </CommunityToolkit:SettingsCard>
+            <CommunityToolkit:SettingsCard
+                x:Uid="SpotifyRedirectUriCard"
+                Description="{x:Bind ViewModel.RedirectUri}">
+                <Button
+                    x:Uid="CopyRedirectUriButton"
+                    MinWidth="132"
+                    Click="HandleCopyRedirectUri" />
+            </CommunityToolkit:SettingsCard>
+            <CommunityToolkit:SettingsCard x:Uid="SpotifyClientIdCard">
+                <TextBox
+                    Width="240"
+                    HorizontalAlignment="Stretch"
+                    Text="{x:Bind ViewModel.Value, Mode=TwoWay}" />
+            </CommunityToolkit:SettingsCard>
+            <InfoBar
+                x:Uid="SpotifySecretWarning"
+                IsClosable="False"
+                IsOpen="True"
+                Severity="Warning" />
+            <InfoBar
+                IsClosable="False"
+                IsOpen="{x:Bind ViewModel.HasValidationError, Mode=OneWay}"
+                Message="{x:Bind ViewModel.ValidationMessage, Mode=OneWay}"
+                Severity="Warning" />
+        </CommunityToolkit:SettingsExpander.Items>
+    </CommunityToolkit:SettingsExpander>
+</UserControl>

@@ -129,6 +129,15 @@
   <Project Path="Glance.Media.Tests/Glance.Media.Tests.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.Spotify.WinUI/Glance.Spotify.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Spotify/Glance.Spotify.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Spotify.Tests/Glance.Spotify.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.Network.WinUI/Glance.Network.WinUI.csproj">
     <Platform Project="x64" />
   </Project>

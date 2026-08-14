@@ -1,0 +1,22 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Default">
+            <SolidColorBrush x:Key="GlanceSpotifyIconBrush" Color="#1ED760" />
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#1ED760" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#1FDF64" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#169C46" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="GlanceSpotifyIconBrush" Color="#16883E" />
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#16883E" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#137A38" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#0F642E" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="HighContrast">
+            <StaticResource x:Key="GlanceSpotifyIconBrush" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="SystemColorHighlightColorBrush" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

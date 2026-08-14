@@ -104,7 +104,7 @@ internal sealed class RecordingBoundaryWindow :
         {
             FontFamily = new FontFamily("Segoe Fluent Icons"),
             FontSize = 14,
-            Glyph = "\uE769"
+            Glyph = "\uF8AE"
         };
         pauseButton = CreateToolbarButton(pauseIcon, useAccentStyle: false);
         pauseButton.IsEnabled = false;
@@ -255,7 +255,7 @@ internal sealed class RecordingBoundaryWindow :
 
     public void SetPaused(bool paused)
     {
-        pauseIcon.Glyph = paused ? "\uE768" : "\uE769";
+        pauseIcon.Glyph = paused ? "\uF5B0" : "\uF8AE";
         SetButtonLabel(pauseButton, localizer.GetText(paused ? "ResumeRecording" : "PauseRecording"));
         boundary.BorderBrush = new SolidColorBrush(paused
             ? Color.FromArgb(255, 255, 185, 70)

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve"><value>Spotify</value></data>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Spotify</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Control Spotify playback and switch between available devices.</value></data>
+  <data name="NotConnected" xml:space="preserve"><value>Spotify not connected</value></data>
+  <data name="ConnectInSettings" xml:space="preserve"><value>Connect your account in settings</value></data>
+  <data name="Connecting" xml:space="preserve"><value>Connecting to Spotify</value></data>
+  <data name="CompleteSignIn" xml:space="preserve"><value>Complete sign-in in your browser</value></data>
+  <data name="NothingPlaying" xml:space="preserve"><value>Nothing playing</value></data>
+  <data name="StartPlayback" xml:space="preserve"><value>Start playing something in Spotify</value></data>
+  <data name="InvalidClientId" xml:space="preserve"><value>Enter the application ID shown by Spotify.</value></data>
+  <data name="SpotifyDisconnected" xml:space="preserve"><value>Not connected</value></data>
+  <data name="ConnectSpotify" xml:space="preserve"><value>Connect</value></data>
+  <data name="DisconnectSpotify" xml:space="preserve"><value>Disconnect</value></data>
+  <data name="SpotifyConnectionFailed" xml:space="preserve"><value>Spotify could not be connected.</value></data>
+  <data name="EnterClientIdFirst" xml:space="preserve"><value>Enter the application ID shown by Spotify before connecting.</value></data>
+  <data name="SpotifyConnected" xml:space="preserve"><value>Connected</value></data>
+  <data name="SpotifyConnectedAs" xml:space="preserve"><value>Connected as {0}</value></data>
+  <data name="SpotifySetupExpander.Header" xml:space="preserve"><value>Connect Spotify</value></data>
+  <data name="SpotifySetupExpander.Description" xml:space="preserve"><value>Create a Spotify app, then connect your account.</value></data>
+  <data name="SpotifyDashboardCard.Header" xml:space="preserve"><value>Create an application</value></data>
+  <data name="SpotifyDashboardCard.Description" xml:space="preserve"><value>Open the Spotify developer dashboard and create an application.</value></data>
+  <data name="OpenDashboardButton.Content" xml:space="preserve"><value>Open</value></data>
+  <data name="SpotifyRedirectUriCard.Header" xml:space="preserve"><value>Redirect address</value></data>
+  <data name="CopyRedirectUriButton.Content" xml:space="preserve"><value>Copy</value></data>
+  <data name="SpotifyClientIdCard.Header" xml:space="preserve"><value>Application ID</value></data>
+  <data name="SpotifyClientIdCard.Description" xml:space="preserve"><value>Paste the ID shown in your Spotify app.</value></data>
+  <data name="SpotifySecretWarning.Message" xml:space="preserve"><value>Keep your secret key private. Glance only needs the application ID above.</value></data>
+  <data name="SpotifyConnectionCard.Header" xml:space="preserve"><value>Spotify account</value></data>
+  <data name="DisconnectedTitle.Text" xml:space="preserve"><value>SPOTIFY</value></data>
+  <data name="PreviousButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Previous</value></data>
+  <data name="PreviousButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Previous</value></data>
+  <data name="ToggleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Play or pause</value></data>
+  <data name="ToggleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Play or pause</value></data>
+  <data name="NextButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Next</value></data>
+  <data name="NextButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Next</value></data>
+</root>
