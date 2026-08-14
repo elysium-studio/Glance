@@ -15,6 +15,7 @@ public sealed partial class ModuleLoadingView :
     private static readonly TimeSpan ShimmerDuration = TimeSpan.FromMilliseconds(1600);
     private readonly FrameworkElement[] shimmerElements;
     private bool isAnimating;
+    private bool restartPending;
 
     public static readonly DependencyProperty IsExpandedProperty = DependencyProperty.Register(nameof(IsExpanded), typeof(bool), typeof(ModuleLoadingView), new PropertyMetadata(false));
 
@@ -30,6 +31,10 @@ public sealed partial class ModuleLoadingView :
             ExpandedPrimaryPlaceholder,
             ExpandedSubtitlePlaceholder
         ];
+        foreach (FrameworkElement element in shimmerElements)
+        {
+            element.SizeChanged += HandleShimmerElementSizeChanged;
+        }
         Loaded += HandleLoaded;
         Unloaded += HandleUnloaded;
         SizeChanged += HandleSizeChanged;
@@ -68,8 +73,40 @@ public sealed partial class ModuleLoadingView :
             return;
         }
 
-        StopAnimations();
-        StartAnimations();
+        QueueAnimationRestart();
+    }
+
+    private void HandleShimmerElementSizeChanged(object sender,
+        SizeChangedEventArgs args)
+    {
+        if (!IsLoaded || Visibility != Visibility.Visible || args.NewSize == args.PreviousSize)
+        {
+            return;
+        }
+
+        QueueAnimationRestart();
+    }
+
+    private void QueueAnimationRestart()
+    {
+        if (restartPending)
+        {
+            return;
+        }
+
+        restartPending = true;
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            restartPending = false;
+
+            if (!IsLoaded || Visibility != Visibility.Visible)
+            {
+                return;
+            }
+
+            StopAnimations();
+            StartAnimations();
+        });
     }
 
     private void HandleActualThemeChanged(FrameworkElement sender,

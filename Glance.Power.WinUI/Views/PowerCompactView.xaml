@@ -2,11 +2,58 @@
 <UserControl
     x:Class="Glance.Power.WinUI.PowerCompactView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:UI="using:Glance.UI.WinUI">
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Power.xaml" />
     </UserControl.Resources>
-    <Grid Padding="12,4" ColumnSpacing="8">
+    <Grid x:Name="LayoutRoot" Padding="12,4" ColumnSpacing="8">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="CompactSizeStates">
+                <VisualState x:Name="Default" />
+                <VisualState x:Name="Standard">
+                    <VisualState.StateTriggers>
+                        <UI:ElementSizeTrigger MinHeight="33" MaxHeight="48" Source="{x:Bind LayoutRoot, Mode=OneWay}" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="LayoutRoot.Padding" Value="10,2" />
+                        <Setter Target="LayoutRoot.ColumnSpacing" Value="7" />
+                        <Setter Target="StatusIndicator.Width" Value="24" />
+                        <Setter Target="StatusIndicator.Height" Value="24" />
+                        <Setter Target="BatteryIcon.Width" Value="24" />
+                        <Setter Target="BatteryIcon.Height" Value="12" />
+                        <Setter Target="BatteryBody.Width" Value="20" />
+                        <Setter Target="BatteryBody.Height" Value="12" />
+                        <Setter Target="BatteryProgress.Height" Value="6" />
+                        <Setter Target="BatteryTerminal.Height" Value="6" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Small">
+                    <VisualState.StateTriggers>
+                        <UI:ElementSizeTrigger
+                            MaxHeight="32"
+                            Source="{x:Bind LayoutRoot, Mode=OneWay}" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="LayoutRoot.Padding" Value="8,0,8,4" />
+                        <Setter Target="LayoutRoot.ColumnSpacing" Value="6" />
+                        <Setter Target="CompactText.FontSize" Value="12" />
+                        <Setter Target="CompactText.FontWeight" Value="Normal" />
+                        <Setter Target="StatusIndicator.Width" Value="20" />
+                        <Setter Target="StatusIndicator.Height" Value="20" />
+                        <Setter Target="StatusIndicator.Margin" Value="0,1,0,-1" />
+                        <Setter Target="BatteryIcon.Width" Value="20" />
+                        <Setter Target="BatteryIcon.Height" Value="10" />
+                        <Setter Target="BatteryBody.Width" Value="17" />
+                        <Setter Target="BatteryBody.Height" Value="10" />
+                        <Setter Target="BatteryProgress.Height" Value="5" />
+                        <Setter Target="BatteryProgress.Margin" Value="1.5" />
+                        <Setter Target="BatteryTerminal.Width" Value="2" />
+                        <Setter Target="BatteryTerminal.Height" Value="5" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
@@ -16,8 +63,9 @@
             x:Name="StatusIndicator"
             Width="28"
             Height="28">
-            <Grid Width="28" Height="14">
+            <Grid x:Name="BatteryIcon" Width="28" Height="14">
                 <Border
+                    x:Name="BatteryBody"
                     Width="24"
                     Height="14"
                     HorizontalAlignment="Left"
@@ -25,6 +73,7 @@
                     BorderThickness="1.5"
                     CornerRadius="3">
                     <ProgressBar
+                        x:Name="BatteryProgress"
                         Height="7"
                         Margin="2"
                         Background="Transparent"
@@ -33,6 +82,7 @@
                         Value="{x:Bind ViewModel.ChargePercent, Mode=OneWay}" />
                 </Border>
                 <Border
+                    x:Name="BatteryTerminal"
                     Width="3"
                     Height="7"
                     HorizontalAlignment="Right"
@@ -41,6 +91,7 @@
             </Grid>
         </Grid>
         <TextBlock
+            x:Name="CompactText"
             Grid.Column="1"
             VerticalAlignment="Center"
             Style="{StaticResource BodyStrongTextBlockStyle}"

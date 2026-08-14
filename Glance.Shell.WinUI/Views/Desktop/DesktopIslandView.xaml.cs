@@ -20,6 +20,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Foundation;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Streams;
@@ -816,6 +817,10 @@ public sealed partial class DesktopIslandView :
 
         outgoing.IsHitTestVisible = false;
         incoming.IsHitTestVisible = showRoutes;
+        ExpandedContentHost.Clip = new RectangleGeometry
+        {
+            Rect = new Rect(0, 0, ExpandedContentHost.ActualWidth, ExpandedContentHost.ActualHeight)
+        };
         FrameworkElement? background = GetTemplateChild("PART_BackgroundContent") as FrameworkElement;
         FrameworkElement? compactContent = showRoutes ?
             GetTemplateChild("PART_CompactContent") as FrameworkElement :
@@ -849,6 +854,8 @@ public sealed partial class DesktopIslandView :
 
     private void ApplyContentRoutePresentation(bool showRoutes)
     {
+        ExpandedContentHost.Clip = null;
+
         if (!showRoutes)
         {
             ReleaseActiveContentRouteTarget();

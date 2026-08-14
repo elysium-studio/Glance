@@ -62,7 +62,7 @@
         </Grid>
     </Controls:DesktopIsland.CompactContent>
     <Controls:DesktopIsland.ExpandedContent>
-        <Grid>
+        <Grid x:Name="ExpandedContentHost">
             <Grid
                 x:Name="ExpandedModuleSurface"
                 Visibility="Visible">

@@ -2,11 +2,53 @@
     x:Class="Glance.DevicePresence.WinUI.DevicePresenceCompactView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:UI="using:Glance.UI.WinUI"
     xmlns:local="using:Glance.DevicePresence.WinUI">
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/DevicePresence.xaml" />
     </UserControl.Resources>
-    <Grid Padding="12,4" ColumnSpacing="8">
+    <Grid x:Name="LayoutRoot" Padding="12,4" ColumnSpacing="8">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="CompactSizeStates">
+                <VisualState x:Name="Default" />
+                <VisualState x:Name="Standard">
+                    <VisualState.StateTriggers>
+                        <UI:ElementSizeTrigger
+                            MinHeight="33"
+                            MaxHeight="48"
+                            Source="{x:Bind LayoutRoot, Mode=OneWay}" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="LayoutRoot.Padding" Value="10,2" />
+                        <Setter Target="LayoutRoot.ColumnSpacing" Value="7" />
+                        <Setter Target="StatusIndicator.Width" Value="24" />
+                        <Setter Target="StatusIndicator.Height" Value="24" />
+                        <Setter Target="CompactIcon.Width" Value="20" />
+                        <Setter Target="CompactIcon.Height" Value="20" />
+                        <Setter Target="CompactIcon.FontSize" Value="20" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Small">
+                    <VisualState.StateTriggers>
+                        <UI:ElementSizeTrigger
+                            MaxHeight="32"
+                            Source="{x:Bind LayoutRoot, Mode=OneWay}" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="LayoutRoot.Padding" Value="8,0,8,4" />
+                        <Setter Target="LayoutRoot.ColumnSpacing" Value="6" />
+                        <Setter Target="CompactText.FontSize" Value="12" />
+                        <Setter Target="CompactText.FontWeight" Value="Normal" />
+                        <Setter Target="StatusIndicator.Width" Value="20" />
+                        <Setter Target="StatusIndicator.Height" Value="20" />
+                        <Setter Target="StatusIndicator.Margin" Value="0,1,0,-1" />
+                        <Setter Target="CompactIcon.Width" Value="16" />
+                        <Setter Target="CompactIcon.Height" Value="16" />
+                        <Setter Target="CompactIcon.FontSize" Value="16" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
@@ -17,6 +59,7 @@
             Width="28"
             Height="28">
             <FontIcon
+                x:Name="CompactIcon"
                 Width="24"
                 Height="24"
                 HorizontalAlignment="Center"
@@ -27,6 +70,7 @@
                 Glyph="{x:Bind ViewModel.SelectedDeviceGlyph, Mode=OneWay}" />
         </Grid>
         <TextBlock
+            x:Name="CompactText"
             Grid.Column="1"
             VerticalAlignment="Center"
             MaxLines="1"
