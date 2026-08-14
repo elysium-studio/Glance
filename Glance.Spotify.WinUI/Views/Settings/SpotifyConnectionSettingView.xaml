@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="Glance.Spotify.WinUI.SpotifyConnectionSettingView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:CommunityToolkit="using:CommunityToolkit.WinUI.Controls"
+    Loaded="{x:Bind ViewModel.Activate}"
+    Unloaded="{x:Bind ViewModel.Deactivate}">
+    <StackPanel Spacing="4">
+        <CommunityToolkit:SettingsCard
+            x:Uid="SpotifyConnectionCard"
+            Description="{x:Bind ViewModel.StatusText, Mode=OneWay}">
+            <Button
+                MinWidth="132"
+                Click="HandleConnectionClicked"
+                Content="{x:Bind ViewModel.ButtonText, Mode=OneWay}"
+                IsEnabled="{x:Bind ViewModel.CanChangeConnection, Mode=OneWay}" />
+        </CommunityToolkit:SettingsCard>
+        <InfoBar
+            IsClosable="False"
+            IsOpen="{x:Bind ViewModel.HasConfigurationError, Mode=OneWay}"
+            Message="{x:Bind ViewModel.ConfigurationErrorMessage, Mode=OneWay}"
+            Severity="Warning" />
+        <InfoBar
+            IsClosable="False"
+            IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
+            Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+            Severity="Error" />
+    </StackPanel>
+</UserControl>

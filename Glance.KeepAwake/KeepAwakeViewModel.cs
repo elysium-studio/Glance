@@ -31,7 +31,7 @@ public sealed partial class KeepAwakeViewModel(IKeepAwakeService keepAwakeServic
         ? localizer.GetText("StopLabel")
         : localizer.GetText("StartLabel");
 
-    public string ActionGlyph => IsActive ? "\uE71A" : "\uE768";
+    public string ActionGlyph => IsActive ? "\uE71A" : "\uF5B0";
 
     public event EventHandler? SessionStateChanged;
 

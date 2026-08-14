@@ -91,7 +91,7 @@
             <Button
                 AutomationProperties.Name="{x:Bind PauseAllLabel}"
                 Click="PauseAllClicked"
-                Content="&#xE769;"
+                Content="&#xF8AE;"
                 IsEnabled="{x:Bind ViewModel.CanPauseAll, Mode=OneWay}"
                 Visibility="{x:Bind PauseVisibility(ViewModel.CanPauseAll, ViewModel.CanResumeAll), Mode=OneWay}"
                 ToolTipService.ToolTip="{x:Bind PauseAllLabel}">
@@ -109,7 +109,7 @@
             <Button
                 AutomationProperties.Name="{x:Bind ResumeAllLabel}"
                 Click="ResumeAllClicked"
-                Content="&#xE768;"
+                Content="&#xF5B0;"
                 IsEnabled="{x:Bind ViewModel.CanResumeAll, Mode=OneWay}"
                 Visibility="{x:Bind ResumeVisibility(ViewModel.CanPauseAll, ViewModel.CanResumeAll), Mode=OneWay}"
                 ToolTipService.ToolTip="{x:Bind ResumeAllLabel}">

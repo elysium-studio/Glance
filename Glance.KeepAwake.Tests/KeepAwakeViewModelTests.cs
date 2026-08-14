@@ -40,7 +40,7 @@ public sealed class KeepAwakeViewModelTests
         Assert.False(service.IsActive);
         Assert.False(viewModel.IsActive);
         Assert.Equal("Ready", viewModel.StatusText);
-        Assert.Equal("\uE768", viewModel.ActionGlyph);
+        Assert.Equal("\uF5B0", viewModel.ActionGlyph);
     }
 
     [Fact]
