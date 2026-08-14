@@ -2,9 +2,50 @@
     x:Class="Glance.Shell.WinUI.ModuleLoadingView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:UI="using:Glance.UI.WinUI"
     IsHitTestVisible="False">
-    <Grid Background="Transparent">
+    <Grid x:Name="LayoutRoot" Background="Transparent">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="CompactSizeStates">
+                <VisualState x:Name="Default" />
+                <VisualState x:Name="Standard">
+                    <VisualState.StateTriggers>
+                        <UI:ElementSizeTrigger
+                            MinHeight="33"
+                            MaxHeight="48"
+                            Source="{x:Bind LayoutRoot, Mode=OneWay}" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="CompactLayout.Padding" Value="10,2" />
+                        <Setter Target="CompactLayout.ColumnSpacing" Value="7" />
+                        <Setter Target="CompactIconPlaceholder.Width" Value="20" />
+                        <Setter Target="CompactIconPlaceholder.Height" Value="20" />
+                        <Setter Target="CompactTextPlaceholder.Width" Value="120" />
+                        <Setter Target="CompactTextPlaceholder.Height" Value="8" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Small">
+                    <VisualState.StateTriggers>
+                        <UI:ElementSizeTrigger
+                            MaxHeight="32"
+                            Source="{x:Bind LayoutRoot, Mode=OneWay}" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="CompactLayout.Padding" Value="8,0,8,4" />
+                        <Setter Target="CompactLayout.ColumnSpacing" Value="6" />
+                        <Setter Target="CompactIconPlaceholder.Width" Value="16" />
+                        <Setter Target="CompactIconPlaceholder.Height" Value="16" />
+                        <Setter Target="CompactIconPlaceholder.Margin" Value="0,1,0,-1" />
+                        <Setter Target="CompactIconPlaceholder.CornerRadius" Value="3" />
+                        <Setter Target="CompactTextPlaceholder.Width" Value="104" />
+                        <Setter Target="CompactTextPlaceholder.Height" Value="6" />
+                        <Setter Target="CompactTextPlaceholder.CornerRadius" Value="3" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
         <Grid
+            x:Name="CompactLayout"
             Padding="12,4"
             ColumnSpacing="8"
             Visibility="{x:Bind WhenCompact(IsExpanded), Mode=OneWay}">

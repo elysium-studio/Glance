@@ -20,6 +20,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Foundation;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Streams;
@@ -111,6 +112,11 @@ public sealed partial class DesktopIslandView :
             _ => DesktopIslandPlacement.Top
         };
     }
+
+    public DesktopIslandHostMode ToHostMode(int index) =>
+        (GlanceDisplayLocation)index == GlanceDisplayLocation.Taskbar
+            ? DesktopIslandHostMode.Taskbar
+            : DesktopIslandHostMode.Floating;
 
     public Visibility WhenPinned(bool isPinned) => isPinned ? Visibility.Visible : Visibility.Collapsed;
 
@@ -811,6 +817,10 @@ public sealed partial class DesktopIslandView :
 
         outgoing.IsHitTestVisible = false;
         incoming.IsHitTestVisible = showRoutes;
+        ExpandedContentHost.Clip = new RectangleGeometry
+        {
+            Rect = new Rect(0, 0, ExpandedContentHost.ActualWidth, ExpandedContentHost.ActualHeight)
+        };
         FrameworkElement? background = GetTemplateChild("PART_BackgroundContent") as FrameworkElement;
         FrameworkElement? compactContent = showRoutes ?
             GetTemplateChild("PART_CompactContent") as FrameworkElement :
@@ -844,6 +854,8 @@ public sealed partial class DesktopIslandView :
 
     private void ApplyContentRoutePresentation(bool showRoutes)
     {
+        ExpandedContentHost.Clip = null;
+
         if (!showRoutes)
         {
             ReleaseActiveContentRouteTarget();
@@ -1527,7 +1539,14 @@ public sealed partial class DesktopIslandView :
                 return;
             }
 
-            PlayConnectedExpansionAnimation();
+            if (HostMode == DesktopIslandHostMode.Taskbar)
+            {
+                PlayTaskbarConnectedExpansionAnimation();
+            }
+            else
+            {
+                PlayConnectedExpansionAnimation();
+            }
             return;
         }
 
@@ -1955,7 +1974,12 @@ public sealed partial class DesktopIslandView :
         }
     }
 
-    private void PlayConnectedExpansionAnimation()
+    private void PlayConnectedExpansionAnimation() => PlayConnectedExpansionAnimation(null);
+
+    private void PlayTaskbarConnectedExpansionAnimation() =>
+        PlayConnectedExpansionAnimation(ConfigureTaskbarConnectedExpansionAnimation);
+
+    private void PlayConnectedExpansionAnimation(Action<ConnectedAnimation>? configureAnimation)
     {
         IGlanceComponent? selectedComponent = ViewModel.SelectedComponent;
 
@@ -2001,6 +2025,7 @@ public sealed partial class DesktopIslandView :
             }
 
             animation.Configuration = new DirectConnectedAnimationConfiguration();
+            configureAnimation?.Invoke(animation);
 
             try
             {
@@ -2010,6 +2035,26 @@ public sealed partial class DesktopIslandView :
             {
             }
         });
+    }
+
+    private void ConfigureTaskbarConnectedExpansionAnimation(ConnectedAnimation animation)
+    {
+        Vector3 offset = GetVisualStateTransitionOffset(ViewModel.IsExpanded);
+
+        if (offset.Y == 0)
+        {
+            return;
+        }
+
+        Compositor compositor = ElementCompositionPreview.GetElementVisual(this).Compositor;
+        ScalarKeyFrameAnimation offsetAnimation = compositor.CreateScalarKeyFrameAnimation();
+        offsetAnimation.SetScalarParameter("taskbarOffset", offset.Y);
+        offsetAnimation.InsertExpressionKeyFrame(0, "StartingValue");
+        offsetAnimation.InsertExpressionKeyFrame(1,
+            "FinalValue + taskbarOffset",
+            CreateVisualStateTransitionEasing());
+        offsetAnimation.Duration = GetVisualStateTransitionDuration(ViewModel.IsExpanded);
+        animation.SetAnimationComponent(ConnectedAnimationComponent.OffsetY, offsetAnimation);
     }
 
     private void CancelConnectedExpansionAnimation()

@@ -108,4 +108,8 @@
   <data name="UpdateReadyToastRestartButton" xml:space="preserve"><value>再起動</value></data>
   <data name="UpdateReadyToastRestartRequired" xml:space="preserve"><value>再起動してアップデートを完了します。</value></data>
   <data name="UpdateReadyToastTitle" xml:space="preserve"><value>アップデートの準備ができました</value></data>
+  <data name="GlanceDisplayLocationCard.Header" xml:space="preserve"><value>Display location</value></data>
+  <data name="GlanceDisplayLocationCard.Description" xml:space="preserve"><value>Choose whether Glance floats at the screen edge or sits in the Windows taskbar</value></data>
+  <data name="GlanceDisplayLocationDesktopEdgeOption.Content" xml:space="preserve"><value>Screen edge</value></data>
+  <data name="GlanceDisplayLocationTaskbarOption.Content" xml:space="preserve"><value>Taskbar</value></data>
 </root>

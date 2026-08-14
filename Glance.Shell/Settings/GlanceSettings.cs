@@ -10,6 +10,8 @@ public sealed class GlanceSettings
 
     public GlanceExpansionMode ExpansionMode { get; set; }
 
+    public GlanceDisplayLocation DisplayLocation { get; set; }
+
     public List<GlanceModulePreference> Modules { get; set; } = [];
 
     public List<string> UninstalledModulePackages { get; set; } = [];

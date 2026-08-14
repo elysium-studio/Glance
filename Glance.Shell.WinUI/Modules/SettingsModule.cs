@@ -28,6 +28,8 @@ public sealed class SettingsModule :
                     provider.GetRequiredService<IServiceFactory>(),
                     provider.GetRequiredService<IMessenger>(),
                     provider.GetRequiredService<IDisposer>(),
+                    provider.GetRequiredService<IDispatcher>(),
+                    provider.GetRequiredService<GlanceSettings>(),
                     provider.GetRequiredService<ITextLocalizer>(),
                     provider.GetRequiredService<IEnumerable<IGlanceViewModel>>()))
             .AddViewFor<ModulesView, ISettingViewModel, ModulesViewModel>(ServiceLifetime.Transient,

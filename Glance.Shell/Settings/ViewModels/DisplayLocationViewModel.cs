@@ -3,7 +3,7 @@ using Elysium.Application.Abstractions;
 
 namespace Glance.Shell;
 
-public sealed partial class PlacementViewModel(IServiceProvider provider,
+public sealed partial class DisplayLocationViewModel(IServiceProvider provider,
     IServiceFactory factory,
     IMessenger messenger,
     IDisposer disposer,
@@ -13,7 +13,4 @@ public sealed partial class PlacementViewModel(IServiceProvider provider,
     Func<GlanceSettings, int> read,
     Action<GlanceSettings, int> write) :
     GlanceSettingsViewModel<int>(provider, factory, messenger, disposer, dispatcher, settings, writer, read, write),
-    IConditionalGlanceViewModel
-{
-    public bool IsAvailable(GlanceSettings settings) => settings.DisplayLocation == GlanceDisplayLocation.DesktopEdge;
-}
+    IGlanceViewModel;

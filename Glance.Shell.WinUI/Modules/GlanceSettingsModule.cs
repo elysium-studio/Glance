@@ -27,6 +27,17 @@ public sealed class GlanceSettingsModule :
             .AddViewFor<AssistantSemanticResolverView, IGlanceViewModel, AssistantSemanticResolverViewModel>(ServiceLifetime.Transient,
                 provider => new AssistantSemanticResolverView(),
                 provider => new AssistantSemanticResolverViewModel(provider.GetRequiredService<IGlanceAssistantSemanticResolverService>()))
+            .AddViewFor<DisplayLocationView, IGlanceViewModel, DisplayLocationViewModel>(ServiceLifetime.Transient,
+                provider => new DisplayLocationView(),
+                provider => new DisplayLocationViewModel(provider,
+                    provider.GetRequiredService<IServiceFactory>(),
+                    provider.GetRequiredService<IMessenger>(),
+                    provider.GetRequiredService<IDisposer>(),
+                    provider.GetRequiredService<IDispatcher>(),
+                    provider.GetRequiredService<GlanceSettings>(),
+                    provider.GetRequiredService<IWritableOptions<GlanceSettings>>(),
+                    config => (int)config.DisplayLocation,
+                    (config, location) => config.DisplayLocation = (GlanceDisplayLocation)location))
             .AddViewFor<PlacementView, IGlanceViewModel, PlacementViewModel>(ServiceLifetime.Transient,
                 provider => new PlacementView(),
                 provider => new PlacementViewModel(provider,

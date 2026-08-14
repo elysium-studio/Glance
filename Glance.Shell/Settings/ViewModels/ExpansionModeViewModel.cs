@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
-using Elysium.Presentation;
 
 namespace Glance.Shell;
 
@@ -13,5 +12,5 @@ public sealed partial class ExpansionModeViewModel(IServiceProvider provider,
     IWritableOptions<GlanceSettings> writer,
     Func<GlanceSettings, int> read,
     Action<GlanceSettings, int> write) :
-    ObservableReadWriteViewModel<GlanceSettings, int>(provider, factory, messenger, disposer, dispatcher, settings, writer, read, write),
+    GlanceSettingsViewModel<int>(provider, factory, messenger, disposer, dispatcher, settings, writer, read, write),
     IGlanceViewModel;

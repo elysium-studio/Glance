@@ -36,6 +36,10 @@ public sealed partial class DesktopIslandViewModel :
     private GlanceExpansionMode expansionMode;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DisplayLocationIndex))]
+    private GlanceDisplayLocation displayLocation;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PlacementIndex))]
     private GlancePlacement placement;
 
@@ -91,6 +95,7 @@ public sealed partial class DesktopIslandViewModel :
         this.settingsWriter = settingsWriter;
         AutoHide = settings.AutoHide;
         ExpansionMode = settings.ExpansionMode;
+        DisplayLocation = settings.DisplayLocation;
         Placement = settings.Placement;
         attentionService.AttentionRequested += HandleAttentionRequested;
         actionService.PresentationRequested += HandleActionPresentationRequested;
@@ -158,6 +163,8 @@ public sealed partial class DesktopIslandViewModel :
     public bool IsPinned => ExpansionMode == GlanceExpansionMode.AlwaysExpanded;
 
     public int PlacementIndex => (int)Placement;
+
+    public int DisplayLocationIndex => (int)DisplayLocation;
 
     public string PageText => components.Count == 0
         ? "0 / 0"
@@ -407,6 +414,7 @@ public sealed partial class DesktopIslandViewModel :
                                                                                      bool restoreExpansionState = AutoHide && !message.Options.AutoHide;
                                                                                      ExpansionMode = message.Options.ExpansionMode;
                                                                                      AutoHide = message.Options.AutoHide;
+                                                                                     DisplayLocation = message.Options.DisplayLocation;
                                                                                      Placement = message.Options.Placement;
 
                                                                                      if (restoreExpansionState)

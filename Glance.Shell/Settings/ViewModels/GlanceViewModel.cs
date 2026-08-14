@@ -13,6 +13,8 @@ public sealed partial class GlanceViewModel :
         IServiceFactory factory,
         IMessenger messenger,
         IDisposer disposer,
+        IDispatcher dispatcher,
+        GlanceSettings settings,
         ITextLocalizer localizer,
         IEnumerable<IGlanceViewModel> items) :
         base(provider, factory, messenger, disposer)
@@ -23,17 +25,29 @@ public sealed partial class GlanceViewModel :
         AddCategory(GlanceSettingsCategories.AppearanceAndBehaviour,
             localizer.GetText("AppearanceAndBehaviourSettingsTitle"),
             "\uE790",
+            messenger,
+            dispatcher,
+            settings,
             categories);
         AddCategory(GlanceSettingsCategories.SpeechAndCommands,
             localizer.GetText("SpeechAndCommandsSettingsTitle"),
             "\uE720",
+            messenger,
+            dispatcher,
+            settings,
             categories);
 
         foreach (IGrouping<string, IGlanceViewModel> category in categories.Where(category =>
             !string.Equals(category.Key, GlanceSettingsCategories.AppearanceAndBehaviour, StringComparison.OrdinalIgnoreCase) &&
             !string.Equals(category.Key, GlanceSettingsCategories.SpeechAndCommands, StringComparison.OrdinalIgnoreCase)))
         {
-            Add(new SettingsCategoryViewModel(category.Key, category.Key, "\uE8B7", category.Cast<object>()));
+            Add(new GlanceSettingsCategoryViewModel(category.Key,
+                category.Key,
+                "\uE8B7",
+                messenger,
+                dispatcher,
+                settings,
+                category));
         }
     }
 
@@ -46,13 +60,16 @@ public sealed partial class GlanceViewModel :
     private void AddCategory(string id,
         string title,
         string glyph,
+        IMessenger messenger,
+        IDispatcher dispatcher,
+        GlanceSettings settings,
         ILookup<string, IGlanceViewModel> categories)
     {
         IGlanceViewModel[] items = [.. categories[id]];
 
         if (items.Length > 0)
         {
-            Add(new SettingsCategoryViewModel(id, title, glyph, items.Cast<object>()));
+            Add(new GlanceSettingsCategoryViewModel(id, title, glyph, messenger, dispatcher, settings, items));
         }
     }
 }
