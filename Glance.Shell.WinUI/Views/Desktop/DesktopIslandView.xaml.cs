@@ -1532,7 +1532,14 @@ public sealed partial class DesktopIslandView :
                 return;
             }
 
-            PlayConnectedExpansionAnimation();
+            if (HostMode == DesktopIslandHostMode.Taskbar)
+            {
+                PlayTaskbarConnectedExpansionAnimation();
+            }
+            else
+            {
+                PlayConnectedExpansionAnimation();
+            }
             return;
         }
 
@@ -1960,7 +1967,12 @@ public sealed partial class DesktopIslandView :
         }
     }
 
-    private void PlayConnectedExpansionAnimation()
+    private void PlayConnectedExpansionAnimation() => PlayConnectedExpansionAnimation(null);
+
+    private void PlayTaskbarConnectedExpansionAnimation() =>
+        PlayConnectedExpansionAnimation(ConfigureTaskbarConnectedExpansionAnimation);
+
+    private void PlayConnectedExpansionAnimation(Action<ConnectedAnimation>? configureAnimation)
     {
         IGlanceComponent? selectedComponent = ViewModel.SelectedComponent;
 
@@ -2006,6 +2018,7 @@ public sealed partial class DesktopIslandView :
             }
 
             animation.Configuration = new DirectConnectedAnimationConfiguration();
+            configureAnimation?.Invoke(animation);
 
             try
             {
@@ -2015,6 +2028,26 @@ public sealed partial class DesktopIslandView :
             {
             }
         });
+    }
+
+    private void ConfigureTaskbarConnectedExpansionAnimation(ConnectedAnimation animation)
+    {
+        Vector3 offset = GetVisualStateTransitionOffset(ViewModel.IsExpanded);
+
+        if (offset.Y == 0)
+        {
+            return;
+        }
+
+        Compositor compositor = ElementCompositionPreview.GetElementVisual(this).Compositor;
+        ScalarKeyFrameAnimation offsetAnimation = compositor.CreateScalarKeyFrameAnimation();
+        offsetAnimation.SetScalarParameter("taskbarOffset", offset.Y);
+        offsetAnimation.InsertExpressionKeyFrame(0, "StartingValue");
+        offsetAnimation.InsertExpressionKeyFrame(1,
+            "FinalValue + taskbarOffset",
+            CreateVisualStateTransitionEasing());
+        offsetAnimation.Duration = GetVisualStateTransitionDuration(ViewModel.IsExpanded);
+        animation.SetAnimationComponent(ConnectedAnimationComponent.OffsetY, offsetAnimation);
     }
 
     private void CancelConnectedExpansionAnimation()

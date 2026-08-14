@@ -8,12 +8,4 @@ public sealed partial class DisplayLocationView :
     public DisplayLocationView() => InitializeComponent();
 
     public DisplayLocationViewModel ViewModel => (DisplayLocationViewModel)DataContext;
-
-    public int SelectedDisplayLocationIndex
-    {
-        get => ViewModel.Value == (int)GlanceDisplayLocation.Taskbar ? 1 : 0;
-        set => ViewModel.Value = value == 1
-            ? (int)GlanceDisplayLocation.Taskbar
-            : (int)GlanceDisplayLocation.DesktopEdge;
-    }
 }

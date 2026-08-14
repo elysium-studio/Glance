@@ -7,7 +7,7 @@
     Loaded="{x:Bind ViewModel.Activate}"
     Unloaded="{x:Bind ViewModel.Deactivate}">
     <CommunityToolkit:SettingsCard x:Uid="GlanceDisplayLocationCard">
-        <ComboBox Width="240" SelectedIndex="{x:Bind SelectedDisplayLocationIndex, Mode=TwoWay}">
+        <ComboBox Width="240" SelectedIndex="{x:Bind ViewModel.Value, Mode=TwoWay}">
             <ComboBoxItem x:Uid="GlanceDisplayLocationDesktopEdgeOption" />
             <ComboBoxItem x:Uid="GlanceDisplayLocationTaskbarOption" />
         </ComboBox>

@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
-using Elysium.Presentation;
 
 namespace Glance.Shell;
 
@@ -13,5 +12,8 @@ public sealed partial class PlacementViewModel(IServiceProvider provider,
     IWritableOptions<GlanceSettings> writer,
     Func<GlanceSettings, int> read,
     Action<GlanceSettings, int> write) :
-    ObservableReadWriteViewModel<GlanceSettings, int>(provider, factory, messenger, disposer, dispatcher, settings, writer, read, write),
-    IGlanceViewModel;
+    GlanceSettingsViewModel<int>(provider, factory, messenger, disposer, dispatcher, settings, writer, read, write),
+    IConditionalGlanceViewModel
+{
+    public bool IsAvailable(GlanceSettings settings) => settings.DisplayLocation == GlanceDisplayLocation.DesktopEdge;
+}
