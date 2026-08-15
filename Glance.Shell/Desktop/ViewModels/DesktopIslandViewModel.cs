@@ -262,6 +262,25 @@ public sealed partial class DesktopIslandViewModel :
         }
     }
 
+    public async void ToggleDisplayLocation()
+    {
+        GlanceDisplayLocation previousLocation = DisplayLocation;
+        GlanceDisplayLocation nextLocation = DisplayLocation == GlanceDisplayLocation.Taskbar
+            ? GlanceDisplayLocation.DesktopEdge
+            : GlanceDisplayLocation.Taskbar;
+        DisplayLocation = nextLocation;
+
+        try
+        {
+            await settingsWriter.WriteAsync(settings => settings.DisplayLocation = nextLocation);
+        }
+        catch (Exception exception)
+        {
+            DisplayLocation = previousLocation;
+            logger.LogError(exception, "Failed to change the Glance display location");
+        }
+    }
+
     public bool CanHandleContent(GlanceContentKind kind) => IntentService.GetIntents(kind).Count > 0;
 
     public bool TryActivateContent(GlanceContentContext context)

@@ -9,7 +9,5 @@ public interface IGlanceAssistantSemanticResolverService :
 
     IGlanceAssistantSemanticResolver? ActiveResolver { get; }
 
-    Task SetActiveResolverAsync(string resolverId, CancellationToken cancellationToken = default);
-
     Task<GlanceAssistantCommandResult> TryExecuteAsync(string command, CancellationToken cancellationToken = default);
 }

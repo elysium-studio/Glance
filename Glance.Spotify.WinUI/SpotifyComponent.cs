@@ -2,17 +2,23 @@ using Glance.Application.Abstractions;
 using Glance.Spotify;
 using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Storage.Streams;
 
 namespace Glance.Spotify.WinUI;
 
 public sealed class SpotifyComponent :
     IGlanceComponent,
     IGlanceActionProvider,
+    IGlanceBackgroundComponent,
+    IGlanceFooterAppearanceComponent,
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
@@ -20,30 +26,41 @@ public sealed class SpotifyComponent :
     private readonly ISpotifyConnectionService connectionService;
     private readonly ISpotifyPlaybackService playbackService;
     private readonly ModuleResourceTextLocalizer<SpotifyModule> localizer;
+    private readonly HttpClient httpClient;
     private readonly DispatcherQueue dispatcherQueue;
     private readonly DispatcherQueueTimer refreshTimer;
+    private readonly SpotifyAlbumAmbience backgroundView;
     private readonly CancellationTokenSource cancellation = new();
     private readonly CancellationToken token;
     private readonly SemaphoreSlim synchronization = new(1, 1);
     private DateTimeOffset refreshAfter;
     private int refreshCount;
     private int refreshing;
+    private int playbackMutationVersion;
+    private int artworkGeneration;
     private int disposed;
+    private CancellationTokenSource? artworkCancellation;
+    private SpotifyAmbientArtwork? currentAmbientArtwork;
+    private uint currentArtworkAverageColor = 0xFF2C2C2C;
 
     public SpotifyComponent(SpotifyViewModel viewModel,
         ISpotifyConnectionService connectionService,
         ISpotifyPlaybackService playbackService,
-        ModuleResourceTextLocalizer<SpotifyModule> localizer)
+        ModuleResourceTextLocalizer<SpotifyModule> localizer,
+        HttpClient httpClient)
     {
         this.viewModel = viewModel;
         this.connectionService = connectionService;
         this.playbackService = playbackService;
         this.localizer = localizer;
+        this.httpClient = httpClient;
         token = cancellation.Token;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        backgroundView = new SpotifyAlbumAmbience { ViewModel = viewModel };
         SpotifyCompactView compactView = new(viewModel);
         SpotifyExpandedView expandedView = new(viewModel);
         CompactContent = compactView;
+        BackgroundContent = backgroundView;
         ExpandedContent = expandedView;
         CompactAnimationElement = compactView.ConnectedAnimationElement;
         ExpandedAnimationElement = expandedView.ConnectedAnimationElement;
@@ -54,6 +71,7 @@ public sealed class SpotifyComponent :
         connectionService.StateChanged += HandleConnectionStateChanged;
         viewModel.PlaybackActionRequested += HandlePlaybackActionRequested;
         viewModel.PropertyChanged += HandleViewModelPropertyChanged;
+        backgroundView.SurfaceAppearanceChanged += HandleBackgroundSurfaceAppearanceChanged;
         _ = ConfigureAsync();
     }
 
@@ -65,15 +83,29 @@ public sealed class SpotifyComponent :
 
     public string SettingsCategory => GlanceModuleCategories.MediaAndCapture;
 
+    public object CreateIcon(bool isLightTheme) => new ImageIcon
+    {
+        Width = 24,
+        Height = 24,
+        Source = SpotifyLogo.CreateImageSource(isLightTheme, 24)
+    };
+
     public int Order => 25;
 
     public object CompactContent { get; }
 
+    public object BackgroundContent { get; }
+
     public object ExpandedContent { get; }
+
+    public uint? FooterForegroundColor => !viewModel.HasPlayback ||
+        viewModel.AmbientArtwork is null ? null : viewModel.BackgroundForegroundColor;
 
     public object CompactAnimationElement { get; }
 
     public object ExpandedAnimationElement { get; }
+
+    public event EventHandler? FooterAppearanceChanged;
 
     public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
     [
@@ -95,6 +127,8 @@ public sealed class SpotifyComponent :
 
         try
         {
+            _ = Interlocked.Increment(ref playbackMutationVersion);
+
             switch (request.ActionId)
             {
                 case "Spotify.Previous":
@@ -134,6 +168,12 @@ public sealed class SpotifyComponent :
         connectionService.StateChanged -= HandleConnectionStateChanged;
         viewModel.PlaybackActionRequested -= HandlePlaybackActionRequested;
         viewModel.PropertyChanged -= HandleViewModelPropertyChanged;
+        backgroundView.SurfaceAppearanceChanged -= HandleBackgroundSurfaceAppearanceChanged;
+        Interlocked.Increment(ref artworkGeneration);
+        artworkCancellation?.Cancel();
+        artworkCancellation?.Dispose();
+        artworkCancellation = null;
+        SetAmbientArtwork(null);
         cancellation.Cancel();
         cancellation.Dispose();
     }
@@ -194,6 +234,7 @@ public sealed class SpotifyComponent :
 
         try
         {
+            int mutationVersion = Volatile.Read(ref playbackMutationVersion);
             SpotifyPlaybackSnapshot? playback = await playbackService.GetPlaybackAsync(cancellationToken);
             IReadOnlyList<SpotifyDevice>? devices = null;
 
@@ -202,7 +243,7 @@ public sealed class SpotifyComponent :
                 devices = await playbackService.GetDevicesAsync(cancellationToken);
             }
 
-            viewModel.ApplyPlayback(playback, devices);
+            ApplyPlayback(playback, devices, mutationVersion);
             refreshAfter = DateTimeOffset.MinValue;
         }
         catch (OperationCanceledException)
@@ -211,11 +252,11 @@ public sealed class SpotifyComponent :
         catch (SpotifyApiException exception) when (exception.RetryAfter is TimeSpan retryAfter)
         {
             refreshAfter = DateTimeOffset.UtcNow.Add(retryAfter);
-            viewModel.StatusMessage = exception.Message;
+            viewModel.SetStatusMessage(exception.Message);
         }
         catch (Exception exception)
         {
-            viewModel.StatusMessage = exception.Message;
+            viewModel.SetStatusMessage(exception.Message);
         }
     }
 
@@ -234,6 +275,28 @@ public sealed class SpotifyComponent :
         {
             _ = Interlocked.Exchange(ref refreshing, 0);
         }
+    }
+
+    private void ApplyPlayback(SpotifyPlaybackSnapshot? playback,
+        IReadOnlyList<SpotifyDevice>? devices,
+        int mutationVersion)
+    {
+        void Apply()
+        {
+            if (Volatile.Read(ref disposed) == 0 &&
+                mutationVersion == Volatile.Read(ref playbackMutationVersion))
+            {
+                viewModel.ApplyPlayback(playback, devices);
+            }
+        }
+
+        if (dispatcherQueue.HasThreadAccess)
+        {
+            Apply();
+            return;
+        }
+
+        _ = dispatcherQueue.TryEnqueue(Apply);
     }
 
     private async void HandleRefreshTimerTick(DispatcherQueueTimer sender, object args) =>
@@ -266,12 +329,193 @@ public sealed class SpotifyComponent :
         {
             _ = ConfigureAsync();
         }
+
+        if (args.PropertyName == nameof(SpotifyViewModel.ArtworkUrl))
+        {
+            QueueArtworkUpdate(viewModel.ArtworkUrl);
+        }
+
+        if (args.PropertyName is nameof(SpotifyViewModel.AccentColor) or
+            nameof(SpotifyViewModel.BackgroundForegroundColor) or
+            nameof(SpotifyViewModel.AmbientArtwork) or
+            nameof(SpotifyViewModel.HasPlayback))
+        {
+            FooterAppearanceChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private void HandleBackgroundSurfaceAppearanceChanged(object? sender, EventArgs args)
+    {
+        if (viewModel.HasPlayback && viewModel.AmbientArtwork is not null)
+        {
+            viewModel.BackgroundForegroundColor =
+                backgroundView.GetContrastingForeground(currentArtworkAverageColor);
+        }
+    }
+
+    private void QueueArtworkUpdate(string? artworkUrl)
+    {
+        int generation = Interlocked.Increment(ref artworkGeneration);
+        artworkCancellation?.Cancel();
+        artworkCancellation?.Dispose();
+        artworkCancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
+        _ = UpdateArtworkAsync(artworkUrl, generation, artworkCancellation.Token);
+    }
+
+    private async Task UpdateArtworkAsync(string? artworkUrl,
+        int generation,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(artworkUrl))
+            {
+                await RunOnDispatcherAsync(() =>
+                {
+                    if (generation == Volatile.Read(ref artworkGeneration))
+                    {
+                        ClearArtwork();
+                    }
+
+                    return Task.CompletedTask;
+                });
+                return;
+            }
+
+            using HttpResponseMessage response = await httpClient.GetAsync(artworkUrl,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken);
+            response.EnsureSuccessStatusCode();
+            byte[] bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            SpotifyArtworkColors colors;
+
+            using (InMemoryRandomAccessStream analysisStream = await CreateStreamAsync(bytes))
+            {
+                colors = await SpotifyArtworkColorAnalyzer.AnalyzeAsync(analysisStream);
+            }
+
+            await RunOnDispatcherAsync(async () =>
+            {
+                if (generation != Volatile.Read(ref artworkGeneration) ||
+                    Volatile.Read(ref disposed) != 0)
+                {
+                    return;
+                }
+
+                BitmapImage artwork = new();
+
+                using (InMemoryRandomAccessStream imageStream = await CreateStreamAsync(bytes))
+                {
+                    await artwork.SetSourceAsync(imageStream);
+                }
+
+                InMemoryRandomAccessStream ambientStream = await CreateStreamAsync(bytes);
+                SpotifyAmbientArtwork? ambientArtwork = await SpotifyAmbientArtwork.LoadAsync(ambientStream);
+
+                if (generation != Volatile.Read(ref artworkGeneration) ||
+                    Volatile.Read(ref disposed) != 0)
+                {
+                    ambientArtwork?.Dispose();
+                    return;
+                }
+
+                viewModel.Artwork = artwork;
+                viewModel.AccentColor = colors.AccentColor;
+                currentArtworkAverageColor = colors.AverageColor;
+                viewModel.BackgroundForegroundColor =
+                    backgroundView.GetContrastingForeground(colors.AverageColor);
+                SetAmbientArtwork(ambientArtwork);
+            });
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch
+        {
+            await RunOnDispatcherAsync(() =>
+            {
+                if (generation == Volatile.Read(ref artworkGeneration))
+                {
+                    ClearArtwork();
+                }
+
+                return Task.CompletedTask;
+            });
+        }
+    }
+
+    private void ClearArtwork()
+    {
+        viewModel.Artwork = null;
+        SetAmbientArtwork(null);
+        viewModel.AccentColor = SpotifyViewModel.DefaultAccentColor;
+        currentArtworkAverageColor = 0xFF2C2C2C;
+        viewModel.BackgroundForegroundColor = 0xFFFFFFFF;
+    }
+
+    private void SetAmbientArtwork(SpotifyAmbientArtwork? artwork)
+    {
+        if (ReferenceEquals(currentAmbientArtwork, artwork))
+        {
+            return;
+        }
+
+        SpotifyAmbientArtwork? previousArtwork = currentAmbientArtwork;
+        currentAmbientArtwork = artwork;
+        viewModel.AmbientArtwork = artwork;
+        previousArtwork?.Dispose();
+    }
+
+    private Task RunOnDispatcherAsync(Func<Task> action)
+    {
+        if (dispatcherQueue.HasThreadAccess)
+        {
+            return action();
+        }
+
+        TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (!dispatcherQueue.TryEnqueue(async () =>
+        {
+            try
+            {
+                await action();
+                completion.SetResult();
+            }
+            catch (Exception exception)
+            {
+                completion.SetException(exception);
+            }
+        }))
+        {
+            completion.SetException(new InvalidOperationException("The Spotify dispatcher rejected an update."));
+        }
+
+        return completion.Task;
+    }
+
+    private static async Task<InMemoryRandomAccessStream> CreateStreamAsync(byte[] bytes)
+    {
+        InMemoryRandomAccessStream stream = new();
+
+        using (DataWriter writer = new(stream.GetOutputStreamAt(0)))
+        {
+            writer.WriteBytes(bytes);
+            _ = await writer.StoreAsync();
+        }
+
+        stream.Seek(0);
+        return stream;
     }
 
     private async void HandlePlaybackActionRequested(object? sender, SpotifyPlaybackAction action)
     {
         try
         {
+            _ = Interlocked.Increment(ref playbackMutationVersion);
+
             switch (action.Kind)
             {
                 case SpotifyPlaybackActionKind.Previous:
@@ -305,10 +549,19 @@ public sealed class SpotifyComponent :
         }
         catch (OperationCanceledException)
         {
+            if (action.Kind == SpotifyPlaybackActionKind.Seek)
+            {
+                viewModel.CancelPendingSeek();
+            }
         }
         catch (Exception exception)
         {
-            viewModel.StatusMessage = exception.Message;
+            if (action.Kind == SpotifyPlaybackActionKind.Seek)
+            {
+                viewModel.CancelPendingSeek();
+            }
+
+            viewModel.SetStatusMessage(exception.Message);
         }
     }
 }

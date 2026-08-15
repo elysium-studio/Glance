@@ -99,6 +99,10 @@
   <data name="SetupPlacementBottomDescription.Text" xml:space="preserve"><value>Keep Glance close to the lower edge of your desktop.</value></data>
   <data name="ReorderModulesButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Reordenar módulos</value></data>
   <data name="ReorderModulesButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Reordenar módulos</value></data>
+  <data name="MoveToTaskbarButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Mover a la barra de tareas</value></data>
+  <data name="MoveToTaskbarButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Mover Glance a la barra de tareas</value></data>
+  <data name="MoveToScreenEdgeButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Mover al borde de la pantalla</value></data>
+  <data name="MoveToScreenEdgeButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Mover Glance al borde de la pantalla</value></data>
   <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Cancelar</value></data>
   <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Cancelar la reorganización de módulos</value></data>
   <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Listo</value></data>

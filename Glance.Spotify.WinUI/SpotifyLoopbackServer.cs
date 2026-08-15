@@ -29,17 +29,15 @@ internal sealed class SpotifyLoopbackServerFactory : ISpotifyLoopbackServerFacto
 
 internal sealed class SpotifyLoopbackServer : ISpotifyLoopbackServer
 {
-    private readonly TcpListener listener = new(IPAddress.Loopback, 0);
+    private readonly TcpListener listener = new(IPAddress.Loopback, SpotifyAuthenticationDefaults.LoopbackPort);
     private int disposed;
 
     public SpotifyLoopbackServer()
     {
         listener.Start(1);
-        int port = ((IPEndPoint)listener.LocalEndpoint).Port;
-        RedirectUri = new Uri($"http://127.0.0.1:{port}/callback");
     }
 
-    public Uri RedirectUri { get; }
+    public Uri RedirectUri => SpotifyAuthenticationDefaults.RedirectUri;
 
     public async Task<SpotifyLoopbackResult> WaitForResultAsync(CancellationToken cancellationToken = default)
     {

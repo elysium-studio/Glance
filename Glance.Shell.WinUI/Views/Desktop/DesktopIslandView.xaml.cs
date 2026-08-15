@@ -1,3 +1,4 @@
+using Elysium.Platform.Abstractions;
 using Elysium.UI.Controls.WinUI;
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
@@ -41,6 +42,8 @@ public sealed partial class DesktopIslandView :
     private const int StartupAttentionDelayMs = 2500;
 
     private readonly DispatcherQueue dispatcherQueue;
+    private readonly IMonitorLocator monitorLocator;
+    private readonly ITaskbarLocator taskbarLocator;
     private DispatcherQueueTimer? attentionExpansionTimer;
     private DispatcherQueueTimer? contextualDragExitTimer;
     private DispatcherQueueTimer? interactionExitTimer;
@@ -82,8 +85,11 @@ public sealed partial class DesktopIslandView :
     private int previousIndex;
     private bool skipNextConnectedExpansion;
 
-    public DesktopIslandView()
+    public DesktopIslandView(IMonitorLocator monitorLocator,
+        ITaskbarLocator taskbarLocator)
     {
+        this.monitorLocator = monitorLocator;
+        this.taskbarLocator = taskbarLocator;
         InitializeComponent();
         dispatcherQueue = DispatcherQueue;
 
@@ -121,6 +127,14 @@ public sealed partial class DesktopIslandView :
     public Visibility WhenPinned(bool isPinned) => isPinned ? Visibility.Visible : Visibility.Collapsed;
 
     public Visibility WhenNotPinned(bool isPinned) => isPinned ? Visibility.Collapsed : Visibility.Visible;
+
+    public Visibility WhenOnScreenEdge(int index) => (GlanceDisplayLocation)index == GlanceDisplayLocation.DesktopEdge
+        ? Visibility.Visible
+        : Visibility.Collapsed;
+
+    public Visibility WhenOnTaskbar(int index) => (GlanceDisplayLocation)index == GlanceDisplayLocation.Taskbar
+        ? Visibility.Visible
+        : Visibility.Collapsed;
 
     public Visibility WhenAvailable(bool isAvailable) => isAvailable ? Visibility.Visible : Visibility.Collapsed;
 
@@ -169,6 +183,7 @@ public sealed partial class DesktopIslandView :
 
     private void HandleLoaded(object sender, RoutedEventArgs args)
     {
+        RefreshDisplayLocationIcons();
         previousIndex = ViewModel.SelectedIndex;
         ViewModel.PropertyChanged += HandleViewModelPropertyChanged;
         ViewModel.AttentionReceived += HandleAttentionReceived;
@@ -1424,6 +1439,11 @@ public sealed partial class DesktopIslandView :
             return;
         }
 
+        if (args.PropertyName == nameof(DesktopIslandViewModel.DisplayLocation))
+        {
+            RefreshDisplayLocationIcons();
+        }
+
         if (args.PropertyName == nameof(DesktopIslandViewModel.IsModuleReorderVisible))
         {
             _ = DispatcherQueue.TryEnqueue(() =>
@@ -1780,12 +1800,22 @@ public sealed partial class DesktopIslandView :
 
     private void HandleIslandPointerEntered(object sender, PointerRoutedEventArgs args)
     {
+        RefreshDisplayLocationIcons();
         StopAttentionExpansionTimer();
         StopInteractionExitTimer();
         isPointerOverIsland = true;
         UpdateComponentInteraction();
         Reveal();
         ViewModel.IsExpanded = true;
+    }
+
+    private void RefreshDisplayLocationIcons()
+    {
+        MonitorHandle monitor = monitorLocator.GetMonitorForWindow(new WindowHandle(Handle));
+        bool isTaskbarAtTop = taskbarLocator.GetTaskbarForMonitor(monitor)?.Edge == TaskbarEdge.Top;
+        MoveToTaskbarIcon.Glyph = isTaskbarAtTop ? "\uE8AD" : "\uE90E";
+        MoveToScreenEdgeIcon.Glyph = isTaskbarAtTop ? "\uEA4F" : "\uE8AB";
+        MoveToScreenEdgeIconTransform.Angle = isTaskbarAtTop ? 180 : 0;
     }
 
     private void HandleIslandPointerExited(object sender, PointerRoutedEventArgs args)

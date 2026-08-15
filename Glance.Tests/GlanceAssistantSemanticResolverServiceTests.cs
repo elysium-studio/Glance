@@ -1,4 +1,3 @@
-using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
 using Glance.Shell;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -15,8 +14,7 @@ public sealed class GlanceAssistantSemanticResolverServiceTests
         using JsonDocument arguments = JsonDocument.Parse("{\"minutes\":24}");
         TestResolver resolver = new("Test", new GlanceAssistantActionResolution("Timer.Start", arguments.RootElement.Clone()));
         TestActionService actionService = new();
-        GlanceSettings settings = new();
-        GlanceAssistantSemanticResolverService service = new([resolver], actionService, settings, new TestWritableOptions(settings), NullLogger<GlanceAssistantSemanticResolverService>.Instance);
+        GlanceAssistantSemanticResolverService service = new([resolver], actionService, NullLogger<GlanceAssistantSemanticResolverService>.Instance);
 
         GlanceAssistantCommandResult result = await service.TryExecuteAsync("set a time for twenty four minutes");
 
@@ -32,41 +30,13 @@ public sealed class GlanceAssistantSemanticResolverServiceTests
         using JsonDocument arguments = JsonDocument.Parse("{\"minutes\":24}");
         TestResolver resolver = new("Test", new GlanceAssistantActionResolution("Timer.Start", arguments.RootElement.Clone()));
         TestActionService actionService = new(GlanceActionResult.InvalidArguments("How long should the timer run?", "Say a duration such as 24 minutes."));
-        GlanceSettings settings = new();
-        GlanceAssistantSemanticResolverService service = new([resolver], actionService, settings, new TestWritableOptions(settings), NullLogger<GlanceAssistantSemanticResolverService>.Instance);
+        GlanceAssistantSemanticResolverService service = new([resolver], actionService, NullLogger<GlanceAssistantSemanticResolverService>.Instance);
 
         GlanceAssistantCommandResult result = await service.TryExecuteAsync("set a timer");
 
         Assert.False(result.Handled);
         Assert.Equal("How long should the timer run?", result.Response);
         Assert.Equal("Say a duration such as 24 minutes.", result.Guidance);
-    }
-
-    [Fact]
-    public async Task SetActiveResolverAsyncPersistsTheUserSelection()
-    {
-        TestResolver first = new("First", null);
-        TestResolver second = new("Second", null);
-        GlanceSettings settings = new();
-        GlanceAssistantSemanticResolverService service = new([first, second], new TestActionService(), settings, new TestWritableOptions(settings), NullLogger<GlanceAssistantSemanticResolverService>.Instance);
-
-        await service.SetActiveResolverAsync("Second");
-
-        Assert.Same(second, service.ActiveResolver);
-        Assert.Equal("Second", settings.AssistantSemanticResolverId);
-    }
-
-    [Fact]
-    public void RegisterSelectsAHotLoadedPreferredResolver()
-    {
-        TestResolver fallback = new("Fallback", null);
-        TestResolver preferred = new("Preferred", null);
-        GlanceSettings settings = new() { AssistantSemanticResolverId = "Preferred" };
-        GlanceAssistantSemanticResolverService service = new([fallback], new TestActionService(), settings, new TestWritableOptions(settings), NullLogger<GlanceAssistantSemanticResolverService>.Instance);
-
-        service.Register([preferred]);
-
-        Assert.Same(preferred, service.ActiveResolver);
     }
 
     private sealed class TestResolver(string id,
@@ -117,19 +87,4 @@ public sealed class GlanceAssistantSemanticResolverServiceTests
         }
     }
 
-    private sealed class TestWritableOptions(GlanceSettings settings) :
-        IWritableOptions<GlanceSettings>
-    {
-        public Task<GlanceSettings?> ReadAsync(CancellationToken cancellationToken = default) => Task.FromResult<GlanceSettings?>(settings);
-
-        public Task WriteAsync(Action<GlanceSettings> update,
-            CancellationToken cancellationToken = default)
-        {
-            update(settings);
-            return Task.CompletedTask;
-        }
-
-        public Task WriteAsync(GlanceSettings value,
-            CancellationToken cancellationToken = default) => Task.CompletedTask;
-    }
 }

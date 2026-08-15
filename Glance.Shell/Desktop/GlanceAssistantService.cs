@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
+using Glance.Transcription;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 
@@ -14,6 +15,7 @@ public sealed class GlanceAssistantService :
     IDisposable
 {
     private readonly IGlanceActionService actionService;
+    private readonly ITranscriptionModelCatalog modelCatalog;
     private readonly ILogger<GlanceAssistantService> logger;
     private readonly List<IGlanceAssistantProvider> providers = [];
     private readonly IDispatcher dispatcher;
@@ -27,16 +29,25 @@ public sealed class GlanceAssistantService :
         IMessenger messenger,
         IDispatcher dispatcher,
         IGlanceActionService actionService,
+        ITranscriptionModelCatalog modelCatalog,
         ILogger<GlanceAssistantService> logger)
     {
         this.settings = settings;
         this.settingsWriter = settingsWriter;
         this.dispatcher = dispatcher;
         this.actionService = actionService;
+        this.modelCatalog = modelCatalog;
         this.logger = logger;
-        isEnabled = settings.IsAssistantEnabled;
+        isEnabled = settings.IsAssistantEnabled && CanEnable;
         actionService.PresentationRequested += HandleActionPresentationRequested;
+        modelCatalog.StateChanged += HandleModelStateChanged;
         messenger.Register(this);
+
+        if (settings.IsAssistantEnabled && !isEnabled)
+        {
+            settings.IsAssistantEnabled = false;
+            _ = settingsWriter.WriteAsync(options => options.IsAssistantEnabled = false);
+        }
     }
 
     public event EventHandler? WakeWordDetected;
@@ -100,7 +111,7 @@ public sealed class GlanceAssistantService :
 
         OnPropertyChanged(nameof(Providers));
 
-        ActiveProvider ??= providers.FirstOrDefault(provider => string.Equals(provider.Id, settings.AssistantProviderId, StringComparison.OrdinalIgnoreCase)) ?? providers.FirstOrDefault();
+        ActiveProvider ??= providers.FirstOrDefault();
 
         if (!ReferenceEquals(previousProvider, ActiveProvider) && ActiveProvider is not null && IsEnabled)
         {
@@ -110,6 +121,11 @@ public sealed class GlanceAssistantService :
 
     public async Task SetEnabledAsync(bool isEnabled, CancellationToken cancellationToken = default)
     {
+        if (isEnabled && !CanEnable)
+        {
+            return;
+        }
+
         if (IsEnabled == isEnabled)
         {
             return;
@@ -126,37 +142,22 @@ public sealed class GlanceAssistantService :
         NotifyPresentationChanged();
     }
 
-    public async Task SetActiveProviderAsync(string providerId, CancellationToken cancellationToken = default)
-    {
-        IGlanceAssistantProvider? nextProvider = providers.FirstOrDefault(provider => string.Equals(provider.Id, providerId, StringComparison.OrdinalIgnoreCase));
-
-        if (nextProvider is null || ReferenceEquals(nextProvider, ActiveProvider))
-        {
-            return;
-        }
-
-        IGlanceAssistantProvider? previousProvider = ActiveProvider;
-
-        if (previousProvider is not null)
-        {
-            await previousProvider.SetEnabledAsync(false, cancellationToken);
-        }
-
-        ActiveProvider = nextProvider;
-        await settingsWriter.WriteAsync(options => options.AssistantProviderId = nextProvider.Id);
-
-        if (IsEnabled)
-        {
-            await nextProvider.SetEnabledAsync(true, cancellationToken);
-        }
-    }
-
     public void Receive(OptionsChangedEventArgs<GlanceSettings> message) => dispatcher.Dispatch(() => ApplySettings(message.Options));
 
-    public void Dispose() => actionService.PresentationRequested -= HandleActionPresentationRequested;
+    public void Dispose()
+    {
+        actionService.PresentationRequested -= HandleActionPresentationRequested;
+        modelCatalog.StateChanged -= HandleModelStateChanged;
+    }
 
     private void ApplySettings(GlanceSettings options)
     {
+        if (options.IsAssistantEnabled && !CanEnable)
+        {
+            options.IsAssistantEnabled = false;
+            _ = settingsWriter.WriteAsync(settings => settings.IsAssistantEnabled = false);
+        }
+
         if (IsEnabled == options.IsAssistantEnabled)
         {
             return;
@@ -218,6 +219,18 @@ public sealed class GlanceAssistantService :
 
         NotifyPresentationChanged();
     }
+
+    private void HandleModelStateChanged(object? sender, EventArgs args) => dispatcher.Dispatch(() =>
+    {
+        OnPropertyChanged(nameof(CanEnable));
+
+        if (IsEnabled && !CanEnable)
+        {
+            _ = SetEnabledAsync(false);
+        }
+    });
+
+    public bool CanEnable => modelCatalog.Models.Any(model => modelCatalog.IsInstalled(model.Id));
 
     public async Task UnregisterAsync(IEnumerable<IGlanceAssistantProvider> registrations)
     {

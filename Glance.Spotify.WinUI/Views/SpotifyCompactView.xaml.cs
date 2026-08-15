@@ -19,7 +19,7 @@ public sealed partial class SpotifyCompactView :
 
     public SpotifyViewModel ViewModel { get; }
 
-    public FrameworkElement ConnectedAnimationElement => LogoContainer;
+    public FrameworkElement ConnectedAnimationElement => ArtworkContainer;
 
     private void HandleLoaded(object sender, RoutedEventArgs args)
     {
@@ -41,4 +41,8 @@ public sealed partial class SpotifyCompactView :
             firstFrameHandler = null;
         }
     }
+
+    private ImageSource? ToImageSource(object? value) => value as ImageSource;
+
+    private Visibility WhenArtworkUnavailable(object? artwork) => artwork is null ? Visibility.Visible : Visibility.Collapsed;
 }

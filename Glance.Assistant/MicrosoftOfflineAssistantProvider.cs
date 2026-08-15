@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
+using Glance.Transcription;
 using Microsoft.AI.Foundry.Local;
 using Microsoft.AI.Foundry.Local.OpenAI;
 using Microsoft.Extensions.Logging;
@@ -31,8 +32,11 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
     private static readonly List<nint> nativeLibraryHandles = [];
     private static bool nativeLibrariesLoaded;
     private readonly IGlanceAssistantCommandService commandService;
+    private readonly IAudioInputSourceCatalog audioInputSources;
     private readonly IDispatcher dispatcher;
     private readonly ILogger<MicrosoftOfflineAssistantProvider> logger;
+    private readonly ITranscriptionModelCatalog modelCatalog;
+    private readonly ITranscriptionSessionFactory transcriptionSessions;
     private readonly SemaphoreSlim lifecycleGate = new(1, 1);
     private readonly StringBuilder pendingUtterance = new();
     private readonly SemaphoreSlim wakeSessionGate = new(1, 1);
@@ -42,7 +46,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
     private CancellationTokenSource? utteranceCompletionCancellationTokenSource;
     private TaskCompletionSource<long>? commandSpeechBoundaryCompletion;
     private IModel? model;
-    private LiveAudioTranscriptionSession? transcriptionSession;
+    private ITranscriptionSession? transcriptionSession;
     private OpenAIAudioClient? audioClient;
     private RollingAudioCapture? audioCapture;
     private SpeechRecognizer? wakeRecognizer;
@@ -75,10 +79,16 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
     public MicrosoftOfflineAssistantProvider(IGlanceAssistantCommandService commandService,
         IAssistantViewFactory viewFactory,
         IDispatcher dispatcher,
+        IAudioInputSourceCatalog audioInputSources,
+        ITranscriptionModelCatalog modelCatalog,
+        ITranscriptionSessionFactory transcriptionSessions,
         ILogger<MicrosoftOfflineAssistantProvider> logger)
     {
         this.commandService = commandService;
         this.dispatcher = dispatcher;
+        this.audioInputSources = audioInputSources;
+        this.modelCatalog = modelCatalog;
+        this.transcriptionSessions = transcriptionSessions;
         this.logger = logger;
         CompactIndicatorContent = viewFactory.CreateCompactIndicator(this);
         ExpandedIndicatorContent = viewFactory.CreateExpandedIndicator(this);
@@ -106,6 +116,11 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         {
             if (isEnabled)
             {
+                if (!modelCatalog.Models.Any(model => modelCatalog.IsInstalled(model.Id)))
+                {
+                    throw new InvalidOperationException("Install a speech model in Glance settings before enabling the voice assistant");
+                }
+
                 if (State == GlanceAssistantState.Error)
                 {
                     await StopAsync();
@@ -146,18 +161,6 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         try
         {
             await StopAsync();
-
-            if (model is not null)
-            {
-                await model.UnloadAsync();
-                model = null;
-                audioClient = null;
-            }
-
-            if (FoundryLocalManager.IsInitialized)
-            {
-                FoundryLocalManager.Instance.Dispose();
-            }
         }
         finally
         {
@@ -188,7 +191,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             wakeHealthTask = MonitorWakeRecognitionAsync(providerCancellationTokenSource.Token);
             TraceWake("Provider.Start.Ready", GetWakeSnapshot());
 
-            if (audioClient is null)
+            if (modelCatalog.Models.Count == 0)
             {
                 SetPresentation(GlanceAssistantState.Preparing, "Getting voice commands ready", "Loading the command model");
                 modelPreparationTask = PrepareModelAsync(providerCancellationTokenSource.Token);
@@ -214,7 +217,6 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             await FoundryLocalRuntime.EnsureInitializedAsync(logger, cancellationToken);
             ICatalog catalog = await FoundryLocalManager.Instance.GetCatalogAsync();
             model = await catalog.GetModelAsync(ModelAlias) ?? throw new InvalidOperationException("The Microsoft streaming speech model is unavailable");
-            await model.DownloadAsync(_ => { }, cancellationToken);
             await model.LoadAsync(cancellationToken);
             audioClient = await model.GetAudioClientAsync();
             cancellationToken.ThrowIfCancellationRequested();
@@ -332,9 +334,9 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             throw;
         }
 
-        SetPresentation(audioClient is null ? GlanceAssistantState.Preparing : GlanceAssistantState.ListeningForWakeWord,
+        SetPresentation(GlanceAssistantState.ListeningForWakeWord,
             "Say “Glance” or “Hey Glance”",
-            audioClient is null ? "Loading the command model" : "Listening");
+            "Listening");
     }
 
     private async Task StopWakeRecognitionAsync()
@@ -756,33 +758,32 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             return;
         }
 
-        OpenAIAudioClient client = audioClient ?? throw new InvalidOperationException("The command model is unavailable");
-        RollingAudioCapture capture = audioCapture ?? throw new InvalidOperationException("Audio capture is unavailable");
         listeningCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         CancellationToken listeningCancellationToken = listeningCancellationTokenSource.Token;
-        transcriptionSession = client.CreateLiveTranscriptionSession();
-        transcriptionSession.Settings.SampleRate = 16000;
-        transcriptionSession.Settings.Channels = 1;
-        transcriptionSession.Settings.Language = "en";
-        await transcriptionSession.StartAsync(listeningCancellationToken);
+        AudioInputSource source = (await audioInputSources.GetSourcesAsync(listeningCancellationToken))
+            .FirstOrDefault(item => item.IsDefault) ?? throw new InvalidOperationException("No microphone is available");
+        string modelId = modelCatalog.IsInstalled(modelCatalog.DefaultModelId)
+            ? modelCatalog.DefaultModelId
+            : modelCatalog.Models.First(model => modelCatalog.IsInstalled(model.Id)).Id;
+        transcriptionSession = await transcriptionSessions.CreateAsync(new TranscriptionSessionOptions(modelId,
+            source.Id,
+            "en"),
+            listeningCancellationToken);
         transcriptionTask = ReadTranscriptionAsync(transcriptionSession, listeningCancellationToken);
-        TaskCompletionSource<long> boundaryCompletion = commandSpeechBoundaryCompletion ?? throw new InvalidOperationException("The command speech boundary is unavailable");
-        long audioBoundary = await boundaryCompletion.Task.WaitAsync(listeningCancellationToken);
-        await capture.AttachAsync(transcriptionSession, audioBoundary, listeningCancellationToken);
-        TraceWake("Command.Start.Completed", $"AudioBoundary={audioBoundary}; {GetWakeSnapshot()}");
+        TraceWake("Command.Start.Completed", GetWakeSnapshot());
     }
 
-    private async Task ReadTranscriptionAsync(LiveAudioTranscriptionSession session, CancellationToken cancellationToken)
+    private async Task ReadTranscriptionAsync(ITranscriptionSession session, CancellationToken cancellationToken)
     {
         bool recoveryRequired = false;
 
         try
         {
-            await foreach (LiveAudioTranscriptionResponse result in session.GetStream(cancellationToken))
+            await foreach (TranscriptionResult result in session.GetResultsAsync(cancellationToken))
             {
-                string text = result.Content?.FirstOrDefault()?.Text?.Trim() ?? string.Empty;
+                string text = result.Text.Trim();
 
-                if (!string.IsNullOrWhiteSpace(text))
+                if (result.IsFinal && !string.IsNullOrWhiteSpace(text))
                 {
                     TraceWake("Command.Transcription.Result", $"Text={text}; {GetWakeSnapshot()}");
                     Dispatch(() => ProcessRecognizedText(text));
@@ -1080,11 +1081,10 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         CancelPendingUtterance();
         CancellationTokenSource? cancellationTokenSource = listeningCancellationTokenSource;
         listeningCancellationTokenSource = null;
-        LiveAudioTranscriptionSession? session = transcriptionSession;
+        ITranscriptionSession? session = transcriptionSession;
         transcriptionSession = null;
         Task? readingTask = transcriptionTask;
         transcriptionTask = null;
-        audioCapture?.Detach();
 
         if (cancellationTokenSource is not null)
         {

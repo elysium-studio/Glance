@@ -8,6 +8,7 @@ public sealed partial class ModuleSettingsItemViewModel :
     IModulesViewModel
 {
     private readonly Action<ModuleSettingsItemViewModel> navigate;
+    private readonly IGlanceComponent? component;
     private readonly Func<ModuleSettingsItemViewModel, Task<bool>>? uninstall;
     private bool suppressPersistence;
 
@@ -48,6 +49,7 @@ public sealed partial class ModuleSettingsItemViewModel :
         IconFontFamily = component?.IconFontFamily ?? "Segoe Fluent Icons";
         IconGlyph = string.IsNullOrEmpty(component?.IconGlyph) ? "\uE8B7" : component.IconGlyph;
         Settings = new ModuleSettingsViewModel(displayName, settings);
+        this.component = component;
         this.navigate = navigate;
         this.uninstall = uninstall;
         this.isEnabled = isEnabled;
@@ -68,6 +70,8 @@ public sealed partial class ModuleSettingsItemViewModel :
     public string IconFontFamily { get; }
 
     public string IconGlyph { get; }
+
+    public object? CreateIcon(bool isLightTheme) => component?.CreateIcon(isLightTheme);
 
     public bool HasSettings => Settings.HasSettings;
 

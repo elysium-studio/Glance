@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
 using Microsoft.Extensions.Logging;
 
@@ -12,19 +11,13 @@ public sealed class GlanceAssistantSemanticResolverService :
     private readonly IGlanceActionService actionService;
     private readonly ILogger<GlanceAssistantSemanticResolverService> logger;
     private readonly List<IGlanceAssistantSemanticResolver> resolvers = [];
-    private readonly GlanceSettings settings;
     private readonly object synchronization = new();
-    private readonly IWritableOptions<GlanceSettings> settingsWriter;
 
     public GlanceAssistantSemanticResolverService(IEnumerable<IGlanceAssistantSemanticResolver> resolvers,
         IGlanceActionService actionService,
-        GlanceSettings settings,
-        IWritableOptions<GlanceSettings> settingsWriter,
         ILogger<GlanceAssistantSemanticResolverService> logger)
     {
         this.actionService = actionService;
-        this.settings = settings;
-        this.settingsWriter = settingsWriter;
         this.logger = logger;
         Register(resolvers);
     }
@@ -70,12 +63,7 @@ public sealed class GlanceAssistantSemanticResolverService :
         }
 
         OnPropertyChanged(nameof(Resolvers));
-        IGlanceAssistantSemanticResolver? preferred = Resolvers.FirstOrDefault(resolver => string.Equals(resolver.Id, settings.AssistantSemanticResolverId, StringComparison.OrdinalIgnoreCase));
-
-        if (ActiveResolver is null || (preferred is not null && !ReferenceEquals(ActiveResolver, preferred)))
-        {
-            ActiveResolver = preferred ?? Resolvers.FirstOrDefault();
-        }
+        ActiveResolver ??= Resolvers.FirstOrDefault();
     }
 
     public void Unregister(IEnumerable<IGlanceAssistantSemanticResolver> registrations)
@@ -95,20 +83,6 @@ public sealed class GlanceAssistantSemanticResolverService :
         }
 
         OnPropertyChanged(nameof(Resolvers));
-    }
-
-    public async Task SetActiveResolverAsync(string resolverId, CancellationToken cancellationToken = default)
-    {
-        IGlanceAssistantSemanticResolver? resolver = Resolvers.FirstOrDefault(candidate => string.Equals(candidate.Id, resolverId, StringComparison.OrdinalIgnoreCase));
-
-        if (resolver is null || ReferenceEquals(resolver, ActiveResolver))
-        {
-            return;
-        }
-
-        ActiveResolver = resolver;
-        await settingsWriter.WriteAsync(options => options.AssistantSemanticResolverId = resolver.Id);
-        cancellationToken.ThrowIfCancellationRequested();
     }
 
     public async Task<GlanceAssistantCommandResult> TryExecuteAsync(string command, CancellationToken cancellationToken = default)

@@ -16,11 +16,26 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        <Local:SpotifyLogo
-            x:Name="StatusIndicator"
-            Width="36"
-            Height="36"
-            VerticalAlignment="Center" />
+        <Border
+            x:Name="ArtworkContainer"
+            Width="64"
+            Height="64"
+            VerticalAlignment="Center"
+            CornerRadius="{StaticResource OverlayCornerRadius}">
+            <Grid>
+                <Border
+                    Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                    CornerRadius="{StaticResource OverlayCornerRadius}"
+                    Visibility="{x:Bind WhenArtworkUnavailable(ViewModel.Artwork), Mode=OneWay}">
+                    <Local:SpotifyLogo
+                        Width="32"
+                        Height="32"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" />
+                </Border>
+                <Local:SpotifyArtworkTransition Source="{x:Bind ToImageSource(ViewModel.Artwork), Mode=OneWay}" />
+            </Grid>
+        </Border>
         <Grid
             x:Name="DisconnectedContent"
             Grid.Column="1"
@@ -28,7 +43,7 @@
             Height="58"
             Margin="18,0,0,0"
             VerticalAlignment="Center"
-            Visibility="{x:Bind ViewModel.IsNotConnected, Mode=OneWay}">
+            Visibility="{x:Bind ViewModel.HasNoPlayback, Mode=OneWay}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="14" />
                 <RowDefinition Height="22" />
@@ -64,7 +79,7 @@
             Margin="18,0,16,0"
             VerticalAlignment="Center"
             RowSpacing="1"
-            Visibility="{x:Bind ViewModel.IsConnected, Mode=OneWay}">
+            Visibility="{x:Bind ViewModel.HasPlayback, Mode=OneWay}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -73,23 +88,35 @@
                 x:Name="PlaybackSourceButton"
                 MinHeight="18"
                 Padding="0"
-                HorizontalAlignment="Left"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
                 IsEnabled="{x:Bind ViewModel.HasDevices, Mode=OneWay}"
                 Style="{StaticResource SubtleButtonStyle}">
                 <Button.Content>
-                    <StackPanel Orientation="Horizontal" Spacing="4">
+                    <Grid ColumnSpacing="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
                         <TextBlock
-                            Foreground="{ThemeResource GlanceSpotifyIconBrush}"
+                            Foreground="{x:Bind ToAccentBrush(ViewModel.AccentColor), Mode=OneWay}"
                             Style="{StaticResource CaptionTextBlockStyle}"
-                            Text="{x:Bind ViewModel.PlaybackSourceName, Mode=OneWay}" />
+                            Text="{x:Bind ToUpper(ViewModel.PlaybackSourceName), Mode=OneWay}"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="NoWrap" />
                         <FontIcon
+                            Grid.Column="1"
                             FontSize="8"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                             Glyph="&#xE70D;" />
-                    </StackPanel>
+                    </Grid>
                 </Button.Content>
                 <Button.Flyout>
-                    <MenuFlyout x:Name="PlaybackSourceFlyout" Opening="HandlePlaybackSourceFlyoutOpening" />
+                    <MenuFlyout
+                        x:Name="PlaybackSourceFlyout"
+                        Closed="{x:Bind HandlePlaybackSourceFlyoutClosed}"
+                        Opened="{x:Bind HandlePlaybackSourceFlyoutOpened}"
+                        Opening="HandlePlaybackSourceFlyoutOpening" />
                 </Button.Flyout>
             </Button>
             <Grid Grid.Row="1" RowSpacing="1">
@@ -132,7 +159,7 @@
                         Margin="0,0,8,0"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Center"
-                        Fill="{ThemeResource GlanceSpotifyIconBrush}"
+                        Fill="{x:Bind ToAccentBrush(ViewModel.AccentColor), Mode=OneWay}"
                         IsHitTestVisible="False"
                         RadiusX="2"
                         RadiusY="2"
@@ -181,7 +208,7 @@
             VerticalAlignment="Center"
             Orientation="Horizontal"
             Spacing="5"
-            Visibility="{x:Bind ViewModel.IsConnected, Mode=OneWay}">
+            Visibility="{x:Bind ViewModel.HasPlayback, Mode=OneWay}">
             <Button x:Uid="PreviousButton" Click="{x:Bind ViewModel.Previous}" IsEnabled="{x:Bind ViewModel.CanControlPlayback, Mode=OneWay}">
                 <Button.Style>
                     <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
@@ -200,6 +227,20 @@
                 Click="{x:Bind ViewModel.TogglePlayback}"
                 Content="{x:Bind ViewModel.PlayPauseGlyph, Mode=OneWay}"
                 IsEnabled="{x:Bind ViewModel.CanControlPlayback, Mode=OneWay}">
+                <Button.Resources>
+                    <SolidColorBrush x:Key="AccentButtonBackground" Color="{x:Bind ToAccentColor(ViewModel.AccentColor), Mode=OneWay}" />
+                    <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="{x:Bind ToPointerOverColor(ViewModel.AccentColor), Mode=OneWay}" />
+                    <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="{x:Bind ToPressedColor(ViewModel.AccentColor), Mode=OneWay}" />
+                    <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="{x:Bind ToDisabledColor(ViewModel.AccentColor), Mode=OneWay}" />
+                    <SolidColorBrush x:Key="AccentButtonForeground" Color="{x:Bind ToForegroundColor(ViewModel.AccentColor), Mode=OneWay}" />
+                    <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="{x:Bind ToPointerOverForegroundColor(ViewModel.AccentColor), Mode=OneWay}" />
+                    <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="{x:Bind ToPressedForegroundColor(ViewModel.AccentColor), Mode=OneWay}" />
+                    <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="{x:Bind ToDisabledForegroundColor(ViewModel.AccentColor), Mode=OneWay}" />
+                    <SolidColorBrush x:Key="AccentButtonBorderBrush" Color="{x:Bind ToBorderColor(ViewModel.AccentColor), Mode=OneWay}" />
+                    <SolidColorBrush x:Key="AccentButtonBorderBrushPointerOver" Color="{x:Bind ToPointerOverBorderColor(ViewModel.AccentColor), Mode=OneWay}" />
+                    <SolidColorBrush x:Key="AccentButtonBorderBrushPressed" Color="{x:Bind ToPressedBorderColor(ViewModel.AccentColor), Mode=OneWay}" />
+                    <SolidColorBrush x:Key="AccentButtonBorderBrushDisabled" Color="{x:Bind ToDisabledBorderColor(ViewModel.AccentColor), Mode=OneWay}" />
+                </Button.Resources>
                 <Button.Style>
                     <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
                         <Setter Property="Width" Value="36" />

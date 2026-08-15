@@ -2,10 +2,6 @@ namespace Glance.Shell;
 
 public sealed class GlanceSettings
 {
-    public string? AssistantProviderId { get; set; }
-
-    public string? AssistantSemanticResolverId { get; set; }
-
     public bool AutoHide { get; set; }
 
     public GlanceExpansionMode ExpansionMode { get; set; }
@@ -18,7 +14,7 @@ public sealed class GlanceSettings
 
     public GlancePlacement Placement { get; set; } = GlancePlacement.Top;
 
-    public bool IsAssistantEnabled { get; set; } = true;
+    public bool IsAssistantEnabled { get; set; }
 
     public bool ShowSetupOnStartup { get; set; } = true;
 

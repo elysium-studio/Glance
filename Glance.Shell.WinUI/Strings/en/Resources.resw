@@ -66,10 +66,6 @@
   <data name="QuitDialogCloseButton" xml:space="preserve"><value>Cancel</value></data>
   <data name="AssistantEnabledCard.Header" xml:space="preserve"><value>Voice assistant</value></data>
   <data name="AssistantEnabledCard.Description" xml:space="preserve"><value>Listen for “Glance” or “Hey Glance” to control Glance with voice commands</value></data>
-  <data name="AssistantProviderCard.Header" xml:space="preserve"><value>Speech provider</value></data>
-  <data name="AssistantProviderCard.Description" xml:space="preserve"><value>Choose the provider used for wake-word and command recognition</value></data>
-  <data name="AssistantSemanticResolverCard.Header" xml:space="preserve"><value>Command understanding</value></data>
-  <data name="AssistantSemanticResolverCard.Description" xml:space="preserve"><value>Choose the local AI used to understand requests and select Glance actions</value></data>
   <data name="SetupTourTitleBar.Title" xml:space="preserve"><value>Getting Started</value></data>
   <data name="SetupTourWelcomeText.Text" xml:space="preserve"><value>Welcome to Glance</value></data>
   <data name="SetupTourWelcomeDescription.Text" xml:space="preserve"><value>Glance keeps useful tools and live information within reach in a compact desktop island. This quick walkthrough helps you choose how it behaves and which modules appear.</value></data>
@@ -99,6 +95,10 @@
   <data name="SetupPlacementBottomDescription.Text" xml:space="preserve"><value>Keep Glance close to the lower edge of your desktop.</value></data>
   <data name="ReorderModulesButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Reorder modules</value></data>
   <data name="ReorderModulesButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Reorder modules</value></data>
+  <data name="MoveToTaskbarButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Move to taskbar</value></data>
+  <data name="MoveToTaskbarButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Move Glance to the taskbar</value></data>
+  <data name="MoveToScreenEdgeButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Move to screen edge</value></data>
+  <data name="MoveToScreenEdgeButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Move Glance to the screen edge</value></data>
   <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Cancel</value></data>
   <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Cancel module reordering</value></data>
   <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Done</value></data>
@@ -112,4 +112,13 @@
   <data name="GlanceDisplayLocationCard.Description" xml:space="preserve"><value>Choose whether Glance floats at the screen edge or sits in the Windows taskbar</value></data>
   <data name="GlanceDisplayLocationDesktopEdgeOption.Content" xml:space="preserve"><value>Screen edge</value></data>
   <data name="GlanceDisplayLocationTaskbarOption.Content" xml:space="preserve"><value>Taskbar</value></data>
+  <data name="AssistantModelSetupExpander.Header" xml:space="preserve"><value>Set up voice assistant</value></data>
+  <data name="AssistantModelSetupExpander.Description" xml:space="preserve"><value>Download a speech model once. Voice processing stays on this device.</value></data>
+  <data name="AssistantModelChoiceCard.Header" xml:space="preserve"><value>Speech model</value></data>
+  <data name="AssistantModelInstallCard.Header" xml:space="preserve"><value>Model download</value></data>
+  <data name="AssistantModelInstallButtonText.Text" xml:space="preserve"><value>Install</value></data>
+  <data name="AssistantModelCancelButtonText.Text" xml:space="preserve"><value>Cancel</value></data>
+  <data name="AssistantModelRemoveButtonText.Text" xml:space="preserve"><value>Remove</value></data>
+  <data name="AssistantModelReadyInfoBar.Title" xml:space="preserve"><value>Ready</value></data>
+  <data name="AssistantModelReadyInfoBar.Message" xml:space="preserve"><value>The voice assistant can now be switched on.</value></data>
 </root>

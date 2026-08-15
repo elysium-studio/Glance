@@ -15,6 +15,25 @@ public sealed partial class ModuleSettingsItemView :
 
     public Visibility GetUninstallVisibility(bool canUninstall) => canUninstall ? Visibility.Visible : Visibility.Collapsed;
 
+    private void HandleLoaded(object sender, RoutedEventArgs args)
+    {
+        ActualThemeChanged += HandleActualThemeChanged;
+        ApplyHeaderIcon();
+    }
+
+    private void HandleUnloaded(object sender, RoutedEventArgs args) =>
+        ActualThemeChanged -= HandleActualThemeChanged;
+
+    private void HandleActualThemeChanged(FrameworkElement sender, object args) => ApplyHeaderIcon();
+
+    private void ApplyHeaderIcon()
+    {
+        if (ViewModel.CreateIcon(ActualTheme == ElementTheme.Light) is IconElement icon)
+        {
+            SettingsCard.HeaderIcon = icon;
+        }
+    }
+
     private async void HandleUninstallClicked(object sender,
         RoutedEventArgs args)
     {

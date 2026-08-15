@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="Glance.Shell.WinUI.AssistantModelSetupView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:CommunityToolkit="using:CommunityToolkit.WinUI.Controls">
+    <StackPanel Spacing="8">
+        <CommunityToolkit:SettingsExpander
+            x:Uid="AssistantModelSetupExpander"
+            IsExpanded="True">
+            <CommunityToolkit:SettingsExpander.HeaderIcon>
+                <FontIcon Glyph="&#xE720;" />
+            </CommunityToolkit:SettingsExpander.HeaderIcon>
+            <CommunityToolkit:SettingsExpander.Items>
+                <CommunityToolkit:SettingsCard
+                    x:Uid="AssistantModelChoiceCard"
+                    Description="{x:Bind ViewModel.SelectedDescription, Mode=OneWay}">
+                    <ComboBox
+                        Width="240"
+                        DisplayMemberPath="DisplayLabel"
+                        IsEnabled="{x:Bind ViewModel.CanChangeModel, Mode=OneWay}"
+                        ItemsSource="{x:Bind ViewModel.Models, Mode=OneWay}"
+                        SelectedIndex="{x:Bind ViewModel.SelectedIndex, Mode=TwoWay}" />
+                </CommunityToolkit:SettingsCard>
+                <CommunityToolkit:SettingsCard
+                    x:Uid="AssistantModelInstallCard"
+                    Description="{x:Bind ViewModel.SelectedDownloadDescription, Mode=OneWay}">
+                    <Grid ColumnSpacing="8">
+                        <Button
+                            x:Name="InstallButton"
+                            MinWidth="132"
+                            Click="HandleInstallClick"
+                            IsEnabled="{x:Bind ViewModel.CanInstall, Mode=OneWay}"
+                            Visibility="{x:Bind ViewModel.ShowInstallButton, Mode=OneWay}">
+                            <TextBlock x:Uid="AssistantModelInstallButtonText" />
+                        </Button>
+                        <Button
+                            x:Name="CancelButton"
+                            MinWidth="132"
+                            Click="HandleCancelClick"
+                            Visibility="{x:Bind ViewModel.ShowCancelButton, Mode=OneWay}">
+                            <TextBlock x:Uid="AssistantModelCancelButtonText" />
+                        </Button>
+                        <Button
+                            x:Name="RemoveButton"
+                            MinWidth="132"
+                            Click="HandleRemoveClick"
+                            IsEnabled="{x:Bind ViewModel.CanRemove, Mode=OneWay}"
+                            Visibility="{x:Bind ViewModel.ShowRemoveButton, Mode=OneWay}">
+                            <TextBlock x:Uid="AssistantModelRemoveButtonText" />
+                        </Button>
+                    </Grid>
+                </CommunityToolkit:SettingsCard>
+            </CommunityToolkit:SettingsExpander.Items>
+        </CommunityToolkit:SettingsExpander>
+        <ProgressBar
+            Maximum="100"
+            Value="{x:Bind ViewModel.Progress, Mode=OneWay}"
+            Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+        <InfoBar
+            IsClosable="False"
+            IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
+            Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+            Severity="Error" />
+        <InfoBar
+            x:Uid="AssistantModelReadyInfoBar"
+            IsClosable="False"
+            IsOpen="{x:Bind ViewModel.IsSetupComplete, Mode=OneWay}"
+            Severity="Success" />
+    </StackPanel>
+</UserControl>

@@ -19,7 +19,7 @@ internal sealed class SpotifySetupService : ISpotifySetupService
 {
     private static readonly Uri DashboardUri = new("https://developer.spotify.com/dashboard");
 
-    public string RedirectUri => "http://127.0.0.1/callback";
+    public string RedirectUri => SpotifyAuthenticationDefaults.RedirectUri.AbsoluteUri;
 
     public async Task OpenDashboardAsync() => _ = await Launcher.LaunchUriAsync(DashboardUri);
 
@@ -32,11 +32,15 @@ internal sealed class SpotifySetupService : ISpotifySetupService
                 DataPackage content = new();
                 content.SetText(RedirectUri);
                 Clipboard.SetContent(content);
-                Clipboard.Flush();
                 return true;
             }
-            catch (COMException) when (attempt < 5)
+            catch (COMException)
             {
+                if (attempt == 5)
+                {
+                    return false;
+                }
+
                 await Task.Delay(40 * (attempt + 1));
             }
         }

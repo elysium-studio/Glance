@@ -99,6 +99,10 @@
   <data name="SetupPlacementBottomDescription.Text" xml:space="preserve"><value>Keep Glance close to the lower edge of your desktop.</value></data>
   <data name="ReorderModulesButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>モジュールの並べ替え</value></data>
   <data name="ReorderModulesButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>モジュールの並べ替え</value></data>
+  <data name="MoveToTaskbarButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>タスクバーに移動</value></data>
+  <data name="MoveToTaskbarButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Glance をタスクバーに移動</value></data>
+  <data name="MoveToScreenEdgeButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>画面の端に移動</value></data>
+  <data name="MoveToScreenEdgeButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Glance を画面の端に移動</value></data>
   <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>キャンセル</value></data>
   <data name="CancelModuleReorderButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>モジュールの並べ替えをキャンセル</value></data>
   <data name="ConfirmModuleReorderButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>完了</value></data>

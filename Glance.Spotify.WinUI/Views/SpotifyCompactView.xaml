@@ -22,8 +22,11 @@
                     <VisualState.Setters>
                         <Setter Target="LayoutRoot.Padding" Value="10,2" />
                         <Setter Target="LayoutRoot.ColumnSpacing" Value="7" />
-                        <Setter Target="LogoContainer.Width" Value="22" />
-                        <Setter Target="LogoContainer.Height" Value="22" />
+                        <Setter Target="ArtworkContainer.Width" Value="22" />
+                        <Setter Target="ArtworkContainer.Height" Value="22" />
+                        <Setter Target="ArtworkContainer.CornerRadius" Value="5.5" />
+                        <Setter Target="CompactIcon.Width" Value="18" />
+                        <Setter Target="CompactIcon.Height" Value="18" />
                     </VisualState.Setters>
                 </VisualState>
                 <VisualState x:Name="Small">
@@ -33,9 +36,12 @@
                     <VisualState.Setters>
                         <Setter Target="LayoutRoot.Padding" Value="8,0,8,4" />
                         <Setter Target="LayoutRoot.ColumnSpacing" Value="6" />
-                        <Setter Target="LogoContainer.Width" Value="18" />
-                        <Setter Target="LogoContainer.Height" Value="18" />
-                        <Setter Target="LogoContainer.Margin" Value="0,1,0,-1" />
+                        <Setter Target="ArtworkContainer.Width" Value="18" />
+                        <Setter Target="ArtworkContainer.Height" Value="18" />
+                        <Setter Target="ArtworkContainer.Margin" Value="0,1,0,-1" />
+                        <Setter Target="ArtworkContainer.CornerRadius" Value="4.5" />
+                        <Setter Target="CompactIcon.Width" Value="14" />
+                        <Setter Target="CompactIcon.Height" Value="14" />
                         <Setter Target="TitleText.FontSize" Value="12" />
                         <Setter Target="TitleText.FontWeight" Value="Normal" />
                     </VisualState.Setters>
@@ -46,11 +52,27 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Local:SpotifyLogo
-            x:Name="LogoContainer"
+        <Border
+            x:Name="ArtworkContainer"
             Width="28"
             Height="28"
-            VerticalAlignment="Center" />
+            VerticalAlignment="Center"
+            CornerRadius="7">
+            <Grid>
+                <Border
+                    Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                    CornerRadius="7"
+                    Visibility="{x:Bind WhenArtworkUnavailable(ViewModel.Artwork), Mode=OneWay}">
+                    <Local:SpotifyLogo
+                        x:Name="CompactIcon"
+                        Width="23"
+                        Height="23"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" />
+                </Border>
+                <Local:SpotifyArtworkTransition Source="{x:Bind ToImageSource(ViewModel.Artwork), Mode=OneWay}" />
+            </Grid>
+        </Border>
         <Controls:MarqueeTextBlock
             x:Name="TitleText"
             Grid.Column="1"

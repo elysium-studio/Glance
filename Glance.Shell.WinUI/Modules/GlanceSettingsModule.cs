@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
 using Glance.Application.Abstractions;
+using Glance.Transcription;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Glance.Shell.WinUI;
@@ -10,6 +11,10 @@ public sealed class GlanceSettingsModule :
     IModule
 {
     public void Register(IServiceCollection services) => _ = services
+            .AddViewFor<AssistantModelSetupView, IGlanceViewModel, AssistantModelSetupViewModel>(ServiceLifetime.Transient,
+                provider => new AssistantModelSetupView(),
+                provider => new AssistantModelSetupViewModel(provider.GetRequiredService<ITranscriptionModelCatalog>(),
+                    provider.GetRequiredService<IDispatcher>()))
             .AddViewFor<AssistantEnabledView, IGlanceViewModel, AssistantEnabledViewModel>(ServiceLifetime.Transient,
                 provider => new AssistantEnabledView(),
                 provider => new AssistantEnabledViewModel(provider,
@@ -19,14 +24,9 @@ public sealed class GlanceSettingsModule :
                     provider.GetRequiredService<IDispatcher>(),
                     provider.GetRequiredService<GlanceSettings>(),
                     provider.GetRequiredService<IWritableOptions<GlanceSettings>>(),
+                    provider.GetRequiredService<IGlanceAssistantService>(),
                     config => config.IsAssistantEnabled,
                     (config, enabled) => config.IsAssistantEnabled = enabled))
-            .AddViewFor<AssistantProviderView, IGlanceViewModel, AssistantProviderViewModel>(ServiceLifetime.Transient,
-                provider => new AssistantProviderView(),
-                provider => new AssistantProviderViewModel(provider.GetRequiredService<IGlanceAssistantService>()))
-            .AddViewFor<AssistantSemanticResolverView, IGlanceViewModel, AssistantSemanticResolverViewModel>(ServiceLifetime.Transient,
-                provider => new AssistantSemanticResolverView(),
-                provider => new AssistantSemanticResolverViewModel(provider.GetRequiredService<IGlanceAssistantSemanticResolverService>()))
             .AddViewFor<DisplayLocationView, IGlanceViewModel, DisplayLocationViewModel>(ServiceLifetime.Transient,
                 provider => new DisplayLocationView(),
                 provider => new DisplayLocationViewModel(provider,

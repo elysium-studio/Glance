@@ -15,6 +15,8 @@ public interface IGlanceAssistantService :
 
     bool IsEnabled { get; }
 
+    bool CanEnable { get; }
+
     bool IsOverlayVisible { get; }
 
     bool IsResultPresentationActive { get; }
@@ -26,6 +28,4 @@ public interface IGlanceAssistantService :
     object? OverlayContent { get; }
 
     Task SetEnabledAsync(bool isEnabled, CancellationToken cancellationToken = default);
-
-    Task SetActiveProviderAsync(string providerId, CancellationToken cancellationToken = default);
 }

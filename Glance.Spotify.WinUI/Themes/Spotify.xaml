@@ -5,18 +5,36 @@
             <SolidColorBrush x:Key="AccentButtonBackground" Color="#1ED760" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#1FDF64" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#169C46" />
+            <SolidColorBrush x:Key="SliderThumbBackground" Color="#1ED760" />
+            <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="#1FDF64" />
+            <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="#169C46" />
+            <SolidColorBrush x:Key="SliderTrackValueFill" Color="#1ED760" />
+            <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="#1FDF64" />
+            <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="#169C46" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="GlanceSpotifyIconBrush" Color="#16883E" />
             <SolidColorBrush x:Key="AccentButtonBackground" Color="#16883E" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#137A38" />
             <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#0F642E" />
+            <SolidColorBrush x:Key="SliderThumbBackground" Color="#16883E" />
+            <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="#137A38" />
+            <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="#0F642E" />
+            <SolidColorBrush x:Key="SliderTrackValueFill" Color="#16883E" />
+            <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="#137A38" />
+            <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="#0F642E" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <StaticResource x:Key="GlanceSpotifyIconBrush" ResourceKey="SystemColorHighlightColorBrush" />
             <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemColorHighlightColorBrush" />
             <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="SystemColorHighlightColorBrush" />
             <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="SliderThumbBackground" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="SliderThumbBackgroundPointerOver" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="SliderThumbBackgroundPressed" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="SliderTrackValueFill" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="SliderTrackValueFillPointerOver" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="SliderTrackValueFillPressed" ResourceKey="SystemColorHighlightColorBrush" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

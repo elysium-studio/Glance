@@ -14,7 +14,10 @@ public sealed class ApplicationModule(string applicationData,
     IModule
 {
     public void Register(IServiceCollection services) => _ = services
-            .AddSingleton(new AppEnvironment(applicationData)).AddSingleton<IStartupManager>(new StartupManager(Environment.ProcessPath ?? string.Empty, "GlanceDesktop", "GlanceDesktop")).AddSingleton<IDispatcher>(new Dispatcher(args =>
+            .AddSingleton(new AppEnvironment(applicationData))
+            .AddSingleton<IMonitorLocator, MonitorLocator>()
+            .AddSingleton<ITaskbarLocator, TaskbarLocator>()
+            .AddSingleton<IStartupManager>(new StartupManager(Environment.ProcessPath ?? string.Empty, "GlanceDesktop", "GlanceDesktop")).AddSingleton<IDispatcher>(new Dispatcher(args =>
             {
                 if (dispatcherQueue.HasThreadAccess)
                 {

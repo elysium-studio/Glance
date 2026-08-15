@@ -22,6 +22,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Glance.Application.Abstractions\Glance.Application.Abstractions.csproj" />
     <ProjectReference Include="..\Glance.Assistant\Glance.Assistant.csproj" />
+    <ProjectReference Include="..\Glance.Transcription.Windows\Glance.Transcription.Windows.csproj" />
+    <ProjectReference Include="..\Glance.Transcription\Glance.Transcription.csproj" />
     <ProjectReference Include="..\Glance.UI.WinUI\Glance.UI.WinUI.csproj" />
   </ItemGroup>
   <Target Name="RestoreAssistantPriIndexName" AfterTargets="_OverrideGetPriIndexName">

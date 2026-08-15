@@ -86,6 +86,8 @@ public interface IGlanceComponent
 
     string IconFontFamily => "Segoe Fluent Icons";
 
+    object? CreateIcon(bool isLightTheme) => null;
+
     int Order { get; }
 
     object CompactContent { get; }

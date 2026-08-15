@@ -165,7 +165,7 @@ public sealed partial class SpotifyConnectionSettingViewModel :
             return;
         }
 
-        IsBusy = true;
+        SetBusy(true);
         ClearError();
 
         try
@@ -196,7 +196,7 @@ public sealed partial class SpotifyConnectionSettingViewModel :
         }
         finally
         {
-            IsBusy = false;
+            SetBusy(false);
         }
     }
 
@@ -235,7 +235,7 @@ public sealed partial class SpotifyConnectionSettingViewModel :
             return;
         }
 
-        IsBusy = true;
+        SetBusy(true);
 
         try
         {
@@ -251,7 +251,7 @@ public sealed partial class SpotifyConnectionSettingViewModel :
         }
         finally
         {
-            IsBusy = false;
+            SetBusy(false);
         }
     }
 
@@ -274,13 +274,13 @@ public sealed partial class SpotifyConnectionSettingViewModel :
     private async Task RefreshAsync()
     {
         SpotifyConnectionState state = connectionService.State;
-        ButtonText = state == SpotifyConnectionState.Connected
+        string buttonText = state == SpotifyConnectionState.Connected
             ? localizer.GetText("DisconnectSpotify")
             : localizer.GetText("ConnectSpotify");
 
         if (!IsConfigured)
         {
-            StatusText = localizer.GetText("SpotifyDisconnected");
+            ApplyPresentation(buttonText, localizer.GetText("SpotifyDisconnected"));
             return;
         }
 
@@ -289,26 +289,28 @@ public sealed partial class SpotifyConnectionSettingViewModel :
             try
             {
                 SpotifyAccount? account = await profileService.GetCurrentAccountAsync(token);
-                StatusText = account is null
+                string status = account is null
                     ? localizer.GetText("SpotifyConnected")
                     : string.Format(localizer.GetText("SpotifyConnectedAs"), account.DisplayName);
-                ClearError();
+                ApplyPresentation(buttonText, status, true);
             }
             catch (OperationCanceledException)
             {
             }
             catch (Exception exception)
             {
-                StatusText = localizer.GetText("SpotifyConnected");
-                ShowError(exception.Message);
+                ApplyPresentation(buttonText,
+                    localizer.GetText("SpotifyConnected"),
+                    exception.Message);
             }
 
             return;
         }
 
-        StatusText = state == SpotifyConnectionState.Connecting
+        string statusText = state == SpotifyConnectionState.Connecting
             ? localizer.GetText("Connecting")
             : localizer.GetText("SpotifyDisconnected");
+        ApplyPresentation(buttonText, statusText);
     }
 
     private void HandleConnectionStateChanged(object? sender,
@@ -342,13 +344,51 @@ public sealed partial class SpotifyConnectionSettingViewModel :
 
     private void ShowError(string message)
     {
-        HasError = true;
-        ErrorMessage = message;
+        dispatcher.Dispatch(() =>
+        {
+            HasError = true;
+            ErrorMessage = message;
+        });
     }
 
     private void ClearError()
     {
-        HasError = false;
-        ErrorMessage = string.Empty;
+        dispatcher.Dispatch(() =>
+        {
+            HasError = false;
+            ErrorMessage = string.Empty;
+        });
     }
+
+    private void SetBusy(bool value) => dispatcher.Dispatch(() => IsBusy = value);
+
+    private void ApplyPresentation(string buttonText, string statusText) => dispatcher.Dispatch(() =>
+    {
+        ButtonText = buttonText;
+        StatusText = statusText;
+    });
+
+    private void ApplyPresentation(string buttonText,
+        string statusText,
+        bool clearError) => dispatcher.Dispatch(() =>
+        {
+            ButtonText = buttonText;
+            StatusText = statusText;
+
+            if (clearError)
+            {
+                HasError = false;
+                ErrorMessage = string.Empty;
+            }
+        });
+
+    private void ApplyPresentation(string buttonText,
+        string statusText,
+        string errorMessage) => dispatcher.Dispatch(() =>
+        {
+            ButtonText = buttonText;
+            StatusText = statusText;
+            HasError = true;
+            ErrorMessage = errorMessage;
+        });
 }

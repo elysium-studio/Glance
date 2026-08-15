@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
 using Glance.Shell;
+using Glance.Transcription;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
@@ -14,7 +15,7 @@ public sealed class GlanceAssistantServiceTests
     {
         GlanceSettings settings = new() { IsAssistantEnabled = false };
         QueuedDispatcher dispatcher = new();
-        GlanceAssistantService service = new(settings, new TestWritableOptions(settings), new WeakReferenceMessenger(), dispatcher, new TestActionService(), NullLogger<GlanceAssistantService>.Instance);
+        GlanceAssistantService service = new(settings, new TestWritableOptions(settings), new WeakReferenceMessenger(), dispatcher, new TestActionService(), new TestTranscriptionModelCatalog(), NullLogger<GlanceAssistantService>.Instance);
 
         service.Receive(new OptionsChangedEventArgs<GlanceSettings>(new GlanceSettings { IsAssistantEnabled = true }));
 
@@ -73,5 +74,40 @@ public sealed class GlanceAssistantServiceTests
 
         public Task<GlanceActionResult> InvokeAsync(GlanceActionRequest request,
             CancellationToken cancellationToken = default) => Task.FromResult(GlanceActionResult.Unavailable());
+    }
+
+    private sealed class TestTranscriptionModelCatalog :
+        ITranscriptionModelCatalog
+    {
+        private static readonly TranscriptionModel Model = new("test", "Test", "Test", 0);
+
+        public event EventHandler? StateChanged
+        {
+            add { }
+            remove { }
+        }
+
+        public IReadOnlyList<TranscriptionModel> Models => [Model];
+
+        public string DefaultModelId => Model.Id;
+
+        public bool IsInstalled(string modelId) => modelId == Model.Id;
+
+        public string GetModelPath(string modelId) => string.Empty;
+
+        public Task<TranscriptionModelState> GetStateAsync(string modelId,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(TranscriptionModelState.Installed);
+
+        public Task InstallAsync(string modelId,
+            IProgress<double>? progress = null,
+            CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task RemoveAsync(string modelId,
+            CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public BackgroundDownloadSnapshot? GetDownload(string modelId) => null;
+
+        public bool CancelInstall(string modelId) => false;
     }
 }

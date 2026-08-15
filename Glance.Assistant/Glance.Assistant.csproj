@@ -19,5 +19,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Glance.Application.Abstractions\Glance.Application.Abstractions.csproj" />
+    <ProjectReference Include="..\Glance.Transcription\Glance.Transcription.csproj" />
   </ItemGroup>
 </Project>

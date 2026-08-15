@@ -4,11 +4,14 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:CommunityToolkit="using:CommunityToolkit.WinUI.Controls"
-    xmlns:Local="using:Glance.Shell.WinUI">
+    xmlns:Local="using:Glance.Shell.WinUI"
+    Loaded="{x:Bind HandleLoaded}"
+    Unloaded="{x:Bind HandleUnloaded}">
     <UserControl.Resources>
         <Local:GlanceModuleAccentBrushConverter x:Key="GlanceModuleAccentBrushConverter" />
     </UserControl.Resources>
     <CommunityToolkit:SettingsCard
+        x:Name="SettingsCard"
         Click="{x:Bind ViewModel.NavigateToSettings}"
         Description="{x:Bind ViewModel.Description}"
         Header="{x:Bind ViewModel.DisplayName}"

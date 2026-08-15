@@ -9,6 +9,7 @@
     <CommunityToolkit:SettingsCard x:Uid="AssistantEnabledCard">
         <ToggleSwitch
             x:Uid="BooleanToggle"
+            IsEnabled="{x:Bind ViewModel.Assistant.CanEnable, Mode=OneWay}"
             IsOn="{x:Bind ViewModel.Value, Mode=TwoWay}" />
     </CommunityToolkit:SettingsCard>
 </UserControl>
