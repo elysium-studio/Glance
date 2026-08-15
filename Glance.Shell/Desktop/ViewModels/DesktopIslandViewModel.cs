@@ -283,7 +283,8 @@ public sealed partial class DesktopIslandViewModel :
 
     public bool CanHandleContent(GlanceContentKind kind) => IntentService.GetIntents(kind).Count > 0;
 
-    public bool TryActivateContent(GlanceContentContext context)
+    public bool TryActivateContent(GlanceContentContext context,
+        bool restoreExpandedState)
     {
         IReadOnlyList<GlanceContentRoute> routes = GetContentRoutes(context);
 
@@ -297,7 +298,7 @@ public sealed partial class DesktopIslandViewModel :
             isContentRouting = true;
             contentRoutingContext = context;
             contentRoutingPreviousIndex = SelectedIndex;
-            contentRoutingPreviousExpanded = IsExpanded;
+            contentRoutingPreviousExpanded = restoreExpandedState;
             contentRoutingPreviousOpen = IsOpen;
         }
         else if (contentRoutingContext == context)

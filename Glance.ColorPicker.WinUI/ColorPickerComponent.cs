@@ -107,5 +107,5 @@ public sealed partial class ColorPickerComponent :
 
     private void HandleOptionsChanged(object? sender, GlanceModuleOptionsChangedEventArgs<ColorPickerSettings> args) => _ = dispatcherQueue.TryEnqueue(() => viewModel.ApplySettings(args.Options));
 
-    private void HandleColorPicked(object? sender, ColorPickerEventArgs args) => attentionService.RequestAttention(Id);
+    private void HandleColorPicked(object? sender, ColorPickerEventArgs args) => attentionService.RequestAttention(Id, expand: false);
 }

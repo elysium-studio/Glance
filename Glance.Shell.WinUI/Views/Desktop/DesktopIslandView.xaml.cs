@@ -2217,7 +2217,10 @@ public sealed partial class DesktopIslandView :
         {
             if (isContextualDragActive && session == contextualDragSession)
             {
-                _ = ViewModel.TryActivateContent(context);
+                bool restoreExpandedState = HostMode == DesktopIslandHostMode.Taskbar
+                    ? ViewModel.IsPinned
+                    : ViewModel.IsExpanded;
+                _ = ViewModel.TryActivateContent(context, restoreExpandedState);
             }
         });
     }
