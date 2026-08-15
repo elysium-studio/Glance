@@ -1813,8 +1813,9 @@ public sealed partial class DesktopIslandView :
     {
         MonitorHandle monitor = monitorLocator.GetMonitorForWindow(new WindowHandle(Handle));
         bool isTaskbarAtTop = taskbarLocator.GetTaskbarForMonitor(monitor)?.Edge == TaskbarEdge.Top;
-        MoveToTaskbarIcon.Glyph = isTaskbarAtTop ? "\uE8AD" : "\uE90E";
-        MoveToScreenEdgeIcon.Glyph = isTaskbarAtTop ? "\uEA4F" : "\uE8AB";
+        MoveToTaskbarIcon.Glyph = isTaskbarAtTop ? "\uE8AD" : "\uEA4F";
+        MoveToTaskbarIconTransform.Angle = isTaskbarAtTop ? 0 : 180;
+        MoveToScreenEdgeIcon.Glyph = isTaskbarAtTop ? "\uE8AD" : "\uEA4F";
         MoveToScreenEdgeIconTransform.Angle = isTaskbarAtTop ? 180 : 0;
     }
 

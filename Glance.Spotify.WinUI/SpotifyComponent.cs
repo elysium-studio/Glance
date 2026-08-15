@@ -22,6 +22,8 @@ public sealed class SpotifyComponent :
     IGlanceConnectedAnimationComponent,
     IDisposable
 {
+    private static readonly TimeSpan PlaybackRefreshInterval = TimeSpan.FromSeconds(8);
+    private static readonly TimeSpan DeviceRefreshInterval = TimeSpan.FromMinutes(1);
     private readonly SpotifyViewModel viewModel;
     private readonly ISpotifyConnectionService connectionService;
     private readonly ISpotifyPlaybackService playbackService;
@@ -34,9 +36,10 @@ public sealed class SpotifyComponent :
     private readonly CancellationToken token;
     private readonly SemaphoreSlim synchronization = new(1, 1);
     private DateTimeOffset refreshAfter;
-    private int refreshCount;
+    private DateTimeOffset nextPlaybackRefreshAt;
+    private DateTimeOffset nextDeviceRefreshAt;
+    private DateTimeOffset lastProgressUpdateAt;
     private int refreshing;
-    private int playbackMutationVersion;
     private int artworkGeneration;
     private int disposed;
     private CancellationTokenSource? artworkCancellation;
@@ -65,7 +68,7 @@ public sealed class SpotifyComponent :
         CompactAnimationElement = compactView.ConnectedAnimationElement;
         ExpandedAnimationElement = expandedView.ConnectedAnimationElement;
         refreshTimer = dispatcherQueue.CreateTimer();
-        refreshTimer.Interval = TimeSpan.FromSeconds(2);
+        refreshTimer.Interval = TimeSpan.FromSeconds(1);
         refreshTimer.IsRepeating = true;
         refreshTimer.Tick += HandleRefreshTimerTick;
         connectionService.StateChanged += HandleConnectionStateChanged;
@@ -127,8 +130,6 @@ public sealed class SpotifyComponent :
 
         try
         {
-            _ = Interlocked.Increment(ref playbackMutationVersion);
-
             switch (request.ActionId)
             {
                 case "Spotify.Previous":
@@ -147,7 +148,7 @@ public sealed class SpotifyComponent :
                     return GlanceActionResult.Unavailable();
             }
 
-            await RefreshOnceAsync(cancellationToken);
+            await RefreshOnceAsync(cancellationToken, true);
             return GlanceActionResult.Success();
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
@@ -207,7 +208,8 @@ public sealed class SpotifyComponent :
 
             if (restored)
             {
-                await RefreshOnceAsync(token);
+                lastProgressUpdateAt = DateTimeOffset.UtcNow;
+                await RefreshOnceAsync(token, true);
                 refreshTimer.Start();
             }
         }
@@ -220,31 +222,30 @@ public sealed class SpotifyComponent :
         }
     }
 
-    private async Task RefreshAsync(CancellationToken cancellationToken)
+    private async Task RefreshAsync(CancellationToken cancellationToken,
+        bool force)
     {
         if (connectionService.State != SpotifyConnectionState.Connected)
         {
             return;
         }
 
-        if (refreshAfter > DateTimeOffset.UtcNow)
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+
+        if (refreshAfter > now || !force && nextPlaybackRefreshAt > now)
         {
             return;
         }
 
         try
         {
-            int mutationVersion = Volatile.Read(ref playbackMutationVersion);
             SpotifyPlaybackSnapshot? playback = await playbackService.GetPlaybackAsync(cancellationToken);
-            IReadOnlyList<SpotifyDevice>? devices = null;
-
-            if (refreshCount++ % 5 == 0)
-            {
-                devices = await playbackService.GetDevicesAsync(cancellationToken);
-            }
-
-            ApplyPlayback(playback, devices, mutationVersion);
+            viewModel.ApplyPlayback(playback);
+            nextPlaybackRefreshAt = DateTimeOffset.UtcNow.Add(PlaybackRefreshInterval);
             refreshAfter = DateTimeOffset.MinValue;
+            viewModel.SetStatusMessage(string.Empty);
+
+            await RefreshDevicesAsync(cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -260,7 +261,38 @@ public sealed class SpotifyComponent :
         }
     }
 
-    private async Task RefreshOnceAsync(CancellationToken cancellationToken)
+    private async Task RefreshDevicesAsync(CancellationToken cancellationToken)
+    {
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+
+        if (nextDeviceRefreshAt > now)
+        {
+            return;
+        }
+
+        nextDeviceRefreshAt = now.Add(DeviceRefreshInterval);
+
+        try
+        {
+            IReadOnlyList<SpotifyDevice> devices = await playbackService.GetDevicesAsync(cancellationToken);
+            viewModel.ApplyDevices(devices);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (SpotifyApiException exception) when (exception.RetryAfter is TimeSpan retryAfter)
+        {
+            nextDeviceRefreshAt = DateTimeOffset.UtcNow.Add(retryAfter > DeviceRefreshInterval
+                ? retryAfter
+                : DeviceRefreshInterval);
+        }
+        catch
+        {
+        }
+    }
+
+    private async Task RefreshOnceAsync(CancellationToken cancellationToken,
+        bool force = false)
     {
         if (Interlocked.Exchange(ref refreshing, 1) != 0)
         {
@@ -269,7 +301,7 @@ public sealed class SpotifyComponent :
 
         try
         {
-            await RefreshAsync(cancellationToken);
+            await RefreshAsync(cancellationToken, force);
         }
         finally
         {
@@ -277,30 +309,18 @@ public sealed class SpotifyComponent :
         }
     }
 
-    private void ApplyPlayback(SpotifyPlaybackSnapshot? playback,
-        IReadOnlyList<SpotifyDevice>? devices,
-        int mutationVersion)
+    private async void HandleRefreshTimerTick(DispatcherQueueTimer sender, object args)
     {
-        void Apply()
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+
+        if (lastProgressUpdateAt != default)
         {
-            if (Volatile.Read(ref disposed) == 0 &&
-                mutationVersion == Volatile.Read(ref playbackMutationVersion))
-            {
-                viewModel.ApplyPlayback(playback, devices);
-            }
+            viewModel.AdvancePlayback(now - lastProgressUpdateAt);
         }
 
-        if (dispatcherQueue.HasThreadAccess)
-        {
-            Apply();
-            return;
-        }
-
-        _ = dispatcherQueue.TryEnqueue(Apply);
-    }
-
-    private async void HandleRefreshTimerTick(DispatcherQueueTimer sender, object args) =>
+        lastProgressUpdateAt = now;
         await RefreshOnceAsync(token);
+    }
 
     private void HandleConnectionStateChanged(object? sender, SpotifyConnectionStateChangedEventArgs args) =>
         _ = dispatcherQueue.TryEnqueue(() =>
@@ -314,8 +334,11 @@ public sealed class SpotifyComponent :
 
             if (args.State == SpotifyConnectionState.Connected)
             {
+                nextPlaybackRefreshAt = DateTimeOffset.MinValue;
+                nextDeviceRefreshAt = DateTimeOffset.MinValue;
+                lastProgressUpdateAt = DateTimeOffset.UtcNow;
                 refreshTimer.Start();
-                _ = RefreshOnceAsync(token);
+                _ = RefreshOnceAsync(token, true);
             }
             else
             {
@@ -514,8 +537,6 @@ public sealed class SpotifyComponent :
     {
         try
         {
-            _ = Interlocked.Increment(ref playbackMutationVersion);
-
             switch (action.Kind)
             {
                 case SpotifyPlaybackActionKind.Previous:
@@ -545,7 +566,7 @@ public sealed class SpotifyComponent :
                     break;
             }
 
-            await RefreshOnceAsync(token);
+            await RefreshOnceAsync(token, true);
         }
         catch (OperationCanceledException)
         {

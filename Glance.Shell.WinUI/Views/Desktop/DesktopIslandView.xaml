@@ -191,7 +191,12 @@
                             <FontIcon
                                 x:Name="MoveToTaskbarIcon"
                                 FontSize="12"
-                                Glyph="&#xE90E;" />
+                                Glyph="&#xEA4F;"
+                                RenderTransformOrigin="0.5,0.5">
+                                <FontIcon.RenderTransform>
+                                    <RotateTransform x:Name="MoveToTaskbarIconTransform" Angle="180" />
+                                </FontIcon.RenderTransform>
+                            </FontIcon>
                         </Button.Content>
                         <Button.Style>
                             <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
@@ -214,7 +219,7 @@
                             <FontIcon
                                 x:Name="MoveToScreenEdgeIcon"
                                 FontSize="12"
-                                Glyph="&#xE8AB;"
+                                Glyph="&#xEA4F;"
                                 RenderTransformOrigin="0.5,0.5">
                                 <FontIcon.RenderTransform>
                                     <RotateTransform x:Name="MoveToScreenEdgeIconTransform" />

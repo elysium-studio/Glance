@@ -143,6 +143,18 @@ public sealed partial class SpotifyViewModel :
         IReadOnlyList<SpotifyDevice>? availableDevices = null) =>
         dispatcher.Dispatch(() => ApplyPlaybackCore(snapshot, availableDevices));
 
+    public void ApplyDevices(IReadOnlyList<SpotifyDevice> availableDevices) =>
+        dispatcher.Dispatch(() => Devices = availableDevices);
+
+    public void AdvancePlayback(TimeSpan elapsed) => dispatcher.Dispatch(() =>
+    {
+        if (HasPlayback && IsPlaying && pendingSeekTarget is null)
+        {
+            ProgressMilliseconds = Math.Min(DurationMilliseconds,
+                ProgressMilliseconds + Math.Max(0, elapsed.TotalMilliseconds));
+        }
+    });
+
     public void SetStatusMessage(string message) => dispatcher.Dispatch(() => StatusMessage = message);
 
     public void CancelPendingSeek() => dispatcher.Dispatch(ClearPendingSeek);
