@@ -72,6 +72,7 @@ public sealed partial class DesktopIslandView :
     private IGlanceIslandActivationComponent? islandActivationComponent;
     private IGlanceExpansionLockComponent? expansionLockComponent;
     private IGlanceInteractionAwareComponent? interactionComponent;
+    private IGlanceViewAwareComponent? visibleComponent;
     private IGlanceFooterAppearanceComponent? footerAppearanceComponent;
     private bool isPointerOverIsland;
     private bool isAssistantPresentationRequested;
@@ -199,6 +200,7 @@ public sealed partial class DesktopIslandView :
         ApplyContentRoutePresentation(ViewModel.IsContentRoutePickerVisible);
         ApplyModuleReorderPresentation(ViewModel.IsModuleReorderVisible);
         InitializeModuleLoadingPresentation();
+        UpdateComponentVisibility();
         StartStartupAttentionTimer();
         _ = DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, ApplyIslandActivationMode);
     }
@@ -230,6 +232,7 @@ public sealed partial class DesktopIslandView :
         ClearIslandActivationComponent();
         ClearExpansionLockComponent();
         ClearFooterAppearanceComponent();
+        ClearComponentVisibility();
         EndComponentInteraction();
         StopAttentionExpansionTimer();
         StopContextualDragExitTimer();
@@ -684,6 +687,7 @@ public sealed partial class DesktopIslandView :
     private void ApplyAssistantPresentation(bool showAssistant)
     {
         isAssistantPresentationRequested = showAssistant;
+        UpdateComponentVisibility();
 
         if (showAssistant)
         {
@@ -877,6 +881,7 @@ public sealed partial class DesktopIslandView :
         }
 
         isContentRoutePresentationRequested = showRoutes;
+        UpdateComponentVisibility();
         FluentMotion.SetContentPresentationState(ExpandedModuleSurface, !showRoutes);
         FluentMotion.SetContentPresentationState(ContentRoutePicker, showRoutes);
         ExpandedModuleSurface.Visibility = showRoutes ? Visibility.Collapsed : Visibility.Visible;
@@ -1347,6 +1352,7 @@ public sealed partial class DesktopIslandView :
     private void ApplyModuleReorderPresentation(bool showReorder)
     {
         isModuleReorderPresentationRequested = showReorder;
+        UpdateComponentVisibility();
 
         if (showReorder)
         {
@@ -1446,6 +1452,7 @@ public sealed partial class DesktopIslandView :
 
         if (args.PropertyName == nameof(DesktopIslandViewModel.IsModuleReorderVisible))
         {
+            UpdateComponentVisibility();
             _ = DispatcherQueue.TryEnqueue(() =>
             {
                 if (ViewModel.IsModuleReorderVisible)
@@ -1461,6 +1468,7 @@ public sealed partial class DesktopIslandView :
 
         if (args.PropertyName == nameof(DesktopIslandViewModel.IsContentRoutePickerVisible))
         {
+            UpdateComponentVisibility();
             if (ViewModel.IsContentRoutePickerVisible)
             {
                 CancelConnectedExpansionAnimation();
@@ -1485,6 +1493,7 @@ public sealed partial class DesktopIslandView :
             UpdateExpansionLockComponent();
             UpdateComponentInteraction();
             UpdateFooterAppearanceComponent();
+            UpdateComponentVisibility();
 
             if (isAssistantPresentationRequested || isContentRoutePresentationRequested || isModuleReorderPresentationRequested)
             {
@@ -1496,6 +1505,7 @@ public sealed partial class DesktopIslandView :
 
         if (args.PropertyName == nameof(DesktopIslandViewModel.IsTransientPresentationActive))
         {
+            UpdateComponentVisibility();
             ApplyExpansionLock();
             bool showTransient = ViewModel.IsTransientPresentationActive;
 
@@ -1519,6 +1529,7 @@ public sealed partial class DesktopIslandView :
 
         if (args.PropertyName == nameof(DesktopIslandViewModel.IsLoadingModules))
         {
+            UpdateComponentVisibility();
             BackgroundContent = ViewModel.IsLoadingModules ||
                 isAssistantPresentationRequested ||
                 isContentRoutePresentationRequested ||
@@ -1542,6 +1553,12 @@ public sealed partial class DesktopIslandView :
                 });
             }
 
+            return;
+        }
+
+        if (args.PropertyName == nameof(DesktopIslandViewModel.IsOpen))
+        {
+            UpdateComponentVisibility();
             return;
         }
 
@@ -1936,6 +1953,35 @@ public sealed partial class DesktopIslandView :
         IGlanceInteractionAwareComponent? previousComponent = interactionComponent;
         interactionComponent = null;
         previousComponent?.EndInteraction();
+    }
+
+    private void UpdateComponentVisibility()
+    {
+        IGlanceViewAwareComponent? selectedComponent = IsLoaded &&
+            ViewModel.IsOpen &&
+            !ViewModel.IsLoadingModules &&
+            !ViewModel.IsTransientPresentationActive &&
+            !isAssistantPresentationRequested &&
+            !isContentRoutePresentationRequested &&
+            !isModuleReorderPresentationRequested
+                ? ViewModel.SelectedComponent as IGlanceViewAwareComponent
+                : null;
+
+        if (ReferenceEquals(visibleComponent, selectedComponent))
+        {
+            return;
+        }
+
+        ClearComponentVisibility();
+        visibleComponent = selectedComponent;
+        visibleComponent?.EnterView();
+    }
+
+    private void ClearComponentVisibility()
+    {
+        IGlanceViewAwareComponent? previousComponent = visibleComponent;
+        visibleComponent = null;
+        previousComponent?.LeaveView();
     }
 
     private void UpdateIslandActivationComponent()

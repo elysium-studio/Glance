@@ -114,7 +114,21 @@ Optional contracts add more integration without shell-specific code:
 - `IGlanceTransientComponent` presents short-lived content without adding it to paging or module ordering.
 - `IGlanceIntent` lets the module accept contextual files, text, links, or other content.
 - `IGlanceActionProvider` exposes commands to the application action system.
+- `IGlanceViewAwareComponent` lets a module suspend background work while it is not being shown.
 - `IDisposable` or `IAsyncDisposable` provides deterministic cleanup.
+
+Modules that poll, capture, or maintain other continuous work can opt into the view lifecycle:
+
+```csharp
+public sealed class ExampleComponent :
+    IGlanceComponent,
+    IGlanceViewAwareComponent
+{
+    public void EnterView() => refreshTimer.Start();
+
+    public void LeaveView() => refreshTimer.Stop();
+}
+```
 
 ### 3. Package the module
 

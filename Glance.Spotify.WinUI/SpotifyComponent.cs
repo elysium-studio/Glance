@@ -20,9 +20,10 @@ public sealed class SpotifyComponent :
     IGlanceBackgroundComponent,
     IGlanceFooterAppearanceComponent,
     IGlanceConnectedAnimationComponent,
+    IGlanceViewAwareComponent,
     IDisposable
 {
-    private static readonly TimeSpan PlaybackRefreshInterval = TimeSpan.FromSeconds(8);
+    private static readonly TimeSpan PlaybackRefreshInterval = TimeSpan.FromSeconds(15);
     private static readonly TimeSpan DeviceRefreshInterval = TimeSpan.FromMinutes(1);
     private readonly SpotifyViewModel viewModel;
     private readonly ISpotifyConnectionService connectionService;
@@ -30,6 +31,7 @@ public sealed class SpotifyComponent :
     private readonly ModuleResourceTextLocalizer<SpotifyModule> localizer;
     private readonly HttpClient httpClient;
     private readonly DispatcherQueue dispatcherQueue;
+    private readonly DispatcherQueueTimer rateLimitTimer;
     private readonly DispatcherQueueTimer refreshTimer;
     private readonly SpotifyAlbumAmbience backgroundView;
     private readonly CancellationTokenSource cancellation = new();
@@ -42,6 +44,7 @@ public sealed class SpotifyComponent :
     private int refreshing;
     private int artworkGeneration;
     private int disposed;
+    private int isInView;
     private CancellationTokenSource? artworkCancellation;
     private SpotifyAmbientArtwork? currentAmbientArtwork;
     private uint currentArtworkAverageColor = 0xFF2C2C2C;
@@ -71,11 +74,13 @@ public sealed class SpotifyComponent :
         refreshTimer.Interval = TimeSpan.FromSeconds(1);
         refreshTimer.IsRepeating = true;
         refreshTimer.Tick += HandleRefreshTimerTick;
+        rateLimitTimer = dispatcherQueue.CreateTimer();
+        rateLimitTimer.IsRepeating = false;
+        rateLimitTimer.Tick += HandleRateLimitTimerTick;
         connectionService.StateChanged += HandleConnectionStateChanged;
         viewModel.PlaybackActionRequested += HandlePlaybackActionRequested;
         viewModel.PropertyChanged += HandleViewModelPropertyChanged;
         backgroundView.SurfaceAppearanceChanged += HandleBackgroundSurfaceAppearanceChanged;
-        _ = ConfigureAsync();
     }
 
     public string Id => "Spotify";
@@ -109,6 +114,35 @@ public sealed class SpotifyComponent :
     public object ExpandedAnimationElement { get; }
 
     public event EventHandler? FooterAppearanceChanged;
+
+    public void EnterView()
+    {
+        if (Volatile.Read(ref disposed) != 0 || Interlocked.Exchange(ref isInView, 1) != 0)
+        {
+            return;
+        }
+
+        if (connectionService.State == SpotifyConnectionState.Connected &&
+            refreshAfter > DateTimeOffset.UtcNow)
+        {
+            SuspendForRateLimit();
+            return;
+        }
+
+        _ = ConfigureAsync();
+    }
+
+    public void LeaveView()
+    {
+        if (Interlocked.Exchange(ref isInView, 0) == 0)
+        {
+            return;
+        }
+
+        refreshTimer.Stop();
+        rateLimitTimer.Stop();
+        lastProgressUpdateAt = default;
+    }
 
     public IReadOnlyList<GlanceActionDescriptor> GetActions() =>
     [
@@ -166,6 +200,8 @@ public sealed class SpotifyComponent :
 
         refreshTimer.Stop();
         refreshTimer.Tick -= HandleRefreshTimerTick;
+        rateLimitTimer.Stop();
+        rateLimitTimer.Tick -= HandleRateLimitTimerTick;
         connectionService.StateChanged -= HandleConnectionStateChanged;
         viewModel.PlaybackActionRequested -= HandlePlaybackActionRequested;
         viewModel.PropertyChanged -= HandleViewModelPropertyChanged;
@@ -181,7 +217,7 @@ public sealed class SpotifyComponent :
 
     private async Task ConfigureAsync()
     {
-        if (Volatile.Read(ref disposed) != 0)
+        if (Volatile.Read(ref disposed) != 0 || Volatile.Read(ref isInView) == 0)
         {
             return;
         }
@@ -191,6 +227,12 @@ public sealed class SpotifyComponent :
         try
         {
             refreshTimer.Stop();
+            rateLimitTimer.Stop();
+
+            if (Volatile.Read(ref isInView) == 0)
+            {
+                return;
+            }
 
             if (!viewModel.IsConfigured)
             {
@@ -206,11 +248,19 @@ public sealed class SpotifyComponent :
             bool restored = await connectionService.RestoreAsync(viewModel.ClientId, token);
             viewModel.ApplyConnectionState(connectionService.State);
 
-            if (restored)
+            if (restored && Volatile.Read(ref isInView) != 0)
             {
                 lastProgressUpdateAt = DateTimeOffset.UtcNow;
                 await RefreshOnceAsync(token, true);
-                refreshTimer.Start();
+
+                if (refreshAfter > DateTimeOffset.UtcNow)
+                {
+                    SuspendForRateLimit();
+                }
+                else if (Volatile.Read(ref isInView) != 0)
+                {
+                    refreshTimer.Start();
+                }
             }
         }
         catch (OperationCanceledException)
@@ -225,14 +275,21 @@ public sealed class SpotifyComponent :
     private async Task RefreshAsync(CancellationToken cancellationToken,
         bool force)
     {
-        if (connectionService.State != SpotifyConnectionState.Connected)
+        if (connectionService.State != SpotifyConnectionState.Connected ||
+            Volatile.Read(ref isInView) == 0)
         {
             return;
         }
 
         DateTimeOffset now = DateTimeOffset.UtcNow;
 
-        if (refreshAfter > now || !force && nextPlaybackRefreshAt > now)
+        if (refreshAfter > now)
+        {
+            SuspendForRateLimit();
+            return;
+        }
+
+        if (!force && nextPlaybackRefreshAt > now)
         {
             return;
         }
@@ -254,6 +311,7 @@ public sealed class SpotifyComponent :
         {
             refreshAfter = DateTimeOffset.UtcNow.Add(retryAfter);
             viewModel.SetStatusMessage(exception.Message);
+            SuspendForRateLimit();
         }
         catch (Exception exception)
         {
@@ -282,9 +340,13 @@ public sealed class SpotifyComponent :
         }
         catch (SpotifyApiException exception) when (exception.RetryAfter is TimeSpan retryAfter)
         {
+            DateTimeOffset retryAt = DateTimeOffset.UtcNow.Add(retryAfter);
             nextDeviceRefreshAt = DateTimeOffset.UtcNow.Add(retryAfter > DeviceRefreshInterval
                 ? retryAfter
                 : DeviceRefreshInterval);
+            refreshAfter = retryAt > refreshAfter ? retryAt : refreshAfter;
+            viewModel.SetStatusMessage(exception.Message);
+            SuspendForRateLimit();
         }
         catch
         {
@@ -311,6 +373,12 @@ public sealed class SpotifyComponent :
 
     private async void HandleRefreshTimerTick(DispatcherQueueTimer sender, object args)
     {
+        if (Volatile.Read(ref isInView) == 0)
+        {
+            sender.Stop();
+            return;
+        }
+
         DateTimeOffset now = DateTimeOffset.UtcNow;
 
         if (lastProgressUpdateAt != default)
@@ -320,6 +388,49 @@ public sealed class SpotifyComponent :
 
         lastProgressUpdateAt = now;
         await RefreshOnceAsync(token);
+    }
+
+    private void SuspendForRateLimit()
+    {
+        if (!dispatcherQueue.HasThreadAccess)
+        {
+            _ = dispatcherQueue.TryEnqueue(SuspendForRateLimit);
+            return;
+        }
+
+        refreshTimer.Stop();
+        rateLimitTimer.Stop();
+
+        TimeSpan remaining = refreshAfter - DateTimeOffset.UtcNow;
+
+        if (Volatile.Read(ref isInView) == 0 || remaining <= TimeSpan.Zero)
+        {
+            return;
+        }
+
+        rateLimitTimer.Interval = remaining;
+        rateLimitTimer.Start();
+    }
+
+    private async void HandleRateLimitTimerTick(DispatcherQueueTimer sender, object args)
+    {
+        sender.Stop();
+
+        if (Volatile.Read(ref isInView) == 0 ||
+            connectionService.State != SpotifyConnectionState.Connected)
+        {
+            return;
+        }
+
+        refreshAfter = DateTimeOffset.MinValue;
+        nextPlaybackRefreshAt = DateTimeOffset.MinValue;
+        lastProgressUpdateAt = DateTimeOffset.UtcNow;
+        await RefreshOnceAsync(token, true);
+
+        if (refreshAfter <= DateTimeOffset.UtcNow && Volatile.Read(ref isInView) != 0)
+        {
+            refreshTimer.Start();
+        }
     }
 
     private void HandleConnectionStateChanged(object? sender, SpotifyConnectionStateChangedEventArgs args) =>
@@ -332,17 +443,26 @@ public sealed class SpotifyComponent :
 
             viewModel.ApplyConnectionState(args.State, args.ErrorMessage);
 
-            if (args.State == SpotifyConnectionState.Connected)
+            if (args.State == SpotifyConnectionState.Connected && Volatile.Read(ref isInView) != 0)
             {
                 nextPlaybackRefreshAt = DateTimeOffset.MinValue;
                 nextDeviceRefreshAt = DateTimeOffset.MinValue;
                 lastProgressUpdateAt = DateTimeOffset.UtcNow;
-                refreshTimer.Start();
-                _ = RefreshOnceAsync(token, true);
+
+                if (refreshAfter > DateTimeOffset.UtcNow)
+                {
+                    SuspendForRateLimit();
+                }
+                else
+                {
+                    refreshTimer.Start();
+                    _ = RefreshOnceAsync(token, true);
+                }
             }
             else
             {
                 refreshTimer.Stop();
+                rateLimitTimer.Stop();
             }
         });
 
@@ -350,7 +470,10 @@ public sealed class SpotifyComponent :
     {
         if (args.PropertyName == nameof(SpotifyViewModel.ClientId))
         {
-            _ = ConfigureAsync();
+            if (Volatile.Read(ref isInView) != 0)
+            {
+                _ = ConfigureAsync();
+            }
         }
 
         if (args.PropertyName == nameof(SpotifyViewModel.ArtworkUrl))
