@@ -4,6 +4,7 @@ using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -30,6 +31,7 @@ public sealed class SpotifyComponent :
     private readonly ISpotifyPlaybackService playbackService;
     private readonly ModuleResourceTextLocalizer<SpotifyModule> localizer;
     private readonly HttpClient httpClient;
+    private readonly ILogger<SpotifyComponent> logger;
     private readonly DispatcherQueue dispatcherQueue;
     private readonly DispatcherQueueTimer rateLimitTimer;
     private readonly DispatcherQueueTimer refreshTimer;
@@ -53,13 +55,15 @@ public sealed class SpotifyComponent :
         ISpotifyConnectionService connectionService,
         ISpotifyPlaybackService playbackService,
         ModuleResourceTextLocalizer<SpotifyModule> localizer,
-        HttpClient httpClient)
+        HttpClient httpClient,
+        ILogger<SpotifyComponent> logger)
     {
         this.viewModel = viewModel;
         this.connectionService = connectionService;
         this.playbackService = playbackService;
         this.localizer = localizer;
         this.httpClient = httpClient;
+        this.logger = logger;
         token = cancellation.Token;
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         backgroundView = new SpotifyAlbumAmbience { ViewModel = viewModel };
@@ -535,11 +539,20 @@ public sealed class SpotifyComponent :
             byte[] bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
-            SpotifyArtworkColors colors;
+            SpotifyArtworkColors colors = new(SpotifyViewModel.DefaultAccentColor, 0xFF2C2C2C);
 
-            using (InMemoryRandomAccessStream analysisStream = await CreateStreamAsync(bytes))
+            try
             {
+                using InMemoryRandomAccessStream analysisStream = await CreateStreamAsync(bytes);
                 colors = await SpotifyArtworkColorAnalyzer.AnalyzeAsync(analysisStream);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                logger.LogWarning(exception, "Failed to analyse Spotify album artwork");
             }
 
             await RunOnDispatcherAsync(async () =>
@@ -551,35 +564,67 @@ public sealed class SpotifyComponent :
                 }
 
                 BitmapImage artwork = new();
+                SpotifyAmbientArtwork? ambientArtwork = null;
+                InMemoryRandomAccessStream? artworkStream = null;
 
-                using (InMemoryRandomAccessStream imageStream = await CreateStreamAsync(bytes))
+                try
                 {
-                    await artwork.SetSourceAsync(imageStream);
+                    artworkStream = await CreateStreamAsync(bytes);
+                    await artwork.SetSourceAsync(artworkStream);
+                    artworkStream.Seek(0);
+                    InMemoryRandomAccessStream ambientStream = artworkStream;
+                    artworkStream = null;
+                    ambientArtwork = await SpotifyAmbientArtwork.LoadAsync(ambientStream);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception exception)
+                {
+                    logger.LogWarning(exception, "Failed to create Spotify ambient artwork");
+                }
+                finally
+                {
+                    artworkStream?.Dispose();
                 }
 
-                InMemoryRandomAccessStream ambientStream = await CreateStreamAsync(bytes);
-                SpotifyAmbientArtwork? ambientArtwork = await SpotifyAmbientArtwork.LoadAsync(ambientStream);
+                bool artworkApplied = false;
+                await RunOnDispatcherAsync(() =>
+                {
+                    if (generation != Volatile.Read(ref artworkGeneration) ||
+                        Volatile.Read(ref disposed) != 0)
+                    {
+                        return Task.CompletedTask;
+                    }
 
-                if (generation != Volatile.Read(ref artworkGeneration) ||
-                    Volatile.Read(ref disposed) != 0)
+                    viewModel.Artwork = artwork;
+                    viewModel.AccentColor = colors.AccentColor;
+                    currentArtworkAverageColor = colors.AverageColor;
+                    viewModel.BackgroundForegroundColor =
+                        backgroundView.GetContrastingForeground(colors.AverageColor);
+
+                    if (ambientArtwork is not null)
+                    {
+                        SetAmbientArtwork(ambientArtwork);
+                    }
+
+                    artworkApplied = true;
+                    return Task.CompletedTask;
+                });
+
+                if (!artworkApplied)
                 {
                     ambientArtwork?.Dispose();
-                    return;
                 }
-
-                viewModel.Artwork = artwork;
-                viewModel.AccentColor = colors.AccentColor;
-                currentArtworkAverageColor = colors.AverageColor;
-                viewModel.BackgroundForegroundColor =
-                    backgroundView.GetContrastingForeground(colors.AverageColor);
-                SetAmbientArtwork(ambientArtwork);
             });
         }
         catch (OperationCanceledException)
         {
         }
-        catch
+        catch (Exception exception)
         {
+            logger.LogWarning(exception, "Failed to load Spotify album artwork");
             await RunOnDispatcherAsync(() =>
             {
                 if (generation == Volatile.Read(ref artworkGeneration))
@@ -650,6 +695,7 @@ public sealed class SpotifyComponent :
         {
             writer.WriteBytes(bytes);
             _ = await writer.StoreAsync();
+            _ = writer.DetachStream();
         }
 
         stream.Seek(0);
