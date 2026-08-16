@@ -1,13 +1,12 @@
 using Glance.Application.Abstractions;
 
-namespace Glance.Transcription;
+namespace Glance.Transcription.Whisper;
 
 public sealed class WhisperModelCatalog :
-    ITranscriptionModelCatalog,
     IDisposable
 {
     private const string Repository = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main";
-    private const string DownloadIdPrefix = "transcription-model:";
+    private const string DownloadIdPrefix = "transcription-model:Whisper/";
     private readonly IBackgroundDownloadManager downloads;
     private readonly string modelsDirectory;
     private readonly IReadOnlyDictionary<string, ModelFile> modelFiles;
@@ -22,8 +21,7 @@ public sealed class WhisperModelCatalog :
             new TranscriptionModel("whisper-large-v3-turbo",
                 "Whisper Large v3 Turbo",
                 "Fast, highly accurate multilingual transcription",
-                1624555275,
-                true),
+                1624555275),
             new TranscriptionModel("whisper-large-v3",
                 "Whisper Large v3",
                 "Highest local accuracy for demanding transcription",

@@ -19,4 +19,6 @@ public sealed class GlanceSettings
     public bool ShowSetupOnStartup { get; set; } = true;
 
     public bool StartWithWindows { get; set; } = true;
+
+    public string? TranscriptionModelId { get; set; }
 }

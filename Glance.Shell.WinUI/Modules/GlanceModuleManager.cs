@@ -1,4 +1,5 @@
 using Glance.Application.Abstractions;
+using Glance.Transcription;
 using Elysium.Application.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -27,6 +28,7 @@ internal sealed class GlanceModuleManager :
     private readonly GlanceActionService actionService;
     private readonly GlanceIntentService intentService;
     private readonly GlanceQuickConverterRegistry quickConverterRegistry;
+    private readonly ITranscriptionProviderRegistry transcriptionProviderRegistry;
     private readonly List<LoadedModulePackage> loadedPackages = [];
     private readonly ModulePreferenceService preferences;
     private readonly ModuleInstallationService installations;
@@ -52,6 +54,7 @@ internal sealed class GlanceModuleManager :
         actionService = applicationServices.GetRequiredService<GlanceActionService>();
         intentService = applicationServices.GetRequiredService<GlanceIntentService>();
         quickConverterRegistry = applicationServices.GetRequiredService<GlanceQuickConverterRegistry>();
+        transcriptionProviderRegistry = applicationServices.GetRequiredService<ITranscriptionProviderRegistry>();
         installations.ConfigureInstaller(InstallPackageAsync);
 
         _ = Directory.CreateDirectory(GlanceModuleLoader.UserModulesDirectory);
@@ -123,6 +126,7 @@ internal sealed class GlanceModuleManager :
 
         foreach (LoadedModulePackage package in loadedPackages.AsEnumerable().Reverse())
         {
+            DisposeRegistrations(package.TranscriptionRegistrations);
             await DisposeRuntimeAsync(package.Runtime);
         }
     }
@@ -131,6 +135,7 @@ internal sealed class GlanceModuleManager :
     {
         GlanceModuleRuntime? runtime = null;
         string[] registeredInstallationIds = [];
+        List<IDisposable> transcriptionRegistrations = [];
 
         try
         {
@@ -143,8 +148,9 @@ internal sealed class GlanceModuleManager :
             IReadOnlyList<IGlanceApplicationMessageHandler> bridgeHandlers = (IGlanceApplicationMessageHandler[])[.. runtime.Services.GetServices<IGlanceApplicationMessageHandler>()];
             IReadOnlyList<IGlanceActionProvider> actionProviders = (IGlanceActionProvider[])[.. runtime.Services.GetServices<IGlanceActionProvider>()];
             IReadOnlyList<IGlanceIntent> intents = (IGlanceIntent[])[.. runtime.Services.GetServices<IGlanceIntent>()];
+            IReadOnlyList<ITranscriptionProvider> transcriptionProviders = (ITranscriptionProvider[])[.. runtime.Services.GetServices<ITranscriptionProvider>()];
 
-            if (components.Count == 0 && assistantProviders.Count == 0 && assistantCommandHandlers.Count == 0 && assistantSemanticResolvers.Count == 0 && quickConverters.Count == 0)
+            if (components.Count == 0 && assistantProviders.Count == 0 && assistantCommandHandlers.Count == 0 && assistantSemanticResolvers.Count == 0 && quickConverters.Count == 0 && transcriptionProviders.Count == 0)
             {
                 throw new InvalidOperationException("The package did not register a Glance component or background capability.");
             }
@@ -166,6 +172,11 @@ internal sealed class GlanceModuleManager :
 
             IServiceProvider moduleServices = runtime.Services;
             runtimeServices.AddModuleProvider(moduleServices);
+
+            foreach (ITranscriptionProvider transcriptionProvider in transcriptionProviders)
+            {
+                transcriptionRegistrations.Add(transcriptionProviderRegistry.Register(transcriptionProvider));
+            }
 
             if (components.Count > 0)
             {
@@ -190,8 +201,11 @@ internal sealed class GlanceModuleManager :
                 quickConverters,
                 bridgeHandlers,
                 actionProviders,
-                intents);
+                intents,
+                transcriptionProviders,
+                transcriptionRegistrations);
             loadedPackages.Add(loadedPackage);
+            transcriptionRegistrations = [];
 
             runtime = null;
 
@@ -200,11 +214,12 @@ internal sealed class GlanceModuleManager :
                 _ = knownPackages.Add(result.SourcePath);
             }
 
-            logger.LogInformation("Loaded Glance module package {ModulePackage} with {ComponentCount} component(s) and {AssistantProviderCount} assistant provider(s)", result.SourcePath, components.Count, assistantProviders.Count);
+            logger.LogInformation("Loaded Glance module package {ModulePackage} with {ComponentCount} component(s), {AssistantProviderCount} assistant provider(s), and {TranscriptionProviderCount} transcription provider(s)", result.SourcePath, components.Count, assistantProviders.Count, transcriptionProviders.Count);
             return ModuleInstallResult.Installed(components.Select(component => component.Id));
         }
         catch (Exception exception)
         {
+            DisposeRegistrations(transcriptionRegistrations);
             installations.Unregister(registeredInstallationIds);
             logger.LogError(exception, "Failed to activate Glance module package {ModulePackage}", result.SourcePath);
             return ModuleInstallResult.Failed(exception.Message);
@@ -459,6 +474,7 @@ internal sealed class GlanceModuleManager :
         assistantCommandService.Unregister(package.AssistantCommandHandlers);
         applicationServices.GetRequiredService<GlanceAssistantSemanticResolverService>().Unregister(package.AssistantSemanticResolvers);
         await assistantService.UnregisterAsync(package.AssistantProviders);
+        DisposeRegistrations(package.TranscriptionRegistrations);
         runtimeServices.RemoveModuleProvider(package.Runtime.Services);
         await DisposeRuntimeAsync(package.Runtime);
         _ = loadedPackages.Remove(package);
@@ -548,6 +564,14 @@ internal sealed class GlanceModuleManager :
     private Task DisposeRuntimeAsync(GlanceModuleRuntime runtime) =>
         DispatchAsync(() => runtime.DisposeAsync().AsTask());
 
+    private static void DisposeRegistrations(IEnumerable<IDisposable> registrations)
+    {
+        foreach (IDisposable registration in registrations.Reverse())
+        {
+            registration.Dispose();
+        }
+    }
+
     private Task<T> DispatchAsync<T>(Func<Task<T>> action,
         DispatcherQueuePriority priority = DispatcherQueuePriority.Normal)
     {
@@ -587,5 +611,7 @@ internal sealed class GlanceModuleManager :
         IReadOnlyList<IGlanceQuickConverter> QuickConverters,
         IReadOnlyList<IGlanceApplicationMessageHandler> BridgeHandlers,
         IReadOnlyList<IGlanceActionProvider> ActionProviders,
-        IReadOnlyList<IGlanceIntent> Intents);
+        IReadOnlyList<IGlanceIntent> Intents,
+        IReadOnlyList<ITranscriptionProvider> TranscriptionProviders,
+        IReadOnlyList<IDisposable> TranscriptionRegistrations);
 }

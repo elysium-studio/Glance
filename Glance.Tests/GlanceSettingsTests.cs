@@ -27,6 +27,7 @@ public sealed class GlanceSettingsTests
             AutoHide = true,
             ExpansionMode = GlanceExpansionMode.AlwaysExpanded,
             Placement = GlancePlacement.Bottom,
+            TranscriptionModelId = "nemotron-3.5-asr-streaming-0.6b",
             ShowSetupOnStartup = false,
             StartWithWindows = false,
             Modules =
@@ -47,6 +48,7 @@ public sealed class GlanceSettingsTests
         Assert.True(result.AutoHide);
         Assert.Equal(GlanceExpansionMode.AlwaysExpanded, result.ExpansionMode);
         Assert.Equal(GlancePlacement.Bottom, result.Placement);
+        Assert.Equal("nemotron-3.5-asr-streaming-0.6b", result.TranscriptionModelId);
         Assert.False(result.ShowSetupOnStartup);
         Assert.False(result.StartWithWindows);
         _ = Assert.Single(result.Modules);

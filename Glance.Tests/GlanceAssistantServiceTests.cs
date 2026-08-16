@@ -93,8 +93,6 @@ public sealed class GlanceAssistantServiceTests
 
         public bool IsInstalled(string modelId) => modelId == Model.Id;
 
-        public string GetModelPath(string modelId) => string.Empty;
-
         public Task<TranscriptionModelState> GetStateAsync(string modelId,
             CancellationToken cancellationToken = default) =>
             Task.FromResult(TranscriptionModelState.Installed);
@@ -106,7 +104,7 @@ public sealed class GlanceAssistantServiceTests
         public Task RemoveAsync(string modelId,
             CancellationToken cancellationToken = default) => Task.CompletedTask;
 
-        public BackgroundDownloadSnapshot? GetDownload(string modelId) => null;
+        public TranscriptionModelDownload? GetDownload(string modelId) => null;
 
         public bool CancelInstall(string modelId) => false;
     }

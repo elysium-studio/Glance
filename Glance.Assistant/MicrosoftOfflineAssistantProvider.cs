@@ -2,13 +2,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
 using Glance.Transcription;
-using Microsoft.AI.Foundry.Local;
-using Microsoft.AI.Foundry.Local.OpenAI;
 using Microsoft.Extensions.Logging;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
-using System.Runtime.InteropServices;
 using System.Text;
 using Windows.ApplicationModel;
 using Windows.Media.SpeechRecognition;
@@ -27,15 +24,12 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
     private const int WakeRecognitionRestartAttempts = 3;
     private const int WakeSessionOperationTimeoutMilliseconds = 5000;
     private const int UtteranceSilenceMilliseconds = 1800;
-    private const string ModelAlias = "nemotron-speech-streaming-en-0.6b";
-    private static readonly object nativeLibraryGate = new();
-    private static readonly List<nint> nativeLibraryHandles = [];
-    private static bool nativeLibrariesLoaded;
     private readonly IGlanceAssistantCommandService commandService;
     private readonly IAudioInputSourceCatalog audioInputSources;
     private readonly IDispatcher dispatcher;
     private readonly ILogger<MicrosoftOfflineAssistantProvider> logger;
     private readonly ITranscriptionModelCatalog modelCatalog;
+    private readonly ITranscriptionModelSelection modelSelection;
     private readonly ITranscriptionSessionFactory transcriptionSessions;
     private readonly SemaphoreSlim lifecycleGate = new(1, 1);
     private readonly StringBuilder pendingUtterance = new();
@@ -45,13 +39,10 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
     private CancellationTokenSource? providerCancellationTokenSource;
     private CancellationTokenSource? utteranceCompletionCancellationTokenSource;
     private TaskCompletionSource<long>? commandSpeechBoundaryCompletion;
-    private IModel? model;
     private ITranscriptionSession? transcriptionSession;
-    private OpenAIAudioClient? audioClient;
     private RollingAudioCapture? audioCapture;
     private SpeechRecognizer? wakeRecognizer;
     private SpeechContinuousRecognitionSession? wakeRecognitionSession;
-    private Task? modelPreparationTask;
     private Task? transcriptionTask;
     private Task? wakeHealthTask;
     private bool isStarted;
@@ -81,6 +72,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         IDispatcher dispatcher,
         IAudioInputSourceCatalog audioInputSources,
         ITranscriptionModelCatalog modelCatalog,
+        ITranscriptionModelSelection modelSelection,
         ITranscriptionSessionFactory transcriptionSessions,
         ILogger<MicrosoftOfflineAssistantProvider> logger)
     {
@@ -88,6 +80,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         this.dispatcher = dispatcher;
         this.audioInputSources = audioInputSources;
         this.modelCatalog = modelCatalog;
+        this.modelSelection = modelSelection;
         this.transcriptionSessions = transcriptionSessions;
         this.logger = logger;
         CompactIndicatorContent = viewFactory.CreateCompactIndicator(this);
@@ -191,44 +184,13 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             wakeHealthTask = MonitorWakeRecognitionAsync(providerCancellationTokenSource.Token);
             TraceWake("Provider.Start.Ready", GetWakeSnapshot());
 
-            if (modelCatalog.Models.Count == 0)
-            {
-                SetPresentation(GlanceAssistantState.Preparing, "Getting voice commands ready", "Loading the command model");
-                modelPreparationTask = PrepareModelAsync(providerCancellationTokenSource.Token);
-            }
-            else
-            {
-                SetPresentation(GlanceAssistantState.ListeningForWakeWord, "Say “Glance” or “Hey Glance”", "Listening");
-            }
+            SetPresentation(GlanceAssistantState.ListeningForWakeWord, "Say “Glance” or “Hey Glance”", "Listening");
         }
         catch (Exception exception)
         {
             TraceWake("Provider.Start.Failed", $"{exception.GetType().Name}: {exception.Message}; {GetWakeSnapshot()}");
             logger.LogError(exception, "Failed to start the Microsoft offline assistant provider");
             await StopAsync();
-            SetPresentation(GlanceAssistantState.Error, "Voice assistant unavailable", exception.Message);
-        }
-    }
-
-    private async Task PrepareModelAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await FoundryLocalRuntime.EnsureInitializedAsync(logger, cancellationToken);
-            ICatalog catalog = await FoundryLocalManager.Instance.GetCatalogAsync();
-            model = await catalog.GetModelAsync(ModelAlias) ?? throw new InvalidOperationException("The Microsoft streaming speech model is unavailable");
-            await model.LoadAsync(cancellationToken);
-            audioClient = await model.GetAudioClientAsync();
-            cancellationToken.ThrowIfCancellationRequested();
-            SetPresentation(GlanceAssistantState.ListeningForWakeWord, "Say “Glance” or “Hey Glance”", "Listening");
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-        }
-        catch (Exception exception)
-        {
-            logger.LogError(exception, "Failed to prepare the Microsoft offline speech model");
-            await StopCommandRecognitionAsync();
             SetPresentation(GlanceAssistantState.Error, "Voice assistant unavailable", exception.Message);
         }
     }
@@ -258,19 +220,6 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
             }
 
             wakeHealthTask = null;
-        }
-
-        if (modelPreparationTask is not null)
-        {
-            try
-            {
-                await modelPreparationTask;
-            }
-            catch (OperationCanceledException)
-            {
-            }
-
-            modelPreparationTask = null;
         }
 
         if (audioCapture is not null)
@@ -708,49 +657,6 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         throw new InvalidOperationException("Windows audio capture could not be started", failure);
     }
 
-    internal static void EnsureNativeLibrariesLoaded()
-    {
-        lock (nativeLibraryGate)
-        {
-            if (nativeLibrariesLoaded)
-            {
-                return;
-            }
-
-            string directory = Path.GetDirectoryName(typeof(MicrosoftOfflineAssistantProvider).Assembly.Location) ?? AppContext.BaseDirectory;
-            string currentPath = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
-
-            if (!currentPath.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries).Contains(directory, StringComparer.OrdinalIgnoreCase))
-            {
-                Environment.SetEnvironmentVariable("PATH", $"{directory}{Path.PathSeparator}{currentPath}");
-            }
-
-            foreach (string fileName in (string[])["onnxruntime_providers_shared.dll", "onnxruntime.dll", "onnxruntime-genai.dll"])
-            {
-                string path = Path.Combine(directory, fileName);
-
-                if (!File.Exists(path))
-                {
-                    throw new FileNotFoundException($"The assistant runtime dependency {fileName} was not found", path);
-                }
-
-                nint handle = LoadLibraryEx(path, 0, 0x00000100 | 0x00001000);
-
-                if (handle == 0)
-                {
-                    throw new DllNotFoundException($"Unable to load {fileName} from the assistant package. Windows error {Marshal.GetLastWin32Error()}");
-                }
-
-                nativeLibraryHandles.Add(handle);
-            }
-
-            nativeLibrariesLoaded = true;
-        }
-    }
-
-    [LibraryImport("kernel32.dll", EntryPoint = "LoadLibraryExW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
-    private static partial nint LoadLibraryEx(string fileName, nint file, uint flags);
-
     private async Task StartCommandRecognitionAsync(CancellationToken cancellationToken)
     {
         if (transcriptionSession is not null)
@@ -762,9 +668,8 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         CancellationToken listeningCancellationToken = listeningCancellationTokenSource.Token;
         AudioInputSource source = (await audioInputSources.GetSourcesAsync(listeningCancellationToken))
             .FirstOrDefault(item => item.IsDefault) ?? throw new InvalidOperationException("No microphone is available");
-        string modelId = modelCatalog.IsInstalled(modelCatalog.DefaultModelId)
-            ? modelCatalog.DefaultModelId
-            : modelCatalog.Models.First(model => modelCatalog.IsInstalled(model.Id)).Id;
+        string modelId = TranscriptionModelResolver.ResolveInstalledModel(modelCatalog, modelSelection) ??
+            throw new InvalidOperationException("Install a speech model in Glance settings before using voice commands");
         transcriptionSession = await transcriptionSessions.CreateAsync(new TranscriptionSessionOptions(modelId,
             source.Id,
             "en"),
@@ -1209,8 +1114,6 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         private readonly Queue<BufferedAudioChunk> bufferedAudio = new();
         private readonly CancellationTokenSource captureCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         private readonly object gate = new();
-        private CancellationToken activeSessionCancellationToken;
-        private LiveAudioTranscriptionSession? activeSession;
         private long audioSequence;
         private long dataBytes;
         private long dataCallbackCount;
@@ -1218,7 +1121,6 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
         private long lastSpeechLikeAudioTimestamp;
         private WasapiCapture? capture;
         private Task? capturePumpTask;
-        private bool isAttaching;
         private Exception? recordingFailure;
         private int isRecording;
         private BufferedWaveProvider? sourceBuffer;
@@ -1244,7 +1146,7 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
                 DateTimeOffset? lastData = lastDataTimestamp == 0 ? null : new DateTimeOffset(lastDataTimestamp, TimeSpan.Zero);
                 return $"Healthy={IsHealthy}; Recording={Volatile.Read(ref isRecording)}; Sequence={audioSequence}; Buffered={bufferedAudio.Count}; " +
                     $"Callbacks={Interlocked.Read(ref dataCallbackCount)}; Bytes={Interlocked.Read(ref dataBytes)}; LastDataUtc={lastData:O}; " +
-                    $"Attached={activeSession is not null}; Attaching={isAttaching}; PumpStatus={capturePumpTask?.Status}; Failure={Failure?.Message}";
+                    $"PumpStatus={capturePumpTask?.Status}; Failure={Failure?.Message}";
             }
         }
 
@@ -1272,67 +1174,6 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
                 Volatile.Write(ref isRecording, 0);
                 AssistantWakeDiagnostics.Write("Audio.Start.Failed", $"{exception.GetType().Name}: {exception.Message}");
                 throw;
-            }
-        }
-
-        public async Task AttachAsync(LiveAudioTranscriptionSession session, long wakeBoundary, CancellationToken cancellationToken)
-        {
-            lock (gate)
-            {
-                isAttaching = true;
-            }
-
-            long replayedSequence = wakeBoundary;
-            bool attached = false;
-            using CancellationTokenSource attachmentCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            attachmentCancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(5));
-
-            try
-            {
-                while (true)
-                {
-                    BufferedAudioChunk[] snapshot;
-
-                    lock (gate)
-                    {
-                        snapshot = [.. bufferedAudio.Where(chunk => chunk.Sequence > replayedSequence)];
-
-                        if (snapshot.Length == 0)
-                        {
-                            activeSession = session;
-                            activeSessionCancellationToken = cancellationToken;
-                            isAttaching = false;
-                            attached = true;
-                            return;
-                        }
-                    }
-
-                    foreach (BufferedAudioChunk chunk in snapshot)
-                    {
-                        await session.AppendAsync(chunk.Audio, attachmentCancellationTokenSource.Token);
-                        replayedSequence = chunk.Sequence;
-                    }
-                }
-            }
-            finally
-            {
-                if (!attached)
-                {
-                    lock (gate)
-                    {
-                        isAttaching = false;
-                    }
-                }
-            }
-        }
-
-        public void Detach()
-        {
-            lock (gate)
-            {
-                activeSession = null;
-                activeSessionCancellationToken = default;
-                isAttaching = false;
             }
         }
 
@@ -1414,9 +1255,6 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
                     _ = Interlocked.Exchange(ref lastSpeechLikeAudioTimestamp, DateTime.UtcNow.Ticks);
                 }
 
-                LiveAudioTranscriptionSession? session;
-                CancellationToken sessionCancellationToken;
-
                 lock (gate)
                 {
                     bufferedAudio.Enqueue(new BufferedAudioChunk(++audioSequence, buffer));
@@ -1426,33 +1264,6 @@ public sealed partial class MicrosoftOfflineAssistantProvider :
                         _ = bufferedAudio.Dequeue();
                     }
 
-                    session = isAttaching ? null : activeSession;
-                    sessionCancellationToken = activeSessionCancellationToken;
-                }
-
-                if (session is null)
-                {
-                    continue;
-                }
-
-                try
-                {
-                    await session.AppendAsync(buffer, sessionCancellationToken);
-                }
-                catch (OperationCanceledException) when (sessionCancellationToken.IsCancellationRequested)
-                {
-                }
-                catch (Exception exception)
-                {
-                    AssistantWakeDiagnostics.Write("Audio.Append.Failed", $"{exception.GetType().Name}: {exception.Message}; {GetDiagnosticState()}");
-                    lock (gate)
-                    {
-                        if (ReferenceEquals(activeSession, session))
-                        {
-                            activeSession = null;
-                            activeSessionCancellationToken = default;
-                        }
-                    }
                 }
             }
         }

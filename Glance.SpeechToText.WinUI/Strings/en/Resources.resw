@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" /></xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Speech to text</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Transcribe speech live on this device.</value></data>
+  <data name="GettingReady" xml:space="preserve"><value>Getting ready</value></data>
+  <data name="SetupRequired" xml:space="preserve"><value>Set up speech recognition</value></data>
+  <data name="Starting" xml:space="preserve"><value>Starting transcription</value></data>
+  <data name="Listening" xml:space="preserve"><value>Listening…</value></data>
+  <data name="Paused" xml:space="preserve"><value>Transcription paused</value></data>
+  <data name="Unavailable" xml:space="preserve"><value>Speech recognition unavailable</value></data>
+  <data name="TranscriptionPaused" xml:space="preserve"><value>Paused</value></data>
+  <data name="ReadyToTranscribe" xml:space="preserve"><value>Ready to transcribe</value></data>
+  <data name="CheckingSpeechModel" xml:space="preserve"><value>Checking the speech model</value></data>
+  <data name="DownloadModelInSettings" xml:space="preserve"><value>Download a speech model in Speech and commands</value></data>
+  <data name="TryAgain" xml:space="preserve"><value>Select play to try again</value></data>
+  <data name="ConnectMicrophone" xml:space="preserve"><value>Connect a microphone to get started</value></data>
+  <data name="SelectPlayToStart" xml:space="preserve"><value>Select play to begin live transcription</value></data>
+  <data name="NoMicrophone" xml:space="preserve"><value>No microphone found</value></data>
+  <data name="PauseTranscription" xml:space="preserve"><value>Pause transcription</value></data>
+  <data name="ResumeTranscription" xml:space="preserve"><value>Resume transcription</value></data>
+  <data name="StartTranscription" xml:space="preserve"><value>Start transcription</value></data>
+  <data name="InitializationFailed" xml:space="preserve"><value>Speech recognition could not be prepared</value></data>
+  <data name="TranscriptionFailed" xml:space="preserve"><value>Transcription stopped unexpectedly</value></data>
+  <data name="CopyTranscriptMenuItem.Text" xml:space="preserve"><value>Copy transcript</value></data>
+  <data name="ClearTranscriptMenuItem.Text" xml:space="preserve"><value>Clear transcript</value></data>
+</root>

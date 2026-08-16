@@ -2,6 +2,7 @@ using Betalgo.Ranul.OpenAI.ObjectModels.RequestModels;
 using Betalgo.Ranul.OpenAI.ObjectModels.ResponseModels;
 using Betalgo.Ranul.OpenAI.ObjectModels.SharedModels;
 using Glance.Application.Abstractions;
+using Glance.FoundryLocal;
 using Microsoft.AI.Foundry.Local;
 using Microsoft.Extensions.Logging;
 using System.Text;

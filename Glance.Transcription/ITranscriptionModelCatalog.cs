@@ -1,5 +1,3 @@
-using Glance.Application.Abstractions;
-
 namespace Glance.Transcription;
 
 public interface ITranscriptionModelCatalog
@@ -12,8 +10,6 @@ public interface ITranscriptionModelCatalog
 
     bool IsInstalled(string modelId);
 
-    string GetModelPath(string modelId);
-
     Task<TranscriptionModelState> GetStateAsync(string modelId,
         CancellationToken cancellationToken = default);
 
@@ -24,7 +20,7 @@ public interface ITranscriptionModelCatalog
     Task RemoveAsync(string modelId,
         CancellationToken cancellationToken = default);
 
-    BackgroundDownloadSnapshot? GetDownload(string modelId);
+    TranscriptionModelDownload? GetDownload(string modelId);
 
     bool CancelInstall(string modelId);
 }

@@ -13,12 +13,13 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Elysium.Application.Abstractions" Version="$(ElysiumVersion)" />
-    <PackageReference Include="Microsoft.AI.Foundry.Local.WinML" Version="1.2.4" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
     <PackageReference Include="NAudio" Version="2.3.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Glance.Application.Abstractions\Glance.Application.Abstractions.csproj" />
+    <ProjectReference Include="..\Glance.FoundryLocal\Glance.FoundryLocal.csproj" />
     <ProjectReference Include="..\Glance.Transcription\Glance.Transcription.csproj" />
+    <ProjectReference Include="..\Glance.Transcription.Windows\Glance.Transcription.Windows.csproj" />
   </ItemGroup>
 </Project>

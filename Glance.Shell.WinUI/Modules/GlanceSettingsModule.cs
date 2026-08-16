@@ -14,6 +14,7 @@ public sealed class GlanceSettingsModule :
             .AddViewFor<AssistantModelSetupView, IGlanceViewModel, AssistantModelSetupViewModel>(ServiceLifetime.Transient,
                 provider => new AssistantModelSetupView(),
                 provider => new AssistantModelSetupViewModel(provider.GetRequiredService<ITranscriptionModelCatalog>(),
+                    provider.GetRequiredService<ITranscriptionModelSelection>(),
                     provider.GetRequiredService<IDispatcher>()))
             .AddViewFor<AssistantEnabledView, IGlanceViewModel, AssistantEnabledViewModel>(ServiceLifetime.Transient,
                 provider => new AssistantEnabledView(),

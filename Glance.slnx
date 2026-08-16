@@ -14,10 +14,19 @@
   <Project Path="Glance.Assistant.WinUI/Glance.Assistant.WinUI.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.FoundryLocal/Glance.FoundryLocal.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.Transcription/Glance.Transcription.csproj">
     <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Transcription.Windows/Glance.Transcription.Windows.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Transcription.Nemotron/Glance.Transcription.Nemotron.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Transcription.Whisper/Glance.Transcription.Whisper.csproj">
     <Platform Project="x64" />
   </Project>
   <Project Path="Glance.AppMixer.WinUI/Glance.AppMixer.WinUI.csproj">
@@ -139,6 +148,15 @@
     <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Spotify.Tests/Glance.Spotify.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.SpeechToText.WinUI/Glance.SpeechToText.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.SpeechToText/Glance.SpeechToText.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.SpeechToText.Tests/Glance.SpeechToText.Tests.csproj">
     <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Network.WinUI/Glance.Network.WinUI.csproj">

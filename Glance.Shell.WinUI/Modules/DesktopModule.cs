@@ -8,7 +8,6 @@ using Glance.Transcription;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.IO;
 using System.Net.Http;
 
 namespace Glance.Shell.WinUI;
@@ -25,8 +24,12 @@ public sealed class DesktopModule :
             .AddSingleton<HttpClient>()
             .AddSingleton<BackgroundDownloadManager>()
             .AddSingleton<IBackgroundDownloadManager>(provider => provider.GetRequiredService<BackgroundDownloadManager>())
-            .AddSingleton(provider => new WhisperModelCatalog(provider.GetRequiredService<IBackgroundDownloadManager>(), Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "Transcription", "Models")))
-            .AddSingleton<ITranscriptionModelCatalog>(provider => provider.GetRequiredService<WhisperModelCatalog>())
+            .AddSingleton<TranscriptionService>()
+            .AddSingleton<ITranscriptionModelCatalog>(provider => provider.GetRequiredService<TranscriptionService>())
+            .AddSingleton<ITranscriptionDecoderFactory>(provider => provider.GetRequiredService<TranscriptionService>())
+            .AddSingleton<ITranscriptionProviderRegistry>(provider => provider.GetRequiredService<TranscriptionService>())
+            .AddSingleton<TranscriptionModelSelection>()
+            .AddSingleton<ITranscriptionModelSelection>(provider => provider.GetRequiredService<TranscriptionModelSelection>())
             .AddSingleton(provider => new GlanceAssistantService(provider.GetRequiredService<GlanceSettings>(), provider.GetRequiredService<IWritableOptions<GlanceSettings>>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<IGlanceActionService>(), provider.GetRequiredService<ITranscriptionModelCatalog>(), provider.GetRequiredService<ILogger<GlanceAssistantService>>()))
             .AddSingleton<IGlanceAssistantService>(provider => provider.GetRequiredService<GlanceAssistantService>())
             .AddSingleton<IGlanceAssistantCommandHandler, ShowComponentAssistantCommandHandler>()

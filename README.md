@@ -130,6 +130,8 @@ public sealed class ExampleComponent :
 }
 ```
 
+Transcription engines can be shipped as headless modules. Register an `ITranscriptionProvider` from the package's `IGlanceModule`. A provider may publish any number of `TranscriptionModel` entries and creates an `ITranscriptionDecoder` for the selected model. Glance captures the selected microphone, converts it to the provider's requested PCM format, and streams the audio into the decoder. Model downloads, model-specific preprocessing, and decoding remain owned by the provider.
+
 ### 3. Package the module
 
 A `.glance` package is a ZIP archive whose files are stored at its root. Include the WinUI assembly and matching PRI file, the platform-independent assembly, and every private runtime dependency:
@@ -142,7 +144,7 @@ Example.glance
   Example.PrivateDependency.dll
 ```
 
-The WinUI DLL and PRI filenames must share the same base name. Do not package shared Glance, WinUI, Elysium, or Microsoft Extensions assemblies supplied by the host.
+The WinUI DLL and PRI filenames must share the same base name. A headless module instead includes its entry assembly and matching `.deps.json` file. Do not package shared Glance, WinUI, Elysium, or Microsoft Extensions assemblies supplied by the host.
 
 One simple packaging command is:
 

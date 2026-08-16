@@ -11,6 +11,22 @@
             <CommunityToolkit:SettingsExpander.HeaderIcon>
                 <FontIcon Glyph="&#xE720;" />
             </CommunityToolkit:SettingsExpander.HeaderIcon>
+            <CommunityToolkit:SettingsExpander.ItemsFooter>
+                <StackPanel Spacing="8">
+                    <InfoBar
+                        IsClosable="False"
+                        IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
+                        Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+                        Severity="Error"
+                        Visibility="{x:Bind ViewModel.HasError, Mode=OneWay}" />
+                    <InfoBar
+                        x:Uid="AssistantModelReadyInfoBar"
+                        IsClosable="False"
+                        IsOpen="{x:Bind ViewModel.IsSetupComplete, Mode=OneWay}"
+                        Severity="Success"
+                        Visibility="{x:Bind ViewModel.IsSetupComplete, Mode=OneWay}" />
+                </StackPanel>
+            </CommunityToolkit:SettingsExpander.ItemsFooter>
             <CommunityToolkit:SettingsExpander.Items>
                 <CommunityToolkit:SettingsCard
                     x:Uid="AssistantModelChoiceCard"
@@ -22,11 +38,15 @@
                         ItemsSource="{x:Bind ViewModel.Models, Mode=OneWay}"
                         SelectedIndex="{x:Bind ViewModel.SelectedIndex, Mode=TwoWay}" />
                 </CommunityToolkit:SettingsCard>
-                <Grid>
-                    <CommunityToolkit:SettingsCard
-                        x:Uid="AssistantModelInstallCard"
-                        Description="{x:Bind ViewModel.SelectedDownloadDescription, Mode=OneWay}">
-                        <Grid ColumnSpacing="8">
+                <CommunityToolkit:SettingsCard
+                    x:Uid="AssistantModelInstallCard"
+                    Description="{x:Bind ViewModel.SelectedDownloadDescription, Mode=OneWay}">
+                    <Grid RowSpacing="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid>
                             <Button
                                 x:Name="InstallButton"
                                 MinWidth="132"
@@ -51,27 +71,14 @@
                                 <TextBlock x:Uid="AssistantModelRemoveButtonText" />
                             </Button>
                         </Grid>
-                    </CommunityToolkit:SettingsCard>
-                    <ProgressBar
-                        Margin="16,0,16,4"
-                        VerticalAlignment="Bottom"
-                        IsHitTestVisible="False"
-                        Maximum="100"
-                        Value="{x:Bind ViewModel.Progress, Mode=OneWay}"
-                        Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
-                </Grid>
-                <InfoBar
-                    IsClosable="False"
-                    IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
-                    Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
-                    Severity="Error"
-                    Visibility="{x:Bind ViewModel.HasError, Mode=OneWay}" />
-                <InfoBar
-                    x:Uid="AssistantModelReadyInfoBar"
-                    IsClosable="False"
-                    IsOpen="{x:Bind ViewModel.IsSetupComplete, Mode=OneWay}"
-                    Severity="Success"
-                    Visibility="{x:Bind ViewModel.IsSetupComplete, Mode=OneWay}" />
+                        <ProgressBar
+                            Grid.Row="1"
+                            IsHitTestVisible="False"
+                            Maximum="100"
+                            Value="{x:Bind ViewModel.Progress, Mode=OneWay}"
+                            Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+                    </Grid>
+                </CommunityToolkit:SettingsCard>
             </CommunityToolkit:SettingsExpander.Items>
         </CommunityToolkit:SettingsExpander>
     </StackPanel>

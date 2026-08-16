@@ -167,7 +167,13 @@ internal static partial class GlanceModuleLoader
     {
         List<IGlanceModule> modules = [];
 
-        foreach (string path in Directory.EnumerateFiles(source.ContentDirectory, "*.dll", SearchOption.AllDirectories).Where(path => File.Exists(Path.ChangeExtension(path, ".pri"))).Order(StringComparer.OrdinalIgnoreCase))
+        IEnumerable<string> resourceModules = Directory.EnumerateFiles(source.ContentDirectory, "*.dll", SearchOption.AllDirectories)
+            .Where(path => File.Exists(Path.ChangeExtension(path, ".pri")));
+        IEnumerable<string> headlessModules = Directory.EnumerateFiles(source.ContentDirectory, "*.deps.json", SearchOption.TopDirectoryOnly)
+            .Select(path => path[..^".deps.json".Length] + ".dll")
+            .Where(File.Exists);
+
+        foreach (string path in resourceModules.Concat(headlessModules).Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase))
         {
             modules.AddRange(LoadAssembly(path, throwOnFailure));
         }
@@ -186,7 +192,9 @@ internal static partial class GlanceModuleLoader
             Assembly? existingAssembly = AssemblyLoadContext.Default.Assemblies.FirstOrDefault(candidate =>
                 AssemblyName.ReferenceMatchesDefinition(candidate.GetName(), assemblyName));
 
-            if (existingAssembly is null && !DynamicLoader.TryLoadPri(Path.ChangeExtension(path, ".pri")))
+            string priPath = Path.ChangeExtension(path, ".pri");
+
+            if (existingAssembly is null && File.Exists(priPath) && !DynamicLoader.TryLoadPri(priPath))
             {
                 if (throwOnFailure)
                 {

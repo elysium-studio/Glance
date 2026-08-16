@@ -12,6 +12,7 @@ public sealed partial class AssistantModelSetupViewModel :
     IDisposable
 {
     private readonly ITranscriptionModelCatalog catalog;
+    private readonly ITranscriptionModelSelection modelSelection;
     private readonly IDispatcher dispatcher;
     private int disposed;
 
@@ -34,17 +35,21 @@ public sealed partial class AssistantModelSetupViewModel :
     private int selectedIndex;
 
     public AssistantModelSetupViewModel(ITranscriptionModelCatalog catalog,
+        ITranscriptionModelSelection modelSelection,
         IDispatcher dispatcher)
     {
         this.catalog = catalog;
+        this.modelSelection = modelSelection;
         this.dispatcher = dispatcher;
         Models = new ObservableCollection<AssistantModelOption>(catalog.Models.Select(CreateOption));
-        selectedIndex = Math.Max(0, catalog.Models.Select((model, index) => (model, index))
-            .Where(item => string.Equals(item.model.Id, catalog.DefaultModelId, StringComparison.OrdinalIgnoreCase))
+        string selectedModelId = modelSelection.SelectedModelId ?? catalog.DefaultModelId;
+        selectedIndex = catalog.Models.Select((model, index) => (model, index))
+            .Where(item => string.Equals(item.model.Id, selectedModelId, StringComparison.OrdinalIgnoreCase))
             .Select(item => item.index)
-            .DefaultIfEmpty(0)
-            .First());
+            .DefaultIfEmpty(-1)
+            .First();
         catalog.StateChanged += HandleStateChanged;
+        modelSelection.SelectionChanged += HandleSelectionChanged;
         SynchronizeSelectedModel();
     }
 
@@ -63,6 +68,11 @@ public sealed partial class AssistantModelSetupViewModel :
             }
 
             SynchronizeSelectedModel();
+
+            if (SelectedModel is not null)
+            {
+                _ = modelSelection.SelectAsync(SelectedModel.Id);
+            }
         }
     }
 
@@ -184,26 +194,75 @@ public sealed partial class AssistantModelSetupViewModel :
     {
         _ = Interlocked.Exchange(ref disposed, 1);
         catalog.StateChanged -= HandleStateChanged;
+        modelSelection.SelectionChanged -= HandleSelectionChanged;
     }
 
     private void HandleStateChanged(object? sender, EventArgs args) => dispatcher.Dispatch(() =>
     {
         if (Volatile.Read(ref disposed) == 0)
         {
+            SynchronizeModels();
             SynchronizeSelectedModel();
         }
     });
 
+    private void HandleSelectionChanged(object? sender, EventArgs args) => dispatcher.Dispatch(() =>
+    {
+        if (Volatile.Read(ref disposed) != 0)
+        {
+            return;
+        }
+
+        int index = Models.Select((model, index) => (model, index))
+            .Where(item => string.Equals(item.model.Id, modelSelection.SelectedModelId, StringComparison.OrdinalIgnoreCase))
+            .Select(item => item.index)
+            .DefaultIfEmpty(-1)
+            .First();
+
+        if (selectedIndex != index)
+        {
+            selectedIndex = index;
+            OnPropertyChanged(nameof(SelectedIndex));
+        }
+
+        SynchronizeSelectedModel();
+    });
+
+    private void SynchronizeModels()
+    {
+        IReadOnlyList<TranscriptionModel> current = catalog.Models;
+
+        if (Models.Select(model => model.Id).SequenceEqual(current.Select(model => model.Id), StringComparer.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        string selectedModelId = modelSelection.SelectedModelId ?? SelectedModel?.Id ?? catalog.DefaultModelId;
+        Models.Clear();
+
+        foreach (TranscriptionModel model in current)
+        {
+            Models.Add(CreateOption(model));
+        }
+
+        selectedIndex = Models.Select((model, index) => (model, index))
+            .Where(item => string.Equals(item.model.Id, selectedModelId, StringComparison.OrdinalIgnoreCase))
+            .Select(item => item.index)
+            .DefaultIfEmpty(Models.Count > 0 ? 0 : -1)
+            .First();
+        OnPropertyChanged(nameof(SelectedIndex));
+    }
+
     private void SynchronizeSelectedModel()
     {
-        BackgroundDownloadSnapshot? download = SelectedModel is null
+        TranscriptionModelDownload? download = SelectedModel is null
             ? null
             : catalog.GetDownload(SelectedModel.Id);
         IsBusy = download?.IsActive == true;
         Progress = download is null
             ? IsSelectedInstalled ? 100 : 0
             : download.Progress * 100;
-        ErrorMessage = download?.Status == BackgroundDownloadStatus.Failed
+        ErrorMessage = download?.Status == TranscriptionModelDownloadStatus.Failed
             ? download.ErrorMessage
             : null;
         NotifySelectionChanged();
@@ -227,7 +286,8 @@ public sealed partial class AssistantModelSetupViewModel :
         model.DisplayName,
         model.Description,
         FormatSize(model.DownloadSize),
-        model.IsRecommended);
+        model.IsRecommended,
+        model.ProviderDisplayName);
 
     private static string FormatSize(long size)
     {
@@ -243,7 +303,17 @@ public sealed record AssistantModelOption(string Id,
     string DisplayName,
     string Description,
     string DownloadSizeText,
-    bool IsRecommended)
+    bool IsRecommended,
+    string? ProviderDisplayName)
 {
-    public string DisplayLabel => IsRecommended ? $"{DisplayName} · Recommended" : DisplayName;
+    public string DisplayLabel
+    {
+        get
+        {
+            string label = string.IsNullOrWhiteSpace(ProviderDisplayName)
+                ? DisplayName
+                : $"{DisplayName} · {ProviderDisplayName}";
+            return IsRecommended ? $"{label} · Recommended" : label;
+        }
+    }
 }

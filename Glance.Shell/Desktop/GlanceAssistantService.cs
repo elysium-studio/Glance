@@ -38,15 +38,14 @@ public sealed class GlanceAssistantService :
         this.actionService = actionService;
         this.modelCatalog = modelCatalog;
         this.logger = logger;
-        isEnabled = settings.IsAssistantEnabled && CanEnable;
+        isEnabled = settings.IsAssistantEnabled;
         actionService.PresentationRequested += HandleActionPresentationRequested;
         modelCatalog.StateChanged += HandleModelStateChanged;
         messenger.Register(this);
 
-        if (settings.IsAssistantEnabled && !isEnabled)
+        if (settings.IsAssistantEnabled)
         {
-            settings.IsAssistantEnabled = false;
-            _ = settingsWriter.WriteAsync(options => options.IsAssistantEnabled = false);
+            _ = ValidateModelAvailabilityAsync();
         }
     }
 
@@ -223,12 +222,46 @@ public sealed class GlanceAssistantService :
     private void HandleModelStateChanged(object? sender, EventArgs args) => dispatcher.Dispatch(() =>
     {
         OnPropertyChanged(nameof(CanEnable));
-
-        if (IsEnabled && !CanEnable)
-        {
-            _ = SetEnabledAsync(false);
-        }
+        _ = ValidateModelAvailabilityAsync();
     });
+
+    private async Task ValidateModelAvailabilityAsync()
+    {
+        TranscriptionModel[] models = [.. modelCatalog.Models];
+
+        if (models.Length == 0 || !IsEnabled)
+        {
+            return;
+        }
+
+        bool isAvailable = false;
+
+        foreach (TranscriptionModel model in models)
+        {
+            try
+            {
+                if (await modelCatalog.GetStateAsync(model.Id) == TranscriptionModelState.Installed)
+                {
+                    isAvailable = true;
+                    break;
+                }
+            }
+            catch (Exception exception)
+            {
+                logger.LogWarning(exception, "Failed to read transcription model state for {TranscriptionModelId}", model.Id);
+            }
+        }
+
+        if (!isAvailable)
+        {
+            if (!models.Select(model => model.Id).SequenceEqual(modelCatalog.Models.Select(model => model.Id), StringComparer.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            dispatcher.Dispatch(() => _ = SetEnabledAsync(false));
+        }
+    }
 
     public bool CanEnable => modelCatalog.Models.Any(model => modelCatalog.IsInstalled(model.Id));
 
