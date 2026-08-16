@@ -22,34 +22,45 @@
         </Grid>
         <Grid Grid.Column="1" Height="58" VerticalAlignment="Center">
             <Grid.RowDefinitions>
-                <RowDefinition Height="14" />
+                <RowDefinition Height="18" />
                 <RowDefinition Height="22" />
                 <RowDefinition Height="18" />
             </Grid.RowDefinitions>
             <Button
                 x:Name="AudioSourceButton"
-                MinHeight="14"
+                Height="18"
                 Padding="0"
+                BorderThickness="0"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
                 AutomationProperties.Name="{x:Bind ViewModel.AudioSourceName, Mode=OneWay}"
                 IsEnabled="{x:Bind ViewModel.CanChangeAudioSource, Mode=OneWay}"
-                Style="{StaticResource SubtleButtonStyle}"
                 ToolTipService.ToolTip="{x:Bind ViewModel.AudioSourceName, Mode=OneWay}">
+                <Button.Resources>
+                    <SolidColorBrush x:Key="ButtonBackground" Color="Transparent" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent" />
+                    <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent" />
+                    <StaticResource x:Key="ButtonForeground" ResourceKey="GlanceSpeechToTextIconBrush" />
+                    <StaticResource x:Key="ButtonForegroundPointerOver" ResourceKey="GlanceSpeechToTextIconBrushPointerOver" />
+                    <StaticResource x:Key="ButtonForegroundPressed" ResourceKey="GlanceSpeechToTextIconBrushPressed" />
+                    <StaticResource x:Key="ButtonForegroundDisabled" ResourceKey="GlanceSpeechToTextIconBrush" />
+                </Button.Resources>
                 <Button.Content>
                     <Grid ColumnSpacing="4">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <TextBlock
-                            Foreground="{ThemeResource GlanceSpeechToTextIconBrush}"
+                            MaxWidth="190"
                             Style="{StaticResource CaptionTextBlockStyle}"
                             Text="{x:Bind ToUpper(ViewModel.AudioSourceName), Mode=OneWay}"
                             TextTrimming="CharacterEllipsis"
                             TextWrapping="NoWrap" />
                         <FontIcon
                             Grid.Column="1"
+                            HorizontalAlignment="Left"
                             FontSize="8"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                             Glyph="&#xE70D;" />

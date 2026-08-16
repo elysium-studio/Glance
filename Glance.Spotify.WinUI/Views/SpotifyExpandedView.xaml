@@ -86,26 +86,39 @@
             </Grid.RowDefinitions>
             <Button
                 x:Name="PlaybackSourceButton"
-                MinHeight="18"
+                Height="18"
+                MinWidth="0"
+                MinHeight="0"
                 Padding="0"
+                BorderThickness="0"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
-                IsEnabled="{x:Bind ViewModel.HasDevices, Mode=OneWay}"
-                Style="{StaticResource SubtleButtonStyle}">
+                IsEnabled="{x:Bind ViewModel.HasDevices, Mode=OneWay}">
+                <Button.Resources>
+                    <SolidColorBrush x:Key="ButtonBackground" Color="Transparent" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent" />
+                    <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent" />
+                    <SolidColorBrush x:Key="ButtonForeground" Color="{x:Bind ToAccentColor(ViewModel.AccentColor), Mode=OneWay}" />
+                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{x:Bind ToPointerOverColor(ViewModel.AccentColor), Mode=OneWay}" />
+                    <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{x:Bind ToPressedColor(ViewModel.AccentColor), Mode=OneWay}" />
+                    <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="{x:Bind ToDisabledColor(ViewModel.AccentColor), Mode=OneWay}" />
+                </Button.Resources>
                 <Button.Content>
                     <Grid ColumnSpacing="4">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <TextBlock
-                            Foreground="{x:Bind ToAccentBrush(ViewModel.AccentColor), Mode=OneWay}"
+                            MaxWidth="120"
                             Style="{StaticResource CaptionTextBlockStyle}"
                             Text="{x:Bind ToUpper(ViewModel.PlaybackSourceName), Mode=OneWay}"
                             TextTrimming="CharacterEllipsis"
                             TextWrapping="NoWrap" />
                         <FontIcon
                             Grid.Column="1"
+                            HorizontalAlignment="Left"
                             FontSize="8"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                             Glyph="&#xE70D;" />

@@ -4,12 +4,54 @@
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Default">
             <SolidColorBrush x:Key="GlanceSpeechToTextIconBrush" Color="#FFB59AFF" />
+            <SolidColorBrush x:Key="GlanceSpeechToTextIconBrushPointerOver" Color="#FFC4AEFF" />
+            <SolidColorBrush x:Key="GlanceSpeechToTextIconBrushPressed" Color="#FFA284F5" />
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FFB59AFF" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#FFC4AEFF" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#FFA284F5" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#66B59AFF" />
+            <SolidColorBrush x:Key="AccentButtonForeground" Color="#FF1F1437" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FF1F1437" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#FF1F1437" />
+            <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#801F1437" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrush" Color="Transparent" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrushPointerOver" Color="Transparent" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrushPressed" Color="Transparent" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrushDisabled" Color="Transparent" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="GlanceSpeechToTextIconBrush" Color="#FF6640B8" />
+            <SolidColorBrush x:Key="GlanceSpeechToTextIconBrushPointerOver" Color="#FF7550C5" />
+            <SolidColorBrush x:Key="GlanceSpeechToTextIconBrushPressed" Color="#FF5632A0" />
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#FF6640B8" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#FF7550C5" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#FF5632A0" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#666640B8" />
+            <SolidColorBrush x:Key="AccentButtonForeground" Color="White" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="White" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="White" />
+            <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#80FFFFFF" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrush" Color="Transparent" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrushPointerOver" Color="Transparent" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrushPressed" Color="Transparent" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrushDisabled" Color="Transparent" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <SolidColorBrush x:Key="GlanceSpeechToTextIconBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="GlanceSpeechToTextIconBrushPointerOver" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="GlanceSpeechToTextIconBrushPressed" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="AccentButtonForeground" Color="{ThemeResource SystemColorHighlightTextColor}" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="{ThemeResource SystemColorHighlightTextColor}" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="{ThemeResource SystemColorHighlightTextColor}" />
+            <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="{ThemeResource SystemColorHighlightTextColor}" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrush" Color="{ThemeResource SystemColorButtonTextColor}" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrushPointerOver" Color="{ThemeResource SystemColorButtonTextColor}" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrushPressed" Color="{ThemeResource SystemColorButtonTextColor}" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrushDisabled" Color="{ThemeResource SystemColorGrayTextColor}" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>
