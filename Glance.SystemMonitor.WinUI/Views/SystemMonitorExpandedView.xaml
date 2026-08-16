@@ -6,7 +6,7 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/System.xaml" />
     </UserControl.Resources>
-    <Grid Padding="20,10,20,26" ColumnSpacing="18">
+    <Grid Padding="20,12,20,30" ColumnSpacing="18">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
@@ -52,9 +52,7 @@
                             FontWeight="SemiBold"
                             Foreground="{ThemeResource GlanceSystemCpuGraphBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}" />
-                        <TextBlock
-                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                            Text="{x:Bind ViewModel.CpuText, Mode=OneWay}" />
+                        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.CpuText, Mode=OneWay}" />
                     </StackPanel>
                     <StackPanel
                         Margin="8,6"
@@ -66,9 +64,7 @@
                             FontWeight="SemiBold"
                             Foreground="{ThemeResource GlanceSystemCpuGraphBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}" />
-                        <TextBlock
-                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                            Text="{x:Bind ViewModel.CpuText, Mode=OneWay}" />
+                        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.CpuText, Mode=OneWay}" />
                         <ProgressBar
                             Height="3"
                             Foreground="{ThemeResource GlanceSystemCpuGraphBrush}"
@@ -98,9 +94,7 @@
                             FontWeight="SemiBold"
                             Foreground="{ThemeResource GlanceSystemMemoryGraphBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}" />
-                        <TextBlock
-                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                            Text="{x:Bind ViewModel.MemoryText, Mode=OneWay}" />
+                        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.MemoryText, Mode=OneWay}" />
                     </StackPanel>
                     <StackPanel
                         Margin="8,6"
@@ -112,9 +106,7 @@
                             FontWeight="SemiBold"
                             Foreground="{ThemeResource GlanceSystemMemoryGraphBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}" />
-                        <TextBlock
-                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                            Text="{x:Bind ViewModel.MemoryText, Mode=OneWay}" />
+                        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.MemoryText, Mode=OneWay}" />
                         <ProgressBar
                             Height="3"
                             Foreground="{ThemeResource GlanceSystemMemoryGraphBrush}"
@@ -144,9 +136,7 @@
                             FontWeight="SemiBold"
                             Foreground="{ThemeResource GlanceSystemGpuGraphBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}" />
-                        <TextBlock
-                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                            Text="{x:Bind ViewModel.GpuText, Mode=OneWay}" />
+                        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.GpuText, Mode=OneWay}" />
                     </StackPanel>
                     <StackPanel
                         Margin="8,6"
@@ -158,9 +148,7 @@
                             FontWeight="SemiBold"
                             Foreground="{ThemeResource GlanceSystemGpuGraphBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}" />
-                        <TextBlock
-                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                            Text="{x:Bind ViewModel.GpuText, Mode=OneWay}" />
+                        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.GpuText, Mode=OneWay}" />
                         <ProgressBar
                             Height="3"
                             Foreground="{ThemeResource GlanceSystemGpuGraphBrush}"

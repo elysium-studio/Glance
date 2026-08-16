@@ -45,9 +45,7 @@
             VerticalAlignment="Center"
             Orientation="Horizontal"
             Spacing="5">
-            <Button
-                x:Uid="ResetButton"
-                Click="{x:Bind ViewModel.Reset}">
+            <Button x:Uid="ResetButton" Click="{x:Bind ViewModel.Reset}">
                 <Button.Style>
                     <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
                         <Setter Property="Width" Value="32" />
@@ -60,9 +58,7 @@
                     </Style>
                 </Button.Style>
             </Button>
-            <Button
-                x:Uid="SkipButton"
-                Click="{x:Bind ViewModel.Skip}">
+            <Button x:Uid="SkipButton" Click="{x:Bind ViewModel.Skip}">
                 <Button.Style>
                     <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
                         <Setter Property="Width" Value="32" />
@@ -95,7 +91,7 @@
                             <Setter Property="Padding" Value="0" />
                             <Setter Property="CornerRadius" Value="18" />
                             <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                            <Setter Property="FontSize" Value="16" />
+                            <Setter Property="FontSize" Value="14" />
                         </Style>
                     </Button.Style>
                 </Button>

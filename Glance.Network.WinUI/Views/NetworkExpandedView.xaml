@@ -6,12 +6,16 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Themes/Network.xaml" />
     </UserControl.Resources>
-    <Grid Padding="20,10,20,26" ColumnSpacing="18">
+    <Grid Padding="20,12,20,30" ColumnSpacing="18">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Grid x:Name="StatusIndicator" Width="36" Height="36" VerticalAlignment="Center">
+        <Grid
+            x:Name="StatusIndicator"
+            Width="36"
+            Height="36"
+            VerticalAlignment="Center">
             <FontIcon
                 Width="30"
                 Height="30"
@@ -32,25 +36,36 @@
                     <local:NetworkMetricGraph
                         x:Name="DownloadGraph"
                         Margin="6,26,6,6"
-                        Maximum="0"
                         GridStroke="{ThemeResource GlanceNetworkGraphGridBrush}"
+                        Maximum="0"
                         PrimaryStroke="{ThemeResource GlanceNetworkDownloadBrush}" />
                     <StackPanel Margin="8,6" Spacing="1">
-                        <TextBlock x:Uid="DownloadLabel" FontWeight="SemiBold" Foreground="{ThemeResource GlanceNetworkDownloadBrush}" Style="{StaticResource CaptionTextBlockStyle}" />
+                        <TextBlock
+                            x:Uid="DownloadLabel"
+                            FontWeight="SemiBold"
+                            Foreground="{ThemeResource GlanceNetworkDownloadBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}" />
                         <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.DownloadText, Mode=OneWay}" />
                     </StackPanel>
                 </Grid>
             </Border>
-            <Border Grid.Column="1" Background="{ThemeResource ControlFillColorSecondaryBrush}" CornerRadius="{StaticResource OverlayCornerRadius}">
+            <Border
+                Grid.Column="1"
+                Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                CornerRadius="{StaticResource OverlayCornerRadius}">
                 <Grid>
                     <local:NetworkMetricGraph
                         x:Name="UploadGraph"
                         Margin="6,26,6,6"
-                        Maximum="0"
                         GridStroke="{ThemeResource GlanceNetworkGraphGridBrush}"
+                        Maximum="0"
                         PrimaryStroke="{ThemeResource GlanceNetworkUploadBrush}" />
                     <StackPanel Margin="8,6" Spacing="1">
-                        <TextBlock x:Uid="UploadLabel" FontWeight="SemiBold" Foreground="{ThemeResource GlanceNetworkUploadBrush}" Style="{StaticResource CaptionTextBlockStyle}" />
+                        <TextBlock
+                            x:Uid="UploadLabel"
+                            FontWeight="SemiBold"
+                            Foreground="{ThemeResource GlanceNetworkUploadBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}" />
                         <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.UploadText, Mode=OneWay}" />
                     </StackPanel>
                 </Grid>

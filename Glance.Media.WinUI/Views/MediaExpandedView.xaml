@@ -71,10 +71,10 @@
                 <Local:MediaAudioVisualizer
                     Width="23"
                     Height="16"
-                    AccentColor="{x:Bind ViewModel.AccentColor, Mode=OneWay}"
                     HorizontalAlignment="Center"
-                    Visibility="{x:Bind WhenAvailable(ViewModel.ShowAudioVisualization), Mode=OneWay}"
-                    ViewModel="{x:Bind ViewModel}" />
+                    AccentColor="{x:Bind ViewModel.AccentColor, Mode=OneWay}"
+                    ViewModel="{x:Bind ViewModel}"
+                    Visibility="{x:Bind WhenAvailable(ViewModel.ShowAudioVisualization), Mode=OneWay}" />
                 <StackPanel
                     HorizontalAlignment="Center"
                     Orientation="Horizontal"
@@ -121,7 +121,7 @@
                                 <Setter Property="Padding" Value="0" />
                                 <Setter Property="CornerRadius" Value="18" />
                                 <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                                <Setter Property="FontSize" Value="16" />
+                                <Setter Property="FontSize" Value="14" />
                             </Style>
                         </Button.Style>
                     </Button>

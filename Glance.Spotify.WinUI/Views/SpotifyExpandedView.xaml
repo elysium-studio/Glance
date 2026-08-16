@@ -90,9 +90,9 @@
                 MinWidth="0"
                 MinHeight="0"
                 Padding="0"
-                BorderThickness="0"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
+                BorderThickness="0"
                 IsEnabled="{x:Bind ViewModel.HasDevices, Mode=OneWay}">
                 <Button.Resources>
                     <SolidColorBrush x:Key="ButtonBackground" Color="Transparent" />
@@ -215,7 +215,10 @@
             Orientation="Horizontal"
             Spacing="5"
             Visibility="{x:Bind ViewModel.HasPlayback, Mode=OneWay}">
-            <Button x:Uid="PreviousButton" Click="{x:Bind ViewModel.Previous}" IsEnabled="{x:Bind ViewModel.CanControlPlayback, Mode=OneWay}">
+            <Button
+                x:Uid="PreviousButton"
+                Click="{x:Bind ViewModel.Previous}"
+                IsEnabled="{x:Bind ViewModel.CanControlPlayback, Mode=OneWay}">
                 <Button.Style>
                     <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
                         <Setter Property="Width" Value="32" />
@@ -258,7 +261,10 @@
                     </Style>
                 </Button.Style>
             </Button>
-            <Button x:Uid="NextButton" Click="{x:Bind ViewModel.Next}" IsEnabled="{x:Bind ViewModel.CanControlPlayback, Mode=OneWay}">
+            <Button
+                x:Uid="NextButton"
+                Click="{x:Bind ViewModel.Next}"
+                IsEnabled="{x:Bind ViewModel.CanControlPlayback, Mode=OneWay}">
                 <Button.Style>
                     <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
                         <Setter Property="Width" Value="32" />
