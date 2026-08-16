@@ -84,5 +84,16 @@
                              "Added view-aware module lifecycle support so modules can pause background work while they are out of view.",
                              "Improved taskbar placement, adaptive module layouts, drag and hover behaviour, Spotify playback reliability, and island transitions."
                          ]
+    },
+    {
+        "version":  "0.1.7-preview",
+        "date":  "2026-08-17",
+        "releaseNotes":  [
+                             "Added Speech to Text for live on-device transcription with microphone switching, play and pause controls, and recent transcription lines.",
+                             "Added modular transcription providers with downloadable Whisper and NVIDIA Nemotron model choices.",
+                             "Shared model discovery, selection, download state, and audio capture across Voice Assistant and Speech to Text.",
+                             "Added safe headless .glance provider packaging so transcription engines and their private dependencies stay isolated from Glance.",
+                             "Refined source selectors, accent playback controls, and expanded layouts across Glance modules."
+                         ]
     }
 ]
