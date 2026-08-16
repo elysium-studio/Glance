@@ -11,7 +11,11 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        <Grid x:Name="StatusIndicator" Width="36" Height="36" VerticalAlignment="Center">
+        <Grid
+            x:Name="StatusIndicator"
+            Width="36"
+            Height="36"
+            VerticalAlignment="Center">
             <FontIcon
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
@@ -20,7 +24,10 @@
                 Foreground="{ThemeResource GlanceSpeechToTextIconBrush}"
                 Glyph="&#xE720;" />
         </Grid>
-        <Grid Grid.Column="1" Height="58" VerticalAlignment="Center">
+        <Grid
+            Grid.Column="1"
+            Height="58"
+            VerticalAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition Height="18" />
                 <RowDefinition Height="22" />
@@ -30,10 +37,10 @@
                 x:Name="AudioSourceButton"
                 Height="18"
                 Padding="0"
-                BorderThickness="0"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
                 AutomationProperties.Name="{x:Bind ViewModel.AudioSourceName, Mode=OneWay}"
+                BorderThickness="0"
                 IsEnabled="{x:Bind ViewModel.CanChangeAudioSource, Mode=OneWay}"
                 ToolTipService.ToolTip="{x:Bind ViewModel.AudioSourceName, Mode=OneWay}">
                 <Button.Resources>
@@ -69,9 +76,9 @@
                 <Button.Flyout>
                     <MenuFlyout
                         x:Name="AudioSourceFlyout"
-                        Opening="HandleAudioSourceFlyoutOpening"
+                        Closed="HandleAudioSourceFlyoutClosed"
                         Opened="HandleAudioSourceFlyoutOpened"
-                        Closed="HandleAudioSourceFlyoutClosed" />
+                        Opening="HandleAudioSourceFlyoutOpening" />
                 </Button.Flyout>
             </Button>
             <TextBlock
@@ -85,8 +92,14 @@
                 TextWrapping="NoWrap">
                 <TextBlock.ContextFlyout>
                     <MenuFlyout>
-                        <MenuFlyoutItem x:Uid="CopyTranscriptMenuItem" Click="{x:Bind CopyTranscript}" Icon="Copy" />
-                        <MenuFlyoutItem x:Uid="ClearTranscriptMenuItem" Click="{x:Bind ClearTranscript}" Icon="Clear" />
+                        <MenuFlyoutItem
+                            x:Uid="CopyTranscriptMenuItem"
+                            Click="{x:Bind CopyTranscript}"
+                            Icon="Copy" />
+                        <MenuFlyoutItem
+                            x:Uid="ClearTranscriptMenuItem"
+                            Click="{x:Bind ClearTranscript}"
+                            Icon="Clear" />
                     </MenuFlyout>
                 </TextBlock.ContextFlyout>
             </TextBlock>
@@ -104,8 +117,8 @@
             Grid.Column="2"
             Width="36"
             Height="36"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center">
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
             <Ellipse
                 x:Name="PulseRing"
                 Width="36"
@@ -127,7 +140,7 @@
                         <Setter Property="Padding" Value="0" />
                         <Setter Property="CornerRadius" Value="18" />
                         <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                        <Setter Property="FontSize" Value="16" />
+                        <Setter Property="FontSize" Value="14" />
                     </Style>
                 </Button.Style>
             </Button>
