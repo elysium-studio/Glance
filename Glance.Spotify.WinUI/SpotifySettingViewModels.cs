@@ -84,24 +84,24 @@ public sealed partial class SpotifyConnectionSettingViewModel :
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanChangeConnection))]
-    private bool isBusy;
+    public partial bool IsBusy { get; private set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasConfigurationError))]
     [NotifyPropertyChangedFor(nameof(CanChangeConnection))]
-    private bool isConfigured;
+    public partial bool IsConfigured { get; private set; }
 
     [ObservableProperty]
-    private string statusText;
+    public partial string StatusText { get; private set; }
 
     [ObservableProperty]
-    private string buttonText;
+    public partial string ButtonText { get; private set; }
 
     [ObservableProperty]
-    private bool hasError;
+    public partial bool HasError { get; private set; }
 
     [ObservableProperty]
-    private string errorMessage = string.Empty;
+    public partial string ErrorMessage { get; private set; } = string.Empty;
 
     public SpotifyConnectionSettingViewModel(SpotifySettings settings,
         ISpotifyConnectionService connectionService,
@@ -118,8 +118,8 @@ public sealed partial class SpotifyConnectionSettingViewModel :
         this.dispatcher = dispatcher;
         token = cancellation.Token;
         currentClientId = settings.ClientId;
-        statusText = localizer.GetText("SpotifyDisconnected");
-        buttonText = localizer.GetText("ConnectSpotify");
+        StatusText = localizer.GetText("SpotifyDisconnected");
+        ButtonText = localizer.GetText("ConnectSpotify");
         ApplyConfiguration();
     }
 

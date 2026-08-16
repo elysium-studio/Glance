@@ -66,6 +66,10 @@
   <data name="QuitDialogCloseButton" xml:space="preserve"><value>Cancel</value></data>
   <data name="AssistantEnabledCard.Header" xml:space="preserve"><value>Voice assistant</value></data>
   <data name="AssistantEnabledCard.Description" xml:space="preserve"><value>Listen for “Glance” or “Hey Glance” to control Glance with voice commands</value></data>
+  <data name="AssistantProviderCard.Header" xml:space="preserve"><value>Speech provider</value></data>
+  <data name="AssistantProviderCard.Description" xml:space="preserve"><value>Choose the provider used for wake-word and command recognition</value></data>
+  <data name="AssistantSemanticResolverCard.Header" xml:space="preserve"><value>Command understanding</value></data>
+  <data name="AssistantSemanticResolverCard.Description" xml:space="preserve"><value>Choose the local AI used to understand requests and select Glance actions</value></data>
   <data name="SetupTourTitleBar.Title" xml:space="preserve"><value>Getting Started</value></data>
   <data name="SetupTourWelcomeText.Text" xml:space="preserve"><value>Welcome to Glance</value></data>
   <data name="SetupTourWelcomeDescription.Text" xml:space="preserve"><value>Glance keeps useful tools and live information within reach in a compact desktop island. This quick walkthrough helps you choose how it behaves and which modules appear.</value></data>

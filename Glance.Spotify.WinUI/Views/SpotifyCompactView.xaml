@@ -17,7 +17,7 @@
                 <VisualState x:Name="Default" />
                 <VisualState x:Name="Standard">
                     <VisualState.StateTriggers>
-                        <UI:ElementSizeTrigger MinHeight="33" MaxHeight="48" Source="{x:Bind LayoutRoot, Mode=OneWay}" />
+                        <UI:ElementSizeTrigger MinHeight="33" MaxHeight="48" Source="{x:Bind LayoutRoot, Mode=OneTime}" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
                         <Setter Target="LayoutRoot.Padding" Value="10,2" />
@@ -31,7 +31,7 @@
                 </VisualState>
                 <VisualState x:Name="Small">
                     <VisualState.StateTriggers>
-                        <UI:ElementSizeTrigger MaxHeight="32" Source="{x:Bind LayoutRoot, Mode=OneWay}" />
+                        <UI:ElementSizeTrigger MaxHeight="32" Source="{x:Bind LayoutRoot, Mode=OneTime}" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
                         <Setter Target="LayoutRoot.Padding" Value="8,0,8,4" />
