@@ -56,7 +56,7 @@ public sealed class SpeechToTextComponent :
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
         SpeechToTextCompactView compactView = new(viewModel);
-        SpeechToTextExpandedView expandedView = new(viewModel, localizer);
+        SpeechToTextExpandedView expandedView = new(viewModel);
         CompactContent = compactView;
         ExpandedContent = expandedView;
         CompactAnimationElement = compactView.ConnectedAnimationElement;

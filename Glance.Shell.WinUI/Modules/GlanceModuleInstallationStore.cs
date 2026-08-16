@@ -157,13 +157,18 @@ internal static class GlanceModuleInstallationStore
         HashSet<string> entries = [with(StringComparer.OrdinalIgnoreCase), .. archive.Entries
             .Where(entry => !string.IsNullOrEmpty(entry.Name))
             .Select(entry => entry.FullName)];
-        bool containsModule = entries
+        bool containsResourceModule = entries
             .Where(entry => string.Equals(Path.GetExtension(entry), ".dll", StringComparison.OrdinalIgnoreCase))
             .Any(assembly => entries.Contains(Path.ChangeExtension(assembly, ".pri")));
+        bool containsHeadlessModule = entries
+            .Where(entry => entry.EndsWith(".deps.json", StringComparison.OrdinalIgnoreCase) &&
+                string.IsNullOrEmpty(Path.GetDirectoryName(entry)))
+            .Select(entry => entry[..^".deps.json".Length] + ".dll")
+            .Any(entries.Contains);
 
-        if (!containsModule)
+        if (!containsResourceModule && !containsHeadlessModule)
         {
-            throw new InvalidDataException("The package does not contain a Glance module assembly and PRI resource pair.");
+            throw new InvalidDataException("The package does not contain a Glance module entry assembly.");
         }
     }
 

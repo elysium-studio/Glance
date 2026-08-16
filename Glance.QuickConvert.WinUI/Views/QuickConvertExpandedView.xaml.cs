@@ -29,5 +29,7 @@ public sealed partial class QuickConvertExpandedView :
 
     private void StopConversions() => stopConversions();
 
+    private string ToActionGlyph(bool isBusy) => isBusy ? "\uF8AE" : "\uF5B0";
+
     private string ToUpper(string value) => value.ToUpperInvariant();
 }

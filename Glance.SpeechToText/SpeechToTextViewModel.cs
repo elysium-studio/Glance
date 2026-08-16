@@ -41,12 +41,18 @@ public sealed partial class SpeechToTextViewModel(ITextLocalizer localizer) :
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CompactStatusText))]
     [NotifyPropertyChangedFor(nameof(MainText))]
+    [NotifyPropertyChangedFor(nameof(SubtitleText))]
     private string partialText = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CompactStatusText))]
     [NotifyPropertyChangedFor(nameof(MainText))]
+    [NotifyPropertyChangedFor(nameof(SubtitleText))]
     private string latestFinalText = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SubtitleText))]
+    private string previousFinalText = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SubtitleText))]
@@ -64,7 +70,7 @@ public sealed partial class SpeechToTextViewModel(ITextLocalizer localizer) :
 
     public bool CanToggleListening => SelectedAudioSource is not null && State is (SpeechToTextState.Ready or SpeechToTextState.Listening or SpeechToTextState.Paused or SpeechToTextState.Error);
 
-    public bool CanChangeAudioSource => !IsBusy && !IsListening && AudioSources.Count > 0;
+    public bool CanChangeAudioSource => !IsBusy && AudioSources.Count > 0;
 
     public string ToggleGlyph => IsListening ? "\uF8AE" : "\uF5B0";
 
@@ -108,9 +114,9 @@ public sealed partial class SpeechToTextViewModel(ITextLocalizer localizer) :
     {
         SpeechToTextState.Loading => localizer.GetText("CheckingSpeechModel"),
         SpeechToTextState.ModelRequired => localizer.GetText("DownloadModelInSettings"),
-        SpeechToTextState.Starting => AudioSourceName,
-        SpeechToTextState.Listening => AudioSourceName,
-        SpeechToTextState.Paused => AudioSourceName,
+        SpeechToTextState.Starting => localizer.GetText("Listening"),
+        SpeechToTextState.Listening => GetPreviousText(localizer.GetText("Listening")),
+        SpeechToTextState.Paused => GetPreviousText(localizer.GetText("SelectPlayToResume")),
         SpeechToTextState.Error => string.IsNullOrWhiteSpace(ErrorMessage)
             ? localizer.GetText("TryAgain")
             : ErrorMessage,
@@ -212,6 +218,7 @@ public sealed partial class SpeechToTextViewModel(ITextLocalizer localizer) :
         }
 
         transcriptBuilder.Append(text);
+        PreviousFinalText = LatestFinalText;
         LatestFinalText = text;
         Transcript = transcriptBuilder.ToString();
     }
@@ -222,6 +229,7 @@ public sealed partial class SpeechToTextViewModel(ITextLocalizer localizer) :
         Transcript = string.Empty;
         PartialText = string.Empty;
         LatestFinalText = string.Empty;
+        PreviousFinalText = string.Empty;
     }
 
     partial void OnSelectedAudioSourceChanged(AudioInputSource? oldValue,
@@ -238,6 +246,13 @@ public sealed partial class SpeechToTextViewModel(ITextLocalizer localizer) :
         : !string.IsNullOrWhiteSpace(LatestFinalText)
             ? LatestFinalText
             : fallback;
+
+    private string GetPreviousText(string fallback) => !string.IsNullOrWhiteSpace(PartialText) &&
+        !string.IsNullOrWhiteSpace(LatestFinalText)
+            ? LatestFinalText
+            : !string.IsNullOrWhiteSpace(PreviousFinalText)
+                ? PreviousFinalText
+                : fallback;
 
     private void NotifySourceAvailabilityChanged()
     {

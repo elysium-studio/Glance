@@ -37,6 +37,7 @@
   <data name="TryAgain" xml:space="preserve"><value>Select play to try again</value></data>
   <data name="ConnectMicrophone" xml:space="preserve"><value>Connect a microphone to get started</value></data>
   <data name="SelectPlayToStart" xml:space="preserve"><value>Select play to begin live transcription</value></data>
+  <data name="SelectPlayToResume" xml:space="preserve"><value>Select play to resume live transcription</value></data>
   <data name="NoMicrophone" xml:space="preserve"><value>No microphone found</value></data>
   <data name="PauseTranscription" xml:space="preserve"><value>Pause transcription</value></data>
   <data name="ResumeTranscription" xml:space="preserve"><value>Resume transcription</value></data>

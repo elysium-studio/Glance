@@ -73,7 +73,7 @@
             <Button
                 AutomationProperties.Name="{x:Bind StopConversionsLabel}"
                 Click="{x:Bind StopConversions}"
-                Content="&#xE71A;"
+                Content="{x:Bind ToActionGlyph(ViewModel.IsBusy), Mode=OneWay}"
                 IsEnabled="{x:Bind ViewModel.IsBusy, Mode=OneWay}"
                 ToolTipService.ToolTip="{x:Bind StopConversionsLabel}">
                 <Button.Style>
@@ -83,7 +83,7 @@
                         <Setter Property="Padding" Value="0" />
                         <Setter Property="CornerRadius" Value="18" />
                         <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                        <Setter Property="FontSize" Value="14" />
+                        <Setter Property="FontSize" Value="16" />
                     </Style>
                 </Button.Style>
             </Button>

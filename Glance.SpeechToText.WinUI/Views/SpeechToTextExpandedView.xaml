@@ -10,7 +10,6 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Grid x:Name="StatusIndicator" Width="36" Height="36" VerticalAlignment="Center">
             <FontIcon
@@ -27,11 +26,43 @@
                 <RowDefinition Height="22" />
                 <RowDefinition Height="18" />
             </Grid.RowDefinitions>
-            <TextBlock
-                FontWeight="SemiBold"
-                Foreground="{ThemeResource GlanceSpeechToTextIconBrush}"
-                Style="{StaticResource CaptionTextBlockStyle}"
-                Text="{x:Bind Title}" />
+            <Button
+                x:Name="AudioSourceButton"
+                MinHeight="14"
+                Padding="0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                AutomationProperties.Name="{x:Bind ViewModel.AudioSourceName, Mode=OneWay}"
+                IsEnabled="{x:Bind ViewModel.CanChangeAudioSource, Mode=OneWay}"
+                Style="{StaticResource SubtleButtonStyle}"
+                ToolTipService.ToolTip="{x:Bind ViewModel.AudioSourceName, Mode=OneWay}">
+                <Button.Content>
+                    <Grid ColumnSpacing="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Foreground="{ThemeResource GlanceSpeechToTextIconBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Text="{x:Bind ToUpper(ViewModel.AudioSourceName), Mode=OneWay}"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="NoWrap" />
+                        <FontIcon
+                            Grid.Column="1"
+                            FontSize="8"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Glyph="&#xE70D;" />
+                    </Grid>
+                </Button.Content>
+                <Button.Flyout>
+                    <MenuFlyout
+                        x:Name="AudioSourceFlyout"
+                        Opening="HandleAudioSourceFlyoutOpening"
+                        Opened="HandleAudioSourceFlyoutOpened"
+                        Closed="HandleAudioSourceFlyoutClosed" />
+                </Button.Flyout>
+            </Button>
             <TextBlock
                 Grid.Row="1"
                 VerticalAlignment="Center"
@@ -58,34 +89,37 @@
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="NoWrap" />
         </Grid>
-        <Button
-            x:Name="AudioSourceButton"
+        <Grid
             Grid.Column="2"
             Width="36"
             Height="36"
-            Padding="0"
             VerticalAlignment="Center"
-            AutomationProperties.Name="{x:Bind ViewModel.AudioSourceName, Mode=OneWay}"
-            IsEnabled="{x:Bind ViewModel.CanChangeAudioSource, Mode=OneWay}"
-            ToolTipService.ToolTip="{x:Bind ViewModel.AudioSourceName, Mode=OneWay}">
-            <Button.Flyout>
-                <MenuFlyout x:Name="AudioSourceFlyout" Opening="HandleAudioSourceFlyoutOpening" Opened="HandleAudioSourceFlyoutOpened" Closed="HandleAudioSourceFlyoutClosed" />
-            </Button.Flyout>
-            <FontIcon FontFamily="Segoe Fluent Icons" FontSize="16" Glyph="&#xE767;" />
-        </Button>
-        <Button
-            Grid.Column="3"
-            Width="36"
-            Height="36"
-            Padding="0"
-            VerticalAlignment="Center"
-            AutomationProperties.Name="{x:Bind ViewModel.ToggleToolTip, Mode=OneWay}"
-            Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}"
-            FontFamily="Segoe Fluent Icons"
-            FontSize="16"
-            IsEnabled="{x:Bind ViewModel.CanToggleListening, Mode=OneWay}"
-            Click="{x:Bind ToggleListening}"
-            Style="{StaticResource AccentButtonStyle}"
-            ToolTipService.ToolTip="{x:Bind ViewModel.ToggleToolTip, Mode=OneWay}" />
+            HorizontalAlignment="Center">
+            <Ellipse
+                x:Name="PulseRing"
+                Width="36"
+                Height="36"
+                IsHitTestVisible="False"
+                Opacity="1"
+                Stroke="{ThemeResource GlanceSpeechToTextIconBrush}"
+                StrokeThickness="1.5" />
+            <Button
+                AutomationProperties.Name="{x:Bind ViewModel.ToggleToolTip, Mode=OneWay}"
+                Click="{x:Bind ToggleListening}"
+                Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}"
+                IsEnabled="{x:Bind ViewModel.CanToggleListening, Mode=OneWay}"
+                ToolTipService.ToolTip="{x:Bind ViewModel.ToggleToolTip, Mode=OneWay}">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+                        <Setter Property="Width" Value="36" />
+                        <Setter Property="Height" Value="36" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="CornerRadius" Value="18" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="16" />
+                    </Style>
+                </Button.Style>
+            </Button>
+        </Grid>
     </Grid>
 </UserControl>

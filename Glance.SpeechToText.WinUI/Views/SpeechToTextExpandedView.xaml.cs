@@ -12,14 +12,14 @@ namespace Glance.SpeechToText.WinUI;
 public sealed partial class SpeechToTextExpandedView :
     UserControl
 {
+    private readonly CompositionActivityPulse activityPulse;
     private DesktopIsland? audioSourceExpansionIsland;
 
-    public SpeechToTextExpandedView(SpeechToTextViewModel viewModel,
-        ModuleResourceTextLocalizer<SpeechToTextModule> localizer)
+    public SpeechToTextExpandedView(SpeechToTextViewModel viewModel)
     {
         ViewModel = viewModel;
-        Title = localizer.GetText("ModuleDisplayName").ToUpperInvariant();
         InitializeComponent();
+        activityPulse = new(this, PulseRing, viewModel, nameof(SpeechToTextViewModel.IsListening), () => viewModel.IsListening);
         Unloaded += HandleUnloaded;
     }
 
@@ -27,13 +27,17 @@ public sealed partial class SpeechToTextExpandedView :
 
     public FrameworkElement ConnectedAnimationElement => StatusIndicator;
 
-    public string Title { get; }
-
-    private void ToggleListening() => ViewModel.ToggleListening();
+    private void ToggleListening()
+    {
+        ViewModel.ToggleListening();
+        activityPulse.Refresh();
+    }
 
     private void CopyTranscript() => ViewModel.Copy();
 
     private void ClearTranscript() => ViewModel.Clear();
+
+    private string ToUpper(string value) => value.ToUpperInvariant();
 
     private void HandleAudioSourceFlyoutOpening(object sender, object args)
     {

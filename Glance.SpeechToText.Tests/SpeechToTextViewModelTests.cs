@@ -61,6 +61,7 @@ public sealed class SpeechToTextViewModelTests
 
         Assert.Equal("Hello world This is Glance", viewModel.Transcript);
         Assert.Equal("This is Glance", viewModel.MainText);
+        Assert.Equal("Hello world", viewModel.SubtitleText);
         Assert.Empty(viewModel.PartialText);
     }
 
