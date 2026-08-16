@@ -73,5 +73,16 @@
                              "Added automatic background update checking and downloading, with localized update-ready notifications and safe restart-to-apply behaviour for direct Glance installations.",
                              "Extended the module contract, preference handling, documentation, packaging, and tests for transient components and System Indicators."
                          ]
+    },
+    {
+        "version":  "0.1.6-preview",
+        "date":  "2026-08-16",
+        "releaseNotes":  [
+                             "Added taskbar mode, allowing Glance to sit beside the system tray and expand on hover with adaptive support for standard and small taskbars.",
+                             "Added a Spotify remote player with account connection, playback controls, device switching, seeking, album artwork, and dynamic artwork colours.",
+                             "Added guided on-device speech model setup for Voice Assistant with reusable background downloads, progress, cancellation, and recovery.",
+                             "Added view-aware module lifecycle support so modules can pause background work while they are out of view.",
+                             "Improved taskbar placement, adaptive module layouts, drag and hover behaviour, Spotify playback reliability, and island transitions."
+                         ]
     }
 ]
