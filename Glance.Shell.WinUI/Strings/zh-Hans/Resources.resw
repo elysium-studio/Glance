@@ -116,4 +116,13 @@
   <data name="GlanceDisplayLocationCard.Description" xml:space="preserve"><value>Choose whether Glance floats at the screen edge or sits in the Windows taskbar</value></data>
   <data name="GlanceDisplayLocationDesktopEdgeOption.Content" xml:space="preserve"><value>Screen edge</value></data>
   <data name="GlanceDisplayLocationTaskbarOption.Content" xml:space="preserve"><value>Taskbar</value></data>
+  <data name="AssistantModelSetupExpander.Header" xml:space="preserve"><value>设置语音助手</value></data>
+  <data name="AssistantModelSetupExpander.Description" xml:space="preserve"><value>下载一次语音模型。语音处理始终在此设备上进行。</value></data>
+  <data name="AssistantModelChoiceCard.Header" xml:space="preserve"><value>语音模型</value></data>
+  <data name="AssistantModelInstallCard.Header" xml:space="preserve"><value>模型下载</value></data>
+  <data name="AssistantModelInstallButtonText.Text" xml:space="preserve"><value>安装</value></data>
+  <data name="AssistantModelCancelButtonText.Text" xml:space="preserve"><value>取消</value></data>
+  <data name="AssistantModelRemoveButtonText.Text" xml:space="preserve"><value>移除</value></data>
+  <data name="AssistantModelReadyInfoBar.Title" xml:space="preserve"><value>已就绪</value></data>
+  <data name="AssistantModelReadyInfoBar.Message" xml:space="preserve"><value>现在可以开启语音助手。</value></data>
 </root>

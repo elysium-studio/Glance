@@ -116,4 +116,13 @@
   <data name="GlanceDisplayLocationCard.Description" xml:space="preserve"><value>Choose whether Glance floats at the screen edge or sits in the Windows taskbar</value></data>
   <data name="GlanceDisplayLocationDesktopEdgeOption.Content" xml:space="preserve"><value>Screen edge</value></data>
   <data name="GlanceDisplayLocationTaskbarOption.Content" xml:space="preserve"><value>Taskbar</value></data>
+  <data name="AssistantModelSetupExpander.Header" xml:space="preserve"><value>Sprachassistent einrichten</value></data>
+  <data name="AssistantModelSetupExpander.Description" xml:space="preserve"><value>Laden Sie einmalig ein Sprachmodell herunter. Die Sprachverarbeitung erfolgt auf diesem Gerät.</value></data>
+  <data name="AssistantModelChoiceCard.Header" xml:space="preserve"><value>Sprachmodell</value></data>
+  <data name="AssistantModelInstallCard.Header" xml:space="preserve"><value>Modell herunterladen</value></data>
+  <data name="AssistantModelInstallButtonText.Text" xml:space="preserve"><value>Installieren</value></data>
+  <data name="AssistantModelCancelButtonText.Text" xml:space="preserve"><value>Abbrechen</value></data>
+  <data name="AssistantModelRemoveButtonText.Text" xml:space="preserve"><value>Entfernen</value></data>
+  <data name="AssistantModelReadyInfoBar.Title" xml:space="preserve"><value>Bereit</value></data>
+  <data name="AssistantModelReadyInfoBar.Message" xml:space="preserve"><value>Der Sprachassistent kann jetzt eingeschaltet werden.</value></data>
 </root>

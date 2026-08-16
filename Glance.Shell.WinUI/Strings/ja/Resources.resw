@@ -116,4 +116,13 @@
   <data name="GlanceDisplayLocationCard.Description" xml:space="preserve"><value>Choose whether Glance floats at the screen edge or sits in the Windows taskbar</value></data>
   <data name="GlanceDisplayLocationDesktopEdgeOption.Content" xml:space="preserve"><value>Screen edge</value></data>
   <data name="GlanceDisplayLocationTaskbarOption.Content" xml:space="preserve"><value>Taskbar</value></data>
+  <data name="AssistantModelSetupExpander.Header" xml:space="preserve"><value>音声アシスタントを設定</value></data>
+  <data name="AssistantModelSetupExpander.Description" xml:space="preserve"><value>音声モデルを一度ダウンロードします。音声処理はこのデバイス上で行われます。</value></data>
+  <data name="AssistantModelChoiceCard.Header" xml:space="preserve"><value>音声モデル</value></data>
+  <data name="AssistantModelInstallCard.Header" xml:space="preserve"><value>モデルのダウンロード</value></data>
+  <data name="AssistantModelInstallButtonText.Text" xml:space="preserve"><value>インストール</value></data>
+  <data name="AssistantModelCancelButtonText.Text" xml:space="preserve"><value>キャンセル</value></data>
+  <data name="AssistantModelRemoveButtonText.Text" xml:space="preserve"><value>削除</value></data>
+  <data name="AssistantModelReadyInfoBar.Title" xml:space="preserve"><value>準備完了</value></data>
+  <data name="AssistantModelReadyInfoBar.Message" xml:space="preserve"><value>音声アシスタントをオンにできるようになりました。</value></data>
 </root>

@@ -116,4 +116,13 @@
   <data name="GlanceDisplayLocationCard.Description" xml:space="preserve"><value>Choose whether Glance floats at the screen edge or sits in the Windows taskbar</value></data>
   <data name="GlanceDisplayLocationDesktopEdgeOption.Content" xml:space="preserve"><value>Screen edge</value></data>
   <data name="GlanceDisplayLocationTaskbarOption.Content" xml:space="preserve"><value>Taskbar</value></data>
+  <data name="AssistantModelSetupExpander.Header" xml:space="preserve"><value>Configurer l’assistant vocal</value></data>
+  <data name="AssistantModelSetupExpander.Description" xml:space="preserve"><value>Téléchargez une fois un modèle vocal. Le traitement de la voix reste sur cet appareil.</value></data>
+  <data name="AssistantModelChoiceCard.Header" xml:space="preserve"><value>Modèle vocal</value></data>
+  <data name="AssistantModelInstallCard.Header" xml:space="preserve"><value>Téléchargement du modèle</value></data>
+  <data name="AssistantModelInstallButtonText.Text" xml:space="preserve"><value>Installer</value></data>
+  <data name="AssistantModelCancelButtonText.Text" xml:space="preserve"><value>Annuler</value></data>
+  <data name="AssistantModelRemoveButtonText.Text" xml:space="preserve"><value>Supprimer</value></data>
+  <data name="AssistantModelReadyInfoBar.Title" xml:space="preserve"><value>Prêt</value></data>
+  <data name="AssistantModelReadyInfoBar.Message" xml:space="preserve"><value>L’assistant vocal peut maintenant être activé.</value></data>
 </root>
