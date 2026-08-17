@@ -31,7 +31,7 @@ public sealed partial class PresenceViewModel(IPresenceService presenceService,
         ? localizer.GetText("StopLabel")
         : localizer.GetText("StartLabel");
 
-    public string ActionGlyph => IsActive ? "\uE71A" : "\uF5B0";
+    public string ActionGlyph => IsActive ? "\uEE95" : "\uF5B0";
 
     public event EventHandler? SessionStateChanged;
 

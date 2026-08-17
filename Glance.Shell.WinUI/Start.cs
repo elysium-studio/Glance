@@ -45,6 +45,13 @@ public static class Start
             return;
         }
 
+        using SingleInstanceGuard? instanceGuard = SingleInstanceGuard.TryAcquire($"{Environment.UserName}.Glance");
+
+        if (instanceGuard is null)
+        {
+            return;
+        }
+
 #pragma warning disable CA1806
         Microsoft.UI.Xaml.Application.Start(_ => new App(instance, activation));
 #pragma warning restore CA1806
