@@ -16,6 +16,9 @@ public sealed class UpdateModule :
 {
     private const string RestartForUpdateArgument = "update=restart";
     private const string DismissUpdateArgument = "update=dismiss";
+#if DEBUG
+    private const string SimulateUpdateReadyArgument = "--simulate-update-ready";
+#endif
 
     public void Register(IServiceCollection services)
     {
@@ -31,41 +34,49 @@ public sealed class UpdateModule :
         });
 
         services.AddSingleton<AppToastNotifier>();
+        services.AddSingleton<IUpdateNotificationService, UpdateNotificationService>();
 
         services.Subscribe<IUpdateController>((provider, controller) =>
         {
             ILogger<UpdateModule> logger = provider.GetRequiredService<ILogger<UpdateModule>>();
 
-            void HandleUpdateReady(string version)
+            void ShowUpdateReady(string version, bool applyOnExit)
             {
                 bool enqueued = dispatcherQueue.TryEnqueue(() =>
                 {
-                    IStringLocalizer localizer = provider.GetRequiredService<IStringLocalizer>();
-
-                    ToastContent content = new ToastBuilder()
-                        .AddText(localizer.GetString("UpdateReadyToastTitle"))
-                        .AddText(localizer.GetString("UpdateReadyToastDownloaded", version))
-                        .AddText(localizer.GetString("UpdateReadyToastRestartRequired"))
-                        .SetLaunchArgument(RestartForUpdateArgument)
-                        .AddButton(localizer.GetString("UpdateReadyToastRestartButton"), RestartForUpdateArgument)
-                        .AddButton(localizer.GetString("UpdateReadyToastDismissButton"), DismissUpdateArgument)
-                        .Build();
-
-                    provider.GetRequiredService<AppToastNotifier>().Show(content, argument =>
+                    try
                     {
-                        if (argument == RestartForUpdateArgument)
-                        {
-                            bool restartEnqueued = dispatcherQueue.TryEnqueue(() =>
-                            {
-                                _ = ApplyUpdateAndExitAsync(provider, controller, logger);
-                            });
+                        IStringLocalizer localizer = provider.GetRequiredService<IStringLocalizer>();
 
-                            if (!restartEnqueued)
+                        ToastContent content = new ToastBuilder()
+                            .AddText(localizer.GetString("UpdateReadyToastTitle"))
+                            .AddText(localizer.GetString("UpdateReadyToastDownloaded", version))
+                            .AddText(localizer.GetString("UpdateReadyToastRestartRequired"))
+                            .SetLaunchArgument(RestartForUpdateArgument)
+                            .AddButton(localizer.GetString("UpdateReadyToastRestartButton"), RestartForUpdateArgument)
+                            .AddButton(localizer.GetString("UpdateReadyToastDismissButton"), DismissUpdateArgument)
+                            .Build();
+
+                        provider.GetRequiredService<IUpdateNotificationService>().Show(content, argument =>
+                        {
+                            if (argument == RestartForUpdateArgument)
                             {
-                                logger.LogWarning("Dispatcher rejected update restart request");
+                                bool restartEnqueued = dispatcherQueue.TryEnqueue(() =>
+                                {
+                                    _ = ExitForUpdateAsync(provider, applyOnExit ? controller : null, logger);
+                                });
+
+                                if (!restartEnqueued)
+                                {
+                                    logger.LogWarning("Dispatcher rejected update restart request");
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
+                    catch (Exception exception)
+                    {
+                        logger.LogError(exception, "Failed to show update-ready notification for version {Version}", version);
+                    }
                 });
 
                 if (!enqueued)
@@ -74,18 +85,26 @@ public sealed class UpdateModule :
                 }
             }
 
+            void HandleUpdateReady(string version) => ShowUpdateReady(version, true);
+
             controller.UpdateReady += HandleUpdateReady;
+
+#if DEBUG
+            if (Array.Exists(Environment.GetCommandLineArgs(), argument => string.Equals(argument, SimulateUpdateReadyArgument, StringComparison.OrdinalIgnoreCase)))
+            {
+                ShowUpdateReady("test", false);
+            }
+#endif
+
             return () => controller.UpdateReady -= HandleUpdateReady;
         });
     }
 
-    private static async Task ApplyUpdateAndExitAsync(IServiceProvider provider,
-        IUpdateController controller,
-        ILogger logger)
+    private static async Task ExitForUpdateAsync(IServiceProvider provider, IUpdateController? controller, ILogger logger)
     {
         try
         {
-            controller.ApplyOnExit();
+            controller?.ApplyOnExit();
             await provider.GetRequiredService<IApplicationLifetime>().ExitAsync();
         }
         catch (Exception exception)

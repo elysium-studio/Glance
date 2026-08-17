@@ -22,8 +22,8 @@ internal static partial class GlanceModuleLoader
     private static readonly HashSet<Assembly> nativeResolverAssemblies = [];
     private static readonly Dictionary<string, nint> nativeLibraryHandles = [with(StringComparer.OrdinalIgnoreCase)];
     private static readonly List<object> xamlMetadataProviderTokens = [];
-    private static Dictionary<string, string> moduleAssemblyPaths = [with(StringComparer.OrdinalIgnoreCase)];
-    private static Dictionary<string, string> moduleNativeLibraryPaths = [with(StringComparer.OrdinalIgnoreCase)];
+    private static Dictionary<string, string[]> moduleAssemblyPaths = [with(StringComparer.OrdinalIgnoreCase)];
+    private static Dictionary<string, string[]> moduleNativeLibraryPaths = [with(StringComparer.OrdinalIgnoreCase)];
     private static IReadOnlyList<ModuleSource>? startupSources;
     private static bool resolverRegistered;
 
@@ -230,17 +230,17 @@ internal static partial class GlanceModuleLoader
     private static void RegisterAssemblyPaths(IEnumerable<string> contentDirectories,
         bool replaceExisting = false)
     {
-        Dictionary<string, string> assemblyPaths;
-        Dictionary<string, string> nativeLibraryPaths;
+        Dictionary<string, List<string>> assemblyPaths;
+        Dictionary<string, List<string>> nativeLibraryPaths;
 
         lock (synchronization)
         {
             assemblyPaths = replaceExisting
-                ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                : new Dictionary<string, string>(moduleAssemblyPaths, StringComparer.OrdinalIgnoreCase);
+                ? new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
+                : moduleAssemblyPaths.ToDictionary(pair => pair.Key, pair => pair.Value.ToList(), StringComparer.OrdinalIgnoreCase);
             nativeLibraryPaths = replaceExisting
-                ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                : new Dictionary<string, string>(moduleNativeLibraryPaths, StringComparer.OrdinalIgnoreCase);
+                ? new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
+                : moduleNativeLibraryPaths.ToDictionary(pair => pair.Key, pair => pair.Value.ToList(), StringComparer.OrdinalIgnoreCase);
         }
 
         foreach (string contentDirectory in contentDirectories.Distinct(StringComparer.OrdinalIgnoreCase))
@@ -253,12 +253,12 @@ internal static partial class GlanceModuleLoader
 
                     if (assemblyName is not null)
                     {
-                        assemblyPaths[assemblyName] = path;
+                        AddResolutionPath(assemblyPaths, assemblyName, path);
                     }
                 }
                 catch (BadImageFormatException)
                 {
-                    nativeLibraryPaths[Path.GetFileName(path)] = path;
+                    AddResolutionPath(nativeLibraryPaths, Path.GetFileName(path), path);
                 }
                 catch (FileLoadException)
                 {
@@ -268,8 +268,22 @@ internal static partial class GlanceModuleLoader
 
         lock (synchronization)
         {
-            moduleAssemblyPaths = assemblyPaths;
-            moduleNativeLibraryPaths = nativeLibraryPaths;
+            moduleAssemblyPaths = assemblyPaths.ToDictionary(pair => pair.Key, pair => pair.Value.ToArray(), StringComparer.OrdinalIgnoreCase);
+            moduleNativeLibraryPaths = nativeLibraryPaths.ToDictionary(pair => pair.Key, pair => pair.Value.ToArray(), StringComparer.OrdinalIgnoreCase);
+        }
+    }
+
+    private static void AddResolutionPath(Dictionary<string, List<string>> paths, string name, string path)
+    {
+        if (!paths.TryGetValue(name, out List<string>? candidates))
+        {
+            candidates = [];
+            paths.Add(name, candidates);
+        }
+
+        if (!candidates.Contains(path, StringComparer.OrdinalIgnoreCase))
+        {
+            candidates.Add(path);
         }
     }
 
@@ -317,16 +331,38 @@ internal static partial class GlanceModuleLoader
 
     private static Assembly? ResolveModuleAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
     {
-        IReadOnlyDictionary<string, string> assemblyPaths = moduleAssemblyPaths;
+        IReadOnlyDictionary<string, string[]> assemblyPaths = moduleAssemblyPaths;
 
-        if (assemblyName.Name is null || !assemblyPaths.TryGetValue(assemblyName.Name, out string? path))
+        if (assemblyName.Name is null || !assemblyPaths.TryGetValue(assemblyName.Name, out string[]? paths))
         {
             return null;
         }
 
-        Assembly assembly = context.LoadFromAssemblyPath(path);
-        RegisterNativeLibraryResolver(assembly);
-        return assembly;
+        foreach (string path in paths.Where(File.Exists))
+        {
+            try
+            {
+                if (!AssemblyName.ReferenceMatchesDefinition(assemblyName, AssemblyName.GetAssemblyName(path)))
+                {
+                    continue;
+                }
+
+                Assembly assembly = context.LoadFromAssemblyPath(path);
+                RegisterNativeLibraryResolver(assembly);
+                return assembly;
+            }
+            catch (BadImageFormatException)
+            {
+            }
+            catch (FileLoadException)
+            {
+            }
+            catch (FileNotFoundException)
+            {
+            }
+        }
+
+        return null;
     }
 
     private static void RegisterNativeLibraryResolver(Assembly assembly)
@@ -362,9 +398,19 @@ internal static partial class GlanceModuleLoader
         {
             string? path = assemblyDirectory is null ? null : Path.Combine(assemblyDirectory, fileName);
 
-            if ((path is null || !File.Exists(path)) && !moduleNativeLibraryPaths.TryGetValue(fileName, out path))
+            if (path is null || !File.Exists(path))
             {
-                return 0;
+                if (!moduleNativeLibraryPaths.TryGetValue(fileName, out string[]? paths))
+                {
+                    return 0;
+                }
+
+                path = paths.FirstOrDefault(File.Exists);
+
+                if (path is null)
+                {
+                    return 0;
+                }
             }
 
             if (nativeLibraryHandles.TryGetValue(path, out nint existingHandle))

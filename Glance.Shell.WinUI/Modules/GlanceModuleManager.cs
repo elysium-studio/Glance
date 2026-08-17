@@ -561,8 +561,17 @@ internal sealed class GlanceModuleManager :
         return completion.Task;
     }
 
-    private Task DisposeRuntimeAsync(GlanceModuleRuntime runtime) =>
-        DispatchAsync(() => runtime.DisposeAsync().AsTask());
+    private async Task DisposeRuntimeAsync(GlanceModuleRuntime runtime)
+    {
+        try
+        {
+            await DispatchAsync(() => runtime.DisposeAsync().AsTask());
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Failed to dispose a Glance module runtime");
+        }
+    }
 
     private static void DisposeRegistrations(IEnumerable<IDisposable> registrations)
     {

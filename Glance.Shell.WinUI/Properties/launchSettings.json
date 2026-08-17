@@ -7,6 +7,11 @@
     "Glance (Unpackaged)": {
       "commandName": "Project",
       "debugEngines": "managed"
+    },
+    "Glance (Simulate update)": {
+      "commandName": "Project",
+      "debugEngines": "managed",
+      "commandLineArgs": "--simulate-update-ready"
     }
   }
 }

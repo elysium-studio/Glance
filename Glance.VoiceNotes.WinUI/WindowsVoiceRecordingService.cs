@@ -189,7 +189,17 @@ internal sealed class WindowsVoiceRecordingService :
 
     public void Dispose()
     {
-        StopRecording();
+        if (IsRecording)
+        {
+            try
+            {
+                StopRecording();
+            }
+            catch
+            {
+            }
+        }
+
         GC.SuppressFinalize(this);
     }
 

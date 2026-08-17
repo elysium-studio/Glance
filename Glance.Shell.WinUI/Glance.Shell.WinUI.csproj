@@ -479,6 +479,13 @@
 		<Error Condition="!Exists('$(WindowsAppRuntimeFrameworkMsix)')" Text="Windows App Runtime framework package was not found at $(WindowsAppRuntimeFrameworkMsix)." />
 		<ExtractWindowsAppRuntimeInsightsResource ArchivePath="$(WindowsAppRuntimeFrameworkMsix)" OutputPath="$(PublishDir)Microsoft.WindowsAppRuntime.Insights.Resource.dll" />
 	</Target>
+	<Target Name="CopyWindowsAppRuntimeInsightsResourceToOutput" AfterTargets="Build" Condition="'$(WindowsAppSDKSelfContained)' == 'true'">
+		<PropertyGroup>
+			<WindowsAppRuntimeFrameworkMsix>$(PkgMicrosoft_WindowsAppSDK_Runtime)\tools\MSIX\win10-x64\Microsoft.WindowsAppRuntime.2.msix</WindowsAppRuntimeFrameworkMsix>
+		</PropertyGroup>
+		<Error Condition="!Exists('$(WindowsAppRuntimeFrameworkMsix)')" Text="Windows App Runtime framework package was not found at $(WindowsAppRuntimeFrameworkMsix)." />
+		<ExtractWindowsAppRuntimeInsightsResource ArchivePath="$(WindowsAppRuntimeFrameworkMsix)" OutputPath="$(OutDir)Microsoft.WindowsAppRuntime.Insights.Resource.dll" />
+	</Target>
 	<Target Name="CorrectDynamicXamlMetadataPath" BeforeTargets="_UpdateWindowsMetadataReference" Condition="'$(EnableMsixTooling)' == 'true'">
 		<ItemGroup>
 			<WindowsMetadataReference Remove="$(DynamicXamlWinMDPath)" />
