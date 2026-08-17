@@ -132,6 +132,8 @@ public sealed class ExampleComponent :
 
 Transcription engines can be shipped as headless modules. Register an `ITranscriptionProvider` from the package's `IGlanceModule`. A provider may publish any number of `TranscriptionModel` entries and creates an `ITranscriptionDecoder` for the selected model. Glance captures the selected microphone, converts it to the provider's requested PCM format, and streams the audio into the decoder. Model downloads, model-specific preprocessing, and decoding remain owned by the provider.
 
+Quick Convert providers can also be shipped as headless modules. Register an `IGlanceQuickConverter` from the package's `IGlanceModule`. Quick Convert passes every provider the complete `GlanceContentContext`; the provider returns its match strength and owns its editor, options, conversion, setup, and private dependencies. Providers that return `GlanceQuickConverterMatch.None` are ignored, so support for files and links remains entirely provider-driven.
+
 ### 3. Package the module
 
 A `.glance` package is a ZIP archive whose files are stored at its root. Include the WinUI assembly and matching PRI file, the platform-independent assembly, and every private runtime dependency:

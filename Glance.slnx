@@ -189,6 +189,18 @@
   <Project Path="Glance.QuickConvert.WinUI/Glance.QuickConvert.WinUI.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.QuickConvert.Image/Glance.QuickConvert.Image.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.QuickConvert.OnlineMedia/Glance.QuickConvert.OnlineMedia.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.QuickConvert.Tooling/Glance.QuickConvert.Tooling.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.QuickConvert.Video/Glance.QuickConvert.Video.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.QuickConvert/Glance.QuickConvert.csproj">
     <Platform Project="x64" />
   </Project>

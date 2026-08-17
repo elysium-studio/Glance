@@ -3,9 +3,9 @@ using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Streams;
 
-namespace Glance.QuickConvert.WinUI;
+namespace Glance.QuickConvert.Image;
 
-public sealed class ImageQuickConverter(ModuleResourceTextLocalizer<QuickConvertModule> localizer) :
+public sealed class ImageQuickConverter(ModuleResourceTextLocalizer<ImageQuickConverterModule> localizer) :
     IGlanceQuickConverter
 {
     private static readonly HashSet<string> supportedExtensions =
@@ -14,15 +14,20 @@ public sealed class ImageQuickConverter(ModuleResourceTextLocalizer<QuickConvert
         ".bmp", ".gif", ".heic", ".heif", ".jpeg", ".jpg", ".png", ".tif", ".tiff", ".webp"
     ];
 
-    private readonly ModuleResourceTextLocalizer<QuickConvertModule> localizer = localizer;
+    private readonly ModuleResourceTextLocalizer<ImageQuickConverterModule> localizer = localizer;
 
     public GlanceQuickConverterDescriptor Descriptor => new("QuickConvert.Images",
         localizer.GetText("ImageConverterName"),
         localizer.GetText("ImageConverterDescription"));
 
-    public bool CanConvert(IReadOnlyList<GlanceStorageItem> items) => items.Count > 0 && items.All(item => !item.IsFolder && supportedExtensions.Contains(Path.GetExtension(item.Path)));
+    public GlanceQuickConverterMatch Match(GlanceContentContext context) =>
+        context.Kind == GlanceContentKind.FilesAndFolders &&
+        context.StorageItems.Count > 0 &&
+        context.StorageItems.All(item => !item.IsFolder && supportedExtensions.Contains(Path.GetExtension(item.Path)))
+            ? GlanceQuickConverterMatch.Exact
+            : GlanceQuickConverterMatch.None;
 
-    public IGlanceQuickConverterEditor CreateEditor(IReadOnlyList<GlanceStorageItem> items) => new ImageQuickConverterEditor(localizer);
+    public IGlanceQuickConverterEditor CreateEditor(GlanceContentContext context) => new ImageQuickConverterEditor(localizer);
 
     public async Task<IReadOnlyList<GlanceQuickConversionResult>> ConvertAsync(GlanceQuickConversionRequest request,
         CancellationToken cancellationToken = default)
@@ -34,7 +39,7 @@ public sealed class ImageQuickConverter(ModuleResourceTextLocalizer<QuickConvert
 
         List<GlanceQuickConversionResult> results = [];
 
-        foreach (GlanceStorageItem item in request.Items)
+        foreach (GlanceStorageItem item in request.Content.StorageItems)
         {
             cancellationToken.ThrowIfCancellationRequested();
 

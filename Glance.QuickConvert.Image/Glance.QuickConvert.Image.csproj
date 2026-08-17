@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFramework>net11.0-windows10.0.22000.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.22000.0</TargetPlatformMinVersion>
-    <RootNamespace>Glance.QuickConvert.WinUI</RootNamespace>
     <UseWinUI>true</UseWinUI>
     <DisableEmbeddedXbf>false</DisableEmbeddedXbf>
     <EnablePreviewFeatures>true</EnablePreviewFeatures>
@@ -11,23 +10,13 @@
     <DefaultLanguage>en</DefaultLanguage>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Elysium.Platform.Windows" Version="$(ElysiumVersion)" />
-    <PackageReference Include="Elysium.UI.Controls.WinUI" Version="$(ElysiumVersion)" />
     <PRIResource Include="Strings\**\*.resw" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
-    <PackageReference Include="WinUIEx" Version="2.9.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Glance.Application.Abstractions\Glance.Application.Abstractions.csproj" />
-    <ProjectReference Include="..\Glance.QuickConvert\Glance.QuickConvert.csproj" />
+    <ProjectReference Include="..\Glance.QuickConvert.Tooling\Glance.QuickConvert.Tooling.csproj" />
     <ProjectReference Include="..\Glance.UI.WinUI\Glance.UI.WinUI.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Themes\QuickConvert.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-namespace Glance.QuickConvert;
+namespace Glance.QuickConvert.Image;
 
 public enum ImageScaleMode
 {

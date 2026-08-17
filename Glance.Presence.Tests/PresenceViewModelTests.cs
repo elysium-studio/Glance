@@ -40,7 +40,7 @@ public sealed class PresenceViewModelTests
         Assert.False(service.IsActive);
         Assert.False(viewModel.IsActive);
         Assert.Equal("Ready", viewModel.StatusText);
-        Assert.Equal("\uEE95", viewModel.ActionGlyph);
+        Assert.Equal("\uF5B0", viewModel.ActionGlyph);
     }
 
     [Fact]

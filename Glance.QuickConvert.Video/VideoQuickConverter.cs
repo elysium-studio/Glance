@@ -1,9 +1,10 @@
 using Glance.Application.Abstractions;
 using System.Diagnostics;
 
-namespace Glance.QuickConvert.WinUI;
+namespace Glance.QuickConvert.Video;
 
-public sealed class VideoQuickConverter(ModuleResourceTextLocalizer<QuickConvertModule> localizer) :
+public sealed class VideoQuickConverter(ModuleResourceTextLocalizer<VideoQuickConverterModule> localizer,
+    QuickConvertToolProvider tools) :
     IGlanceQuickConverter
 {
     private static readonly HashSet<string> supportedExtensions =
@@ -11,15 +12,20 @@ public sealed class VideoQuickConverter(ModuleResourceTextLocalizer<QuickConvert
         with(StringComparer.OrdinalIgnoreCase),
         ".3g2", ".3gp", ".avi", ".flv", ".m2ts", ".m4v", ".mkv", ".mov", ".mp4", ".mpeg", ".mpg", ".mts", ".ogv", ".ts", ".webm", ".wmv"
     ];
-    private readonly ModuleResourceTextLocalizer<QuickConvertModule> localizer = localizer;
+    private readonly ModuleResourceTextLocalizer<VideoQuickConverterModule> localizer = localizer;
 
     public GlanceQuickConverterDescriptor Descriptor => new("QuickConvert.Video",
         localizer.GetText("VideoConverterName"),
         localizer.GetText("VideoConverterDescription"));
 
-    public bool CanConvert(IReadOnlyList<GlanceStorageItem> items) => items.Count > 0 && items.All(item => !item.IsFolder && supportedExtensions.Contains(Path.GetExtension(item.Path)));
+    public GlanceQuickConverterMatch Match(GlanceContentContext context) =>
+        context.Kind == GlanceContentKind.FilesAndFolders &&
+        context.StorageItems.Count > 0 &&
+        context.StorageItems.All(item => !item.IsFolder && supportedExtensions.Contains(Path.GetExtension(item.Path)))
+            ? GlanceQuickConverterMatch.Exact
+            : GlanceQuickConverterMatch.None;
 
-    public IGlanceQuickConverterEditor CreateEditor(IReadOnlyList<GlanceStorageItem> items) => new VideoQuickConverterEditor(localizer);
+    public IGlanceQuickConverterEditor CreateEditor(GlanceContentContext context) => new VideoQuickConverterEditor(localizer);
 
     public async Task<IReadOnlyList<GlanceQuickConversionResult>> ConvertAsync(GlanceQuickConversionRequest request,
         CancellationToken cancellationToken = default)
@@ -29,16 +35,21 @@ public sealed class VideoQuickConverter(ModuleResourceTextLocalizer<QuickConvert
             throw new ArgumentException("Video conversion options were not supplied.", nameof(request));
         }
 
-        string executablePath = FindExecutable();
+        Progress<double>? setupProgress = request.Progress is null
+            ? null
+            : new Progress<double>(value => request.Progress.Report(new GlanceQuickConversionProgress(GlanceQuickConversionStage.Setup,
+                value,
+                value >= 1)));
+        QuickConvertToolPaths toolPaths = await tools.GetVideoToolsAsync(setupProgress, cancellationToken);
         List<GlanceQuickConversionResult> results = [];
 
-        foreach (GlanceStorageItem item in request.Items)
+        foreach (GlanceStorageItem item in request.Content.StorageItems)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             try
             {
-                string outputPath = await ConvertAsync(executablePath, item.Path, options, cancellationToken);
+                string outputPath = await ConvertAsync(toolPaths.FfmpegPath, item.Path, options, cancellationToken);
                 results.Add(new GlanceQuickConversionResult(item.Path, outputPath, true));
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
@@ -110,20 +121,6 @@ public sealed class VideoQuickConverter(ModuleResourceTextLocalizer<QuickConvert
 
             throw;
         }
-    }
-
-    private static string FindExecutable()
-    {
-        string assemblyDirectory = Path.GetDirectoryName(typeof(VideoQuickConverter).Assembly.Location)!;
-        string[] candidates =
-        [
-            Path.Combine(assemblyDirectory, "ffmpeg.exe"),
-            Path.Combine(assemblyDirectory, "ffmpeg", "win-x64", "ffmpeg.exe"),
-            Path.Combine(AppContext.BaseDirectory, "ffmpeg", "win-x64", "ffmpeg.exe")
-        ];
-
-        return candidates.FirstOrDefault(File.Exists) ??
-            throw new FileNotFoundException("The video conversion engine is unavailable.");
     }
 
     private static string CreateErrorMessage(string error)

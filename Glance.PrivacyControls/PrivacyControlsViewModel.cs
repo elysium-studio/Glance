@@ -15,11 +15,13 @@ public sealed partial class PrivacyControlsViewModel :
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ToggleGlyph))]
+    [NotifyPropertyChangedFor(nameof(IsMicrophoneLive))]
     [NotifyPropertyChangedFor(nameof(StatusText))]
     private bool isAvailable;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ToggleGlyph))]
+    [NotifyPropertyChangedFor(nameof(IsMicrophoneLive))]
     [NotifyPropertyChangedFor(nameof(StatusText))]
     private bool isMuted;
 
@@ -57,7 +59,9 @@ public sealed partial class PrivacyControlsViewModel :
 
     public string StatusGlyph => IsCameraActive ? "\uE722" : "\uE720";
 
-    public string ToggleGlyph => IsMuted ? "\uE74F" : "\uE720";
+    public string ToggleGlyph => IsMuted ? "\uF5B0" : "\uF8AE";
+
+    public bool IsMicrophoneLive => IsAvailable && !IsMuted;
 
     public void Refresh() => Update(microphoneService.GetState(), cameraUsageService.IsInUse());
 

@@ -84,6 +84,9 @@
 		<GlanceModuleProject Include="..\Glance.Presence.WinUI\Glance.Presence.WinUI.csproj" />
 		<GlanceModuleProject Include="..\Glance.PrivacyControls.WinUI\Glance.PrivacyControls.WinUI.csproj" />
 		<GlanceModuleProject Include="..\Glance.QuickConvert.WinUI\Glance.QuickConvert.WinUI.csproj" />
+		<GlanceModuleProject Include="..\Glance.QuickConvert.Image\Glance.QuickConvert.Image.csproj" />
+		<GlanceModuleProject Include="..\Glance.QuickConvert.OnlineMedia\Glance.QuickConvert.OnlineMedia.csproj" />
+		<GlanceModuleProject Include="..\Glance.QuickConvert.Video\Glance.QuickConvert.Video.csproj" />
 		<GlanceModuleProject Include="..\Glance.RemovableDevices.WinUI\Glance.RemovableDevices.WinUI.csproj" />
 		<GlanceModuleProject Include="..\Glance.Reminders.WinUI\Glance.Reminders.WinUI.csproj" />
 		<GlanceModuleProject Include="..\Glance.ScreenCapture.WinUI\Glance.ScreenCapture.WinUI.csproj" />
@@ -143,7 +146,7 @@
 	<Target Name="ArrangeGlanceModulesInBuildOutput" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true'">
 		<MSBuild Projects="@(GlanceModuleProject)" Targets="Build" BuildInParallel="$(BuildInParallel)" Properties="Configuration=$(Configuration);Platform=$(Platform)" />
 		<ItemGroup>
-			<GlanceModuleStagingDirectory Include="$(OutDir)Modules\Assistant;$(OutDir)Modules\AppMixer;$(OutDir)Modules\AudioSwitcher;$(OutDir)Modules\Clipboard;$(OutDir)Modules\ColorPicker;$(OutDir)Modules\DevicePresence;$(OutDir)Modules\DropShelf;$(OutDir)Modules\FocusSession;$(OutDir)Modules\Infinity;$(OutDir)Modules\KeepAwake;$(OutDir)Modules\Magnifier;$(OutDir)Modules\Media;$(OutDir)Modules\Spotify;$(OutDir)Modules\SpeechToText;$(OutDir)Modules\Nemotron;$(OutDir)Modules\Whisper;$(OutDir)Modules\Network;$(OutDir)Modules\Power;$(OutDir)Modules\Presence;$(OutDir)Modules\PrivacyControls;$(OutDir)Modules\QuickConvert;$(OutDir)Modules\Reminders;$(OutDir)Modules\RemovableDevices;$(OutDir)Modules\ScreenCapture;$(OutDir)Modules\ScreenRecorder;$(OutDir)Modules\ScreenLens;$(OutDir)Modules\Stopwatch;$(OutDir)Modules\Stash;$(OutDir)Modules\SystemIndicators;$(OutDir)Modules\SystemMonitor;$(OutDir)Modules\ThemeSwitcher;$(OutDir)Modules\Timer;$(OutDir)Modules\VoiceNotes;$(OutDir)Modules\Weather;$(OutDir)Modules\WorldClock" />
+			<GlanceModuleStagingDirectory Include="$(OutDir)Modules\Assistant;$(OutDir)Modules\AppMixer;$(OutDir)Modules\AudioSwitcher;$(OutDir)Modules\Clipboard;$(OutDir)Modules\ColorPicker;$(OutDir)Modules\DevicePresence;$(OutDir)Modules\DropShelf;$(OutDir)Modules\FocusSession;$(OutDir)Modules\Infinity;$(OutDir)Modules\KeepAwake;$(OutDir)Modules\Magnifier;$(OutDir)Modules\Media;$(OutDir)Modules\Spotify;$(OutDir)Modules\SpeechToText;$(OutDir)Modules\Nemotron;$(OutDir)Modules\Whisper;$(OutDir)Modules\Network;$(OutDir)Modules\Power;$(OutDir)Modules\Presence;$(OutDir)Modules\PrivacyControls;$(OutDir)Modules\QuickConvert;$(OutDir)Modules\QuickConvertImage;$(OutDir)Modules\QuickConvertOnlineMedia;$(OutDir)Modules\QuickConvertVideo;$(OutDir)Modules\Reminders;$(OutDir)Modules\RemovableDevices;$(OutDir)Modules\ScreenCapture;$(OutDir)Modules\ScreenRecorder;$(OutDir)Modules\ScreenLens;$(OutDir)Modules\Stopwatch;$(OutDir)Modules\Stash;$(OutDir)Modules\SystemIndicators;$(OutDir)Modules\SystemMonitor;$(OutDir)Modules\ThemeSwitcher;$(OutDir)Modules\Timer;$(OutDir)Modules\VoiceNotes;$(OutDir)Modules\Weather;$(OutDir)Modules\WorldClock" />
 			<ExistingGlanceModulePackage Include="$(OutDir)Modules\*.glance" />
 			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Glance.Assistant.*;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Betalgo.Ranul.OpenAI.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.AI.Foundry.Local.*.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Bcl.AsyncInterfaces.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.AI.Abstractions.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.Configuration*.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.Diagnostics.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.Http.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.Logging.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.Options.ConfigurationExtensions.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.ML.OnnxRuntime*.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\Microsoft.Windows.AI.MachineLearning*.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\NAudio*.dll;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\onnxruntime*;$(MSBuildProjectDirectory)\..\Glance.Assistant.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.26100.0\win-x64\System.Numerics.Tensors.dll">
 				<ModuleName>Assistant</ModuleName>
@@ -220,8 +223,14 @@
 			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.QuickConvert.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.QuickConvert.*">
 				<ModuleName>QuickConvert</ModuleName>
 			</GlanceModuleBuildFile>
-			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.QuickConvert.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\ffmpeg\win-x64\ffmpeg.exe;$(MSBuildProjectDirectory)\..\Glance.QuickConvert.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\ffmpeg\win-x64\LICENSE.txt">
-				<ModuleName>QuickConvert</ModuleName>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.QuickConvert.Image\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.QuickConvert.Image.*;$(MSBuildProjectDirectory)\..\Glance.QuickConvert.Image\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.QuickConvert.Tooling.dll">
+				<ModuleName>QuickConvertImage</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.QuickConvert.OnlineMedia\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.QuickConvert.OnlineMedia.*;$(MSBuildProjectDirectory)\..\Glance.QuickConvert.OnlineMedia\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.QuickConvert.Tooling.dll">
+				<ModuleName>QuickConvertOnlineMedia</ModuleName>
+			</GlanceModuleBuildFile>
+			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.QuickConvert.Video\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.QuickConvert.Video.*;$(MSBuildProjectDirectory)\..\Glance.QuickConvert.Video\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\Glance.QuickConvert.Tooling.dll">
+				<ModuleName>QuickConvertVideo</ModuleName>
 			</GlanceModuleBuildFile>
 			<GlanceModuleBuildFile Include="$(MSBuildProjectDirectory)\..\Glance.PrivacyControls.WinUI\bin\$(Platform)\$(Configuration)\net11.0-windows10.0.22000.0\NAudio*.dll">
 				<ModuleName>PrivacyControls</ModuleName>
@@ -347,6 +356,9 @@
 		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Presence" ArchivePath="$(OutDir)Modules\Presence.glance" />
 		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\PrivacyControls" ArchivePath="$(OutDir)Modules\PrivacyControls.glance" />
 		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\QuickConvert" ArchivePath="$(OutDir)Modules\QuickConvert.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\QuickConvertImage" ArchivePath="$(OutDir)Modules\QuickConvertImage.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\QuickConvertOnlineMedia" ArchivePath="$(OutDir)Modules\QuickConvertOnlineMedia.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\QuickConvertVideo" ArchivePath="$(OutDir)Modules\QuickConvertVideo.glance" />
 		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\RemovableDevices" ArchivePath="$(OutDir)Modules\RemovableDevices.glance" />
 		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Reminders" ArchivePath="$(OutDir)Modules\Reminders.glance" />
 		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ScreenCapture" ArchivePath="$(OutDir)Modules\ScreenCapture.glance" />
@@ -392,6 +404,9 @@
 			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)Presence.glance" TargetPath="Modules\Presence.glance" />
 			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)PrivacyControls.glance" TargetPath="Modules\PrivacyControls.glance" />
 			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)QuickConvert.glance" TargetPath="Modules\QuickConvert.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)QuickConvertImage.glance" TargetPath="Modules\QuickConvertImage.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)QuickConvertOnlineMedia.glance" TargetPath="Modules\QuickConvertOnlineMedia.glance" />
+			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)QuickConvertVideo.glance" TargetPath="Modules\QuickConvertVideo.glance" />
 			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)RemovableDevices.glance" TargetPath="Modules\RemovableDevices.glance" />
 			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)Reminders.glance" TargetPath="Modules\Reminders.glance" />
 			<GlanceModulePackage Include="$(GlanceModulePackageDirectory)ScreenCapture.glance" TargetPath="Modules\ScreenCapture.glance" />

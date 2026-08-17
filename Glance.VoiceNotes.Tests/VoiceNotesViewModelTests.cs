@@ -13,7 +13,7 @@ public sealed class VoiceNotesViewModelTests
         Assert.Equal("Ready to record", viewModel.StatusText);
         Assert.Equal("Voice notes", viewModel.CompactStatusText);
         Assert.Equal("Ready to record", viewModel.ExpandedStatusText);
-        Assert.Equal("\uE720", viewModel.ToggleGlyph);
+        Assert.Equal("\uE7C8", viewModel.ToggleGlyph);
     }
 
     [Fact]
@@ -27,7 +27,7 @@ public sealed class VoiceNotesViewModelTests
         Assert.True(viewModel.IsRecording);
         Assert.Equal("02:07", viewModel.ElapsedText);
         Assert.Equal("02:07", viewModel.CompactStatusText);
-        Assert.Equal("\uF78A", viewModel.ToggleGlyph);
+        Assert.Equal("\uE7C8", viewModel.ToggleGlyph);
     }
 
     [Fact]

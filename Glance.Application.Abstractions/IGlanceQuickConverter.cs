@@ -4,9 +4,9 @@ public interface IGlanceQuickConverter
 {
     GlanceQuickConverterDescriptor Descriptor { get; }
 
-    bool CanConvert(IReadOnlyList<GlanceStorageItem> items);
+    GlanceQuickConverterMatch Match(GlanceContentContext context);
 
-    IGlanceQuickConverterEditor? CreateEditor(IReadOnlyList<GlanceStorageItem> items);
+    IGlanceQuickConverterEditor? CreateEditor(GlanceContentContext context);
 
     Task<IReadOnlyList<GlanceQuickConversionResult>> ConvertAsync(GlanceQuickConversionRequest request,
         CancellationToken cancellationToken = default);

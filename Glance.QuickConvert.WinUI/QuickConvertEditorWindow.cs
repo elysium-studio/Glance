@@ -17,9 +17,9 @@ internal sealed partial class QuickConvertEditorWindow
 {
     private readonly TaskCompletionSource<QuickConversionSelection?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly IReadOnlyList<IGlanceQuickConverter> converters;
+    private readonly GlanceContentContext context;
     private readonly ContentControl editorPresenter;
     private readonly TextBlock errorText;
-    private readonly IReadOnlyList<GlanceStorageItem> items;
     private readonly ModuleResourceTextLocalizer<QuickConvertModule> localizer;
     private readonly ComboBox providerPicker;
     private readonly Grid root;
@@ -30,12 +30,12 @@ internal sealed partial class QuickConvertEditorWindow
     private bool isClosed;
 
     private QuickConvertEditorWindow(IReadOnlyList<IGlanceQuickConverter> converters,
-        IReadOnlyList<GlanceStorageItem> items,
+        GlanceContentContext context,
         ModuleResourceTextLocalizer<QuickConvertModule> localizer,
         WindowId ownerWindowId)
     {
         this.converters = converters;
-        this.items = items;
+        this.context = context;
         this.localizer = localizer;
         DisplayArea displayArea = DisplayArea.GetFromWindowId(ownerWindowId, DisplayAreaFallback.Primary);
         providerPicker = new ComboBox
@@ -60,7 +60,7 @@ internal sealed partial class QuickConvertEditorWindow
         StackPanel content = new() { Spacing = 12, Width = 380 };
         content.Children.Add(new TextBlock
         {
-            Text = localizer.GetText(items.Count == 1 ? "DialogOneFile" : "DialogManyFiles", items.Count),
+            Text = CreatePrompt(context, localizer),
             TextWrapping = TextWrapping.Wrap,
             Style = Microsoft.UI.Xaml.Application.Current.Resources["BodyTextBlockStyle"] as Style
         });
@@ -121,9 +121,9 @@ internal sealed partial class QuickConvertEditorWindow
     }
 
     public static Task<QuickConversionSelection?> ShowAsync(IReadOnlyList<IGlanceQuickConverter> converters,
-        IReadOnlyList<GlanceStorageItem> items,
+        GlanceContentContext context,
         ModuleResourceTextLocalizer<QuickConvertModule> localizer,
-        WindowId ownerWindowId) => new QuickConvertEditorWindow(converters, items, localizer, ownerWindowId).ShowAsync();
+        WindowId ownerWindowId) => new QuickConvertEditorWindow(converters, context, localizer, ownerWindowId).ShowAsync();
 
     private Task<QuickConversionSelection?> ShowAsync()
     {
@@ -137,7 +137,7 @@ internal sealed partial class QuickConvertEditorWindow
     private void UpdateEditor()
     {
         IGlanceQuickConverter? converter = providerPicker.SelectedItem as IGlanceQuickConverter ?? converters.FirstOrDefault();
-        editor = converter?.CreateEditor(items);
+        editor = converter?.CreateEditor(context);
         editorPresenter.Content = editor?.Content;
         errorText.Visibility = Visibility.Collapsed;
     }
@@ -225,4 +225,9 @@ internal sealed partial class QuickConvertEditorWindow
         window.Closed -= HandleWindowClosed;
         window.Close();
     }
+
+    private static string CreatePrompt(GlanceContentContext context,
+        ModuleResourceTextLocalizer<QuickConvertModule> localizer) => context.Kind == GlanceContentKind.FilesAndFolders
+            ? localizer.GetText(context.StorageItems.Count == 1 ? "DialogOneFile" : "DialogManyFiles", context.StorageItems.Count)
+            : localizer.GetText("DialogLink");
 }

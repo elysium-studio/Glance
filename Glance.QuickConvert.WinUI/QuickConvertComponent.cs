@@ -79,11 +79,11 @@ public sealed partial class QuickConvertComponent :
         localizer.GetText("RouteDescription"),
         "\uE8B1");
 
-    public bool CanHandle(GlanceContentKind kind) => kind == GlanceContentKind.FilesAndFolders;
+    public bool CanHandle(GlanceContentKind kind) => kind is GlanceContentKind.FilesAndFolders or GlanceContentKind.WebLink or GlanceContentKind.Text;
 
-    public bool CanHandle(GlanceContentContext context) => context.Kind == GlanceContentKind.FilesAndFolders && registry.GetConverters(context.StorageItems).Count > 0;
+    public bool CanHandle(GlanceContentContext context) => registry.GetConverters(context).Count > 0;
 
-    public void BeginContentPreview(GlanceContentContext context) => viewModel.Prepare(context.StorageItems.Count);
+    public void BeginContentPreview(GlanceContentContext context) => viewModel.Prepare(context.StorageItems.Count == 0 ? 1 : context.StorageItems.Count);
 
     public void EndContentPreview() => viewModel.CancelPreview();
 
@@ -100,7 +100,7 @@ public sealed partial class QuickConvertComponent :
 
         try
         {
-            IReadOnlyList<IGlanceQuickConverter> converters = registry.GetConverters(context.StorageItems);
+            IReadOnlyList<IGlanceQuickConverter> converters = registry.GetConverters(context);
 
             if (converters.Count == 0)
             {
@@ -114,7 +114,7 @@ public sealed partial class QuickConvertComponent :
                 return false;
             }
 
-            Task<QuickConversionSelection?> editorTask = await RunOnDispatcherAsync(() => QuickConvertEditorWindow.ShowAsync(converters, context.StorageItems, localizer, windowId));
+            Task<QuickConversionSelection?> editorTask = await RunOnDispatcherAsync(() => QuickConvertEditorWindow.ShowAsync(converters, context, localizer, windowId));
             QuickConversionSelection? selection = await editorTask;
 
             if (selection is null)
@@ -150,7 +150,7 @@ public sealed partial class QuickConvertComponent :
                 return true;
             });
             await jobs.Writer.WriteAsync(new QuickConversionJob(selection.Converter,
-                context.StorageItems,
+                context,
                 selection.Options,
                 generation,
                 jobCancellationToken), cancellation.Token);
@@ -218,18 +218,23 @@ public sealed partial class QuickConvertComponent :
 
             _ = await RunOnDispatcherAsync(() =>
             {
-                viewModel.BeginConversion(job.Items.Count);
+                viewModel.BeginConversion(job.Content.StorageItems.Count == 0 ? 1 : job.Content.StorageItems.Count);
                 return true;
             });
             int successful;
             int failed;
+            bool setupFailed = false;
 
             try
             {
                 using CancellationTokenSource linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, job.CancellationToken);
-                IReadOnlyList<GlanceQuickConversionResult> results = await job.Converter.ConvertAsync(new GlanceQuickConversionRequest(job.Items, job.Options), linkedCancellation.Token);
+                Progress<GlanceQuickConversionProgress> progress = new(HandleConversionProgress);
+                IReadOnlyList<GlanceQuickConversionResult> results = await job.Converter.ConvertAsync(new GlanceQuickConversionRequest(job.Content,
+                    job.Options,
+                    progress), linkedCancellation.Token);
                 successful = results.Count(result => result.IsSuccessful);
-                failed = Math.Max(job.Items.Count - successful, results.Count - successful);
+                int expected = job.Content.StorageItems.Count == 0 ? 1 : job.Content.StorageItems.Count;
+                failed = Math.Max(expected - successful, results.Count - successful);
             }
             catch (OperationCanceledException) when (job.CancellationToken.IsCancellationRequested)
             {
@@ -239,10 +244,16 @@ public sealed partial class QuickConvertComponent :
             {
                 throw;
             }
+            catch (GlanceQuickConverterSetupException)
+            {
+                successful = 0;
+                failed = job.Content.StorageItems.Count == 0 ? 1 : job.Content.StorageItems.Count;
+                setupFailed = true;
+            }
             catch
             {
                 successful = 0;
-                failed = job.Items.Count;
+                failed = job.Content.StorageItems.Count == 0 ? 1 : job.Content.StorageItems.Count;
             }
             int remaining;
             int totalSuccessful;
@@ -264,7 +275,15 @@ public sealed partial class QuickConvertComponent :
 
             _ = await RunOnDispatcherAsync(() =>
             {
-                viewModel.Complete(totalSuccessful, totalFailed, remaining);
+                if (setupFailed && remaining == 0)
+                {
+                    viewModel.ShowToolSetupFailure();
+                }
+                else
+                {
+                    viewModel.Complete(totalSuccessful, totalFailed, remaining);
+                }
+
                 return true;
             });
         }
@@ -293,6 +312,23 @@ public sealed partial class QuickConvertComponent :
         cancellationToStop.Cancel();
         viewModel.StopConversions();
     }
+
+    private void HandleConversionProgress(GlanceQuickConversionProgress progress) => _ = RunOnDispatcherAsync(() =>
+    {
+        if (progress.Stage == GlanceQuickConversionStage.Setup)
+        {
+            if (progress.IsComplete)
+            {
+                viewModel.CompleteToolSetup();
+            }
+            else
+            {
+                viewModel.ShowToolSetup(progress.Progress);
+            }
+        }
+
+        return true;
+    });
 
     private Task<T> RunOnDispatcherAsync<T>(Func<T> action)
     {

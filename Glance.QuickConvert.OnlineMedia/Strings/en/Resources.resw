@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="OnlineMediaConverterName" xml:space="preserve"><value>Online media</value></data>
+  <data name="OnlineMediaConverterDescription" xml:space="preserve"><value>Download video or audio from a supported link</value></data>
+  <data name="OutputFormat" xml:space="preserve"><value>Output format</value></data>
+  <data name="DownloadQuality" xml:space="preserve"><value>Video quality</value></data>
+  <data name="BestAvailable" xml:space="preserve"><value>Best available</value></data>
+  <data name="OutputFileMissing" xml:space="preserve"><value>The converted file could not be found.</value></data>
+</root>

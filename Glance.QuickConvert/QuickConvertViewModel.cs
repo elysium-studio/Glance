@@ -21,6 +21,8 @@ public sealed partial class QuickConvertViewModel(ITextLocalizer localizer) :
     [ObservableProperty]
     private int queuedJobs;
 
+    private int currentConversionCount;
+
     public bool IsBusy => IsConverting || QueuedJobs > 0;
 
     public string Title => localizer.GetText("ModuleTitle");
@@ -52,10 +54,30 @@ public sealed partial class QuickConvertViewModel(ITextLocalizer localizer) :
 
     public void BeginConversion(int count)
     {
+        currentConversionCount = count;
         IsConverting = true;
         IsComplete = false;
         Summary = localizer.GetText(count == 1 ? "ConvertingOneFile" : "ConvertingManyFiles", count);
         Detail = localizer.GetText("PleaseWait");
+    }
+
+    public void ShowToolSetup(double progress)
+    {
+        IsConverting = true;
+        IsComplete = false;
+        Summary = localizer.GetText("SettingUp");
+        Detail = localizer.GetText("DownloadingTools", Math.Round(Math.Clamp(progress, 0, 1) * 100));
+    }
+
+    public void CompleteToolSetup() => BeginConversion(Math.Max(1, currentConversionCount));
+
+    public void ShowToolSetupFailure()
+    {
+        QueuedJobs = 0;
+        IsConverting = false;
+        IsComplete = false;
+        Summary = localizer.GetText("SetupFailed");
+        Detail = localizer.GetText("SetupFailedDetail");
     }
 
     public void Enqueue(int jobs)

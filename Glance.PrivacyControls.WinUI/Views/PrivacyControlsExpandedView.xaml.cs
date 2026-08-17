@@ -9,6 +9,7 @@ namespace Glance.PrivacyControls.WinUI;
 public sealed partial class PrivacyControlsExpandedView :
     UserControl
 {
+    private readonly CompositionActivityPulse activityPulse;
     private readonly ModuleResourceTextLocalizer<PrivacyControlsModule> localizer;
 
     public PrivacyControlsExpandedView(PrivacyControlsViewModel viewModel,
@@ -17,6 +18,7 @@ public sealed partial class PrivacyControlsExpandedView :
         ViewModel = viewModel;
         this.localizer = localizer;
         InitializeComponent();
+        activityPulse = new(this, PulseRing, viewModel, nameof(PrivacyControlsViewModel.IsMicrophoneLive), () => viewModel.IsMicrophoneLive);
     }
 
     public PrivacyControlsViewModel ViewModel { get; }

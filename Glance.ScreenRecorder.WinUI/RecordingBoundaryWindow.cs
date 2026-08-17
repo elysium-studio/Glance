@@ -144,7 +144,7 @@ internal sealed class RecordingBoundaryWindow :
         {
             FontFamily = new FontFamily("Segoe Fluent Icons"),
             FontSize = 14,
-            Glyph = "\uE71A"
+            Glyph = "\uE7C8"
         };
         Button stopButton = CreateToolbarButton(stopIcon, useAccentStyle: true);
         string stopLabel = localizer.GetText("StopRecording");

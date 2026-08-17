@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ImageConverterName" xml:space="preserve"><value>Images</value></data>
+  <data name="ImageConverterDescription" xml:space="preserve"><value>Convert and resize image files</value></data>
+  <data name="OutputFormat" xml:space="preserve"><value>Output format</value></data>
+  <data name="ImageSize" xml:space="preserve"><value>Image size</value></data>
+  <data name="OriginalSize" xml:space="preserve"><value>Keep original size</value></data>
+  <data name="PercentageSize" xml:space="preserve"><value>Scale by percentage</value></data>
+  <data name="FitWithinSize" xml:space="preserve"><value>Fit within dimensions</value></data>
+  <data name="ScalePercentage" xml:space="preserve"><value>Scale</value></data>
+  <data name="MaximumWidth" xml:space="preserve"><value>Maximum width</value></data>
+  <data name="MaximumHeight" xml:space="preserve"><value>Maximum height</value></data>
+  <data name="LockAspectRatio" xml:space="preserve"><value>Lock aspect ratio</value></data>
+  <data name="UnlockAspectRatio" xml:space="preserve"><value>Unlock aspect ratio</value></data>
+  <data name="ImageQuality" xml:space="preserve"><value>JPEG quality</value></data>
+  <data name="ValidSizeRequired" xml:space="preserve"><value>Enter a valid image size.</value></data>
+</root>

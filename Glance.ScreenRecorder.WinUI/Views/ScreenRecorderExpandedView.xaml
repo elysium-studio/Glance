@@ -168,7 +168,7 @@
             <Button
                 x:Name="RecordButton"
                 AutomationProperties.Name="{x:Bind ViewModel.Title}"
-                Content="&#xE714;"
+                Content="&#xE7C8;"
                 IsEnabled="{x:Bind WhenCanStart(ViewModel.IsBusy, ViewModel.IsRecording), Mode=OneWay}"
                 Visibility="{x:Bind WhenNotRecording(ViewModel.IsRecording), Mode=OneWay}">
                 <Button.Style>
@@ -201,7 +201,7 @@
             <Button
                 AutomationProperties.Name="{x:Bind ViewModel.Title}"
                 Click="{x:Bind ViewModel.ToggleRecording}"
-                Content="&#xE71A;"
+                Content="&#xE7C8;"
                 Visibility="{x:Bind WhenRecording(ViewModel.IsRecording), Mode=OneWay}">
                 <Button.Style>
                     <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">

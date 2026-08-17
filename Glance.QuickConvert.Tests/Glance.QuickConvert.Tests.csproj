@@ -1,10 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net11.0</TargetFramework>
+    <TargetFramework>net11.0-windows10.0.22000.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <EnablePreviewFeatures>true</EnablePreviewFeatures>
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
   <ItemGroup>
@@ -17,5 +18,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Glance.QuickConvert\Glance.QuickConvert.csproj" />
+    <ProjectReference Include="..\Glance.QuickConvert.Image\Glance.QuickConvert.Image.csproj" />
+    <ProjectReference Include="..\Glance.QuickConvert.OnlineMedia\Glance.QuickConvert.OnlineMedia.csproj" />
+    <ProjectReference Include="..\Glance.QuickConvert.Tooling\Glance.QuickConvert.Tooling.csproj" />
+    <ProjectReference Include="..\Glance.QuickConvert.Video\Glance.QuickConvert.Video.csproj" />
   </ItemGroup>
 </Project>

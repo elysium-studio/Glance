@@ -13,8 +13,10 @@ public sealed class PrivacyControlsViewModelTests
 
         Assert.True(viewModel.IsAvailable);
         Assert.False(viewModel.IsMuted);
+        Assert.True(viewModel.IsMicrophoneLive);
         Assert.Equal("Studio microphone", viewModel.DeviceName);
         Assert.Equal("Ready", viewModel.StatusText);
+        Assert.Equal("\uF8AE", viewModel.ToggleGlyph);
     }
 
     [Fact]
@@ -37,8 +39,9 @@ public sealed class PrivacyControlsViewModelTests
 
         Assert.True(service.State.IsMuted);
         Assert.True(viewModel.IsMuted);
+        Assert.False(viewModel.IsMicrophoneLive);
         Assert.Equal("Muted", viewModel.StatusText);
-        Assert.Equal("\uE74F", viewModel.ToggleGlyph);
+        Assert.Equal("\uF5B0", viewModel.ToggleGlyph);
     }
 
     [Fact]

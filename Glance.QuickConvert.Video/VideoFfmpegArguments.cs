@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Glance.QuickConvert;
+namespace Glance.QuickConvert.Video;
 
 public static class VideoFfmpegArguments
 {

@@ -78,22 +78,31 @@
                     </Style>
                 </Button.Style>
             </Button>
-            <Button
-                x:Uid="ToggleMuteButton"
-                Click="{x:Bind ViewModel.ToggleMute}"
-                Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}"
-                IsEnabled="{x:Bind ViewModel.IsAvailable, Mode=OneWay}">
-                <Button.Style>
-                    <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
-                        <Setter Property="Width" Value="36" />
-                        <Setter Property="Height" Value="36" />
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="CornerRadius" Value="18" />
-                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-                        <Setter Property="FontSize" Value="16" />
-                    </Style>
-                </Button.Style>
-            </Button>
+            <Grid Width="36" Height="36">
+                <Ellipse
+                    x:Name="PulseRing"
+                    Width="36"
+                    Height="36"
+                    IsHitTestVisible="False"
+                    Stroke="{ThemeResource GlancePrivacyControlsIconBrush}"
+                    StrokeThickness="1.5" />
+                <Button
+                    x:Uid="ToggleMuteButton"
+                    Click="{x:Bind ViewModel.ToggleMute}"
+                    Content="{x:Bind ViewModel.ToggleGlyph, Mode=OneWay}"
+                    IsEnabled="{x:Bind ViewModel.IsAvailable, Mode=OneWay}">
+                    <Button.Style>
+                        <Style BasedOn="{StaticResource AccentButtonStyle}" TargetType="Button">
+                            <Setter Property="Width" Value="36" />
+                            <Setter Property="Height" Value="36" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="CornerRadius" Value="18" />
+                            <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                            <Setter Property="FontSize" Value="16" />
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
         </StackPanel>
     </Grid>
 </UserControl>

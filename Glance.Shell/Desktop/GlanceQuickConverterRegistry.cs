@@ -8,15 +8,18 @@ public sealed class GlanceQuickConverterRegistry :
     private readonly Dictionary<string, IGlanceQuickConverter> converters = [with(StringComparer.OrdinalIgnoreCase)];
     private readonly object synchronization = new();
 
-    public IReadOnlyList<IGlanceQuickConverter> GetConverters(IReadOnlyList<GlanceStorageItem> items)
+    public IReadOnlyList<IGlanceQuickConverter> GetConverters(GlanceContentContext context)
     {
         lock (synchronization)
         {
             return
             [
                 .. converters.Values
-                    .Where(converter => converter.CanConvert(items))
-                    .OrderBy(converter => converter.Descriptor.DisplayName)
+                    .Select(converter => (converter, match: converter.Match(context)))
+                    .Where(item => item.match != GlanceQuickConverterMatch.None)
+                    .OrderByDescending(item => item.match)
+                    .ThenBy(item => item.converter.Descriptor.DisplayName)
+                    .Select(item => item.converter)
             ];
         }
     }

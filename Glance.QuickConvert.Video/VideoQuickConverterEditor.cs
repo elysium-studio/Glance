@@ -3,7 +3,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 
-namespace Glance.QuickConvert.WinUI;
+namespace Glance.QuickConvert.Video;
 
 internal sealed class VideoQuickConverterEditor :
     IGlanceQuickConverterEditor
@@ -12,7 +12,7 @@ internal sealed class VideoQuickConverterEditor :
     private readonly NumberBox heightBox;
     private readonly ToggleButton aspectRatioButton;
     private readonly Grid dimensions;
-    private readonly ModuleResourceTextLocalizer<QuickConvertModule> localizer;
+    private readonly ModuleResourceTextLocalizer<VideoQuickConverterModule> localizer;
     private readonly NumberBox percentageBox;
     private readonly ComboBox qualityPicker;
     private readonly ComboBox scalePicker;
@@ -21,7 +21,7 @@ internal sealed class VideoQuickConverterEditor :
     private bool isUpdatingDimensions;
     private double lockedAspectRatio = 16d / 9;
 
-    public VideoQuickConverterEditor(ModuleResourceTextLocalizer<QuickConvertModule> localizer)
+    public VideoQuickConverterEditor(ModuleResourceTextLocalizer<VideoQuickConverterModule> localizer)
     {
         this.localizer = localizer;
         formatPicker = new ComboBox

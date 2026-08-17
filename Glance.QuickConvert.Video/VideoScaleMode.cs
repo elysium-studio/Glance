@@ -1,4 +1,4 @@
-namespace Glance.QuickConvert;
+namespace Glance.QuickConvert.Video;
 
 public enum VideoScaleMode
 {

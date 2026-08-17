@@ -8,13 +8,17 @@
   <data name="ModuleDisplayName" xml:space="preserve"><value>Quick convert</value></data>
   <data name="ModuleDescription" xml:space="preserve"><value>Convert and resize files with extensible conversion providers.</value></data>
   <data name="ReadySummary" xml:space="preserve"><value>Ready to convert</value></data>
-  <data name="ReadyDetail" xml:space="preserve"><value>Drop supported files here</value></data>
+  <data name="ReadyDetail" xml:space="preserve"><value>Drop supported files or links here</value></data>
   <data name="OneFileReady" xml:space="preserve"><value>Convert this file</value></data>
   <data name="ManyFilesReady" xml:space="preserve"><value>Convert {0} files</value></data>
   <data name="ChooseOptions" xml:space="preserve"><value>Drop to choose format and size</value></data>
   <data name="ConvertingOneFile" xml:space="preserve"><value>Converting {0} file</value></data>
   <data name="ConvertingManyFiles" xml:space="preserve"><value>Converting {0} files</value></data>
   <data name="PleaseWait" xml:space="preserve"><value>Your queued jobs will continue in order</value></data>
+  <data name="SettingUp" xml:space="preserve"><value>Setting up Quick Convert</value></data>
+  <data name="DownloadingTools" xml:space="preserve"><value>Downloading conversion tools · {0}%</value></data>
+  <data name="SetupFailed" xml:space="preserve"><value>Setup couldn’t finish</value></data>
+  <data name="SetupFailedDetail" xml:space="preserve"><value>Check your connection and try again</value></data>
   <data name="OneJobQueued" xml:space="preserve"><value>{0} conversion queued</value></data>
   <data name="ManyJobsQueued" xml:space="preserve"><value>{0} conversions queued</value></data>
   <data name="WaitingToConvert" xml:space="preserve"><value>Waiting to start</value></data>
@@ -26,11 +30,7 @@
   <data name="SavedBesideOriginals" xml:space="preserve"><value>Saved beside the original files</value></data>
   <data name="ConversionFailures" xml:space="preserve"><value>{0} files could not be converted</value></data>
   <data name="RouteDisplayName" xml:space="preserve"><value>Quick convert</value></data>
-  <data name="RouteDescription" xml:space="preserve"><value>Convert or resize these files</value></data>
-  <data name="ImageConverterName" xml:space="preserve"><value>Images</value></data>
-  <data name="ImageConverterDescription" xml:space="preserve"><value>Convert and resize image files</value></data>
-  <data name="VideoConverterName" xml:space="preserve"><value>Video and audio</value></data>
-  <data name="VideoConverterDescription" xml:space="preserve"><value>Convert, resize, extract audio, or create a GIF</value></data>
+  <data name="RouteDescription" xml:space="preserve"><value>Convert files or download supported media</value></data>
   <data name="Converter" xml:space="preserve"><value>Converter</value></data>
   <data name="ConvertFiles" xml:space="preserve"><value>Convert files</value></data>
   <data name="Convert" xml:space="preserve"><value>Convert</value></data>
@@ -38,23 +38,6 @@
   <data name="StopConversions" xml:space="preserve"><value>Stop conversions</value></data>
   <data name="DialogOneFile" xml:space="preserve"><value>Choose how to convert this file.</value></data>
   <data name="DialogManyFiles" xml:space="preserve"><value>Choose how to convert these {0} files.</value></data>
-  <data name="OutputFormat" xml:space="preserve"><value>Output format</value></data>
-  <data name="ImageSize" xml:space="preserve"><value>Image size</value></data>
-  <data name="VideoSize" xml:space="preserve"><value>Video size</value></data>
-  <data name="OriginalSize" xml:space="preserve"><value>Keep original size</value></data>
-  <data name="PercentageSize" xml:space="preserve"><value>Scale by percentage</value></data>
-  <data name="FitWithinSize" xml:space="preserve"><value>Fit within dimensions</value></data>
-  <data name="ScalePercentage" xml:space="preserve"><value>Scale</value></data>
-  <data name="MaximumWidth" xml:space="preserve"><value>Maximum width</value></data>
-  <data name="MaximumHeight" xml:space="preserve"><value>Maximum height</value></data>
-  <data name="LockAspectRatio" xml:space="preserve"><value>Lock aspect ratio</value></data>
-  <data name="UnlockAspectRatio" xml:space="preserve"><value>Unlock aspect ratio</value></data>
-  <data name="ImageQuality" xml:space="preserve"><value>JPEG quality</value></data>
-  <data name="VideoQuality" xml:space="preserve"><value>Quality</value></data>
-  <data name="SmallerFile" xml:space="preserve"><value>Smaller file</value></data>
-  <data name="BalancedQuality" xml:space="preserve"><value>Balanced</value></data>
-  <data name="HighQuality" xml:space="preserve"><value>High quality</value></data>
-  <data name="ValidSizeRequired" xml:space="preserve"><value>Enter a valid image size.</value></data>
-  <data name="ValidVideoSizeRequired" xml:space="preserve"><value>Enter a valid video size.</value></data>
+  <data name="DialogLink" xml:space="preserve"><value>Choose how to download and convert this link.</value></data>
   <data name="ConversionOptionsInvalid" xml:space="preserve"><value>Check the conversion options and try again.</value></data>
 </root>

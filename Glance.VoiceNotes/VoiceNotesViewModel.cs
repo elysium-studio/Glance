@@ -11,7 +11,6 @@ public sealed partial class VoiceNotesViewModel(ITextLocalizer localizer, VoiceN
     private int recentRecordingLimit = GetRecentRecordingLimit(settings ?? new VoiceNotesSettings());
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ToggleGlyph))]
     [NotifyPropertyChangedFor(nameof(CompactStatusText))]
     [NotifyPropertyChangedFor(nameof(ExpandedStatusText))]
     private bool isRecording;
@@ -33,7 +32,7 @@ public sealed partial class VoiceNotesViewModel(ITextLocalizer localizer, VoiceN
 
     public ObservableCollection<VoiceNoteItemViewModel> Recordings { get; } = [];
 
-    public string ToggleGlyph => IsRecording ? "\uF78A" : "\uE720";
+    public string ToggleGlyph => "\uE7C8";
 
     public string CompactStatusText => IsRecording
         ? ElapsedText

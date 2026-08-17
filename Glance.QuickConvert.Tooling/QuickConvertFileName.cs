@@ -1,4 +1,4 @@
-namespace Glance.QuickConvert;
+namespace Glance.QuickConvert.Tooling;
 
 public static class QuickConvertFileName
 {
