@@ -105,5 +105,15 @@
                              "Removed the blue taskbar badge while retaining Windows integration for supported links and files.",
                              "Improved taskbar presentation and corrected minor module control visuals."
                          ]
+    },
+    {
+        "version":  "0.1.9-preview",
+        "date":  "2026-08-17",
+        "releaseNotes":  [
+                             "Added an extensible Quick Convert provider system for image, video, and online-media conversions, including first-use tool setup.",
+                             "Improved URL and text drag-and-drop handling for supported conversions.",
+                             "Strengthened reliability with strict single-instance startup, safer taskbar hosting, and a cleaner desktop-island architecture.",
+                             "Corrected the Presence module action to use solid play and stop controls."
+                         ]
     }
 ]
