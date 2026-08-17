@@ -1,5 +1,6 @@
 param(
     [string]$Version = "",
+    [string[]]$ReleaseNotes = @(),
     [string]$Bump = "",
     [string]$ConfigurationPath = "",
     [string]$AzureSigningEndpoint = "",
@@ -946,9 +947,8 @@ if (-not $Local -and
 }
 
 $dotnetVersion = $Version -replace '-.*$', ''
-$releaseNotes = @()
 
-if (-not $Local)
+if (-not $Local -and $ReleaseNotes.Count -eq 0)
 {
     Write-Host ""
     Write-Host "Enter release notes (empty line to finish):" -ForegroundColor Cyan
