@@ -80,7 +80,7 @@ public sealed partial class SetupTourViewModel :
 
     public bool IsLastPage => CurrentPage == PageCount - 1;
 
-    public bool IsCompactModeSelected => ExpansionMode == GlanceExpansionMode.ExpandOnHover;
+    public bool IsCompactModeSelected => ExpansionMode != GlanceExpansionMode.AlwaysExpanded;
 
     public bool IsExpandedModeSelected => ExpansionMode == GlanceExpansionMode.AlwaysExpanded;
 

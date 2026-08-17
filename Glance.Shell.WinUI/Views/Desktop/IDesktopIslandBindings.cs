@@ -10,6 +10,8 @@ public interface IDesktopIslandBindings
 
     DesktopIslandHostMode ToHostMode(int index);
 
+    DesktopIslandExpansionMode ToExpansionMode(int index);
+
     Visibility WhenPinned(bool isPinned);
 
     Visibility WhenNotPinned(bool isPinned);
@@ -34,4 +36,3 @@ public interface IDesktopIslandBindings
 
     object? ToBackgroundContent(IGlanceComponent? component, bool isLoadingModules, bool isTransientPresentationActive);
 }
-

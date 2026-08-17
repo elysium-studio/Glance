@@ -223,6 +223,12 @@ public sealed partial class DesktopIslandView :
         RefreshDisplayLocationIcons();
         presentationController.StopAttentionExpansion();
         componentController.PointerEntered();
+
+        if (ViewModel.ExpansionMode == GlanceExpansionMode.ExpandOnClick && !ViewModel.IsExpanded)
+        {
+            return;
+        }
+
         Reveal();
         ViewModel.IsExpanded = true;
     }

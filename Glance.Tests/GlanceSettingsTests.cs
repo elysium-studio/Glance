@@ -25,7 +25,7 @@ public sealed class GlanceSettingsTests
         GlanceSettings settings = new()
         {
             AutoHide = true,
-            ExpansionMode = GlanceExpansionMode.AlwaysExpanded,
+            ExpansionMode = GlanceExpansionMode.ExpandOnClick,
             Placement = GlancePlacement.Bottom,
             TranscriptionModelId = "nemotron-3.5-asr-streaming-0.6b",
             ShowSetupOnStartup = false,
@@ -46,7 +46,7 @@ public sealed class GlanceSettingsTests
 
         Assert.NotNull(result);
         Assert.True(result.AutoHide);
-        Assert.Equal(GlanceExpansionMode.AlwaysExpanded, result.ExpansionMode);
+        Assert.Equal(GlanceExpansionMode.ExpandOnClick, result.ExpansionMode);
         Assert.Equal(GlancePlacement.Bottom, result.Placement);
         Assert.Equal("nemotron-3.5-asr-streaming-0.6b", result.TranscriptionModelId);
         Assert.False(result.ShowSetupOnStartup);

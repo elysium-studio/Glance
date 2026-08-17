@@ -18,6 +18,11 @@
                     <x:Int32>1</x:Int32>
                 </ComboBoxItem.Tag>
             </ComboBoxItem>
+            <ComboBoxItem x:Uid="GlanceExpansionClickOption">
+                <ComboBoxItem.Tag>
+                    <x:Int32>2</x:Int32>
+                </ComboBoxItem.Tag>
+            </ComboBoxItem>
         </ComboBox>
     </CommunityToolkit:SettingsCard>
 </UserControl>

@@ -40,9 +40,10 @@
   <data name="AutoHideCard.Header" xml:space="preserve"><value>[Åütø-hïdé]</value></data>
   <data name="AutoHideCard.Description" xml:space="preserve"><value>[Hïdé Glance whén ït ïs ïdlé ånd révéål ït whén thé pøïntér åpprøåçhés ïts sçréén-édgé ïndïçåtør]</value></data>
   <data name="GlanceExpansionCard.Header" xml:space="preserve"><value>[Island expansion]</value></data>
-  <data name="GlanceExpansionCard.Description" xml:space="preserve"><value>[Choose whether Glance expands on pointer hover or always stays expanded]</value></data>
+  <data name="GlanceExpansionCard.Description" xml:space="preserve"><value>[Choose whether Glance expands on hover, on click, or always stays expanded]</value></data>
   <data name="GlanceExpansionHoverOption.Content" xml:space="preserve"><value>[Expand on hover]</value></data>
   <data name="GlanceExpansionPinnedOption.Content" xml:space="preserve"><value>[Always expanded]</value></data>
+  <data name="GlanceExpansionClickOption.Content" xml:space="preserve"><value>[Expand on click]</value></data>
   <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Keep expanded]</value></data>
   <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>[Keep island expanded]</value></data>
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>[Expand on hover]</value></data>

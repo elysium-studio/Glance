@@ -40,9 +40,10 @@
   <data name="AutoHideCard.Header" xml:space="preserve"><value>自動的に隠す</value></data>
   <data name="AutoHideCard.Description" xml:space="preserve"><value>操作していないときは Glance を隠し、ポインターが画面端のインジケーターに近づくと表示します</value></data>
   <data name="GlanceExpansionCard.Header" xml:space="preserve"><value>アイランドの展開</value></data>
-  <data name="GlanceExpansionCard.Description" xml:space="preserve"><value>ポインターを合わせたときに Glance を展開するか、常に展開したままにするかを選択します</value></data>
+  <data name="GlanceExpansionCard.Description" xml:space="preserve"><value>Glance をホバー時、クリック時、または常に展開するかを選択します</value></data>
   <data name="GlanceExpansionHoverOption.Content" xml:space="preserve"><value>ポインターで展開</value></data>
   <data name="GlanceExpansionPinnedOption.Content" xml:space="preserve"><value>常に展開</value></data>
+  <data name="GlanceExpansionClickOption.Content" xml:space="preserve"><value>クリックで展開</value></data>
   <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>展開したままにする</value></data>
   <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>アイランドを展開したままにする</value></data>
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>ポインターで展開</value></data>

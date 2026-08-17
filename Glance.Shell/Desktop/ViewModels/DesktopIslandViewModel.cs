@@ -33,6 +33,7 @@ public sealed partial class DesktopIslandViewModel :
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsPinned))]
+    [NotifyPropertyChangedFor(nameof(ExpansionModeIndex))]
     private GlanceExpansionMode expansionMode;
 
     [ObservableProperty]
@@ -161,6 +162,8 @@ public sealed partial class DesktopIslandViewModel :
     public int ComponentCount => components.Count;
 
     public bool IsPinned => ExpansionMode == GlanceExpansionMode.AlwaysExpanded;
+
+    public int ExpansionModeIndex => (int)ExpansionMode;
 
     public int PlacementIndex => (int)Placement;
 

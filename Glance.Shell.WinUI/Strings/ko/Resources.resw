@@ -40,9 +40,10 @@
   <data name="AutoHideCard.Header" xml:space="preserve"><value>자동 숨기기</value></data>
   <data name="AutoHideCard.Description" xml:space="preserve"><value>사용하지 않을 때 Glance를 숨기고 포인터가 화면 가장자리 표시기에 가까워지면 다시 표시합니다</value></data>
   <data name="GlanceExpansionCard.Header" xml:space="preserve"><value>아일랜드 펼치기</value></data>
-  <data name="GlanceExpansionCard.Description" xml:space="preserve"><value>포인터를 올릴 때 Glance를 펼칠지 항상 펼친 상태로 둘지 선택합니다</value></data>
+  <data name="GlanceExpansionCard.Description" xml:space="preserve"><value>Glance를 가리킬 때, 클릭할 때 또는 항상 펼칠지 선택합니다</value></data>
   <data name="GlanceExpansionHoverOption.Content" xml:space="preserve"><value>가리킬 때 펼치기</value></data>
   <data name="GlanceExpansionPinnedOption.Content" xml:space="preserve"><value>항상 펼침</value></data>
+  <data name="GlanceExpansionClickOption.Content" xml:space="preserve"><value>클릭할 때 펼치기</value></data>
   <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>펼친 상태로 유지</value></data>
   <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>아일랜드를 펼친 상태로 유지</value></data>
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>가리킬 때 펼치기</value></data>

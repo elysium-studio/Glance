@@ -40,9 +40,10 @@
   <data name="AutoHideCard.Header" xml:space="preserve"><value>Automatisch ausblenden</value></data>
   <data name="AutoHideCard.Description" xml:space="preserve"><value>Blendet Glance bei Inaktivität aus und wieder ein, wenn sich der Zeiger der Bildschirmrandanzeige nähert</value></data>
   <data name="GlanceExpansionCard.Header" xml:space="preserve"><value>Insel-Erweiterung</value></data>
-  <data name="GlanceExpansionCard.Description" xml:space="preserve"><value>Lege fest, ob Glance beim Zeigen erweitert wird oder immer erweitert bleibt</value></data>
+  <data name="GlanceExpansionCard.Description" xml:space="preserve"><value>Lege fest, ob Glance beim Zeigen, beim Klicken oder dauerhaft erweitert wird</value></data>
   <data name="GlanceExpansionHoverOption.Content" xml:space="preserve"><value>Beim Zeigen erweitern</value></data>
   <data name="GlanceExpansionPinnedOption.Content" xml:space="preserve"><value>Immer erweitert</value></data>
+  <data name="GlanceExpansionClickOption.Content" xml:space="preserve"><value>Beim Klicken erweitern</value></data>
   <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Erweitert lassen</value></data>
   <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Insel erweitert lassen</value></data>
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Beim Zeigen erweitern</value></data>

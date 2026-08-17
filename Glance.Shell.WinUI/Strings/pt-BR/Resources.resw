@@ -40,9 +40,10 @@
   <data name="AutoHideCard.Header" xml:space="preserve"><value>Ocultar automaticamente</value></data>
   <data name="AutoHideCard.Description" xml:space="preserve"><value>Oculta o Glance quando está ocioso e o mostra quando o ponteiro se aproxima do indicador na borda da tela</value></data>
   <data name="GlanceExpansionCard.Header" xml:space="preserve"><value>Expansão da ilha</value></data>
-  <data name="GlanceExpansionCard.Description" xml:space="preserve"><value>Escolha se o Glance se expande ao passar o ponteiro ou permanece sempre expandido</value></data>
+  <data name="GlanceExpansionCard.Description" xml:space="preserve"><value>Escolha se o Glance se expande ao passar o ponteiro, ao clicar ou permanece sempre expandido</value></data>
   <data name="GlanceExpansionHoverOption.Content" xml:space="preserve"><value>Expandir ao passar o ponteiro</value></data>
   <data name="GlanceExpansionPinnedOption.Content" xml:space="preserve"><value>Sempre expandido</value></data>
+  <data name="GlanceExpansionClickOption.Content" xml:space="preserve"><value>Expandir ao clicar</value></data>
   <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Manter expandido</value></data>
   <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Manter a ilha expandida</value></data>
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Expandir ao passar o ponteiro</value></data>

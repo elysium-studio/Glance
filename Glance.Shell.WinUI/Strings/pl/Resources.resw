@@ -40,9 +40,10 @@
   <data name="AutoHideCard.Header" xml:space="preserve"><value>Automatyczne ukrywanie</value></data>
   <data name="AutoHideCard.Description" xml:space="preserve"><value>Ukrywa Glance, gdy nie jest używany, i pokazuje go, gdy wskaźnik zbliży się do znacznika przy krawędzi ekranu</value></data>
   <data name="GlanceExpansionCard.Header" xml:space="preserve"><value>Rozwijanie wyspy</value></data>
-  <data name="GlanceExpansionCard.Description" xml:space="preserve"><value>Wybierz, czy Glance rozwija się po wskazaniu, czy pozostaje zawsze rozwinięty</value></data>
+  <data name="GlanceExpansionCard.Description" xml:space="preserve"><value>Wybierz, czy Glance rozwija się po wskazaniu, kliknięciu, czy pozostaje zawsze rozwinięty</value></data>
   <data name="GlanceExpansionHoverOption.Content" xml:space="preserve"><value>Rozwiń po wskazaniu</value></data>
   <data name="GlanceExpansionPinnedOption.Content" xml:space="preserve"><value>Zawsze rozwinięty</value></data>
+  <data name="GlanceExpansionClickOption.Content" xml:space="preserve"><value>Rozwiń po kliknięciu</value></data>
   <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Pozostaw rozwinięty</value></data>
   <data name="PinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Pozostaw wyspę rozwiniętą</value></data>
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Rozwiń po wskazaniu</value></data>
