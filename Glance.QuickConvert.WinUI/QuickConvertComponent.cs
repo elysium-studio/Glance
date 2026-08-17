@@ -91,6 +91,9 @@ public sealed partial class QuickConvertComponent :
 
     Task<bool> IGlanceContentHandlingResultComponent.TryHandleAsync(GlanceContentContext context) => HandleCoreAsync(context);
 
+    Task<bool> IGlanceIntent.TryInvokeAsync(GlanceContentContext context,
+        CancellationToken cancellationToken) => HandleCoreAsync(context);
+
     private async Task<bool> HandleCoreAsync(GlanceContentContext context)
     {
         await promptSynchronization.WaitAsync(cancellation.Token);

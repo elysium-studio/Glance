@@ -66,7 +66,11 @@ public sealed class GlanceIntentService(ModulePreferenceService modulePreference
             return false;
         }
 
-        await intent.InvokeAsync(context, cancellationToken);
+        if (!await intent.TryInvokeAsync(context, cancellationToken))
+        {
+            return false;
+        }
+
         IntentInvoked?.Invoke(this, new GlanceIntentInvokedEventArgs(intent.Descriptor.TargetComponentId));
         return true;
     }

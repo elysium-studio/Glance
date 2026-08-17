@@ -29,5 +29,6 @@ public sealed class TorrentModule : IGlanceModule
         public bool CanHandle(GlanceContentKind kind) => component.CanHandle(kind);
         public bool CanHandle(GlanceContentContext context) => component.CanHandle(context);
         public Task InvokeAsync(GlanceContentContext context, CancellationToken cancellationToken = default) => ((IGlanceIntent)component).InvokeAsync(context, cancellationToken);
+        public Task<bool> TryInvokeAsync(GlanceContentContext context, CancellationToken cancellationToken = default) => ((IGlanceIntent)component).TryInvokeAsync(context, cancellationToken);
     }
 }

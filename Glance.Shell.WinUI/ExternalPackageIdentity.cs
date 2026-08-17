@@ -20,7 +20,7 @@ internal static class ExternalPackageIdentity
 
         string packagePath = Path.Combine(AppContext.BaseDirectory, IdentityPackageFileName);
 
-        if (!File.Exists(packagePath) || HasMatchingRegistration())
+        if (!File.Exists(packagePath) || HasMatchingRegistration(version))
         {
             return;
         }
@@ -44,7 +44,7 @@ internal static class ExternalPackageIdentity
         }
     }
 
-    private static bool HasMatchingRegistration()
+    private static bool HasMatchingRegistration(SemanticVersion version)
     {
         if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000))
         {
@@ -55,7 +55,10 @@ internal static class ExternalPackageIdentity
         {
             Package package = Package.Current;
             return string.Equals(package.Id.Name, PackageName, StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(Path.TrimEndingDirectorySeparator(package.EffectiveExternalPath), Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory), StringComparison.OrdinalIgnoreCase);
+                string.Equals(Path.TrimEndingDirectorySeparator(package.EffectiveExternalPath), Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory), StringComparison.OrdinalIgnoreCase) &&
+                package.Id.Version.Major == version.Major &&
+                package.Id.Version.Minor == version.Minor &&
+                package.Id.Version.Build == version.Patch;
         }
         catch (InvalidOperationException)
         {

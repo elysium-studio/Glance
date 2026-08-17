@@ -437,6 +437,24 @@ function Get-MakeAppxPath
     return $path
 }
 
+function Get-MakePriPath
+{
+    $windowsKitsPath = "${env:ProgramFiles(x86)}\Windows Kits\10\bin"
+    $path = Get-ChildItem $windowsKitsPath -Directory |
+        Where-Object { $_.Name -match '^\d+\.\d+\.\d+\.\d+$' } |
+        Sort-Object { [version]$_.Name } -Descending |
+        ForEach-Object { Join-Path $_.FullName "x64\makepri.exe" } |
+        Where-Object { Test-Path $_ } |
+        Select-Object -First 1
+
+    if (-not $path)
+    {
+        throw "MakePri.exe was not found in the Windows SDK"
+    }
+
+    return $path
+}
+
 function Get-SignToolPath
 {
     $windowsKitsPath = "${env:ProgramFiles(x86)}\Windows Kits\10\bin"
@@ -501,6 +519,23 @@ function New-ExternalIdentityPackage
     Copy-Item (Join-Path $PSScriptRoot "Glance.Shell.WinUI\Assets") $stagingPath -Recurse -Force
     $manifest = (Get-Content $manifestTemplatePath -Raw).Replace("__VERSION__", $packageVersion)
     [System.IO.File]::WriteAllText((Join-Path $stagingPath "AppxManifest.xml"), $manifest, [System.Text.UTF8Encoding]::new($false))
+
+    $makePriPath = Get-MakePriPath
+    $priConfigPath = Join-Path $identityRoot "priconfig.xml"
+    $resourcesPath = Join-Path $stagingPath "resources.pri"
+    & $makePriPath createconfig /cf $priConfigPath /dq en-US /o
+
+    if ($LASTEXITCODE -ne 0)
+    {
+        throw "External identity resource configuration failed with exit code $LASTEXITCODE"
+    }
+
+    & $makePriPath new /pr $stagingPath /cf $priConfigPath /of $resourcesPath /o
+
+    if ($LASTEXITCODE -ne 0)
+    {
+        throw "External identity resource indexing failed with exit code $LASTEXITCODE"
+    }
 
     $makeAppxPath = Get-MakeAppxPath
     & $makeAppxPath pack /o /d $stagingPath /nv /p $packagePath

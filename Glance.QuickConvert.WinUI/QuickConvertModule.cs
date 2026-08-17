@@ -32,5 +32,9 @@ public sealed class QuickConvertModule :
         public Task InvokeAsync(GlanceContentContext context,
             CancellationToken cancellationToken = default) =>
             ((IGlanceIntent)component).InvokeAsync(context, cancellationToken);
+
+        public Task<bool> TryInvokeAsync(GlanceContentContext context,
+            CancellationToken cancellationToken = default) =>
+            ((IGlanceIntent)component).TryInvokeAsync(context, cancellationToken);
     }
 }

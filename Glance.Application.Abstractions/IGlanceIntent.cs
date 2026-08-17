@@ -10,4 +10,11 @@ public interface IGlanceIntent
 
     Task InvokeAsync(GlanceContentContext context,
         CancellationToken cancellationToken = default);
+
+    async Task<bool> TryInvokeAsync(GlanceContentContext context,
+        CancellationToken cancellationToken = default)
+    {
+        await InvokeAsync(context, cancellationToken);
+        return true;
+    }
 }

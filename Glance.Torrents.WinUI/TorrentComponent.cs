@@ -117,6 +117,9 @@ public sealed class TorrentComponent :
     Task IGlanceIntent.InvokeAsync(GlanceContentContext context,
         CancellationToken cancellationToken) => HandleCoreAsync(context, cancellationToken);
 
+    Task<bool> IGlanceIntent.TryInvokeAsync(GlanceContentContext context,
+        CancellationToken cancellationToken) => HandleCoreAsync(context, cancellationToken);
+
     public ValueTask DisposeAsync()
     {
         lock (disposalSynchronization)

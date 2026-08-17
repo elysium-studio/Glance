@@ -50,6 +50,22 @@ public sealed class GlanceIntentServiceTests
     }
 
     [Fact]
+    public async Task CancellingIntentDoesNotPresentItsTarget()
+    {
+        GlanceIntentService service = CreateService(new TestComponent("Torrent"));
+        CancelledIntent intent = new("Torrent.Add", "Torrent", GlanceContentKind.WebLink);
+        GlanceIntentInvokedEventArgs? invoked = null;
+        service.Register([intent]);
+        service.IntentInvoked += (_, args) => invoked = args;
+        GlanceContentContext context = new(GlanceContentKind.WebLink, [], "magnet:?xt=urn:btih:test");
+
+        bool result = await service.InvokeAsync(intent.Descriptor.Id, context);
+
+        Assert.False(result);
+        Assert.Null(invoked);
+    }
+
+    [Fact]
     public void DescriptorRetainsModuleBinaryConstructorContract()
     {
         Type[] parameterTypes = [.. Enumerable.Repeat(typeof(string), 6)];
@@ -110,6 +126,22 @@ public sealed class GlanceIntentServiceTests
         public object CompactContent { get; } = new();
 
         public object ExpandedContent { get; } = new();
+    }
+
+    private sealed class CancelledIntent(string id,
+        string targetComponentId,
+        GlanceContentKind kind) :
+        IGlanceIntent
+    {
+        public GlanceIntentDescriptor Descriptor { get; } = new(id, targetComponentId, id, id, "\uE718");
+
+        public bool CanHandle(GlanceContentKind value) => value == kind;
+
+        public Task InvokeAsync(GlanceContentContext context,
+            CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task<bool> TryInvokeAsync(GlanceContentContext context,
+            CancellationToken cancellationToken = default) => Task.FromResult(false);
     }
 
     private sealed class TestWritableOptions(GlanceSettings settings) :
