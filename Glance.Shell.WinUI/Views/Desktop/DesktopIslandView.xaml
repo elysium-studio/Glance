@@ -7,11 +7,11 @@
     xmlns:Local="using:Glance.Shell.WinUI"
     xmlns:WinUI="using:Elysium.UI.WinUI"
     CompactHeight="52"
-    CompactWidth="{x:Bind ToCompactWidth(ViewModel.Assistant.IsAvailable, ViewModel.Assistant.IsEnabled, ViewModel.IsLoadingModules, ViewModel.IsTransientPresentationActive), Mode=OneWay}"
+    CompactWidth="{x:Bind BindingPolicy.ToCompactWidth(ViewModel.Assistant.IsAvailable, ViewModel.Assistant.IsEnabled, ViewModel.IsLoadingModules, ViewModel.IsTransientPresentationActive), Mode=OneWay}"
     AllowDrop="True"
-    BackgroundContent="{x:Bind ToBackgroundContent(ViewModel.SelectedComponent, ViewModel.IsLoadingModules, ViewModel.IsTransientPresentationActive), Mode=OneWay}"
+    BackgroundContent="{x:Bind BindingPolicy.ToBackgroundContent(ViewModel.SelectedComponent, ViewModel.IsLoadingModules, ViewModel.IsTransientPresentationActive), Mode=OneWay}"
     DataContext="{WinUI:ViewModel Key=DesktopIslandView}"
-    HostMode="{x:Bind ToHostMode(ViewModel.DisplayLocationIndex), Mode=OneWay}"
+    HostMode="{x:Bind BindingPolicy.ToHostMode(ViewModel.DisplayLocationIndex), Mode=OneWay}"
     DragEnter="{x:Bind HandleDragEnter}"
     DragLeave="{x:Bind HandleDragLeave}"
     DragOver="{x:Bind HandleDragOver}"
@@ -20,7 +20,7 @@
     IsExpanded="{x:Bind ViewModel.IsExpanded, Mode=TwoWay}"
     IsOpen="{x:Bind ViewModel.IsOpen, Mode=TwoWay}"
     IsTabStop="False"
-    Placement="{x:Bind ToPlacement(ViewModel.PlacementIndex), Mode=OneWay}"
+    Placement="{x:Bind BindingPolicy.ToPlacement(ViewModel.PlacementIndex), Mode=OneWay}"
     PointerEntered="{x:Bind HandleIslandPointerEntered}"
     PointerExited="{x:Bind HandleIslandPointerExited}"
     PointerWheelChanged="{x:Bind HandlePointerWheelChanged}">
@@ -39,7 +39,7 @@
                 <ColumnDefinition Width="228" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <Grid Visibility="{x:Bind WhenModulesLoaded(ViewModel.IsLoadingModules), Mode=OneWay}">
+            <Grid Visibility="{x:Bind BindingPolicy.WhenModulesLoaded(ViewModel.IsLoadingModules), Mode=OneWay}">
                 <ContentPresenter
                     x:Name="CompactPresenter"
                     Content="{x:Bind ViewModel.SelectedComponent.CompactContent, Mode=OneWay}" />
@@ -55,7 +55,7 @@
                 VerticalAlignment="Center"
                 Content="{x:Bind ViewModel.Assistant.CompactIndicatorContent, Mode=OneWay}"
                 Foreground="{StaticResource GlanceDefaultAssistantIndicatorForegroundBrush}"
-                Visibility="{x:Bind WhenAssistantAvailable(ViewModel.Assistant.IsAvailable, ViewModel.Assistant.IsEnabled, ViewModel.IsLoadingModules, ViewModel.IsTransientPresentationActive), Mode=OneWay}" />
+                Visibility="{x:Bind BindingPolicy.WhenAssistantAvailable(ViewModel.Assistant.IsAvailable, ViewModel.Assistant.IsEnabled, ViewModel.IsLoadingModules, ViewModel.IsTransientPresentationActive), Mode=OneWay}" />
             <Local:ModuleLoadingView
                 x:Name="CompactModuleLoadingView"
                 Grid.ColumnSpan="2" />
@@ -66,7 +66,7 @@
             <Grid
                 x:Name="ExpandedModuleSurface"
                 Visibility="Visible">
-                <Grid Visibility="{x:Bind WhenModulesLoaded(ViewModel.IsLoadingModules), Mode=OneWay}">
+                <Grid Visibility="{x:Bind BindingPolicy.WhenModulesLoaded(ViewModel.IsLoadingModules), Mode=OneWay}">
                     <ContentPresenter
                         x:Name="ExpandedPresenter"
                         Content="{x:Bind ViewModel.SelectedComponent.ExpandedContent, Mode=OneWay}" />
@@ -86,7 +86,7 @@
                     VerticalAlignment="Bottom"
                     Orientation="Horizontal"
                     Spacing="6"
-                    Visibility="{x:Bind WhenPrimaryContentVisible(ViewModel.IsLoadingModules, ViewModel.IsTransientPresentationActive), Mode=OneWay}">
+                    Visibility="{x:Bind BindingPolicy.WhenPrimaryContentVisible(ViewModel.IsLoadingModules, ViewModel.IsTransientPresentationActive), Mode=OneWay}">
                     <PipsPager
                         x:Name="ComponentPager"
                         Height="24"
@@ -118,7 +118,7 @@
                         x:Uid="PinIslandButton"
                         VerticalAlignment="Center"
                         Click="{x:Bind ViewModel.TogglePinned}"
-                        Visibility="{x:Bind WhenNotPinned(ViewModel.IsPinned), Mode=OneWay}">
+                        Visibility="{x:Bind BindingPolicy.WhenNotPinned(ViewModel.IsPinned), Mode=OneWay}">
                         <Button.Style>
                             <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
                                 <Setter Property="Width" Value="24" />
@@ -141,12 +141,12 @@
                         VerticalAlignment="Center"
                         Content="{x:Bind ViewModel.Assistant.ExpandedIndicatorContent, Mode=OneWay}"
                         Foreground="{StaticResource GlanceFooterForegroundBrush}"
-                        Visibility="{x:Bind WhenAvailable(ViewModel.Assistant.IsAvailable), Mode=OneWay}" />
+                        Visibility="{x:Bind BindingPolicy.WhenAvailable(ViewModel.Assistant.IsAvailable), Mode=OneWay}" />
                     <Button
                         x:Uid="UnpinIslandButton"
                         VerticalAlignment="Center"
                         Click="{x:Bind ViewModel.TogglePinned}"
-                        Visibility="{x:Bind WhenPinned(ViewModel.IsPinned), Mode=OneWay}">
+                        Visibility="{x:Bind BindingPolicy.WhenPinned(ViewModel.IsPinned), Mode=OneWay}">
                         <Button.Style>
                             <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
                                 <Setter Property="Width" Value="24" />
@@ -166,7 +166,7 @@
                         x:Uid="ReorderModulesButton"
                         VerticalAlignment="Center"
                         Click="{x:Bind ViewModel.BeginModuleReorder}"
-                        Visibility="{x:Bind WhenAvailable(ViewModel.HasMultipleComponents), Mode=OneWay}">
+                        Visibility="{x:Bind BindingPolicy.WhenAvailable(ViewModel.HasMultipleComponents), Mode=OneWay}">
                         <Button.Style>
                             <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
                                 <Setter Property="Width" Value="24" />
@@ -186,7 +186,7 @@
                         x:Uid="MoveToTaskbarButton"
                         VerticalAlignment="Center"
                         Click="{x:Bind ViewModel.ToggleDisplayLocation}"
-                        Visibility="{x:Bind WhenOnScreenEdge(ViewModel.DisplayLocationIndex), Mode=OneWay}">
+                        Visibility="{x:Bind BindingPolicy.WhenOnScreenEdge(ViewModel.DisplayLocationIndex), Mode=OneWay}">
                         <Button.Content>
                             <FontIcon
                                 x:Name="MoveToTaskbarIcon"
@@ -214,7 +214,7 @@
                         x:Uid="MoveToScreenEdgeButton"
                         VerticalAlignment="Center"
                         Click="{x:Bind ViewModel.ToggleDisplayLocation}"
-                        Visibility="{x:Bind WhenOnTaskbar(ViewModel.DisplayLocationIndex), Mode=OneWay}">
+                        Visibility="{x:Bind BindingPolicy.WhenOnTaskbar(ViewModel.DisplayLocationIndex), Mode=OneWay}">
                         <Button.Content>
                             <FontIcon
                                 x:Name="MoveToScreenEdgeIcon"

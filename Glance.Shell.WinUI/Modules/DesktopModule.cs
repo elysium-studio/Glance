@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
-using Elysium.Platform.Abstractions;
 using Elysium.Presentation.Abstractions;
 using Glance.Application.Abstractions;
 using Glance.Transcription;
@@ -41,7 +40,14 @@ public sealed class DesktopModule :
             .AddSingleton<IGlanceIntentService>(provider => provider.GetRequiredService<GlanceIntentService>())
             .AddSingleton<GlanceQuickConverterRegistry>()
             .AddSingleton<IGlanceQuickConverterRegistry>(provider => provider.GetRequiredService<GlanceQuickConverterRegistry>())
-            .AddViewFor(ServiceLifetime.Singleton,
-                provider => new DesktopIslandView(provider.GetRequiredService<IMonitorLocator>(), provider.GetRequiredService<ITaskbarLocator>()),
-                provider => new DesktopIslandViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<ModulePreferenceService>(), provider.GetRequiredService<IGlanceAttentionService>(), provider.GetRequiredService<IGlanceAssistantService>(), provider.GetRequiredService<IGlanceActionService>(), provider.GetRequiredService<IGlanceIntentService>(), provider.GetRequiredService<INavigator>(), provider.GetRequiredService<ILogger<DesktopIslandViewModel>>(), provider.GetRequiredService<GlanceSettings>(), provider.GetRequiredService<IWritableOptions<GlanceSettings>>()));
+            .AddSingleton<IDesktopIslandAnimationController, DesktopIslandAnimationController>()
+            .AddSingleton<IDesktopIslandBindings, DesktopIslandBindings>()
+            .AddSingleton<IDesktopIslandComponentController, DesktopIslandComponentController>()
+            .AddSingleton<IDesktopIslandContentReader, DesktopIslandContentReader>()
+            .AddSingleton<IDesktopIslandDisplayController, DesktopIslandDisplayController>()
+            .AddSingleton<IDesktopIslandDropController, DesktopIslandDropController>()
+            .AddSingleton<IDesktopIslandModuleReorderController, DesktopIslandModuleReorderController>()
+            .AddSingleton<IDesktopIslandPresentationController, DesktopIslandPresentationController>()
+            .AddSingleton<IDesktopIslandScreenTargetProvider, DesktopIslandScreenTargetProvider>()
+            .AddViewFor(ServiceLifetime.Singleton, provider => new DesktopIslandView(provider.GetRequiredService<IDesktopIslandAnimationController>(), provider.GetRequiredService<IDesktopIslandComponentController>(), provider.GetRequiredService<IDesktopIslandDisplayController>(), provider.GetRequiredService<IDesktopIslandDropController>(), provider.GetRequiredService<IDesktopIslandModuleReorderController>(), provider.GetRequiredService<IDesktopIslandPresentationController>(), provider.GetRequiredService<IDesktopIslandScreenTargetProvider>(), provider.GetRequiredService<IDesktopIslandBindings>()), provider => new DesktopIslandViewModel(provider, provider.GetRequiredService<IServiceFactory>(), provider.GetRequiredService<IMessenger>(), provider.GetRequiredService<IDisposer>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<ModulePreferenceService>(), provider.GetRequiredService<IGlanceAttentionService>(), provider.GetRequiredService<IGlanceAssistantService>(), provider.GetRequiredService<IGlanceActionService>(), provider.GetRequiredService<IGlanceIntentService>(), provider.GetRequiredService<INavigator>(), provider.GetRequiredService<ILogger<DesktopIslandViewModel>>(), provider.GetRequiredService<GlanceSettings>(), provider.GetRequiredService<IWritableOptions<GlanceSettings>>()));
 }
