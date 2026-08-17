@@ -124,5 +124,12 @@
                              "Improved module dependency resolution so stale module paths cannot disrupt startup or shutdown.",
                              "Made module and Voice Notes shutdown resilient when individual runtime dependencies are unavailable."
                          ]
+    },
+    {
+        "version":  "0.1.11-preview",
+        "date":  "2026-08-17",
+        "releaseNotes":  [
+                             "Update delivery test release with no application changes."
+                         ]
     }
 ]
