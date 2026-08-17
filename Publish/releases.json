@@ -95,5 +95,15 @@
                              "Added safe headless .glance provider packaging so transcription engines and their private dependencies stay isolated from Glance.",
                              "Refined source selectors, accent playback controls, and expanded layouts across Glance modules."
                          ]
+    },
+    {
+        "version":  "0.1.8-preview",
+        "date":  "2026-08-17",
+        "releaseNotes":  [
+                             "Improved taskbar startup so Glance docks immediately and reliably after restarting.",
+                             "Cancelled Torrent and Quick Convert prompts no longer cause the island to expand unnecessarily.",
+                             "Removed the blue taskbar badge while retaining Windows integration for supported links and files.",
+                             "Improved taskbar presentation and corrected minor module control visuals."
+                         ]
     }
 ]
