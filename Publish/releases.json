@@ -115,5 +115,14 @@
                              "Strengthened reliability with strict single-instance startup, safer taskbar hosting, and a cleaner desktop-island architecture.",
                              "Corrected the Presence module action to use solid play and stop controls."
                          ]
+    },
+    {
+        "version":  "0.1.10-preview",
+        "date":  "2026-08-17",
+        "releaseNotes":  [
+                             "Fixed a crash in installed builds when Glance attempted to show an update-ready notification.",
+                             "Improved module dependency resolution so stale module paths cannot disrupt startup or shutdown.",
+                             "Made module and Voice Notes shutdown resilient when individual runtime dependencies are unavailable."
+                         ]
     }
 ]
