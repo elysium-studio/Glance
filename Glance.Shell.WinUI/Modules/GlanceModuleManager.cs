@@ -27,6 +27,7 @@ internal sealed class GlanceModuleManager :
     private readonly GlanceAssistantService assistantService;
     private readonly GlanceActionService actionService;
     private readonly GlanceIntentService intentService;
+    private readonly IGlanceQuickConverterPreferences quickConverterPreferences;
     private readonly GlanceQuickConverterRegistry quickConverterRegistry;
     private readonly ITranscriptionProviderRegistry transcriptionProviderRegistry;
     private readonly List<LoadedModulePackage> loadedPackages = [];
@@ -53,6 +54,7 @@ internal sealed class GlanceModuleManager :
         assistantService = applicationServices.GetRequiredService<GlanceAssistantService>();
         actionService = applicationServices.GetRequiredService<GlanceActionService>();
         intentService = applicationServices.GetRequiredService<GlanceIntentService>();
+        quickConverterPreferences = applicationServices.GetRequiredService<IGlanceQuickConverterPreferences>();
         quickConverterRegistry = applicationServices.GetRequiredService<GlanceQuickConverterRegistry>();
         transcriptionProviderRegistry = applicationServices.GetRequiredService<ITranscriptionProviderRegistry>();
         installations.ConfigureInstaller(InstallPackageAsync);
@@ -134,7 +136,10 @@ internal sealed class GlanceModuleManager :
     private async Task<ModuleInstallResult> InstallAsync(GlanceModuleLoadResult result)
     {
         GlanceModuleRuntime? runtime = null;
+        string? registeredPackageId = null;
         string[] registeredInstallationIds = [];
+        IReadOnlyList<IGlanceQuickConverter> quickConverters = [];
+        bool quickConvertersRegistered = false;
         List<IDisposable> transcriptionRegistrations = [];
 
         try
@@ -144,7 +149,7 @@ internal sealed class GlanceModuleManager :
             IReadOnlyList<IGlanceAssistantProvider> assistantProviders = (IGlanceAssistantProvider[])[.. runtime.Services.GetServices<IGlanceAssistantProvider>()];
             IReadOnlyList<IGlanceAssistantCommandHandler> assistantCommandHandlers = (IGlanceAssistantCommandHandler[])[.. runtime.Services.GetServices<IGlanceAssistantCommandHandler>()];
             IReadOnlyList<IGlanceAssistantSemanticResolver> assistantSemanticResolvers = (IGlanceAssistantSemanticResolver[])[.. runtime.Services.GetServices<IGlanceAssistantSemanticResolver>()];
-            IReadOnlyList<IGlanceQuickConverter> quickConverters = (IGlanceQuickConverter[])[.. runtime.Services.GetServices<IGlanceQuickConverter>()];
+            quickConverters = (IGlanceQuickConverter[])[.. runtime.Services.GetServices<IGlanceQuickConverter>()];
             IReadOnlyList<IGlanceApplicationMessageHandler> bridgeHandlers = (IGlanceApplicationMessageHandler[])[.. runtime.Services.GetServices<IGlanceApplicationMessageHandler>()];
             IReadOnlyList<IGlanceActionProvider> actionProviders = (IGlanceActionProvider[])[.. runtime.Services.GetServices<IGlanceActionProvider>()];
             IReadOnlyList<IGlanceIntent> intents = (IGlanceIntent[])[.. runtime.Services.GetServices<IGlanceIntent>()];
@@ -162,13 +167,11 @@ internal sealed class GlanceModuleManager :
 
             string packageId = GlanceModuleInstallationStore.GetPackageId(result.SourcePath);
             registeredInstallationIds = [.. components.Select(component => component.Id)];
-
-            if (registeredInstallationIds.Length > 0)
-            {
-                installations.Register(packageId,
-                    registeredInstallationIds,
-                    () => UninstallAsync(result.SourcePath));
-            }
+            registeredPackageId = packageId;
+            installations.Register(packageId, registeredInstallationIds, () => UninstallAsync(result.SourcePath));
+            quickConverterRegistry.Register(packageId, quickConverters);
+            quickConvertersRegistered = true;
+            await quickConverterPreferences.RegisterAsync(quickConverters.Select(converter => converter.Descriptor.Id));
 
             IServiceProvider moduleServices = runtime.Services;
             runtimeServices.AddModuleProvider(moduleServices);
@@ -186,7 +189,6 @@ internal sealed class GlanceModuleManager :
             bridgeRouter.AddHandlers(bridgeHandlers);
             actionService.Register(actionProviders);
             intentService.Register(intents);
-            quickConverterRegistry.Register(quickConverters);
             assistantCommandService.Register(assistantCommandHandlers);
             applicationServices.GetRequiredService<GlanceAssistantSemanticResolverService>().Register(assistantSemanticResolvers);
             assistantService.Register(assistantProviders);
@@ -215,12 +217,23 @@ internal sealed class GlanceModuleManager :
             }
 
             logger.LogInformation("Loaded Glance module package {ModulePackage} with {ComponentCount} component(s), {AssistantProviderCount} assistant provider(s), and {TranscriptionProviderCount} transcription provider(s)", result.SourcePath, components.Count, assistantProviders.Count, transcriptionProviders.Count);
-            return ModuleInstallResult.Installed(components.Select(component => component.Id));
+            return ModuleInstallResult.Installed(components.Select(component => component.Id), packageId, quickConverters.Select(converter => converter.Descriptor.Id));
         }
         catch (Exception exception)
         {
             DisposeRegistrations(transcriptionRegistrations);
-            installations.Unregister(registeredInstallationIds);
+
+            if (quickConvertersRegistered)
+            {
+                quickConverterRegistry.Unregister(quickConverters);
+                await quickConverterPreferences.RemoveAsync(quickConverters.Select(converter => converter.Descriptor.Id));
+            }
+
+            if (registeredPackageId is not null)
+            {
+                installations.Unregister(registeredPackageId, registeredInstallationIds);
+            }
+
             logger.LogError(exception, "Failed to activate Glance module package {ModulePackage}", result.SourcePath);
             return ModuleInstallResult.Failed(exception.Message);
         }
@@ -391,7 +404,7 @@ internal sealed class GlanceModuleManager :
         if (existingPackage is not null)
         {
             logger.LogInformation("Staged updated Glance module package {ModulePackage}; it will be activated on the next launch", installedPackagePath);
-            return ModuleInstallResult.Staged(existingPackage.Components.Select(component => component.Id));
+            return ModuleInstallResult.Staged(existingPackage.Components.Select(component => component.Id), existingPackage.PackageId, existingPackage.QuickConverters.Select(converter => converter.Descriptor.Id));
         }
 
         GlanceModuleLoadResult? result;
@@ -465,12 +478,13 @@ internal sealed class GlanceModuleManager :
         }
 
         string[] componentIds = [.. package.Components.Select(component => component.Id)];
-        installations.Unregister(componentIds);
+        installations.Unregister(package.PackageId, componentIds);
         await DispatchAsync(() => preferences.UnregisterComponentsAsync(package.Components));
         bridgeRouter.RemoveHandlers(package.BridgeHandlers);
         actionService.Unregister(package.ActionProviders);
         intentService.Unregister(package.Intents);
         quickConverterRegistry.Unregister(package.QuickConverters);
+        await quickConverterPreferences.RemoveAsync(package.QuickConverters.Select(converter => converter.Descriptor.Id));
         assistantCommandService.Unregister(package.AssistantCommandHandlers);
         applicationServices.GetRequiredService<GlanceAssistantSemanticResolverService>().Unregister(package.AssistantSemanticResolvers);
         await assistantService.UnregisterAsync(package.AssistantProviders);

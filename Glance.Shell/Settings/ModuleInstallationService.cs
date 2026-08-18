@@ -2,6 +2,7 @@ namespace Glance.Shell;
 
 public sealed class ModuleInstallationService
 {
+    private readonly Dictionary<string, ModuleRegistration> packages = [with(StringComparer.OrdinalIgnoreCase)];
     private readonly Dictionary<string, ModuleRegistration> registrations = [with(StringComparer.OrdinalIgnoreCase)];
     private readonly object synchronization = new();
     private Func<string, Task<ModuleInstallResult>>? install;
@@ -37,9 +38,15 @@ public sealed class ModuleInstallationService
         }
     }
 
-    public void Register(string packageId,
-        IEnumerable<string> componentIds,
-        Func<Task<bool>> uninstall)
+    public bool CanUninstallPackage(string packageId)
+    {
+        lock (synchronization)
+        {
+            return packages.ContainsKey(packageId);
+        }
+    }
+
+    public void Register(string packageId, IEnumerable<string> componentIds, Func<Task<bool>> uninstall)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
         ArgumentNullException.ThrowIfNull(componentIds);
@@ -49,6 +56,8 @@ public sealed class ModuleInstallationService
 
         lock (synchronization)
         {
+            packages[packageId] = registration;
+
             foreach (string componentId in componentIds)
             {
                 registrations[componentId] = registration;
@@ -56,10 +65,12 @@ public sealed class ModuleInstallationService
         }
     }
 
-    public void Unregister(IEnumerable<string> componentIds)
+    public void Unregister(string packageId, IEnumerable<string> componentIds)
     {
         lock (synchronization)
         {
+            _ = packages.Remove(packageId);
+
             foreach (string componentId in componentIds)
             {
                 _ = registrations.Remove(componentId);
@@ -79,27 +90,15 @@ public sealed class ModuleInstallationService
         return registration?.Uninstall() ?? Task.FromResult(false);
     }
 
-    private sealed record ModuleRegistration(string PackageId,
-        Func<Task<bool>> Uninstall);
-}
+    public Task<bool> UninstallPackageAsync(string packageId)
+    {
+        ModuleRegistration? registration;
 
-public sealed record ModuleInstallResult(bool IsSuccessful,
-    IReadOnlyList<string> ComponentIds,
-    bool RequiresRestart,
-    string? ErrorMessage)
-{
-    public static ModuleInstallResult Installed(IEnumerable<string> componentIds) => new(true,
-        [.. componentIds],
-        false,
-        null);
+        lock (synchronization)
+        {
+            _ = packages.TryGetValue(packageId, out registration);
+        }
 
-    public static ModuleInstallResult Staged(IEnumerable<string> componentIds) => new(true,
-        [.. componentIds],
-        true,
-        null);
-
-    public static ModuleInstallResult Failed(string message) => new(false,
-        [],
-        false,
-        message);
+        return registration?.Uninstall() ?? Task.FromResult(false);
+    }
 }

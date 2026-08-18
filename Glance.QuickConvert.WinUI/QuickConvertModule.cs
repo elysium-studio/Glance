@@ -1,3 +1,6 @@
+using Elysium.Application.Abstractions;
+using Elysium.Application.DependencyInjection;
+using Elysium.Presentation.Abstractions;
 using Glance.Application.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
@@ -12,6 +15,7 @@ public sealed class QuickConvertModule :
         _ = services.AddSingleton<ModuleResourceTextLocalizer<QuickConvertModule>>();
         _ = services.AddSingleton(provider => new QuickConvertViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<QuickConvertModule>>()));
         _ = services.AddSingleton<IGlanceComponent, QuickConvertComponent>();
+        _ = services.AddViewFor<QuickConverterSettingsView, IGlanceModuleSettingViewModel, QuickConverterSettingsViewModel>(ServiceLifetime.Transient, provider => new QuickConverterSettingsView(), provider => new QuickConverterSettingsViewModel(provider.GetRequiredService<IGlanceQuickConverterManager>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<ModuleResourceTextLocalizer<QuickConvertModule>>()));
         _ = services.AddSingleton<IGlanceIntent>(provider => new QuickConvertIntentAdapter(provider
             .GetServices<IGlanceComponent>()
             .OfType<QuickConvertComponent>()

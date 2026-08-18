@@ -5,8 +5,13 @@ namespace Glance.Shell;
 public sealed class GlanceQuickConverterRegistry :
     IGlanceQuickConverterRegistry
 {
-    private readonly Dictionary<string, IGlanceQuickConverter> converters = [with(StringComparer.OrdinalIgnoreCase)];
+    private readonly Dictionary<string, GlanceQuickConverterRegistration> converters = [with(StringComparer.OrdinalIgnoreCase)];
+    private readonly IGlanceQuickConverterPreferences preferences;
     private readonly object synchronization = new();
+
+    internal event EventHandler? Changed;
+
+    public GlanceQuickConverterRegistry(IGlanceQuickConverterPreferences preferences) => this.preferences = preferences;
 
     public IReadOnlyList<IGlanceQuickConverter> GetConverters(GlanceContentContext context)
     {
@@ -15,7 +20,8 @@ public sealed class GlanceQuickConverterRegistry :
             return
             [
                 .. converters.Values
-                    .Select(converter => (converter, match: converter.Match(context)))
+                    .Where(registration => preferences.IsEnabled(registration.Converter.Descriptor.Id))
+                    .Select(registration => (converter: registration.Converter, match: registration.Converter.Match(context)))
                     .Where(item => item.match != GlanceQuickConverterMatch.None)
                     .OrderByDescending(item => item.match)
                     .ThenBy(item => item.converter.Descriptor.DisplayName)
@@ -24,7 +30,17 @@ public sealed class GlanceQuickConverterRegistry :
         }
     }
 
-    public void Register(IEnumerable<IGlanceQuickConverter> registrations)
+    internal IReadOnlyList<GlanceQuickConverterRegistration> GetRegistrations()
+    {
+        lock (synchronization)
+        {
+            return [.. converters.Values.OrderBy(registration => registration.Converter.Descriptor.DisplayName)];
+        }
+    }
+
+    public void Register(IEnumerable<IGlanceQuickConverter> registrations) => Register(null, registrations);
+
+    public void Register(string? packageId, IEnumerable<IGlanceQuickConverter> registrations)
     {
         IGlanceQuickConverter[] additions = [.. registrations];
 
@@ -44,21 +60,36 @@ public sealed class GlanceQuickConverterRegistry :
 
             foreach (IGlanceQuickConverter converter in additions)
             {
-                converters.Add(converter.Descriptor.Id, converter);
+                converters.Add(converter.Descriptor.Id, new GlanceQuickConverterRegistration(converter, packageId));
             }
+        }
+
+        if (additions.Length > 0)
+        {
+            Changed?.Invoke(this, EventArgs.Empty);
         }
     }
 
     public void Unregister(IEnumerable<IGlanceQuickConverter> registrations)
     {
         HashSet<IGlanceQuickConverter> removals = [.. registrations];
+        bool changed;
 
         lock (synchronization)
         {
-            foreach (string id in converters.Where(item => removals.Contains(item.Value)).Select(item => item.Key).ToArray())
+            string[] ids = [.. converters.Where(item => removals.Contains(item.Value.Converter)).Select(item => item.Key)];
+
+            foreach (string id in ids)
             {
                 _ = converters.Remove(id);
             }
+
+            changed = ids.Length > 0;
+        }
+
+        if (changed)
+        {
+            Changed?.Invoke(this, EventArgs.Empty);
         }
     }
 }
