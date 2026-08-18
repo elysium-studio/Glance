@@ -67,13 +67,18 @@
                 Foreground="{ThemeResource GlanceSystemIconBrush}"
                 Glyph="&#xEEA1;" />
         </Grid>
-        <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
+        <Grid Grid.Column="1" VerticalAlignment="Center" ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
             <TextBlock
                 x:Name="CompactText"
                 VerticalAlignment="Center"
                 Style="{StaticResource BodyStrongTextBlockStyle}"
                 Text="{x:Bind ViewModel.CpuText, Mode=OneWay}" />
-            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
                 <TextBlock
                     x:Uid="RamLabel"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -83,7 +88,7 @@
                     Style="{StaticResource CaptionTextBlockStyle}"
                     Text="{x:Bind ViewModel.MemoryText, Mode=OneWay}" />
             </StackPanel>
-            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
+            <StackPanel Grid.Column="2" VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
                 <TextBlock
                     x:Uid="GpuLabel"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -93,6 +98,6 @@
                     Style="{StaticResource CaptionTextBlockStyle}"
                     Text="{x:Bind ViewModel.GpuText, Mode=OneWay}" />
             </StackPanel>
-        </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>
