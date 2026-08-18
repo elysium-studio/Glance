@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="OnlineMediaConverterName" xml:space="preserve"><value>Online-Medien</value></data>
+  <data name="OnlineMediaConverterDescription" xml:space="preserve"><value>Video oder Audio über einen unterstützten Link herunterladen</value></data>
+  <data name="OutputFormat" xml:space="preserve"><value>Ausgabeformat</value></data>
+  <data name="DownloadQuality" xml:space="preserve"><value>Videoqualität</value></data>
+  <data name="BestAvailable" xml:space="preserve"><value>Beste verfügbare Qualität</value></data>
+  <data name="OutputFileMissing" xml:space="preserve"><value>Die konvertierte Datei wurde nicht gefunden.</value></data>
+  <data name="VideoUnavailable" xml:space="preserve"><value>Dieses Video ist nicht verfügbar.</value></data>
+  <data name="SignInRequired" xml:space="preserve"><value>Für dieses Video musst du dich anmelden.</value></data>
+  <data name="RegionUnavailable" xml:space="preserve"><value>Dieses Video ist in deiner Region nicht verfügbar.</value></data>
+  <data name="LinkUnsupported" xml:space="preserve"><value>Dieser Link wird nicht unterstützt.</value></data>
+  <data name="FormatUnavailable" xml:space="preserve"><value>Dieses Format ist für das Video nicht verfügbar.</value></data>
+  <data name="RequestsLimited" xml:space="preserve"><value>Der Videoanbieter ist ausgelastet. Versuche es später erneut.</value></data>
+  <data name="DownloadRefused" xml:space="preserve"><value>Der Videoanbieter hat den Download abgelehnt. Versuche es gleich noch einmal.</value></data>
+  <data name="ProviderUnavailable" xml:space="preserve"><value>Glance konnte den Videoanbieter nicht erreichen. Prüfe deine Verbindung und versuche es erneut.</value></data>
+  <data name="DownloadFailed" xml:space="preserve"><value>Die Online-Medien konnten nicht heruntergeladen werden.</value></data>
+</root>

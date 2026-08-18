@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="OnlineMediaConverterName" xml:space="preserve"><value>オンライン メディア</value></data>
+  <data name="OnlineMediaConverterDescription" xml:space="preserve"><value>対応しているリンクから動画または音声をダウンロードします</value></data>
+  <data name="OutputFormat" xml:space="preserve"><value>出力形式</value></data>
+  <data name="DownloadQuality" xml:space="preserve"><value>動画の品質</value></data>
+  <data name="BestAvailable" xml:space="preserve"><value>利用可能な最高品質</value></data>
+  <data name="OutputFileMissing" xml:space="preserve"><value>変換されたファイルが見つかりませんでした。</value></data>
+  <data name="VideoUnavailable" xml:space="preserve"><value>この動画は利用できません。</value></data>
+  <data name="SignInRequired" xml:space="preserve"><value>この動画を利用するにはサインインが必要です。</value></data>
+  <data name="RegionUnavailable" xml:space="preserve"><value>この動画はお住まいの地域では利用できません。</value></data>
+  <data name="LinkUnsupported" xml:space="preserve"><value>このリンクには対応していません。</value></data>
+  <data name="FormatUnavailable" xml:space="preserve"><value>この動画ではその形式を利用できません。</value></data>
+  <data name="RequestsLimited" xml:space="preserve"><value>動画プロバイダーが混み合っています。しばらくしてからもう一度お試しください。</value></data>
+  <data name="DownloadRefused" xml:space="preserve"><value>動画プロバイダーがダウンロードを拒否しました。しばらくしてからもう一度お試しください。</value></data>
+  <data name="ProviderUnavailable" xml:space="preserve"><value>動画プロバイダーに接続できませんでした。接続を確認して、もう一度お試しください。</value></data>
+  <data name="DownloadFailed" xml:space="preserve"><value>オンライン メディアをダウンロードできませんでした。</value></data>
+</root>

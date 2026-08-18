@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="OnlineMediaConverterName" xml:space="preserve"><value>Online media</value></data>
+  <data name="OnlineMediaConverterDescription" xml:space="preserve"><value>Video of audio downloaden via een ondersteunde koppeling</value></data>
+  <data name="OutputFormat" xml:space="preserve"><value>Uitvoerindeling</value></data>
+  <data name="DownloadQuality" xml:space="preserve"><value>Videokwaliteit</value></data>
+  <data name="BestAvailable" xml:space="preserve"><value>Best beschikbaar</value></data>
+  <data name="OutputFileMissing" xml:space="preserve"><value>Het geconverteerde bestand is niet gevonden.</value></data>
+  <data name="VideoUnavailable" xml:space="preserve"><value>Deze video is niet beschikbaar.</value></data>
+  <data name="SignInRequired" xml:space="preserve"><value>Je moet je aanmelden voor deze video.</value></data>
+  <data name="RegionUnavailable" xml:space="preserve"><value>Deze video is niet beschikbaar in jouw regio.</value></data>
+  <data name="LinkUnsupported" xml:space="preserve"><value>Deze koppeling wordt niet ondersteund.</value></data>
+  <data name="FormatUnavailable" xml:space="preserve"><value>Die indeling is niet beschikbaar voor deze video.</value></data>
+  <data name="RequestsLimited" xml:space="preserve"><value>De videoprovider is bezet. Probeer het later opnieuw.</value></data>
+  <data name="DownloadRefused" xml:space="preserve"><value>De videoprovider heeft de download geweigerd. Probeer het zo opnieuw.</value></data>
+  <data name="ProviderUnavailable" xml:space="preserve"><value>Glance kan de videoprovider niet bereiken. Controleer je verbinding en probeer het opnieuw.</value></data>
+  <data name="DownloadFailed" xml:space="preserve"><value>De online media kon niet worden gedownload.</value></data>
+</root>

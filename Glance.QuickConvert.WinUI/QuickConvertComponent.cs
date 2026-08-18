@@ -30,6 +30,7 @@ public sealed partial class QuickConvertComponent :
     private readonly QuickConvertViewModel viewModel;
     private readonly Task worker;
     private Task? disposalTask;
+    private string? conversionFailureReason;
     private int failedConversions;
     private int pendingJobs;
     private int successfulConversions;
@@ -137,6 +138,7 @@ public sealed partial class QuickConvertComponent :
                 {
                     successfulConversions = 0;
                     failedConversions = 0;
+                    conversionFailureReason = null;
                 }
 
                 queued = ++pendingJobs;
@@ -223,6 +225,7 @@ public sealed partial class QuickConvertComponent :
             });
             int successful;
             int failed;
+            string? failureReason = null;
             bool setupFailed = false;
 
             try
@@ -235,6 +238,9 @@ public sealed partial class QuickConvertComponent :
                 successful = results.Count(result => result.IsSuccessful);
                 int expected = job.Content.StorageItems.Count == 0 ? 1 : job.Content.StorageItems.Count;
                 failed = Math.Max(expected - successful, results.Count - successful);
+                failureReason = results.Where(result => !result.IsSuccessful && !string.IsNullOrWhiteSpace(result.ErrorMessage))
+                    .Select(CreateFailureReason)
+                    .FirstOrDefault();
             }
             catch (OperationCanceledException) when (job.CancellationToken.IsCancellationRequested)
             {
@@ -250,10 +256,11 @@ public sealed partial class QuickConvertComponent :
                 failed = job.Content.StorageItems.Count == 0 ? 1 : job.Content.StorageItems.Count;
                 setupFailed = true;
             }
-            catch
+            catch (Exception exception)
             {
                 successful = 0;
                 failed = job.Content.StorageItems.Count == 0 ? 1 : job.Content.StorageItems.Count;
+                failureReason = exception.Message;
             }
             int remaining;
             int totalSuccessful;
@@ -268,9 +275,11 @@ public sealed partial class QuickConvertComponent :
 
                 successfulConversions += successful;
                 failedConversions += failed;
+                conversionFailureReason ??= failureReason;
                 remaining = --pendingJobs;
                 totalSuccessful = successfulConversions;
                 totalFailed = failedConversions;
+                failureReason = conversionFailureReason;
             }
 
             _ = await RunOnDispatcherAsync(() =>
@@ -281,7 +290,7 @@ public sealed partial class QuickConvertComponent :
                 }
                 else
                 {
-                    viewModel.Complete(totalSuccessful, totalFailed, remaining);
+                    viewModel.Complete(totalSuccessful, totalFailed, remaining, failureReason);
                 }
 
                 return true;
@@ -307,10 +316,24 @@ public sealed partial class QuickConvertComponent :
             pendingJobs = 0;
             successfulConversions = 0;
             failedConversions = 0;
+            conversionFailureReason = null;
         }
 
         cancellationToStop.Cancel();
         viewModel.StopConversions();
+    }
+
+    private static string CreateFailureReason(GlanceQuickConversionResult result)
+    {
+        if (Uri.TryCreate(result.SourcePath, UriKind.Absolute, out Uri? source) && source.Scheme is "http" or "https")
+        {
+            return result.ErrorMessage!;
+        }
+
+        string sourceName = Path.GetFileName(result.SourcePath);
+        return string.IsNullOrWhiteSpace(sourceName)
+            ? result.ErrorMessage!
+            : $"{sourceName}: {result.ErrorMessage}";
     }
 
     private void HandleConversionProgress(GlanceQuickConversionProgress progress) => _ = RunOnDispatcherAsync(() =>

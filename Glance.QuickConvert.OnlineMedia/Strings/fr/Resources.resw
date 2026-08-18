@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="OnlineMediaConverterName" xml:space="preserve"><value>Média en ligne</value></data>
+  <data name="OnlineMediaConverterDescription" xml:space="preserve"><value>Télécharger une vidéo ou un fichier audio depuis un lien pris en charge</value></data>
+  <data name="OutputFormat" xml:space="preserve"><value>Format de sortie</value></data>
+  <data name="DownloadQuality" xml:space="preserve"><value>Qualité vidéo</value></data>
+  <data name="BestAvailable" xml:space="preserve"><value>Meilleure disponible</value></data>
+  <data name="OutputFileMissing" xml:space="preserve"><value>Le fichier converti est introuvable.</value></data>
+  <data name="VideoUnavailable" xml:space="preserve"><value>Cette vidéo n’est pas disponible.</value></data>
+  <data name="SignInRequired" xml:space="preserve"><value>Vous devez vous connecter pour accéder à cette vidéo.</value></data>
+  <data name="RegionUnavailable" xml:space="preserve"><value>Cette vidéo n’est pas disponible dans votre région.</value></data>
+  <data name="LinkUnsupported" xml:space="preserve"><value>Ce lien n’est pas pris en charge.</value></data>
+  <data name="FormatUnavailable" xml:space="preserve"><value>Ce format n’est pas disponible pour cette vidéo.</value></data>
+  <data name="RequestsLimited" xml:space="preserve"><value>Le fournisseur vidéo est occupé. Réessayez plus tard.</value></data>
+  <data name="DownloadRefused" xml:space="preserve"><value>Le fournisseur vidéo a refusé le téléchargement. Réessayez dans quelques instants.</value></data>
+  <data name="ProviderUnavailable" xml:space="preserve"><value>Glance n’a pas pu joindre le fournisseur vidéo. Vérifiez votre connexion et réessayez.</value></data>
+  <data name="DownloadFailed" xml:space="preserve"><value>Le média en ligne n’a pas pu être téléchargé.</value></data>
+</root>

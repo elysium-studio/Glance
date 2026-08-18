@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ConversionFailed" xml:space="preserve"><value>Conversione non riuscita</value></data>
+  <data name="ConversionFailures" xml:space="preserve"><value>Impossibile convertire {0} file</value></data>
+  <data name="ConversionFailuresWithReason" xml:space="preserve"><value>{0} non riusciti · {1}</value></data>
+</root>

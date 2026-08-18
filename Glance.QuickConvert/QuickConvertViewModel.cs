@@ -98,7 +98,8 @@ public sealed partial class QuickConvertViewModel(ITextLocalizer localizer) :
 
     public void Complete(int successful,
         int failed,
-        int jobsRemaining)
+        int jobsRemaining,
+        string? failureReason = null)
     {
         QueuedJobs = jobsRemaining;
 
@@ -113,10 +114,20 @@ public sealed partial class QuickConvertViewModel(ITextLocalizer localizer) :
 
         IsConverting = false;
         IsComplete = true;
+
+        if (successful == 0 && failed > 0)
+        {
+            Summary = localizer.GetText("ConversionFailed");
+            Detail = failureReason ?? localizer.GetText("ConversionFailures", failed);
+            return;
+        }
+
         Summary = localizer.GetText(successful == 1 ? "ConvertedOneFile" : "ConvertedManyFiles", successful);
         Detail = failed == 0
             ? localizer.GetText("SavedBesideOriginals")
-            : localizer.GetText("ConversionFailures", failed);
+            : failureReason is null
+                ? localizer.GetText("ConversionFailures", failed)
+                : localizer.GetText("ConversionFailuresWithReason", failed, failureReason);
     }
 
     public void StopConversions()

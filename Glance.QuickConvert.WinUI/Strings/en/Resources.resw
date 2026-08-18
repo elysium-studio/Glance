@@ -28,7 +28,9 @@
   <data name="ConvertedOneFile" xml:space="preserve"><value>{0} file converted</value></data>
   <data name="ConvertedManyFiles" xml:space="preserve"><value>{0} files converted</value></data>
   <data name="SavedBesideOriginals" xml:space="preserve"><value>Saved beside the original files</value></data>
+  <data name="ConversionFailed" xml:space="preserve"><value>Conversion failed</value></data>
   <data name="ConversionFailures" xml:space="preserve"><value>{0} files could not be converted</value></data>
+  <data name="ConversionFailuresWithReason" xml:space="preserve"><value>{0} failed · {1}</value></data>
   <data name="RouteDisplayName" xml:space="preserve"><value>Quick convert</value></data>
   <data name="RouteDescription" xml:space="preserve"><value>Convert files or download supported media</value></data>
   <data name="Converter" xml:space="preserve"><value>Converter</value></data>

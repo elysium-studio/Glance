@@ -31,6 +31,19 @@ public sealed class QuickConvertViewModelTests
         Assert.Equal("SetupFailedDetail", viewModel.Detail);
     }
 
+    [Fact]
+    public void ShowsProviderReasonWhenConversionFails()
+    {
+        QuickConvertViewModel viewModel = new(new FakeLocalizer());
+        viewModel.BeginConversion(1);
+
+        viewModel.Complete(0, 1, 0, "video.mp4: Unsupported codec");
+
+        Assert.False(viewModel.IsBusy);
+        Assert.Equal("ConversionFailed", viewModel.Summary);
+        Assert.Equal("video.mp4: Unsupported codec", viewModel.Detail);
+    }
+
     private sealed class FakeLocalizer :
         ITextLocalizer
     {

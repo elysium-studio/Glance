@@ -68,7 +68,7 @@ public static class YtDlpUrlMatcher
             return GlanceQuickConverterMatch.Supported;
         }
 
-        return GlanceQuickConverterMatch.None;
+        return GlanceQuickConverterMatch.Fallback;
     }
 
     public static bool IsSupported(string? content) => Match(content) != GlanceQuickConverterMatch.None;

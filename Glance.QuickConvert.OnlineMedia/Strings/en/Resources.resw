@@ -10,4 +10,13 @@
   <data name="DownloadQuality" xml:space="preserve"><value>Video quality</value></data>
   <data name="BestAvailable" xml:space="preserve"><value>Best available</value></data>
   <data name="OutputFileMissing" xml:space="preserve"><value>The converted file could not be found.</value></data>
+  <data name="VideoUnavailable" xml:space="preserve"><value>This video is unavailable.</value></data>
+  <data name="SignInRequired" xml:space="preserve"><value>This video requires you to sign in.</value></data>
+  <data name="RegionUnavailable" xml:space="preserve"><value>This video is not available in your region.</value></data>
+  <data name="LinkUnsupported" xml:space="preserve"><value>This link is not supported.</value></data>
+  <data name="FormatUnavailable" xml:space="preserve"><value>That format is not available for this video.</value></data>
+  <data name="RequestsLimited" xml:space="preserve"><value>The video provider is busy. Try again later.</value></data>
+  <data name="DownloadRefused" xml:space="preserve"><value>The video provider refused the download. Try again shortly.</value></data>
+  <data name="ProviderUnavailable" xml:space="preserve"><value>Glance could not reach the video provider. Check your connection and try again.</value></data>
+  <data name="DownloadFailed" xml:space="preserve"><value>The online media could not be downloaded.</value></data>
 </root>

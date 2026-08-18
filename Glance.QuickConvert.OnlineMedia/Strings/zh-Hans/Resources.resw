@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="OnlineMediaConverterName" xml:space="preserve"><value>在线媒体</value></data>
+  <data name="OnlineMediaConverterDescription" xml:space="preserve"><value>从支持的链接下载视频或音频</value></data>
+  <data name="OutputFormat" xml:space="preserve"><value>输出格式</value></data>
+  <data name="DownloadQuality" xml:space="preserve"><value>视频质量</value></data>
+  <data name="BestAvailable" xml:space="preserve"><value>最佳可用质量</value></data>
+  <data name="OutputFileMissing" xml:space="preserve"><value>找不到转换后的文件。</value></data>
+  <data name="VideoUnavailable" xml:space="preserve"><value>此视频不可用。</value></data>
+  <data name="SignInRequired" xml:space="preserve"><value>需要登录才能访问此视频。</value></data>
+  <data name="RegionUnavailable" xml:space="preserve"><value>此视频在你所在的地区不可用。</value></data>
+  <data name="LinkUnsupported" xml:space="preserve"><value>不支持此链接。</value></data>
+  <data name="FormatUnavailable" xml:space="preserve"><value>此视频没有这种格式。</value></data>
+  <data name="RequestsLimited" xml:space="preserve"><value>视频提供商正忙。请稍后重试。</value></data>
+  <data name="DownloadRefused" xml:space="preserve"><value>视频提供商拒绝了下载。请稍后重试。</value></data>
+  <data name="ProviderUnavailable" xml:space="preserve"><value>Glance 无法连接到视频提供商。请检查连接后重试。</value></data>
+  <data name="DownloadFailed" xml:space="preserve"><value>无法下载在线媒体。</value></data>
+</root>

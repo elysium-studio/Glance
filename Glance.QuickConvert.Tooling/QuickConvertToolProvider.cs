@@ -6,8 +6,9 @@ namespace Glance.QuickConvert.Tooling;
 public sealed class QuickConvertToolProvider(IBackgroundDownloadManager downloads) :
     IDisposable
 {
+    private static readonly TimeSpan ytDlpRefreshInterval = TimeSpan.FromDays(1);
     private static readonly Uri ffmpegSource = new("https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n8.1-latest-win64-lgpl-8.1.zip");
-    private static readonly Uri ytDlpSource = new("https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe");
+    private static readonly Uri ytDlpSource = new("https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/latest/download/yt-dlp.exe");
     private static readonly Uri denoSource = new("https://github.com/denoland/deno/releases/latest/download/deno-x86_64-pc-windows-msvc.zip");
     private readonly SemaphoreSlim synchronization = new(1, 1);
     private readonly object progressSynchronization = new();
@@ -65,7 +66,7 @@ public sealed class QuickConvertToolProvider(IBackgroundDownloadManager download
                 requiredDownloads.Add("quick-convert:ffmpeg");
             }
 
-            if (!File.Exists(CreatePaths().YtDlpPath))
+            if (RequiresYtDlpRefresh())
             {
                 requiredDownloads.Add("quick-convert:yt-dlp");
             }
@@ -158,13 +159,22 @@ public sealed class QuickConvertToolProvider(IBackgroundDownloadManager download
 
     private async Task EnsureYtDlpAsync(CancellationToken cancellationToken)
     {
-        string path = CreatePaths().YtDlpPath;
-
-        if (!File.Exists(path))
+        if (RequiresYtDlpRefresh())
         {
+            string path = CreatePaths().YtDlpPath;
             await DownloadAsync("quick-convert:yt-dlp", ytDlpSource, path, cancellationToken);
+            File.WriteAllText(CreateYtDlpRefreshPath(), DateTimeOffset.UtcNow.ToString("O"));
         }
     }
+
+    private bool RequiresYtDlpRefresh()
+    {
+        QuickConvertToolPaths paths = CreatePaths();
+        string refreshPath = CreateYtDlpRefreshPath();
+        return !File.Exists(paths.YtDlpPath) || !File.Exists(refreshPath) || DateTime.UtcNow - File.GetLastWriteTimeUtc(refreshPath) >= ytDlpRefreshInterval;
+    }
+
+    private string CreateYtDlpRefreshPath() => Path.Combine(toolsDirectory, "online-media", "yt-dlp.refresh");
 
     private async Task EnsureDenoAsync(CancellationToken cancellationToken)
     {
