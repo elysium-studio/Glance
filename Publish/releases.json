@@ -1,135 +1,142 @@
-﻿[
-    {
-        "version":  "0.1.0-preview",
-        "date":  "2026-07-31",
-        "releaseNotes":  [
-                             "Initial Glance preview release."
-                         ]
-    },
-    {
-        "version":  "0.1.1-preview",
-        "date":  "2026-08-11",
-        "releaseNotes":  [
-
-                         ]
-    },
-    {
-        "version":  "0.1.2-preview",
-        "date":  "2026-08-13",
-        "releaseNotes":  [
-                             "Added the Torrent module, powered by MonoTorrent, for focused downloads inside Glance.",
-                             "Open .torrent files and magnet links directly with Glance, or add them through drag and drop, paste, and the contextual module picker.",
-                             "Review torrent metadata before downloading, including name, total size, file count, individual files, trackers, destination, and validation errors.",
-                             "Choose which files to download and see the selected size before confirmation.",
-                             "Track live progress, download and upload speed, peer count, metadata retrieval, and download state.",
-                             "Pause or resume all downloads from the island and safely remove entries with separate options for keeping or deleting downloaded data.",
-                             "Restore active downloads, metadata, and fast-resume state after restarting Glance, with safe asynchronous shutdown.",
-                             "Handle repeated torrent additions using familiar numbered folder names instead of blocking duplicate downloads.",
-                             "Configure destination, download and upload limits, connection limits, seeding behaviour, ratio and time limits, and optional completion attention.",
-                             "Added dedicated compact and expanded Torrent experiences, desktop confirmation and removal overlays, localized UI, and packaged MonoTorrent runtime dependencies.",
-                             "Added Network Speed with live download and upload readings and performance graphs.",
-                             "Added Network details for the current connection type, adapter, IPv4 address, link speed, and direct access to Windows network settings.",
-                             "Added camera and microphone usage monitoring, microphone mute control, and camera privacy settings access.",
-                             "Greatly reduced startup blocking by loading modules responsively while keeping the first island module stable as the rest arrive.",
-                             "Restored file drag-and-drop and contextual routing, and improved island activation, dismissal, and topmost behaviour.",
-                             "Restored the previously selected module after returning from Infinity.",
-                             "Eliminated App Mixer process-query exception storms caused by inaccessible or short-lived audio processes.",
-                             "Improved module settings with Fluent cards, consistent control sizing, immediate saving, correctly placed validation messages, and aligned breadcrumb chevrons.",
-                             "Refined Torrent compact and expanded layouts, metadata and file selection, removal actions, duplicate handling, and settings.",
-                             "Added the Voice Notes three-line empty state and updated localized no-recording messages.",
-                             "Expanded tests for Torrent validation, restoration, seeding policy, runtime limits, duplicate naming, completion attention, disposal, and shell intent compatibility."
-                         ]
-    },
-    {
-        "version":  "0.1.3-preview",
-        "date":  "2026-08-13",
-        "releaseNotes":  [
-                             "Rewrote the project documentation with a concise overview, module catalogue, build instructions, and module development and packaging guidance.",
-                             "Glance now requires Windows 11 build 22000 or later across project targets, package manifests, and direct installer startup.",
-                             "Fixed a Voice Notes localization resource crash that could occur while modules were loaded or browsed in Settings."
-                         ]
-    },
-    {
-        "version":  "0.1.4-preview",
-        "date":  "2026-08-13",
-        "releaseNotes":  [
-                             "Fixed a shutdown crash by disposing module-owned WinUI windows and controls on the application UI thread, with idempotent Color Picker teardown.",
-                             "Stabilized startup module presentation by loading enabled modules in the saved order, keeping the first configured module selected while the rest load.",
-                             "Completed module installation and removal localization across every supported language.",
-                             "Resolved repository-enforced syntax diagnostics and restored a warning-free full solution build."
-                         ]
-    },
-    {
-        "version":  "0.1.5-preview",
-        "date":  "2026-08-13",
-        "releaseNotes":  [
-                             "Added System Indicators, a transient module for volume and mute, display brightness, Caps Lock, Num Lock, Scroll Lock, and airplane mode.",
-                             "System indicators now appear temporarily without entering module paging or ordering, preserve the current expanded state, block background scrolling, and dismiss automatically.",
-                             "Added a synchronized Fluent push transition between the active module and temporary system indicators.",
-                             "Added compact and expanded loading shimmer placeholders that keep module content and the footer hidden until every startup module is ready, then cross-fade into the settled first module.",
-                             "Restored live GPU usage to System Monitor in compact and expanded views and removed redundant network throughput now covered by Network Speed.",
-                             "Refined Network Speed and System Monitor spacing and metric layouts for closer alignment with the rest of Glance.",
-                             "Rebalanced module accent colours across Audio Switcher, Drop Shelf, Presence, Quick Convert, Screen Lens, System Monitor, Torrent, World Clock, and System Indicators.",
-                             "Added automatic background update checking and downloading, with localized update-ready notifications and safe restart-to-apply behaviour for direct Glance installations.",
-                             "Extended the module contract, preference handling, documentation, packaging, and tests for transient components and System Indicators."
-                         ]
-    },
-    {
-        "version":  "0.1.6-preview",
-        "date":  "2026-08-16",
-        "releaseNotes":  [
-                             "Added taskbar mode, allowing Glance to sit beside the system tray and expand on hover with adaptive support for standard and small taskbars.",
-                             "Added a Spotify remote player with account connection, playback controls, device switching, seeking, album artwork, and dynamic artwork colours.",
-                             "Added guided on-device speech model setup for Voice Assistant with reusable background downloads, progress, cancellation, and recovery.",
-                             "Added view-aware module lifecycle support so modules can pause background work while they are out of view.",
-                             "Improved taskbar placement, adaptive module layouts, drag and hover behaviour, Spotify playback reliability, and island transitions."
-                         ]
-    },
-    {
-        "version":  "0.1.7-preview",
-        "date":  "2026-08-17",
-        "releaseNotes":  [
-                             "Added Speech to Text for live on-device transcription with microphone switching, play and pause controls, and recent transcription lines.",
-                             "Added modular transcription providers with downloadable Whisper and NVIDIA Nemotron model choices.",
-                             "Shared model discovery, selection, download state, and audio capture across Voice Assistant and Speech to Text.",
-                             "Added safe headless .glance provider packaging so transcription engines and their private dependencies stay isolated from Glance.",
-                             "Refined source selectors, accent playback controls, and expanded layouts across Glance modules."
-                         ]
-    },
-    {
-        "version":  "0.1.8-preview",
-        "date":  "2026-08-17",
-        "releaseNotes":  [
-                             "Improved taskbar startup so Glance docks immediately and reliably after restarting.",
-                             "Cancelled Torrent and Quick Convert prompts no longer cause the island to expand unnecessarily.",
-                             "Removed the blue taskbar badge while retaining Windows integration for supported links and files.",
-                             "Improved taskbar presentation and corrected minor module control visuals."
-                         ]
-    },
-    {
-        "version":  "0.1.9-preview",
-        "date":  "2026-08-17",
-        "releaseNotes":  [
-                             "Added an extensible Quick Convert provider system for image, video, and online-media conversions, including first-use tool setup.",
-                             "Improved URL and text drag-and-drop handling for supported conversions.",
-                             "Strengthened reliability with strict single-instance startup, safer taskbar hosting, and a cleaner desktop-island architecture.",
-                             "Corrected the Presence module action to use solid play and stop controls."
-                         ]
-    },
-    {
-        "version":  "0.1.10-preview",
-        "date":  "2026-08-17",
-        "releaseNotes":  [
-                             "Fixed a crash in installed builds when Glance attempted to show an update-ready notification.",
-                             "Improved module dependency resolution so stale module paths cannot disrupt startup or shutdown.",
-                             "Made module and Voice Notes shutdown resilient when individual runtime dependencies are unavailable."
-                         ]
-    },
-    {
-        "version":  "0.1.11-preview",
-        "date":  "2026-08-17",
-        "releaseNotes":  [
-                             "Update delivery test release with no application changes."
-                         ]
-    }
+[
+  {
+    "version": "0.1.0-preview",
+    "date": "2026-07-31",
+    "releaseNotes": [
+      "Initial Glance preview release."
+    ]
+  },
+  {
+    "version": "0.1.1-preview",
+    "date": "2026-08-11",
+    "releaseNotes": []
+  },
+  {
+    "version": "0.1.2-preview",
+    "date": "2026-08-13",
+    "releaseNotes": [
+      "Added the Torrent module, powered by MonoTorrent, for focused downloads inside Glance.",
+      "Open .torrent files and magnet links directly with Glance, or add them through drag and drop, paste, and the contextual module picker.",
+      "Review torrent metadata before downloading, including name, total size, file count, individual files, trackers, destination, and validation errors.",
+      "Choose which files to download and see the selected size before confirmation.",
+      "Track live progress, download and upload speed, peer count, metadata retrieval, and download state.",
+      "Pause or resume all downloads from the island and safely remove entries with separate options for keeping or deleting downloaded data.",
+      "Restore active downloads, metadata, and fast-resume state after restarting Glance, with safe asynchronous shutdown.",
+      "Handle repeated torrent additions using familiar numbered folder names instead of blocking duplicate downloads.",
+      "Configure destination, download and upload limits, connection limits, seeding behaviour, ratio and time limits, and optional completion attention.",
+      "Added dedicated compact and expanded Torrent experiences, desktop confirmation and removal overlays, localized UI, and packaged MonoTorrent runtime dependencies.",
+      "Added Network Speed with live download and upload readings and performance graphs.",
+      "Added Network details for the current connection type, adapter, IPv4 address, link speed, and direct access to Windows network settings.",
+      "Added camera and microphone usage monitoring, microphone mute control, and camera privacy settings access.",
+      "Greatly reduced startup blocking by loading modules responsively while keeping the first island module stable as the rest arrive.",
+      "Restored file drag-and-drop and contextual routing, and improved island activation, dismissal, and topmost behaviour.",
+      "Restored the previously selected module after returning from Infinity.",
+      "Eliminated App Mixer process-query exception storms caused by inaccessible or short-lived audio processes.",
+      "Improved module settings with Fluent cards, consistent control sizing, immediate saving, correctly placed validation messages, and aligned breadcrumb chevrons.",
+      "Refined Torrent compact and expanded layouts, metadata and file selection, removal actions, duplicate handling, and settings.",
+      "Added the Voice Notes three-line empty state and updated localized no-recording messages.",
+      "Expanded tests for Torrent validation, restoration, seeding policy, runtime limits, duplicate naming, completion attention, disposal, and shell intent compatibility."
+    ]
+  },
+  {
+    "version": "0.1.3-preview",
+    "date": "2026-08-13",
+    "releaseNotes": [
+      "Rewrote the project documentation with a concise overview, module catalogue, build instructions, and module development and packaging guidance.",
+      "Glance now requires Windows 11 build 22000 or later across project targets, package manifests, and direct installer startup.",
+      "Fixed a Voice Notes localization resource crash that could occur while modules were loaded or browsed in Settings."
+    ]
+  },
+  {
+    "version": "0.1.4-preview",
+    "date": "2026-08-13",
+    "releaseNotes": [
+      "Fixed a shutdown crash by disposing module-owned WinUI windows and controls on the application UI thread, with idempotent Color Picker teardown.",
+      "Stabilized startup module presentation by loading enabled modules in the saved order, keeping the first configured module selected while the rest load.",
+      "Completed module installation and removal localization across every supported language.",
+      "Resolved repository-enforced syntax diagnostics and restored a warning-free full solution build."
+    ]
+  },
+  {
+    "version": "0.1.5-preview",
+    "date": "2026-08-13",
+    "releaseNotes": [
+      "Added System Indicators, a transient module for volume and mute, display brightness, Caps Lock, Num Lock, Scroll Lock, and airplane mode.",
+      "System indicators now appear temporarily without entering module paging or ordering, preserve the current expanded state, block background scrolling, and dismiss automatically.",
+      "Added a synchronized Fluent push transition between the active module and temporary system indicators.",
+      "Added compact and expanded loading shimmer placeholders that keep module content and the footer hidden until every startup module is ready, then cross-fade into the settled first module.",
+      "Restored live GPU usage to System Monitor in compact and expanded views and removed redundant network throughput now covered by Network Speed.",
+      "Refined Network Speed and System Monitor spacing and metric layouts for closer alignment with the rest of Glance.",
+      "Rebalanced module accent colours across Audio Switcher, Drop Shelf, Presence, Quick Convert, Screen Lens, System Monitor, Torrent, World Clock, and System Indicators.",
+      "Added automatic background update checking and downloading, with localized update-ready notifications and safe restart-to-apply behaviour for direct Glance installations.",
+      "Extended the module contract, preference handling, documentation, packaging, and tests for transient components and System Indicators."
+    ]
+  },
+  {
+    "version": "0.1.6-preview",
+    "date": "2026-08-16",
+    "releaseNotes": [
+      "Added taskbar mode, allowing Glance to sit beside the system tray and expand on hover with adaptive support for standard and small taskbars.",
+      "Added a Spotify remote player with account connection, playback controls, device switching, seeking, album artwork, and dynamic artwork colours.",
+      "Added guided on-device speech model setup for Voice Assistant with reusable background downloads, progress, cancellation, and recovery.",
+      "Added view-aware module lifecycle support so modules can pause background work while they are out of view.",
+      "Improved taskbar placement, adaptive module layouts, drag and hover behaviour, Spotify playback reliability, and island transitions."
+    ]
+  },
+  {
+    "version": "0.1.7-preview",
+    "date": "2026-08-17",
+    "releaseNotes": [
+      "Added Speech to Text for live on-device transcription with microphone switching, play and pause controls, and recent transcription lines.",
+      "Added modular transcription providers with downloadable Whisper and NVIDIA Nemotron model choices.",
+      "Shared model discovery, selection, download state, and audio capture across Voice Assistant and Speech to Text.",
+      "Added safe headless .glance provider packaging so transcription engines and their private dependencies stay isolated from Glance.",
+      "Refined source selectors, accent playback controls, and expanded layouts across Glance modules."
+    ]
+  },
+  {
+    "version": "0.1.8-preview",
+    "date": "2026-08-17",
+    "releaseNotes": [
+      "Improved taskbar startup so Glance docks immediately and reliably after restarting.",
+      "Cancelled Torrent and Quick Convert prompts no longer cause the island to expand unnecessarily.",
+      "Removed the blue taskbar badge while retaining Windows integration for supported links and files.",
+      "Improved taskbar presentation and corrected minor module control visuals."
+    ]
+  },
+  {
+    "version": "0.1.9-preview",
+    "date": "2026-08-17",
+    "releaseNotes": [
+      "Added an extensible Quick Convert provider system for image, video, and online-media conversions, including first-use tool setup.",
+      "Improved URL and text drag-and-drop handling for supported conversions.",
+      "Strengthened reliability with strict single-instance startup, safer taskbar hosting, and a cleaner desktop-island architecture.",
+      "Corrected the Presence module action to use solid play and stop controls."
+    ]
+  },
+  {
+    "version": "0.1.10-preview",
+    "date": "2026-08-17",
+    "releaseNotes": [
+      "Fixed a crash in installed builds when Glance attempted to show an update-ready notification.",
+      "Improved module dependency resolution so stale module paths cannot disrupt startup or shutdown.",
+      "Made module and Voice Notes shutdown resilient when individual runtime dependencies are unavailable."
+    ]
+  },
+  {
+    "version": "0.1.11-preview",
+    "date": "2026-08-17",
+    "releaseNotes": [
+      "Update delivery test release with no application changes."
+    ]
+  },
+  {
+    "version": "0.1.12-preview",
+    "date": "2026-08-18",
+    "releaseNotes": [
+      "Added click-to-expand taskbar behaviour and refined taskbar island interaction visuals.",
+      "Restored online-media Quick Convert with more reliable first-use tooling and clearer conversion failures.",
+      "Improved island shadow bounds and taskbar presentation."
+    ]
+  }
 ]
