@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ProviderName" xml:space="preserve"><value>Applications</value></data>
+  <data name="ProviderDescription" xml:space="preserve"><value>Show product, publisher, version and architecture details</value></data>
+  <data name="SectionTitle" xml:space="preserve"><value>Application · {0}</value></data>
+  <data name="Description" xml:space="preserve"><value>Description</value></data>
+  <data name="Product" xml:space="preserve"><value>Product</value></data>
+  <data name="Company" xml:space="preserve"><value>Company</value></data>
+  <data name="FileVersion" xml:space="preserve"><value>File version</value></data>
+  <data name="ProductVersion" xml:space="preserve"><value>Product version</value></data>
+  <data name="Architecture" xml:space="preserve"><value>Architecture</value></data>
+  <data name="Unknown" xml:space="preserve"><value>Unknown</value></data>
+</root>

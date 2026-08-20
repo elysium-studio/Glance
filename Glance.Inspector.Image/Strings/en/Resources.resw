@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ProviderName" xml:space="preserve"><value>Images</value></data>
+  <data name="ProviderDescription" xml:space="preserve"><value>Show dimensions, format, resolution, colour and orientation</value></data>
+  <data name="SectionTitle" xml:space="preserve"><value>Image · {0}</value></data>
+  <data name="Dimensions" xml:space="preserve"><value>Dimensions</value></data>
+  <data name="DimensionsValue" xml:space="preserve"><value>{0} × {1} pixels</value></data>
+  <data name="Format" xml:space="preserve"><value>Format</value></data>
+  <data name="ColourSpace" xml:space="preserve"><value>Pixel format</value></data>
+  <data name="Alpha" xml:space="preserve"><value>Transparency</value></data>
+  <data name="Dpi" xml:space="preserve"><value>Resolution</value></data>
+  <data name="DpiValue" xml:space="preserve"><value>{0:0.##} × {1:0.##} DPI</value></data>
+  <data name="Orientation" xml:space="preserve"><value>Orientation</value></data>
+  <data name="Yes" xml:space="preserve"><value>Yes</value></data>
+  <data name="No" xml:space="preserve"><value>No</value></data>
+</root>

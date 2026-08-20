@@ -186,6 +186,30 @@
   <Project Path="Glance.PrivacyControls.Tests/Glance.PrivacyControls.Tests.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.Inspector.WinUI/Glance.Inspector.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Inspector.Application/Glance.Inspector.Application.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Inspector.Archive/Glance.Inspector.Archive.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Inspector.Document/Glance.Inspector.Document.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Inspector.FileSystem/Glance.Inspector.FileSystem.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Inspector.Image/Glance.Inspector.Image.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Inspector.Media/Glance.Inspector.Media.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Inspector/Glance.Inspector.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.QuickConvert.WinUI/Glance.QuickConvert.WinUI.csproj">
     <Platform Project="x64" />
   </Project>

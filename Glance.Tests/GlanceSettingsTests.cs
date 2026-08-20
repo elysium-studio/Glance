@@ -13,6 +13,7 @@ public sealed class GlanceSettingsTests
 
         Assert.False(settings.AutoHide);
         Assert.Empty(settings.Converters);
+        Assert.Empty(settings.InspectorProviders);
         Assert.Equal(GlanceExpansionMode.ExpandOnHover, settings.ExpansionMode);
         Assert.Empty(settings.Modules);
         Assert.Equal(GlancePlacement.Top, settings.Placement);
@@ -36,6 +37,14 @@ public sealed class GlanceSettingsTests
                 new GlanceQuickConverterPreference
                 {
                     Id = "QuickConvert.Video",
+                    IsEnabled = false
+                }
+            ],
+            InspectorProviders =
+            [
+                new GlanceInspectorProviderPreference
+                {
+                    Id = "Inspector.Images",
                     IsEnabled = false
                 }
             ],
@@ -63,6 +72,9 @@ public sealed class GlanceSettingsTests
         _ = Assert.Single(result.Converters);
         Assert.Equal("QuickConvert.Video", result.Converters[0].Id);
         Assert.False(result.Converters[0].IsEnabled);
+        _ = Assert.Single(result.InspectorProviders);
+        Assert.Equal("Inspector.Images", result.InspectorProviders[0].Id);
+        Assert.False(result.InspectorProviders[0].IsEnabled);
         _ = Assert.Single(result.Modules);
         Assert.Equal("Timer", result.Modules[0].Id);
         Assert.False(result.Modules[0].IsAttentionEnabled);

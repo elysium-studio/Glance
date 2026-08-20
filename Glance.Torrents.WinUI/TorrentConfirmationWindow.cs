@@ -1,19 +1,14 @@
-using Elysium.Platform.Windows;
+using Elysium.UI.Controls.WinUI;
 using Glance.Application.Abstractions;
 using Glance.UI.WinUI;
 using Microsoft.UI;
 using Microsoft.UI.Dispatching;
-using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Animation;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using WinRT;
 using WinRT.Interop;
-using WinUIEx;
-using PlatformWindowExtensions = Elysium.Platform.Windows.WindowExtensions;
 
 namespace Glance.Torrents.WinUI;
 
@@ -24,27 +19,24 @@ internal sealed record TorrentConfirmationResult(TorrentMetadataSession Session,
 internal sealed class TorrentConfirmationWindow
 {
     private readonly CancellationTokenSource cancellation = new();
-    private readonly TaskCompletionSource<TorrentConfirmationResult?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly TorrentAddCoordinator coordinator;
     private readonly Grid details = new() { Width = 600, MaxHeight = 560 };
     private readonly DispatcherQueue dispatcherQueue;
-    private readonly ContentDialog dialog;
+    private readonly ContentDialogWindow dialog;
     private string downloadPath;
     private readonly TextBlock downloadPathText = new();
     private readonly List<CheckBox> fileSelectionControls = [];
     private readonly TorrentInput input;
     private readonly ModuleResourceTextLocalizer<TorrentModule> localizer;
+    private readonly WindowId ownerWindowId;
     private readonly ProgressRing progress = new() { IsActive = true, Width = 24, Height = 24 };
-    private readonly Grid root;
     private readonly TextBlock selectedSize = new() { FontWeight = Microsoft.UI.Text.FontWeights.SemiBold };
-    private readonly Border smokeLayer;
     private readonly TextBlock status = new() { TextWrapping = TextWrapping.Wrap };
-    private readonly Window window;
-    private bool closed;
     private bool confirmed;
     private bool isUpdatingSelectAll;
     private CheckBox? selectAll;
     private TorrentMetadataSession? session;
+    private TorrentConfirmationResult? result;
     private TorrentConfirmationViewModel? viewModel;
 
     private TorrentConfirmationWindow(TorrentAddCoordinator coordinator,
@@ -57,6 +49,7 @@ internal sealed class TorrentConfirmationWindow
         this.input = input;
         this.downloadPath = downloadPath;
         this.localizer = localizer;
+        this.ownerWindowId = ownerWindowId;
 
         StackPanel loading = new()
         {
@@ -70,8 +63,10 @@ internal sealed class TorrentConfirmationWindow
             ? localizer.GetText("MetadataLoading")
             : localizer.GetText("TorrentReading");
 
-        dialog = new ContentDialog
+        dialog = new ContentDialogWindow
         {
+            Width = 680,
+            Height = 756,
             Title = localizer.GetText("ConfirmTitle"),
             Content = details,
             PrimaryButtonText = localizer.GetText("AddDownload"),
@@ -81,48 +76,7 @@ internal sealed class TorrentConfirmationWindow
         };
         dialog.PrimaryButtonClick += HandlePrimaryButtonClick;
         dialog.Opened += HandleDialogOpened;
-        dialog.Resources["ContentDialogMaxWidth"] = 680d;
-        dialog.Resources["ContentDialogSmokeFill"] = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
-
-        smokeLayer = new Border
-        {
-            Background = ResolveSmokeBrush(),
-            IsHitTestVisible = false,
-            Opacity = 0
-        };
-        root = new Grid
-        {
-            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0))
-        };
-        dispatcherQueue = root.DispatcherQueue;
-        root.Children.Add(smokeLayer);
-        root.Children.Add(dialog);
-        root.Loaded += HandleRootLoaded;
-
-        window = new Window
-        {
-            Content = root,
-            ExtendsContentIntoTitleBar = true,
-            SystemBackdrop = new TransparentTintBackdrop()
-        };
-        window.SetTitleBar(null);
-        window.Closed += HandleWindowClosed;
-
-        DisplayArea area = DisplayArea.GetFromWindowId(ownerWindowId,
-            DisplayAreaFallback.Primary);
-        window.AppWindow.IsShownInSwitchers = false;
-        OverlappedPresenter presenter = window.AppWindow.Presenter.As<OverlappedPresenter>();
-        presenter.IsAlwaysOnTop = true;
-        presenter.IsMaximizable = false;
-        presenter.IsMinimizable = false;
-        presenter.IsResizable = false;
-        presenter.SetBorderAndTitleBar(false, false);
-
-        nint handle = WindowNative.GetWindowHandle(window);
-        PlatformWindowExtensions.SetBorderless(handle, true);
-        PlatformWindowExtensions.SetCornerRadius(handle, WindowCornerPreference.Sharp);
-        PlatformWindowExtensions.SetTopMost(handle, true);
-        window.AppWindow.MoveAndResize(area.OuterBounds);
+        dispatcherQueue = dialog.DispatcherQueue;
     }
 
     public static Task<TorrentConfirmationResult?> ShowAsync(TorrentAddCoordinator coordinator,
@@ -135,32 +89,12 @@ internal sealed class TorrentConfirmationWindow
             localizer,
             ownerWindowId).ShowAsync();
 
-    private Task<TorrentConfirmationResult?> ShowAsync()
+    private async Task<TorrentConfirmationResult?> ShowAsync()
     {
-        window.AppWindow.Show(true);
-        return completion.Task;
-    }
-
-    private async void HandleRootLoaded(object sender,
-        RoutedEventArgs args)
-    {
-        root.Loaded -= HandleRootLoaded;
-        AnimateSmoke(1);
-        dialog.XamlRoot = root.XamlRoot;
-        _ = LoadMetadataAsync();
-
         try
         {
-            _ = await dialog.ShowAsync(ContentDialogPlacement.InPlace);
-
-            if (!confirmed)
-            {
-                _ = completion.TrySetResult(null);
-            }
-        }
-        catch (Exception exception)
-        {
-            _ = completion.TrySetException(exception);
+            ContentDialogResult dialogResult = await dialog.ShowAsync(ownerWindowId);
+            return dialogResult == ContentDialogResult.Primary ? result : null;
         }
         finally
         {
@@ -224,7 +158,7 @@ internal sealed class TorrentConfirmationWindow
             }
         }))
         {
-            completionSource.TrySetException(new InvalidOperationException("The Torrent confirmation overlay is unavailable."));
+            completionSource.TrySetException(new InvalidOperationException("The torrent confirmation window is unavailable."));
         }
 
         return completionSource.Task;
@@ -498,8 +432,7 @@ internal sealed class TorrentConfirmationWindow
     {
         FolderPicker picker = new();
         picker.FileTypeFilter.Add("*");
-        InitializeWithWindow.Initialize(picker,
-            WindowNative.GetWindowHandle(window));
+        InitializeWithWindow.Initialize(picker, dialog.Handle);
         StorageFolder? folder = await picker.PickSingleFolderAsync();
 
         if (folder is null)
@@ -537,8 +470,7 @@ internal sealed class TorrentConfirmationWindow
         isUpdatingSelectAll = false;
     }
 
-    private void HandlePrimaryButtonClick(ContentDialog sender,
-        ContentDialogButtonClickEventArgs args)
+    private void HandlePrimaryButtonClick(object? sender, ContentDialogWindowButtonClickEventArgs args)
     {
         if (session is null || viewModel is null || viewModel.GetSelectedFiles().Count == 0)
         {
@@ -547,17 +479,7 @@ internal sealed class TorrentConfirmationWindow
         }
 
         confirmed = true;
-        _ = completion.TrySetResult(new TorrentConfirmationResult(session,
-            viewModel.GetSelectedFiles(),
-            downloadPath));
-    }
-
-    private void HandleWindowClosed(object sender,
-        WindowEventArgs args)
-    {
-        closed = true;
-        cancellation.Cancel();
-        _ = completion.TrySetResult(null);
+        result = new TorrentConfirmationResult(session, viewModel.GetSelectedFiles(), downloadPath);
     }
 
     private async Task CloseAsync()
@@ -569,37 +491,11 @@ internal sealed class TorrentConfirmationWindow
             await coordinator.CancelAsync(session);
         }
 
-        AnimateSmoke(0);
-
-        if (!closed)
-        {
-            closed = true;
-            dialog.PrimaryButtonClick -= HandlePrimaryButtonClick;
-            dialog.Opened -= HandleDialogOpened;
-            window.Closed -= HandleWindowClosed;
-            window.Close();
-        }
+        dialog.PrimaryButtonClick -= HandlePrimaryButtonClick;
+        dialog.Opened -= HandleDialogOpened;
 
         cancellation.Dispose();
     }
-
-    private void AnimateSmoke(double opacity)
-    {
-        DoubleAnimation animation = new()
-        {
-            To = opacity,
-            Duration = TimeSpan.FromMilliseconds(83)
-        };
-        Storyboard.SetTarget(animation, smokeLayer);
-        Storyboard.SetTargetProperty(animation, nameof(UIElement.Opacity));
-        Storyboard storyboard = new();
-        storyboard.Children.Add(animation);
-        storyboard.Begin();
-    }
-
-    private static Brush ResolveSmokeBrush() => Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("SmokeFillColorDefaultBrush", out object value) && value is Brush brush
-        ? brush
-        : new SolidColorBrush(Windows.UI.Color.FromArgb(77, 0, 0, 0));
 
     private static Brush ResolveBrush(string resourceKey) => Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue(resourceKey, out object value) && value is Brush brush
         ? brush
@@ -609,23 +505,7 @@ internal sealed class TorrentConfirmationWindow
         ? value as Style
         : null;
 
-    private void HandleDialogOpened(ContentDialog sender,
-        ContentDialogOpenedEventArgs args) => SetActionButtonMinimumWidth(sender);
-
-    private static void SetActionButtonMinimumWidth(DependencyObject parent)
-    {
-        for (int index = 0; index < VisualTreeHelper.GetChildrenCount(parent); index++)
-        {
-            DependencyObject child = VisualTreeHelper.GetChild(parent, index);
-
-            if (child is Button button)
-            {
-                button.MinWidth = 132;
-            }
-
-            SetActionButtonMinimumWidth(child);
-        }
-    }
+    private void HandleDialogOpened(object? sender, EventArgs args) => _ = LoadMetadataAsync();
 
     private static string FormatSize(long bytes) => bytes switch
     {

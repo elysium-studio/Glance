@@ -42,7 +42,7 @@ public sealed class GlanceQuickConverterManager :
             return GlanceQuickConverterInstallResult.Failed(result.ErrorMessage ?? "ConverterInstallFailed");
         }
 
-        if (result.QuickConverterIds.Count > 0 && result.ComponentIds.Count == 0)
+        if (result.QuickConverterIds.Count > 0 && result.ComponentIds.Count == 0 && result.InspectorProviderIds.Count == 0)
         {
             return GlanceQuickConverterInstallResult.Installed(result.RequiresRestart);
         }

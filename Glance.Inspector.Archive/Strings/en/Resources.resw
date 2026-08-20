@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ProviderName" xml:space="preserve"><value>Archives</value></data>
+  <data name="ProviderDescription" xml:space="preserve"><value>Show contents, expanded size and compression details for ZIP-based archives</value></data>
+  <data name="SectionTitle" xml:space="preserve"><value>Archive · {0}</value></data>
+  <data name="Files" xml:space="preserve"><value>Files</value></data>
+  <data name="Folders" xml:space="preserve"><value>Folders</value></data>
+  <data name="ExpandedSize" xml:space="preserve"><value>Expanded size</value></data>
+  <data name="CompressedSize" xml:space="preserve"><value>Compressed size</value></data>
+  <data name="SpaceSaved" xml:space="preserve"><value>Space saved</value></data>
+</root>

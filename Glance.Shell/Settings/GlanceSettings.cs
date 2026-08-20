@@ -10,6 +10,8 @@ public sealed class GlanceSettings
 
     public List<GlanceQuickConverterPreference> Converters { get; set; } = [];
 
+    public List<GlanceInspectorProviderPreference> InspectorProviders { get; set; } = [];
+
     public List<GlanceModulePreference> Modules { get; set; } = [];
 
     public List<string> UninstalledModulePackages { get; set; } = [];
