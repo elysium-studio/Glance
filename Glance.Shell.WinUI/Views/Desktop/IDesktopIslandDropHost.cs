@@ -1,6 +1,7 @@
 using Elysium.UI.Controls.WinUI;
 using Glance.Application.Abstractions;
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml.Controls;
 using System.Threading.Tasks;
 
 namespace Glance.Shell.WinUI;
@@ -8,6 +9,8 @@ namespace Glance.Shell.WinUI;
 public interface IDesktopIslandDropHost
 {
     DispatcherQueue DispatcherQueue { get; }
+
+    ScrollViewer ContentRouteScrollViewer { get; }
 
     DesktopIslandHostMode HostMode { get; }
 

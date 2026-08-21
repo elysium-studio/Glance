@@ -62,7 +62,12 @@
                 <RowDefinition Height="22" />
                 <RowDefinition Height="18" />
             </Grid.RowDefinitions>
-            <TextBlock FontWeight="SemiBold" Foreground="{ThemeResource GlanceTorrentIconBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind UpperTitle}" />
+            <TextBlock
+                VerticalAlignment="Center"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Foreground="{ThemeResource GlanceTorrentIconBrush}"
+                Text="{x:Bind UpperTitle}" />
             <TextBlock
                 Grid.Row="1"
                 VerticalAlignment="Center"

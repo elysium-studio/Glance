@@ -112,6 +112,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock
                             MaxWidth="120"
+                            FontWeight="SemiBold"
                             Style="{StaticResource CaptionTextBlockStyle}"
                             Text="{x:Bind ToUpper(ViewModel.PlaybackSourceName), Mode=OneWay}"
                             TextTrimming="CharacterEllipsis"

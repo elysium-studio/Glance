@@ -21,11 +21,17 @@ public interface IDesktopIslandDropController
 
     void OverRoute(DragEventArgs args);
 
+    void OverRoutePicker(DragEventArgs args);
+
     void LeaveRoute(object sender);
+
+    void LeaveRoutePicker();
 
     void DropOnRoute(object sender, DragEventArgs args);
 
     void ReleaseActiveRouteTarget();
+
+    void ResetRoutePicker();
 
     Task DropAsync(DragEventArgs args);
 }

@@ -54,6 +54,8 @@ public sealed partial class DesktopIslandView :
         AddHandler(PointerReleasedEvent, new PointerEventHandler(HandleButtonPointerReleased), true);
         AddHandler(PointerCanceledEvent, new PointerEventHandler(HandleButtonPointerCanceled), true);
         AddHandler(PointerCaptureLostEvent, new PointerEventHandler(HandleButtonPointerCaptureLost), true);
+        ContentRouteScrollViewer.AddHandler(DragOverEvent, new DragEventHandler(HandleContentRoutePickerDragOver), true);
+        ContentRouteScrollViewer.AddHandler(DragLeaveEvent, new DragEventHandler(HandleContentRoutePickerDragLeave), true);
     }
 
     public IDesktopIslandBindings BindingPolicy { get; }
@@ -142,6 +144,7 @@ public sealed partial class DesktopIslandView :
             if (ViewModel.IsContentRoutePickerVisible)
             {
                 animationController.CancelConnectedAnimation();
+                dropController.ResetRoutePicker();
             }
 
             presentationController.ContentRouteVisibilityChanged();
@@ -288,6 +291,10 @@ public sealed partial class DesktopIslandView :
 
     private void HandleContentRouteDragOver(object sender, DragEventArgs args) => dropController.OverRoute(args);
 
+    private void HandleContentRoutePickerDragOver(object sender, DragEventArgs args) => dropController.OverRoutePicker(args);
+
+    private void HandleContentRoutePickerDragLeave(object sender, DragEventArgs args) => dropController.LeaveRoutePicker();
+
     private void HandleContentRouteDragLeave(object sender, DragEventArgs args) => dropController.LeaveRoute(sender);
 
     private void HandleContentRouteDrop(object sender, DragEventArgs args) => dropController.DropOnRoute(sender, args);
@@ -363,6 +370,8 @@ public sealed partial class DesktopIslandView :
     double IDesktopIslandModuleReorderHost.ModuleReorderItemWidth => Resources["GlanceModuleReorderItemWidth"] is double width ? width : 164;
 
     DispatcherQueue IDesktopIslandDropHost.DispatcherQueue => DispatcherQueue;
+
+    ScrollViewer IDesktopIslandDropHost.ContentRouteScrollViewer => ContentRouteScrollViewer;
 
     DesktopIslandHostMode IDesktopIslandDropHost.HostMode => HostMode;
 
@@ -448,6 +457,8 @@ public sealed partial class DesktopIslandView :
     FrameworkElement IDesktopIslandPresentationHost.ModuleReorderSurface => ModuleReorderSurface;
 
     FrameworkElement IDesktopIslandPresentationHost.ExpandedContentHost => ExpandedContentHost;
+
+    FrameworkElement? IDesktopIslandPresentationHost.ContentTransitionClipHost => GetTemplateChild("PART_ShadowContainer") as FrameworkElement;
 
     FrameworkElement? IDesktopIslandPresentationHost.BackgroundElement => GetTemplateChild("PART_BackgroundContent") as FrameworkElement;
 

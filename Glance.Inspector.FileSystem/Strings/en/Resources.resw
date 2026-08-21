@@ -22,4 +22,8 @@
   <data name="Unavailable" xml:space="preserve"><value>Unavailable</value></data>
   <data name="CopyPath" xml:space="preserve"><value>Copy path</value></data>
   <data name="OpenLocation" xml:space="preserve"><value>Open location</value></data>
+  <data name="SpaceUsageTitle" xml:space="preserve"><value>Space usage · {0}</value></data>
+  <data name="TotalSize" xml:space="preserve"><value>Total size</value></data>
+  <data name="FilesAnalysed" xml:space="preserve"><value>Files analysed</value></data>
+  <data name="Other" xml:space="preserve"><value>Other</value></data>
 </root>

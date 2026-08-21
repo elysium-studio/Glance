@@ -48,6 +48,8 @@ public interface IDesktopIslandPresentationHost
 
     FrameworkElement ExpandedContentHost { get; }
 
+    FrameworkElement? ContentTransitionClipHost { get; }
+
     FrameworkElement? BackgroundElement { get; }
 
     FrameworkElement? CompactTemplateContent { get; }

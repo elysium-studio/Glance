@@ -3,10 +3,11 @@ using System.Security.Cryptography;
 
 namespace Glance.Inspector.FileSystem;
 
-public sealed class FileSystemInspectorProvider(ModuleResourceTextLocalizer<FileSystemInspectorModule> localizer) :
+public sealed class FileSystemInspectorProvider(ModuleResourceTextLocalizer<FileSystemInspectorModule> localizer, IFolderSpaceAnalyzer folderSpaceAnalyzer) :
     IGlanceInspectorProvider
 {
     private readonly ModuleResourceTextLocalizer<FileSystemInspectorModule> localizer = localizer;
+    private readonly IFolderSpaceAnalyzer folderSpaceAnalyzer = folderSpaceAnalyzer;
 
     public GlanceInspectorProviderDescriptor Descriptor => new("Inspector.FilesAndFolders", localizer.GetText("ProviderName"), localizer.GetText("ProviderDescription"));
 
@@ -20,7 +21,7 @@ public sealed class FileSystemInspectorProvider(ModuleResourceTextLocalizer<File
         foreach (GlanceStorageItem item in context.StorageItems)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            sections.Add(await InspectItemAsync(item, cancellationToken));
+            sections.AddRange(await InspectItemAsync(item, cancellationToken));
         }
 
         if (context.StorageItems.Count == 1)
@@ -33,7 +34,7 @@ public sealed class FileSystemInspectorProvider(ModuleResourceTextLocalizer<File
         return new GlanceInspectionResult(sections, actions);
     }
 
-    private async Task<GlanceInspectionSection> InspectItemAsync(GlanceStorageItem item, CancellationToken cancellationToken)
+    private async Task<IReadOnlyList<GlanceInspectionSection>> InspectItemAsync(GlanceStorageItem item, CancellationToken cancellationToken)
     {
         List<GlanceInspectionProperty> properties =
         [
@@ -49,22 +50,41 @@ public sealed class FileSystemInspectorProvider(ModuleResourceTextLocalizer<File
             properties.Add(new GlanceInspectionProperty(localizer.GetText("Created"), FormatDate(directory.CreationTime)));
             properties.Add(new GlanceInspectionProperty(localizer.GetText("Modified"), FormatDate(directory.LastWriteTime)));
             properties.Add(new GlanceInspectionProperty(localizer.GetText("Attributes"), directory.Attributes.ToString()));
+            FolderSpaceAnalysis analysis = await folderSpaceAnalyzer.AnalyzeAsync(item.Path, cancellationToken);
+            return [new GlanceInspectionSection(item.Name, properties), CreateSpaceUsageSection(item.Name, analysis)];
         }
-        else
+
+        FileInfo file = new(item.Path);
+        properties.Add(new GlanceInspectionProperty(localizer.GetText("Size"), FormatBytes(file.Length)));
+        properties.Add(new GlanceInspectionProperty(localizer.GetText("Created"), FormatDate(file.CreationTime)));
+        properties.Add(new GlanceInspectionProperty(localizer.GetText("Modified"), FormatDate(file.LastWriteTime)));
+        properties.Add(new GlanceInspectionProperty(localizer.GetText("Attributes"), file.Attributes.ToString()));
+
+        if (CanCalculateHash(file))
         {
-            FileInfo file = new(item.Path);
-            properties.Add(new GlanceInspectionProperty(localizer.GetText("Size"), FormatBytes(file.Length)));
-            properties.Add(new GlanceInspectionProperty(localizer.GetText("Created"), FormatDate(file.CreationTime)));
-            properties.Add(new GlanceInspectionProperty(localizer.GetText("Modified"), FormatDate(file.LastWriteTime)));
-            properties.Add(new GlanceInspectionProperty(localizer.GetText("Attributes"), file.Attributes.ToString()));
-
-            if (CanCalculateHash(file))
-            {
-                properties.Add(new GlanceInspectionProperty(localizer.GetText("Sha256"), await CalculateHashAsync(file.FullName, cancellationToken)));
-            }
+            properties.Add(new GlanceInspectionProperty(localizer.GetText("Sha256"), await CalculateHashAsync(file.FullName, cancellationToken)));
         }
 
-        return new GlanceInspectionSection(item.Name, properties);
+        return [new GlanceInspectionSection(item.Name, properties)];
+    }
+
+    private GlanceInspectionSection CreateSpaceUsageSection(string name, FolderSpaceAnalysis analysis)
+    {
+        List<GlanceInspectionDistributionItem> items = [.. analysis.Entries.Take(8).Select(entry => new GlanceInspectionDistributionItem(entry.Name, entry.Size, FormatBytes(entry.Size)))];
+
+        if (analysis.Entries.Count > items.Count)
+        {
+            long otherSize = analysis.Entries.Skip(items.Count).Sum(entry => entry.Size);
+            items.Add(new GlanceInspectionDistributionItem(localizer.GetText("Other"), otherSize, FormatBytes(otherSize)));
+        }
+
+        GlanceInspectionDistribution? distribution = analysis.TotalBytes > 0 ? new GlanceInspectionDistribution(items) : null;
+        GlanceInspectionProperty[] properties =
+        [
+            new(localizer.GetText("TotalSize"), FormatBytes(analysis.TotalBytes)),
+            new(localizer.GetText("FilesAnalysed"), analysis.FileCount.ToString("N0"))
+        ];
+        return new GlanceInspectionSection(string.Format(localizer.GetText("SpaceUsageTitle"), name), properties, distribution);
     }
 
     private static bool CanCalculateHash(FileInfo file) => file.Exists && file.Length <= 512L * 1024 * 1024;

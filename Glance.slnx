@@ -213,6 +213,15 @@
   <Project Path="Glance.QuickConvert.WinUI/Glance.QuickConvert.WinUI.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.Archive/Glance.Archive.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Archive.WinUI/Glance.Archive.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Archive.Tests/Glance.Archive.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.QuickConvert.Image/Glance.QuickConvert.Image.csproj">
     <Platform Project="x64" />
   </Project>

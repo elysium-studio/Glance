@@ -9,6 +9,7 @@ public sealed class FileSystemInspectorModule :
     public void Register(IServiceCollection services)
     {
         _ = services.AddSingleton<ModuleResourceTextLocalizer<FileSystemInspectorModule>>();
+        _ = services.AddSingleton<IFolderSpaceAnalyzer, FolderSpaceAnalyzer>();
         _ = services.AddSingleton<IGlanceInspectorProvider, FileSystemInspectorProvider>();
     }
 }

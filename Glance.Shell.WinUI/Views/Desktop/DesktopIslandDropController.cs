@@ -4,6 +4,7 @@ using Glance.UI.WinUI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -16,6 +17,9 @@ internal sealed class DesktopIslandDropController :
     IDesktopIslandDropController
 {
     private const int ContextualDragExitDelayMs = 160;
+    private const double RouteScrollEdgeWidth = 48;
+    private const double RouteScrollMaximumVelocity = 560;
+    private const double RouteScrollMinimumVelocity = 120;
 
     private readonly IDesktopIslandContentReader contentReader;
     private DispatcherQueueTimer? contextualDragExitTimer;
@@ -23,7 +27,10 @@ internal sealed class DesktopIslandDropController :
     private IDesktopIslandDropHost? host;
     private string? droppedContentRouteId;
     private bool isContextualDragActive;
+    private bool isRouteScrollActive;
     private int contextualDragSession;
+    private long routeScrollTimestamp;
+    private double routeScrollVelocity;
 
     public DesktopIslandDropController(IDesktopIslandContentReader contentReader) => this.contentReader = contentReader;
 
@@ -34,7 +41,9 @@ internal sealed class DesktopIslandDropController :
     public void Detach()
     {
         StopContextualDragExitTimer();
+        StopRouteAutoScroll();
         ReleaseActiveContentRouteTarget();
+
         contextualDragExitTimer = null;
         droppedContentRouteId = null;
         isContextualDragActive = false;
@@ -53,6 +62,7 @@ internal sealed class DesktopIslandDropController :
 
         if (!CanHandleContent(args.DataView))
         {
+            StopRouteAutoScroll();
             args.AcceptedOperation = DataPackageOperation.None;
             ScheduleContextualDragExit();
             return;
@@ -104,6 +114,7 @@ internal sealed class DesktopIslandDropController :
 
         if (!CanHandleContent(args.DataView))
         {
+            StopRouteAutoScroll();
             args.AcceptedOperation = DataPackageOperation.None;
             ScheduleContextualDragExit();
             return;
@@ -115,6 +126,8 @@ internal sealed class DesktopIslandDropController :
 
     public void Leave()
     {
+        StopRouteAutoScroll();
+
         if (!GetHost().IsModuleReorderVisible)
         {
             ScheduleContextualDragExit();
@@ -131,6 +144,7 @@ internal sealed class DesktopIslandDropController :
 
         StopContextualDragExitTimer();
         SetActiveContentRouteTarget(element);
+        UpdateRouteAutoScroll(args);
         args.AcceptedOperation = DataPackageOperation.Copy;
         args.Handled = true;
     }
@@ -138,8 +152,16 @@ internal sealed class DesktopIslandDropController :
     public void OverRoute(DragEventArgs args)
     {
         StopContextualDragExitTimer();
+        UpdateRouteAutoScroll(args);
         args.AcceptedOperation = DataPackageOperation.Copy;
         args.Handled = true;
+    }
+
+    public void OverRoutePicker(DragEventArgs args)
+    {
+        StopContextualDragExitTimer();
+        UpdateRouteAutoScroll(args);
+        args.AcceptedOperation = DataPackageOperation.Copy;
     }
 
     public void LeaveRoute(object sender)
@@ -151,6 +173,8 @@ internal sealed class DesktopIslandDropController :
 
         ScheduleContextualDragExit();
     }
+
+    public void LeaveRoutePicker() => StopRouteAutoScroll();
 
     public void DropOnRoute(object sender, DragEventArgs args)
     {
@@ -164,10 +188,28 @@ internal sealed class DesktopIslandDropController :
         droppedContentRouteId = route.Id;
         ReleaseActiveContentRouteTarget();
         StopContextualDragExitTimer();
+        StopRouteAutoScroll();
         args.AcceptedOperation = DataPackageOperation.Copy;
     }
 
-    public void ReleaseActiveRouteTarget() => ReleaseActiveContentRouteTarget();
+    public void ReleaseActiveRouteTarget()
+    {
+        StopRouteAutoScroll();
+        ReleaseActiveContentRouteTarget();
+    }
+
+    public void ResetRoutePicker()
+    {
+        IDesktopIslandDropHost currentHost = GetHost();
+        StopRouteAutoScroll();
+        _ = currentHost.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+        {
+            if (ReferenceEquals(host, currentHost))
+            {
+                _ = currentHost.ContentRouteScrollViewer.ChangeView(0, null, null, true);
+            }
+        });
+    }
 
     public async Task DropAsync(DragEventArgs args)
     {
@@ -179,6 +221,7 @@ internal sealed class DesktopIslandDropController :
         }
 
         StopContextualDragExitTimer();
+        StopRouteAutoScroll();
         string? routeId = droppedContentRouteId;
         droppedContentRouteId = null;
 
@@ -296,6 +339,70 @@ internal sealed class DesktopIslandDropController :
 
     private void StopContextualDragExitTimer() => contextualDragExitTimer?.Stop();
 
+    private void UpdateRouteAutoScroll(DragEventArgs args)
+    {
+        ScrollViewer scrollViewer = GetHost().ContentRouteScrollViewer;
+
+        if (scrollViewer.ActualWidth <= 0 || scrollViewer.ScrollableWidth <= 0)
+        {
+            StopRouteAutoScroll();
+            return;
+        }
+
+        double edgeWidth = Math.Min(RouteScrollEdgeWidth, scrollViewer.ActualWidth / 2);
+        double pointerX = args.GetPosition(scrollViewer).X;
+        double direction = pointerX < edgeWidth && scrollViewer.HorizontalOffset > 0 ? -1 : pointerX > scrollViewer.ActualWidth - edgeWidth && scrollViewer.HorizontalOffset < scrollViewer.ScrollableWidth ? 1 : 0;
+
+        if (direction == 0)
+        {
+            StopRouteAutoScroll();
+            return;
+        }
+
+        double edgeProgress = direction < 0 ? 1 - Math.Clamp(pointerX / edgeWidth, 0, 1) : 1 - Math.Clamp((scrollViewer.ActualWidth - pointerX) / edgeWidth, 0, 1);
+        routeScrollVelocity = direction * (RouteScrollMinimumVelocity + ((RouteScrollMaximumVelocity - RouteScrollMinimumVelocity) * edgeProgress));
+
+        if (!isRouteScrollActive)
+        {
+            routeScrollTimestamp = Environment.TickCount64;
+            CompositionTarget.Rendering += HandleRouteScrollRendering;
+            isRouteScrollActive = true;
+        }
+    }
+
+    private void StopRouteAutoScroll()
+    {
+        if (isRouteScrollActive)
+        {
+            CompositionTarget.Rendering -= HandleRouteScrollRendering;
+        }
+
+        isRouteScrollActive = false;
+        routeScrollTimestamp = 0;
+        routeScrollVelocity = 0;
+    }
+
+    private void HandleRouteScrollRendering(object? sender, object args)
+    {
+        if (host is null)
+        {
+            StopRouteAutoScroll();
+            return;
+        }
+
+        ScrollViewer scrollViewer = host.ContentRouteScrollViewer;
+        long timestamp = Environment.TickCount64;
+        double elapsed = Math.Min((timestamp - routeScrollTimestamp) / 1000d, 0.05);
+        double offset = Math.Clamp(scrollViewer.HorizontalOffset + (routeScrollVelocity * elapsed), 0, scrollViewer.ScrollableWidth);
+        routeScrollTimestamp = timestamp;
+        _ = scrollViewer.ChangeView(offset, null, null, true);
+
+        if (offset <= 0 || offset >= scrollViewer.ScrollableWidth)
+        {
+            StopRouteAutoScroll();
+        }
+    }
+
     private void HandleContextualDragExitTimerTick(DispatcherQueueTimer sender, object args)
     {
         sender.Stop();
@@ -313,6 +420,7 @@ internal sealed class DesktopIslandDropController :
         }
 
         StopContextualDragExitTimer();
+        StopRouteAutoScroll();
         isContextualDragActive = false;
         droppedContentRouteId = null;
         contextualDragSession++;

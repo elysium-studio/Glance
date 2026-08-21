@@ -27,6 +27,8 @@ internal sealed class DesktopIslandPresentationController :
     private IDesktopIslandPresentationHost? host;
     private DispatcherQueueTimer? attentionExpansionTimer;
     private DispatcherQueueTimer? startupAttentionTimer;
+    private RectangleGeometry? contentRouteClip;
+    private FrameworkElement? contentRouteClipHost;
     private int assistantPresentationTransition;
     private int contentRoutePresentationTransition;
     private int moduleLoadingTransition;
@@ -65,6 +67,7 @@ internal sealed class DesktopIslandPresentationController :
 
         StopAttentionExpansion();
         StopStartupAttentionTimer();
+        ClearContentRouteClip();
         attentionExpansionTimer = null;
         startupAttentionTimer = null;
         IsAssistantRequested = false;
@@ -702,6 +705,7 @@ internal sealed class DesktopIslandPresentationController :
                 return;
             }
 
+            ClearContentRouteClip();
             ApplyContentRoutePresentation(showRoutes);
             return;
         }
@@ -712,6 +716,7 @@ internal sealed class DesktopIslandPresentationController :
         {
             Rect = new Windows.Foundation.Rect(0, 0, Host.ExpandedContentHost.ActualWidth, Host.ExpandedContentHost.ActualHeight)
         };
+        ApplyContentRouteClip();
         FrameworkElement? background = Host.BackgroundElement;
         FrameworkElement? compactContent = showRoutes ? Host.CompactTemplateContent : null;
         FluentMotion.PlayVerticalPushTransition(outgoing, incoming, background, compactContent, showRoutes, () =>
@@ -721,6 +726,7 @@ internal sealed class DesktopIslandPresentationController :
                 return;
             }
 
+            ClearContentRouteClip();
             ApplyContentRoutePresentation(showRoutes);
 
             if (background is not null)
@@ -737,6 +743,7 @@ internal sealed class DesktopIslandPresentationController :
 
     private void ApplyContentRoutePresentation(bool showRoutes)
     {
+        ClearContentRouteClip();
         Host.ExpandedContentHost.Clip = null;
 
         if (!showRoutes)
@@ -751,6 +758,36 @@ internal sealed class DesktopIslandPresentationController :
         Host.ExpandedModuleSurface.Visibility = showRoutes ? Visibility.Collapsed : Visibility.Visible;
         Host.ContentRoutePicker.Visibility = showRoutes ? Visibility.Visible : Visibility.Collapsed;
         Host.BackgroundContent = showRoutes ? null : Host.GetModuleBackgroundContent();
+    }
+
+    private void ApplyContentRouteClip()
+    {
+        ClearContentRouteClip();
+
+        if (Host.ContentTransitionClipHost is not FrameworkElement clipHost)
+        {
+            return;
+        }
+
+        double horizontalInset = Math.Max(0, (clipHost.ActualWidth - Host.ExpandedContentHost.ActualWidth) / 2);
+        double verticalInset = Math.Max(0, (clipHost.ActualHeight - Host.ExpandedContentHost.ActualHeight) / 2);
+        contentRouteClipHost = clipHost;
+        contentRouteClip = new RectangleGeometry
+        {
+            Rect = new Windows.Foundation.Rect(horizontalInset, verticalInset, Host.ExpandedContentHost.ActualWidth, Host.ExpandedContentHost.ActualHeight)
+        };
+        contentRouteClipHost.Clip = contentRouteClip;
+    }
+
+    private void ClearContentRouteClip()
+    {
+        if (contentRouteClipHost is not null && ReferenceEquals(contentRouteClipHost.Clip, contentRouteClip))
+        {
+            contentRouteClipHost.Clip = null;
+        }
+
+        contentRouteClip = null;
+        contentRouteClipHost = null;
     }
 
     private void ShowModuleReorderPresentation()

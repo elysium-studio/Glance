@@ -72,6 +72,11 @@ internal sealed class InspectorOverlayWindow
             content.Children.Add(row);
         }
 
+        if (section.Distribution is not null)
+        {
+            content.Children.Add(new InspectionDistributionView(section.Distribution));
+        }
+
         return new Border { Background = ResolveBrush("CardBackgroundFillColorDefaultBrush"), BorderBrush = ResolveBrush("CardStrokeColorDefaultBrush"), BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(8), Padding = new Thickness(16), Child = content };
     }
 

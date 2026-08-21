@@ -1,4 +1,5 @@
 using Microsoft.UI.Windowing;
+using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -23,7 +24,8 @@ internal sealed partial class CursorColorPreviewWindow :
     private const uint DwmDoNotRound = 1;
     private const int ExtendedWindowStyleIndex = -20;
     private const int NoActivateWindowStyle = 0x08000000;
-    private const int PreviewSize = 26;
+    private const int PreviewHeight = 44;
+    private const int PreviewWidth = 116;
     private const int ResizableFrameStyle = 0x00040000;
     private const int SystemMenuStyle = 0x00080000;
     private const int ToolWindowStyle = 0x00000080;
@@ -31,7 +33,10 @@ internal sealed partial class CursorColorPreviewWindow :
     private const int WindowStyleIndex = -16;
 
     private readonly Border colorPreview;
+    private readonly TextBlock colorValue;
     private readonly Window window = new();
+    private readonly int windowHeight;
+    private readonly int windowWidth;
     private int disposed;
     private bool isVisible;
 
@@ -39,14 +44,39 @@ internal sealed partial class CursorColorPreviewWindow :
     {
         colorPreview = new Border
         {
+            BorderBrush = (Brush)Microsoft.UI.Xaml.Application.Current.Resources["ControlStrokeColorDefaultBrush"],
+            BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(6),
-            IsHitTestVisible = false
+            Height = 34,
+            IsHitTestVisible = false,
+            Width = 34
         };
+        colorValue = new TextBlock
+        {
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            IsHitTestVisible = false,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        Grid content = new()
+        {
+            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(1, 0, 0, 0)),
+            BorderBrush = (Brush)Microsoft.UI.Xaml.Application.Current.Resources["SurfaceStrokeColorDefaultBrush"],
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(8),
+            IsHitTestVisible = false,
+            Padding = new Thickness(4)
+        };
+        content.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        content.ColumnDefinitions.Add(new ColumnDefinition());
+        content.Children.Add(colorPreview);
+        Grid.SetColumn(colorValue, 1);
+        colorValue.Margin = new Thickness(8, 0, 8, 0);
+        content.Children.Add(colorValue);
 
-        window.Content = colorPreview;
+        window.Content = content;
         window.ExtendsContentIntoTitleBar = true;
         window.SetTitleBar(null);
-        window.SystemBackdrop = new TransparentTintBackdrop();
+        window.SystemBackdrop = new MicaBackdrop { Kind = MicaKind.BaseAlt };
         window.AppWindow.IsShownInSwitchers = false;
 
         OverlappedPresenter presenter = window.AppWindow.Presenter.As<OverlappedPresenter>();
@@ -65,26 +95,30 @@ internal sealed partial class CursorColorPreviewWindow :
         uint borderColor = DwmColorNone;
         _ = DwmSetWindowAttribute(handle, DwmCornerPreferenceAttribute, in cornerPreference, sizeof(uint));
         _ = DwmSetWindowAttribute(handle, DwmBorderColorAttribute, in borderColor, sizeof(uint));
-        window.AppWindow.Resize(new SizeInt32(PreviewSize, PreviewSize));
+        double scale = GetDpiForWindow(handle) / 96d;
+        windowWidth = (int)Math.Round(PreviewWidth * scale);
+        windowHeight = (int)Math.Round(PreviewHeight * scale);
+        window.AppWindow.Resize(new SizeInt32(windowWidth, windowHeight));
     }
 
     public void Show(ColorValue color, int cursorX, int cursorY)
     {
         colorPreview.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, color.Red, color.Green, color.Blue));
+        colorValue.Text = color.Hex.TrimStart('#');
 
         PointInt32 cursor = new(cursorX, cursorY);
         RectInt32 bounds = DisplayArea.GetFromPoint(cursor, DisplayAreaFallback.Nearest).OuterBounds;
         int x = cursorX + CursorOffset;
         int y = cursorY + CursorOffset;
 
-        if (x + PreviewSize > bounds.X + bounds.Width)
+        if (x + windowWidth > bounds.X + bounds.Width)
         {
-            x = cursorX - CursorOffset - PreviewSize;
+            x = cursorX - CursorOffset - windowWidth;
         }
 
-        if (y + PreviewSize > bounds.Y + bounds.Height)
+        if (y + windowHeight > bounds.Y + bounds.Height)
         {
-            y = cursorY - CursorOffset - PreviewSize;
+            y = cursorY - CursorOffset - windowHeight;
         }
 
         window.AppWindow.Move(new PointInt32(x, y));
@@ -123,6 +157,9 @@ internal sealed partial class CursorColorPreviewWindow :
 
     [LibraryImport("user32.dll", EntryPoint = "SetWindowLongW")]
     private static partial int SetWindowLong(nint window, int index, int value);
+
+    [LibraryImport("user32.dll")]
+    private static partial uint GetDpiForWindow(nint window);
 
     [LibraryImport("dwmapi.dll")]
     private static partial int DwmSetWindowAttribute(nint window, uint attribute, in uint value, uint size);

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve"><value>Archive</value></data>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Archive</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Create, extract, and change archive formats.</value></data>
+  <data name="ReadySummary" xml:space="preserve"><value>Ready to archive</value></data>
+  <data name="ReadyDetail" xml:space="preserve"><value>Drop files, folders, or archives here</value></data>
+  <data name="CreateOneArchive" xml:space="preserve"><value>Create an archive</value></data>
+  <data name="CreateManyArchives" xml:space="preserve"><value>Archive {0} items</value></data>
+  <data name="ExtractOneArchive" xml:space="preserve"><value>Extract this archive</value></data>
+  <data name="ExtractManyArchives" xml:space="preserve"><value>Extract {0} archives</value></data>
+  <data name="DropToChoose" xml:space="preserve"><value>Drop to choose an action</value></data>
+  <data name="CreatingArchive" xml:space="preserve"><value>Creating archive</value></data>
+  <data name="ExtractingOneArchive" xml:space="preserve"><value>Extracting archive</value></data>
+  <data name="ExtractingManyArchives" xml:space="preserve"><value>Extracting {0} archives</value></data>
+  <data name="ConvertingOneArchive" xml:space="preserve"><value>Changing archive format</value></data>
+  <data name="ConvertingManyArchives" xml:space="preserve"><value>Changing {0} archive formats</value></data>
+  <data name="PleaseWait" xml:space="preserve"><value>This will continue in the background</value></data>
+  <data name="ArchiveCreated" xml:space="preserve"><value>Archive created</value></data>
+  <data name="ExtractedOneArchive" xml:space="preserve"><value>Archive extracted</value></data>
+  <data name="ExtractedManyArchives" xml:space="preserve"><value>{0} archives extracted</value></data>
+  <data name="ConvertedOneArchive" xml:space="preserve"><value>Archive format changed</value></data>
+  <data name="ConvertedManyArchives" xml:space="preserve"><value>{0} archive formats changed</value></data>
+  <data name="SavedBesideOriginals" xml:space="preserve"><value>Saved beside the original files</value></data>
+  <data name="ArchiveOperationFailed" xml:space="preserve"><value>Archive action failed</value></data>
+  <data name="ArchiveAccessDenied" xml:space="preserve"><value>Glance could not access one of the selected files.</value></data>
+  <data name="ArchiveInvalid" xml:space="preserve"><value>This archive is damaged or uses an unsupported format.</value></data>
+  <data name="ArchiveFileUnavailable" xml:space="preserve"><value>One of the selected files is unavailable or already in use.</value></data>
+  <data name="ArchiveOperationFailedDetail" xml:space="preserve"><value>Glance could not complete the archive action.</value></data>
+  <data name="RouteDisplayName" xml:space="preserve"><value>Archive</value></data>
+  <data name="RouteDescription" xml:space="preserve"><value>Create an archive or extract its contents</value></data>
+  <data name="ArchiveAction" xml:space="preserve"><value>Action</value></data>
+  <data name="CreateArchive" xml:space="preserve"><value>Create archive</value></data>
+  <data name="ExtractArchive" xml:space="preserve"><value>Extract</value></data>
+  <data name="ConvertArchive" xml:space="preserve"><value>Change format</value></data>
+  <data name="ArchiveFormat" xml:space="preserve"><value>Archive format</value></data>
+  <data name="Compression" xml:space="preserve"><value>Compression</value></data>
+  <data name="FastCompression" xml:space="preserve"><value>Faster</value></data>
+  <data name="BalancedCompression" xml:space="preserve"><value>Balanced</value></data>
+  <data name="SmallestArchive" xml:space="preserve"><value>Smaller file</value></data>
+  <data name="ArchiveDialogOneArchive" xml:space="preserve"><value>Choose what to do with this archive.</value></data>
+  <data name="ArchiveDialogManyArchives" xml:space="preserve"><value>Choose what to do with these {0} archives.</value></data>
+  <data name="ArchiveDialogOneItem" xml:space="preserve"><value>Choose how to archive this item.</value></data>
+  <data name="ArchiveDialogManyItems" xml:space="preserve"><value>Choose how to archive these {0} items.</value></data>
+  <data name="Create" xml:space="preserve"><value>Create</value></data>
+  <data name="Extract" xml:space="preserve"><value>Extract</value></data>
+  <data name="Convert" xml:space="preserve"><value>Convert</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="StopArchiveOperation" xml:space="preserve"><value>Stop archive action</value></data>
+</root>

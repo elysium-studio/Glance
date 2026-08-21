@@ -481,54 +481,66 @@
                 Padding="12"
                 Background="Transparent"
                 Visibility="Collapsed">
-                <ItemsControl
-                    HorizontalAlignment="Center"
+                <ScrollViewer
+                    x:Name="ContentRouteScrollViewer"
+                    AllowDrop="True"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    HorizontalScrollBarVisibility="Hidden"
+                    HorizontalScrollMode="Enabled"
                     VerticalAlignment="Center"
-                    ItemsSource="{x:Bind ViewModel.ContentRoutes, Mode=OneWay}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" Spacing="8" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border
-                                Width="96"
-                                Height="64"
-                                Padding="6"
-                                AllowDrop="True"
-                                Background="{ThemeResource ControlFillColorDefaultBrush}"
-                                BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
-                                BorderThickness="1"
-                                CornerRadius="10"
-                                DragEnter="HandleContentRouteDragEnter"
-                                DragLeave="HandleContentRouteDragLeave"
-                                DragOver="HandleContentRouteDragOver"
-                                ToolTipService.ToolTip="{Binding Description}"
-                                Drop="HandleContentRouteDrop">
-                                <StackPanel
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Spacing="4">
-                                    <FontIcon
-                                        FontFamily="{Binding GlyphFontFamily}"
-                                        FontSize="22"
-                                        Foreground="{Binding Converter={StaticResource GlanceIntentAccentBrushConverter}}"
-                                        Glyph="{Binding Glyph}" />
-                                    <TextBlock
-                                        MaxWidth="84"
-                                        HorizontalAlignment="Center"
-                                        FontSize="12"
-                                        FontWeight="SemiBold"
-                                        Foreground="{Binding Converter={StaticResource GlanceIntentAccentBrushConverter}}"
-                                        Text="{Binding DisplayName}"
-                                        TextAlignment="Center"
-                                        TextTrimming="CharacterEllipsis" />
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                    VerticalScrollBarVisibility="Disabled"
+                    VerticalScrollMode="Disabled">
+                    <Grid MinWidth="{Binding ActualWidth, ElementName=ContentRouteScrollViewer}">
+                        <ItemsControl
+                            HorizontalAlignment="Center"
+                            ItemsSource="{x:Bind ViewModel.ContentRoutes, Mode=OneWay}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border
+                                        Width="96"
+                                        Height="64"
+                                        Padding="6"
+                                        AllowDrop="True"
+                                        Background="{ThemeResource ControlFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="10"
+                                        DragEnter="HandleContentRouteDragEnter"
+                                        DragLeave="HandleContentRouteDragLeave"
+                                        DragOver="HandleContentRouteDragOver"
+                                        ToolTipService.ToolTip="{Binding Description}"
+                                        Drop="HandleContentRouteDrop">
+                                        <StackPanel
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Spacing="4">
+                                            <FontIcon
+                                                FontFamily="{Binding GlyphFontFamily}"
+                                                FontSize="22"
+                                                Foreground="{Binding Converter={StaticResource GlanceIntentAccentBrushConverter}}"
+                                                Glyph="{Binding Glyph}" />
+                                            <TextBlock
+                                                MaxWidth="84"
+                                                HorizontalAlignment="Center"
+                                                FontSize="12"
+                                                FontWeight="SemiBold"
+                                                Foreground="{Binding Converter={StaticResource GlanceIntentAccentBrushConverter}}"
+                                                Text="{Binding DisplayName}"
+                                                TextAlignment="Center"
+                                                TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </ScrollViewer>
             </Grid>
         </Grid>
     </Controls:DesktopIsland.ExpandedContent>
