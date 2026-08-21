@@ -29,7 +29,17 @@ public sealed partial class ModuleLoadingView :
             ExpandedIconPlaceholder,
             ExpandedTitlePlaceholder,
             ExpandedPrimaryPlaceholder,
-            ExpandedSubtitlePlaceholder
+            ExpandedSubtitlePlaceholder,
+            ExpandedPagerPlaceholder1,
+            ExpandedPagerPlaceholder2,
+            ExpandedPagerPlaceholder3,
+            ExpandedPagerPlaceholder4,
+            ExpandedPagerPlaceholder5,
+            ExpandedActionPlaceholder1,
+            ExpandedActionPlaceholder2,
+            ExpandedActionPlaceholder3,
+            ExpandedActionPlaceholder4,
+            ExpandedActionPlaceholder5
         ];
         foreach (FrameworkElement element in shimmerElements)
         {
