@@ -148,5 +148,15 @@
       "Introduced movable content-dialog windows for richer confirmations, editors, and inspection results.",
       "Improved taskbar island stability, transitions, shutdown behaviour, and compact system-monitor presentation."
     ]
+  },
+  {
+    "version": "0.1.14-preview",
+    "date": "2026-08-22",
+    "releaseNotes": [
+      "Added Archive, a dedicated module for creating and extracting archives from files, folders, and existing archive packages.",
+      "Added folder space analysis to Inspector, making it easy to see which files and folders consume the most storage.",
+      "Improved drag-and-drop module routing with centred navigation, edge scrolling, and cleaner transition containment.",
+      "Refined module title consistency and completed the startup shimmer across content and footer controls."
+    ]
   }
 ]
