@@ -19,6 +19,9 @@
   <data name="RamLabel.Text" xml:space="preserve">
     <value>RAM</value>
   </data>
+  <data name="CpuLabel.Text" xml:space="preserve">
+    <value>CPU</value>
+  </data>
   <data name="ProcessorLabel.Text" xml:space="preserve">
     <value>PROCESSORE</value>
   </data>

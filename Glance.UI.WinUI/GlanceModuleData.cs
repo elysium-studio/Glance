@@ -11,7 +11,8 @@ public static class GlanceModuleData
     public static string RootDirectory { get; } = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         ApplicationDirectoryName,
-        ModulesDirectoryName);
+        ModulesDirectoryName,
+        "Data");
 
     public static string GetDirectory(string moduleId)
     {
@@ -27,8 +28,7 @@ public static class GlanceModuleData
         return Path.Combine(RootDirectory, moduleId);
     }
 
-    public static string GetPath(string moduleId,
-        string fileName)
+    public static string GetPath(string moduleId, string fileName)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
         return Path.Combine(GetDirectory(moduleId), fileName);

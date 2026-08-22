@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="Glance.Fasting.WinUI.FastingPlanSettingView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:CommunityToolkit="using:CommunityToolkit.WinUI.Controls">
+    <CommunityToolkit:SettingsExpander x:Uid="FastingPlanSettingsExpander" IsExpanded="True">
+        <CommunityToolkit:SettingsExpander.HeaderIcon>
+            <FontIcon Glyph="&#xE916;" />
+        </CommunityToolkit:SettingsExpander.HeaderIcon>
+        <CommunityToolkit:SettingsExpander.Items>
+            <CommunityToolkit:SettingsCard x:Uid="FastingPlanSettingCard">
+                <ComboBox Width="240" SelectedIndex="{x:Bind ViewModel.SelectedPlanIndex, Mode=TwoWay}">
+                    <ComboBoxItem x:Uid="TwelveTwelvePlan" />
+                    <ComboBoxItem x:Uid="FourteenTenPlan" />
+                    <ComboBoxItem x:Uid="SixteenEightPlan" />
+                    <ComboBoxItem x:Uid="EighteenSixPlan" />
+                    <ComboBoxItem x:Uid="TwentyFourPlan" />
+                    <ComboBoxItem x:Uid="CustomPlan" />
+                </ComboBox>
+            </CommunityToolkit:SettingsCard>
+            <CommunityToolkit:SettingsCard x:Uid="CustomDurationSettingCard" Visibility="{x:Bind ViewModel.IsCustom, Mode=OneWay}">
+                <NumberBox Width="160" Minimum="1" Maximum="48" SmallChange="1" SpinButtonPlacementMode="Compact" Value="{x:Bind ViewModel.CustomFastingHours, Mode=TwoWay}" />
+            </CommunityToolkit:SettingsCard>
+        </CommunityToolkit:SettingsExpander.Items>
+    </CommunityToolkit:SettingsExpander>
+</UserControl>

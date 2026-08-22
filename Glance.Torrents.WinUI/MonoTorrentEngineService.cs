@@ -1,4 +1,5 @@
 using Glance.Application.Abstractions;
+using Glance.UI.WinUI;
 using MonoTorrent;
 using MonoTorrent.Client;
 using System.Collections.Concurrent;
@@ -42,7 +43,7 @@ public sealed class MonoTorrentEngineService : ITorrentEngineService
     public MonoTorrentEngineService(GlanceModuleOptions<CoreSettings> options)
     {
         this.options = options;
-        rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Glance", "Modules", "Torrent", "Data");
+        rootPath = Path.Combine(GlanceModuleData.GetDirectory("Torrent"), "Data");
         cachePath = Path.Combine(rootPath, "Engine");
         metadataPath = Path.Combine(rootPath, "Metadata");
         statePath = Path.Combine(rootPath, "downloads.json");

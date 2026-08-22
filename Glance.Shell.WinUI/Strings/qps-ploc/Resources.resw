@@ -25,6 +25,7 @@
   <data name="SpeechAndCommandsSettingsTitle" xml:space="preserve"><value>[Spééch ånd cømmånds]</value></data>
   <data name="InformationModulesTitle" xml:space="preserve"><value>[Ïnførmåtïøn]</value></data>
   <data name="ProductivityModulesTitle" xml:space="preserve"><value>[Prødüctïvïty]</value></data>
+  <data name="HealthModulesTitle" xml:space="preserve"><value>[Héålth]</value></data>
   <data name="MediaAndCaptureModulesTitle" xml:space="preserve"><value>[Médïå ånd cåptüré]</value></data>
   <data name="DevicesAndSystemModulesTitle" xml:space="preserve"><value>[Dévïcés ånd systém]</value></data>
   <data name="IntegrationsModulesTitle" xml:space="preserve"><value>[Ïntégråtïøns]</value></data>

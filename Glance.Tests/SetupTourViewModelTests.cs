@@ -67,12 +67,10 @@ public sealed class SetupTourViewModelTests
         Assert.True(writer.WriteCount >= 2);
     }
 
-    private static SetupTourViewModel CreateViewModel(GlanceSettings settings,
-        ModulePreferenceService preferences,
-        TestWritableOptions writer) => new(settings,
+    private static SetupTourViewModel CreateViewModel(GlanceSettings settings, ModulePreferenceService preferences, TestWritableOptions writer) => new(settings,
             preferences,
             writer,
-            new TestLocalizer(),
+            new GlanceModuleCategoryResolver(new TestLocalizer()),
             NullLogger<SetupTourViewModel>.Instance);
 
     private sealed class TestComponent(string id) :

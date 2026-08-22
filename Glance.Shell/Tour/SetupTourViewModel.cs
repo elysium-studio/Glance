@@ -11,6 +11,7 @@ public sealed partial class SetupTourViewModel :
 {
     private const int PageCount = 5;
 
+    private readonly IGlanceModuleCategoryResolver categoryResolver;
     private readonly ILogger<SetupTourViewModel> logger;
     private readonly ModulePreferenceService preferences;
     private readonly IWritableOptions<GlanceSettings> writer;
@@ -48,19 +49,16 @@ public sealed partial class SetupTourViewModel :
     [NotifyPropertyChangedFor(nameof(ModulePosition))]
     private int selectedModuleIndex;
 
-    public SetupTourViewModel(GlanceSettings settings,
-        ModulePreferenceService preferences,
-        IWritableOptions<GlanceSettings> writer,
-        ITextLocalizer localizer,
-        ILogger<SetupTourViewModel> logger)
+    public SetupTourViewModel(GlanceSettings settings, ModulePreferenceService preferences, IWritableOptions<GlanceSettings> writer, IGlanceModuleCategoryResolver categoryResolver, ILogger<SetupTourViewModel> logger)
     {
         this.preferences = preferences;
         this.writer = writer;
+        this.categoryResolver = categoryResolver;
         this.logger = logger;
         expansionMode = settings.ExpansionMode;
         autoHide = settings.AutoHide;
         placement = settings.Placement;
-        Modules = [.. preferences.GetPreferences().Select(preference => CreateModule(preference, preferences, localizer))];
+        Modules = [.. preferences.GetPreferences().Select(preference => CreateModule(preference, preferences))];
 
         foreach (SetupTourModuleViewModel module in Modules)
         {
@@ -215,44 +213,20 @@ public sealed partial class SetupTourViewModel :
         }
     }
 
-    private static SetupTourModuleViewModel CreateModule(GlanceModulePreference preference,
-        ModulePreferenceService preferences,
-        ITextLocalizer localizer)
+    private SetupTourModuleViewModel CreateModule(GlanceModulePreference preference, ModulePreferenceService preferences)
     {
         IGlanceComponent? component = preferences.GetComponent(preference.Id);
-        string category = component?.SettingsCategory ?? GlanceModuleCategories.Other;
+        GlanceModuleCategoryDescriptor category = categoryResolver.Resolve(component);
         return new SetupTourModuleViewModel(preference.Id,
             component?.DisplayName ?? preference.Id,
             component?.Description ?? string.Empty,
-            ResolveCategoryTitle(category, localizer),
-            string.IsNullOrEmpty(component?.IconGlyph) ? ResolveGlyph(category) : component.IconGlyph,
+            category.DisplayName,
+            string.IsNullOrEmpty(component?.IconGlyph) ? category.Glyph : component.IconGlyph,
             component?.IconFontFamily ?? "Segoe Fluent Icons",
             component?.AccentResourceKey ?? "AccentTextFillColorPrimaryBrush",
             component?.CompactContent,
             preference.IsEnabled);
     }
-
-    private static string ResolveGlyph(string category) => category switch
-    {
-        GlanceModuleCategories.Information => "\uE946",
-        GlanceModuleCategories.Productivity => "\uE8FD",
-        GlanceModuleCategories.MediaAndCapture => "\uE8B9",
-        GlanceModuleCategories.DevicesAndSystem => "\uE772",
-        GlanceModuleCategories.Integrations => "\uE71B",
-        _ => "\uE8B7"
-    };
-
-    private static string ResolveCategoryTitle(string category,
-        ITextLocalizer localizer) => category switch
-        {
-            GlanceModuleCategories.Information => localizer.GetText("InformationModulesTitle"),
-            GlanceModuleCategories.Productivity => localizer.GetText("ProductivityModulesTitle"),
-            GlanceModuleCategories.MediaAndCapture => localizer.GetText("MediaAndCaptureModulesTitle"),
-            GlanceModuleCategories.DevicesAndSystem => localizer.GetText("DevicesAndSystemModulesTitle"),
-            GlanceModuleCategories.Integrations => localizer.GetText("IntegrationsModulesTitle"),
-            GlanceModuleCategories.Other => localizer.GetText("OtherModulesTitle"),
-            _ => category
-        };
 
     private async void HandleModulePropertyChanged(object? sender,
         System.ComponentModel.PropertyChangedEventArgs args)

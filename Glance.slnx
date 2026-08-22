@@ -8,6 +8,12 @@
   <Project Path="Glance.Application.Abstractions/Glance.Application.Abstractions.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Glance.Settings/Glance.Settings.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Settings.Tests/Glance.Settings.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Glance.Assistant/Glance.Assistant.csproj">
     <Platform Project="x64" />
   </Project>
@@ -105,6 +111,24 @@
     <Platform Project="x64" />
   </Project>
   <Project Path="Glance.FocusSession.Tests/Glance.FocusSession.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Fasting.WinUI/Glance.Fasting.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Fasting/Glance.Fasting.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Fasting.Tests/Glance.Fasting.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Hydration.WinUI/Glance.Hydration.WinUI.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Hydration/Glance.Hydration.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Glance.Hydration.Tests/Glance.Hydration.Tests.csproj">
     <Platform Project="x64" />
   </Project>
   <Project Path="Glance.Clipboard.Tests/Glance.Clipboard.Tests.csproj">

@@ -6,6 +6,8 @@ public static class GlanceModuleCategories
 
     public const string Productivity = "Productivity";
 
+    public const string Health = "Health";
+
     public const string MediaAndCapture = "MediaAndCapture";
 
     public const string DevicesAndSystem = "DevicesAndSystem";

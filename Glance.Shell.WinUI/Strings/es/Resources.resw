@@ -25,6 +25,7 @@
   <data name="SpeechAndCommandsSettingsTitle" xml:space="preserve"><value>Voz y comandos</value></data>
   <data name="InformationModulesTitle" xml:space="preserve"><value>Información</value></data>
   <data name="ProductivityModulesTitle" xml:space="preserve"><value>Productividad</value></data>
+  <data name="HealthModulesTitle" xml:space="preserve"><value>Salud</value></data>
   <data name="MediaAndCaptureModulesTitle" xml:space="preserve"><value>Multimedia y captura</value></data>
   <data name="DevicesAndSystemModulesTitle" xml:space="preserve"><value>Dispositivos y sistema</value></data>
   <data name="IntegrationsModulesTitle" xml:space="preserve"><value>Integraciones</value></data>

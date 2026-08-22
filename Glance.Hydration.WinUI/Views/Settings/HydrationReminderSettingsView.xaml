@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="Glance.Hydration.WinUI.HydrationReminderSettingsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:CommunityToolkit="using:CommunityToolkit.WinUI.Controls">
+    <CommunityToolkit:SettingsExpander x:Uid="ReminderSettingsExpander" IsExpanded="True">
+        <CommunityToolkit:SettingsExpander.HeaderIcon>
+            <FontIcon Glyph="&#xEA8F;" />
+        </CommunityToolkit:SettingsExpander.HeaderIcon>
+        <CommunityToolkit:SettingsExpander.Items>
+            <CommunityToolkit:SettingsCard x:Uid="RemindersEnabledSettingCard">
+                <ToggleSwitch IsOn="{x:Bind ViewModel.RemindersEnabled, Mode=TwoWay}" />
+            </CommunityToolkit:SettingsCard>
+            <CommunityToolkit:SettingsCard x:Uid="ReminderIntervalSettingCard">
+                <NumberBox Width="160" Minimum="15" Maximum="240" SmallChange="15" SpinButtonPlacementMode="Compact" Value="{x:Bind ViewModel.ReminderIntervalMinutes, Mode=TwoWay}" />
+            </CommunityToolkit:SettingsCard>
+            <CommunityToolkit:SettingsCard x:Uid="ReminderStartSettingCard">
+                <TimePicker Width="240" ClockIdentifier="24HourClock" Time="{x:Bind ViewModel.ReminderStart, Mode=TwoWay}" />
+            </CommunityToolkit:SettingsCard>
+            <CommunityToolkit:SettingsCard x:Uid="ReminderEndSettingCard">
+                <TimePicker Width="240" ClockIdentifier="24HourClock" Time="{x:Bind ViewModel.ReminderEnd, Mode=TwoWay}" />
+            </CommunityToolkit:SettingsCard>
+            <CommunityToolkit:SettingsCard x:Uid="OnlyWhenBehindSettingCard">
+                <ToggleSwitch IsOn="{x:Bind ViewModel.OnlyRemindWhenBehind, Mode=TwoWay}" />
+            </CommunityToolkit:SettingsCard>
+        </CommunityToolkit:SettingsExpander.Items>
+    </CommunityToolkit:SettingsExpander>
+</UserControl>

@@ -11,6 +11,7 @@ public sealed class SettingsModule :
     IModule
 {
     public void Register(IServiceCollection services) => _ = services
+            .AddSingleton<IGlanceModuleCategoryResolver, GlanceModuleCategoryResolver>()
             .AddTransient<AboutViewModel>()
             .AddViewFor(ServiceLifetime.Transient,
                 provider => new SettingsWindow(provider.GetRequiredService<IMessenger>(),
@@ -43,6 +44,7 @@ public sealed class SettingsModule :
                     provider.GetRequiredService<ModuleInstallationService>(),
                     provider.GetRequiredService<IApplicationRestartService>(),
                     provider.GetRequiredService<ITextLocalizer>(),
+                    provider.GetRequiredService<IGlanceModuleCategoryResolver>(),
                     provider.GetRequiredService<IEnumerable<IGlanceModuleSettingViewModel>>()))
             .AddViewFor<WindowsView, ISettingViewModel, WindowsViewModel>(ServiceLifetime.Transient,
                 provider => new WindowsView(),

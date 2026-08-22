@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ModuleTitle" xml:space="preserve"><value>Fasting</value></data>
+  <data name="ModuleDisplayName" xml:space="preserve"><value>Fasting</value></data>
+  <data name="ModuleDescription" xml:space="preserve"><value>Follow a preferred fasting schedule and see how far through it you are.</value></data>
+  <data name="ReadyToFast" xml:space="preserve"><value>Ready to fast</value></data>
+  <data name="ReadyDetail" xml:space="preserve"><value>Select play to begin a {0} fast</value></data>
+  <data name="FastComplete" xml:space="preserve"><value>Fast complete</value></data>
+  <data name="CompletedDetail" xml:space="preserve"><value>You completed a {0} fast</value></data>
+  <data name="CompactRemaining" xml:space="preserve"><value>{0} remaining</value></data>
+  <data name="StageGettingStarted" xml:space="preserve"><value>Getting started · {0} plan</value></data>
+  <data name="StageSettledIn" xml:space="preserve"><value>Settled in · {0} plan</value></data>
+  <data name="StageHalfway" xml:space="preserve"><value>Halfway through · {0} plan</value></data>
+  <data name="StageFinalStretch" xml:space="preserve"><value>Final stretch · {0} plan</value></data>
+  <data name="ResetButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Reset fast</value></data>
+  <data name="ResetButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Reset fast</value></data>
+  <data name="ToggleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Start or stop fasting</value></data>
+  <data name="ToggleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Start or stop fasting</value></data>
+  <data name="FastingPlanSettingsExpander.Header" xml:space="preserve"><value>Fasting plan</value></data>
+  <data name="FastingPlanSettingsExpander.Description" xml:space="preserve"><value>Choose the schedule Glance uses when you begin a new fast.</value></data>
+  <data name="FastingPlanSettingCard.Header" xml:space="preserve"><value>Preferred plan</value></data>
+  <data name="FastingPlanSettingCard.Description" xml:space="preserve"><value>The first number is fasting time; the second is your eating window.</value></data>
+  <data name="TwelveTwelvePlan.Content" xml:space="preserve"><value>12:12 · Gentle</value></data>
+  <data name="FourteenTenPlan.Content" xml:space="preserve"><value>14:10 · Balanced</value></data>
+  <data name="SixteenEightPlan.Content" xml:space="preserve"><value>16:8 · Popular</value></data>
+  <data name="EighteenSixPlan.Content" xml:space="preserve"><value>18:6 · Extended</value></data>
+  <data name="TwentyFourPlan.Content" xml:space="preserve"><value>20:4 · Short window</value></data>
+  <data name="CustomPlan.Content" xml:space="preserve"><value>Custom</value></data>
+  <data name="CustomDurationSettingCard.Header" xml:space="preserve"><value>Fasting duration</value></data>
+  <data name="CustomDurationSettingCard.Description" xml:space="preserve"><value>Hours in your custom fast. Choose between 1 and 48.</value></data>
+</root>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Glance.Shell.WinUI;
 
@@ -42,16 +43,21 @@ internal static class GlanceModuleDataMigration
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(applicationData);
         string modulesDirectory = Path.Combine(applicationData, "Modules");
+        string dataDirectory = Path.Combine(modulesDirectory, "Data");
+        string packagesDirectory = Path.Combine(modulesDirectory, "Packages");
         _ = Directory.CreateDirectory(modulesDirectory);
+        _ = Directory.CreateDirectory(dataDirectory);
+        _ = Directory.CreateDirectory(packagesDirectory);
+        MigrateModuleDirectories(modulesDirectory, dataDirectory, packagesDirectory);
 
         foreach ((string fileName, string moduleId) in LegacySettingOwners)
         {
-            MoveFileIfNeeded(Path.Combine(applicationData, fileName), Path.Combine(modulesDirectory, moduleId, fileName));
+            MoveFileIfNeeded(Path.Combine(applicationData, fileName), Path.Combine(dataDirectory, moduleId, fileName));
         }
 
         foreach (string moduleId in LegacyDataDirectories)
         {
-            MergeDirectory(Path.Combine(applicationData, moduleId), Path.Combine(modulesDirectory, moduleId));
+            MergeDirectory(Path.Combine(applicationData, moduleId), Path.Combine(dataDirectory, moduleId));
         }
 
         string legacyCache = Path.Combine(applicationData, "ModuleCache");
@@ -71,8 +77,49 @@ internal static class GlanceModuleDataMigration
         }
     }
 
-    private static void MergeDirectory(string sourceDirectory,
-        string destinationDirectory)
+    private static void MigrateModuleDirectories(string modulesDirectory, string dataDirectory, string packagesDirectory)
+    {
+        foreach (string loosePackage in Directory.EnumerateFiles(modulesDirectory, "*.glance", SearchOption.TopDirectoryOnly))
+        {
+            MoveFileIfNeeded(loosePackage, Path.Combine(packagesDirectory, Path.GetFileName(loosePackage)));
+        }
+
+        foreach (string sourceDirectory in Directory.EnumerateDirectories(modulesDirectory, "*", SearchOption.TopDirectoryOnly))
+        {
+            string moduleId = Path.GetFileName(sourceDirectory);
+
+            if (string.Equals(moduleId, "Data", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(moduleId, "Packages", StringComparison.OrdinalIgnoreCase) ||
+                moduleId.StartsWith(".removed-", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            string moduleDataDirectory = Path.Combine(dataDirectory, moduleId);
+            string modulePackageDirectory = Path.Combine(packagesDirectory, moduleId);
+
+            foreach (string sourcePath in Directory.EnumerateFiles(sourceDirectory, "*", SearchOption.TopDirectoryOnly))
+            {
+                string destinationDirectory = string.Equals(Path.GetExtension(sourcePath), ".glance", StringComparison.OrdinalIgnoreCase) ||
+                    Path.GetFileName(sourcePath).Contains(".installing", StringComparison.OrdinalIgnoreCase)
+                    ? modulePackageDirectory
+                    : moduleDataDirectory;
+                MoveFileIfNeeded(sourcePath, Path.Combine(destinationDirectory, Path.GetFileName(sourcePath)));
+            }
+
+            foreach (string childDirectory in Directory.EnumerateDirectories(sourceDirectory, "*", SearchOption.TopDirectoryOnly))
+            {
+                string destinationDirectory = string.Equals(Path.GetFileName(childDirectory), "Runtime", StringComparison.OrdinalIgnoreCase)
+                    ? modulePackageDirectory
+                    : moduleDataDirectory;
+                MergeDirectory(childDirectory, Path.Combine(destinationDirectory, Path.GetFileName(childDirectory)));
+            }
+
+            TryDeleteEmptyDirectory(sourceDirectory);
+        }
+    }
+
+    private static void MergeDirectory(string sourceDirectory, string destinationDirectory)
     {
         if (!Directory.Exists(sourceDirectory))
         {
@@ -97,8 +144,7 @@ internal static class GlanceModuleDataMigration
         }
     }
 
-    private static void MoveFileIfNeeded(string sourcePath,
-        string destinationPath)
+    private static void MoveFileIfNeeded(string sourcePath, string destinationPath)
     {
         if (!File.Exists(sourcePath))
         {
@@ -112,5 +158,22 @@ internal static class GlanceModuleDataMigration
 
         _ = Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
         File.Move(sourcePath, destinationPath);
+    }
+
+    private static void TryDeleteEmptyDirectory(string directory)
+    {
+        try
+        {
+            if (!Directory.EnumerateFileSystemEntries(directory).Any())
+            {
+                Directory.Delete(directory);
+            }
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
     }
 }

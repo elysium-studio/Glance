@@ -25,6 +25,7 @@
   <data name="SpeechAndCommandsSettingsTitle" xml:space="preserve"><value>음성 및 명령</value></data>
   <data name="InformationModulesTitle" xml:space="preserve"><value>정보</value></data>
   <data name="ProductivityModulesTitle" xml:space="preserve"><value>생산성</value></data>
+  <data name="HealthModulesTitle" xml:space="preserve"><value>건강</value></data>
   <data name="MediaAndCaptureModulesTitle" xml:space="preserve"><value>미디어 및 캡처</value></data>
   <data name="DevicesAndSystemModulesTitle" xml:space="preserve"><value>장치 및 시스템</value></data>
   <data name="IntegrationsModulesTitle" xml:space="preserve"><value>통합</value></data>

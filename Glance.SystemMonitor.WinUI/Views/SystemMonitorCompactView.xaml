@@ -36,8 +36,6 @@
                     <VisualState.Setters>
                         <Setter Target="LayoutRoot.Padding" Value="8,0,8,4" />
                         <Setter Target="LayoutRoot.ColumnSpacing" Value="6" />
-                        <Setter Target="CompactText.FontSize" Value="12" />
-                        <Setter Target="CompactText.FontWeight" Value="Normal" />
                         <Setter Target="StatusIndicator.Width" Value="20" />
                         <Setter Target="StatusIndicator.Height" Value="20" />
                         <Setter Target="StatusIndicator.Margin" Value="0,1,0,-1" />
@@ -73,11 +71,16 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <TextBlock
-                x:Name="CompactText"
-                VerticalAlignment="Center"
-                Style="{StaticResource BodyStrongTextBlockStyle}"
-                Text="{x:Bind ViewModel.CpuText, Mode=OneWay}" />
+            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
+                <TextBlock
+                    x:Uid="CpuLabel"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}" />
+                <TextBlock
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.CpuText, Mode=OneWay}" />
+            </StackPanel>
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
                 <TextBlock
                     x:Uid="RamLabel"

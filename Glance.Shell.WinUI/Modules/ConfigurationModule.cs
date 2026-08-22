@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
 using Elysium.Platform.Abstractions;
+using Glance.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 
@@ -12,17 +13,19 @@ public sealed class ConfigurationModule :
 {
     public void Register(IServiceCollection services)
     {
-        WritableOptionsBuilder<GlanceSettings> builder =
-            new(services, "Settings", "settings.dat");
-
-        _ = builder
-            .WithJsonOptions(new JsonSerializerOptions
+        GlanceSettingsBuilder<GlanceSettings> builder = services.AddGlanceSettings<GlanceSettings>(
+            "glance.application.settings",
+            "Settings",
+            "settings.dat",
+            new JsonSerializerOptions
             {
                 WriteIndented = true,
                 PropertyNameCaseInsensitive = true,
                 TypeInfoResolverChain = { GlanceJsonContext.Default }
-            })
-            .UseJson().WithChangeHandler((provider, options, name) =>
+            });
+
+        _ = builder
+            .WithChangeHandler((provider, options, name) =>
                 provider.GetRequiredService<IMessenger>().Send(new OptionsChangedEventArgs<GlanceSettings>(options)))
             .WithAsyncChangeHandler(async (provider, options, _) =>
             {

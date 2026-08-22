@@ -88,6 +88,23 @@ public sealed class ExampleComponent : IGlanceComponent
 
 Keep UI text in `Strings/<language>/Resources.resw` and module brushes or styles in a theme resource dictionary. Put platform-independent state and view-model logic in the non-WinUI project so it can be tested without starting the application.
 
+Built-in categories can be selected with `GlanceModuleCategories`. A module can introduce a new category by implementing `IGlanceModuleCategoryProvider`:
+
+```csharp
+public sealed class ExampleComponent :
+    IGlanceComponent,
+    IGlanceModuleCategoryProvider
+{
+    public GlanceModuleCategoryDescriptor ModuleCategory { get; } = new(
+        "Research",
+        "Research and labs",
+        "\uE773",
+        450);
+}
+```
+
+Glance creates the settings group automatically. Components that publish the same category ID share that group. The display name can come from the module's own localizer, and `Order` controls where the group appears among the built-in categories.
+
 ### 2. Register the module
 
 Create a public, parameterless `IGlanceModule` implementation in the WinUI assembly. Register the component and any module-owned services with dependency injection:
@@ -130,6 +147,39 @@ public sealed class ExampleComponent :
 }
 ```
 
+Module settings are stored separately from the installed package and survive package updates and removal. Register settings with a stable module identifier. Existing unversioned settings are treated as schema version 1:
+
+```csharp
+services.AddModuleOptions<ExampleSettings>(
+    "Example",
+    "example.settings.dat",
+    ExampleJsonContext.Default,
+    options => options
+        .WithSchemaVersion(2)
+        .AddMigration<ExampleSettingsV1ToV2>());
+```
+
+Migrations operate on raw JSON before the current settings type is deserialized:
+
+```csharp
+public sealed class ExampleSettingsV1ToV2 :
+    IGlanceSettingsMigration<ExampleSettings>
+{
+    public int FromVersion => 1;
+
+    public int ToVersion => 2;
+
+    public JsonObject Migrate(JsonObject settings)
+    {
+        settings["DisplayName"] = settings["Name"]?.DeepClone();
+        _ = settings.Remove("Name");
+        return settings;
+    }
+}
+```
+
+Adding an optional property does not normally require a migration. Register one when renaming, splitting, merging, or changing the type or meaning of stored values. Glance validates the complete migration chain and atomically replaces the settings file only after the result can be deserialized. A failed migration leaves the previous settings untouched.
+
 Transcription engines can be shipped as headless modules. Register an `ITranscriptionProvider` from the package's `IGlanceModule`. A provider may publish any number of `TranscriptionModel` entries and creates an `ITranscriptionDecoder` for the selected model. Glance captures the selected microphone, converts it to the provider's requested PCM format, and streams the audio into the decoder. Model downloads, model-specific preprocessing, and decoding remain owned by the provider.
 
 Quick Convert providers can also be shipped as headless modules. Register an `IGlanceQuickConverter` from the package's `IGlanceModule`. Quick Convert passes every provider the complete `GlanceContentContext`; the provider returns its match strength and owns its editor, options, conversion, setup, and private dependencies. Providers that return `GlanceQuickConverterMatch.None` are ignored, so support for files and links remains entirely provider-driven.
@@ -166,7 +216,7 @@ To install a completed package:
 3. Select **Add module** and choose the `.glance` file, or drag the package onto the module page.
 4. Enable and configure the module after it appears in the list.
 
-Installed packages and their private runtime cache are stored under `%LOCALAPPDATA%\Glance\Modules`.
+Installed packages and their private runtime cache are stored under `%LOCALAPPDATA%\Glance\Modules\Packages`. Persistent module settings and data are stored separately under `%LOCALAPPDATA%\Glance\Modules\Data`.
 
 To ship a module as part of this repository:
 
