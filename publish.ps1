@@ -201,7 +201,7 @@ function Send-SftpRelease
             "mkdir $(Format-WinScpValue $sftpFeedsPath)"
             "mkdir $(Format-WinScpValue $sftpFeedPath)"
             "option batch abort"
-            "synchronize remote -delete $(Format-WinScpValue $FeedPath) $(Format-WinScpValue $sftpFeedPath)"
+            "synchronize remote $(Format-WinScpValue $FeedPath) $(Format-WinScpValue $sftpFeedPath)"
             "put $(Format-WinScpValue $ReleaseLogPath) $(Format-WinScpValue $sftpReleaseLogPath)"
             "exit"
         ) | Set-Content $winScpScriptPath -Encoding UTF8
