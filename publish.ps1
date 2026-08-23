@@ -1121,7 +1121,10 @@ if (-not (Test-Path $VelopackInstallerPath))
     exit 1
 }
 
-Copy-Item $VelopackInstallerPath $InstallerPath -Force
+if ($VelopackInstallerPath -ne $InstallerPath)
+{
+    Copy-Item $VelopackInstallerPath $InstallerPath -Force
+}
 
 if (-not (Test-Path $FullPackagePath))
 {
