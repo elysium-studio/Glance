@@ -16,11 +16,8 @@ namespace Glance.Shell.WinUI;
 internal sealed class GlanceModuleManager :
     IAsyncDisposable
 {
-    private static readonly TimeSpan copySettleDelay = TimeSpan.FromMilliseconds(500);
     private readonly DispatcherQueue dispatcherQueue;
-    private readonly IReadOnlyList<FileSystemWatcher> watchers;
     private readonly GlanceRuntimeServiceProvider runtimeServices;
-    private readonly HashSet<string> knownPackages = [with(StringComparer.OrdinalIgnoreCase)];
     private readonly ILogger<GlanceModuleManager> logger;
     private readonly GlanceBridgeRouter bridgeRouter;
     private readonly GlanceAssistantCommandService assistantCommandService;
@@ -38,9 +35,7 @@ internal sealed class GlanceModuleManager :
     private readonly GlanceSettings settings;
     private readonly IWritableOptions<GlanceSettings> settingsWriter;
     private readonly IServiceProvider applicationServices;
-    private readonly Dictionary<string, CancellationTokenSource> pendingPackages = [with(StringComparer.OrdinalIgnoreCase)];
     private readonly SemaphoreSlim packageOperations = new(1, 1);
-    private readonly object synchronization = new();
 
     public GlanceModuleManager(IServiceProvider applicationServices, GlanceRuntimeServiceProvider runtimeServices, DispatcherQueue dispatcherQueue, ILogger<GlanceModuleManager> logger)
     {
@@ -65,10 +60,6 @@ internal sealed class GlanceModuleManager :
         installations.ConfigureInstaller(InstallPackageAsync);
 
         _ = Directory.CreateDirectory(GlanceModuleLoader.UserModulesDirectory);
-        watchers = (FileSystemWatcher[])[.. GlanceModuleLoader.ModuleDirectories
-            .Where(Directory.Exists)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .Select(CreateWatcher)];
     }
 
     public async Task LoadStartupModulesAsync()
@@ -92,45 +83,8 @@ internal sealed class GlanceModuleManager :
         }
     }
 
-    public void StartWatching()
-    {
-        foreach (FileSystemWatcher watcher in watchers)
-        {
-            watcher.EnableRaisingEvents = true;
-
-            foreach (string packagePath in Directory.EnumerateFiles(watcher.Path, "*.glance", SearchOption.AllDirectories))
-            {
-                SchedulePackage(packagePath);
-            }
-        }
-    }
-
     public async ValueTask DisposeAsync()
     {
-        foreach (FileSystemWatcher watcher in watchers)
-        {
-            watcher.EnableRaisingEvents = false;
-            watcher.Created -= HandlePackageChanged;
-            watcher.Changed -= HandlePackageChanged;
-            watcher.Renamed -= HandlePackageRenamed;
-            watcher.Error -= HandleWatcherError;
-            watcher.Dispose();
-        }
-
-        CancellationTokenSource[] pending;
-
-        lock (synchronization)
-        {
-            pending = [.. pendingPackages.Values];
-            pendingPackages.Clear();
-        }
-
-        foreach (CancellationTokenSource cancellation in pending)
-        {
-            cancellation.Cancel();
-            cancellation.Dispose();
-        }
-
         foreach (LoadedModulePackage package in loadedPackages.AsEnumerable().Reverse())
         {
             DisposeRegistrations(package.TranscriptionRegistrations);
@@ -223,11 +177,6 @@ internal sealed class GlanceModuleManager :
 
             runtime = null;
 
-            lock (synchronization)
-            {
-                _ = knownPackages.Add(result.SourcePath);
-            }
-
             logger.LogInformation("Loaded Glance module package {ModulePackage} with {ComponentCount} component(s), {AssistantProviderCount} assistant provider(s), {QuickConverterCount} quick converter(s), {InspectorProviderCount} inspector provider(s), and {TranscriptionProviderCount} transcription provider(s)", result.SourcePath, components.Count, assistantProviders.Count, quickConverters.Count, inspectorProviders.Count, transcriptionProviders.Count);
             return ModuleInstallResult.Installed(components.Select(component => component.Id), packageId, quickConverters.Select(converter => converter.Descriptor.Id), inspectorProviders.Select(provider => provider.Descriptor.Id));
         }
@@ -264,127 +213,6 @@ internal sealed class GlanceModuleManager :
         }
     }
 
-    private void HandlePackageChanged(object sender, FileSystemEventArgs args) => SchedulePackage(args.FullPath);
-
-    private void HandlePackageRenamed(object sender, RenamedEventArgs args) => SchedulePackage(args.FullPath);
-
-    private void HandleWatcherError(object sender, ErrorEventArgs args)
-    {
-        if (sender is not FileSystemWatcher watcher)
-        {
-            return;
-        }
-
-        logger.LogWarning(args.GetException(), "The Glance module folder watcher missed one or more changes in {ModuleDirectory}; rescanning the folder", watcher.Path);
-
-        foreach (string packagePath in Directory.EnumerateFiles(watcher.Path, "*.glance", SearchOption.AllDirectories))
-        {
-            SchedulePackage(packagePath);
-        }
-    }
-
-    private FileSystemWatcher CreateWatcher(string directory)
-    {
-        FileSystemWatcher watcher = new(directory, "*.glance")
-        {
-            IncludeSubdirectories = true,
-            NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size
-        };
-        watcher.Created += HandlePackageChanged;
-        watcher.Changed += HandlePackageChanged;
-        watcher.Renamed += HandlePackageRenamed;
-        watcher.Error += HandleWatcherError;
-        return watcher;
-    }
-
-    private void SchedulePackage(string packagePath)
-    {
-        string fullPackagePath = Path.GetFullPath(packagePath);
-
-        if (fullPackagePath.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-            .Any(segment => segment.StartsWith(".removed-", StringComparison.OrdinalIgnoreCase)))
-        {
-            return;
-        }
-
-        lock (synchronization)
-        {
-            if (knownPackages.Contains(fullPackagePath))
-            {
-                return;
-            }
-
-            if (pendingPackages.Remove(fullPackagePath, out CancellationTokenSource? previous))
-            {
-                previous.Cancel();
-                previous.Dispose();
-            }
-
-            CancellationTokenSource cancellation = new();
-            pendingPackages.Add(fullPackagePath, cancellation);
-            _ = PrepareAndInstallAsync(fullPackagePath, cancellation);
-        }
-    }
-
-    private async Task PrepareAndInstallAsync(string packagePath, CancellationTokenSource cancellation)
-    {
-        try
-        {
-            await Task.Delay(copySettleDelay, cancellation.Token);
-
-            if (!await WaitForStablePackageAsync(packagePath, cancellation.Token))
-            {
-                return;
-            }
-
-            await DispatchAsync(async () =>
-            {
-                lock (synchronization)
-                {
-                    if (knownPackages.Contains(packagePath))
-                    {
-                        return;
-                    }
-                }
-
-                string installedPackagePath = GlanceModuleInstallationStore.NormalizePackage(packagePath);
-                string packageId = GlanceModuleInstallationStore.GetPackageId(installedPackagePath);
-                GlanceModuleLoadResult? result = GlanceModuleLoader.LoadPackage(installedPackagePath);
-
-                if (result is not null)
-                {
-                    if (settings.UninstalledModulePackages.RemoveAll(value => string.Equals(value, packageId, StringComparison.OrdinalIgnoreCase)) > 0)
-                    {
-                        await settingsWriter.WriteAsync(value => value.UninstalledModulePackages = [.. settings.UninstalledModulePackages]);
-                    }
-
-                    await InstallAsync(result);
-                    return;
-                }
-
-                logger.LogWarning("The discovered Glance module package {ModulePackage} did not contain a loadable module", packagePath);
-            });
-        }
-        catch (OperationCanceledException)
-        {
-        }
-        catch (Exception exception)
-        {
-            logger.LogError(exception, "Failed to load the newly discovered Glance module package {ModulePackage}", packagePath);
-        }
-        finally
-        {
-            lock (synchronization)
-            {
-                if (pendingPackages.TryGetValue(packagePath, out CancellationTokenSource? current) && ReferenceEquals(current, cancellation))
-                {
-                    _ = pendingPackages.Remove(packagePath);
-                    cancellation.Dispose();
-                }
-            }
-        }
-    }
-
     private Task<ModuleInstallResult> InstallPackageAsync(string packagePath) => DispatchAsync(() => RunPackageOperationAsync(() => InstallPackageCoreAsync(packagePath)));
 
     private async Task<ModuleInstallResult> InstallPackageCoreAsync(string packagePath)
@@ -401,17 +229,6 @@ internal sealed class GlanceModuleManager :
         string expectedPath = Path.Combine(GlanceModuleInstallationStore.RootDirectory, packageId, $"{packageId}.glance");
         string installedPackagePath;
 
-        lock (synchronization)
-        {
-            _ = knownPackages.Add(expectedPath);
-
-            if (pendingPackages.Remove(expectedPath, out CancellationTokenSource? pending))
-            {
-                pending.Cancel();
-                pending.Dispose();
-            }
-        }
-
         try
         {
             string fullSourcePath = Path.GetFullPath(packagePath);
@@ -421,11 +238,6 @@ internal sealed class GlanceModuleManager :
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
         {
-            lock (synchronization)
-            {
-                _ = knownPackages.Remove(expectedPath);
-            }
-
             logger.LogError(exception, "Failed to stage Glance module package {ModulePackage}", packagePath);
             return ModuleInstallResult.Failed(exception.Message);
         }
@@ -446,11 +258,6 @@ internal sealed class GlanceModuleManager :
         {
             logger.LogError(exception, "Failed to inspect Glance module package {ModulePackage}", installedPackagePath);
 
-            lock (synchronization)
-            {
-                _ = knownPackages.Remove(installedPackagePath);
-            }
-
             GlanceModuleInstallationStore.DeletePackagePayload(installedPackagePath);
             GlanceModuleLoader.RefreshResolutionPaths(loadedPackages.Select(package => package.ContentDirectory));
             return ModuleInstallResult.Failed(exception.Message);
@@ -458,11 +265,6 @@ internal sealed class GlanceModuleManager :
 
         if (result is null)
         {
-            lock (synchronization)
-            {
-                _ = knownPackages.Remove(installedPackagePath);
-            }
-
             GlanceModuleInstallationStore.DeletePackagePayload(installedPackagePath);
             GlanceModuleLoader.RefreshResolutionPaths(loadedPackages.Select(package => package.ContentDirectory));
             return ModuleInstallResult.Failed("The package does not contain a loadable Glance module.");
@@ -472,11 +274,6 @@ internal sealed class GlanceModuleManager :
 
         if (!installResult.IsSuccessful)
         {
-            lock (synchronization)
-            {
-                _ = knownPackages.Remove(installedPackagePath);
-            }
-
             GlanceModuleInstallationStore.DeletePackagePayload(installedPackagePath);
             GlanceModuleLoader.RefreshResolutionPaths(loadedPackages.Select(package => package.ContentDirectory));
             return installResult;
@@ -527,11 +324,6 @@ internal sealed class GlanceModuleManager :
         _ = loadedPackages.Remove(package);
         GlanceModuleLoader.RefreshResolutionPaths(loadedPackages.Select(candidate => candidate.ContentDirectory));
 
-        lock (synchronization)
-        {
-            _ = knownPackages.Remove(package.SourcePath);
-        }
-
         GlanceModuleInstallationStore.RemovePackageForCurrentProcess(package.SourcePath);
         logger.LogInformation("Uninstalled Glance module package {ModulePackage}", package.SourcePath);
         return true;
@@ -549,49 +341,6 @@ internal sealed class GlanceModuleManager :
         {
             _ = packageOperations.Release();
         }
-    }
-
-    private static async Task<bool> WaitForStablePackageAsync(string packagePath, CancellationToken cancellationToken)
-    {
-        for (int attempt = 0; attempt < 8; attempt++)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            try
-            {
-                FileInfo before = new(packagePath);
-
-                if (!before.Exists || before.Length == 0)
-                {
-                    await Task.Delay(250, cancellationToken);
-                    continue;
-                }
-
-                using (new FileStream(packagePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-                {
-                }
-
-                long length = before.Length;
-                DateTime lastWriteTimeUtc = before.LastWriteTimeUtc;
-                await Task.Delay(250, cancellationToken);
-                FileInfo after = new(packagePath);
-
-                if (after.Exists && after.Length == length && after.LastWriteTimeUtc == lastWriteTimeUtc)
-                {
-                    return true;
-                }
-            }
-            catch (IOException)
-            {
-                await Task.Delay(250, cancellationToken);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                await Task.Delay(250, cancellationToken);
-            }
-        }
-
-        return false;
     }
 
     private Task DispatchAsync(Func<Task> action)

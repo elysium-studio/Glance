@@ -101,7 +101,7 @@ $MicrosoftStoreFlightId = Resolve-PublishSetting $MicrosoftStoreFlightId "GLANCE
 
 $GitRemoteName = "origin"
 $GitTagPrefix = "v"
-$VelopackPackId = "ElysiumStudio.Glance"
+$VelopackPackId = "Glance"
 $VelopackInstallerName = "$VelopackPackId-win-Setup.exe"
 $PublicInstallerName = "Glance-win-Setup.exe"
 
@@ -1056,7 +1056,7 @@ Write-Host "Publishing Glance v$Version" -ForegroundColor Cyan
     "-p:StripSymbols=true" `
     "-p:IncludeBundledGlanceModules=false" `
     "-p:Version=$dotnetVersion" `
-    "-p:AssemblyVersion=$dotnetVersion" `
+    "-p:AssemblyVersion=1.0.0.0" `
     "-p:FileVersion=$dotnetVersion"
 
 if ($LASTEXITCODE -ne 0)
@@ -1067,7 +1067,10 @@ if ($LASTEXITCODE -ne 0)
 
 Assert-ModuleFreeRelease -OutputDirectory $OutputPath
 
-New-ExternalIdentityPackage -Version $Version -OutputDirectory $OutputPath -MetadataPath $SigningMetadataPath -Sign:(-not $Local -and -not $SkipSigning)
+if (-not $Local)
+{
+    New-ExternalIdentityPackage -Version $Version -OutputDirectory $OutputPath -MetadataPath $SigningMetadataPath -Sign:(-not $SkipSigning)
+}
 
 $exePath = Get-ChildItem -Path $OutputPath -Filter "*.exe" | Select-Object -First 1
 

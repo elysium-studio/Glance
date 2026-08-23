@@ -20,7 +20,13 @@ internal static class ExternalPackageIdentity
 
         string packagePath = Path.Combine(AppContext.BaseDirectory, IdentityPackageFileName);
 
-        if (!File.Exists(packagePath) || HasMatchingRegistration(version))
+        if (!File.Exists(packagePath))
+        {
+            Unregister();
+            return;
+        }
+
+        if (HasMatchingRegistration(version))
         {
             return;
         }
@@ -30,11 +36,6 @@ internal static class ExternalPackageIdentity
 
     public static void Unregister()
     {
-        if (!PackageIdentity.IsExternalLocation)
-        {
-            return;
-        }
-
         try
         {
             RunPowerShell($"Get-AppxPackage -Name '{PackageName}' | Remove-AppxPackage -ErrorAction Stop");

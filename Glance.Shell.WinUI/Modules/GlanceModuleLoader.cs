@@ -126,19 +126,6 @@ internal static partial class GlanceModuleLoader
                     sources.Add(new ModuleSource(Path.GetFullPath(packagePath), contentDirectory));
                 }
             }
-
-            foreach (string priPath in Directory.EnumerateFiles(modulesDirectory, "*.pri", SearchOption.AllDirectories)
-                .Where(path => !IsRuntimePath(path))
-                .Order(StringComparer.OrdinalIgnoreCase))
-            {
-                string assemblyPath = Path.ChangeExtension(priPath, ".dll");
-
-                if (File.Exists(assemblyPath))
-                {
-                    string contentDirectory = Path.GetDirectoryName(assemblyPath)!;
-                    sources.Add(new ModuleSource(Path.GetFullPath(assemblyPath), contentDirectory));
-                }
-            }
         }
 
         return (ModuleSource[])[.. sources
@@ -147,10 +134,6 @@ internal static partial class GlanceModuleLoader
     }
 
     private static IEnumerable<string> GetModuleDirectories() => ModuleDirectories;
-
-    private static bool IsRuntimePath(string path) => Path.GetFullPath(path)
-        .Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-        .Contains("Runtime", StringComparer.OrdinalIgnoreCase);
 
     private static string? PreparePackage(string packagePath)
     {

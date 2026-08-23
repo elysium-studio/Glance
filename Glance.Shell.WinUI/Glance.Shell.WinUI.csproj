@@ -5,6 +5,7 @@
 		<TargetPlatformMinVersion>10.0.22000.0</TargetPlatformMinVersion>
 		<RootNamespace>Glance.Shell.WinUI</RootNamespace>
 		<AssemblyName>Glance</AssemblyName>
+		<ProjectPriFileName>resources.pri</ProjectPriFileName>
 		<AssemblyTitle>Glance</AssemblyTitle>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<Configurations>Debug;DebugPackaged;Release</Configurations>
@@ -505,10 +506,10 @@
 	<Target Name="CopyPriAndXbfToPublish" AfterTargets="Publish">
 		<ItemGroup>
 			<PriFiles Include="$(OutDir)*.pri" />
-			<XbfFiles Include="$(OutDir)*.xbf" />
+			<XbfFiles Include="$(OutDir)**\*.xbf" Exclude="$(OutDir)Modules\**\*.xbf" />
 		</ItemGroup>
 		<Copy SourceFiles="@(PriFiles)" DestinationFolder="$(PublishDir)" />
-		<Copy SourceFiles="@(XbfFiles)" DestinationFolder="$(PublishDir)" />
+		<Copy SourceFiles="@(XbfFiles)" DestinationFiles="@(XbfFiles->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" />
 	</Target>
 	<Target Name="ArrangeGlanceModulesInPublishOutput" AfterTargets="Publish" DependsOnTargets="CopyPriAndXbfToPublish">
 		<ItemGroup>

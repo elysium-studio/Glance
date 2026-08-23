@@ -220,7 +220,6 @@ public sealed partial class App
             }).ConfigureAwait(false);
 
             await moduleManager.LoadStartupModulesAsync().ConfigureAwait(false);
-            moduleManager.StartWatching();
         }
         catch (Exception exception)
         {

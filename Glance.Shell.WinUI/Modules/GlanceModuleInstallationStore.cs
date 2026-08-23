@@ -21,7 +21,6 @@ internal static class GlanceModuleInstallationStore
     {
         _ = Directory.CreateDirectory(RootDirectory);
         DeletePendingDirectories();
-        NormalizeLoosePackages();
     }
 
     public static void RemoveSuppressedPackages(IEnumerable<string> packageIds)
@@ -44,25 +43,6 @@ internal static class GlanceModuleInstallationStore
         }
 
         return Path.GetFileNameWithoutExtension(fullPackagePath);
-    }
-
-    public static string NormalizePackage(string packagePath)
-    {
-        string fullPackagePath = Path.GetFullPath(packagePath);
-        string? parentDirectory = Path.GetDirectoryName(fullPackagePath);
-
-        if (!string.Equals(parentDirectory, RootDirectory, StringComparison.OrdinalIgnoreCase))
-        {
-            return fullPackagePath;
-        }
-
-        ValidatePackage(fullPackagePath);
-        string packageId = Path.GetFileNameWithoutExtension(fullPackagePath);
-        string moduleDirectory = GetModuleDirectory(packageId);
-        string destinationPath = Path.Combine(moduleDirectory, $"{packageId}.glance");
-        _ = Directory.CreateDirectory(moduleDirectory);
-        File.Move(fullPackagePath, destinationPath, true);
-        return destinationPath;
     }
 
     public static string StagePackage(string packagePath)
@@ -146,66 +126,6 @@ internal static class GlanceModuleInstallationStore
         if (!containsResourceModule && !containsHeadlessModule)
         {
             throw new InvalidDataException("The package does not contain a Glance module entry assembly.");
-        }
-    }
-
-    private static void NormalizeLoosePackages()
-    {
-        foreach (string packagePath in Directory.EnumerateFiles(RootDirectory, "*.glance", SearchOption.TopDirectoryOnly).ToArray())
-        {
-            try
-            {
-                _ = NormalizePackage(packagePath);
-            }
-            catch (InvalidDataException)
-            {
-            }
-            catch (IOException)
-            {
-            }
-            catch (UnauthorizedAccessException)
-            {
-            }
-        }
-    }
-
-    private static bool FilesMatch(string firstPath,
-        string secondPath)
-    {
-        FileInfo first = new(firstPath);
-        FileInfo second = new(secondPath);
-
-        if (!second.Exists || first.Length != second.Length)
-        {
-            return false;
-        }
-
-        // File.Copy preserves this timestamp. Avoid rereading every bundled package
-        // during normal startup; fall back to byte comparison for ambiguous files.
-        if (first.LastWriteTimeUtc == second.LastWriteTimeUtc)
-        {
-            return true;
-        }
-
-        using FileStream firstStream = first.OpenRead();
-        using FileStream secondStream = second.OpenRead();
-        Span<byte> firstBuffer = stackalloc byte[8192];
-        Span<byte> secondBuffer = stackalloc byte[8192];
-
-        while (true)
-        {
-            int firstRead = firstStream.Read(firstBuffer);
-            int secondRead = secondStream.Read(secondBuffer);
-
-            if (firstRead != secondRead || !firstBuffer[..firstRead].SequenceEqual(secondBuffer[..secondRead]))
-            {
-                return false;
-            }
-
-            if (firstRead == 0)
-            {
-                return true;
-            }
         }
     }
 
