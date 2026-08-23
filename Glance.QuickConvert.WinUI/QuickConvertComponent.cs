@@ -60,7 +60,7 @@ public sealed partial class QuickConvertComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
-    public string SettingsCategory => GlanceModuleCategories.MediaAndCapture;
+    public string SettingsCategory => GlanceModuleCategories.Productivity;
 
     public string AccentResourceKey => "GlanceQuickConvertIconBrush";
 

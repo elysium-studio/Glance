@@ -54,7 +54,7 @@ public sealed partial class SystemMonitorComponent :
 
     public string Description => localizer.GetText("ModuleDescription");
 
-    public string SettingsCategory => GlanceModuleCategories.Information;
+    public string SettingsCategory => GlanceModuleCategories.DevicesAndSystem;
 
     public int Order => 30;
 
