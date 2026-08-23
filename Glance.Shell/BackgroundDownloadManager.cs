@@ -160,12 +160,9 @@ public sealed class BackgroundDownloadManager(HttpClient httpClient) :
                 _ = Directory.CreateDirectory(directory);
             }
 
-            if (request.Source.IsFile)
-            {
-                return await CopyFileAsync(operation, temporaryPath);
-            }
-
-            using HttpResponseMessage response = await httpClient.GetAsync(request.Source, HttpCompletionOption.ResponseHeadersRead, operation.Cancellation.Token);
+            using HttpResponseMessage response = await httpClient.GetAsync(request.Source,
+                HttpCompletionOption.ResponseHeadersRead,
+                operation.Cancellation.Token);
             response.EnsureSuccessStatusCode();
             long? totalBytes = response.Content.Headers.ContentLength;
             Update(operation, BackgroundDownloadStatus.Downloading, 0, totalBytes, null);
@@ -223,38 +220,6 @@ public sealed class BackgroundDownloadManager(HttpClient httpClient) :
                 operation.Snapshot.TotalBytes,
                 exception.Message);
         }
-    }
-
-    private async Task<BackgroundDownloadSnapshot> CopyFileAsync(DownloadOperation operation, string temporaryPath)
-    {
-        FileInfo sourceInfo = new(operation.Request.Source.LocalPath);
-        Update(operation, BackgroundDownloadStatus.Downloading, 0, sourceInfo.Length, null);
-        long bytesReceived = 0;
-
-        {
-            await using FileStream source = new(sourceInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan);
-            await using FileStream destination = new(temporaryPath, FileMode.Create, FileAccess.Write, FileShare.None, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan);
-            byte[] buffer = new byte[BufferSize];
-
-            while (true)
-            {
-                int read = await source.ReadAsync(buffer, operation.Cancellation.Token);
-
-                if (read == 0)
-                {
-                    break;
-                }
-
-                await destination.WriteAsync(buffer.AsMemory(0, read), operation.Cancellation.Token);
-                bytesReceived += read;
-                Update(operation, BackgroundDownloadStatus.Downloading, bytesReceived, sourceInfo.Length, null);
-            }
-
-            await destination.FlushAsync(operation.Cancellation.Token);
-        }
-
-        File.Move(temporaryPath, operation.Request.DestinationPath, true);
-        return Update(operation, BackgroundDownloadStatus.Completed, bytesReceived, sourceInfo.Length, null);
     }
 
     private BackgroundDownloadSnapshot Update(DownloadOperation operation,

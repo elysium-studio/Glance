@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using Glance.Application.Abstractions;
 
 namespace Glance.Shell.WinUI;
 
@@ -74,29 +73,14 @@ internal static class GlanceModuleInstallationStore
         string packageId = Path.GetFileNameWithoutExtension(sourcePath);
         string moduleDirectory = GetModuleDirectory(packageId);
         string destinationPath = Path.Combine(moduleDirectory, $"{packageId}.glance");
-        string previousPath = Path.Combine(moduleDirectory, $".{packageId}.previous");
         string temporaryPath = Path.Combine(moduleDirectory, $".{packageId}.{Guid.NewGuid():N}.installing");
         _ = Directory.CreateDirectory(moduleDirectory);
 
         try
         {
-            if (File.Exists(destinationPath))
-            {
-                File.Copy(destinationPath, previousPath, true);
-            }
-
             File.Copy(sourcePath, temporaryPath, true);
             File.Move(temporaryPath, destinationPath, true);
             return destinationPath;
-        }
-        catch
-        {
-            if (File.Exists(previousPath))
-            {
-                File.Copy(previousPath, destinationPath, true);
-            }
-
-            throw;
         }
         finally
         {
@@ -134,9 +118,7 @@ internal static class GlanceModuleInstallationStore
     {
         string fullPackagePath = Path.GetFullPath(packagePath);
         string moduleDirectory = Path.GetDirectoryName(fullPackagePath)!;
-        string packageId = Path.GetFileNameWithoutExtension(fullPackagePath);
         TryDeleteFile(fullPackagePath);
-        TryDeleteFile(Path.Combine(moduleDirectory, $".{packageId}.previous"));
         _ = TryDeleteDirectory(Path.Combine(moduleDirectory, "Runtime"));
 
         if (Directory.Exists(moduleDirectory) && !Directory.EnumerateFileSystemEntries(moduleDirectory).Any())
@@ -172,13 +154,6 @@ internal static class GlanceModuleInstallationStore
 
     private static void ValidatePackage(string packagePath)
     {
-        GlanceModulePackageManifest manifest = GlanceModulePackageReader.ReadManifest(packagePath);
-
-        if (!string.Equals(manifest.Id, Path.GetFileNameWithoutExtension(packagePath), StringComparison.OrdinalIgnoreCase))
-        {
-            throw new InvalidDataException("The module package name does not match its metadata.");
-        }
-
         using ZipArchive archive = ZipFile.OpenRead(packagePath);
         HashSet<string> entries = [with(StringComparer.OrdinalIgnoreCase), .. archive.Entries
             .Where(entry => !string.IsNullOrEmpty(entry.Name))

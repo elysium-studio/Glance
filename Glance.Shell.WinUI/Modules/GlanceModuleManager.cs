@@ -173,10 +173,9 @@ internal sealed class GlanceModuleManager :
             }
 
             string packageId = GlanceModuleInstallationStore.GetPackageId(result.SourcePath);
-            string packageVersion = GlanceModulePackageReader.TryReadManifest(result.SourcePath, out GlanceModulePackageManifest? manifest) && manifest is not null ? manifest.Version : "0.0.0";
             registeredInstallationIds = [.. components.Select(component => component.Id)];
             registeredPackageId = packageId;
-            installations.Register(packageId, packageVersion, registeredInstallationIds, () => UninstallAsync(result.SourcePath));
+            installations.Register(packageId, registeredInstallationIds, () => UninstallAsync(result.SourcePath));
             quickConverterRegistry.Register(packageId, quickConverters);
             quickConvertersRegistered = true;
             await quickConverterPreferences.RegisterAsync(quickConverters.Select(converter => converter.Descriptor.Id));

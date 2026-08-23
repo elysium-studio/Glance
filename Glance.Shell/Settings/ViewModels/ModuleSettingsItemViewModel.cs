@@ -10,10 +10,36 @@ public sealed partial class ModuleSettingsItemViewModel :
     private readonly Action<ModuleSettingsItemViewModel> navigate;
     private readonly IGlanceComponent? component;
     private readonly Func<ModuleSettingsItemViewModel, Task<bool>>? uninstall;
-    private readonly Func<ModuleSettingsItemViewModel, Task<bool>>? install;
     private bool suppressPersistence;
 
-    public ModuleSettingsItemViewModel(string id, string displayName, string description, IGlanceComponent? component, bool isEnabled, IEnumerable<IGlanceModuleSettingViewModel> settings, Action<ModuleSettingsItemViewModel> navigate, Func<ModuleSettingsItemViewModel, bool, Task<bool>> setEnabled, Func<ModuleSettingsItemViewModel, Task<bool>>? uninstall = null, Func<ModuleSettingsItemViewModel, Task<bool>>? install = null)
+    public ModuleSettingsItemViewModel(string id,
+        string displayName,
+        string description,
+        bool isEnabled,
+        IEnumerable<IGlanceModuleSettingViewModel> settings,
+        Action<ModuleSettingsItemViewModel> navigate,
+        Func<ModuleSettingsItemViewModel, bool, Task<bool>> setEnabled) :
+        this(id,
+            displayName,
+            description,
+            null,
+            isEnabled,
+            settings,
+            navigate,
+            setEnabled,
+            null)
+    {
+    }
+
+    public ModuleSettingsItemViewModel(string id,
+        string displayName,
+        string description,
+        IGlanceComponent? component,
+        bool isEnabled,
+        IEnumerable<IGlanceModuleSettingViewModel> settings,
+        Action<ModuleSettingsItemViewModel> navigate,
+        Func<ModuleSettingsItemViewModel, bool, Task<bool>> setEnabled,
+        Func<ModuleSettingsItemViewModel, Task<bool>>? uninstall = null)
     {
         Id = id;
         DisplayName = displayName;
@@ -26,10 +52,8 @@ public sealed partial class ModuleSettingsItemViewModel :
         this.component = component;
         this.navigate = navigate;
         this.uninstall = uninstall;
-        this.install = install;
         this.isEnabled = isEnabled;
         SetEnabled = setEnabled;
-        PackageState = component is null ? ModulePackageState.Available : ModulePackageState.Installed;
         RefreshSettings();
     }
 
@@ -43,53 +67,21 @@ public sealed partial class ModuleSettingsItemViewModel :
 
     public object? AccentResourceSource { get; }
 
-    public string IconFontFamily { get; private set; }
+    public string IconFontFamily { get; }
 
-    public string IconGlyph { get; private set; }
-
-    public GlanceModuleFeedItem? FeedItem { get; private set; }
-
-    public GlanceModuleFeedIcon? FeedIcon => FeedItem?.Icon;
+    public string IconGlyph { get; }
 
     public object? CreateIcon(bool isLightTheme) => component?.CreateIcon(isLightTheme);
 
     public bool HasSettings => Settings.HasSettings;
 
-    public bool IsInstalled => component is not null;
+    public bool CanExpand => IsEnabled && HasSettings;
 
-    public bool CanExpand => IsInstalled && IsEnabled && HasSettings;
-
-    public bool CanToggle => IsInstalled;
-
-    public bool CanUninstall => IsInstalled && uninstall is not null;
-
-    public bool ShowInstallAction => !IsInstalled && FeedItem is not null;
-
-    public bool ShowUpdateAction => IsInstalled && FeedItem is not null && PackageState == ModulePackageState.UpdateAvailable;
-
-    public bool CanInstall => ShowInstallAction && PackageState == ModulePackageState.Available && !IsBusy;
-
-    public bool CanUpdate => ShowUpdateAction && !IsBusy;
+    public bool CanUninstall => uninstall is not null;
 
     public ModuleSettingsViewModel Settings { get; }
 
     private Func<ModuleSettingsItemViewModel, bool, Task<bool>> SetEnabled { get; }
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanExpand))]
-    private bool isEnabled;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanInstall))]
-    [NotifyPropertyChangedFor(nameof(CanUpdate))]
-    private bool isBusy;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowInstallAction))]
-    [NotifyPropertyChangedFor(nameof(ShowUpdateAction))]
-    [NotifyPropertyChangedFor(nameof(CanInstall))]
-    [NotifyPropertyChangedFor(nameof(CanUpdate))]
-    private ModulePackageState packageState;
 
     public void NavigateToSettings()
     {
@@ -99,42 +91,11 @@ public sealed partial class ModuleSettingsItemViewModel :
         }
     }
 
-    public void SetFeedItem(GlanceModuleFeedItem feedItem, bool feedAvailable, string? installedVersion)
-    {
-        FeedItem = feedItem;
-        IconFontFamily = string.IsNullOrWhiteSpace(feedItem.Icon.FontFamily) ? "Segoe Fluent Icons" : feedItem.Icon.FontFamily;
-        IconGlyph = feedItem.Icon.Type == GlanceModuleIconType.Glyph ? feedItem.Icon.Source : "\uE8B7";
-        PackageState = ResolvePackageState(feedItem, feedAvailable, installedVersion);
-        OnPropertyChanged(nameof(FeedItem));
-        OnPropertyChanged(nameof(FeedIcon));
-        OnPropertyChanged(nameof(IconFontFamily));
-        OnPropertyChanged(nameof(IconGlyph));
-        OnPropertyChanged(nameof(ShowInstallAction));
-        OnPropertyChanged(nameof(ShowUpdateAction));
-        OnPropertyChanged(nameof(CanInstall));
-        OnPropertyChanged(nameof(CanUpdate));
-    }
-
-    public async Task<bool> InstallAsync()
-    {
-        if ((!CanInstall && !CanUpdate) || install is null)
-        {
-            return false;
-        }
-
-        IsBusy = true;
-
-        try
-        {
-            return await install(this);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
     public Task<bool> UninstallAsync() => uninstall?.Invoke(this) ?? Task.FromResult(false);
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanExpand))]
+    private bool isEnabled;
 
     partial void OnIsEnabledChanged(bool value)
     {
@@ -144,27 +105,6 @@ public sealed partial class ModuleSettingsItemViewModel :
         {
             PersistEnabled(value);
         }
-    }
-
-    public void Dispose()
-    {
-        Settings.Dispose();
-        GC.SuppressFinalize(this);
-    }
-
-    private static ModulePackageState ResolvePackageState(GlanceModuleFeedItem feedItem, bool feedAvailable, string? installedVersion)
-    {
-        if (!feedItem.IsCompatible)
-        {
-            return ModulePackageState.Incompatible;
-        }
-
-        if (installedVersion is not null)
-        {
-            return Version.TryParse(installedVersion, out Version? installed) && Version.TryParse(feedItem.Version, out Version? available) && available > installed ? ModulePackageState.UpdateAvailable : ModulePackageState.Installed;
-        }
-
-        return feedAvailable ? ModulePackageState.Available : ModulePackageState.Unavailable;
     }
 
     private async void PersistEnabled(bool value)
@@ -177,6 +117,12 @@ public sealed partial class ModuleSettingsItemViewModel :
         suppressPersistence = true;
         IsEnabled = !value;
         suppressPersistence = false;
+    }
+
+    public void Dispose()
+    {
+        Settings.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     private void RefreshSettings() => Settings.SetEnabled(IsEnabled);

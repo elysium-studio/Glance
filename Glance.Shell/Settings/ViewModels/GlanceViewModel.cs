@@ -36,18 +36,10 @@ public sealed partial class GlanceViewModel :
             dispatcher,
             settings,
             categories);
-        AddCategory(GlanceSettingsCategories.ModuleFeeds,
-            localizer.GetText("ModuleFeedsSettingsTitle"),
-            "\uE774",
-            messenger,
-            dispatcher,
-            settings,
-            categories);
 
         foreach (IGrouping<string, IGlanceViewModel> category in categories.Where(category =>
             !string.Equals(category.Key, GlanceSettingsCategories.AppearanceAndBehaviour, StringComparison.OrdinalIgnoreCase) &&
-            !string.Equals(category.Key, GlanceSettingsCategories.SpeechAndCommands, StringComparison.OrdinalIgnoreCase) &&
-            !string.Equals(category.Key, GlanceSettingsCategories.ModuleFeeds, StringComparison.OrdinalIgnoreCase)))
+            !string.Equals(category.Key, GlanceSettingsCategories.SpeechAndCommands, StringComparison.OrdinalIgnoreCase)))
         {
             Add(new GlanceSettingsCategoryViewModel(category.Key,
                 category.Key,

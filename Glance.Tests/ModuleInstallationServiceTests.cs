@@ -10,7 +10,7 @@ public sealed class ModuleInstallationServiceTests
     {
         ModuleInstallationService service = new();
         bool uninstalled = false;
-        service.Register("QuickConvertImage", "1.0.0", [], () =>
+        service.Register("QuickConvertImage", [], () =>
         {
             uninstalled = true;
             return Task.FromResult(true);

@@ -20,7 +20,6 @@
 		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 		<StartupObject>Glance.Shell.WinUI.Start</StartupObject>
 		<DefaultLanguage>en</DefaultLanguage>
-		<IncludeBundledGlanceModules Condition="'$(IncludeBundledGlanceModules)' == ''">false</IncludeBundledGlanceModules>
 		<MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3842</MSBuildWarningsAsMessages>
 		<NoWarn>$(NoWarn);CA2252;CS8305</NoWarn>
 		<ApplicationIcon>Assets\Glance.ico</ApplicationIcon>
@@ -124,8 +123,6 @@
 		<ParameterGroup>
 			<SourceDirectory ParameterType="System.String" Required="true" />
 			<ArchivePath ParameterType="System.String" Required="true" />
-			<PackageVersion ParameterType="System.String" Required="false" />
-			<ModuleApiVersion ParameterType="System.Int32" Required="false" />
 		</ParameterGroup>
 		<Task>
 			<Using Namespace="System.IO" />
@@ -145,15 +142,6 @@
           using (ZipArchive archive = ZipFile.Open(ArchivePath, ZipArchiveMode.Create))
           {
             string sourceDirectoryPrefix = Path.GetFullPath(SourceDirectory).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
-			string packageId = Path.GetFileNameWithoutExtension(ArchivePath);
-			string packageVersion = string.IsNullOrWhiteSpace(PackageVersion) ? "1.0.0" : PackageVersion;
-			int moduleApiVersion = ModuleApiVersion <= 0 ? 1 : ModuleApiVersion;
-			ZipArchiveEntry manifestEntry = archive.CreateEntry("module.json", CompressionLevel.Optimal);
-
-			using (StreamWriter writer = new StreamWriter(manifestEntry.Open()))
-			{
-			  writer.Write($"{{\"schemaVersion\":1,\"id\":\"{packageId}\",\"version\":\"{packageVersion}\",\"moduleApiVersion\":{moduleApiVersion},\"dependencies\":[]}}");
-			}
 
             foreach (string file in Directory.EnumerateFiles(SourceDirectory, "*", SearchOption.AllDirectories).OrderBy(path => path, System.StringComparer.OrdinalIgnoreCase))
             {
@@ -392,60 +380,60 @@
 		<Copy SourceFiles="@(GlanceModuleBuildFile)" DestinationFiles="@(GlanceModuleBuildFile->'$(OutDir)Modules\%(ModuleName)\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
 		<Copy SourceFiles="@(GlanceModuleRuntimeBuildFile)" DestinationFiles="@(GlanceModuleRuntimeBuildFile->'$(OutDir)Modules\%(ModuleName)\runtimes\win-x64\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
 		<Copy SourceFiles="@(GlanceModuleVulkanRuntimeBuildFile)" DestinationFiles="@(GlanceModuleVulkanRuntimeBuildFile->'$(OutDir)Modules\%(ModuleName)\runtimes\vulkan\win-x64\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Assistant" ArchivePath="$(OutDir)Modules\Assistant.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\AppMixer" ArchivePath="$(OutDir)Modules\AppMixer.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\AudioSwitcher" ArchivePath="$(OutDir)Modules\AudioSwitcher.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Clipboard" ArchivePath="$(OutDir)Modules\Clipboard.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ColorPicker" ArchivePath="$(OutDir)Modules\ColorPicker.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\DevicePresence" ArchivePath="$(OutDir)Modules\DevicePresence.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\DropShelf" ArchivePath="$(OutDir)Modules\DropShelf.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Fasting" ArchivePath="$(OutDir)Modules\Fasting.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\FocusSession" ArchivePath="$(OutDir)Modules\FocusSession.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Hydration" ArchivePath="$(OutDir)Modules\Hydration.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Inspector" ArchivePath="$(OutDir)Modules\Inspector.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\InspectorApplication" ArchivePath="$(OutDir)Modules\InspectorApplication.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\InspectorArchive" ArchivePath="$(OutDir)Modules\InspectorArchive.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\InspectorDocument" ArchivePath="$(OutDir)Modules\InspectorDocument.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\InspectorFileSystem" ArchivePath="$(OutDir)Modules\InspectorFileSystem.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\InspectorImage" ArchivePath="$(OutDir)Modules\InspectorImage.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\InspectorMedia" ArchivePath="$(OutDir)Modules\InspectorMedia.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Infinity" ArchivePath="$(OutDir)Modules\Infinity.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\KeepAwake" ArchivePath="$(OutDir)Modules\KeepAwake.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Magnifier" ArchivePath="$(OutDir)Modules\Magnifier.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Media" ArchivePath="$(OutDir)Modules\Media.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Spotify" ArchivePath="$(OutDir)Modules\Spotify.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\SpeechToText" ArchivePath="$(OutDir)Modules\SpeechToText.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Nemotron" ArchivePath="$(OutDir)Modules\Nemotron.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Whisper" ArchivePath="$(OutDir)Modules\Whisper.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Network" ArchivePath="$(OutDir)Modules\Network.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Power" ArchivePath="$(OutDir)Modules\Power.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Presence" ArchivePath="$(OutDir)Modules\Presence.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\PrivacyControls" ArchivePath="$(OutDir)Modules\PrivacyControls.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\QuickConvert" ArchivePath="$(OutDir)Modules\QuickConvert.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Archive" ArchivePath="$(OutDir)Modules\Archive.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\QuickConvertImage" ArchivePath="$(OutDir)Modules\QuickConvertImage.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\QuickConvertOnlineMedia" ArchivePath="$(OutDir)Modules\QuickConvertOnlineMedia.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\QuickConvertVideo" ArchivePath="$(OutDir)Modules\QuickConvertVideo.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\RemovableDevices" ArchivePath="$(OutDir)Modules\RemovableDevices.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Reminders" ArchivePath="$(OutDir)Modules\Reminders.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ScreenCapture" ArchivePath="$(OutDir)Modules\ScreenCapture.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ScreenRecorder" ArchivePath="$(OutDir)Modules\ScreenRecorder.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ScreenLens" ArchivePath="$(OutDir)Modules\ScreenLens.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Stopwatch" ArchivePath="$(OutDir)Modules\Stopwatch.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Stash" ArchivePath="$(OutDir)Modules\Stash.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\SystemMonitor" ArchivePath="$(OutDir)Modules\SystemMonitor.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\SystemIndicators" ArchivePath="$(OutDir)Modules\SystemIndicators.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ThemeSwitcher" ArchivePath="$(OutDir)Modules\ThemeSwitcher.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Timer" ArchivePath="$(OutDir)Modules\Timer.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Torrent" ArchivePath="$(OutDir)Modules\Torrent.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\VoiceNotes" ArchivePath="$(OutDir)Modules\VoiceNotes.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Weather" ArchivePath="$(OutDir)Modules\Weather.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
-		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\WorldClock" ArchivePath="$(OutDir)Modules\WorldClock.glance" PackageVersion="$(GlanceModuleVersion)" ModuleApiVersion="$(GlanceModuleApiVersion)" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Assistant" ArchivePath="$(OutDir)Modules\Assistant.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\AppMixer" ArchivePath="$(OutDir)Modules\AppMixer.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\AudioSwitcher" ArchivePath="$(OutDir)Modules\AudioSwitcher.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Clipboard" ArchivePath="$(OutDir)Modules\Clipboard.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ColorPicker" ArchivePath="$(OutDir)Modules\ColorPicker.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\DevicePresence" ArchivePath="$(OutDir)Modules\DevicePresence.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\DropShelf" ArchivePath="$(OutDir)Modules\DropShelf.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Fasting" ArchivePath="$(OutDir)Modules\Fasting.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\FocusSession" ArchivePath="$(OutDir)Modules\FocusSession.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Hydration" ArchivePath="$(OutDir)Modules\Hydration.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Inspector" ArchivePath="$(OutDir)Modules\Inspector.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\InspectorApplication" ArchivePath="$(OutDir)Modules\InspectorApplication.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\InspectorArchive" ArchivePath="$(OutDir)Modules\InspectorArchive.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\InspectorDocument" ArchivePath="$(OutDir)Modules\InspectorDocument.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\InspectorFileSystem" ArchivePath="$(OutDir)Modules\InspectorFileSystem.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\InspectorImage" ArchivePath="$(OutDir)Modules\InspectorImage.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\InspectorMedia" ArchivePath="$(OutDir)Modules\InspectorMedia.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Infinity" ArchivePath="$(OutDir)Modules\Infinity.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\KeepAwake" ArchivePath="$(OutDir)Modules\KeepAwake.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Magnifier" ArchivePath="$(OutDir)Modules\Magnifier.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Media" ArchivePath="$(OutDir)Modules\Media.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Spotify" ArchivePath="$(OutDir)Modules\Spotify.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\SpeechToText" ArchivePath="$(OutDir)Modules\SpeechToText.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Nemotron" ArchivePath="$(OutDir)Modules\Nemotron.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Whisper" ArchivePath="$(OutDir)Modules\Whisper.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Network" ArchivePath="$(OutDir)Modules\Network.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Power" ArchivePath="$(OutDir)Modules\Power.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Presence" ArchivePath="$(OutDir)Modules\Presence.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\PrivacyControls" ArchivePath="$(OutDir)Modules\PrivacyControls.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\QuickConvert" ArchivePath="$(OutDir)Modules\QuickConvert.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Archive" ArchivePath="$(OutDir)Modules\Archive.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\QuickConvertImage" ArchivePath="$(OutDir)Modules\QuickConvertImage.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\QuickConvertOnlineMedia" ArchivePath="$(OutDir)Modules\QuickConvertOnlineMedia.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\QuickConvertVideo" ArchivePath="$(OutDir)Modules\QuickConvertVideo.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\RemovableDevices" ArchivePath="$(OutDir)Modules\RemovableDevices.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Reminders" ArchivePath="$(OutDir)Modules\Reminders.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ScreenCapture" ArchivePath="$(OutDir)Modules\ScreenCapture.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ScreenRecorder" ArchivePath="$(OutDir)Modules\ScreenRecorder.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ScreenLens" ArchivePath="$(OutDir)Modules\ScreenLens.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Stopwatch" ArchivePath="$(OutDir)Modules\Stopwatch.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Stash" ArchivePath="$(OutDir)Modules\Stash.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\SystemMonitor" ArchivePath="$(OutDir)Modules\SystemMonitor.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\SystemIndicators" ArchivePath="$(OutDir)Modules\SystemIndicators.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\ThemeSwitcher" ArchivePath="$(OutDir)Modules\ThemeSwitcher.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Timer" ArchivePath="$(OutDir)Modules\Timer.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Torrent" ArchivePath="$(OutDir)Modules\Torrent.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\VoiceNotes" ArchivePath="$(OutDir)Modules\VoiceNotes.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\Weather" ArchivePath="$(OutDir)Modules\Weather.glance" />
+		<CreateGlanceModulePackage SourceDirectory="$(OutDir)Modules\WorldClock" ArchivePath="$(OutDir)Modules\WorldClock.glance" />
 		<RemoveDir Directories="@(GlanceModuleStagingDirectory)" />
 		<Delete Files="@(GlanceModuleBuildRootFile)" />
 		<RemoveDir Directories="@(GlanceModuleRootXbfDirectory)" />
 	</Target>
-	<Target Name="IncludeGlanceModulesInPackage" BeforeTargets="_ComputeAppxPackagePayload" DependsOnTargets="ArrangeGlanceModulesInBuildOutput" Condition="'$(EnableMsixTooling)' == 'true' and '$(IncludeBundledGlanceModules)' == 'true'">
+	<Target Name="IncludeGlanceModulesInPackage" BeforeTargets="_ComputeAppxPackagePayload" DependsOnTargets="ArrangeGlanceModulesInBuildOutput" Condition="'$(EnableMsixTooling)' == 'true'">
 		<PropertyGroup>
 			<GlanceModulePackageDirectory>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(OutDir)', 'Modules'))</GlanceModulePackageDirectory>
 		</PropertyGroup>
@@ -520,7 +508,7 @@
 			<GlanceModulePublishRootFile Include="$(PublishDir)Glance.Fasting.*" />
 		</ItemGroup>
 		<RemoveDir Directories="$(PublishDir)Modules" />
-		<Copy SourceFiles="@(GlanceModulePublishFile)" DestinationFolder="$(PublishDir)Modules" SkipUnchangedFiles="true" Condition="'$(IncludeBundledGlanceModules)' == 'true'" />
+		<Copy SourceFiles="@(GlanceModulePublishFile)" DestinationFolder="$(PublishDir)Modules" SkipUnchangedFiles="true" />
 		<Delete Files="@(GlanceModulePublishRootFile)" />
 	</Target>
 	<UsingTask TaskName="ExtractWindowsAppRuntimeInsightsResource" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
@@ -557,9 +545,6 @@
 		</PropertyGroup>
 		<Error Condition="!Exists('$(WindowsAppRuntimeFrameworkMsix)')" Text="Windows App Runtime framework package was not found at $(WindowsAppRuntimeFrameworkMsix)." />
 		<ExtractWindowsAppRuntimeInsightsResource ArchivePath="$(WindowsAppRuntimeFrameworkMsix)" OutputPath="$(PublishDir)Microsoft.WindowsAppRuntime.Insights.Resource.dll" />
-	</Target>
-	<Target Name="CreateLocalGlanceModuleFeed" AfterTargets="ArrangeGlanceModulesInBuildOutput" Condition="'$(DesignTimeBuild)' != 'true' and ('$(Configuration)' == 'Debug' or '$(Configuration)' == 'DebugPackaged')">
-		<Exec Command="&quot;$(SystemRoot)\System32\WindowsPowerShell\v1.0\powershell.exe&quot; -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\build-local-module-feed.ps1&quot; -PackageDirectory &quot;$(OutDir)Modules&quot; -OutputPath &quot;$(OutDir)module-feed.json&quot;" />
 	</Target>
 	<Target Name="CopyWindowsAppRuntimeInsightsResourceToOutput" AfterTargets="Build" Condition="'$(WindowsAppSDKSelfContained)' == 'true'">
 		<PropertyGroup>

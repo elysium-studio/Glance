@@ -20,7 +20,6 @@ param(
     [string]$MicrosoftStoreClientId = "",
     [string]$MicrosoftStoreClientSecret = "",
     [switch]$SkipSftpUpload,
-    [switch]$SkipModuleUpload,
     [switch]$SkipSigning,
     [switch]$SkipGitRelease,
     [switch]$SkipMicrosoftStore,
@@ -280,16 +279,13 @@ function Send-GitHubRelease
         [string]$RepoPath,
         [string]$Version,
         [string[]]$ReleaseNotes,
-        [string[]]$AssetPaths
+        [string]$AssetPath
     )
 
-    foreach ($assetPath in $AssetPaths)
+    if (-not (Test-Path $AssetPath))
     {
-        if (-not (Test-Path $assetPath))
-        {
-            Write-Host "Release asset not found: $assetPath" -ForegroundColor Red
-            exit 1
-        }
+        Write-Host "Release asset not found: $AssetPath" -ForegroundColor Red
+        exit 1
     }
 
     Write-Host ""
@@ -331,7 +327,7 @@ function Send-GitHubRelease
 
         $ghArgs = @(
             "release", "create", $tagName
-            $AssetPaths
+            $AssetPath
             "--title", $releaseTitle
             "--notes-file", $notesPath
         )
@@ -366,43 +362,7 @@ function Send-GitHubRelease
         }
     }
 
-    Write-Host "GitHub release $tagName created with $($AssetPaths.Count) assets" -ForegroundColor Green
-}
-
-function Assert-ModuleFreeRelease
-{
-    param(
-        [string]$OutputDirectory,
-        [string[]]$PackagePaths = @()
-    )
-
-    $bundledModuleFiles = @(Get-ChildItem $OutputDirectory -Filter "*.glance" -File -Recurse -ErrorAction SilentlyContinue)
-
-    if ($bundledModuleFiles.Count -gt 0)
-    {
-        throw "The application release contains bundled module packages: $($bundledModuleFiles.FullName -join ', ')"
-    }
-
-    Add-Type -AssemblyName System.IO.Compression.FileSystem
-
-    foreach ($packagePath in $PackagePaths)
-    {
-        $archive = [IO.Compression.ZipFile]::OpenRead($packagePath)
-
-        try
-        {
-            $bundledEntries = @($archive.Entries | Where-Object { $_.FullName.EndsWith('.glance', [StringComparison]::OrdinalIgnoreCase) -or $_.FullName -match '(^|/)Modules/' })
-
-            if ($bundledEntries.Count -gt 0)
-            {
-                throw "$(Split-Path $packagePath -Leaf) contains bundled module packages: $($bundledEntries.FullName -join ', ')"
-            }
-        }
-        finally
-        {
-            $archive.Dispose()
-        }
-    }
+    Write-Host "GitHub release $tagName created with asset $(Split-Path $AssetPath -Leaf)" -ForegroundColor Green
 }
 
 function Test-AzureSigningAuth
@@ -898,17 +858,11 @@ if ($GitReleaseOnly)
     }
 
     $InstallerPath = "$FeedPath\$PublicInstallerName"
-    $FullPackagePath = "$FeedPath\$VelopackPackId-$Version-full.nupkg"
-    $DeltaPackagePath = "$FeedPath\$VelopackPackId-$Version-delta.nupkg"
-    $releaseAssetPaths = @($InstallerPath, $FullPackagePath, $DeltaPackagePath)
 
-    foreach ($releaseAssetPath in $releaseAssetPaths)
+    if (-not (Test-Path $InstallerPath))
     {
-        if (-not (Test-Path $releaseAssetPath))
-        {
-            Write-Host "Release asset not found at $releaseAssetPath. Build it first without -GitReleaseOnly." -ForegroundColor Red
-            exit 1
-        }
+        Write-Host "Installer not found at $InstallerPath. Build it first without -GitReleaseOnly." -ForegroundColor Red
+        exit 1
     }
 
     $releaseNotes = @($existingRelease.releaseNotes)
@@ -916,7 +870,7 @@ if ($GitReleaseOnly)
     Write-Host ""
     Write-Host "Skipping build, signing, packaging and SFTP - releasing existing v$Version to GitHub only" -ForegroundColor Cyan
 
-    Send-GitHubRelease -RepoPath $PSScriptRoot -Version $Version -ReleaseNotes $releaseNotes -AssetPaths $releaseAssetPaths
+    Send-GitHubRelease -RepoPath $PSScriptRoot -Version $Version -ReleaseNotes $releaseNotes -AssetPath $InstallerPath
 
     exit 0
 }
@@ -1022,8 +976,6 @@ else
 }
 $InstallerPath = "$FeedPath\$PublicInstallerName"
 $VelopackInstallerPath = "$FeedPath\$VelopackInstallerName"
-$FullPackagePath = "$FeedPath\$VelopackPackId-$Version-full.nupkg"
-$DeltaPackagePath = "$FeedPath\$VelopackPackId-$Version-delta.nupkg"
 $publishRootPath = Split-Path $OutputPath -Parent
 
 if (Test-Path $publishRootPath)
@@ -1054,7 +1006,6 @@ Write-Host "Publishing Glance v$Version" -ForegroundColor Cyan
     "-p:DebugType=None" `
     "-p:DebugSymbols=false" `
     "-p:StripSymbols=true" `
-    "-p:IncludeBundledGlanceModules=false" `
     "-p:Version=$dotnetVersion" `
     "-p:AssemblyVersion=$dotnetVersion" `
     "-p:FileVersion=$dotnetVersion"
@@ -1064,8 +1015,6 @@ if ($LASTEXITCODE -ne 0)
     Write-Host "Build failed with exit code $LASTEXITCODE" -ForegroundColor Red
     exit $LASTEXITCODE
 }
-
-Assert-ModuleFreeRelease -OutputDirectory $OutputPath
 
 New-ExternalIdentityPackage -Version $Version -OutputDirectory $OutputPath -MetadataPath $SigningMetadataPath -Sign:(-not $Local -and -not $SkipSigning)
 
@@ -1120,18 +1069,6 @@ if (-not (Test-Path $VelopackInstallerPath))
 
 Copy-Item $VelopackInstallerPath $InstallerPath -Force
 
-if (-not (Test-Path $FullPackagePath))
-{
-    throw "The full update package was not created: $FullPackagePath"
-}
-
-if (-not (Test-Path $DeltaPackagePath))
-{
-    throw "The delta update package was not created: $DeltaPackagePath"
-}
-
-Assert-ModuleFreeRelease -OutputDirectory $OutputPath -PackagePaths @($FullPackagePath, $DeltaPackagePath)
-
 if (-not $SkipMicrosoftStore)
 {
     Write-Host ""
@@ -1182,19 +1119,7 @@ if (-not $SkipSftpUpload)
     Send-SftpRelease $FeedPath $ReleaseLogPath
 }
 
-if (-not $SkipSftpUpload -and -not $SkipModuleUpload)
-{
-    Write-Host ""
-    Write-Host "Publishing complete module feed..." -ForegroundColor Cyan
-    & (Join-Path $PSScriptRoot "publish-modules.ps1") -All -ConfigurationPath $ConfigurationPath
-
-    if ($LASTEXITCODE -ne 0)
-    {
-        throw "Module feed publishing failed with exit code $LASTEXITCODE."
-    }
-}
-
 if (-not $SkipGitRelease)
 {
-    Send-GitHubRelease -RepoPath $PSScriptRoot -Version $Version -ReleaseNotes $releaseNotes -AssetPaths @($InstallerPath, $FullPackagePath, $DeltaPackagePath)
+    Send-GitHubRelease -RepoPath $PSScriptRoot -Version $Version -ReleaseNotes $releaseNotes -AssetPath $InstallerPath
 }

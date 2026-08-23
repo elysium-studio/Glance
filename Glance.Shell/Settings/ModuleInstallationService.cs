@@ -46,30 +46,13 @@ public sealed class ModuleInstallationService
         }
     }
 
-    public bool IsInstalled(string packageId)
-    {
-        lock (synchronization)
-        {
-            return packages.ContainsKey(packageId);
-        }
-    }
-
-    public string? GetInstalledVersion(string packageId)
-    {
-        lock (synchronization)
-        {
-            return packages.TryGetValue(packageId, out ModuleRegistration? registration) ? registration.Version : null;
-        }
-    }
-
-    public void Register(string packageId, string version, IEnumerable<string> componentIds, Func<Task<bool>> uninstall)
+    public void Register(string packageId, IEnumerable<string> componentIds, Func<Task<bool>> uninstall)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
-        ArgumentException.ThrowIfNullOrWhiteSpace(version);
         ArgumentNullException.ThrowIfNull(componentIds);
         ArgumentNullException.ThrowIfNull(uninstall);
 
-        ModuleRegistration registration = new(packageId, version, uninstall);
+        ModuleRegistration registration = new(packageId, uninstall);
 
         lock (synchronization)
         {

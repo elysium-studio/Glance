@@ -41,22 +41,14 @@ public sealed class SetupTourViewModelTests
     {
         GlanceSettings settings = new();
         TestWritableOptions writer = new(settings);
-        TestComponent weather = new("Weather");
-        TestComponent timer = new("Timer");
-        ModulePreferenceService preferences = new([weather, timer], settings, writer);
-        ModuleInstallationService installations = new();
-        installations.Register("Timer", "1.0.0", ["Timer"], async () =>
-        {
-            await preferences.UnregisterComponentsAsync([timer]);
-            return true;
-        });
-        SetupTourViewModel viewModel = CreateViewModel(settings, preferences, writer, installations: installations);
+        ModulePreferenceService preferences = new([new TestComponent("Weather"), new TestComponent("Timer")], settings, writer);
+        SetupTourViewModel viewModel = CreateViewModel(settings, preferences, writer);
         TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
         viewModel.Finished += (_, _) => completion.SetResult();
         await viewModel.SelectExpansionModeAsync(GlanceExpansionMode.AlwaysExpanded);
         await viewModel.SelectAutoHideAsync(true);
         await viewModel.SelectPlacementAsync(GlancePlacement.Bottom);
-        await viewModel.Modules[1].RemoveAsync();
+        viewModel.Modules[1].IsEnabled = false;
 
         Assert.Equal(GlanceExpansionMode.AlwaysExpanded, settings.ExpansionMode);
         Assert.True(settings.AutoHide);
@@ -75,15 +67,10 @@ public sealed class SetupTourViewModelTests
         Assert.True(writer.WriteCount >= 2);
     }
 
-    private static SetupTourViewModel CreateViewModel(GlanceSettings settings, ModulePreferenceService preferences, TestWritableOptions writer, TestGlanceModuleFeedService? feed = null, ModuleInstallationService? installations = null) => new(settings,
+    private static SetupTourViewModel CreateViewModel(GlanceSettings settings, ModulePreferenceService preferences, TestWritableOptions writer) => new(settings,
             preferences,
             writer,
             new GlanceModuleCategoryResolver(new TestLocalizer()),
-            feed ?? new TestGlanceModuleFeedService(),
-            new TestGlanceModulePackageService(),
-            installations ?? new ModuleInstallationService(),
-            new ImmediateTestDispatcher(),
-            new TestLocalizer(),
             NullLogger<SetupTourViewModel>.Instance);
 
     private sealed class TestComponent(string id) :
