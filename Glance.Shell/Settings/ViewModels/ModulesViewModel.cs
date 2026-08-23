@@ -17,13 +17,17 @@ public sealed partial class ModulesViewModel :
     private readonly ITextLocalizer localizer;
     private readonly ModulePreferenceService preferences;
     private readonly ModuleInstallationService installations;
+    private readonly IGlanceModuleFeedService feed;
+    private readonly IGlanceModulePackageService packages;
 
-    public ModulesViewModel(IServiceProvider provider, IServiceFactory factory, IMessenger messenger, IDisposer disposer, IDispatcher dispatcher, ModulePreferenceService preferences, ModuleInstallationService installations, IApplicationRestartService applicationRestart, ITextLocalizer localizer, IGlanceModuleCategoryResolver categoryResolver, IEnumerable<IGlanceModuleSettingViewModel> settings) :
+    public ModulesViewModel(IServiceProvider provider, IServiceFactory factory, IMessenger messenger, IDisposer disposer, IDispatcher dispatcher, ModulePreferenceService preferences, ModuleInstallationService installations, IGlanceModuleFeedService feed, IGlanceModulePackageService packages, IApplicationRestartService applicationRestart, ITextLocalizer localizer, IGlanceModuleCategoryResolver categoryResolver, IEnumerable<IGlanceModuleSettingViewModel> settings) :
         base(provider, factory, messenger, disposer)
     {
         this.dispatcher = dispatcher;
         this.preferences = preferences;
         this.installations = installations;
+        this.feed = feed;
+        this.packages = packages;
         this.applicationRestart = applicationRestart;
         this.localizer = localizer;
         this.categoryResolver = categoryResolver;
@@ -42,6 +46,8 @@ public sealed partial class ModulesViewModel :
 
         preferences.ComponentsAdded += HandleComponentsAdded;
         preferences.ComponentsRemoved += HandleComponentsRemoved;
+        feed.FeedChanged += HandleFeedChanged;
+        _ = RefreshFeedAsync();
     }
 
     public IReadOnlyList<ISettingViewModel> Children => [.. this];
@@ -81,6 +87,12 @@ public sealed partial class ModulesViewModel :
 
     [ObservableProperty]
     private ModuleInstallStatusKind installStatusKind;
+
+    [ObservableProperty]
+    private bool isFeedStatusOpen;
+
+    [ObservableProperty]
+    private string feedStatusMessage = string.Empty;
 
     public async Task<ModuleInstallResult?> InstallAsync(IEnumerable<string> paths)
     {
@@ -155,6 +167,7 @@ public sealed partial class ModulesViewModel :
     {
         preferences.ComponentsAdded -= HandleComponentsAdded;
         preferences.ComponentsRemoved -= HandleComponentsRemoved;
+        feed.FeedChanged -= HandleFeedChanged;
         base.Dispose();
     }
 
@@ -183,12 +196,46 @@ public sealed partial class ModulesViewModel :
             (_, enabled) => preferences.SetEnabledAsync(preference.Id, enabled),
             installations.CanUninstall(preference.Id)
                 ? _ => installations.UninstallAsync(preference.Id)
-                : null);
+                : null,
+            InstallFeedModuleAsync);
+    }
+
+    private ModuleSettingsItemViewModel CreateItem(GlanceModuleFeedItem module)
+    {
+        ModuleSettingsItemViewModel item = new(module.Id,
+            module.DisplayName,
+            module.Description,
+            null,
+            false,
+            [],
+            NavigateToModule,
+            (_, _) => Task.FromResult(false),
+            null,
+            InstallFeedModuleAsync);
+        item.SetFeedItem(module, feed.IsSourceAvailable(module.FeedId), installations.GetInstalledVersion(module.Id));
+        return item;
     }
 
     private ModuleSettingsCategoryViewModel GetOrCreateCategory(IGlanceComponent? component)
     {
         GlanceModuleCategoryDescriptor descriptor = categoryResolver.Resolve(component);
+        string id = descriptor.Id;
+
+        if (categories.TryGetValue(id, out ModuleSettingsCategoryViewModel? category))
+        {
+            return category;
+        }
+
+        category = new ModuleSettingsCategoryViewModel(id, descriptor.DisplayName, descriptor.Glyph, descriptor.Order, [], this);
+        categories.Add(id, category);
+        int index = this.TakeWhile(item => item is ModuleSettingsCategoryViewModel existing && existing.Order <= descriptor.Order).Count();
+        Insert(index, category);
+        return category;
+    }
+
+    private ModuleSettingsCategoryViewModel GetOrCreateCategory(GlanceModuleFeedItem module)
+    {
+        GlanceModuleCategoryDescriptor descriptor = categoryResolver.Resolve(module);
         string id = descriptor.Id;
 
         if (categories.TryGetValue(id, out ModuleSettingsCategoryViewModel? category))
@@ -214,12 +261,21 @@ public sealed partial class ModulesViewModel :
         foreach (IGlanceComponent component in args.Components)
         {
             GlanceModulePreference preference = orderedPreferences.First(item => string.Equals(item.Id, component.Id, StringComparison.OrdinalIgnoreCase));
+            RemoveItem(component.Id);
             ModuleSettingsCategoryViewModel category = GetOrCreateCategory(component);
             string categoryId = categoryResolver.Resolve(component).Id;
             int index = orderedPreferences
                 .TakeWhile(item => !string.Equals(item.Id, component.Id, StringComparison.OrdinalIgnoreCase))
                 .Count(item => string.Equals(categoryResolver.Resolve(preferences.GetComponent(item.Id)).Id, categoryId, StringComparison.OrdinalIgnoreCase));
-            category.Insert(Math.Min(index, category.Count), CreateItem(preference, settingsByModule[component.Id]));
+            ModuleSettingsItemViewModel item = CreateItem(preference, settingsByModule[component.Id]);
+            GlanceModuleFeedItem? feedItem = feed.Modules.FirstOrDefault(module => string.Equals(module.Id, component.Id, StringComparison.OrdinalIgnoreCase));
+
+            if (feedItem is not null)
+            {
+                item.SetFeedItem(feedItem, feed.IsSourceAvailable(feedItem.FeedId), installations.GetInstalledVersion(feedItem.Id));
+            }
+
+            category.Insert(Math.Min(index, category.Count), item);
         }
     }
 
@@ -251,6 +307,101 @@ public sealed partial class ModulesViewModel :
         {
             ShowInstallStatus(ModuleInstallStatusKind.Warning,
                 localizer.GetText("ModuleRemovedMessage", string.Join(", ", displayNames)));
+        }
+
+        SynchronizeFeed();
+    }
+
+    private async Task<bool> InstallFeedModuleAsync(ModuleSettingsItemViewModel item)
+    {
+        if (item.FeedItem is null || !feed.IsSourceAvailable(item.FeedItem.FeedId))
+        {
+            return false;
+        }
+
+        ModuleInstallResult result = await packages.InstallAsync(item.FeedItem);
+
+        if (!result.IsSuccessful)
+        {
+            ShowInstallStatus(ModuleInstallStatusKind.Error, string.IsNullOrWhiteSpace(result.ErrorMessage) ? localizer.GetText("ModuleInstallFailedMessage") : result.ErrorMessage);
+            return false;
+        }
+
+        string installedModuleNames = ResolveInstalledModuleNames(result);
+        ShowInstallStatus(ModuleInstallStatusKind.Success, result.RequiresRestart ? localizer.GetText("ModuleUpdateStagedMessage", installedModuleNames) : localizer.GetText("ModuleInstalledMessage", installedModuleNames));
+        item.SetFeedItem(item.FeedItem, feed.IsSourceAvailable(item.FeedItem.FeedId), item.FeedItem.Version);
+        return true;
+    }
+
+    private async Task RefreshFeedAsync()
+    {
+        try
+        {
+            await feed.RefreshAsync();
+        }
+        catch
+        {
+            dispatcher.Dispatch(() =>
+            {
+                IsFeedStatusOpen = true;
+                FeedStatusMessage = localizer.GetText("ModuleFeedsUnavailableMessage");
+            });
+        }
+    }
+
+    private void HandleFeedChanged(object? sender, EventArgs args) => dispatcher.Dispatch(SynchronizeFeed);
+
+    private void SynchronizeFeed()
+    {
+        bool hasUnavailableSources = feed.Sources.Any(source => !string.IsNullOrWhiteSpace(source.ErrorMessage));
+        IsFeedStatusOpen = !feed.IsAvailable || hasUnavailableSources;
+        FeedStatusMessage = feed.IsAvailable && hasUnavailableSources
+            ? localizer.GetText("ModuleFeedsPartiallyUnavailableMessage")
+            : feed.IsUsingCache
+                ? localizer.GetText("ModuleFeedsCachedMessage")
+                : localizer.GetText("ModuleFeedsUnavailableMessage");
+        HashSet<string> feedIds = [with(StringComparer.OrdinalIgnoreCase), .. feed.Modules.Select(module => module.Id)];
+
+        foreach (ModuleSettingsItemViewModel item in categories.Values.SelectMany(category => category.OfType<ModuleSettingsItemViewModel>()).Where(item => !item.IsInstalled && !feedIds.Contains(item.Id)).ToArray())
+        {
+            RemoveItem(item.Id);
+        }
+
+        foreach (GlanceModuleFeedItem module in feed.Modules.Where(module => !module.IsDelisted && module.IsVisible))
+        {
+            ModuleSettingsItemViewModel? item = categories.Values.SelectMany(category => category.OfType<ModuleSettingsItemViewModel>()).FirstOrDefault(item => string.Equals(item.Id, module.Id, StringComparison.OrdinalIgnoreCase));
+
+            if (item is null)
+            {
+                GetOrCreateCategory(module).Add(CreateItem(module));
+                continue;
+            }
+
+            item.SetFeedItem(module, feed.IsSourceAvailable(module.FeedId), installations.GetInstalledVersion(module.Id));
+        }
+    }
+
+    private void RemoveItem(string id)
+    {
+        foreach (ModuleSettingsCategoryViewModel category in categories.Values.ToArray())
+        {
+            ModuleSettingsItemViewModel? item = category.OfType<ModuleSettingsItemViewModel>().FirstOrDefault(item => string.Equals(item.Id, id, StringComparison.OrdinalIgnoreCase));
+
+            if (item is null)
+            {
+                continue;
+            }
+
+            _ = category.Remove(item);
+            item.Dispose();
+
+            if (category.Count == 0)
+            {
+                _ = Remove(category);
+                _ = categories.Remove(category.Id);
+            }
+
+            return;
         }
     }
 

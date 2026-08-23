@@ -11,6 +11,9 @@ public sealed class GlanceSettingsModule :
     IModule
 {
     public void Register(IServiceCollection services) => _ = services
+            .AddViewFor<ModuleFeedsSettingView, IGlanceViewModel, ModuleFeedsSettingViewModel>(ServiceLifetime.Transient,
+                provider => new ModuleFeedsSettingView(),
+                provider => new ModuleFeedsSettingViewModel(provider.GetRequiredService<GlanceSettings>(), provider.GetRequiredService<IWritableOptions<GlanceSettings>>(), provider.GetRequiredService<IGlanceModuleFeedSourceProvider>(), provider.GetRequiredService<IGlanceModuleFeedService>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<ITextLocalizer>()))
             .AddViewFor<AssistantModelSetupView, IGlanceViewModel, AssistantModelSetupViewModel>(ServiceLifetime.Transient,
                 provider => new AssistantModelSetupView(),
                 provider => new AssistantModelSetupViewModel(provider.GetRequiredService<ITranscriptionModelCatalog>(),

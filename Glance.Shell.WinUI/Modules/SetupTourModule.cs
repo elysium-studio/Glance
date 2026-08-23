@@ -16,5 +16,10 @@ public sealed class SetupTourModule :
                     provider.GetRequiredService<ModulePreferenceService>(),
                     provider.GetRequiredService<IWritableOptions<GlanceSettings>>(),
                     provider.GetRequiredService<IGlanceModuleCategoryResolver>(),
+                    provider.GetRequiredService<IGlanceModuleFeedService>(),
+                    provider.GetRequiredService<IGlanceModulePackageService>(),
+                    provider.GetRequiredService<ModuleInstallationService>(),
+                    provider.GetRequiredService<IDispatcher>(),
+                    provider.GetRequiredService<ITextLocalizer>(),
                     provider.GetRequiredService<ILogger<SetupTourViewModel>>()));
 }

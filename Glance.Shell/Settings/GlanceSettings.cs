@@ -12,6 +12,8 @@ public sealed class GlanceSettings
 
     public List<GlanceInspectorProviderPreference> InspectorProviders { get; set; } = [];
 
+    public List<GlanceModuleFeedPreference> ModuleFeeds { get; set; } = [];
+
     public List<GlanceModulePreference> Modules { get; set; } = [];
 
     public List<string> UninstalledModulePackages { get; set; } = [];

@@ -1,34 +1,181 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Elysium.Application.Abstractions;
+using Glance.Application.Abstractions;
 
 namespace Glance.Shell;
 
-public sealed partial class SetupTourModuleViewModel(string id,
-    string displayName,
-    string description,
-    string categoryDisplayName,
-    string glyph,
-    string glyphFontFamily,
-    string accentResourceKey,
-    object? accentResourceSource,
-    bool isEnabled) :
+public sealed partial class SetupTourModuleViewModel :
     ObservableObject
 {
+    private readonly IDispatcher dispatcher;
+    private readonly Func<SetupTourModuleViewModel, Task<bool>> install;
+    private readonly Func<SetupTourModuleViewModel, Task<bool>> remove;
+    private IGlanceComponent? component;
+
+    public SetupTourModuleViewModel(string id, string displayName, string description, string categoryId, string categoryDisplayName, string categoryGlyph, int categoryOrder, string glyph, string glyphFontFamily, string accentResourceKey, object? accentResourceSource, IGlanceComponent? component, bool isInstalled, IDispatcher dispatcher, Func<SetupTourModuleViewModel, Task<bool>> install, Func<SetupTourModuleViewModel, Task<bool>> remove)
+    {
+        Id = id;
+        DisplayName = displayName;
+        Description = description;
+        CategoryId = categoryId;
+        CategoryDisplayName = categoryDisplayName;
+        CategoryGlyph = categoryGlyph;
+        CategoryOrder = categoryOrder;
+        Glyph = glyph;
+        GlyphFontFamily = glyphFontFamily;
+        AccentResourceKey = accentResourceKey;
+        AccentResourceSource = accentResourceSource;
+        this.component = component;
+        IsInstalled = isInstalled;
+        this.dispatcher = dispatcher;
+        this.install = install;
+        this.remove = remove;
+    }
+
+    public string Id { get; }
+
+    public string DisplayName { get; }
+
+    public string Description { get; }
+
+    public string CategoryId { get; }
+
+    public string CategoryDisplayName { get; }
+
+    public string CategoryGlyph { get; }
+
+    public int CategoryOrder { get; }
+
+    public string Glyph { get; private set; }
+
+    public string GlyphFontFamily { get; private set; }
+
+    public string AccentResourceKey { get; private set; }
+
+    public object? AccentResourceSource { get; private set; }
+
+    public GlanceModuleFeedIcon? Icon => FeedItem?.Icon;
+
+    public GlanceModuleFeedItem? FeedItem { get; private set; }
+
+    public bool CanAdd => !IsInstalled && IsAvailable && !IsBusy;
+
+    public bool CanRemove => IsInstalled && !IsBusy;
+
+    public bool ShowAddAction => !IsInstalled;
+
+    public bool ShowRemoveAction => IsInstalled;
+
     [ObservableProperty]
-    private bool isEnabled = isEnabled;
+    [NotifyPropertyChangedFor(nameof(CanAdd))]
+    [NotifyPropertyChangedFor(nameof(CanRemove))]
+    [NotifyPropertyChangedFor(nameof(ShowAddAction))]
+    [NotifyPropertyChangedFor(nameof(ShowRemoveAction))]
+    private bool isInstalled;
 
-    public string Id { get; } = id;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanAdd))]
+    private bool isAvailable;
 
-    public string DisplayName { get; } = displayName;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanAdd))]
+    [NotifyPropertyChangedFor(nameof(CanRemove))]
+    private bool isBusy;
 
-    public string Description { get; } = description;
+    public void SetFeedItem(GlanceModuleFeedItem feedItem, bool isAvailable)
+    {
+        FeedItem = feedItem;
+        IsAvailable = isAvailable && feedItem.IsCompatible;
+        OnPropertyChanged(nameof(Icon));
 
-    public string CategoryDisplayName { get; } = categoryDisplayName;
+        if (component is null)
+        {
+            ApplyVisuals(feedItem.Icon.Type == GlanceModuleIconType.Glyph ? feedItem.Icon.Source : "\uE8B7", string.IsNullOrWhiteSpace(feedItem.Icon.FontFamily) ? "Segoe Fluent Icons" : feedItem.Icon.FontFamily, "AccentTextFillColorPrimaryBrush", null);
+        }
+    }
 
-    public string Glyph { get; } = glyph;
+    public object? CreateIcon(bool isLightTheme) => component?.CreateIcon(isLightTheme);
 
-    public string GlyphFontFamily { get; } = glyphFontFamily;
+    public void SetComponent(IGlanceComponent? value)
+    {
+        component = value;
 
-    public string AccentResourceKey { get; } = accentResourceKey;
+        if (value is not null)
+        {
+            ApplyVisuals(value.IconGlyph, value.IconFontFamily, value.AccentResourceKey, value.CompactContent);
+            IsInstalled = true;
+            return;
+        }
 
-    public object? AccentResourceSource { get; } = accentResourceSource;
+        if (FeedItem is not null)
+        {
+            ApplyVisuals(FeedItem.Icon.Type == GlanceModuleIconType.Glyph ? FeedItem.Icon.Source : "\uE8B7", string.IsNullOrWhiteSpace(FeedItem.Icon.FontFamily) ? "Segoe Fluent Icons" : FeedItem.Icon.FontFamily, "AccentTextFillColorPrimaryBrush", null);
+        }
+
+        IsInstalled = false;
+    }
+
+    public async Task InstallAsync()
+    {
+        if (!CanAdd)
+        {
+            return;
+        }
+
+        IsBusy = true;
+
+        try
+        {
+            bool installed = await install(this);
+            dispatcher.Dispatch(() =>
+            {
+                if (installed)
+                {
+                    IsInstalled = true;
+                }
+            });
+        }
+        finally
+        {
+            dispatcher.Dispatch(() => IsBusy = false);
+        }
+    }
+
+    public async Task RemoveAsync()
+    {
+        if (!CanRemove)
+        {
+            return;
+        }
+
+        IsBusy = true;
+
+        try
+        {
+            bool removed = await remove(this);
+            dispatcher.Dispatch(() =>
+            {
+                if (removed)
+                {
+                    IsInstalled = false;
+                }
+            });
+        }
+        finally
+        {
+            dispatcher.Dispatch(() => IsBusy = false);
+        }
+    }
+
+    private void ApplyVisuals(string glyph, string glyphFontFamily, string accentResourceKey, object? accentResourceSource)
+    {
+        Glyph = glyph;
+        GlyphFontFamily = glyphFontFamily;
+        AccentResourceKey = accentResourceKey;
+        AccentResourceSource = accentResourceSource;
+        OnPropertyChanged(nameof(Glyph));
+        OnPropertyChanged(nameof(GlyphFontFamily));
+        OnPropertyChanged(nameof(AccentResourceKey));
+        OnPropertyChanged(nameof(AccentResourceSource));
+    }
 }

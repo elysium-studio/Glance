@@ -56,6 +56,14 @@
   <data name="UninstallModuleDialogDataMessage" xml:space="preserve"><value>Son package, ses paramètres, ses données enregistrées et ses fichiers d’exécution seront supprimés.</value></data>
   <data name="UninstallModuleDialogPrimaryButton" xml:space="preserve"><value>Désinstaller</value></data>
   <data name="UninstallModuleDialogCloseButton" xml:space="preserve"><value>Annuler</value></data>
+  <data name="InstallModuleButton.Content" xml:space="preserve"><value>Installer</value></data>
+  <data name="InstallModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Installer le module</value></data>
+  <data name="SetupTourAddModuleButton.Content" xml:space="preserve"><value>Ajouter</value></data>
+  <data name="SetupTourAddModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Ajouter un module</value></data>
+  <data name="SetupTourRemoveModuleButton.Content" xml:space="preserve"><value>Supprimer</value></data>
+  <data name="SetupTourRemoveModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Supprimer le module</value></data>
+  <data name="UpdateModuleButton.Content" xml:space="preserve"><value>Mettre à jour</value></data>
+  <data name="UpdateModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Mettre à jour le module</value></data>
   <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Désinstaller le module</value></data>
   <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Désinstaller</value></data>
   <data name="AboutNavigationItem.Content" xml:space="preserve"><value>À propos</value></data>
@@ -127,4 +135,16 @@
   <data name="AssistantModelRemoveButtonText.Text" xml:space="preserve"><value>Supprimer</value></data>
   <data name="AssistantModelReadyInfoBar.Title" xml:space="preserve"><value>Prêt</value></data>
   <data name="AssistantModelReadyInfoBar.Message" xml:space="preserve"><value>L’assistant vocal peut maintenant être activé.</value></data>
+  <data name="ModuleFeedsSettingsTitle" xml:space="preserve"><value>Module feeds</value></data>
+  <data name="ModuleFeedsExpander.Header" xml:space="preserve"><value>Module feeds</value></data>
+  <data name="ModuleFeedsExpander.Description" xml:space="preserve"><value>Choose where Glance finds modules and updates</value></data>
+  <data name="AddModuleFeedCard.Header" xml:space="preserve"><value>Add a feed</value></data>
+  <data name="AddModuleFeedCard.Description" xml:space="preserve"><value>Use an HTTPS module feed from a source you trust</value></data>
+  <data name="ModuleFeedAddressTextBox.PlaceholderText" xml:space="preserve"><value>https://example.com/glance/index.json</value></data>
+  <data name="AddModuleFeedButtonText.Text" xml:space="preserve"><value>Add feed</value></data>
+  <data name="AddModuleFeedButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Add module feed</value></data>
+  <data name="ModuleFeedAddressInvalidMessage" xml:space="preserve"><value>Enter a unique HTTPS feed address.</value></data>
+  <data name="ModuleFeedsUnavailableMessage" xml:space="preserve"><value>Module feeds are unavailable. Installed modules remain available.</value></data>
+  <data name="ModuleFeedsCachedMessage" xml:space="preserve"><value>Module feeds could not be refreshed. The last available catalogue is shown; affected installs and updates are temporarily unavailable.</value></data>
+  <data name="ModuleFeedsPartiallyUnavailableMessage" xml:space="preserve"><value>One or more module feeds could not be refreshed. Other feeds and installed modules remain available.</value></data>
 </root>

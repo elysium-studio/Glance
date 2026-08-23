@@ -12,6 +12,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Button
@@ -30,11 +31,18 @@
             Grid.Row="1"
             Margin="36,0,36,8"
             IsClosable="True"
+            IsOpen="{x:Bind ViewModel.Modules.IsFeedStatusOpen, Mode=TwoWay}"
+            Message="{x:Bind ViewModel.Modules.FeedStatusMessage, Mode=OneWay}"
+            Severity="Warning" />
+        <InfoBar
+            Grid.Row="2"
+            Margin="36,0,36,8"
+            IsClosable="True"
             IsOpen="{x:Bind ViewModel.Modules.IsInstallStatusOpen, Mode=TwoWay}"
             Message="{x:Bind ViewModel.Modules.InstallStatusMessage, Mode=OneWay}"
             Severity="{x:Bind GetSeverity(ViewModel.Modules.InstallStatusKind), Mode=OneWay}" />
         <ListView
-            Grid.Row="2"
+            Grid.Row="3"
             Margin="36,0,36,36"
             ItemsSource="{x:Bind ViewModel}"
             SelectionMode="None">
@@ -59,7 +67,7 @@
         </ListView>
         <Border
             x:Name="ModuleDropOverlay"
-            Grid.RowSpan="3"
+            Grid.RowSpan="4"
             Margin="36,0,36,36"
             Padding="24"
             Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}"

@@ -11,7 +11,7 @@ public sealed class ModuleSettingsItemViewModelTests
     {
         TestSetting first = new("Timer", 10);
         TestSetting second = new("Timer", 20);
-        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", true, [first, second], _ => { }, (_, _) => Task.FromResult(true));
+        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", new TestComponent("Timer"), true, [first, second], _ => { }, (_, _) => Task.FromResult(true));
 
         _ = Assert.IsAssignableFrom<ISettingViewModel>(item.Settings);
         Assert.Equal([first, second], item.Settings);
@@ -28,7 +28,7 @@ public sealed class ModuleSettingsItemViewModelTests
     [Fact]
     public void ModuleWithoutSettingsCannotExpand()
     {
-        ModuleSettingsItemViewModel item = new("Stopwatch", "Stopwatch", "Elapsed time", true, [], _ => { }, (_, _) => Task.FromResult(true));
+        ModuleSettingsItemViewModel item = new("Stopwatch", "Stopwatch", "Elapsed time", new TestComponent("Stopwatch"), true, [], _ => { }, (_, _) => Task.FromResult(true));
 
         Assert.False(item.CanExpand);
     }
@@ -38,7 +38,7 @@ public sealed class ModuleSettingsItemViewModelTests
     {
         int navigationRequests = 0;
         TestSetting setting = new("Timer", 10);
-        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", true, [setting], _ => navigationRequests++, (_, _) => Task.FromResult(true));
+        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", new TestComponent("Timer"), true, [setting], _ => navigationRequests++, (_, _) => Task.FromResult(true));
 
         item.NavigateToSettings();
         item.IsEnabled = false;
@@ -51,7 +51,7 @@ public sealed class ModuleSettingsItemViewModelTests
     public void DisposeDisposesOwnedSettingViewModels()
     {
         TestSetting setting = new("Timer", 10);
-        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", false, [setting], _ => { }, (_, _) => Task.FromResult(true));
+        ModuleSettingsItemViewModel item = new("Timer", "Timer", "Countdown", new TestComponent("Timer"), false, [setting], _ => { }, (_, _) => Task.FromResult(true));
 
         item.Dispose();
         item.Dispose();
@@ -69,5 +69,21 @@ public sealed class ModuleSettingsItemViewModelTests
         public int DisposeCount { get; private set; }
 
         public void Dispose() => DisposeCount++;
+    }
+
+    private sealed class TestComponent(string id) :
+        IGlanceComponent
+    {
+        public string Id { get; } = id;
+
+        public string DisplayName => Id;
+
+        public string Description => string.Empty;
+
+        public int Order => 0;
+
+        public object CompactContent { get; } = new();
+
+        public object ExpandedContent { get; } = new();
     }
 }

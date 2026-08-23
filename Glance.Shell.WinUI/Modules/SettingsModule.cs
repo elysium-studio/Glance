@@ -42,6 +42,8 @@ public sealed class SettingsModule :
                     provider.GetRequiredService<IDispatcher>(),
                     provider.GetRequiredService<ModulePreferenceService>(),
                     provider.GetRequiredService<ModuleInstallationService>(),
+                    provider.GetRequiredService<IGlanceModuleFeedService>(),
+                    provider.GetRequiredService<IGlanceModulePackageService>(),
                     provider.GetRequiredService<IApplicationRestartService>(),
                     provider.GetRequiredService<ITextLocalizer>(),
                     provider.GetRequiredService<IGlanceModuleCategoryResolver>(),
