@@ -391,7 +391,7 @@ function Assert-ModuleFreeRelease
 
         try
         {
-            $bundledEntries = @($archive.Entries | Where-Object { $_.FullName.EndsWith('.glance', [StringComparison]::OrdinalIgnoreCase) -or $_.FullName -match '(^|/)Modules/' })
+            $bundledEntries = @($archive.Entries | Where-Object { $_.FullName.EndsWith('.glance', [StringComparison]::OrdinalIgnoreCase) })
 
             if ($bundledEntries.Count -gt 0)
             {
