@@ -192,7 +192,6 @@ public sealed partial class ModulesViewModel :
             component,
             preference.IsEnabled,
             availableSettings.OrderBy(setting => setting.Order),
-            dispatcher,
             NavigateToModule,
             (_, enabled) => preferences.SetEnabledAsync(preference.Id, enabled),
             installations.CanUninstall(preference.Id)
@@ -209,7 +208,6 @@ public sealed partial class ModulesViewModel :
             null,
             false,
             [],
-            dispatcher,
             NavigateToModule,
             (_, _) => Task.FromResult(false),
             null,
@@ -331,7 +329,7 @@ public sealed partial class ModulesViewModel :
 
         string installedModuleNames = ResolveInstalledModuleNames(result);
         ShowInstallStatus(ModuleInstallStatusKind.Success, result.RequiresRestart ? localizer.GetText("ModuleUpdateStagedMessage", installedModuleNames) : localizer.GetText("ModuleInstalledMessage", installedModuleNames));
-        dispatcher.Dispatch(() => item.SetFeedItem(item.FeedItem, feed.IsSourceAvailable(item.FeedItem.FeedId), item.FeedItem.Version));
+        item.SetFeedItem(item.FeedItem, feed.IsSourceAvailable(item.FeedItem.FeedId), item.FeedItem.Version);
         return true;
     }
 

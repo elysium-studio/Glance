@@ -429,11 +429,7 @@ if ([string]::IsNullOrWhiteSpace($winScpPath))
     throw "WinSCP.com was not found."
 }
 
-$remoteBasePath = $SftpBasePath.Replace('\', '/').TrimEnd('/')
-$remoteFeedsPath = "$remoteBasePath/feeds"
-$remoteGlancePath = "$remoteFeedsPath/glance"
-$remoteModulesPath = "$remoteGlancePath/modules"
-$remoteRoot = "$remoteModulesPath/stable"
+$remoteRoot = $SftpBasePath.Replace('\', '/').TrimEnd('/') + "/feeds/glance/modules/stable"
 $scriptPath = Join-Path $env:TEMP "glance-module-upload-$([Guid]::NewGuid().ToString('N')).txt"
 $commands = [Collections.Generic.List[string]]::new()
 $commands.Add("option batch abort")
@@ -441,10 +437,6 @@ $commands.Add("option confirm off")
 $commands.Add("option transfer binary")
 $commands.Add("open sftp://$SftpHost/ -username=$(Format-WinScpValue $SftpUser) -password=$(Format-WinScpValue $SftpPassword) -hostkey=$(Format-WinScpValue $SftpHostKey)")
 $commands.Add("option batch continue")
-$commands.Add("mkdir $(Format-WinScpValue $remoteBasePath)")
-$commands.Add("mkdir $(Format-WinScpValue $remoteFeedsPath)")
-$commands.Add("mkdir $(Format-WinScpValue $remoteGlancePath)")
-$commands.Add("mkdir $(Format-WinScpValue $remoteModulesPath)")
 $commands.Add("mkdir $(Format-WinScpValue $remoteRoot)")
 $commands.Add("option batch abort")
 

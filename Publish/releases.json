@@ -158,24 +158,5 @@
       "Improved drag-and-drop module routing with centred navigation, edge scrolling, and cleaner transition containment.",
       "Refined module title consistency and completed the startup shimmer across content and footer controls."
     ]
-  },
-  {
-    "version": "0.1.15-preview",
-    "date": "2026-08-23",
-    "releaseNotes": [
-      "Added Hydration and Fasting with a new Health category and configurable daily goals, reminders, and fasting plans.",
-      "Introduced an independent module catalogue so modules can be added, removed, updated, and discovered without bundling them into the Glance installer.",
-      "Added configurable module feeds with cached offline fallback and a redesigned module selection experience.",
-      "Added versioned settings migration support so Glance and third-party modules can preserve settings as their schemas evolve."
-    ]
-  },
-  {
-    "version": "0.1.16-preview",
-    "date": "2026-08-23",
-    "releaseNotes": [
-      "Fixed module installation from the setup tour and module settings.",
-      "Fixed UI-thread crashes while module downloads and catalogue state were updating.",
-      "Preserved module feed data during settings migration and improved installation failure feedback."
-    ]
   }
 ]
