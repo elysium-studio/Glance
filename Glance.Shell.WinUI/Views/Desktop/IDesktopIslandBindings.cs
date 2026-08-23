@@ -24,6 +24,10 @@ public interface IDesktopIslandBindings
 
     Visibility WhenModulesLoaded(bool isLoadingModules);
 
+    Visibility WhenModulesAvailable(bool isLoadingModules, int componentCount);
+
+    Visibility WhenNoModulesAvailable(bool isLoadingModules, int componentCount);
+
     Visibility WhenRoutePickerVisible(bool isVisible);
 
     Visibility WhenRoutePickerHidden(bool isVisible);
@@ -32,7 +36,7 @@ public interface IDesktopIslandBindings
 
     Visibility WhenAssistantAvailable(bool isAssistantAvailable, bool isAssistantEnabled, bool isLoadingModules, bool isTransientPresentationActive);
 
-    Visibility WhenPrimaryContentVisible(bool isLoadingModules, bool isTransientPresentationActive);
+    Visibility WhenPrimaryContentVisible(bool isLoadingModules, bool isTransientPresentationActive, int componentCount);
 
     object? ToBackgroundContent(IGlanceComponent? component, bool isLoadingModules, bool isTransientPresentationActive);
 }

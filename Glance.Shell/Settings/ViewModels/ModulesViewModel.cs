@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
 using Elysium.Presentation;
+using Elysium.Presentation.Abstractions;
 using Glance.Application.Abstractions;
 
 namespace Glance.Shell;
@@ -18,9 +19,10 @@ public sealed partial class ModulesViewModel :
     private readonly ModulePreferenceService preferences;
     private readonly ModuleInstallationService installations;
     private readonly IGlanceModuleFeedService feed;
+    private readonly INavigator navigator;
     private readonly IGlanceModulePackageService packages;
 
-    public ModulesViewModel(IServiceProvider provider, IServiceFactory factory, IMessenger messenger, IDisposer disposer, IDispatcher dispatcher, ModulePreferenceService preferences, ModuleInstallationService installations, IGlanceModuleFeedService feed, IGlanceModulePackageService packages, IApplicationRestartService applicationRestart, ITextLocalizer localizer, IGlanceModuleCategoryResolver categoryResolver, IEnumerable<IGlanceModuleSettingViewModel> settings) :
+    public ModulesViewModel(IServiceProvider provider, IServiceFactory factory, IMessenger messenger, IDisposer disposer, IDispatcher dispatcher, ModulePreferenceService preferences, ModuleInstallationService installations, IGlanceModuleFeedService feed, IGlanceModulePackageService packages, IApplicationRestartService applicationRestart, ITextLocalizer localizer, IGlanceModuleCategoryResolver categoryResolver, INavigator navigator, IEnumerable<IGlanceModuleSettingViewModel> settings) :
         base(provider, factory, messenger, disposer)
     {
         this.dispatcher = dispatcher;
@@ -28,6 +30,7 @@ public sealed partial class ModulesViewModel :
         this.installations = installations;
         this.feed = feed;
         this.packages = packages;
+        this.navigator = navigator;
         this.applicationRestart = applicationRestart;
         this.localizer = localizer;
         this.categoryResolver = categoryResolver;
@@ -54,6 +57,8 @@ public sealed partial class ModulesViewModel :
 
     public string Glyph => "\uE74C";
 
+    public string RouteSegment => SettingsNavigationRoutes.Modules;
+
     public string Title { get; }
 
     public ModuleSettingsCategoryViewModel? FindCategoryForComponent(string componentId) => categories.Values
@@ -74,6 +79,14 @@ public sealed partial class ModulesViewModel :
     public string RestartDialogPrimaryButtonText => localizer.GetText("ModuleUpdateRestartDialogPrimaryButton");
 
     public string RestartDialogCloseButtonText => localizer.GetText("ModuleUpdateRestartDialogCloseButton");
+
+    public async Task<bool> ConfirmRestartAsync(object xamlRoot)
+    {
+        NavigationParameters parameters = new();
+        parameters.Set("XamlRoot", xamlRoot);
+        NavigationDialogResult result = await navigator.NavigateAsync<NavigationDialogResult>(SettingsNavigationRoutes.RestartForModuleUpdateDialog, [RestartDialogTitle, RestartDialogMessage, RestartDialogPrimaryButtonText, RestartDialogCloseButtonText], parameters);
+        return result == NavigationDialogResult.Primary;
+    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanInstall))]
@@ -192,6 +205,8 @@ public sealed partial class ModulesViewModel :
             component,
             preference.IsEnabled,
             availableSettings.OrderBy(setting => setting.Order),
+            dispatcher,
+            navigator,
             NavigateToModule,
             (_, enabled) => preferences.SetEnabledAsync(preference.Id, enabled),
             installations.CanUninstall(preference.Id)
@@ -208,6 +223,8 @@ public sealed partial class ModulesViewModel :
             null,
             false,
             [],
+            dispatcher,
+            navigator,
             NavigateToModule,
             (_, _) => Task.FromResult(false),
             null,

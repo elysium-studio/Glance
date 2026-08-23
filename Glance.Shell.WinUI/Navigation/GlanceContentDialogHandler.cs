@@ -1,4 +1,5 @@
 using Elysium.Presentation.Abstractions;
+using Elysium.UI.WinUI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -30,6 +31,13 @@ public sealed class GlanceContentDialogHandler :
             dialog.XamlRoot = xamlRoot;
         }
 
-        _ = await dialog.ShowAsync();
+        await NavigationRouteDispatcher.DispatchAsync(dialog, parameters);
+
+        parameters.Result = await dialog.ShowAsync() switch
+        {
+            ContentDialogResult.Primary => NavigationDialogResult.Primary,
+            ContentDialogResult.Secondary => NavigationDialogResult.Secondary,
+            _ => NavigationDialogResult.None
+        };
     }
 }

@@ -278,7 +278,7 @@ internal sealed class DesktopIslandPresentationController :
         SetPresenterState(Host.ExpandedPresenter, !showTransient);
         SetPresenterState(Host.TransientCompactPresenter, showTransient);
         SetPresenterState(Host.TransientExpandedPresenter, showTransient);
-        Host.Footer.Visibility = Host.BindingPolicy.WhenPrimaryContentVisible(ViewModel.IsLoadingModules, showTransient);
+        Host.Footer.Visibility = Host.BindingPolicy.WhenPrimaryContentVisible(ViewModel.IsLoadingModules, showTransient, ViewModel.ComponentCount);
         Host.CompactAssistantIndicator.Visibility = Host.BindingPolicy.WhenAssistantAvailable(ViewModel.Assistant.IsAvailable, ViewModel.Assistant.IsEnabled, ViewModel.IsLoadingModules, showTransient);
     }
 
@@ -312,7 +312,9 @@ internal sealed class DesktopIslandPresentationController :
         compactIncoming.Visibility = Visibility.Visible;
         expandedIncoming.Visibility = Visibility.Visible;
 
-        if (!isTransientPresentationActive)
+        bool showPrimaryChrome = !isTransientPresentationActive && ViewModel.ComponentCount > 0;
+
+        if (showPrimaryChrome)
         {
             Host.Footer.Visibility = Visibility.Visible;
         }
@@ -335,7 +337,7 @@ internal sealed class DesktopIslandPresentationController :
         SetOpacity(compactPresenterVisual, 0);
         SetOpacity(expandedPresenterVisual, 0);
 
-        if (!isTransientPresentationActive)
+        if (showPrimaryChrome)
         {
             SetOpacity(assistantIndicatorVisual, 0);
             SetOpacity(footerVisual, 0);
@@ -352,7 +354,7 @@ internal sealed class DesktopIslandPresentationController :
         StartOpacityAnimation(compositor, compactPresenterVisual, 0, 1, duration, entranceEasing);
         StartOpacityAnimation(compositor, expandedPresenterVisual, 0, 1, duration, entranceEasing);
 
-        if (!isTransientPresentationActive)
+        if (showPrimaryChrome)
         {
             StartOpacityAnimation(compositor, assistantIndicatorVisual, 0, 1, duration, entranceEasing);
             StartOpacityAnimation(compositor, footerVisual, 0, 1, duration, entranceEasing);

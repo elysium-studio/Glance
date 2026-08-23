@@ -6,6 +6,8 @@ public sealed class FastingSettings
 
     public double CustomFastingHours { get; set; } = 16;
 
+    public double CustomEatingHours { get; set; } = 8;
+
     public FastingSessionStatus SessionStatus { get; set; }
 
     public DateTimeOffset StartedAt { get; set; }

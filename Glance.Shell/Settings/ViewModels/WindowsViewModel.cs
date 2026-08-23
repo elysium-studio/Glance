@@ -19,5 +19,7 @@ public sealed partial class WindowsViewModel :
 
     public string Glyph => "\uE737";
 
+    public string RouteSegment => SettingsNavigationRoutes.Windows;
+
     public string Title { get; }
 }

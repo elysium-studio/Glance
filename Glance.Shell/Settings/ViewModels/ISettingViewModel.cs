@@ -12,5 +12,7 @@ public interface ISettingViewModel :
 
     string Glyph => string.Empty;
 
+    string RouteSegment => GetType().Name;
+
     string Title => string.Empty;
 }

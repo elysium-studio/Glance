@@ -115,25 +115,14 @@ public sealed class GlanceModulePackageService :
             return ModuleInstallResult.Failed("The downloaded module did not pass verification.");
         }
 
-        GlanceModulePackageManifest manifest;
+        ModuleInstallResult result = await installations.InstallAsync(packagePath);
 
-        try
+        if (result.IsSuccessful)
         {
-            manifest = GlanceModulePackageReader.ReadManifest(packagePath);
-        }
-        catch (InvalidDataException exception)
-        {
-            File.Delete(packagePath);
-            return ModuleInstallResult.Failed(exception.Message);
+            installations.SetInstalledVersion(module.Id, module.Version);
         }
 
-        if (!string.Equals(manifest.Id, module.Id, StringComparison.OrdinalIgnoreCase) || !string.Equals(manifest.Version, module.Version, StringComparison.OrdinalIgnoreCase) || manifest.ModuleApiVersion != module.ModuleApiVersion)
-        {
-            File.Delete(packagePath);
-            return ModuleInstallResult.Failed("The downloaded module metadata does not match the catalogue.");
-        }
-
-        return await installations.InstallAsync(packagePath);
+        return result;
     }
 
     private static string GetDownloadId(GlanceModuleFeedItem module) => $"glance-module:{module.Id}:{module.Version}";

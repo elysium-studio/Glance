@@ -12,6 +12,22 @@
         <CommunityToolkit:SettingsExpander.HeaderIcon>
             <FontIcon Glyph="&#xE774;" />
         </CommunityToolkit:SettingsExpander.HeaderIcon>
+        <CommunityToolkit:SettingsExpander.Content>
+            <Button
+                x:Uid="AddModuleFeedButton"
+                Click="HandleAddClick">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                        <Setter Property="Width" Value="36" />
+                        <Setter Property="Height" Value="36" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="FontSize" Value="14" />
+                        <Setter Property="Content" Value="&#xE710;" />
+                    </Style>
+                </Button.Style>
+            </Button>
+        </CommunityToolkit:SettingsExpander.Content>
         <CommunityToolkit:SettingsExpander.ItemTemplate>
             <DataTemplate x:DataType="Shell:ModuleFeedSettingItemViewModel">
                 <CommunityToolkit:SettingsCard
@@ -31,6 +47,11 @@
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <ToggleSwitch IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
                         <Button
+                            x:Uid="RemoveModuleFeedButton"
+                            Width="36"
+                            Height="36"
+                            MinWidth="36"
+                            Padding="0"
                             Click="HandleRemoveClick"
                             CommandParameter="{x:Bind}"
                             Style="{StaticResource SubtleButtonStyle}"
@@ -41,33 +62,5 @@
                 </CommunityToolkit:SettingsCard>
             </DataTemplate>
         </CommunityToolkit:SettingsExpander.ItemTemplate>
-        <CommunityToolkit:SettingsExpander.ItemsFooter>
-            <StackPanel Spacing="8">
-                <CommunityToolkit:SettingsCard x:Uid="AddModuleFeedCard">
-                    <Grid ColumnDefinitions="240,8,Auto">
-                        <TextBox
-                            Grid.Column="0"
-                            x:Uid="ModuleFeedAddressTextBox"
-                            Text="{x:Bind ViewModel.NewFeedUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Button
-                            Grid.Column="2"
-                            x:Uid="AddModuleFeedButton"
-                            MinWidth="132"
-                            Click="HandleAddClick"
-                            IsEnabled="{x:Bind ViewModel.CanAdd, Mode=OneWay}">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE710;" />
-                                <TextBlock x:Uid="AddModuleFeedButtonText" />
-                            </StackPanel>
-                        </Button>
-                    </Grid>
-                </CommunityToolkit:SettingsCard>
-                <InfoBar
-                    IsClosable="False"
-                    IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
-                    Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
-                    Severity="Error" />
-            </StackPanel>
-        </CommunityToolkit:SettingsExpander.ItemsFooter>
     </CommunityToolkit:SettingsExpander>
 </UserControl>

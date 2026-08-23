@@ -1,0 +1,175 @@
+<UserControl
+    x:Class="Glance.Shell.WinUI.EmptyModulesView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:UI="using:Glance.UI.WinUI">
+    <Grid x:Name="LayoutRoot">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="CompactSizeStates">
+                <VisualState x:Name="Default" />
+                <VisualState x:Name="Standard">
+                    <VisualState.StateTriggers>
+                        <UI:ElementSizeTrigger
+                            MinHeight="33"
+                            MaxHeight="48"
+                            Source="{x:Bind LayoutRoot, Mode=OneTime}" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="CompactButton.Padding" Value="10,2" />
+                        <Setter Target="CompactContentLayout.ColumnSpacing" Value="7" />
+                        <Setter Target="CompactModuleMark.Width" Value="20" />
+                        <Setter Target="CompactModuleMark.Height" Value="20" />
+                        <Setter Target="CompactTile1.Width" Value="8" />
+                        <Setter Target="CompactTile1.Height" Value="8" />
+                        <Setter Target="CompactTile2.Width" Value="8" />
+                        <Setter Target="CompactTile2.Height" Value="8" />
+                        <Setter Target="CompactTile3.Width" Value="8" />
+                        <Setter Target="CompactTile3.Height" Value="8" />
+                        <Setter Target="CompactTile4.Width" Value="8" />
+                        <Setter Target="CompactTile4.Height" Value="8" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Small">
+                    <VisualState.StateTriggers>
+                        <UI:ElementSizeTrigger
+                            MaxHeight="32"
+                            Source="{x:Bind LayoutRoot, Mode=OneTime}" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="CompactButton.Padding" Value="8,0,8,4" />
+                        <Setter Target="CompactContentLayout.ColumnSpacing" Value="6" />
+                        <Setter Target="CompactModuleMark.Width" Value="16" />
+                        <Setter Target="CompactModuleMark.Height" Value="16" />
+                        <Setter Target="CompactModuleMark.RowSpacing" Value="2" />
+                        <Setter Target="CompactModuleMark.ColumnSpacing" Value="2" />
+                        <Setter Target="CompactTile1.Width" Value="7" />
+                        <Setter Target="CompactTile1.Height" Value="7" />
+                        <Setter Target="CompactTile2.Width" Value="7" />
+                        <Setter Target="CompactTile2.Height" Value="7" />
+                        <Setter Target="CompactTile3.Width" Value="7" />
+                        <Setter Target="CompactTile3.Height" Value="7" />
+                        <Setter Target="CompactTile4.Width" Value="7" />
+                        <Setter Target="CompactTile4.Height" Value="7" />
+                        <Setter Target="CompactLabel.FontSize" Value="12" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+        <Button
+            x:Name="CompactButton"
+            x:Uid="EmptyModulesButton"
+            Padding="12,4"
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Stretch"
+            Background="Transparent"
+            BorderThickness="0"
+            Click="{x:Bind HandleAddModulesRequested}"
+            Visibility="{x:Bind WhenCompact(IsExpanded), Mode=OneWay}">
+            <Button.Resources>
+                <StaticResource x:Key="ButtonBackgroundPointerOver" ResourceKey="SubtleFillColorSecondaryBrush" />
+                <StaticResource x:Key="ButtonBackgroundPressed" ResourceKey="SubtleFillColorTertiaryBrush" />
+            </Button.Resources>
+            <Button.Content>
+                <Grid x:Name="CompactContentLayout" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="28" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid
+                        x:Name="CompactModuleMark"
+                        Width="24"
+                        Height="24"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        ColumnSpacing="3"
+                        RowSpacing="3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Border x:Name="CompactTile1" Width="10" Height="10" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="3" />
+                        <Border x:Name="CompactTile2" Grid.Column="1" Width="10" Height="10" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="3" />
+                        <Border x:Name="CompactTile3" Grid.Row="1" Width="10" Height="10" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="3" />
+                        <Border x:Name="CompactTile4" Grid.Row="1" Grid.Column="1" Width="10" Height="10" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="3" />
+                    </Grid>
+                    <TextBlock
+                        x:Name="CompactLabel"
+                        x:Uid="EmptyModulesCompactLabel"
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        FontWeight="SemiBold"
+                        TextTrimming="CharacterEllipsis" />
+                </Grid>
+            </Button.Content>
+        </Button>
+        <Grid
+            Padding="20,12,20,26"
+            ColumnSpacing="18"
+            Visibility="{x:Bind WhenExpanded(IsExpanded), Mode=OneWay}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="36" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="36" />
+            </Grid.ColumnDefinitions>
+            <Grid
+                Width="36"
+                Height="36"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                ColumnSpacing="4"
+                RowSpacing="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Border x:Name="ExpandedTile1" Width="16" Height="16" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="5" />
+                <Border x:Name="ExpandedTile2" Grid.Column="1" Width="16" Height="16" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="5" />
+                <Border x:Name="ExpandedTile3" Grid.Row="1" Width="16" Height="16" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="5" />
+                <Border x:Name="ExpandedTile4" Grid.Row="1" Grid.Column="1" Width="16" Height="16" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="5" />
+            </Grid>
+            <Grid
+                Grid.Column="1"
+                Height="58"
+                VerticalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="14" />
+                    <RowDefinition Height="22" />
+                    <RowDefinition Height="18" />
+                </Grid.RowDefinitions>
+                <TextBlock x:Uid="EmptyModulesTitle" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                <TextBlock x:Uid="EmptyModulesSummary" Grid.Row="1" VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                <TextBlock x:Uid="EmptyModulesSubtitle" Grid.Row="2" VerticalAlignment="Center" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+            </Grid>
+            <Button
+                x:Uid="EmptyModulesButton"
+                Grid.Column="2"
+                Width="36"
+                Height="36"
+                MinWidth="36"
+                Padding="0"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{ThemeResource AccentFillColorDefaultBrush}"
+                BorderThickness="0"
+                Click="{x:Bind HandleAddModulesRequested}"
+                CornerRadius="18">
+                <Button.Resources>
+                    <StaticResource x:Key="ButtonBackgroundPointerOver" ResourceKey="AccentFillColorSecondaryBrush" />
+                    <StaticResource x:Key="ButtonBackgroundPressed" ResourceKey="AccentFillColorTertiaryBrush" />
+                    <StaticResource x:Key="ButtonForeground" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
+                    <StaticResource x:Key="ButtonForegroundPointerOver" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
+                    <StaticResource x:Key="ButtonForegroundPressed" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
+                </Button.Resources>
+                <FontIcon FontSize="14" Glyph="&#xE710;" />
+            </Button>
+        </Grid>
+    </Grid>
+</UserControl>

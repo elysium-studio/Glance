@@ -51,21 +51,21 @@
   <data name="UnpinIslandButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Insel nicht mehr erweitert lassen</value></data>
   <data name="ModuleAttentionSettingCard.Header" xml:space="preserve"><value>Aufmerksamkeit zulassen</value></data>
   <data name="ModuleAttentionSettingCard.Description" xml:space="preserve"><value>Diesem Modul erlauben, sich einzublenden, wenn etwas deine Aufmerksamkeit erfordert</value></data>
-  <data name="UninstallModuleDialogTitle" xml:space="preserve"><value>{0} deinstallieren?</value></data>
+  <data name="UninstallModuleDialogTitle" xml:space="preserve"><value>{0} entfernen?</value></data>
   <data name="UninstallModuleDialogMessage" xml:space="preserve"><value>{0} wird sofort aus Glance entfernt.</value></data>
   <data name="UninstallModuleDialogDataMessage" xml:space="preserve"><value>Das Paket, die Einstellungen, gespeicherten Daten und Laufzeitdateien werden gelöscht.</value></data>
-  <data name="UninstallModuleDialogPrimaryButton" xml:space="preserve"><value>Deinstallieren</value></data>
+  <data name="UninstallModuleDialogPrimaryButton" xml:space="preserve"><value>Entfernen</value></data>
   <data name="UninstallModuleDialogCloseButton" xml:space="preserve"><value>Abbrechen</value></data>
-  <data name="InstallModuleButton.Content" xml:space="preserve"><value>Installieren</value></data>
-  <data name="InstallModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Modul installieren</value></data>
+  <data name="InstallModuleButton.Content" xml:space="preserve"><value>Hinzufügen</value></data>
+  <data name="InstallModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Modul hinzufügen</value></data>
   <data name="SetupTourAddModuleButton.Content" xml:space="preserve"><value>Hinzufügen</value></data>
   <data name="SetupTourAddModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Modul hinzufügen</value></data>
   <data name="SetupTourRemoveModuleButton.Content" xml:space="preserve"><value>Entfernen</value></data>
   <data name="SetupTourRemoveModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Modul entfernen</value></data>
   <data name="UpdateModuleButton.Content" xml:space="preserve"><value>Aktualisieren</value></data>
   <data name="UpdateModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Modul aktualisieren</value></data>
-  <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Modul deinstallieren</value></data>
-  <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Deinstallieren</value></data>
+  <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Modul entfernen</value></data>
+  <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Entfernen</value></data>
   <data name="AboutNavigationItem.Content" xml:space="preserve"><value>Über</value></data>
   <data name="AboutDialogTitle" xml:space="preserve"><value>Über</value></data>
   <data name="AboutDialogCloseButton" xml:space="preserve"><value>Schließen</value></data>
@@ -147,4 +147,16 @@
   <data name="ModuleFeedsUnavailableMessage" xml:space="preserve"><value>Module feeds are unavailable. Installed modules remain available.</value></data>
   <data name="ModuleFeedsCachedMessage" xml:space="preserve"><value>Module feeds could not be refreshed. The last available catalogue is shown; affected installs and updates are temporarily unavailable.</value></data>
   <data name="ModuleFeedsPartiallyUnavailableMessage" xml:space="preserve"><value>One or more module feeds could not be refreshed. Other feeds and installed modules remain available.</value></data>
+  <data name="EmptyModulesButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Module hinzufügen</value></data>
+  <data name="EmptyModulesButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Module hinzufügen</value></data>
+  <data name="EmptyModulesCompactLabel.Text" xml:space="preserve"><value>Module hinzufügen</value></data>
+  <data name="EmptyModulesTitle.Text" xml:space="preserve"><value>MODULE</value></data>
+  <data name="EmptyModulesSummary.Text" xml:space="preserve"><value>Gestalten Sie Glance nach Ihren Wünschen</value></data>
+  <data name="EmptyModulesSubtitle.Text" xml:space="preserve"><value>Fügen Sie Module hinzu, um zu beginnen</value></data>
+  <data name="AddModuleFeedButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Hinzufügen</value></data>
+  <data name="RemoveModuleFeedButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Feed entfernen</value></data>
+  <data name="RemoveModuleFeedButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Entfernen</value></data>
+  <data name="AddModuleFeedDialog.Title" xml:space="preserve"><value>Feed hinzufügen</value></data>
+  <data name="AddModuleFeedDialog.PrimaryButtonText" xml:space="preserve"><value>Hinzufügen</value></data>
+  <data name="AddModuleFeedDialog.CloseButtonText" xml:space="preserve"><value>Abbrechen</value></data>
 </root>

@@ -14,4 +14,6 @@ public static class FastingPlanCatalog
     };
 
     public static double NormalizeCustomHours(double value) => Math.Clamp(value, 1, 48);
+
+    public static double NormalizeCustomEatingHours(double value) => Math.Clamp(value, 1, 24);
 }

@@ -32,4 +32,6 @@
   <data name="CustomPlan.Content" xml:space="preserve"><value>Custom</value></data>
   <data name="CustomDurationSettingCard.Header" xml:space="preserve"><value>Fasting duration</value></data>
   <data name="CustomDurationSettingCard.Description" xml:space="preserve"><value>Hours in your custom fast. Choose between 1 and 48.</value></data>
+  <data name="CustomEatingWindowSettingCard.Header" xml:space="preserve"><value>Eating window</value></data>
+  <data name="CustomEatingWindowSettingCard.Description" xml:space="preserve"><value>Hours in your eating window. For a 23:1 plan, choose 23 fasting hours and 1 eating hour.</value></data>
 </root>

@@ -117,6 +117,7 @@ foreach ($metadata in $catalog.modules)
         isDelisted = $false
         isRevoked = $false
         isVisible = $metadata.visible
+        capabilities = @($metadata.capabilities)
         dependencies = @($metadata.dependencies)
     })
 }

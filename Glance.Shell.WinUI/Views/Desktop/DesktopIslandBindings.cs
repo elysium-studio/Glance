@@ -30,6 +30,10 @@ internal sealed class DesktopIslandBindings :
 
     public Visibility WhenModulesLoaded(bool isLoadingModules) => isLoadingModules ? Visibility.Collapsed : Visibility.Visible;
 
+    public Visibility WhenModulesAvailable(bool isLoadingModules, int componentCount) => !isLoadingModules && componentCount > 0 ? Visibility.Visible : Visibility.Collapsed;
+
+    public Visibility WhenNoModulesAvailable(bool isLoadingModules, int componentCount) => !isLoadingModules && componentCount == 0 ? Visibility.Visible : Visibility.Collapsed;
+
     public Visibility WhenRoutePickerVisible(bool isVisible) => isVisible ? Visibility.Visible : Visibility.Collapsed;
 
     public Visibility WhenRoutePickerHidden(bool isVisible) => isVisible ? Visibility.Collapsed : Visibility.Visible;
@@ -38,7 +42,7 @@ internal sealed class DesktopIslandBindings :
 
     public Visibility WhenAssistantAvailable(bool isAssistantAvailable, bool isAssistantEnabled, bool isLoadingModules, bool isTransientPresentationActive) => !isLoadingModules && !isTransientPresentationActive && isAssistantAvailable && isAssistantEnabled ? Visibility.Visible : Visibility.Collapsed;
 
-    public Visibility WhenPrimaryContentVisible(bool isLoadingModules, bool isTransientPresentationActive) => isLoadingModules || isTransientPresentationActive ? Visibility.Collapsed : Visibility.Visible;
+    public Visibility WhenPrimaryContentVisible(bool isLoadingModules, bool isTransientPresentationActive, int componentCount) => isLoadingModules || isTransientPresentationActive || componentCount == 0 ? Visibility.Collapsed : Visibility.Visible;
 
     public object? ToBackgroundContent(IGlanceComponent? component, bool isLoadingModules, bool isTransientPresentationActive) => isLoadingModules || isTransientPresentationActive ? null : (component as IGlanceBackgroundComponent)?.BackgroundContent;
 }

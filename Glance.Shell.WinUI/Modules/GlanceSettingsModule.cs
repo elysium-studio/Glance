@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
+using Elysium.Presentation.Abstractions;
 using Glance.Application.Abstractions;
 using Glance.Transcription;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,12 +14,10 @@ public sealed class GlanceSettingsModule :
     public void Register(IServiceCollection services) => _ = services
             .AddViewFor<ModuleFeedsSettingView, IGlanceViewModel, ModuleFeedsSettingViewModel>(ServiceLifetime.Transient,
                 provider => new ModuleFeedsSettingView(),
-                provider => new ModuleFeedsSettingViewModel(provider.GetRequiredService<GlanceSettings>(), provider.GetRequiredService<IWritableOptions<GlanceSettings>>(), provider.GetRequiredService<IGlanceModuleFeedSourceProvider>(), provider.GetRequiredService<IGlanceModuleFeedService>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<ITextLocalizer>()))
+                provider => new ModuleFeedsSettingViewModel(provider.GetRequiredService<GlanceSettings>(), provider.GetRequiredService<IWritableOptions<GlanceSettings>>(), provider.GetRequiredService<IGlanceModuleFeedSourceProvider>(), provider.GetRequiredService<IGlanceModuleFeedService>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<ITextLocalizer>(), provider.GetRequiredService<INavigator>()))
             .AddViewFor<AssistantModelSetupView, IGlanceViewModel, AssistantModelSetupViewModel>(ServiceLifetime.Transient,
                 provider => new AssistantModelSetupView(),
-                provider => new AssistantModelSetupViewModel(provider.GetRequiredService<ITranscriptionModelCatalog>(),
-                    provider.GetRequiredService<ITranscriptionModelSelection>(),
-                    provider.GetRequiredService<IDispatcher>()))
+                provider => new AssistantModelSetupViewModel(provider.GetRequiredService<ITranscriptionModelCatalog>(), provider.GetRequiredService<ITranscriptionModelSelection>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<IGlanceModuleFeedService>(), provider.GetRequiredService<IGlanceModulePackageService>(), provider.GetRequiredService<ModuleInstallationService>()))
             .AddViewFor<AssistantEnabledView, IGlanceViewModel, AssistantEnabledViewModel>(ServiceLifetime.Transient,
                 provider => new AssistantEnabledView(),
                 provider => new AssistantEnabledViewModel(provider,

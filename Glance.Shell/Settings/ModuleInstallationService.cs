@@ -62,14 +62,29 @@ public sealed class ModuleInstallationService
         }
     }
 
-    public void Register(string packageId, string version, IEnumerable<string> componentIds, Func<Task<bool>> uninstall)
+    public void SetInstalledVersion(string packageId, string version)
+    {
+        lock (synchronization)
+        {
+            if (packages.TryGetValue(packageId, out ModuleRegistration? registration))
+            {
+                registration.Version = version;
+            }
+        }
+    }
+
+    public void Register(string packageId, IEnumerable<string> componentIds, Func<Task<bool>> uninstall) => Register(packageId, null, componentIds, uninstall);
+
+    public void Register(string packageId, string? version, IEnumerable<string> componentIds, Func<Task<bool>> uninstall)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
-        ArgumentException.ThrowIfNullOrWhiteSpace(version);
         ArgumentNullException.ThrowIfNull(componentIds);
         ArgumentNullException.ThrowIfNull(uninstall);
 
-        ModuleRegistration registration = new(packageId, version, uninstall);
+        ModuleRegistration registration = new(packageId, uninstall)
+        {
+            Version = version
+        };
 
         lock (synchronization)
         {

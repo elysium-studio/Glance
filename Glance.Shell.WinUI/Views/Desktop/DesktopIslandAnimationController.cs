@@ -60,6 +60,14 @@ internal sealed class DesktopIslandAnimationController :
     {
         IDesktopIslandAnimationHost currentHost = GetHost();
         int selectedIndex = currentHost.SelectedIndex;
+
+        if (selectedIndex < 0 || previousIndex < 0)
+        {
+            previousIndex = selectedIndex;
+            skipNextConnectedExpansion = false;
+            return;
+        }
+
         int direction = selectedIndex > previousIndex ? 1 : -1;
         skipNextConnectedExpansion = true;
 
@@ -156,5 +164,4 @@ internal sealed class DesktopIslandAnimationController :
 
     private static bool IsInElementTree(FrameworkElement element) => element.IsLoaded && element.XamlRoot is not null;
 }
-
 

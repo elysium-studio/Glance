@@ -145,15 +145,6 @@
           using (ZipArchive archive = ZipFile.Open(ArchivePath, ZipArchiveMode.Create))
           {
             string sourceDirectoryPrefix = Path.GetFullPath(SourceDirectory).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
-			string packageId = Path.GetFileNameWithoutExtension(ArchivePath);
-			string packageVersion = string.IsNullOrWhiteSpace(PackageVersion) ? "1.0.0" : PackageVersion;
-			int moduleApiVersion = ModuleApiVersion <= 0 ? 1 : ModuleApiVersion;
-			ZipArchiveEntry manifestEntry = archive.CreateEntry("module.json", CompressionLevel.Optimal);
-
-			using (StreamWriter writer = new StreamWriter(manifestEntry.Open()))
-			{
-			  writer.Write($"{{\"schemaVersion\":1,\"id\":\"{packageId}\",\"version\":\"{packageVersion}\",\"moduleApiVersion\":{moduleApiVersion},\"dependencies\":[]}}");
-			}
 
             foreach (string file in Directory.EnumerateFiles(SourceDirectory, "*", SearchOption.AllDirectories).OrderBy(path => path, System.StringComparer.OrdinalIgnoreCase))
             {

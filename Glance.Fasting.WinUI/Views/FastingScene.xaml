@@ -6,62 +6,47 @@
     IsHitTestVisible="False"
     Loaded="{x:Bind HandleLoaded}"
     Unloaded="{x:Bind HandleUnloaded}">
-    <Grid x:Name="SceneRoot" Background="#FF17142D">
-        <Border x:Name="NightLayer">
+    <Grid x:Name="SceneRoot" Background="#FF171225">
+        <Border>
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Offset="0" Color="#FF16132E" />
-                    <GradientStop Offset="0.55" Color="#FF25204B" />
-                    <GradientStop Offset="1" Color="#FF101E3B" />
+                    <GradientStop Offset="0" Color="#FF21142B" />
+                    <GradientStop Offset="0.58" Color="#FF281A38" />
+                    <GradientStop Offset="1" Color="#FF151B35" />
                 </LinearGradientBrush>
             </Border.Background>
         </Border>
-        <Border x:Name="DawnLayer" Opacity="0">
+        <Border x:Name="HeatLayer" Opacity="0">
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,1" EndPoint="1,0">
-                    <GradientStop Offset="0" Color="#FF532548" />
-                    <GradientStop Offset="0.52" Color="#FF713849" />
-                    <GradientStop Offset="1" Color="#FF1F3155" />
+                    <GradientStop Offset="0" Color="#FF9A3D1E" />
+                    <GradientStop Offset="0.42" Color="#FF6D2D35" />
+                    <GradientStop Offset="1" Color="#FF272046" />
                 </LinearGradientBrush>
             </Border.Background>
         </Border>
         <Border x:Name="CompletionLayer" Opacity="0">
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,1" EndPoint="1,0">
-                    <GradientStop Offset="0" Color="#FF724123" />
-                    <GradientStop Offset="0.55" Color="#FF664249" />
-                    <GradientStop Offset="1" Color="#FF25375D" />
+                    <GradientStop Offset="0" Color="#FFCA632A" />
+                    <GradientStop Offset="0.5" Color="#FF873844" />
+                    <GradientStop Offset="1" Color="#FF34315A" />
                 </LinearGradientBrush>
             </Border.Background>
         </Border>
         <Canvas>
-            <Ellipse
-                x:Name="OrbitRing"
-                Width="420"
-                Height="190"
-                Canvas.Left="-16"
-                Canvas.Top="34"
-                Opacity="0.18"
-                Stroke="#FFFFDCA0"
-                StrokeThickness="1" />
-            <Ellipse
-                x:Name="GlowOrb"
-                Width="112"
-                Height="112"
-                Canvas.Left="8"
-                Canvas.Top="82"
-                Fill="#33FFD485" />
-            <Ellipse
-                x:Name="ProgressOrb"
-                Width="48"
-                Height="48"
-                Canvas.Left="40"
-                Canvas.Top="114"
-                Fill="#CCFFD485" />
-            <Ellipse Width="3" Height="3" Canvas.Left="74" Canvas.Top="28" Fill="#99FFFFFF" />
-            <Ellipse Width="2" Height="2" Canvas.Left="158" Canvas.Top="48" Fill="#77FFFFFF" />
-            <Ellipse Width="3" Height="3" Canvas.Left="274" Canvas.Top="32" Fill="#88FFFFFF" />
-            <Ellipse Width="2" Height="2" Canvas.Left="348" Canvas.Top="66" Fill="#77FFFFFF" />
+            <Ellipse x:Name="FireGlow" Width="190" Height="190" Canvas.Left="-64" Canvas.Top="74" Fill="#44FF8B32" />
+            <PathIcon
+                x:Name="FireCore"
+                Width="96"
+                Height="96"
+                Canvas.Left="-4"
+                Canvas.Top="96"
+                Data="M6.15636,9.3231 C6.7923,8.97744 7.58624,8.17622 8.20014,7.31965 C8.80574,6.47466 9.26166,5.58687 9.27484,4.98502 C9.28447,4.54513 9.15624,4.25981 8.98169,3.90876 C8.78975,3.52287 8.54979,3.04046 8.46285,2.19254 C8.43715,1.94196 8.62377,1.71848 8.87509,1.69935 C10.1755,1.60032 11.4386,2.34939 12.4174,3.32821 C13.4062,4.31696 14.1934,5.62193 14.4816,6.81402 C14.7269,6.62787 15.0092,6.37483 15.2869,6.10069 C15.6824,5.71012 16.0256,5.31632 16.1687,5.11897 C16.3471,4.87282 16.6934,4.82537 16.9314,5.01448 C19.068,6.71181 20.4998,9.65066 20.4998,12.5132 C20.4998,17.1557 16.6943,20.5003 11.9998,20.5003 C7.30537,20.5003 3.49976,17.1557 3.49976,12.5132 C3.49976,10.8053 3.77006,9.34858 4.2071,8.32594 C4.29395,8.12275 4.49557,7.99302 4.71647,7.99825 C4.93737,8.00347 5.13261,8.1426 5.20976,8.34967 C5.44059,8.96911 5.63137,9.2131 5.77559,9.30398 C5.88904,9.37548 5.99873,9.37742 6.15636,9.3231 Z"
+                Foreground="#FFFFC15E" />
+            <Ellipse x:Name="EmberOne" Width="5" Height="5" Canvas.Left="38" Canvas.Top="118" Fill="#FFFFD58A" />
+            <Ellipse x:Name="EmberTwo" Width="3" Height="3" Canvas.Left="66" Canvas.Top="132" Fill="#FFFFA53F" />
+            <Ellipse x:Name="EmberThree" Width="4" Height="4" Canvas.Left="88" Canvas.Top="126" Fill="#FFFFE5A8" />
         </Canvas>
         <Ellipse
             x:Name="CompletionRing"

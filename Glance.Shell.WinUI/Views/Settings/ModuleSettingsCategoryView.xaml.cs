@@ -131,15 +131,7 @@ public sealed partial class ModuleSettingsCategoryView :
 
         try
         {
-            RestartForModuleUpdateDialog dialog = new(modules.RestartDialogTitle,
-                modules.RestartDialogMessage,
-                modules.RestartDialogPrimaryButtonText,
-                modules.RestartDialogCloseButtonText)
-            {
-                XamlRoot = XamlRoot
-            };
-
-            if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+            if (await modules.ConfirmRestartAsync(XamlRoot))
             {
                 await RunOnDispatcherAsync(() => AddModuleButton.IsEnabled = false);
                 await modules.RestartAsync();

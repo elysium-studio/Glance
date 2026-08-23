@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
 using Elysium.Application.DependencyInjection;
+using Elysium.Presentation.Abstractions;
 using Glance.Application.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
@@ -8,16 +9,20 @@ using System.Collections.Generic;
 namespace Glance.Shell.WinUI;
 
 public sealed class SettingsModule :
-    IModule
+        IModule
 {
     public void Register(IServiceCollection services) => _ = services
             .AddSingleton<IGlanceModuleCategoryResolver, GlanceModuleCategoryResolver>()
             .AddTransient<AboutViewModel>()
+            .AddView<AboutDialog>(ServiceLifetime.Transient, provider => new AboutDialog(provider.GetRequiredService<AboutViewModel>(), provider.GetRequiredService<ITextLocalizer>()))
+            .AddView<QuitDialog>(ServiceLifetime.Transient, provider => new QuitDialog(provider.GetRequiredService<ITextLocalizer>()))
+            .AddView<AddModuleFeedDialog>(ServiceLifetime.Transient)
+            .AddView<RestartForModuleUpdateDialog>(ServiceLifetime.Transient)
+            .AddView<UninstallModuleDialog>(ServiceLifetime.Transient)
             .AddViewFor(ServiceLifetime.Transient,
                 provider => new SettingsWindow(provider.GetRequiredService<IMessenger>(),
-                    provider.GetRequiredService<ITextLocalizer>(),
                     provider.GetRequiredService<IApplicationLifetime>(),
-                    provider.GetRequiredService<AboutViewModel>()),
+                    provider.GetRequiredService<INavigator>()),
                 provider => new SettingsViewModel(provider,
                     provider.GetRequiredService<IServiceFactory>(),
                     provider.GetRequiredService<IMessenger>(),
@@ -47,6 +52,7 @@ public sealed class SettingsModule :
                     provider.GetRequiredService<IApplicationRestartService>(),
                     provider.GetRequiredService<ITextLocalizer>(),
                     provider.GetRequiredService<IGlanceModuleCategoryResolver>(),
+                    provider.GetRequiredService<INavigator>(),
                     provider.GetRequiredService<IEnumerable<IGlanceModuleSettingViewModel>>()))
             .AddViewFor<WindowsView, ISettingViewModel, WindowsViewModel>(ServiceLifetime.Transient,
                 provider => new WindowsView(),

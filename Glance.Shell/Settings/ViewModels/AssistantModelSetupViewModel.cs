@@ -14,6 +14,9 @@ public sealed partial class AssistantModelSetupViewModel :
     private readonly ITranscriptionModelCatalog catalog;
     private readonly ITranscriptionModelSelection modelSelection;
     private readonly IDispatcher dispatcher;
+    private readonly IGlanceModuleFeedService feed;
+    private readonly IGlanceModulePackageService packages;
+    private readonly ModuleInstallationService installations;
     private int disposed;
 
     [ObservableProperty]
@@ -34,14 +37,16 @@ public sealed partial class AssistantModelSetupViewModel :
 
     private int selectedIndex;
 
-    public AssistantModelSetupViewModel(ITranscriptionModelCatalog catalog,
-        ITranscriptionModelSelection modelSelection,
-        IDispatcher dispatcher)
+    public AssistantModelSetupViewModel(ITranscriptionModelCatalog catalog, ITranscriptionModelSelection modelSelection, IDispatcher dispatcher, IGlanceModuleFeedService feed, IGlanceModulePackageService packages, ModuleInstallationService installations)
     {
         this.catalog = catalog;
         this.modelSelection = modelSelection;
         this.dispatcher = dispatcher;
+        this.feed = feed;
+        this.packages = packages;
+        this.installations = installations;
         Models = new ObservableCollection<AssistantModelOption>(catalog.Models.Select(CreateOption));
+        Providers = [];
         string selectedModelId = modelSelection.SelectedModelId ?? catalog.DefaultModelId;
         selectedIndex = catalog.Models.Select((model, index) => (model, index))
             .Where(item => string.Equals(item.model.Id, selectedModelId, StringComparison.OrdinalIgnoreCase))
@@ -50,12 +55,22 @@ public sealed partial class AssistantModelSetupViewModel :
             .First();
         catalog.StateChanged += HandleStateChanged;
         modelSelection.SelectionChanged += HandleSelectionChanged;
+        feed.FeedChanged += HandleFeedChanged;
+        SynchronizeProviders();
         SynchronizeSelectedModel();
     }
 
     public string SettingsCategory => GlanceSettingsCategories.SpeechAndCommands;
 
     public ObservableCollection<AssistantModelOption> Models { get; }
+
+    public ObservableCollection<AssistantTranscriptionProviderViewModel> Providers { get; }
+
+    public bool HasModels => Models.Count > 0;
+
+    public bool HasProviders => Providers.Count > 0;
+
+    public bool ShowProviderEmptyState => !HasProviders;
 
     public int SelectedIndex
     {
@@ -145,6 +160,72 @@ public sealed partial class AssistantModelSetupViewModel :
         }
     }
 
+    public async Task AddProviderAsync(AssistantTranscriptionProviderViewModel provider)
+    {
+        if (!provider.CanAdd)
+        {
+            return;
+        }
+
+        provider.IsBusy = true;
+        ErrorMessage = null;
+        ModuleInstallResult result;
+
+        try
+        {
+            result = await packages.InstallAsync(provider.Module);
+        }
+        catch (Exception exception)
+        {
+            result = ModuleInstallResult.Failed(exception.Message);
+        }
+
+        dispatcher.Dispatch(() =>
+        {
+            if (Volatile.Read(ref disposed) == 0)
+            {
+                provider.IsBusy = false;
+                provider.IsInstalled = result.IsSuccessful || installations.IsInstalled(provider.Id);
+                ErrorMessage = result.IsSuccessful ? null : result.ErrorMessage;
+                SynchronizeModels();
+                SynchronizeSelectedModel();
+            }
+        });
+    }
+
+    public async Task RemoveProviderAsync(AssistantTranscriptionProviderViewModel provider)
+    {
+        if (!provider.CanRemove)
+        {
+            return;
+        }
+
+        provider.IsBusy = true;
+        ErrorMessage = null;
+        bool removed;
+
+        try
+        {
+            removed = await installations.UninstallPackageAsync(provider.Id);
+        }
+        catch (Exception exception)
+        {
+            removed = false;
+            dispatcher.Dispatch(() => ErrorMessage = exception.Message);
+        }
+
+        dispatcher.Dispatch(() =>
+        {
+            if (Volatile.Read(ref disposed) == 0)
+            {
+                provider.IsBusy = false;
+                provider.IsInstalled = !removed && installations.IsInstalled(provider.Id);
+                SynchronizeModels();
+                SynchronizeSelectedModel();
+            }
+        });
+    }
+
     public void Cancel()
     {
         if (SelectedModel is not null)
@@ -195,6 +276,7 @@ public sealed partial class AssistantModelSetupViewModel :
         _ = Interlocked.Exchange(ref disposed, 1);
         catalog.StateChanged -= HandleStateChanged;
         modelSelection.SelectionChanged -= HandleSelectionChanged;
+        feed.FeedChanged -= HandleFeedChanged;
     }
 
     private void HandleStateChanged(object? sender, EventArgs args) => dispatcher.Dispatch(() =>
@@ -228,6 +310,14 @@ public sealed partial class AssistantModelSetupViewModel :
         SynchronizeSelectedModel();
     });
 
+    private void HandleFeedChanged(object? sender, EventArgs args) => dispatcher.Dispatch(() =>
+    {
+        if (Volatile.Read(ref disposed) == 0)
+        {
+            SynchronizeProviders();
+        }
+    });
+
     private void SynchronizeModels()
     {
         IReadOnlyList<TranscriptionModel> current = catalog.Models;
@@ -244,6 +334,8 @@ public sealed partial class AssistantModelSetupViewModel :
         {
             Models.Add(CreateOption(model));
         }
+
+        OnPropertyChanged(nameof(HasModels));
 
         selectedIndex = Models.Select((model, index) => (model, index))
             .Where(item => string.Equals(item.model.Id, selectedModelId, StringComparison.OrdinalIgnoreCase))
@@ -266,6 +358,33 @@ public sealed partial class AssistantModelSetupViewModel :
             ? download.ErrorMessage
             : null;
         NotifySelectionChanged();
+    }
+
+    private void SynchronizeProviders()
+    {
+        IReadOnlyList<GlanceModuleFeedItem> current = [.. feed.Modules
+            .Where(module => module.Capabilities.Contains(GlanceModuleCapabilities.TranscriptionProvider, StringComparer.OrdinalIgnoreCase))
+            .OrderBy(module => module.Order)];
+
+        if (Providers.Select(provider => provider.Id).SequenceEqual(current.Select(module => module.Id), StringComparer.OrdinalIgnoreCase))
+        {
+            foreach (AssistantTranscriptionProviderViewModel provider in Providers)
+            {
+                provider.IsInstalled = installations.IsInstalled(provider.Id);
+            }
+
+            return;
+        }
+
+        Providers.Clear();
+
+        foreach (GlanceModuleFeedItem module in current)
+        {
+            Providers.Add(new AssistantTranscriptionProviderViewModel(module, installations.IsInstalled(module.Id)));
+        }
+
+        OnPropertyChanged(nameof(HasProviders));
+        OnPropertyChanged(nameof(ShowProviderEmptyState));
     }
 
     private void NotifySelectionChanged()

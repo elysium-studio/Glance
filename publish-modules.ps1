@@ -219,6 +219,7 @@ function Set-PackageManifest([string]$PackagePath, $Metadata)
                 category = $Metadata.category
                 iconGlyph = $Metadata.iconGlyph
                 isVisible = $Metadata.visible
+                capabilities = @($Metadata.capabilities)
                 dependencies = @($Metadata.dependencies)
             }
             $writer.Write(($manifest | ConvertTo-Json -Depth 8 -Compress))
@@ -391,6 +392,7 @@ foreach ($versionGroup in $selectedModules | Group-Object version)
             isDelisted = $false
             isRevoked = $false
             isVisible = $metadata.visible
+            capabilities = @($metadata.capabilities)
             dependencies = @($metadata.dependencies)
         }
         $existingFeed.modules = @($existingFeed.modules | Where-Object { $_.id -ne $metadata.id }) + [pscustomobject]$feedItem

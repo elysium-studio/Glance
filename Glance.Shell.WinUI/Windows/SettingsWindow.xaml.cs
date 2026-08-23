@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Elysium.Application.Abstractions;
+using Elysium.Presentation.Abstractions;
+using Elysium.UI.WinUI;
 using Glance.Application.Abstractions;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -16,34 +18,32 @@ namespace Glance.Shell.WinUI;
 
 public sealed partial class SettingsWindow :
     Window,
-    IRecipient<SettingsNavigationRequestedEventArgs>
+    IRecipient<SettingsNavigationRequestedEventArgs>,
+    INavigationRouteTarget
 {
     private const int WindowWidth = 1100;
     private const int WindowHeight = 680;
     private readonly IApplicationLifetime applicationLifetime;
-    private readonly AboutViewModel aboutViewModel;
-    private readonly ITextLocalizer localizer;
     private readonly IMessenger messenger;
+    private readonly INavigator navigator;
     private readonly Dictionary<ISettingViewModel, NavigationViewItem> navigationItems = [];
     private readonly List<ISettingViewModel> navigationPath = [];
     private readonly List<INotifyCollectionChanged> observedNavigationCollections = [];
     private bool isBuildingNavigation;
     private bool isNavigationRebuildPending;
     private bool isAboutDialogOpen;
+    private bool isLoaded;
     private bool isClosing;
     private bool isQuitDialogOpen;
+    private NavigationRoute? pendingRoute;
 
-    public SettingsWindow(IMessenger messenger,
-        ITextLocalizer localizer,
-        IApplicationLifetime applicationLifetime,
-        AboutViewModel aboutViewModel)
+    public SettingsWindow(IMessenger messenger, IApplicationLifetime applicationLifetime, INavigator navigator)
     {
         InitializeComponent();
 
         this.messenger = messenger;
-        this.localizer = localizer;
         this.applicationLifetime = applicationLifetime;
-        this.aboutViewModel = aboutViewModel;
+        this.navigator = navigator;
 
         messenger.Register<SettingsNavigationRequestedEventArgs>(this);
         Closed += HandleClosed;
@@ -67,6 +67,28 @@ public sealed partial class SettingsWindow :
 
     public SettingsViewModel ViewModel => field ??= (SettingsViewModel)((FrameworkElement)Content).DataContext;
 
+    public Task HandleRouteAsync(NavigationRoute route)
+    {
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            ApplyRoute(route);
+            return Task.CompletedTask;
+        }
+
+        TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (!DispatcherQueue.TryEnqueue(() =>
+            {
+                ApplyRoute(route);
+                completion.TrySetResult();
+            }))
+        {
+            completion.TrySetException(new InvalidOperationException("The settings dispatcher rejected the navigation route."));
+        }
+
+        return completion.Task;
+    }
+
     public void Receive(SettingsNavigationRequestedEventArgs message)
     {
         if (isClosing || ReferenceEquals(ViewModel.CurrentView, message.Target))
@@ -83,13 +105,14 @@ public sealed partial class SettingsWindow :
         }
     }
 
-    private void HandleLoaded(object sender,
-        RoutedEventArgs args)
+    private void HandleLoaded(object sender, RoutedEventArgs args)
     {
         if (!isClosing &&
             ((FrameworkElement)Content).DataContext is SettingsViewModel)
         {
+            isLoaded = true;
             BuildNavigation();
+            ApplyPendingRoute();
         }
     }
 
@@ -123,8 +146,7 @@ public sealed partial class SettingsWindow :
         Navigate(path);
     }
 
-    private async void HandleQuitTapped(object sender,
-        Microsoft.UI.Xaml.Input.TappedRoutedEventArgs args)
+    private async void HandleQuitTapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs args)
     {
         if (isQuitDialogOpen)
         {
@@ -135,12 +157,10 @@ public sealed partial class SettingsWindow :
 
         try
         {
-            QuitDialog dialog = new(localizer)
-            {
-                XamlRoot = ((FrameworkElement)Content).XamlRoot
-            };
+            NavigationParameters parameters = CreateDialogParameters();
+            NavigationDialogResult result = await navigator.NavigateAsync<NavigationDialogResult>(nameof(QuitDialog), null, parameters);
 
-            if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+            if (result == NavigationDialogResult.Primary)
             {
                 isClosing = true;
                 QuitGlanceNavigationItem.IsEnabled = false;
@@ -154,8 +174,7 @@ public sealed partial class SettingsWindow :
         }
     }
 
-    private async void HandleAboutTapped(object sender,
-        Microsoft.UI.Xaml.Input.TappedRoutedEventArgs args)
+    private async void HandleAboutTapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs args)
     {
         if (isAboutDialogOpen)
         {
@@ -166,12 +185,7 @@ public sealed partial class SettingsWindow :
 
         try
         {
-            AboutDialog dialog = new(aboutViewModel,
-                localizer)
-            {
-                XamlRoot = ((FrameworkElement)Content).XamlRoot
-            };
-            _ = await dialog.ShowAsync();
+            await navigator.NavigateAsync(nameof(AboutDialog), null, CreateDialogParameters());
         }
         finally
         {
@@ -211,12 +225,78 @@ public sealed partial class SettingsWindow :
     private void HandleClosed(object sender,
         WindowEventArgs args)
     {
+        isLoaded = false;
         isClosing = true;
         messenger.UnregisterAll(this);
         StopObservingNavigationChanges();
         navigationItems.Clear();
         navigationPath.Clear();
         Closed -= HandleClosed;
+    }
+
+    private void ApplyRoute(NavigationRoute route)
+    {
+        if (!isLoaded || isClosing || navigationItems.Count == 0)
+        {
+            pendingRoute = route;
+            return;
+        }
+
+        IReadOnlyList<ISettingViewModel> candidates = ViewModel.ToArray();
+        List<ISettingViewModel> path = [];
+
+        foreach (string segment in route.Segments)
+        {
+            ISettingViewModel? match = candidates.FirstOrDefault(candidate => string.Equals(candidate.RouteSegment, segment, StringComparison.OrdinalIgnoreCase));
+
+            if (match is null)
+            {
+                pendingRoute = route;
+                return;
+            }
+
+            path.Add(match);
+            candidates = match.Children;
+        }
+
+        if (path.Count == 0)
+        {
+            ApplyRouteTarget(route);
+            return;
+        }
+
+        ISettingViewModel target = path[^1];
+
+        if (target.Children.Count > 0)
+        {
+            target = target.Children[0];
+            path.Add(target);
+        }
+
+        if (navigationItems.TryGetValue(target, out NavigationViewItem? item))
+        {
+            SettingsNavigation.SelectedItem = item;
+        }
+
+        Navigate(path);
+        ApplyRouteTarget(route);
+    }
+
+    private void ApplyRouteTarget(NavigationRoute route)
+    {
+        if (route.Target is null)
+        {
+            return;
+        }
+
+        _ = DispatcherQueue.TryEnqueue(() => _ = NavigationTarget.Apply((DependencyObject)Content, route));
+    }
+
+    private NavigationParameters CreateDialogParameters()
+    {
+        NavigationParameters parameters = new();
+        parameters.Set("XamlRoot", ((FrameworkElement)Content).XamlRoot);
+        return parameters;
     }
 
     private void GoBack()
@@ -302,6 +382,7 @@ public sealed partial class SettingsWindow :
             {
                 isNavigationRebuildPending = false;
                 BuildNavigation();
+                ApplyPendingRoute();
             }))
         {
             isNavigationRebuildPending = false;
@@ -395,6 +476,17 @@ public sealed partial class SettingsWindow :
         }
 
         observedNavigationCollections.Clear();
+    }
+
+    private void ApplyPendingRoute()
+    {
+        if (pendingRoute is not NavigationRoute route)
+        {
+            return;
+        }
+
+        pendingRoute = null;
+        ApplyRoute(route);
     }
 
     private static bool TryFindNavigationPath(ISettingViewModel current,

@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
 
 namespace Glance.Shell.WinUI;
 
@@ -10,7 +11,15 @@ public sealed partial class ModuleFeedsSettingView :
 
     public ModuleFeedsSettingViewModel ViewModel => (ModuleFeedsSettingViewModel)DataContext;
 
-    private void HandleAddClick(object sender, RoutedEventArgs args) => _ = ViewModel.AddAsync();
+    private async void HandleAddClick(object sender, RoutedEventArgs args)
+    {
+        if (XamlRoot is null)
+        {
+            return;
+        }
+
+        await ViewModel.ShowAddDialogAsync(XamlRoot);
+    }
 
     private void HandleRemoveClick(object sender, RoutedEventArgs args)
     {

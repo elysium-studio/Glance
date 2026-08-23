@@ -15,7 +15,8 @@ public sealed class QuickConvertModule :
         _ = services.AddSingleton<ModuleResourceTextLocalizer<QuickConvertModule>>();
         _ = services.AddSingleton(provider => new QuickConvertViewModel(provider.GetRequiredService<ModuleResourceTextLocalizer<QuickConvertModule>>()));
         _ = services.AddSingleton<IGlanceComponent, QuickConvertComponent>();
-        _ = services.AddViewFor<QuickConverterSettingsView, IGlanceModuleSettingViewModel, QuickConverterSettingsViewModel>(ServiceLifetime.Transient, provider => new QuickConverterSettingsView(), provider => new QuickConverterSettingsViewModel(provider.GetRequiredService<IGlanceQuickConverterManager>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<ModuleResourceTextLocalizer<QuickConvertModule>>()));
+        _ = services.AddView<QuickConverterRemoveDialog>(ServiceLifetime.Transient);
+        _ = services.AddViewFor<QuickConverterSettingsView, IGlanceModuleSettingViewModel, QuickConverterSettingsViewModel>(ServiceLifetime.Transient, provider => new QuickConverterSettingsView(), provider => new QuickConverterSettingsViewModel(provider.GetRequiredService<IGlanceQuickConverterManager>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<ModuleResourceTextLocalizer<QuickConvertModule>>(), provider.GetRequiredService<INavigator>()));
         _ = services.AddSingleton<IGlanceIntent>(provider => new QuickConvertIntentAdapter(provider
             .GetServices<IGlanceComponent>()
             .OfType<QuickConvertComponent>()

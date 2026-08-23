@@ -87,6 +87,7 @@ public sealed partial class DesktopIslandViewModel :
         this.dispatcher = dispatcher;
         this.modulePreferences = modulePreferences;
         components = modulePreferences.GetActiveComponents();
+        SelectedIndex = 0;
         this.attentionService = attentionService;
         Assistant = assistant;
         this.actionService = actionService;
@@ -129,7 +130,7 @@ public sealed partial class DesktopIslandViewModel :
     {
         get; set
         {
-            int normalizedIndex = Math.Clamp(value, 0, Math.Max(0, components.Count - 1));
+            int normalizedIndex = components.Count == 0 ? -1 : Math.Clamp(value, 0, components.Count - 1);
 
             if (!isSelectingAttentionComponent &&
                 attentionPresentedComponentId is not null &&
@@ -243,6 +244,8 @@ public sealed partial class DesktopIslandViewModel :
     }
 
     public void CompleteStartup() => attentionService.CompleteStartup();
+
+    public async void NavigateToModules() => await NavigateAsync("SettingsWindow", new NavigationRoute([SettingsNavigationRoutes.Modules, GlanceModuleCategories.Information]));
 
     public async void NavigateToSettings() => await NavigateAsync("SettingsWindow");
 
@@ -522,7 +525,9 @@ public sealed partial class DesktopIslandViewModel :
                 ? selectedComponentIndex
                 : restoredComponentIndex >= 0
                     ? restoredComponentIndex
-                    : Math.Clamp(previousSelectedIndex, 0, Math.Max(0, components.Count - 1));
+                    : components.Count == 0
+                        ? -1
+                        : Math.Clamp(previousSelectedIndex, 0, components.Count - 1);
         }
         finally
         {
@@ -831,11 +836,17 @@ public sealed partial class DesktopIslandViewModel :
         OnPropertyChanged(nameof(IsContentRoutePickerVisible));
     }
 
-    private async Task NavigateAsync(string key)
+    private async Task NavigateAsync(string key, NavigationRoute? route = null)
     {
         try
         {
-            await navigator.NavigateAsync(key);
+            if (route is null)
+            {
+                await navigator.NavigateAsync(key);
+                return;
+            }
+
+            await navigator.NavigateAsync(key, route);
         }
         catch (Exception exception)
         {

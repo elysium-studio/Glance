@@ -23,6 +23,8 @@ public class SettingsCategoryViewModel :
 
     public string Id { get; }
 
+    public string RouteSegment => Id;
+
     public string Title { get; }
 
     public virtual void Dispose()

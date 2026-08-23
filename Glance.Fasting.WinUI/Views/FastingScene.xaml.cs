@@ -13,9 +13,9 @@ public sealed partial class FastingScene :
 {
     private FastingStage previousStage;
     private Visual? completionLayerVisual;
-    private Visual? dawnLayerVisual;
-    private Visual? glowVisual;
-    private Visual? orbVisual;
+    private Visual? fireCoreVisual;
+    private Visual? fireGlowVisual;
+    private Visual? heatLayerVisual;
 
     public FastingScene() => InitializeComponent();
 
@@ -38,35 +38,35 @@ public sealed partial class FastingScene :
 
     private void HandleLoaded(object sender, RoutedEventArgs args)
     {
-        SizeChanged += HandleSizeChanged;
         Subscribe();
-        orbVisual = ElementCompositionPreview.GetElementVisual(ProgressOrb);
-        glowVisual = ElementCompositionPreview.GetElementVisual(GlowOrb);
-        dawnLayerVisual = ElementCompositionPreview.GetElementVisual(DawnLayer);
+        fireCoreVisual = ElementCompositionPreview.GetElementVisual(FireCore);
+        fireGlowVisual = ElementCompositionPreview.GetElementVisual(FireGlow);
+        heatLayerVisual = ElementCompositionPreview.GetElementVisual(HeatLayer);
         completionLayerVisual = ElementCompositionPreview.GetElementVisual(CompletionLayer);
-        StartGlowPulse();
+        StartFirePulse();
+        StartEmber(ElementCompositionPreview.GetElementVisual(EmberOne), 0);
+        StartEmber(ElementCompositionPreview.GetElementVisual(EmberTwo), 1.2);
+        StartEmber(ElementCompositionPreview.GetElementVisual(EmberThree), 2.4);
         UpdateScene(false);
     }
 
     private void HandleUnloaded(object sender, RoutedEventArgs args)
     {
-        SizeChanged -= HandleSizeChanged;
         Unsubscribe();
-        orbVisual?.StopAnimation("Offset.X");
-        orbVisual?.StopAnimation("Offset.Y");
-        glowVisual?.StopAnimation("Offset.X");
-        glowVisual?.StopAnimation("Offset.Y");
-        glowVisual?.StopAnimation("Scale.X");
-        glowVisual?.StopAnimation("Scale.Y");
-        dawnLayerVisual?.StopAnimation(nameof(Visual.Opacity));
+        fireCoreVisual?.StopAnimation("Scale.X");
+        fireCoreVisual?.StopAnimation("Scale.Y");
+        fireGlowVisual?.StopAnimation("Scale.X");
+        fireGlowVisual?.StopAnimation("Scale.Y");
+        heatLayerVisual?.StopAnimation(nameof(Visual.Opacity));
         completionLayerVisual?.StopAnimation(nameof(Visual.Opacity));
-        orbVisual = null;
-        glowVisual = null;
-        dawnLayerVisual = null;
+        StopEmber(ElementCompositionPreview.GetElementVisual(EmberOne));
+        StopEmber(ElementCompositionPreview.GetElementVisual(EmberTwo));
+        StopEmber(ElementCompositionPreview.GetElementVisual(EmberThree));
+        fireCoreVisual = null;
+        fireGlowVisual = null;
+        heatLayerVisual = null;
         completionLayerVisual = null;
     }
-
-    private void HandleSizeChanged(object sender, SizeChangedEventArgs args) => UpdateScene(false);
 
     private void Subscribe()
     {
@@ -91,18 +91,17 @@ public sealed partial class FastingScene :
 
     private void UpdateScene(bool animate)
     {
-        if (!IsLoaded || ViewModel is null || orbVisual is null || glowVisual is null || ActualWidth <= 0 || ActualHeight <= 0)
+        if (!IsLoaded || ViewModel is null || fireCoreVisual is null || fireGlowVisual is null)
         {
             return;
         }
 
-        double progress = Math.Clamp(ViewModel.Progress, 0, 1);
-        float targetX = (float)(progress * Math.Max(0, ActualWidth - 96));
-        float targetY = (float)(-Math.Sin(progress * Math.PI) * Math.Max(18, ActualHeight * 0.48));
-        MoveVisual(orbVisual, targetX, targetY, animate);
-        MoveVisual(glowVisual, targetX, targetY, animate);
-        AnimateOpacity(dawnLayerVisual, (float)Math.Clamp(progress * 1.4, 0, 0.88), animate);
-        AnimateOpacity(completionLayerVisual, (float)Math.Clamp((progress - 0.68) * 3.125, 0, 0.92), animate);
+        float progress = (float)Math.Clamp(ViewModel.Progress, 0, 1);
+        float activity = ViewModel.Stage == FastingStage.Ready ? 0.18f : 0.38f + progress * 0.62f;
+        AnimateOpacity(heatLayerVisual, 0.08f + progress * 0.72f, animate);
+        AnimateOpacity(completionLayerVisual, Math.Clamp((progress - 0.82f) * 4.4f, 0, 0.78f), animate);
+        AnimateOpacity(fireCoreVisual, activity, animate);
+        AnimateOpacity(fireGlowVisual, activity * 0.72f, animate);
 
         if (ViewModel.Stage == FastingStage.Completed && previousStage != FastingStage.Completed)
         {
@@ -112,30 +111,55 @@ public sealed partial class FastingScene :
         previousStage = ViewModel.Stage;
     }
 
-    private static void MoveVisual(Visual visual, float targetX, float targetY, bool animate)
+    private void StartFirePulse()
     {
-        if (!animate)
+        if (fireCoreVisual is null || fireGlowVisual is null)
         {
-            visual.StopAnimation("Offset.X");
-            visual.StopAnimation("Offset.Y");
-            visual.Offset = new Vector3(targetX, targetY, visual.Offset.Z);
             return;
         }
 
-        Compositor compositor = visual.Compositor;
-        CubicBezierEasingFunction easing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.1f, 0.9f), new Vector2(0.2f, 1));
-        ScalarKeyFrameAnimation horizontal = compositor.CreateScalarKeyFrameAnimation();
-        horizontal.InsertExpressionKeyFrame(0, "this.StartingValue");
-        horizontal.InsertKeyFrame(1, targetX, easing);
-        horizontal.Duration = TimeSpan.FromMilliseconds(900);
-        horizontal.StopBehavior = AnimationStopBehavior.SetToFinalValue;
-        ScalarKeyFrameAnimation vertical = compositor.CreateScalarKeyFrameAnimation();
-        vertical.InsertExpressionKeyFrame(0, "this.StartingValue");
-        vertical.InsertKeyFrame(1, targetY, easing);
-        vertical.Duration = horizontal.Duration;
-        vertical.StopBehavior = AnimationStopBehavior.SetToFinalValue;
-        visual.StartAnimation("Offset.X", horizontal);
-        visual.StartAnimation("Offset.Y", vertical);
+        StartPulse(fireCoreVisual, new Vector3(48, 92, 0), 0.96f, 1.04f, 2.8);
+        StartPulse(fireGlowVisual, new Vector3(95, 95, 0), 0.92f, 1.08f, 3.6);
+    }
+
+    private static void StartPulse(Visual visual, Vector3 centerPoint, float minimum, float maximum, double seconds)
+    {
+        visual.CenterPoint = centerPoint;
+        ScalarKeyFrameAnimation animation = visual.Compositor.CreateScalarKeyFrameAnimation();
+        animation.InsertKeyFrame(0, minimum);
+        animation.InsertKeyFrame(0.5f, maximum);
+        animation.InsertKeyFrame(1, minimum);
+        animation.Duration = TimeSpan.FromSeconds(seconds);
+        animation.IterationBehavior = AnimationIterationBehavior.Forever;
+        visual.StartAnimation("Scale.X", animation);
+        visual.StartAnimation("Scale.Y", animation);
+    }
+
+    private static void StartEmber(Visual visual, double delaySeconds)
+    {
+        visual.Offset = new Vector3(visual.Offset.X, 34, visual.Offset.Z);
+        ScalarKeyFrameAnimation rise = visual.Compositor.CreateScalarKeyFrameAnimation();
+        rise.InsertKeyFrame(0, 34);
+        rise.InsertKeyFrame(1, -54);
+        rise.Duration = TimeSpan.FromSeconds(4.2);
+        rise.DelayTime = TimeSpan.FromSeconds(delaySeconds);
+        rise.IterationBehavior = AnimationIterationBehavior.Forever;
+        ScalarKeyFrameAnimation opacity = visual.Compositor.CreateScalarKeyFrameAnimation();
+        opacity.InsertKeyFrame(0, 0);
+        opacity.InsertKeyFrame(0.18f, 0.9f);
+        opacity.InsertKeyFrame(0.72f, 0.45f);
+        opacity.InsertKeyFrame(1, 0);
+        opacity.Duration = rise.Duration;
+        opacity.DelayTime = rise.DelayTime;
+        opacity.IterationBehavior = AnimationIterationBehavior.Forever;
+        visual.StartAnimation("Offset.Y", rise);
+        visual.StartAnimation(nameof(Visual.Opacity), opacity);
+    }
+
+    private static void StopEmber(Visual visual)
+    {
+        visual.StopAnimation("Offset.Y");
+        visual.StopAnimation(nameof(Visual.Opacity));
     }
 
     private static void AnimateOpacity(Visual? visual, float target, bool animate)
@@ -158,24 +182,6 @@ public sealed partial class FastingScene :
         animation.Duration = TimeSpan.FromMilliseconds(900);
         animation.StopBehavior = AnimationStopBehavior.SetToFinalValue;
         visual.StartAnimation(nameof(Visual.Opacity), animation);
-    }
-
-    private void StartGlowPulse()
-    {
-        if (glowVisual is null)
-        {
-            return;
-        }
-
-        glowVisual.CenterPoint = new Vector3(56, 56, 0);
-        ScalarKeyFrameAnimation animation = glowVisual.Compositor.CreateScalarKeyFrameAnimation();
-        animation.InsertKeyFrame(0, 0.92f);
-        animation.InsertKeyFrame(0.5f, 1.08f);
-        animation.InsertKeyFrame(1, 0.92f);
-        animation.Duration = TimeSpan.FromSeconds(3.8);
-        animation.IterationBehavior = AnimationIterationBehavior.Forever;
-        glowVisual.StartAnimation("Scale.X", animation);
-        glowVisual.StartAnimation("Scale.Y", animation);
     }
 
     private void StartCompletionRing()

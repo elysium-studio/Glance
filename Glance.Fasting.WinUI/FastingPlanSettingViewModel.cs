@@ -22,8 +22,12 @@ public sealed partial class FastingPlanSettingViewModel :
         this.writer = writer;
         SelectedPlanIndex = (int)settings.Plan;
         CustomFastingHours = FastingPlanCatalog.NormalizeCustomHours(settings.CustomFastingHours);
+        CustomEatingHours = FastingPlanCatalog.NormalizeCustomEatingHours(settings.CustomEatingHours);
         initialized = true;
     }
+
+    [ObservableProperty]
+    public partial double CustomEatingHours { get; set; }
 
     [ObservableProperty]
     public partial double CustomFastingHours { get; set; }
@@ -41,6 +45,8 @@ public sealed partial class FastingPlanSettingViewModel :
     public void Dispose() => _ = Interlocked.Exchange(ref disposed, 1);
 
     partial void OnCustomFastingHoursChanged(double value) => QueueSave();
+
+    partial void OnCustomEatingHoursChanged(double value) => QueueSave();
 
     partial void OnSelectedPlanIndexChanged(int value) => QueueSave();
 
@@ -64,11 +70,13 @@ public sealed partial class FastingPlanSettingViewModel :
             while (Interlocked.Exchange(ref saveQueued, 0) != 0 && Volatile.Read(ref disposed) == 0)
             {
                 FastingPlan plan = Enum.IsDefined(typeof(FastingPlan), SelectedPlanIndex) ? (FastingPlan)SelectedPlanIndex : FastingPlan.SixteenEight;
-                double customHours = FastingPlanCatalog.NormalizeCustomHours(CustomFastingHours);
+                double customFastingHours = FastingPlanCatalog.NormalizeCustomHours(CustomFastingHours);
+                double customEatingHours = FastingPlanCatalog.NormalizeCustomEatingHours(CustomEatingHours);
                 await writer.WriteAsync(settings =>
                 {
                     settings.Plan = plan;
-                    settings.CustomFastingHours = customHours;
+                    settings.CustomFastingHours = customFastingHours;
+                    settings.CustomEatingHours = customEatingHours;
                 });
             }
         }

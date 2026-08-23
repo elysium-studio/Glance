@@ -20,7 +20,12 @@ public sealed class NavigationModule :
                 key = key.EndsWith("ViewModel", StringComparison.Ordinal) ? key[..^"ViewModel".Length]
                     : key;
                 ViewDescriptor descriptor = provider.GetRequiredKeyedService<ViewDescriptor>(key);
-                Type type = descriptor.ViewModelType!;
+                Type? type = descriptor.ViewModelType;
+
+                if (type is null)
+                {
+                    return null;
+                }
 
                 if (descriptor.ViewType is not null &&
                     typeof(Window).IsAssignableFrom(descriptor.ViewType) &&

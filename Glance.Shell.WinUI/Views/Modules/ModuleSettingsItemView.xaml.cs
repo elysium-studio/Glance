@@ -9,7 +9,13 @@ namespace Glance.Shell.WinUI;
 public sealed partial class ModuleSettingsItemView :
     UserControl
 {
-    public ModuleSettingsItemView() => InitializeComponent();
+    private ModuleSettingsItemViewModel? subscribedViewModel;
+
+    public ModuleSettingsItemView()
+    {
+        InitializeComponent();
+        DataContextChanged += HandleDataContextChanged;
+    }
 
     public ModuleSettingsItemViewModel ViewModel => (ModuleSettingsItemViewModel)DataContext;
 
@@ -18,14 +24,34 @@ public sealed partial class ModuleSettingsItemView :
     private void HandleLoaded(object sender, RoutedEventArgs args)
     {
         ActualThemeChanged += HandleActualThemeChanged;
-        ViewModel.PropertyChanged += HandleViewModelPropertyChanged;
+        SubscribeToViewModel();
         ApplyHeaderIcon();
     }
 
     private void HandleUnloaded(object sender, RoutedEventArgs args)
     {
         ActualThemeChanged -= HandleActualThemeChanged;
-        ViewModel.PropertyChanged -= HandleViewModelPropertyChanged;
+        UnsubscribeFromViewModel();
+    }
+
+    private void HandleDataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
+    {
+        UnsubscribeFromViewModel();
+
+        if (args.NewValue is not ModuleSettingsItemViewModel)
+        {
+            return;
+        }
+
+        Bindings.Update();
+
+        if (!IsLoaded)
+        {
+            return;
+        }
+
+        SubscribeToViewModel();
+        ApplyHeaderIcon();
     }
 
     private void HandleActualThemeChanged(FrameworkElement sender, object args) => ApplyHeaderIcon();
@@ -55,6 +81,25 @@ public sealed partial class ModuleSettingsItemView :
         };
     }
 
+    private void SubscribeToViewModel()
+    {
+        subscribedViewModel = DataContext as ModuleSettingsItemViewModel;
+
+        if (subscribedViewModel is not null)
+        {
+            subscribedViewModel.PropertyChanged += HandleViewModelPropertyChanged;
+        }
+    }
+
+    private void UnsubscribeFromViewModel()
+    {
+        if (subscribedViewModel is not null)
+        {
+            subscribedViewModel.PropertyChanged -= HandleViewModelPropertyChanged;
+            subscribedViewModel = null;
+        }
+    }
+
     private async void HandleInstallClicked(object sender, RoutedEventArgs args) => _ = await ViewModel.InstallAsync();
 
     private async void HandleUninstallClicked(object sender, RoutedEventArgs args)
@@ -64,12 +109,7 @@ public sealed partial class ModuleSettingsItemView :
             return;
         }
 
-        UninstallModuleDialog dialog = new(ViewModel.DisplayName)
-        {
-            XamlRoot = XamlRoot
-        };
-
-        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        if (await ViewModel.ConfirmUninstallAsync(XamlRoot))
         {
             _ = await ViewModel.UninstallAsync();
         }

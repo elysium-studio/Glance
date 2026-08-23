@@ -15,4 +15,11 @@ public sealed class FastingPlanCatalogTests
     [InlineData(24, 24)]
     [InlineData(72, 48)]
     public void CustomDurationIsNormalized(double value, double expected) => Assert.Equal(expected, FastingPlanCatalog.GetFastingDuration(FastingPlan.Custom, value).TotalHours);
+
+    [Theory]
+    [InlineData(0, 1)]
+    [InlineData(1, 1)]
+    [InlineData(24, 24)]
+    [InlineData(48, 24)]
+    public void CustomEatingWindowIsNormalized(double value, double expected) => Assert.Equal(expected, FastingPlanCatalog.NormalizeCustomEatingHours(value));
 }

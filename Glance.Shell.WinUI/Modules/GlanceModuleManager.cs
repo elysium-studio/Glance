@@ -173,10 +173,9 @@ internal sealed class GlanceModuleManager :
             }
 
             string packageId = GlanceModuleInstallationStore.GetPackageId(result.SourcePath);
-            string packageVersion = GlanceModulePackageReader.TryReadManifest(result.SourcePath, out GlanceModulePackageManifest? manifest) && manifest is not null ? manifest.Version : "0.0.0";
             registeredInstallationIds = [.. components.Select(component => component.Id)];
             registeredPackageId = packageId;
-            installations.Register(packageId, packageVersion, registeredInstallationIds, () => UninstallAsync(result.SourcePath));
+            installations.Register(packageId, registeredInstallationIds, () => UninstallAsync(result.SourcePath));
             quickConverterRegistry.Register(packageId, quickConverters);
             quickConvertersRegistered = true;
             await quickConverterPreferences.RegisterAsync(quickConverters.Select(converter => converter.Descriptor.Id));
@@ -396,27 +395,36 @@ internal sealed class GlanceModuleManager :
         string packageId = Path.GetFileNameWithoutExtension(packagePath);
         LoadedModulePackage? existingPackage = loadedPackages.FirstOrDefault(candidate =>
             string.Equals(candidate.PackageId, packageId, StringComparison.OrdinalIgnoreCase));
+        string expectedPath = Path.Combine(GlanceModuleInstallationStore.RootDirectory, packageId, $"{packageId}.glance");
         string installedPackagePath;
+
+        lock (synchronization)
+        {
+            _ = knownPackages.Add(expectedPath);
+
+            if (pendingPackages.Remove(expectedPath, out CancellationTokenSource? pending))
+            {
+                pending.Cancel();
+                pending.Dispose();
+            }
+        }
 
         try
         {
             string fullSourcePath = Path.GetFullPath(packagePath);
-            string expectedPath = Path.Combine(GlanceModuleInstallationStore.RootDirectory,
-                packageId,
-                $"{packageId}.glance");
             installedPackagePath = string.Equals(fullSourcePath, expectedPath, StringComparison.OrdinalIgnoreCase)
                 ? fullSourcePath
                 : GlanceModuleInstallationStore.StagePackage(fullSourcePath);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
         {
+            lock (synchronization)
+            {
+                _ = knownPackages.Remove(expectedPath);
+            }
+
             logger.LogError(exception, "Failed to stage Glance module package {ModulePackage}", packagePath);
             return ModuleInstallResult.Failed(exception.Message);
-        }
-
-        lock (synchronization)
-        {
-            _ = knownPackages.Add(installedPackagePath);
         }
 
         if (existingPackage is not null)

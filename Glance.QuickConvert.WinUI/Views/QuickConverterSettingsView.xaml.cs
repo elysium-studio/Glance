@@ -36,17 +36,7 @@ public sealed partial class QuickConverterSettingsView :
             return;
         }
 
-        ContentDialog dialog = new()
-        {
-            XamlRoot = XamlRoot,
-            Title = ViewModel.RemoveDialogTitle,
-            Content = ViewModel.RemoveDialogMessage,
-            PrimaryButtonText = ViewModel.RemoveDialogPrimaryButtonText,
-            CloseButtonText = ViewModel.RemoveDialogCloseButtonText,
-            DefaultButton = ContentDialogButton.Close
-        };
-
-        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        if (await ViewModel.ConfirmRemoveAsync(XamlRoot))
         {
             await ViewModel.RemoveAsync(converter);
         }

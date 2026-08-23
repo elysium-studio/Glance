@@ -41,6 +41,8 @@ public sealed class GlanceModuleFeedItem
 
     public bool IsVisible { get; set; } = true;
 
+    public List<string> Capabilities { get; set; } = [];
+
     public List<GlanceModuleDependency> Dependencies { get; set; } = [];
 
     [JsonIgnore]

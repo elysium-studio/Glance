@@ -15,4 +15,20 @@ public sealed partial class AssistantModelSetupView :
     private void HandleCancelClick(object sender, RoutedEventArgs args) => ViewModel.Cancel();
 
     private void HandleRemoveClick(object sender, RoutedEventArgs args) => _ = ViewModel.RemoveAsync();
+
+    private void HandleAddProviderClick(object sender, RoutedEventArgs args)
+    {
+        if (sender is FrameworkElement { DataContext: AssistantTranscriptionProviderViewModel provider })
+        {
+            _ = ViewModel.AddProviderAsync(provider);
+        }
+    }
+
+    private void HandleRemoveProviderClick(object sender, RoutedEventArgs args)
+    {
+        if (sender is FrameworkElement { DataContext: AssistantTranscriptionProviderViewModel provider })
+        {
+            _ = ViewModel.RemoveProviderAsync(provider);
+        }
+    }
 }

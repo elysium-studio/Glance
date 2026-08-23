@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Elysium.Application.Abstractions;
+using Elysium.Presentation.Abstractions;
 using Glance.Application.Abstractions;
 using System.Collections.ObjectModel;
 
@@ -12,6 +13,7 @@ public sealed partial class QuickConverterSettingsViewModel :
     private readonly IDispatcher dispatcher;
     private readonly IGlanceQuickConverterManager manager;
     private readonly ModuleResourceTextLocalizer<QuickConvertModule> localizer;
+    private readonly INavigator navigator;
     private int disposed;
 
     [ObservableProperty]
@@ -25,11 +27,12 @@ public sealed partial class QuickConverterSettingsViewModel :
     [ObservableProperty]
     public partial bool IsStatusError { get; set; }
 
-    public QuickConverterSettingsViewModel(IGlanceQuickConverterManager manager, IDispatcher dispatcher, ModuleResourceTextLocalizer<QuickConvertModule> localizer)
+    public QuickConverterSettingsViewModel(IGlanceQuickConverterManager manager, IDispatcher dispatcher, ModuleResourceTextLocalizer<QuickConvertModule> localizer, INavigator navigator)
     {
         this.manager = manager;
         this.dispatcher = dispatcher;
         this.localizer = localizer;
+        this.navigator = navigator;
         manager.Changed += HandleManagerChanged;
         SynchronizeConverters();
     }
@@ -53,6 +56,14 @@ public sealed partial class QuickConverterSettingsViewModel :
     public string RemoveDialogPrimaryButtonText => localizer.GetText("QuickConverterRemoveDialogPrimaryButton");
 
     public string RemoveDialogCloseButtonText => localizer.GetText("QuickConverterRemoveDialogCloseButton");
+
+    public async Task<bool> ConfirmRemoveAsync(object xamlRoot)
+    {
+        NavigationParameters parameters = new();
+        parameters.Set("XamlRoot", xamlRoot);
+        NavigationDialogResult result = await navigator.NavigateAsync<NavigationDialogResult>(nameof(QuickConverterRemoveDialog), [RemoveDialogTitle, RemoveDialogMessage, RemoveDialogPrimaryButtonText, RemoveDialogCloseButtonText], parameters);
+        return result == NavigationDialogResult.Primary;
+    }
 
     public async Task<bool> SetEnabledAsync(QuickConverterSettingItemViewModel converter, bool enabled)
     {

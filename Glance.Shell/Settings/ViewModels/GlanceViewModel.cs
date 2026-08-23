@@ -63,6 +63,8 @@ public sealed partial class GlanceViewModel :
 
     public string Glyph => "\uE713";
 
+    public string RouteSegment => SettingsNavigationRoutes.Glance;
+
     public string Title { get; }
 
     private void AddCategory(string id,

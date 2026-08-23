@@ -40,10 +40,15 @@
                 <ColumnDefinition Width="228" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <Grid Visibility="{x:Bind BindingPolicy.WhenModulesLoaded(ViewModel.IsLoadingModules), Mode=OneWay}">
+            <Grid
+                x:Name="CompactPresenter"
+                Visibility="{x:Bind BindingPolicy.WhenModulesLoaded(ViewModel.IsLoadingModules), Mode=OneWay}">
                 <ContentPresenter
-                    x:Name="CompactPresenter"
-                    Content="{x:Bind ViewModel.SelectedComponent.CompactContent, Mode=OneWay}" />
+                    Content="{x:Bind ViewModel.SelectedComponent.CompactContent, Mode=OneWay}"
+                    Visibility="{x:Bind BindingPolicy.WhenModulesAvailable(ViewModel.IsLoadingModules, ViewModel.ComponentCount), Mode=OneWay}" />
+                <Local:EmptyModulesView
+                    AddModulesRequested="{x:Bind ViewModel.NavigateToModules}"
+                    Visibility="{x:Bind BindingPolicy.WhenNoModulesAvailable(ViewModel.IsLoadingModules, ViewModel.ComponentCount), Mode=OneWay}" />
                 <ContentPresenter
                     x:Name="TransientCompactPresenter"
                     Content="{x:Bind ViewModel.TransientComponent.CompactContent, Mode=OneWay}"
@@ -67,10 +72,16 @@
             <Grid
                 x:Name="ExpandedModuleSurface"
                 Visibility="Visible">
-                <Grid Visibility="{x:Bind BindingPolicy.WhenModulesLoaded(ViewModel.IsLoadingModules), Mode=OneWay}">
+                <Grid
+                    x:Name="ExpandedPresenter"
+                    Visibility="{x:Bind BindingPolicy.WhenModulesLoaded(ViewModel.IsLoadingModules), Mode=OneWay}">
                     <ContentPresenter
-                        x:Name="ExpandedPresenter"
-                        Content="{x:Bind ViewModel.SelectedComponent.ExpandedContent, Mode=OneWay}" />
+                        Content="{x:Bind ViewModel.SelectedComponent.ExpandedContent, Mode=OneWay}"
+                        Visibility="{x:Bind BindingPolicy.WhenModulesAvailable(ViewModel.IsLoadingModules, ViewModel.ComponentCount), Mode=OneWay}" />
+                    <Local:EmptyModulesView
+                        AddModulesRequested="{x:Bind ViewModel.NavigateToModules}"
+                        IsExpanded="True"
+                        Visibility="{x:Bind BindingPolicy.WhenNoModulesAvailable(ViewModel.IsLoadingModules, ViewModel.ComponentCount), Mode=OneWay}" />
                     <ContentPresenter
                         x:Name="TransientExpandedPresenter"
                         Content="{x:Bind ViewModel.TransientComponent.ExpandedContent, Mode=OneWay}"
@@ -87,7 +98,7 @@
                     VerticalAlignment="Bottom"
                     Orientation="Horizontal"
                     Spacing="6"
-                    Visibility="{x:Bind BindingPolicy.WhenPrimaryContentVisible(ViewModel.IsLoadingModules, ViewModel.IsTransientPresentationActive), Mode=OneWay}">
+                    Visibility="{x:Bind BindingPolicy.WhenPrimaryContentVisible(ViewModel.IsLoadingModules, ViewModel.IsTransientPresentationActive, ViewModel.ComponentCount), Mode=OneWay}">
                     <PipsPager
                         x:Name="ComponentPager"
                         Height="24"

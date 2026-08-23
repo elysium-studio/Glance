@@ -17,6 +17,7 @@ public sealed class InspectorModule :
         _ = services.AddSingleton<InspectorComponent>();
         _ = services.AddSingleton<IGlanceComponent>(provider => provider.GetRequiredService<InspectorComponent>());
         _ = services.AddSingleton<IGlanceIntent>(provider => provider.GetRequiredService<InspectorComponent>());
-        _ = services.AddViewFor<InspectorProviderSettingsView, IGlanceModuleSettingViewModel, InspectorProviderSettingsViewModel>(ServiceLifetime.Transient, provider => new InspectorProviderSettingsView(), provider => new InspectorProviderSettingsViewModel(provider.GetRequiredService<IGlanceInspectorProviderManager>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<ModuleResourceTextLocalizer<InspectorModule>>()));
+        _ = services.AddView<InspectorProviderRemoveDialog>(ServiceLifetime.Transient);
+        _ = services.AddViewFor<InspectorProviderSettingsView, IGlanceModuleSettingViewModel, InspectorProviderSettingsViewModel>(ServiceLifetime.Transient, provider => new InspectorProviderSettingsView(), provider => new InspectorProviderSettingsViewModel(provider.GetRequiredService<IGlanceInspectorProviderManager>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<ModuleResourceTextLocalizer<InspectorModule>>(), provider.GetRequiredService<INavigator>()));
     }
 }

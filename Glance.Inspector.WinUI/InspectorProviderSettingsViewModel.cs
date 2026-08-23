@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Elysium.Application.Abstractions;
+using Elysium.Presentation.Abstractions;
 using Glance.Application.Abstractions;
 using System.Collections.ObjectModel;
 
@@ -12,6 +13,7 @@ public sealed partial class InspectorProviderSettingsViewModel :
     private readonly IDispatcher dispatcher;
     private readonly ModuleResourceTextLocalizer<InspectorModule> localizer;
     private readonly IGlanceInspectorProviderManager manager;
+    private readonly INavigator navigator;
     private int disposed;
 
     [ObservableProperty]
@@ -25,11 +27,12 @@ public sealed partial class InspectorProviderSettingsViewModel :
     [ObservableProperty]
     public partial bool IsStatusError { get; set; }
 
-    public InspectorProviderSettingsViewModel(IGlanceInspectorProviderManager manager, IDispatcher dispatcher, ModuleResourceTextLocalizer<InspectorModule> localizer)
+    public InspectorProviderSettingsViewModel(IGlanceInspectorProviderManager manager, IDispatcher dispatcher, ModuleResourceTextLocalizer<InspectorModule> localizer, INavigator navigator)
     {
         this.manager = manager;
         this.dispatcher = dispatcher;
         this.localizer = localizer;
+        this.navigator = navigator;
         manager.Changed += HandleManagerChanged;
         SynchronizeProviders();
     }
@@ -53,6 +56,14 @@ public sealed partial class InspectorProviderSettingsViewModel :
     public string RemoveDialogPrimaryButtonText => localizer.GetText("ProviderRemoveDialogPrimaryButton");
 
     public string RemoveDialogCloseButtonText => localizer.GetText("ProviderRemoveDialogCloseButton");
+
+    public async Task<bool> ConfirmRemoveAsync(object xamlRoot)
+    {
+        NavigationParameters parameters = new();
+        parameters.Set("XamlRoot", xamlRoot);
+        NavigationDialogResult result = await navigator.NavigateAsync<NavigationDialogResult>(nameof(InspectorProviderRemoveDialog), [RemoveDialogTitle, RemoveDialogMessage, RemoveDialogPrimaryButtonText, RemoveDialogCloseButtonText], parameters);
+        return result == NavigationDialogResult.Primary;
+    }
 
     public async Task<bool> SetEnabledAsync(InspectorProviderSettingItemViewModel provider, bool enabled)
     {

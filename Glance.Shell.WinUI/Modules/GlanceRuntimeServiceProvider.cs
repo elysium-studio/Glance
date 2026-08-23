@@ -74,7 +74,7 @@ internal sealed class GlanceRuntimeServiceProvider :
         return applicationServices.GetService<IViewFactory>()?.Create(key, arguments);
     }
 
-    private object CreateViewModel(string key, object?[]? arguments)
+    private object? CreateViewModel(string key, object?[]? arguments)
     {
         string normalizedKey = key.EndsWith("ViewModel", StringComparison.Ordinal) ? key[..^"ViewModel".Length] : key;
 

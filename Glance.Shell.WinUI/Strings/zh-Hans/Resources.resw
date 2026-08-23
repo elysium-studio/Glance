@@ -56,16 +56,16 @@
   <data name="UninstallModuleDialogDataMessage" xml:space="preserve"><value>其模块包、设置、已保存的数据和运行时文件将被删除。</value></data>
   <data name="UninstallModuleDialogPrimaryButton" xml:space="preserve"><value>卸载</value></data>
   <data name="UninstallModuleDialogCloseButton" xml:space="preserve"><value>取消</value></data>
-  <data name="InstallModuleButton.Content" xml:space="preserve"><value>安装</value></data>
-  <data name="InstallModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>安装模块</value></data>
+  <data name="InstallModuleButton.Content" xml:space="preserve"><value>添加</value></data>
+  <data name="InstallModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>添加模块</value></data>
   <data name="SetupTourAddModuleButton.Content" xml:space="preserve"><value>添加</value></data>
   <data name="SetupTourAddModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>添加模块</value></data>
   <data name="SetupTourRemoveModuleButton.Content" xml:space="preserve"><value>删除</value></data>
   <data name="SetupTourRemoveModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>删除模块</value></data>
   <data name="UpdateModuleButton.Content" xml:space="preserve"><value>更新</value></data>
   <data name="UpdateModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>更新模块</value></data>
-  <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>卸载模块</value></data>
-  <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>卸载</value></data>
+  <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>移除模块</value></data>
+  <data name="UninstallModuleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>移除</value></data>
   <data name="AboutNavigationItem.Content" xml:space="preserve"><value>关于</value></data>
   <data name="AboutDialogTitle" xml:space="preserve"><value>关于</value></data>
   <data name="AboutDialogCloseButton" xml:space="preserve"><value>关闭</value></data>
@@ -147,4 +147,16 @@
   <data name="ModuleFeedsUnavailableMessage" xml:space="preserve"><value>Module feeds are unavailable. Installed modules remain available.</value></data>
   <data name="ModuleFeedsCachedMessage" xml:space="preserve"><value>Module feeds could not be refreshed. The last available catalogue is shown; affected installs and updates are temporarily unavailable.</value></data>
   <data name="ModuleFeedsPartiallyUnavailableMessage" xml:space="preserve"><value>One or more module feeds could not be refreshed. Other feeds and installed modules remain available.</value></data>
+  <data name="EmptyModulesButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>添加模块</value></data>
+  <data name="EmptyModulesButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>添加模块</value></data>
+  <data name="EmptyModulesCompactLabel.Text" xml:space="preserve"><value>添加模块</value></data>
+  <data name="EmptyModulesTitle.Text" xml:space="preserve"><value>模块</value></data>
+  <data name="EmptyModulesSummary.Text" xml:space="preserve"><value>打造你的 Glance</value></data>
+  <data name="EmptyModulesSubtitle.Text" xml:space="preserve"><value>添加模块以开始使用</value></data>
+  <data name="AddModuleFeedButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>添加</value></data>
+  <data name="RemoveModuleFeedButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>移除源</value></data>
+  <data name="RemoveModuleFeedButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>移除</value></data>
+  <data name="AddModuleFeedDialog.Title" xml:space="preserve"><value>添加源</value></data>
+  <data name="AddModuleFeedDialog.PrimaryButtonText" xml:space="preserve"><value>添加</value></data>
+  <data name="AddModuleFeedDialog.CloseButtonText" xml:space="preserve"><value>取消</value></data>
 </root>

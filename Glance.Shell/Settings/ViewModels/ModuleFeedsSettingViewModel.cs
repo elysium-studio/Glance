@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Elysium.Application.Abstractions;
+using Elysium.Presentation.Abstractions;
 using Glance.Application.Abstractions;
 using System.Collections.ObjectModel;
 
@@ -13,12 +14,13 @@ public sealed partial class ModuleFeedsSettingViewModel :
     private readonly IGlanceModuleFeedService feed;
     private readonly IGlanceModuleFeedSourceProvider sourceProvider;
     private readonly ITextLocalizer localizer;
+    private readonly INavigator navigator;
     private readonly GlanceSettings settings;
     private readonly IWritableOptions<GlanceSettings> writer;
     private readonly SemaphoreSlim synchronization = new(1, 1);
     private bool disposed;
 
-    public ModuleFeedsSettingViewModel(GlanceSettings settings, IWritableOptions<GlanceSettings> writer, IGlanceModuleFeedSourceProvider sourceProvider, IGlanceModuleFeedService feed, IDispatcher dispatcher, ITextLocalizer localizer)
+    public ModuleFeedsSettingViewModel(GlanceSettings settings, IWritableOptions<GlanceSettings> writer, IGlanceModuleFeedSourceProvider sourceProvider, IGlanceModuleFeedService feed, IDispatcher dispatcher, ITextLocalizer localizer, INavigator navigator)
     {
         this.settings = settings;
         this.writer = writer;
@@ -26,6 +28,7 @@ public sealed partial class ModuleFeedsSettingViewModel :
         this.feed = feed;
         this.dispatcher = dispatcher;
         this.localizer = localizer;
+        this.navigator = navigator;
         Feeds = [];
         Rebuild();
         feed.FeedChanged += HandleFeedChanged;
@@ -37,8 +40,13 @@ public sealed partial class ModuleFeedsSettingViewModel :
 
     public bool CanAdd => Uri.TryCreate(NewFeedUrl, UriKind.Absolute, out Uri? uri) && uri.Scheme == Uri.UriSchemeHttps && !sourceProvider.GetSources().Any(source => Uri.Compare(source.Uri, uri, UriComponents.HttpRequestUrl, UriFormat.SafeUnescaped, StringComparison.OrdinalIgnoreCase) == 0);
 
+    public bool HasAddressValidationError => !string.IsNullOrWhiteSpace(NewFeedUrl) && !CanAdd;
+
+    public string AddressValidationMessage => localizer.GetText("ModuleFeedAddressInvalidMessage");
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanAdd))]
+    [NotifyPropertyChangedFor(nameof(HasAddressValidationError))]
     private string newFeedUrl = string.Empty;
 
     [ObservableProperty]
@@ -47,21 +55,40 @@ public sealed partial class ModuleFeedsSettingViewModel :
     [ObservableProperty]
     private string errorMessage = string.Empty;
 
-    public async Task AddAsync()
+    public void PrepareToAdd()
+    {
+        NewFeedUrl = string.Empty;
+        HasError = false;
+        ErrorMessage = string.Empty;
+    }
+
+    public Task ShowAddDialogAsync(object xamlRoot)
+    {
+        PrepareToAdd();
+        NavigationParameters parameters = new();
+        parameters.Set("XamlRoot", xamlRoot);
+        return navigator.NavigateAsync(SettingsNavigationRoutes.AddModuleFeedDialog, [this], parameters);
+    }
+
+    public async Task<bool> AddAsync()
     {
         if (!CanAdd || !Uri.TryCreate(NewFeedUrl, UriKind.Absolute, out Uri? uri))
         {
             HasError = true;
             ErrorMessage = localizer.GetText("ModuleFeedAddressInvalidMessage");
-            return;
+            return false;
         }
 
         GlanceModuleFeedPreference preference = new() { Id = $"custom-{Guid.NewGuid():N}", DisplayName = uri.Host, Url = uri.AbsoluteUri, IsEnabled = true, IsBuiltIn = false };
 
-        if (await ApplyAsync(() => settings.ModuleFeeds.Add(preference), () => settings.ModuleFeeds.Remove(preference)))
+        bool added = await ApplyAsync(() => settings.ModuleFeeds.Add(preference), () => settings.ModuleFeeds.Remove(preference));
+
+        if (added)
         {
-            NewFeedUrl = string.Empty;
+            dispatcher.Dispatch(() => NewFeedUrl = string.Empty);
         }
+
+        return added;
     }
 
     public async Task RemoveAsync(ModuleFeedSettingItemViewModel item)
@@ -112,15 +139,21 @@ public sealed partial class ModuleFeedsSettingViewModel :
             GlanceModuleFeedPreference[] snapshot = [.. settings.ModuleFeeds.Select(Clone)];
             await writer.WriteAsync(value => value.ModuleFeeds = [.. snapshot.Select(Clone)]);
             await feed.RefreshAsync();
-            HasError = false;
-            ErrorMessage = string.Empty;
+            dispatcher.Dispatch(() =>
+            {
+                HasError = false;
+                ErrorMessage = string.Empty;
+            });
             return true;
         }
         catch
         {
             rollback();
-            HasError = true;
-            ErrorMessage = localizer.GetText("ModuleFeedsUnavailableMessage");
+            dispatcher.Dispatch(() =>
+            {
+                HasError = true;
+                ErrorMessage = localizer.GetText("ModuleFeedsUnavailableMessage");
+            });
             return false;
         }
         finally
