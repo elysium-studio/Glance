@@ -168,5 +168,14 @@
       "Added configurable module feeds with cached offline fallback and a redesigned module selection experience.",
       "Added versioned settings migration support so Glance and third-party modules can preserve settings as their schemas evolve."
     ]
+  },
+  {
+    "version": "0.1.16-preview",
+    "date": "2026-08-23",
+    "releaseNotes": [
+      "Fixed module installation from the setup tour and module settings.",
+      "Fixed UI-thread crashes while module downloads and catalogue state were updating.",
+      "Preserved module feed data during settings migration and improved installation failure feedback."
+    ]
   }
 ]
