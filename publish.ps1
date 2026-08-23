@@ -28,6 +28,7 @@ param(
     [switch]$MicrosoftStorePackageOnly,
     [string]$MicrosoftStoreFlightId = "",
     [switch]$GitReleaseOnly,
+    [switch]$FinalizeReleaseOnly,
     [switch]$Local
 )
 
@@ -917,6 +918,68 @@ if ($GitReleaseOnly)
     Write-Host "Skipping build, signing, packaging and SFTP - releasing existing v$Version to GitHub only" -ForegroundColor Cyan
 
     Send-GitHubRelease -RepoPath $PSScriptRoot -Version $Version -ReleaseNotes $releaseNotes -AssetPaths $releaseAssetPaths
+
+    exit 0
+}
+
+if ($FinalizeReleaseOnly)
+{
+    if ($Version -eq "")
+    {
+        throw "A version is required when finalizing an existing package."
+    }
+
+    $InstallerPath = "$FeedPath\$PublicInstallerName"
+    $FullPackagePath = "$FeedPath\$VelopackPackId-$Version-full.nupkg"
+    $DeltaPackagePath = "$FeedPath\$VelopackPackId-$Version-delta.nupkg"
+    $OutputPath = "$PSScriptRoot\Publish\$Version\Assets"
+
+    foreach ($releaseAssetPath in @($InstallerPath, $FullPackagePath, $DeltaPackagePath))
+    {
+        if (-not (Test-Path $releaseAssetPath))
+        {
+            throw "Release asset not found: $releaseAssetPath"
+        }
+    }
+
+    Assert-ModuleFreeRelease -OutputDirectory $OutputPath -PackagePaths @($FullPackagePath, $DeltaPackagePath)
+
+    $existingRelease = $releases | Where-Object { $_.version -eq $Version } | Select-Object -Last 1
+
+    if ($existingRelease)
+    {
+        $releaseNotes = @($existingRelease.releaseNotes)
+    }
+    else
+    {
+        $releaseNotes = @($ReleaseNotes)
+        $releases += [PSCustomObject]@{
+            version = $Version
+            date = (Get-Date -Format "yyyy-MM-dd")
+            releaseNotes = $releaseNotes
+        }
+        ConvertTo-Json -InputObject $releases -Depth 5 | Set-Content $ReleaseLogPath -Encoding UTF8
+    }
+
+    if (-not $SkipSftpUpload)
+    {
+        Send-SftpRelease $FeedPath $ReleaseLogPath
+    }
+
+    if (-not $SkipSftpUpload -and -not $SkipModuleUpload)
+    {
+        & (Join-Path $PSScriptRoot "publish-modules.ps1") -All -ConfigurationPath $ConfigurationPath
+
+        if ($LASTEXITCODE -ne 0)
+        {
+            throw "Module feed publishing failed with exit code $LASTEXITCODE."
+        }
+    }
+
+    if (-not $SkipGitRelease)
+    {
+        Send-GitHubRelease -RepoPath $PSScriptRoot -Version $Version -ReleaseNotes $releaseNotes -AssetPaths @($InstallerPath, $FullPackagePath, $DeltaPackagePath)
+    }
 
     exit 0
 }
