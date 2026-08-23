@@ -5,6 +5,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:CommunityToolkit="using:CommunityToolkit.WinUI.Controls">
     <CommunityToolkit:SettingsCard x:Uid="ResetDaySettingCard">
+        <CommunityToolkit:SettingsCard.HeaderIcon>
+            <FontIcon Glyph="&#xE777;" />
+        </CommunityToolkit:SettingsCard.HeaderIcon>
         <Button
             x:Uid="ResetDayButton"
             MinWidth="132"

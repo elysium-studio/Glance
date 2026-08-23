@@ -8,6 +8,9 @@
     Unloaded="{x:Bind ViewModel.Deactivate}">
     <StackPanel Spacing="4">
         <CommunityToolkit:SettingsCard x:Uid="DailyGoalSettingCard">
+            <CommunityToolkit:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE81A;" />
+            </CommunityToolkit:SettingsCard.HeaderIcon>
             <NumberBox Width="160" Minimum="500" Maximum="6000" SmallChange="100" SpinButtonPlacementMode="Compact" Value="{x:Bind ViewModel.Value, Mode=TwoWay}" />
         </CommunityToolkit:SettingsCard>
         <InfoBar x:Uid="DailyGoalGuidanceInfoBar" IsClosable="False" IsOpen="True" Severity="Informational" />

@@ -10,6 +10,9 @@
         <CommunityToolkit:SettingsCard
             x:Uid="SpotifyConnectionCard"
             Description="{x:Bind ViewModel.StatusText, Mode=OneWay}">
+            <CommunityToolkit:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE8D6;" />
+            </CommunityToolkit:SettingsCard.HeaderIcon>
             <Button
                 MinWidth="132"
                 Click="HandleConnectionClicked"

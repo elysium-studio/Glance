@@ -17,6 +17,7 @@ public sealed class SettingsModule :
             .AddView<AboutDialog>(ServiceLifetime.Transient, provider => new AboutDialog(provider.GetRequiredService<AboutViewModel>(), provider.GetRequiredService<ITextLocalizer>()))
             .AddView<QuitDialog>(ServiceLifetime.Transient, provider => new QuitDialog(provider.GetRequiredService<ITextLocalizer>()))
             .AddView<AddModuleFeedDialog>(ServiceLifetime.Transient)
+            .AddView<AddSpeechEngineDialog>(ServiceLifetime.Transient)
             .AddView<RestartForModuleUpdateDialog>(ServiceLifetime.Transient)
             .AddView<UninstallModuleDialog>(ServiceLifetime.Transient)
             .AddViewFor(ServiceLifetime.Transient,

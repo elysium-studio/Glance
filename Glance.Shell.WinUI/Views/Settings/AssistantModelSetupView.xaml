@@ -36,47 +36,57 @@
             </CommunityToolkit:SettingsExpander.ItemsFooter>
             <CommunityToolkit:SettingsExpander.Items>
                 <CommunityToolkit:SettingsCard x:Uid="AssistantProvidersCard">
-                    <ItemsControl ItemsSource="{x:Bind ViewModel.Providers, Mode=OneWay}">
+                    <CommunityToolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE720;" />
+                    </CommunityToolkit:SettingsCard.HeaderIcon>
+                    <Button
+                        x:Uid="AddSpeechEngineButton"
+                        Click="HandleAddProviderClick">
+                        <Button.Style>
+                            <Style BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
+                                <Setter Property="Width" Value="36" />
+                                <Setter Property="Height" Value="36" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                                <Setter Property="FontSize" Value="14" />
+                                <Setter Property="Content" Value="&#xE710;" />
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </CommunityToolkit:SettingsCard>
+                <ItemsControl
+                    ItemsSource="{x:Bind ViewModel.InstalledProviders, Mode=OneWay}"
+                    Visibility="{x:Bind ViewModel.HasInstalledProviders, Mode=OneWay}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="Shell:AssistantTranscriptionProviderViewModel">
-                                <Grid MinHeight="48" ColumnSpacing="12">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel VerticalAlignment="Center" Spacing="2">
-                                        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind DisplayName}" />
-                                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind Description}" TextWrapping="Wrap" />
-                                    </StackPanel>
-                                    <Grid Grid.Column="1" VerticalAlignment="Center">
-                                        <Button
-                                            x:Uid="InstallModuleButton"
-                                            MinWidth="132"
-                                            Click="HandleAddProviderClick"
-                                            IsEnabled="{x:Bind CanAdd, Mode=OneWay}"
-                                            Visibility="{x:Bind ShowAddAction, Mode=OneWay}" />
-                                        <Button
-                                            x:Uid="UninstallModuleButton"
-                                            Width="32"
-                                            Height="32"
-                                            MinWidth="32"
-                                            Padding="0"
-                                            Click="HandleRemoveProviderClick"
-                                            IsEnabled="{x:Bind CanRemove, Mode=OneWay}"
-                                            Style="{StaticResource SubtleButtonStyle}"
-                                            Visibility="{x:Bind ShowRemoveAction, Mode=OneWay}">
-                                            <FontIcon FontSize="14" Glyph="&#xE74D;" />
-                                        </Button>
-                                    </Grid>
-                                </Grid>
+                                <CommunityToolkit:SettingsCard
+                                    Description="{x:Bind Description}"
+                                    Header="{x:Bind DisplayName}">
+                                    <CommunityToolkit:SettingsCard.HeaderIcon>
+                                        <FontIcon Glyph="&#xE720;" />
+                                    </CommunityToolkit:SettingsCard.HeaderIcon>
+                                    <Button
+                                        x:Uid="UninstallModuleButton"
+                                        Width="36"
+                                        Height="36"
+                                        MinWidth="36"
+                                        Padding="0"
+                                        Click="HandleRemoveProviderClick"
+                                        IsEnabled="{x:Bind CanRemove, Mode=OneWay}"
+                                        Style="{StaticResource SubtleButtonStyle}">
+                                        <FontIcon FontSize="14" Glyph="&#xE74D;" />
+                                    </Button>
+                                </CommunityToolkit:SettingsCard>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </CommunityToolkit:SettingsCard>
+                </ItemsControl>
                 <CommunityToolkit:SettingsCard
                     x:Uid="AssistantModelChoiceCard"
                     Description="{x:Bind ViewModel.SelectedDescription, Mode=OneWay}"
                     Visibility="{x:Bind ViewModel.HasModels, Mode=OneWay}">
+                    <CommunityToolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE8D7;" />
+                    </CommunityToolkit:SettingsCard.HeaderIcon>
                     <ComboBox
                         Width="240"
                         DisplayMemberPath="DisplayLabel"
@@ -88,6 +98,9 @@
                     x:Uid="AssistantModelInstallCard"
                     Description="{x:Bind ViewModel.SelectedDownloadDescription, Mode=OneWay}"
                     Visibility="{x:Bind ViewModel.HasModels, Mode=OneWay}">
+                    <CommunityToolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE896;" />
+                    </CommunityToolkit:SettingsCard.HeaderIcon>
                     <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />

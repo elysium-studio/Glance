@@ -25,6 +25,9 @@
         <CommunityToolkit:SettingsExpander.ItemTemplate>
             <DataTemplate>
                 <CommunityToolkit:SettingsCard Header="{Binding DisplayName}" Description="{Binding Description}">
+                    <CommunityToolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE721;" />
+                    </CommunityToolkit:SettingsCard.HeaderIcon>
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <ToggleSwitch x:Uid="ProviderEnabledToggle" IsOn="{Binding IsEnabled, Mode=TwoWay}" />
                         <Button x:Uid="ProviderRemoveButton" Width="32" Height="32" MinWidth="32" Padding="0" VerticalAlignment="Center" Click="HandleRemoveClicked" IsEnabled="{Binding CanRemove}" Style="{StaticResource SubtleButtonStyle}" Tag="{Binding}">

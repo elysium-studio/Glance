@@ -9,6 +9,9 @@
             <CommunityToolkit:SettingsCard
                 Header="Download location"
                 Description="{Binding DownloadPath, Mode=OneWay}">
+                <CommunityToolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE8B7;" />
+                </CommunityToolkit:SettingsCard.HeaderIcon>
                 <Button
                     MinWidth="132"
                     Click="ChooseFolderClicked"
@@ -26,10 +29,16 @@
                 Header="Transfer limits"
                 Description="Control bandwidth and peer connections. 0 means unlimited or the safe default."
                 IsExpanded="True">
+                <CommunityToolkit:SettingsExpander.HeaderIcon>
+                    <FontIcon Glyph="&#xE896;" />
+                </CommunityToolkit:SettingsExpander.HeaderIcon>
                 <CommunityToolkit:SettingsExpander.Items>
                     <CommunityToolkit:SettingsCard
                         Header="Maximum download speed"
                         Description="Kilobytes per second. 0 means unlimited.">
+                        <CommunityToolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE896;" />
+                        </CommunityToolkit:SettingsCard.HeaderIcon>
                         <NumberBox
                             Width="160"
                             Minimum="0"
@@ -39,6 +48,9 @@
                     <CommunityToolkit:SettingsCard
                         Header="Maximum upload speed"
                         Description="Kilobytes per second. 0 means unlimited.">
+                        <CommunityToolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE898;" />
+                        </CommunityToolkit:SettingsCard.HeaderIcon>
                         <NumberBox
                             Width="160"
                             Minimum="0"
@@ -48,6 +60,9 @@
                     <CommunityToolkit:SettingsCard
                         Header="Connections per download"
                         Description="0 uses MonoTorrent's safe default.">
+                        <CommunityToolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE774;" />
+                        </CommunityToolkit:SettingsCard.HeaderIcon>
                         <NumberBox
                             Width="160"
                             Maximum="10000"
@@ -69,16 +84,25 @@
                 Header="Seeding"
                 Description="Choose whether and when completed downloads stop uploading."
                 IsExpanded="True">
+                <CommunityToolkit:SettingsExpander.HeaderIcon>
+                    <FontIcon Glyph="&#xE898;" />
+                </CommunityToolkit:SettingsExpander.HeaderIcon>
                 <CommunityToolkit:SettingsExpander.Items>
                     <CommunityToolkit:SettingsCard
                         Header="Continue seeding"
                         Description="Keep uploading completed downloads.">
+                        <CommunityToolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE768;" />
+                        </CommunityToolkit:SettingsCard.HeaderIcon>
                         <ToggleSwitch IsOn="{Binding ContinueSeeding, Mode=TwoWay}" />
                     </CommunityToolkit:SettingsCard>
                     <CommunityToolkit:SettingsCard
                         Header="Share ratio limit"
                         Description="0 disables this limit."
                         IsEnabled="{Binding ContinueSeeding, Mode=OneWay}">
+                        <CommunityToolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE9D2;" />
+                        </CommunityToolkit:SettingsCard.HeaderIcon>
                         <NumberBox
                             Width="160"
                             Minimum="0"
@@ -90,6 +114,9 @@
                         Header="Seeding time limit"
                         Description="Minutes. 0 disables this limit."
                         IsEnabled="{Binding ContinueSeeding, Mode=OneWay}">
+                        <CommunityToolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE916;" />
+                        </CommunityToolkit:SettingsCard.HeaderIcon>
                         <NumberBox
                             Width="160"
                             Minimum="0"
@@ -100,6 +127,9 @@
                         Header="When both limits are set"
                         Description="Choose when seeding should stop."
                         IsEnabled="{Binding ContinueSeeding, Mode=OneWay}">
+                        <CommunityToolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE8D7;" />
+                        </CommunityToolkit:SettingsCard.HeaderIcon>
                         <ComboBox
                             Width="240"
                             SelectedIndex="{Binding SeedingLimitModeIndex, Mode=TwoWay}">

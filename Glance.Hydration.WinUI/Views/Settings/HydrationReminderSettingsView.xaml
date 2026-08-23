@@ -10,18 +10,33 @@
         </CommunityToolkit:SettingsExpander.HeaderIcon>
         <CommunityToolkit:SettingsExpander.Items>
             <CommunityToolkit:SettingsCard x:Uid="RemindersEnabledSettingCard">
+                <CommunityToolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xEA8F;" />
+                </CommunityToolkit:SettingsCard.HeaderIcon>
                 <ToggleSwitch IsOn="{x:Bind ViewModel.RemindersEnabled, Mode=TwoWay}" />
             </CommunityToolkit:SettingsCard>
             <CommunityToolkit:SettingsCard x:Uid="ReminderIntervalSettingCard">
+                <CommunityToolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE916;" />
+                </CommunityToolkit:SettingsCard.HeaderIcon>
                 <NumberBox Width="160" Minimum="15" Maximum="240" SmallChange="15" SpinButtonPlacementMode="Compact" Value="{x:Bind ViewModel.ReminderIntervalMinutes, Mode=TwoWay}" />
             </CommunityToolkit:SettingsCard>
             <CommunityToolkit:SettingsCard x:Uid="ReminderStartSettingCard">
+                <CommunityToolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE823;" />
+                </CommunityToolkit:SettingsCard.HeaderIcon>
                 <TimePicker Width="240" ClockIdentifier="24HourClock" Time="{x:Bind ViewModel.ReminderStart, Mode=TwoWay}" />
             </CommunityToolkit:SettingsCard>
             <CommunityToolkit:SettingsCard x:Uid="ReminderEndSettingCard">
+                <CommunityToolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE916;" />
+                </CommunityToolkit:SettingsCard.HeaderIcon>
                 <TimePicker Width="240" ClockIdentifier="24HourClock" Time="{x:Bind ViewModel.ReminderEnd, Mode=TwoWay}" />
             </CommunityToolkit:SettingsCard>
             <CommunityToolkit:SettingsCard x:Uid="OnlyWhenBehindSettingCard">
+                <CommunityToolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE7ED;" />
+                </CommunityToolkit:SettingsCard.HeaderIcon>
                 <ToggleSwitch IsOn="{x:Bind ViewModel.OnlyRemindWhenBehind, Mode=TwoWay}" />
             </CommunityToolkit:SettingsCard>
         </CommunityToolkit:SettingsExpander.Items>

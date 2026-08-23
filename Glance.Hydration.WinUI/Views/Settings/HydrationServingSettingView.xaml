@@ -7,6 +7,9 @@
     Loaded="{x:Bind ViewModel.Activate}"
     Unloaded="{x:Bind ViewModel.Deactivate}">
     <CommunityToolkit:SettingsCard x:Uid="ServingSizeSettingCard">
+        <CommunityToolkit:SettingsCard.HeaderIcon>
+            <FontIcon Glyph="&#xE81A;" />
+        </CommunityToolkit:SettingsCard.HeaderIcon>
         <NumberBox Width="160" Minimum="50" Maximum="1000" SmallChange="50" SpinButtonPlacementMode="Compact" Value="{x:Bind ViewModel.Value, Mode=TwoWay}" />
     </CommunityToolkit:SettingsCard>
 </UserControl>

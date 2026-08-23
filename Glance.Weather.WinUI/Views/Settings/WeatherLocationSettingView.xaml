@@ -8,6 +8,9 @@
     Unloaded="{x:Bind ViewModel.Deactivate}">
     <StackPanel Spacing="4">
         <CommunityToolkit:SettingsCard x:Uid="WeatherLocationSettingCard">
+            <CommunityToolkit:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE707;" />
+            </CommunityToolkit:SettingsCard.HeaderIcon>
             <TextBox
                 x:Uid="WeatherLocationTextBox"
                 Width="240"

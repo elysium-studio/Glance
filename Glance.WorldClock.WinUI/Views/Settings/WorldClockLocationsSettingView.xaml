@@ -8,6 +8,9 @@
         <CommunityToolkit:SettingsCard
             x:Uid="WorldClockLocationsSettingCard"
             Visibility="{x:Bind WhenEmpty(ViewModel.HasClocks), Mode=OneWay}">
+            <CommunityToolkit:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE916;" />
+            </CommunityToolkit:SettingsCard.HeaderIcon>
             <Button
                 x:Uid="WorldClockAddButton"
                 Click="HandleAddClockClicked">
@@ -28,6 +31,9 @@
             IsExpanded="True"
             ItemsSource="{x:Bind ViewModel.Clocks}"
             Visibility="{x:Bind WhenPopulated(ViewModel.HasClocks), Mode=OneWay}">
+            <CommunityToolkit:SettingsExpander.HeaderIcon>
+                <FontIcon Glyph="&#xE916;" />
+            </CommunityToolkit:SettingsExpander.HeaderIcon>
             <CommunityToolkit:SettingsExpander.Content>
                 <Button
                     x:Uid="WorldClockAddButton"
@@ -47,6 +53,9 @@
             <CommunityToolkit:SettingsExpander.ItemTemplate>
                 <DataTemplate>
                     <CommunityToolkit:SettingsCard Header="{Binding DisplayName}">
+                        <CommunityToolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE916;" />
+                        </CommunityToolkit:SettingsCard.HeaderIcon>
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <Button
                                 x:Uid="WorldClockMoveUpButton"

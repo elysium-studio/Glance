@@ -7,6 +7,9 @@
     Loaded="{x:Bind ViewModel.Activate}"
     Unloaded="{x:Bind ViewModel.Deactivate}">
     <CommunityToolkit:SettingsCard x:Uid="RecentRecordingLimitSettingCard">
+        <CommunityToolkit:SettingsCard.HeaderIcon>
+            <FontIcon Glyph="&#xE714;" />
+        </CommunityToolkit:SettingsCard.HeaderIcon>
         <NumberBox
             Width="160"
             Minimum="1"

@@ -8,12 +8,18 @@
     Unloaded="{x:Bind ViewModel.Deactivate}">
     <StackPanel Spacing="4">
         <CommunityToolkit:SettingsCard x:Uid="WeatherDebugPreviewSettingCard">
+            <CommunityToolkit:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE7BA;" />
+            </CommunityToolkit:SettingsCard.HeaderIcon>
             <ToggleSwitch IsOn="{x:Bind ViewModel.Value, Mode=TwoWay}" />
         </CommunityToolkit:SettingsCard>
         <StackPanel
             Spacing="4"
             Visibility="{x:Bind When(ViewModel.Value), Mode=OneWay}">
             <CommunityToolkit:SettingsCard x:Uid="WeatherTimePreviewSettingCard">
+                <CommunityToolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE916;" />
+                </CommunityToolkit:SettingsCard.HeaderIcon>
                 <Grid
                     Width="300"
                     ColumnSpacing="12">
@@ -36,6 +42,9 @@
                 </Grid>
             </CommunityToolkit:SettingsCard>
             <CommunityToolkit:SettingsCard x:Uid="WeatherSkyPreviewSettingCard">
+                <CommunityToolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE753;" />
+                </CommunityToolkit:SettingsCard.HeaderIcon>
                 <ComboBox
                     Width="240"
                     SelectedIndex="{x:Bind ViewModel.PreviewSkyIndex, Mode=TwoWay}">
@@ -45,6 +54,9 @@
                 </ComboBox>
             </CommunityToolkit:SettingsCard>
             <CommunityToolkit:SettingsCard x:Uid="WeatherCelestialPreviewSettingCard">
+                <CommunityToolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE706;" />
+                </CommunityToolkit:SettingsCard.HeaderIcon>
                 <ComboBox
                     Width="240"
                     SelectedIndex="{x:Bind ViewModel.PreviewCelestialIndex, Mode=TwoWay}">
@@ -55,6 +67,9 @@
                 </ComboBox>
             </CommunityToolkit:SettingsCard>
             <CommunityToolkit:SettingsCard x:Uid="WeatherEffectPreviewSettingCard">
+                <CommunityToolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE753;" />
+                </CommunityToolkit:SettingsCard.HeaderIcon>
                 <ComboBox
                     Width="240"
                     SelectedIndex="{x:Bind ViewModel.PreviewEffectIndex, Mode=TwoWay}">
@@ -66,6 +81,9 @@
                 </ComboBox>
             </CommunityToolkit:SettingsCard>
             <CommunityToolkit:SettingsCard x:Uid="WeatherTemperaturePreviewSettingCard">
+                <CommunityToolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE9CA;" />
+                </CommunityToolkit:SettingsCard.HeaderIcon>
                 <ComboBox
                     Width="240"
                     SelectedIndex="{x:Bind ViewModel.PreviewTemperatureIndex, Mode=TwoWay}">

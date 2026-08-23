@@ -16,11 +16,11 @@ public sealed partial class AssistantModelSetupView :
 
     private void HandleRemoveClick(object sender, RoutedEventArgs args) => _ = ViewModel.RemoveAsync();
 
-    private void HandleAddProviderClick(object sender, RoutedEventArgs args)
+    private async void HandleAddProviderClick(object sender, RoutedEventArgs args)
     {
-        if (sender is FrameworkElement { DataContext: AssistantTranscriptionProviderViewModel provider })
+        if (XamlRoot is not null)
         {
-            _ = ViewModel.AddProviderAsync(provider);
+            await ViewModel.ShowAddProviderDialogAsync(XamlRoot);
         }
     }
 

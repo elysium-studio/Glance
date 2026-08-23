@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Elysium.Application.Abstractions;
+using Elysium.Presentation.Abstractions;
 using Glance.Application.Abstractions;
 using Glance.Transcription;
 using System.Collections.ObjectModel;
@@ -17,6 +18,7 @@ public sealed partial class AssistantModelSetupViewModel :
     private readonly IGlanceModuleFeedService feed;
     private readonly IGlanceModulePackageService packages;
     private readonly ModuleInstallationService installations;
+    private readonly INavigator navigator;
     private int disposed;
 
     [ObservableProperty]
@@ -35,9 +37,13 @@ public sealed partial class AssistantModelSetupViewModel :
     [NotifyPropertyChangedFor(nameof(HasError))]
     public partial string? ErrorMessage { get; set; }
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanAddProvider))]
+    public partial AssistantTranscriptionProviderViewModel? SelectedProvider { get; set; }
+
     private int selectedIndex;
 
-    public AssistantModelSetupViewModel(ITranscriptionModelCatalog catalog, ITranscriptionModelSelection modelSelection, IDispatcher dispatcher, IGlanceModuleFeedService feed, IGlanceModulePackageService packages, ModuleInstallationService installations)
+    public AssistantModelSetupViewModel(ITranscriptionModelCatalog catalog, ITranscriptionModelSelection modelSelection, IDispatcher dispatcher, IGlanceModuleFeedService feed, IGlanceModulePackageService packages, ModuleInstallationService installations, INavigator navigator)
     {
         this.catalog = catalog;
         this.modelSelection = modelSelection;
@@ -45,8 +51,11 @@ public sealed partial class AssistantModelSetupViewModel :
         this.feed = feed;
         this.packages = packages;
         this.installations = installations;
+        this.navigator = navigator;
         Models = new ObservableCollection<AssistantModelOption>(catalog.Models.Select(CreateOption));
         Providers = [];
+        AvailableProviders = [];
+        InstalledProviders = [];
         string selectedModelId = modelSelection.SelectedModelId ?? catalog.DefaultModelId;
         selectedIndex = catalog.Models.Select((model, index) => (model, index))
             .Where(item => string.Equals(item.model.Id, selectedModelId, StringComparison.OrdinalIgnoreCase))
@@ -66,11 +75,19 @@ public sealed partial class AssistantModelSetupViewModel :
 
     public ObservableCollection<AssistantTranscriptionProviderViewModel> Providers { get; }
 
+    public ObservableCollection<AssistantTranscriptionProviderViewModel> AvailableProviders { get; }
+
+    public ObservableCollection<AssistantTranscriptionProviderViewModel> InstalledProviders { get; }
+
     public bool HasModels => Models.Count > 0;
 
     public bool HasProviders => Providers.Count > 0;
 
+    public bool HasInstalledProviders => InstalledProviders.Count > 0;
+
     public bool ShowProviderEmptyState => !HasProviders;
+
+    public bool CanAddProvider => SelectedProvider?.CanAdd == true;
 
     public int SelectedIndex
     {
@@ -160,11 +177,25 @@ public sealed partial class AssistantModelSetupViewModel :
         }
     }
 
-    public async Task AddProviderAsync(AssistantTranscriptionProviderViewModel provider)
+    public Task ShowAddProviderDialogAsync(object xamlRoot)
+    {
+        SelectedProvider = null;
+        NavigationParameters parameters = new();
+        parameters.Set("XamlRoot", xamlRoot);
+        return navigator.NavigateAsync(SettingsNavigationRoutes.AddSpeechEngineDialog, [this], parameters);
+    }
+
+    public async Task<bool> AddSelectedProviderAsync()
+    {
+        AssistantTranscriptionProviderViewModel? provider = SelectedProvider;
+        return provider is not null && await AddProviderAsync(provider);
+    }
+
+    public async Task<bool> AddProviderAsync(AssistantTranscriptionProviderViewModel provider)
     {
         if (!provider.CanAdd)
         {
-            return;
+            return false;
         }
 
         provider.IsBusy = true;
@@ -187,10 +218,13 @@ public sealed partial class AssistantModelSetupViewModel :
                 provider.IsBusy = false;
                 provider.IsInstalled = result.IsSuccessful || installations.IsInstalled(provider.Id);
                 ErrorMessage = result.IsSuccessful ? null : result.ErrorMessage;
+                SynchronizeProviderCollections();
                 SynchronizeModels();
                 SynchronizeSelectedModel();
             }
         });
+
+        return result.IsSuccessful || installations.IsInstalled(provider.Id);
     }
 
     public async Task RemoveProviderAsync(AssistantTranscriptionProviderViewModel provider)
@@ -220,6 +254,7 @@ public sealed partial class AssistantModelSetupViewModel :
             {
                 provider.IsBusy = false;
                 provider.IsInstalled = !removed && installations.IsInstalled(provider.Id);
+                SynchronizeProviderCollections();
                 SynchronizeModels();
                 SynchronizeSelectedModel();
             }
@@ -373,6 +408,7 @@ public sealed partial class AssistantModelSetupViewModel :
                 provider.IsInstalled = installations.IsInstalled(provider.Id);
             }
 
+            SynchronizeProviderCollections();
             return;
         }
 
@@ -383,8 +419,26 @@ public sealed partial class AssistantModelSetupViewModel :
             Providers.Add(new AssistantTranscriptionProviderViewModel(module, installations.IsInstalled(module.Id)));
         }
 
+        SynchronizeProviderCollections();
         OnPropertyChanged(nameof(HasProviders));
         OnPropertyChanged(nameof(ShowProviderEmptyState));
+    }
+
+    private void SynchronizeProviderCollections()
+    {
+        AssistantTranscriptionProviderViewModel? selectedProvider = SelectedProvider;
+        AvailableProviders.Clear();
+        InstalledProviders.Clear();
+
+        foreach (AssistantTranscriptionProviderViewModel provider in Providers)
+        {
+            (provider.IsInstalled ? InstalledProviders : AvailableProviders).Add(provider);
+        }
+
+        SelectedProvider = selectedProvider is not null && AvailableProviders.Contains(selectedProvider)
+            ? selectedProvider
+            : null;
+        OnPropertyChanged(nameof(HasInstalledProviders));
     }
 
     private void NotifySelectionChanged()

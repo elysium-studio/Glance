@@ -5,6 +5,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:CommunityToolkit="using:CommunityToolkit.WinUI.Controls">
     <CommunityToolkit:SettingsCard x:Uid="ModuleAttentionSettingCard">
+        <CommunityToolkit:SettingsCard.HeaderIcon>
+            <FontIcon Glyph="&#xEA8F;" />
+        </CommunityToolkit:SettingsCard.HeaderIcon>
         <ToggleSwitch
             x:Uid="BooleanToggle"
             IsOn="{x:Bind ViewModel.Value, Mode=TwoWay}" />

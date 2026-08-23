@@ -17,7 +17,7 @@ public sealed class GlanceSettingsModule :
                 provider => new ModuleFeedsSettingViewModel(provider.GetRequiredService<GlanceSettings>(), provider.GetRequiredService<IWritableOptions<GlanceSettings>>(), provider.GetRequiredService<IGlanceModuleFeedSourceProvider>(), provider.GetRequiredService<IGlanceModuleFeedService>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<ITextLocalizer>(), provider.GetRequiredService<INavigator>()))
             .AddViewFor<AssistantModelSetupView, IGlanceViewModel, AssistantModelSetupViewModel>(ServiceLifetime.Transient,
                 provider => new AssistantModelSetupView(),
-                provider => new AssistantModelSetupViewModel(provider.GetRequiredService<ITranscriptionModelCatalog>(), provider.GetRequiredService<ITranscriptionModelSelection>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<IGlanceModuleFeedService>(), provider.GetRequiredService<IGlanceModulePackageService>(), provider.GetRequiredService<ModuleInstallationService>()))
+                provider => new AssistantModelSetupViewModel(provider.GetRequiredService<ITranscriptionModelCatalog>(), provider.GetRequiredService<ITranscriptionModelSelection>(), provider.GetRequiredService<IDispatcher>(), provider.GetRequiredService<IGlanceModuleFeedService>(), provider.GetRequiredService<IGlanceModulePackageService>(), provider.GetRequiredService<ModuleInstallationService>(), provider.GetRequiredService<INavigator>()))
             .AddViewFor<AssistantEnabledView, IGlanceViewModel, AssistantEnabledViewModel>(ServiceLifetime.Transient,
                 provider => new AssistantEnabledView(),
                 provider => new AssistantEnabledViewModel(provider,
