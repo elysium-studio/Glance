@@ -59,6 +59,35 @@ public sealed class ModuleSettingsItemViewModelTests
         Assert.Equal(1, setting.DisposeCount);
     }
 
+    [Fact]
+    public void RequiredUpdateHidesInstalledModuleActions()
+    {
+        int navigationRequests = 0;
+        TestSetting setting = new("WorldClock", 10);
+        ModuleSettingsItemViewModel item = new("WorldClock", "World clock", "Local time", new TestComponent("WorldClock"), true, [setting], new ImmediateTestDispatcher(), new TestNavigator(), _ => navigationRequests++, (_, _) => Task.FromResult(true), _ => Task.FromResult(true), _ => Task.FromResult(true));
+        GlanceModuleFeedItem update = new()
+        {
+            Id = "WorldClock",
+            Version = "1.0.2",
+            ModuleApiVersion = GlanceModuleContract.CurrentVersion,
+            DisplayName = "World clock",
+            Description = "Local time",
+            Category = "Information",
+            Icon = new GlanceModuleFeedIcon { Type = GlanceModuleIconType.Glyph, Source = "\uE916" },
+            DownloadUrl = new Uri("https://example.com/WorldClock.glance"),
+            Sha256 = string.Empty
+        };
+
+        item.SetFeedItem(update, true, "1.0.1");
+        item.NavigateToSettings();
+
+        Assert.True(item.ShowUpdateAction);
+        Assert.False(item.CanExpand);
+        Assert.False(item.CanToggle);
+        Assert.False(item.CanUninstall);
+        Assert.Equal(0, navigationRequests);
+    }
+
     private sealed class TestSetting(string moduleId, int order) :
         IGlanceModuleSettingViewModel
     {

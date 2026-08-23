@@ -39,6 +39,7 @@ internal sealed class GlanceModuleManager :
     private readonly IWritableOptions<GlanceSettings> settingsWriter;
     private readonly IServiceProvider applicationServices;
     private readonly Dictionary<string, CancellationTokenSource> pendingPackages = [with(StringComparer.OrdinalIgnoreCase)];
+    private readonly SemaphoreSlim packageOperations = new(1, 1);
     private readonly object synchronization = new();
 
     public GlanceModuleManager(IServiceProvider applicationServices, GlanceRuntimeServiceProvider runtimeServices, DispatcherQueue dispatcherQueue, ILogger<GlanceModuleManager> logger)
@@ -384,7 +385,9 @@ internal sealed class GlanceModuleManager :
         }
     }
 
-    private Task<ModuleInstallResult> InstallPackageAsync(string packagePath) => DispatchAsync(async () =>
+    private Task<ModuleInstallResult> InstallPackageAsync(string packagePath) => DispatchAsync(() => RunPackageOperationAsync(() => InstallPackageCoreAsync(packagePath)));
+
+    private async Task<ModuleInstallResult> InstallPackageCoreAsync(string packagePath)
     {
         if (!File.Exists(packagePath) ||
             !string.Equals(Path.GetExtension(packagePath), ".glance", StringComparison.OrdinalIgnoreCase))
@@ -485,9 +488,11 @@ internal sealed class GlanceModuleManager :
         }
 
         return installResult;
-    });
+    }
 
-    private async Task<bool> UninstallAsync(string sourcePath)
+    private Task<bool> UninstallAsync(string sourcePath) => RunPackageOperationAsync(() => UninstallCoreAsync(sourcePath));
+
+    private async Task<bool> UninstallCoreAsync(string sourcePath)
     {
         LoadedModulePackage? package = loadedPackages.FirstOrDefault(candidate =>
             string.Equals(candidate.SourcePath, sourcePath, StringComparison.OrdinalIgnoreCase));
@@ -530,6 +535,20 @@ internal sealed class GlanceModuleManager :
         GlanceModuleInstallationStore.RemovePackageForCurrentProcess(package.SourcePath);
         logger.LogInformation("Uninstalled Glance module package {ModulePackage}", package.SourcePath);
         return true;
+    }
+
+    private async Task<T> RunPackageOperationAsync<T>(Func<Task<T>> operation)
+    {
+        await packageOperations.WaitAsync();
+
+        try
+        {
+            return await operation();
+        }
+        finally
+        {
+            _ = packageOperations.Release();
+        }
     }
 
     private static async Task<bool> WaitForStablePackageAsync(string packagePath, CancellationToken cancellationToken)

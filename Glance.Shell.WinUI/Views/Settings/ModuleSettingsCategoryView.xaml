@@ -39,7 +39,7 @@
             Margin="36,0,36,8"
             IsClosable="True"
             IsOpen="{x:Bind ViewModel.Modules.IsInstallStatusOpen, Mode=TwoWay}"
-            Message="{x:Bind ViewModel.Modules.InstallStatusMessage, Mode=OneWay}"
+            Title="{x:Bind ViewModel.Modules.InstallStatusMessage, Mode=OneWay}"
             Severity="{x:Bind GetSeverity(ViewModel.Modules.InstallStatusKind), Mode=OneWay}" />
         <ListView
             Grid.Row="3"

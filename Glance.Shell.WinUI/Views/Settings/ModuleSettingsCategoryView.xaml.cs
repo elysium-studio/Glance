@@ -99,9 +99,9 @@ public sealed partial class ModuleSettingsCategoryView :
 
             await InstallModulePathsAsync(modules, packages);
         }
-        catch (Exception exception)
+        catch
         {
-            modules.ShowInstallFailure(exception.Message);
+            modules.ShowInstallFailure();
         }
         finally
         {

@@ -121,10 +121,7 @@ public sealed partial class ModulesViewModel :
 
                 if (!result.IsSuccessful)
                 {
-                    ShowInstallStatus(ModuleInstallStatusKind.Error,
-                        string.IsNullOrWhiteSpace(result.ErrorMessage)
-                            ? localizer.GetText("ModuleInstallFailedMessage")
-                            : result.ErrorMessage);
+                    ShowInstallStatus(ModuleInstallStatusKind.Error, localizer.GetText("ModuleInstallFailedMessage"));
                     return null;
                 }
 
@@ -154,12 +151,9 @@ public sealed partial class ModulesViewModel :
                     : localizer.GetText("ModuleInstalledMessage", installedModuleNames));
             return completedResult;
         }
-        catch (Exception exception)
+        catch
         {
-            ShowInstallStatus(ModuleInstallStatusKind.Error,
-                string.IsNullOrWhiteSpace(exception.Message)
-                    ? localizer.GetText("ModuleInstallFailedMessage")
-                    : exception.Message);
+            ShowInstallStatus(ModuleInstallStatusKind.Error, localizer.GetText("ModuleInstallFailedMessage"));
             return null;
         }
         finally
@@ -173,8 +167,7 @@ public sealed partial class ModulesViewModel :
     public void ShowInvalidPackageStatus() => ShowInstallStatus(ModuleInstallStatusKind.Error,
         localizer.GetText("ModuleInstallInvalidPackageMessage"));
 
-    public void ShowInstallFailure(string message) => ShowInstallStatus(ModuleInstallStatusKind.Error,
-        string.IsNullOrWhiteSpace(message) ? localizer.GetText("ModuleInstallFailedMessage") : message);
+    public void ShowInstallFailure() => ShowInstallStatus(ModuleInstallStatusKind.Error, localizer.GetText("ModuleInstallFailedMessage"));
 
     public override void Dispose()
     {
@@ -340,7 +333,7 @@ public sealed partial class ModulesViewModel :
 
         if (!result.IsSuccessful)
         {
-            ShowInstallStatus(ModuleInstallStatusKind.Error, string.IsNullOrWhiteSpace(result.ErrorMessage) ? localizer.GetText("ModuleInstallFailedMessage") : result.ErrorMessage);
+            ShowInstallStatus(ModuleInstallStatusKind.Error, localizer.GetText("ModuleInstallFailedMessage"));
             return false;
         }
 

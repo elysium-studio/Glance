@@ -108,7 +108,8 @@
                         NextButtonVisibility="VisibleOnPointerOver"
                         NumberOfPages="{x:Bind ViewModel.ComponentCount, Mode=OneWay}"
                         PreviousButtonVisibility="VisibleOnPointerOver"
-                        SelectedPageIndex="{x:Bind ViewModel.SelectedIndex, Mode=TwoWay}">
+                        SelectedPageIndex="{x:Bind ViewModel.SelectedIndex, Mode=TwoWay}"
+                        Visibility="{x:Bind ViewModel.HasMultipleComponents, Mode=OneWay}">
                         <PipsPager.Resources>
                             <StaticResource x:Key="PipsPagerNavigationButtonForeground" ResourceKey="GlanceFooterForegroundBrush" />
                             <StaticResource x:Key="PipsPagerNavigationButtonForegroundDisabled" ResourceKey="GlanceFooterForegroundBrush" />
@@ -125,7 +126,8 @@
                         Width="1"
                         Height="12"
                         VerticalAlignment="Center"
-                        Background="{StaticResource GlanceFooterDividerBrush}" />
+                        Background="{StaticResource GlanceFooterDividerBrush}"
+                        Visibility="{x:Bind ViewModel.HasMultipleComponents, Mode=OneWay}" />
                     <Button
                         x:Uid="PinIslandButton"
                         VerticalAlignment="Center"

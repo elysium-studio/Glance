@@ -14,9 +14,6 @@
         </CommunityToolkit:SettingsExpander.HeaderIcon>
         <CommunityToolkit:SettingsExpander.Items>
             <CommunityToolkit:SettingsCard x:Uid="SpotifyDashboardCard">
-                <CommunityToolkit:SettingsCard.HeaderIcon>
-                    <FontIcon Glyph="&#xE774;" />
-                </CommunityToolkit:SettingsCard.HeaderIcon>
                 <Button
                     x:Uid="OpenDashboardButton"
                     MinWidth="132"
@@ -25,18 +22,12 @@
             <CommunityToolkit:SettingsCard
                 x:Uid="SpotifyRedirectUriCard"
                 Description="{x:Bind ViewModel.RedirectUri}">
-                <CommunityToolkit:SettingsCard.HeaderIcon>
-                    <FontIcon Glyph="&#xE71B;" />
-                </CommunityToolkit:SettingsCard.HeaderIcon>
                 <Button
                     x:Uid="CopyRedirectUriButton"
                     MinWidth="132"
                     Click="HandleCopyRedirectUri" />
             </CommunityToolkit:SettingsCard>
             <CommunityToolkit:SettingsCard x:Uid="SpotifyClientIdCard">
-                <CommunityToolkit:SettingsCard.HeaderIcon>
-                    <FontIcon Glyph="&#xE8D7;" />
-                </CommunityToolkit:SettingsCard.HeaderIcon>
                 <TextBox
                     Width="240"
                     HorizontalAlignment="Stretch"

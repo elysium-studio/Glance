@@ -40,9 +40,6 @@
                 <CommunityToolkit:SettingsCard
                     Header="{Binding DisplayName}"
                     Description="{Binding Description}">
-                    <CommunityToolkit:SettingsCard.HeaderIcon>
-                        <FontIcon Glyph="&#xE8B1;" />
-                    </CommunityToolkit:SettingsCard.HeaderIcon>
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <ToggleSwitch
                             x:Uid="QuickConverterEnabledToggle"

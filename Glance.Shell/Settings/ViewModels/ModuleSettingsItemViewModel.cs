@@ -63,15 +63,17 @@ public sealed partial class ModuleSettingsItemViewModel :
 
     public bool IsInstalled => component is not null;
 
-    public bool CanExpand => IsInstalled && IsEnabled && HasSettings;
+    public bool CanExpand => IsInstalled && IsEnabled && HasSettings && !RequiresUpdate;
 
-    public bool CanToggle => IsInstalled;
+    public bool CanToggle => IsInstalled && !RequiresUpdate;
 
-    public bool CanUninstall => IsInstalled && uninstall is not null;
+    public bool CanUninstall => IsInstalled && uninstall is not null && !RequiresUpdate;
 
     public bool ShowInstallAction => !IsInstalled && FeedItem is not null;
 
     public bool ShowUpdateAction => IsInstalled && FeedItem is not null && PackageState == ModulePackageState.UpdateAvailable;
+
+    private bool RequiresUpdate => PackageState == ModulePackageState.UpdateAvailable;
 
     public bool CanInstall => ShowInstallAction && PackageState == ModulePackageState.Available && !IsBusy;
 
@@ -91,6 +93,9 @@ public sealed partial class ModuleSettingsItemViewModel :
     private bool isBusy;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanExpand))]
+    [NotifyPropertyChangedFor(nameof(CanToggle))]
+    [NotifyPropertyChangedFor(nameof(CanUninstall))]
     [NotifyPropertyChangedFor(nameof(ShowInstallAction))]
     [NotifyPropertyChangedFor(nameof(ShowUpdateAction))]
     [NotifyPropertyChangedFor(nameof(CanInstall))]

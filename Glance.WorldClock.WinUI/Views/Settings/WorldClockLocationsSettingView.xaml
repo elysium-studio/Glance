@@ -53,9 +53,6 @@
             <CommunityToolkit:SettingsExpander.ItemTemplate>
                 <DataTemplate>
                     <CommunityToolkit:SettingsCard Header="{Binding DisplayName}">
-                        <CommunityToolkit:SettingsCard.HeaderIcon>
-                            <FontIcon Glyph="&#xE916;" />
-                        </CommunityToolkit:SettingsCard.HeaderIcon>
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <Button
                                 x:Uid="WorldClockMoveUpButton"

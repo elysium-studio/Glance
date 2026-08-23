@@ -36,9 +36,6 @@
             </CommunityToolkit:SettingsExpander.ItemsFooter>
             <CommunityToolkit:SettingsExpander.Items>
                 <CommunityToolkit:SettingsCard x:Uid="AssistantProvidersCard">
-                    <CommunityToolkit:SettingsCard.HeaderIcon>
-                        <FontIcon Glyph="&#xE720;" />
-                    </CommunityToolkit:SettingsCard.HeaderIcon>
                     <Button
                         x:Uid="AddSpeechEngineButton"
                         Click="HandleAddProviderClick">
@@ -62,9 +59,6 @@
                                 <CommunityToolkit:SettingsCard
                                     Description="{x:Bind Description}"
                                     Header="{x:Bind DisplayName}">
-                                    <CommunityToolkit:SettingsCard.HeaderIcon>
-                                        <FontIcon Glyph="&#xE720;" />
-                                    </CommunityToolkit:SettingsCard.HeaderIcon>
                                     <Button
                                         x:Uid="UninstallModuleButton"
                                         Width="36"
@@ -84,9 +78,6 @@
                     x:Uid="AssistantModelChoiceCard"
                     Description="{x:Bind ViewModel.SelectedDescription, Mode=OneWay}"
                     Visibility="{x:Bind ViewModel.HasModels, Mode=OneWay}">
-                    <CommunityToolkit:SettingsCard.HeaderIcon>
-                        <FontIcon Glyph="&#xE8D7;" />
-                    </CommunityToolkit:SettingsCard.HeaderIcon>
                     <ComboBox
                         Width="240"
                         DisplayMemberPath="DisplayLabel"
@@ -98,9 +89,6 @@
                     x:Uid="AssistantModelInstallCard"
                     Description="{x:Bind ViewModel.SelectedDownloadDescription, Mode=OneWay}"
                     Visibility="{x:Bind ViewModel.HasModels, Mode=OneWay}">
-                    <CommunityToolkit:SettingsCard.HeaderIcon>
-                        <FontIcon Glyph="&#xE896;" />
-                    </CommunityToolkit:SettingsCard.HeaderIcon>
                     <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />

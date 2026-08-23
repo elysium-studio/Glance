@@ -10,9 +10,6 @@
         </CommunityToolkit:SettingsExpander.HeaderIcon>
         <CommunityToolkit:SettingsExpander.Items>
             <CommunityToolkit:SettingsCard x:Uid="FastingPlanSettingCard">
-                <CommunityToolkit:SettingsCard.HeaderIcon>
-                    <FontIcon Glyph="&#xE8D7;" />
-                </CommunityToolkit:SettingsCard.HeaderIcon>
                 <ComboBox Width="240" SelectedIndex="{x:Bind ViewModel.SelectedPlanIndex, Mode=TwoWay}">
                     <ComboBoxItem x:Uid="TwelveTwelvePlan" />
                     <ComboBoxItem x:Uid="FourteenTenPlan" />
@@ -23,15 +20,9 @@
                 </ComboBox>
             </CommunityToolkit:SettingsCard>
             <CommunityToolkit:SettingsCard x:Uid="CustomDurationSettingCard" Visibility="{x:Bind ViewModel.IsCustom, Mode=OneWay}">
-                <CommunityToolkit:SettingsCard.HeaderIcon>
-                    <FontIcon Glyph="&#xE916;" />
-                </CommunityToolkit:SettingsCard.HeaderIcon>
                 <NumberBox Width="160" Minimum="1" Maximum="48" SmallChange="1" SpinButtonPlacementMode="Compact" Value="{x:Bind ViewModel.CustomFastingHours, Mode=TwoWay}" />
             </CommunityToolkit:SettingsCard>
             <CommunityToolkit:SettingsCard x:Uid="CustomEatingWindowSettingCard" Visibility="{x:Bind ViewModel.IsCustom, Mode=OneWay}">
-                <CommunityToolkit:SettingsCard.HeaderIcon>
-                    <FontIcon Glyph="&#xE8C7;" />
-                </CommunityToolkit:SettingsCard.HeaderIcon>
                 <NumberBox Width="160" Minimum="1" Maximum="24" SmallChange="1" SpinButtonPlacementMode="Compact" Value="{x:Bind ViewModel.CustomEatingHours, Mode=TwoWay}" />
             </CommunityToolkit:SettingsCard>
         </CommunityToolkit:SettingsExpander.Items>
