@@ -197,5 +197,14 @@
       "Simplified module installation and removed legacy package discovery.",
       "Consolidated installer and application data beneath the Glance application root."
     ]
+  },
+  {
+    "version": "0.1.19-preview",
+    "date": "2026-08-23",
+    "releaseNotes": [
+      "Refined speech setup around a single active transcription provider, with clear Select and Remove actions and grouped model controls.",
+      "Added a Restart action when module updates are ready to apply.",
+      "Stabilized compact network speed labels so live values no longer shift the layout."
+    ]
   }
 ]
