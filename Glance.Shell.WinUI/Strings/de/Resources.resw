@@ -137,10 +137,12 @@
   <data name="AssistantModelReadyInfoBar.Message" xml:space="preserve"><value>Der Sprachassistent kann jetzt eingeschaltet werden.</value></data>
   <data name="AssistantProvidersCard.Header" xml:space="preserve"><value>Sprach-Engines</value></data>
   <data name="AssistantProvidersCard.Description" xml:space="preserve"><value>Fügen Sie eine oder mehrere Transkriptions-Engines hinzu und wählen Sie anschließend das Sprachmodell aus, das Glance verwenden soll.</value></data>
-  <data name="AddSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Sprach-Engine hinzufügen</value></data>
-  <data name="AddSpeechEngineButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Hinzufügen</value></data>
+  <data name="SelectSpeechEngineButton.Content" xml:space="preserve"><value>Auswählen</value></data>
+  <data name="SelectSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Sprach-Engine auswählen</value></data>
+  <data name="RemoveSpeechEngineButton.Content" xml:space="preserve"><value>Entfernen</value></data>
+  <data name="RemoveSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Sprach-Engine entfernen</value></data>
   <data name="AddSpeechEngineDialog.Title" xml:space="preserve"><value>Sprach-Engine hinzufügen</value></data>
-  <data name="AddSpeechEngineDialog.PrimaryButtonText" xml:space="preserve"><value>Hinzufügen</value></data>
+  <data name="AddSpeechEngineDialog.PrimaryButtonText" xml:space="preserve"><value>Auswählen</value></data>
   <data name="AddSpeechEngineDialog.CloseButtonText" xml:space="preserve"><value>Abbrechen</value></data>
   <data name="AssistantProviderUnavailableInfoBar.Title" xml:space="preserve"><value>Sprach-Engines nicht verfügbar</value></data>
   <data name="AssistantProviderUnavailableInfoBar.Message" xml:space="preserve"><value>In Ihren aktivierten Modulfeeds wurden keine Transkriptions-Engines gefunden.</value></data>

@@ -26,7 +26,7 @@ public sealed partial class AssistantModelSetupView :
 
     private void HandleRemoveProviderClick(object sender, RoutedEventArgs args)
     {
-        if (sender is FrameworkElement { DataContext: AssistantTranscriptionProviderViewModel provider })
+        if (sender is Button { CommandParameter: AssistantTranscriptionProviderViewModel provider })
         {
             _ = ViewModel.RemoveProviderAsync(provider);
         }

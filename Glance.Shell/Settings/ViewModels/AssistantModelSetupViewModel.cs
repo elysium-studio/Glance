@@ -79,6 +79,8 @@ public sealed partial class AssistantModelSetupViewModel :
 
     public ObservableCollection<AssistantTranscriptionProviderViewModel> InstalledProviders { get; }
 
+    public AssistantTranscriptionProviderViewModel? InstalledProvider => InstalledProviders.FirstOrDefault();
+
     public bool HasModels => Models.Count > 0;
 
     public bool HasProviders => Providers.Count > 0;
@@ -198,6 +200,7 @@ public sealed partial class AssistantModelSetupViewModel :
             return false;
         }
 
+        AssistantTranscriptionProviderViewModel[] replacedProviders = [.. InstalledProviders.Where(item => !string.Equals(item.Id, provider.Id, StringComparison.OrdinalIgnoreCase))];
         provider.IsBusy = true;
         ErrorMessage = null;
         ModuleInstallResult result;
@@ -211,15 +214,38 @@ public sealed partial class AssistantModelSetupViewModel :
             result = ModuleInstallResult.Failed(exception.Message);
         }
 
+        if (result.IsSuccessful)
+        {
+            foreach (AssistantTranscriptionProviderViewModel replacedProvider in replacedProviders)
+            {
+                try
+                {
+                    _ = await installations.UninstallPackageAsync(replacedProvider.Id);
+                }
+                catch (Exception exception)
+                {
+                    result = ModuleInstallResult.Failed(exception.Message);
+                    break;
+                }
+            }
+        }
+
         dispatcher.Dispatch(() =>
         {
             if (Volatile.Read(ref disposed) == 0)
             {
                 provider.IsBusy = false;
                 provider.IsInstalled = result.IsSuccessful || installations.IsInstalled(provider.Id);
+
+                foreach (AssistantTranscriptionProviderViewModel replacedProvider in replacedProviders)
+                {
+                    replacedProvider.IsInstalled = installations.IsInstalled(replacedProvider.Id);
+                }
+
                 ErrorMessage = result.IsSuccessful ? null : result.ErrorMessage;
                 SynchronizeProviderCollections();
                 SynchronizeModels();
+                SelectProviderModel(provider.Id);
                 SynchronizeSelectedModel();
             }
         });
@@ -439,6 +465,7 @@ public sealed partial class AssistantModelSetupViewModel :
             ? selectedProvider
             : null;
         OnPropertyChanged(nameof(HasInstalledProviders));
+        OnPropertyChanged(nameof(InstalledProvider));
     }
 
     private void NotifySelectionChanged()
@@ -455,11 +482,30 @@ public sealed partial class AssistantModelSetupViewModel :
         OnPropertyChanged(nameof(SelectedDownloadDescription));
     }
 
+    private void SelectProviderModel(string providerId)
+    {
+        int index = Models.Select((model, index) => (model, index))
+            .Where(item => string.Equals(item.model.ProviderId, providerId, StringComparison.OrdinalIgnoreCase))
+            .Select(item => item.index)
+            .DefaultIfEmpty(-1)
+            .First();
+
+        if (index < 0)
+        {
+            return;
+        }
+
+        selectedIndex = index;
+        OnPropertyChanged(nameof(SelectedIndex));
+        _ = modelSelection.SelectAsync(Models[index].Id);
+    }
+
     private static AssistantModelOption CreateOption(TranscriptionModel model) => new(model.Id,
         model.DisplayName,
         model.Description,
         FormatSize(model.DownloadSize),
         model.IsRecommended,
+        model.ProviderId,
         model.ProviderDisplayName);
 
     private static string FormatSize(long size)
@@ -477,6 +523,7 @@ public sealed record AssistantModelOption(string Id,
     string Description,
     string DownloadSizeText,
     bool IsRecommended,
+    string? ProviderId,
     string? ProviderDisplayName)
 {
     public string DisplayLabel

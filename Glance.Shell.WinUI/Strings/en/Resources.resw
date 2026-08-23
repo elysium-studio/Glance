@@ -137,10 +137,12 @@
   <data name="AssistantModelReadyInfoBar.Message" xml:space="preserve"><value>The voice assistant can now be switched on.</value></data>
   <data name="AssistantProvidersCard.Header" xml:space="preserve"><value>Speech engines</value></data>
   <data name="AssistantProvidersCard.Description" xml:space="preserve"><value>Add one or more transcription engines, then choose which speech model Glance should use.</value></data>
-  <data name="AddSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Add speech engine</value></data>
-  <data name="AddSpeechEngineButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Add</value></data>
+  <data name="SelectSpeechEngineButton.Content" xml:space="preserve"><value>Select</value></data>
+  <data name="SelectSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Select speech engine</value></data>
+  <data name="RemoveSpeechEngineButton.Content" xml:space="preserve"><value>Remove</value></data>
+  <data name="RemoveSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Remove speech engine</value></data>
   <data name="AddSpeechEngineDialog.Title" xml:space="preserve"><value>Add a speech engine</value></data>
-  <data name="AddSpeechEngineDialog.PrimaryButtonText" xml:space="preserve"><value>Add</value></data>
+  <data name="AddSpeechEngineDialog.PrimaryButtonText" xml:space="preserve"><value>Select</value></data>
   <data name="AddSpeechEngineDialog.CloseButtonText" xml:space="preserve"><value>Cancel</value></data>
   <data name="AssistantProviderUnavailableInfoBar.Title" xml:space="preserve"><value>Speech engines unavailable</value></data>
   <data name="AssistantProviderUnavailableInfoBar.Message" xml:space="preserve"><value>No transcription engines were found in your enabled module feeds.</value></data>

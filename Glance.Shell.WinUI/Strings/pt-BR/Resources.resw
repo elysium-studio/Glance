@@ -137,10 +137,12 @@
   <data name="AssistantModelReadyInfoBar.Message" xml:space="preserve"><value>O assistente de voz agora pode ser ativado.</value></data>
   <data name="AssistantProvidersCard.Header" xml:space="preserve"><value>Mecanismos de fala</value></data>
   <data name="AssistantProvidersCard.Description" xml:space="preserve"><value>Adicione um ou mais mecanismos de transcrição e escolha qual modelo de fala o Glance deve usar.</value></data>
-  <data name="AddSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Adicionar mecanismo de fala</value></data>
-  <data name="AddSpeechEngineButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Adicionar</value></data>
+  <data name="SelectSpeechEngineButton.Content" xml:space="preserve"><value>Selecionar</value></data>
+  <data name="SelectSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Selecionar mecanismo de fala</value></data>
+  <data name="RemoveSpeechEngineButton.Content" xml:space="preserve"><value>Remover</value></data>
+  <data name="RemoveSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Remover mecanismo de fala</value></data>
   <data name="AddSpeechEngineDialog.Title" xml:space="preserve"><value>Adicionar um mecanismo de fala</value></data>
-  <data name="AddSpeechEngineDialog.PrimaryButtonText" xml:space="preserve"><value>Adicionar</value></data>
+  <data name="AddSpeechEngineDialog.PrimaryButtonText" xml:space="preserve"><value>Selecionar</value></data>
   <data name="AddSpeechEngineDialog.CloseButtonText" xml:space="preserve"><value>Cancelar</value></data>
   <data name="AssistantProviderUnavailableInfoBar.Title" xml:space="preserve"><value>Mecanismos de fala indisponíveis</value></data>
   <data name="AssistantProviderUnavailableInfoBar.Message" xml:space="preserve"><value>Nenhum mecanismo de transcrição foi encontrado nos feeds de módulos habilitados.</value></data>

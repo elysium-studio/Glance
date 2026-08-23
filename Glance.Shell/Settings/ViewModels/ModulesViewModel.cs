@@ -80,6 +80,8 @@ public sealed partial class ModulesViewModel :
 
     public string RestartDialogCloseButtonText => localizer.GetText("ModuleUpdateRestartDialogCloseButton");
 
+    public string RestartButtonText => localizer.GetText("UpdateReadyToastRestartButton");
+
     public async Task<bool> ConfirmRestartAsync(object xamlRoot)
     {
         NavigationParameters parameters = new();
@@ -100,6 +102,9 @@ public sealed partial class ModulesViewModel :
 
     [ObservableProperty]
     private ModuleInstallStatusKind installStatusKind;
+
+    [ObservableProperty]
+    private bool installStatusRequiresRestart;
 
     [ObservableProperty]
     private bool isFeedStatusOpen;
@@ -148,7 +153,7 @@ public sealed partial class ModulesViewModel :
             ShowInstallStatus(ModuleInstallStatusKind.Success,
                 restartRequired
                     ? localizer.GetText("ModuleUpdateStagedMessage", installedModuleNames)
-                    : localizer.GetText("ModuleInstalledMessage", installedModuleNames));
+                    : localizer.GetText("ModuleInstalledMessage", installedModuleNames), restartRequired);
             return completedResult;
         }
         catch
@@ -338,7 +343,7 @@ public sealed partial class ModulesViewModel :
         }
 
         string installedModuleNames = ResolveInstalledModuleNames(result);
-        ShowInstallStatus(ModuleInstallStatusKind.Success, result.RequiresRestart ? localizer.GetText("ModuleUpdateStagedMessage", installedModuleNames) : localizer.GetText("ModuleInstalledMessage", installedModuleNames));
+        ShowInstallStatus(ModuleInstallStatusKind.Success, result.RequiresRestart ? localizer.GetText("ModuleUpdateStagedMessage", installedModuleNames) : localizer.GetText("ModuleInstalledMessage", installedModuleNames), result.RequiresRestart);
         item.SetFeedItem(item.FeedItem, feed.IsSourceAvailable(item.FeedItem.FeedId), item.FeedItem.Version);
         return true;
     }
@@ -431,11 +436,11 @@ public sealed partial class ModulesViewModel :
 
     private void SetInstalling(bool value) => dispatcher.Dispatch(() => IsInstalling = value);
 
-    private void ShowInstallStatus(ModuleInstallStatusKind kind,
-        string message) => dispatcher.Dispatch(() =>
+    private void ShowInstallStatus(ModuleInstallStatusKind kind, string message, bool requiresRestart = false) => dispatcher.Dispatch(() =>
     {
         InstallStatusKind = kind;
         InstallStatusMessage = message;
+        InstallStatusRequiresRestart = requiresRestart;
         IsInstallStatusOpen = true;
     });
 }

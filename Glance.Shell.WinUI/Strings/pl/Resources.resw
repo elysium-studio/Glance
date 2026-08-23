@@ -137,10 +137,12 @@
   <data name="AssistantModelReadyInfoBar.Message" xml:space="preserve"><value>Można teraz włączyć asystenta głosowego.</value></data>
   <data name="AssistantProvidersCard.Header" xml:space="preserve"><value>Aparaty mowy</value></data>
   <data name="AssistantProvidersCard.Description" xml:space="preserve"><value>Dodaj co najmniej jeden aparat transkrypcji, a następnie wybierz model mowy używany przez Glance.</value></data>
-  <data name="AddSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Dodaj aparat mowy</value></data>
-  <data name="AddSpeechEngineButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Dodaj</value></data>
+  <data name="SelectSpeechEngineButton.Content" xml:space="preserve"><value>Wybierz</value></data>
+  <data name="SelectSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Wybierz aparat mowy</value></data>
+  <data name="RemoveSpeechEngineButton.Content" xml:space="preserve"><value>Usuń</value></data>
+  <data name="RemoveSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Usuń aparat mowy</value></data>
   <data name="AddSpeechEngineDialog.Title" xml:space="preserve"><value>Dodaj aparat mowy</value></data>
-  <data name="AddSpeechEngineDialog.PrimaryButtonText" xml:space="preserve"><value>Dodaj</value></data>
+  <data name="AddSpeechEngineDialog.PrimaryButtonText" xml:space="preserve"><value>Wybierz</value></data>
   <data name="AddSpeechEngineDialog.CloseButtonText" xml:space="preserve"><value>Anuluj</value></data>
   <data name="AssistantProviderUnavailableInfoBar.Title" xml:space="preserve"><value>Aparaty mowy są niedostępne</value></data>
   <data name="AssistantProviderUnavailableInfoBar.Message" xml:space="preserve"><value>Nie znaleziono aparatów transkrypcji we włączonych kanałach modułów.</value></data>

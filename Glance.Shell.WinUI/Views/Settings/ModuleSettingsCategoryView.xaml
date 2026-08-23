@@ -40,7 +40,16 @@
             IsClosable="True"
             IsOpen="{x:Bind ViewModel.Modules.IsInstallStatusOpen, Mode=TwoWay}"
             Title="{x:Bind ViewModel.Modules.InstallStatusMessage, Mode=OneWay}"
-            Severity="{x:Bind GetSeverity(ViewModel.Modules.InstallStatusKind), Mode=OneWay}" />
+            Severity="{x:Bind GetSeverity(ViewModel.Modules.InstallStatusKind), Mode=OneWay}">
+            <InfoBar.ActionButton>
+                <Button
+                    x:Name="RestartButton"
+                    MinWidth="132"
+                    Click="HandleRestartClicked"
+                    Content="{x:Bind ViewModel.Modules.RestartButtonText, Mode=OneWay}"
+                    Visibility="{x:Bind ViewModel.Modules.InstallStatusRequiresRestart, Mode=OneWay}" />
+            </InfoBar.ActionButton>
+        </InfoBar>
         <ListView
             Grid.Row="3"
             Margin="36,0,36,36"

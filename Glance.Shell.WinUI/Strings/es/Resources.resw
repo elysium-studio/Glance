@@ -137,10 +137,12 @@
   <data name="AssistantModelReadyInfoBar.Message" xml:space="preserve"><value>Ahora puedes activar el asistente de voz.</value></data>
   <data name="AssistantProvidersCard.Header" xml:space="preserve"><value>Motores de voz</value></data>
   <data name="AssistantProvidersCard.Description" xml:space="preserve"><value>Añade uno o varios motores de transcripción y elige el modelo de voz que debe usar Glance.</value></data>
-  <data name="AddSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Añadir motor de voz</value></data>
-  <data name="AddSpeechEngineButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Añadir</value></data>
+  <data name="SelectSpeechEngineButton.Content" xml:space="preserve"><value>Seleccionar</value></data>
+  <data name="SelectSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Seleccionar motor de voz</value></data>
+  <data name="RemoveSpeechEngineButton.Content" xml:space="preserve"><value>Quitar</value></data>
+  <data name="RemoveSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Quitar motor de voz</value></data>
   <data name="AddSpeechEngineDialog.Title" xml:space="preserve"><value>Añadir un motor de voz</value></data>
-  <data name="AddSpeechEngineDialog.PrimaryButtonText" xml:space="preserve"><value>Añadir</value></data>
+  <data name="AddSpeechEngineDialog.PrimaryButtonText" xml:space="preserve"><value>Seleccionar</value></data>
   <data name="AddSpeechEngineDialog.CloseButtonText" xml:space="preserve"><value>Cancelar</value></data>
   <data name="AssistantProviderUnavailableInfoBar.Title" xml:space="preserve"><value>Motores de voz no disponibles</value></data>
   <data name="AssistantProviderUnavailableInfoBar.Message" xml:space="preserve"><value>No se encontraron motores de transcripción en las fuentes de módulos habilitadas.</value></data>

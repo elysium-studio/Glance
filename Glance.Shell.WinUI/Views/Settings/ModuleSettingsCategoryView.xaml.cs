@@ -29,6 +29,20 @@ public sealed partial class ModuleSettingsCategoryView :
     public InfoBarSeverity GetSeverity(ModuleInstallStatusKind kind) =>
         ModuleInstallStatusSeverityConverter.Convert(kind);
 
+    private async void HandleRestartClicked(object sender, RoutedEventArgs args)
+    {
+        RestartButton.IsEnabled = false;
+
+        try
+        {
+            await ViewModel.Modules.RestartAsync();
+        }
+        finally
+        {
+            RestartButton.IsEnabled = true;
+        }
+    }
+
     private async void HandleAddModuleClicked(object sender,
         RoutedEventArgs args)
     {

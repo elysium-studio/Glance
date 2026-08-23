@@ -137,10 +137,12 @@
   <data name="AssistantModelReadyInfoBar.Message" xml:space="preserve"><value>现在可以开启语音助手。</value></data>
   <data name="AssistantProvidersCard.Header" xml:space="preserve"><value>语音引擎</value></data>
   <data name="AssistantProvidersCard.Description" xml:space="preserve"><value>添加一个或多个转录引擎，然后选择 Glance 应使用的语音模型。</value></data>
-  <data name="AddSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>添加语音引擎</value></data>
-  <data name="AddSpeechEngineButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>添加</value></data>
+  <data name="SelectSpeechEngineButton.Content" xml:space="preserve"><value>选择</value></data>
+  <data name="SelectSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>选择语音引擎</value></data>
+  <data name="RemoveSpeechEngineButton.Content" xml:space="preserve"><value>移除</value></data>
+  <data name="RemoveSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>移除语音引擎</value></data>
   <data name="AddSpeechEngineDialog.Title" xml:space="preserve"><value>添加语音引擎</value></data>
-  <data name="AddSpeechEngineDialog.PrimaryButtonText" xml:space="preserve"><value>添加</value></data>
+  <data name="AddSpeechEngineDialog.PrimaryButtonText" xml:space="preserve"><value>选择</value></data>
   <data name="AddSpeechEngineDialog.CloseButtonText" xml:space="preserve"><value>取消</value></data>
   <data name="AssistantProviderUnavailableInfoBar.Title" xml:space="preserve"><value>语音引擎不可用</value></data>
   <data name="AssistantProviderUnavailableInfoBar.Message" xml:space="preserve"><value>在已启用的模块源中未找到转录引擎。</value></data>

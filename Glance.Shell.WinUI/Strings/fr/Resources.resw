@@ -137,10 +137,12 @@
   <data name="AssistantModelReadyInfoBar.Message" xml:space="preserve"><value>L’assistant vocal peut maintenant être activé.</value></data>
   <data name="AssistantProvidersCard.Header" xml:space="preserve"><value>Moteurs vocaux</value></data>
   <data name="AssistantProvidersCard.Description" xml:space="preserve"><value>Ajoutez un ou plusieurs moteurs de transcription, puis choisissez le modèle vocal que Glance doit utiliser.</value></data>
-  <data name="AddSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Ajouter un moteur vocal</value></data>
-  <data name="AddSpeechEngineButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Ajouter</value></data>
+  <data name="SelectSpeechEngineButton.Content" xml:space="preserve"><value>Sélectionner</value></data>
+  <data name="SelectSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Sélectionner un moteur vocal</value></data>
+  <data name="RemoveSpeechEngineButton.Content" xml:space="preserve"><value>Supprimer</value></data>
+  <data name="RemoveSpeechEngineButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Supprimer le moteur vocal</value></data>
   <data name="AddSpeechEngineDialog.Title" xml:space="preserve"><value>Ajouter un moteur vocal</value></data>
-  <data name="AddSpeechEngineDialog.PrimaryButtonText" xml:space="preserve"><value>Ajouter</value></data>
+  <data name="AddSpeechEngineDialog.PrimaryButtonText" xml:space="preserve"><value>Sélectionner</value></data>
   <data name="AddSpeechEngineDialog.CloseButtonText" xml:space="preserve"><value>Annuler</value></data>
   <data name="AssistantProviderUnavailableInfoBar.Title" xml:space="preserve"><value>Moteurs vocaux indisponibles</value></data>
   <data name="AssistantProviderUnavailableInfoBar.Message" xml:space="preserve"><value>Aucun moteur de transcription n’a été trouvé dans vos flux de modules activés.</value></data>
