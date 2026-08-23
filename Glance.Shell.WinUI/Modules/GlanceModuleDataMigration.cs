@@ -48,6 +48,8 @@ internal static class GlanceModuleDataMigration
         _ = Directory.CreateDirectory(modulesDirectory);
         _ = Directory.CreateDirectory(dataDirectory);
         _ = Directory.CreateDirectory(packagesDirectory);
+        MergeDirectory(Path.Combine(dataDirectory, "Feed"), Path.Combine(modulesDirectory, "Feed"));
+        MergeDirectory(Path.Combine(dataDirectory, "Feeds"), Path.Combine(modulesDirectory, "Feeds"));
         MigrateModuleDirectories(modulesDirectory, dataDirectory, packagesDirectory);
 
         foreach ((string fileName, string moduleId) in LegacySettingOwners)
@@ -89,6 +91,8 @@ internal static class GlanceModuleDataMigration
             string moduleId = Path.GetFileName(sourceDirectory);
 
             if (string.Equals(moduleId, "Data", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(moduleId, "Feed", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(moduleId, "Feeds", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(moduleId, "Packages", StringComparison.OrdinalIgnoreCase) ||
                 moduleId.StartsWith(".removed-", StringComparison.OrdinalIgnoreCase))
             {

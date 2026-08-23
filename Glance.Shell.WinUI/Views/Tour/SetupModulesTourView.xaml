@@ -28,6 +28,11 @@
             IsOpen="{x:Bind ViewModel.IsModuleFeedStatusOpen, Mode=TwoWay}"
             Message="{x:Bind ViewModel.ModuleFeedStatusMessage, Mode=OneWay}"
             Severity="Warning" />
+        <InfoBar
+            IsClosable="True"
+            IsOpen="{x:Bind ViewModel.IsModuleInstallStatusOpen, Mode=TwoWay}"
+            Message="{x:Bind ViewModel.ModuleInstallStatusMessage, Mode=OneWay}"
+            Severity="Error" />
         <ItemsControl ItemsSource="{x:Bind ViewModel.Categories, Mode=OneWay}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="Shell:SetupTourModuleCategoryViewModel">

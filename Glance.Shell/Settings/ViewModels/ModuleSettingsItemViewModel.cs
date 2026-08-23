@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Elysium.Application.Abstractions;
 using Glance.Application.Abstractions;
 
 namespace Glance.Shell;
@@ -7,13 +8,14 @@ public sealed partial class ModuleSettingsItemViewModel :
     ObservableObject,
     IModulesViewModel
 {
+    private readonly IDispatcher dispatcher;
     private readonly Action<ModuleSettingsItemViewModel> navigate;
     private readonly IGlanceComponent? component;
     private readonly Func<ModuleSettingsItemViewModel, Task<bool>>? uninstall;
     private readonly Func<ModuleSettingsItemViewModel, Task<bool>>? install;
     private bool suppressPersistence;
 
-    public ModuleSettingsItemViewModel(string id, string displayName, string description, IGlanceComponent? component, bool isEnabled, IEnumerable<IGlanceModuleSettingViewModel> settings, Action<ModuleSettingsItemViewModel> navigate, Func<ModuleSettingsItemViewModel, bool, Task<bool>> setEnabled, Func<ModuleSettingsItemViewModel, Task<bool>>? uninstall = null, Func<ModuleSettingsItemViewModel, Task<bool>>? install = null)
+    public ModuleSettingsItemViewModel(string id, string displayName, string description, IGlanceComponent? component, bool isEnabled, IEnumerable<IGlanceModuleSettingViewModel> settings, IDispatcher dispatcher, Action<ModuleSettingsItemViewModel> navigate, Func<ModuleSettingsItemViewModel, bool, Task<bool>> setEnabled, Func<ModuleSettingsItemViewModel, Task<bool>>? uninstall = null, Func<ModuleSettingsItemViewModel, Task<bool>>? install = null)
     {
         Id = id;
         DisplayName = displayName;
@@ -24,6 +26,7 @@ public sealed partial class ModuleSettingsItemViewModel :
         IconGlyph = string.IsNullOrEmpty(component?.IconGlyph) ? "\uE8B7" : component.IconGlyph;
         Settings = new ModuleSettingsViewModel(displayName, settings);
         this.component = component;
+        this.dispatcher = dispatcher;
         this.navigate = navigate;
         this.uninstall = uninstall;
         this.install = install;
@@ -130,7 +133,7 @@ public sealed partial class ModuleSettingsItemViewModel :
         }
         finally
         {
-            IsBusy = false;
+            dispatcher.Dispatch(() => IsBusy = false);
         }
     }
 
@@ -174,9 +177,12 @@ public sealed partial class ModuleSettingsItemViewModel :
             return;
         }
 
-        suppressPersistence = true;
-        IsEnabled = !value;
-        suppressPersistence = false;
+        dispatcher.Dispatch(() =>
+        {
+            suppressPersistence = true;
+            IsEnabled = !value;
+            suppressPersistence = false;
+        });
     }
 
     private void RefreshSettings() => Settings.SetEnabled(IsEnabled);

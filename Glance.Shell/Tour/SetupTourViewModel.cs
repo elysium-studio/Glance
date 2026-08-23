@@ -90,6 +90,12 @@ public sealed partial class SetupTourViewModel :
     [ObservableProperty]
     private string moduleFeedStatusMessage = string.Empty;
 
+    [ObservableProperty]
+    private bool isModuleInstallStatusOpen;
+
+    [ObservableProperty]
+    private string moduleInstallStatusMessage = string.Empty;
+
     public int Count => PageCount;
 
     public bool CanGoBack => CurrentPage > 0;
@@ -277,12 +283,20 @@ public sealed partial class SetupTourViewModel :
 
         ModuleInstallResult result = await packages.InstallAsync(module.FeedItem);
 
-        if (result.IsSuccessful)
+        if (!result.IsSuccessful)
         {
-            _ = await preferences.SetEnabledAsync(module.Id, true);
+            logger.LogError("Failed to install module {ModuleId}: {ErrorMessage}", module.Id, result.ErrorMessage);
+            dispatcher.Dispatch(() =>
+            {
+                ModuleInstallStatusMessage = localizer.GetText("ModuleInstallFailedMessage");
+                IsModuleInstallStatusOpen = true;
+            });
+            return false;
         }
 
-        return result.IsSuccessful;
+        _ = await preferences.SetEnabledAsync(module.Id, true);
+        dispatcher.Dispatch(() => IsModuleInstallStatusOpen = false);
+        return true;
     }
 
     private Task<bool> RemoveModuleAsync(SetupTourModuleViewModel module) => installations.UninstallAsync(module.Id);

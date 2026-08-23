@@ -72,8 +72,7 @@ public sealed partial class App
 
         if (host.Services.GetRequiredService<GlanceSettings>().ShowSetupOnStartup)
         {
-            startupNavigationTask = NavigateToStartupTourAsync(host.Services.GetRequiredService<INavigator>(),
-                host.Services.GetRequiredService<ILogger<App>>());
+            startupNavigationTask = NavigateToStartupTourAsync(startupModulesTask, applicationDispatcherQueue, host.Services.GetRequiredService<INavigator>(), host.Services.GetRequiredService<ILogger<App>>());
         }
     }
 
@@ -191,12 +190,30 @@ public sealed partial class App
         Current.Exit();
     }
 
-    private static async Task NavigateToStartupTourAsync(INavigator navigator,
-        ILogger logger)
+    private static async Task NavigateToStartupTourAsync(Task startupModules, DispatcherQueue dispatcherQueue, INavigator navigator, ILogger logger)
     {
         try
         {
-            await navigator.NavigateAsync("SetupTourWindow");
+            await startupModules.ConfigureAwait(false);
+            TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            if (!dispatcherQueue.TryEnqueue(async () =>
+            {
+                try
+                {
+                    await navigator.NavigateAsync("SetupTourWindow");
+                    completion.SetResult();
+                }
+                catch (Exception exception)
+                {
+                    completion.SetException(exception);
+                }
+            }))
+            {
+                completion.SetException(new InvalidOperationException("The UI dispatcher rejected the setup tour navigation."));
+            }
+
+            await completion.Task.ConfigureAwait(false);
         }
         catch (Exception exception)
         {
