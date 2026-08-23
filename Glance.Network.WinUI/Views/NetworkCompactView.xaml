@@ -36,8 +36,6 @@
                     <VisualState.Setters>
                         <Setter Target="LayoutRoot.Padding" Value="8,0,8,4" />
                         <Setter Target="LayoutRoot.ColumnSpacing" Value="6" />
-                        <Setter Target="CompactText.FontSize" Value="12" />
-                        <Setter Target="CompactText.FontWeight" Value="Normal" />
                         <Setter Target="StatusIndicator.Width" Value="20" />
                         <Setter Target="StatusIndicator.Height" Value="20" />
                         <Setter Target="StatusIndicator.Margin" Value="0,1,0,-1" />
@@ -64,15 +62,25 @@
                 Foreground="{ThemeResource GlanceNetworkIconBrush}"
                 Glyph="&#xE701;" />
         </Grid>
-        <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
-            <StackPanel Orientation="Horizontal" Spacing="4">
+        <Grid Grid.Column="1" VerticalAlignment="Center" ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
                 <FontIcon FontSize="10" Foreground="{ThemeResource GlanceNetworkDownloadBrush}" Glyph="&#xE74B;" />
-                <TextBlock x:Name="CompactText" Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.DownloadText, Mode=OneWay}" />
+                <TextBlock
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.DownloadText, Mode=OneWay}" />
             </StackPanel>
-            <StackPanel Orientation="Horizontal" Spacing="4">
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
                 <FontIcon FontSize="10" Foreground="{ThemeResource GlanceNetworkUploadBrush}" Glyph="&#xE74A;" />
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind ViewModel.UploadText, Mode=OneWay}" />
+                <TextBlock
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.UploadText, Mode=OneWay}" />
             </StackPanel>
-        </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>
