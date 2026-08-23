@@ -20,6 +20,8 @@ public interface IDesktopIslandPresentationController
 
     void LoadingModulesChanged();
 
+    void SelectedComponentChanged();
+
     void ContentRouteVisibilityChanged();
 
     void ModuleReorderVisibilityChanged();

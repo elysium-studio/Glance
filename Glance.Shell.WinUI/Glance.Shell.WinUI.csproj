@@ -151,6 +151,14 @@
               string entryName = Path.GetFullPath(file).Substring(sourceDirectoryPrefix.Length).Replace(Path.DirectorySeparatorChar, '/');
               archive.CreateEntryFromFile(file, entryName, CompressionLevel.Optimal);
             }
+
+            ZipArchiveEntry manifestEntry = archive.CreateEntry("module.json", CompressionLevel.Optimal);
+
+            using (StreamWriter writer = new StreamWriter(manifestEntry.Open()))
+            {
+              string packageId = Path.GetFileNameWithoutExtension(ArchivePath);
+              writer.Write($"{{\"schemaVersion\":1,\"id\":\"{packageId}\",\"version\":\"{PackageVersion}\",\"moduleApiVersion\":{ModuleApiVersion}}}");
+            }
           }
         }
       ]]>

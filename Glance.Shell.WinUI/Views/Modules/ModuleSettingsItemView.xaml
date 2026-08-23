@@ -32,18 +32,36 @@
                 AutomationProperties.Name="{x:Bind ViewModel.DisplayName}"
                 IsOn="{x:Bind ViewModel.IsEnabled, Mode=TwoWay}"
                 Visibility="{x:Bind ViewModel.CanToggle, Mode=OneWay}" />
-            <Button
-                x:Uid="InstallModuleButton"
-                MinWidth="132"
-                Click="HandleInstallClicked"
-                IsEnabled="{x:Bind ViewModel.CanInstall, Mode=OneWay}"
-                Visibility="{x:Bind ViewModel.ShowInstallAction, Mode=OneWay}" />
-            <Button
-                x:Uid="UpdateModuleButton"
-                MinWidth="132"
-                Click="HandleInstallClicked"
-                IsEnabled="{x:Bind ViewModel.CanUpdate, Mode=OneWay}"
-                Visibility="{x:Bind ViewModel.ShowUpdateAction, Mode=OneWay}" />
+            <Grid Visibility="{x:Bind ViewModel.ShowInstallAction, Mode=OneWay}">
+                <Button
+                    x:Uid="InstallModuleButton"
+                    MinWidth="132"
+                    Click="HandleInstallClicked"
+                    IsEnabled="{x:Bind ViewModel.CanInstall, Mode=OneWay}" />
+                <ProgressRing
+                    Width="16"
+                    Height="16"
+                    Margin="12,0,0,0"
+                    HorizontalAlignment="Left"
+                    IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}"
+                    IsHitTestVisible="False"
+                    Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+            </Grid>
+            <Grid Visibility="{x:Bind ViewModel.ShowUpdateAction, Mode=OneWay}">
+                <Button
+                    x:Uid="UpdateModuleButton"
+                    MinWidth="132"
+                    Click="HandleInstallClicked"
+                    IsEnabled="{x:Bind ViewModel.CanUpdate, Mode=OneWay}" />
+                <ProgressRing
+                    Width="16"
+                    Height="16"
+                    Margin="12,0,0,0"
+                    HorizontalAlignment="Left"
+                    IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}"
+                    IsHitTestVisible="False"
+                    Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+            </Grid>
             <Button
                 x:Name="UninstallButton"
                 x:Uid="UninstallModuleButton"

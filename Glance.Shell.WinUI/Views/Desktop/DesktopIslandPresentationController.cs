@@ -130,6 +130,8 @@ internal sealed class DesktopIslandPresentationController :
         });
     }
 
+    public void SelectedComponentChanged() => Host.BackgroundContent = ViewModel.IsLoadingModules || ViewModel.IsTransientPresentationActive || IsAssistantRequested || IsContentRouteRequested || IsModuleReorderRequested ? null : Host.GetModuleBackgroundContent();
+
     public void ContentRouteVisibilityChanged()
     {
         componentController.VisibilityChanged();

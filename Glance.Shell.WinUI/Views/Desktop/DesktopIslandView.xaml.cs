@@ -154,12 +154,7 @@ public sealed partial class DesktopIslandView :
         if (args.PropertyName == nameof(DesktopIslandViewModel.SelectedComponent))
         {
             componentController.SelectedComponentChanged();
-
-            if (presentationController.IsAssistantRequested || presentationController.IsContentRouteRequested || presentationController.IsModuleReorderRequested)
-            {
-                BackgroundContent = null;
-            }
-
+            presentationController.SelectedComponentChanged();
             return;
         }
 

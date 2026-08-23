@@ -8,11 +8,13 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
+using System.Text.Json;
 
 namespace Glance.Shell.WinUI;
 
 internal sealed record GlanceModuleLoadResult(string SourcePath,
     string ContentDirectory,
+    string? Version,
     IReadOnlyList<IGlanceModule> Modules);
 
 internal static partial class GlanceModuleLoader
@@ -178,7 +180,32 @@ internal static partial class GlanceModuleLoader
             modules.AddRange(LoadAssembly(path, throwOnFailure));
         }
 
-        return new GlanceModuleLoadResult(source.SourcePath, source.ContentDirectory, modules);
+        return new GlanceModuleLoadResult(source.SourcePath, source.ContentDirectory, ReadPackageVersion(source.ContentDirectory), modules);
+    }
+
+    private static string? ReadPackageVersion(string contentDirectory)
+    {
+        string manifestPath = Path.Combine(contentDirectory, "module.json");
+
+        if (!File.Exists(manifestPath))
+        {
+            return null;
+        }
+
+        try
+        {
+            using JsonDocument manifest = JsonDocument.Parse(File.ReadAllText(manifestPath));
+            string? version = manifest.RootElement.TryGetProperty("version", out JsonElement value) ? value.GetString() : null;
+            return Version.TryParse(version, out _) ? version : null;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+        catch (IOException)
+        {
+            return null;
+        }
     }
 
     private static IReadOnlyList<IGlanceModule> LoadAssembly(string path,
