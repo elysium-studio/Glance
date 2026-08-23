@@ -187,5 +187,15 @@
       "Refined module settings presentation, empty and single-module island states, and module category consistency.",
       "Improved module catalogue reliability while retaining offline feed fallback."
     ]
+  },
+  {
+    "version": "0.1.18-preview",
+    "date": "2026-08-23",
+    "releaseNotes": [
+      "Fixed downloaded modules failing to load in installed builds.",
+      "Corrected binary contract versioning between Glance and module packages.",
+      "Simplified module installation and removed legacy package discovery.",
+      "Consolidated installer and application data beneath the Glance application root."
+    ]
   }
 ]
