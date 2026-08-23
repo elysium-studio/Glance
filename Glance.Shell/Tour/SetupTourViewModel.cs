@@ -12,6 +12,11 @@ public sealed partial class SetupTourViewModel :
     private const int PageCount = 5;
 
     private readonly IGlanceModuleCategoryResolver categoryResolver;
+    private readonly IDispatcher dispatcher;
+    private readonly IGlanceModuleFeedService feed;
+    private readonly IGlanceModulePackageService packages;
+    private readonly ModuleInstallationService installations;
+    private readonly ITextLocalizer localizer;
     private readonly ILogger<SetupTourViewModel> logger;
     private readonly ModulePreferenceService preferences;
     private readonly IWritableOptions<GlanceSettings> writer;
@@ -49,26 +54,41 @@ public sealed partial class SetupTourViewModel :
     [NotifyPropertyChangedFor(nameof(ModulePosition))]
     private int selectedModuleIndex;
 
-    public SetupTourViewModel(GlanceSettings settings, ModulePreferenceService preferences, IWritableOptions<GlanceSettings> writer, IGlanceModuleCategoryResolver categoryResolver, ILogger<SetupTourViewModel> logger)
+    public SetupTourViewModel(GlanceSettings settings, ModulePreferenceService preferences, IWritableOptions<GlanceSettings> writer, IGlanceModuleCategoryResolver categoryResolver, IGlanceModuleFeedService feed, IGlanceModulePackageService packages, ModuleInstallationService installations, IDispatcher dispatcher, ITextLocalizer localizer, ILogger<SetupTourViewModel> logger)
     {
         this.preferences = preferences;
         this.writer = writer;
         this.categoryResolver = categoryResolver;
+        this.feed = feed;
+        this.packages = packages;
+        this.installations = installations;
+        this.dispatcher = dispatcher;
+        this.localizer = localizer;
         this.logger = logger;
         expansionMode = settings.ExpansionMode;
         autoHide = settings.AutoHide;
         placement = settings.Placement;
         Modules = [.. preferences.GetPreferences().Select(preference => CreateModule(preference, preferences))];
+        Categories = [];
+        RebuildCategories();
 
-        foreach (SetupTourModuleViewModel module in Modules)
-        {
-            module.PropertyChanged += HandleModulePropertyChanged;
-        }
+        preferences.ComponentsAdded += HandleComponentsAdded;
+        preferences.ComponentsRemoved += HandleComponentsRemoved;
+        feed.FeedChanged += HandleFeedChanged;
+        _ = RefreshFeedAsync();
     }
 
     public event EventHandler? Finished;
 
     public ObservableCollection<SetupTourModuleViewModel> Modules { get; }
+
+    public ObservableCollection<SetupTourModuleCategoryViewModel> Categories { get; }
+
+    [ObservableProperty]
+    private bool isModuleFeedStatusOpen;
+
+    [ObservableProperty]
+    private string moduleFeedStatusMessage = string.Empty;
 
     public int Count => PageCount;
 
@@ -177,16 +197,6 @@ public sealed partial class SetupTourViewModel :
 
         try
         {
-            foreach (SetupTourModuleViewModel module in Modules.Where(module => module.IsEnabled))
-            {
-                _ = await preferences.SetEnabledAsync(module.Id, true);
-            }
-
-            foreach (SetupTourModuleViewModel module in Modules.Where(module => !module.IsEnabled))
-            {
-                _ = await preferences.SetEnabledAsync(module.Id, false);
-            }
-
             await writer.WriteAsync(settings =>
             {
                 settings.ExpansionMode = ExpansionMode;
@@ -207,10 +217,10 @@ public sealed partial class SetupTourViewModel :
 
     public void Cancel()
     {
-        foreach (SetupTourModuleViewModel module in Modules)
-        {
-            module.PropertyChanged -= HandleModulePropertyChanged;
-        }
+        feed.FeedChanged -= HandleFeedChanged;
+        preferences.ComponentsAdded -= HandleComponentsAdded;
+        preferences.ComponentsRemoved -= HandleComponentsRemoved;
+
     }
 
     private SetupTourModuleViewModel CreateModule(GlanceModulePreference preference, ModulePreferenceService preferences)
@@ -220,36 +230,134 @@ public sealed partial class SetupTourViewModel :
         return new SetupTourModuleViewModel(preference.Id,
             component?.DisplayName ?? preference.Id,
             component?.Description ?? string.Empty,
+            category.Id,
             category.DisplayName,
+            category.Glyph,
+            category.Order,
             string.IsNullOrEmpty(component?.IconGlyph) ? category.Glyph : component.IconGlyph,
             component?.IconFontFamily ?? "Segoe Fluent Icons",
             component?.AccentResourceKey ?? "AccentTextFillColorPrimaryBrush",
             component?.CompactContent,
-            preference.IsEnabled);
+            component,
+            true,
+            dispatcher,
+            InstallModuleAsync,
+            RemoveModuleAsync);
     }
 
-    private async void HandleModulePropertyChanged(object? sender,
-        System.ComponentModel.PropertyChangedEventArgs args)
+    private SetupTourModuleViewModel CreateModule(GlanceModuleFeedItem module)
     {
-        if (args.PropertyName != nameof(SetupTourModuleViewModel.IsEnabled) ||
-            sender is not SetupTourModuleViewModel module)
+        GlanceModuleCategoryDescriptor category = categoryResolver.Resolve(module);
+        SetupTourModuleViewModel viewModel = new(module.Id,
+            module.DisplayName,
+            module.Description,
+            category.Id,
+            category.DisplayName,
+            category.Glyph,
+            category.Order,
+            module.Icon.Type == GlanceModuleIconType.Glyph ? module.Icon.Source : "\uE8B7",
+            string.IsNullOrWhiteSpace(module.Icon.FontFamily) ? "Segoe Fluent Icons" : module.Icon.FontFamily,
+            "AccentTextFillColorPrimaryBrush",
+            null,
+            null,
+            false,
+            dispatcher,
+            InstallModuleAsync,
+            RemoveModuleAsync);
+        viewModel.SetFeedItem(module, feed.IsSourceAvailable(module.FeedId));
+        return viewModel;
+    }
+
+    private async Task<bool> InstallModuleAsync(SetupTourModuleViewModel module)
+    {
+        if (module.FeedItem is null || !feed.IsSourceAvailable(module.FeedItem.FeedId))
         {
-            return;
+            return false;
         }
 
-        if (!Modules.Any(item => item.IsEnabled))
+        ModuleInstallResult result = await packages.InstallAsync(module.FeedItem);
+
+        if (result.IsSuccessful)
         {
-            module.IsEnabled = true;
-            return;
+            _ = await preferences.SetEnabledAsync(module.Id, true);
         }
 
+        return result.IsSuccessful;
+    }
+
+    private Task<bool> RemoveModuleAsync(SetupTourModuleViewModel module) => installations.UninstallAsync(module.Id);
+
+    private async Task RefreshFeedAsync()
+    {
         try
         {
-            _ = await preferences.SetEnabledAsync(module.Id, module.IsEnabled);
+            await feed.RefreshAsync();
         }
-        catch (Exception exception)
+        catch
         {
-            logger.LogError(exception, "Failed to apply the setup tour module choice for {ModuleId}", module.Id);
+            dispatcher.Dispatch(() =>
+            {
+                IsModuleFeedStatusOpen = true;
+                ModuleFeedStatusMessage = localizer.GetText("ModuleFeedsUnavailableMessage");
+            });
         }
     }
+
+    private void HandleFeedChanged(object? sender, EventArgs args) => dispatcher.Dispatch(SynchronizeModules);
+
+    private void HandleComponentsAdded(object? sender, GlanceComponentsAddedEventArgs args) => dispatcher.Dispatch(() =>
+    {
+        foreach (IGlanceComponent component in args.Components)
+        {
+            Modules.FirstOrDefault(module => string.Equals(module.Id, component.Id, StringComparison.OrdinalIgnoreCase))?.SetComponent(component);
+        }
+    });
+
+    private void HandleComponentsRemoved(object? sender, GlanceComponentsRemovedEventArgs args) => dispatcher.Dispatch(() =>
+    {
+        foreach (IGlanceComponent component in args.Components)
+        {
+            Modules.FirstOrDefault(module => string.Equals(module.Id, component.Id, StringComparison.OrdinalIgnoreCase))?.SetComponent(null);
+        }
+    });
+
+    private void SynchronizeModules()
+    {
+        bool hasUnavailableSources = feed.Sources.Any(source => !string.IsNullOrWhiteSpace(source.ErrorMessage));
+        IsModuleFeedStatusOpen = !feed.IsAvailable || hasUnavailableSources;
+        ModuleFeedStatusMessage = feed.IsAvailable && hasUnavailableSources
+            ? localizer.GetText("ModuleFeedsPartiallyUnavailableMessage")
+            : feed.IsUsingCache
+                ? localizer.GetText("ModuleFeedsCachedMessage")
+                : localizer.GetText("ModuleFeedsUnavailableMessage");
+
+        foreach (GlanceModuleFeedItem feedItem in feed.Modules.Where(module => !module.IsDelisted && module.IsVisible))
+        {
+            SetupTourModuleViewModel? module = Modules.FirstOrDefault(module => string.Equals(module.Id, feedItem.Id, StringComparison.OrdinalIgnoreCase));
+
+            if (module is null)
+            {
+                Modules.Add(CreateModule(feedItem));
+                continue;
+            }
+
+            module.SetFeedItem(feedItem, feed.IsSourceAvailable(feedItem.FeedId));
+        }
+
+        RebuildCategories();
+    }
+
+    private void RebuildCategories()
+    {
+        Categories.Clear();
+
+        foreach (IGrouping<string, SetupTourModuleViewModel> group in Modules.OrderBy(module => module.CategoryOrder).ThenBy(module => module.DisplayName).GroupBy(module => module.CategoryId, StringComparer.OrdinalIgnoreCase))
+        {
+            SetupTourModuleViewModel first = group.First();
+            Categories.Add(new SetupTourModuleCategoryViewModel(first.CategoryId, first.CategoryDisplayName, first.CategoryGlyph, first.CategoryOrder, group));
+        }
+
+        OnPropertyChanged(nameof(ModulePosition));
+    }
+
 }

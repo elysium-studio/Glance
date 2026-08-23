@@ -89,47 +89,10 @@ jobs:
             }
           }
 
-          $requiredModules = @(
-            "AudioSwitcher",
-            "Clipboard",
-            "ColorPicker",
-            "DevicePresence",
-            "DropShelf",
-            "FocusSession",
-            "Infinity",
-            "KeepAwake",
-            "Media",
-            "Power",
-            "Presence",
-            "PrivacyControls",
-            "RemovableDevices",
-            "ScreenCapture",
-            "Stopwatch",
-            "SystemMonitor",
-            "Timer",
-            "VoiceNotes"
-          )
+          if (Test-Path -LiteralPath "artifacts/release/Modules") {
+            $bundledModules = @(Get-ChildItem "artifacts/release/Modules" -Force)
 
-          foreach ($module in $requiredModules) {
-            $modulePath = "artifacts/release/Modules/$module.glance"
-
-            if (-not (Test-Path -LiteralPath $modulePath -PathType Leaf)) {
-              throw "Managed publish did not include Modules/$module.glance"
+            if ($bundledModules.Count -gt 0) {
+              throw "The application release contains independently distributed modules: $($bundledModules.Name -join ', ')"
             }
-          }
-
-          $flattenedModules = @(
-            foreach ($module in $requiredModules) {
-              Get-ChildItem "artifacts/release" -File | Where-Object { $_.Name -match "^Glance\.$module\.WinUI\.(dll|pri)$" }
-            }
-          )
-
-          if ($flattenedModules.Count -gt 0) {
-            throw "Module files were left in the application root: $($flattenedModules.Name -join ', ')"
-          }
-
-          $expandedModules = @(Get-ChildItem "artifacts/release/Modules" -Directory)
-
-          if ($expandedModules.Count -gt 0) {
-            throw "Expanded module directories were left in the release: $($expandedModules.Name -join ', ')"
           }

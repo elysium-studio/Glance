@@ -21,6 +21,15 @@ public sealed class GlanceModuleCategoryResolver(ITextLocalizer localizer) :
         return Resolve(component?.SettingsCategory ?? GlanceModuleCategories.Other);
     }
 
+    public GlanceModuleCategoryDescriptor Resolve(GlanceModuleFeedItem module)
+    {
+        GlanceModuleCategoryDescriptor descriptor = Resolve(module.Category);
+        string displayName = string.IsNullOrWhiteSpace(module.CategoryDisplayName) ? descriptor.DisplayName : module.CategoryDisplayName;
+        string glyph = string.IsNullOrWhiteSpace(module.CategoryGlyph) ? descriptor.Glyph : module.CategoryGlyph;
+        int order = module.CategoryOrder == 0 ? descriptor.Order : module.CategoryOrder;
+        return new(module.Category, displayName, glyph, order);
+    }
+
     private GlanceModuleCategoryDescriptor Resolve(string id) => id switch
     {
         GlanceModuleCategories.Information => new(id, localizer.GetText("InformationModulesTitle"), "\uE946", 100),
