@@ -215,5 +215,14 @@
       "Refined speech setup, module management, and the update workflow for the stable release.",
       "Includes the signed installer, full package, and automatic delta update from the latest preview."
     ]
+  },
+  {
+    "version": "1.0.1",
+    "date": "2026-08-24",
+    "releaseNotes": [
+      "Refined module attention so background reminders no longer briefly expand the island.",
+      "Improved compact System Monitor and Network layouts so live values remain stable and readable.",
+      "Includes the latest signed installer, full package, and automatic delta update."
+    ]
   }
 ]
