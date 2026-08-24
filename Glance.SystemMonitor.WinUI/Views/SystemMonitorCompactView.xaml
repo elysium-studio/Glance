@@ -65,63 +65,53 @@
                 Foreground="{ThemeResource GlanceSystemIconBrush}"
                 Glyph="&#xEEA1;" />
         </Grid>
-        <Grid Grid.Column="1" VerticalAlignment="Center" ColumnSpacing="8">
+        <Grid Grid.Column="1" VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <Grid Margin="0,0,4,0" VerticalAlignment="Center" ColumnSpacing="4">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
                 <TextBlock
                     x:Uid="CpuLabel"
                     FontWeight="SemiBold"
                     Foreground="{ThemeResource GlanceSystemCpuGraphBrush}"
+                    TextWrapping="NoWrap"
                     Style="{StaticResource CaptionTextBlockStyle}" />
                 <TextBlock
-                    Grid.Column="1"
-                    HorizontalAlignment="Right"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Style="{StaticResource CaptionTextBlockStyle}"
-                    Text="{x:Bind ViewModel.CpuText, Mode=OneWay}" />
-            </Grid>
-            <Grid Grid.Column="1" Margin="2,0" VerticalAlignment="Center" ColumnSpacing="4">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+                    Text="{x:Bind ViewModel.CpuText, Mode=OneWay}"
+                    TextWrapping="NoWrap" />
+            </StackPanel>
+            <StackPanel Grid.Column="2" VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
                 <TextBlock
                     x:Uid="RamLabel"
                     FontWeight="SemiBold"
                     Foreground="{ThemeResource GlanceSystemMemoryGraphBrush}"
+                    TextWrapping="NoWrap"
                     Style="{StaticResource CaptionTextBlockStyle}" />
                 <TextBlock
-                    Grid.Column="1"
-                    HorizontalAlignment="Right"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Style="{StaticResource CaptionTextBlockStyle}"
-                    Text="{x:Bind ViewModel.MemoryText, Mode=OneWay}" />
-            </Grid>
-            <Grid Grid.Column="2" Margin="4,0,0,0" VerticalAlignment="Center" ColumnSpacing="4">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+                    Text="{x:Bind ViewModel.MemoryText, Mode=OneWay}"
+                    TextWrapping="NoWrap" />
+            </StackPanel>
+            <StackPanel Grid.Column="4" VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
                 <TextBlock
                     x:Uid="GpuLabel"
                     FontWeight="SemiBold"
                     Foreground="{ThemeResource GlanceSystemGpuGraphBrush}"
+                    TextWrapping="NoWrap"
                     Style="{StaticResource CaptionTextBlockStyle}" />
                 <TextBlock
-                    Grid.Column="1"
-                    HorizontalAlignment="Right"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Style="{StaticResource CaptionTextBlockStyle}"
-                    Text="{x:Bind ViewModel.GpuText, Mode=OneWay}" />
-            </Grid>
+                    Text="{x:Bind ViewModel.GpuText, Mode=OneWay}"
+                    TextWrapping="NoWrap" />
+            </StackPanel>
         </Grid>
     </Grid>
 </UserControl>
