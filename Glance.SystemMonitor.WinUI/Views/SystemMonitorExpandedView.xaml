@@ -48,7 +48,7 @@
                         Spacing="1"
                         Visibility="{x:Bind WhenShowingCharts(ShowPerformanceCharts), Mode=OneWay}">
                         <TextBlock
-                            x:Uid="ProcessorLabel"
+                            x:Uid="CpuLabel"
                             FontWeight="SemiBold"
                             Foreground="{ThemeResource GlanceSystemCpuGraphBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}" />
@@ -60,7 +60,7 @@
                         Spacing="3"
                         Visibility="{x:Bind WhenHidingCharts(ShowPerformanceCharts), Mode=OneWay}">
                         <TextBlock
-                            x:Uid="ProcessorLabel"
+                            x:Uid="CpuLabel"
                             FontWeight="SemiBold"
                             Foreground="{ThemeResource GlanceSystemCpuGraphBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}" />
@@ -90,7 +90,7 @@
                         Spacing="1"
                         Visibility="{x:Bind WhenShowingCharts(ShowPerformanceCharts), Mode=OneWay}">
                         <TextBlock
-                            x:Uid="MemoryLabel"
+                            x:Uid="RamLabel"
                             FontWeight="SemiBold"
                             Foreground="{ThemeResource GlanceSystemMemoryGraphBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}" />
@@ -102,7 +102,7 @@
                         Spacing="3"
                         Visibility="{x:Bind WhenHidingCharts(ShowPerformanceCharts), Mode=OneWay}">
                         <TextBlock
-                            x:Uid="MemoryLabel"
+                            x:Uid="RamLabel"
                             FontWeight="SemiBold"
                             Foreground="{ThemeResource GlanceSystemMemoryGraphBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}" />
