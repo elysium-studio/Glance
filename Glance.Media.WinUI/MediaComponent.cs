@@ -558,7 +558,7 @@ public sealed partial class MediaComponent :
                     if (currentTitle is not null &&
                         !string.Equals(currentTitle, title, StringComparison.Ordinal))
                     {
-                        attentionService.RequestAttention(Id, GlanceAttentionLevel.Passive, expand: false);
+                        attentionService.RequestAttention(Id, GlanceAttentionLevel.Passive);
                     }
 
                     currentTitle = title;

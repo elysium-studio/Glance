@@ -83,7 +83,7 @@ public sealed class InfinityMessageHandler(InfinityViewModel viewModel, Infinity
 
             if (shouldRequestAttention)
             {
-                dispatcher.Dispatch(() => attentionService.RequestAttention(ComponentId, expand: false));
+                dispatcher.Dispatch(() => attentionService.RequestAttention(ComponentId));
             }
         });
 

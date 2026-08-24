@@ -62,24 +62,27 @@
                 Foreground="{ThemeResource GlanceNetworkIconBrush}"
                 Glyph="&#xE701;" />
         </Grid>
-        <Grid Grid.Column="1" VerticalAlignment="Center" ColumnSpacing="8">
+        <Grid Grid.Column="1" VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
                 <FontIcon FontSize="10" Foreground="{ThemeResource GlanceNetworkDownloadBrush}" Glyph="&#xE74B;" />
                 <TextBlock
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Style="{StaticResource CaptionTextBlockStyle}"
-                    Text="{x:Bind ViewModel.DownloadText, Mode=OneWay}" />
+                    Text="{x:Bind ViewModel.DownloadText, Mode=OneWay}"
+                    TextWrapping="NoWrap" />
             </StackPanel>
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
+            <StackPanel Grid.Column="2" VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
                 <FontIcon FontSize="10" Foreground="{ThemeResource GlanceNetworkUploadBrush}" Glyph="&#xE74A;" />
                 <TextBlock
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Style="{StaticResource CaptionTextBlockStyle}"
-                    Text="{x:Bind ViewModel.UploadText, Mode=OneWay}" />
+                    Text="{x:Bind ViewModel.UploadText, Mode=OneWay}"
+                    TextWrapping="NoWrap" />
             </StackPanel>
         </Grid>
     </Grid>

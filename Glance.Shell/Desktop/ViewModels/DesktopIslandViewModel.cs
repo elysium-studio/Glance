@@ -669,13 +669,6 @@ public sealed partial class DesktopIslandViewModel :
             return;
         }
 
-        bool isAlreadyPresented = SelectedIndex == componentIndex && IsOpen && (!request.Expand || IsExpanded);
-
-        if (isAlreadyPresented)
-        {
-            return;
-        }
-
         if (request.Level != GlanceAttentionLevel.Passive)
         {
             IGlanceComponent attentionComponent = components[componentIndex];
@@ -723,7 +716,7 @@ public sealed partial class DesktopIslandViewModel :
                                                                                                     SelectedIndex = componentIndex;
                                                                                                     IsOpen = true;
                                                                                                     IsExpanded = true;
-                                                                                                    AttentionReceived?.Invoke(this, new GlanceAttentionRequest(args.TargetComponentId));
+                                                                                                    AttentionReceived?.Invoke(this, new GlanceAttentionRequest(args.TargetComponentId, Expand: true));
                                                                                                 });
 
     private void HandleActionPresentationRequested(object? sender, GlanceActionPresentationRequestedEventArgs args) => dispatcher.Dispatch(() =>
@@ -742,7 +735,7 @@ public sealed partial class DesktopIslandViewModel :
                                                                                                                                 SelectedIndex = componentIndex;
                                                                                                                                 IsOpen = true;
                                                                                                                                 IsExpanded = IsExpanded || args.Presentation == GlanceActionPresentation.Expanded || IsPinned;
-                                                                                                                                AttentionReceived?.Invoke(this, new GlanceAttentionRequest(args.TargetComponentId));
+                                                                                                                                AttentionReceived?.Invoke(this, new GlanceAttentionRequest(args.TargetComponentId, Expand: args.Presentation == GlanceActionPresentation.Expanded));
                                                                                                                             });
 
     private int FindContextComponentIndex(GlanceContentContext context) => components

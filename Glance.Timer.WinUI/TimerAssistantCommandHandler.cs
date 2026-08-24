@@ -30,7 +30,7 @@ public sealed partial class TimerAssistantCommandHandler(TimerViewModel viewMode
         };
 
         viewModel.Start(duration);
-        attentionService.RequestAttention("Timer", expand: false);
+        attentionService.RequestAttention("Timer");
         return Task.FromResult(new GlanceAssistantCommandResult(true, $"Timer set for {FormatDuration(duration)}"));
     }
 

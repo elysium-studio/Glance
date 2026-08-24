@@ -26,10 +26,51 @@ public sealed class GlanceAttentionServiceTests
         service.AttentionRequested += (_, value) => request = value;
         service.CompleteStartup();
 
-        service.RequestAttention("Timer", GlanceAttentionLevel.Critical, expand: false);
+        service.RequestAttention("Timer", GlanceAttentionLevel.Critical);
 
         Assert.Equal("Timer", request?.ComponentId);
         Assert.Equal(GlanceAttentionLevel.Critical, request?.Level);
+        Assert.False(request?.Expand);
+    }
+
+    [Fact]
+    public void RequestAttention_DefaultsToCompactPresentation()
+    {
+        GlanceAttentionService service = new();
+        GlanceAttentionRequest? request = null;
+        service.AttentionRequested += (_, value) => request = value;
+        service.CompleteStartup();
+
+        service.RequestAttention("Hydration", GlanceAttentionLevel.Critical);
+
+        Assert.Equal("Hydration", request?.ComponentId);
+        Assert.Equal(GlanceAttentionLevel.Critical, request?.Level);
+        Assert.False(request?.Expand);
+    }
+
+    [Fact]
+    public void RequestExpandedAttention_UsesExpandedPresentation()
+    {
+        GlanceAttentionService service = new();
+        GlanceAttentionRequest? request = null;
+        service.AttentionRequested += (_, value) => request = value;
+        service.CompleteStartup();
+
+        service.RequestExpandedAttention("Interactive");
+
+        Assert.True(request?.Expand);
+    }
+
+    [Fact]
+    public void LegacyExpandedAttention_UsesCompactPresentation()
+    {
+        GlanceAttentionService service = new();
+        GlanceAttentionRequest? request = null;
+        service.AttentionRequested += (_, value) => request = value;
+        service.CompleteStartup();
+
+        service.RequestAttention("Hydration", GlanceAttentionLevel.Default, true);
+
         Assert.False(request?.Expand);
     }
 

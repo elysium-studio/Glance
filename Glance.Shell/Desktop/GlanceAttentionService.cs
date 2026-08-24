@@ -12,8 +12,14 @@ public sealed class GlanceAttentionService :
     public void CompleteStartup() => isStartupComplete = true;
 
     public void RequestAttention(string componentId,
-        GlanceAttentionLevel level = GlanceAttentionLevel.Default,
-        bool expand = true)
+        GlanceAttentionLevel level = GlanceAttentionLevel.Default) => Publish(componentId, level, false);
+
+    public void RequestAttention(string componentId, GlanceAttentionLevel level, bool expand) => Publish(componentId, level, false);
+
+    public void RequestExpandedAttention(string componentId,
+        GlanceAttentionLevel level = GlanceAttentionLevel.Default) => Publish(componentId, level, true);
+
+    private void Publish(string componentId, GlanceAttentionLevel level, bool expand)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(componentId);
 
