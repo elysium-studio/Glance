@@ -68,7 +68,13 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
-                <FontIcon FontSize="10" Foreground="{ThemeResource GlanceNetworkDownloadBrush}" Glyph="&#xE74B;" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontFamily="Segoe UI Variable Text"
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource GlanceNetworkDownloadBrush}"
+                    Text="&#x2193;" />
                 <TextBlock
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Style="{StaticResource CaptionTextBlockStyle}"
@@ -76,7 +82,13 @@
                     TextWrapping="NoWrap" />
             </StackPanel>
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
-                <FontIcon FontSize="10" Foreground="{ThemeResource GlanceNetworkUploadBrush}" Glyph="&#xE74A;" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontFamily="Segoe UI Variable Text"
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource GlanceNetworkUploadBrush}"
+                    Text="&#x2191;" />
                 <TextBlock
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Style="{StaticResource CaptionTextBlockStyle}"

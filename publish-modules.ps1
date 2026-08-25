@@ -260,6 +260,7 @@ catch
 }
 
 $artifactRoot = Join-Path $PSScriptRoot "artifacts\module-feed"
+$moduleBuildRoot = Join-Path $artifactRoot "build"
 $packageRoot = Join-Path $artifactRoot "packages"
 $iconRoot = Join-Path $artifactRoot "icons"
 
@@ -269,11 +270,11 @@ if (Test-Path $artifactRoot)
 }
 
 [void](New-Item $packageRoot -ItemType Directory -Force)
-$moduleOutput = Join-Path $PSScriptRoot "Glance.Shell.WinUI\bin\x64\Release\net11.0-windows10.0.26100.0\win-x64\Modules"
+$moduleOutput = Join-Path $moduleBuildRoot "bin\Glance.Shell.WinUI\release_win-x64\Modules"
 
 foreach ($versionGroup in $selectedModules | Group-Object version)
 {
-    dotnet build (Join-Path $PSScriptRoot "Glance.Shell.WinUI\Glance.Shell.WinUI.csproj") --configuration Release --property:Platform=x64 --property:GlanceModuleVersion=$($versionGroup.Name) --warnaserror
+    dotnet build (Join-Path $PSScriptRoot "Glance.Shell.WinUI\Glance.Shell.WinUI.csproj") --configuration Release --artifacts-path $moduleBuildRoot --property:Platform=x64 --property:GlanceModuleVersion=$($versionGroup.Name) --warnaserror
 
     if ($LASTEXITCODE -ne 0)
     {
