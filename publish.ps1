@@ -1109,7 +1109,7 @@ if (-not $Local -and
 
 Write-Host ""
 Write-Host "Publishing Glance v$Version" -ForegroundColor Cyan
-& dotnet publish $ProjectPath -c Release -r win-x64 -o $OutputPath `
+& dotnet publish $ProjectPath -c Release -r win-x64 -o $OutputPath --artifacts-path "$publishRootPath\Build" `
     "-p:Platform=x64" `
     "-p:SelfContained=true" `
     "-p:PublishAot=false" `
