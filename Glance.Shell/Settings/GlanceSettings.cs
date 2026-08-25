@@ -20,6 +20,8 @@ public sealed class GlanceSettings
 
     public GlancePlacement Placement { get; set; } = GlancePlacement.Top;
 
+    public string? SelectedModuleId { get; set; }
+
     public bool IsAssistantEnabled { get; set; }
 
     public bool ShowSetupOnStartup { get; set; } = true;

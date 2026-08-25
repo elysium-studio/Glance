@@ -54,6 +54,8 @@ public sealed partial class DesktopIslandViewModel :
     private string? attentionPresentedComponentId;
     private string? attentionPreviousComponentId;
     private bool isContentRouting;
+    private bool isRestoringSelectedModule;
+    private bool isSelectedModuleSaveActive;
     private bool isSelectingAttentionComponent;
     private bool isSavingModuleOrder;
     private readonly IGlanceAttentionService attentionService;
@@ -62,7 +64,10 @@ public sealed partial class DesktopIslandViewModel :
     private readonly ILogger<DesktopIslandViewModel> logger;
     private readonly ModulePreferenceService modulePreferences;
     private readonly INavigator navigator;
+    private readonly object selectedModuleSaveLock = new();
     private readonly IWritableOptions<GlanceSettings> settingsWriter;
+    private string? pendingSelectedModuleId;
+    private string? savedSelectedModuleId;
     private readonly HashSet<IGlanceTransientComponent> transientComponents = [];
     private bool transientExpansionLocked;
     private bool transientPreviousExpanded;
@@ -86,8 +91,6 @@ public sealed partial class DesktopIslandViewModel :
     {
         this.dispatcher = dispatcher;
         this.modulePreferences = modulePreferences;
-        components = modulePreferences.GetActiveComponents();
-        SelectedIndex = 0;
         this.attentionService = attentionService;
         Assistant = assistant;
         this.actionService = actionService;
@@ -95,6 +98,14 @@ public sealed partial class DesktopIslandViewModel :
         this.navigator = navigator;
         this.logger = logger;
         this.settingsWriter = settingsWriter;
+        components = modulePreferences.GetActiveComponents();
+        savedSelectedModuleId = settings.SelectedModuleId;
+        int restoredSelectedIndex = settings.SelectedModuleId is null
+            ? -1
+            : FindComponentIndex(settings.SelectedModuleId);
+        isRestoringSelectedModule = true;
+        SelectedIndex = restoredSelectedIndex >= 0 ? restoredSelectedIndex : 0;
+        isRestoringSelectedModule = false;
         AutoHide = settings.AutoHide;
         ExpansionMode = settings.ExpansionMode;
         DisplayLocation = settings.DisplayLocation;
@@ -150,6 +161,11 @@ public sealed partial class DesktopIslandViewModel :
 
             OnPropertyChanged(nameof(SelectedComponent));
             OnPropertyChanged(nameof(PageText));
+
+            if (!isSelectingAttentionComponent && !isRestoringSelectedModule)
+            {
+                QueueSelectedModulePersistence();
+            }
         }
     }
 
@@ -438,6 +454,7 @@ public sealed partial class DesktopIslandViewModel :
     public void Receive(OptionsChangedEventArgs<GlanceSettings> message) => dispatcher.Dispatch(() =>
     {
         bool restoreExpansionState = AutoHide && !message.Options.AutoHide;
+        savedSelectedModuleId = message.Options.SelectedModuleId;
         ExpansionMode = message.Options.ExpansionMode;
         AutoHide = message.Options.AutoHide;
         DisplayLocation = message.Options.DisplayLocation;
@@ -547,6 +564,74 @@ public sealed partial class DesktopIslandViewModel :
         OnPropertyChanged(nameof(HasMultipleComponents));
         OnPropertyChanged(nameof(ComponentCount));
         OnPropertyChanged(nameof(PageText));
+
+        if (attentionPresentedComponentId is null)
+        {
+            QueueSelectedModulePersistence();
+        }
+    }
+
+    private void QueueSelectedModulePersistence()
+    {
+        string? selectedModuleId = SelectedComponent?.Id;
+
+        if (selectedModuleId is null)
+        {
+            return;
+        }
+
+        lock (selectedModuleSaveLock)
+        {
+            if (!isSelectedModuleSaveActive &&
+                string.Equals(selectedModuleId, savedSelectedModuleId, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            pendingSelectedModuleId = selectedModuleId;
+
+            if (isSelectedModuleSaveActive)
+            {
+                return;
+            }
+
+            isSelectedModuleSaveActive = true;
+        }
+
+        _ = PersistSelectedModuleAsync();
+    }
+
+    private async Task PersistSelectedModuleAsync()
+    {
+        while (true)
+        {
+            string? selectedModuleId;
+
+            lock (selectedModuleSaveLock)
+            {
+                selectedModuleId = pendingSelectedModuleId;
+                pendingSelectedModuleId = null;
+
+                if (selectedModuleId is null)
+                {
+                    isSelectedModuleSaveActive = false;
+                    return;
+                }
+            }
+
+            try
+            {
+                if (!string.Equals(selectedModuleId, savedSelectedModuleId, StringComparison.OrdinalIgnoreCase))
+                {
+                    await settingsWriter.WriteAsync(settings => settings.SelectedModuleId = selectedModuleId);
+                    savedSelectedModuleId = selectedModuleId;
+                }
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, "Failed to save the selected Glance module");
+            }
+        }
     }
 
     private void TrackTransientComponents(IEnumerable<IGlanceTransientComponent> components)

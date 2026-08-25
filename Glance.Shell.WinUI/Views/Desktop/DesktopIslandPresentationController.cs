@@ -20,6 +20,7 @@ internal sealed class DesktopIslandPresentationController :
     private const int AttentionExpansionDurationMs = 4000;
     private const int ModuleLoadingCrossFadeDurationMs = 360;
     private const int StartupAttentionDelayMs = 2500;
+    private const float ExpandedIslandCornerRadius = 28;
 
     private readonly IDesktopIslandComponentController componentController;
     private readonly IDesktopIslandDropController dropController;
@@ -29,6 +30,8 @@ internal sealed class DesktopIslandPresentationController :
     private DispatcherQueueTimer? startupAttentionTimer;
     private RectangleGeometry? contentRouteClip;
     private FrameworkElement? contentRouteClipHost;
+    private CompositionGeometricClip? contentRouteCompositionClip;
+    private Visual? contentRouteClipVisual;
     private int assistantPresentationTransition;
     private int contentRoutePresentationTransition;
     private int moduleLoadingTransition;
@@ -255,7 +258,7 @@ internal sealed class DesktopIslandPresentationController :
             return;
         }
 
-        FluentMotion.PlayTransientPushTransition(outgoing, incoming, showTransient, () => CompleteTransientPresentationTransition(transition, showTransient));
+        FluentMotion.PlayTransientCrossFadeTransition(outgoing, incoming, () => CompleteTransientPresentationTransition(transition, showTransient));
     }
 
     private void CompleteTransientPresentationTransition(int transition, bool showTransient)
@@ -424,9 +427,6 @@ internal sealed class DesktopIslandPresentationController :
         {
             StartAttentionExpansionTimer();
         }
-
-        FrameworkElement presenter = ViewModel.IsExpanded ? Host.ExpandedPresenter : Host.CompactPresenter;
-        FluentMotion.PlayPulse(presenter);
     });
 
     private void HandleWakeWordDetected(object? sender, EventArgs args) => _ = DispatcherQueue.TryEnqueue(() =>
@@ -781,6 +781,15 @@ internal sealed class DesktopIslandPresentationController :
             Rect = new Windows.Foundation.Rect(horizontalInset, verticalInset, Host.ExpandedContentHost.ActualWidth, Host.ExpandedContentHost.ActualHeight)
         };
         contentRouteClipHost.Clip = contentRouteClip;
+
+        contentRouteClipVisual = ElementCompositionPreview.GetElementVisual(clipHost);
+        Compositor compositor = contentRouteClipVisual.Compositor;
+        CompositionRoundedRectangleGeometry roundedRectangle = compositor.CreateRoundedRectangleGeometry();
+        roundedRectangle.Offset = new Vector2((float)horizontalInset, (float)verticalInset);
+        roundedRectangle.Size = new Vector2((float)Host.ExpandedContentHost.ActualWidth, (float)Host.ExpandedContentHost.ActualHeight);
+        roundedRectangle.CornerRadius = new Vector2(ExpandedIslandCornerRadius);
+        contentRouteCompositionClip = compositor.CreateGeometricClip(roundedRectangle);
+        contentRouteClipVisual.Clip = contentRouteCompositionClip;
     }
 
     private void ClearContentRouteClip()
@@ -790,8 +799,15 @@ internal sealed class DesktopIslandPresentationController :
             contentRouteClipHost.Clip = null;
         }
 
+        if (contentRouteClipVisual is not null && ReferenceEquals(contentRouteClipVisual.Clip, contentRouteCompositionClip))
+        {
+            contentRouteClipVisual.Clip = null;
+        }
+
         contentRouteClip = null;
         contentRouteClipHost = null;
+        contentRouteCompositionClip = null;
+        contentRouteClipVisual = null;
     }
 
     private void ShowModuleReorderPresentation()

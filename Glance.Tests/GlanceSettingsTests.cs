@@ -29,6 +29,7 @@ public sealed class GlanceSettingsTests
             AutoHide = true,
             ExpansionMode = GlanceExpansionMode.ExpandOnClick,
             Placement = GlancePlacement.Bottom,
+            SelectedModuleId = "WorldClock",
             TranscriptionModelId = "nemotron-3.5-asr-streaming-0.6b",
             ShowSetupOnStartup = false,
             StartWithWindows = false,
@@ -66,6 +67,7 @@ public sealed class GlanceSettingsTests
         Assert.True(result.AutoHide);
         Assert.Equal(GlanceExpansionMode.ExpandOnClick, result.ExpansionMode);
         Assert.Equal(GlancePlacement.Bottom, result.Placement);
+        Assert.Equal("WorldClock", result.SelectedModuleId);
         Assert.Equal("nemotron-3.5-asr-streaming-0.6b", result.TranscriptionModelId);
         Assert.False(result.ShowSetupOnStartup);
         Assert.False(result.StartWithWindows);

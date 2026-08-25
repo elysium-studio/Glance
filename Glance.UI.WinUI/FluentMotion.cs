@@ -12,12 +12,11 @@ public static class FluentMotion
     private static readonly TimeSpan ButtonReleaseDuration = TimeSpan.FromMilliseconds(160);
     private static readonly TimeSpan ContentTransitionDuration = TimeSpan.FromMilliseconds(240);
     private static readonly TimeSpan EntranceDuration = TimeSpan.FromMilliseconds(240);
-    private static readonly TimeSpan PulseDuration = TimeSpan.FromMilliseconds(320);
     private static readonly TimeSpan RoutePushDuration = TimeSpan.FromMilliseconds(280);
     private static readonly TimeSpan RouteTargetHoverDuration = TimeSpan.FromMilliseconds(140);
     private static readonly TimeSpan RouteTargetReleaseDuration = TimeSpan.FromMilliseconds(180);
     private static readonly TimeSpan SemanticZoomDuration = TimeSpan.FromMilliseconds(340);
-    private static readonly TimeSpan TransientPushDuration = TimeSpan.FromMilliseconds(250);
+    private static readonly TimeSpan TransientCrossFadeDuration = TimeSpan.FromMilliseconds(160);
 
     public static void PlayButtonPress(FrameworkElement element) => PlayScale(element, 0.94f, ButtonPressDuration);
 
@@ -45,22 +44,6 @@ public static class FluentMotion
 
         visual.StartAnimation(nameof(Visual.Opacity), opacity);
         visual.StartAnimation("Translation.Y", translation);
-    }
-
-    public static void PlayPulse(FrameworkElement element)
-    {
-        Visual visual = ElementCompositionPreview.GetElementVisual(element);
-        Compositor compositor = visual.Compositor;
-
-        visual.CenterPoint = new Vector3((float)element.ActualWidth / 2, (float)element.ActualHeight / 2, 0);
-
-        Vector3KeyFrameAnimation animation = compositor.CreateVector3KeyFrameAnimation();
-        animation.InsertKeyFrame(0, Vector3.One);
-        animation.InsertKeyFrame(0.45f, new Vector3(1.14f, 1.14f, 1), CreateEasing(compositor));
-        animation.InsertKeyFrame(1, Vector3.One, CreateEasing(compositor));
-        animation.Duration = PulseDuration;
-
-        visual.StartAnimation(nameof(Visual.Scale), animation);
     }
 
     public static void PlayZoomEntrance(FrameworkElement element,
@@ -306,9 +289,8 @@ public static class FluentMotion
         batch.End();
     }
 
-    public static void PlayTransientPushTransition(FrameworkElement outgoing,
+    public static void PlayTransientCrossFadeTransition(FrameworkElement outgoing,
         FrameworkElement incoming,
-        bool showingTransient,
         Action completed)
     {
         ElementCompositionPreview.SetIsTranslationEnabled(outgoing, true);
@@ -317,35 +299,31 @@ public static class FluentMotion
         Visual outgoingVisual = ElementCompositionPreview.GetElementVisual(outgoing);
         Visual incomingVisual = ElementCompositionPreview.GetElementVisual(incoming);
         Compositor compositor = outgoingVisual.Compositor;
-        CubicBezierEasingFunction easing = compositor.CreateCubicBezierEasingFunction(Vector2.Zero,
-            new Vector2(0, 1));
-        float distance = (float)Math.Max(outgoing.ActualHeight, incoming.ActualHeight);
-        float outgoingOffset = showingTransient ? distance : -distance;
-        float incomingOffset = -outgoingOffset;
+        CubicBezierEasingFunction easing = CreateEasing(compositor);
 
         outgoingVisual.StopAnimation(nameof(Visual.Opacity));
         incomingVisual.StopAnimation(nameof(Visual.Opacity));
         outgoingVisual.StopAnimation("Translation.Y");
         incomingVisual.StopAnimation("Translation.Y");
         outgoingVisual.Opacity = 1;
-        incomingVisual.Opacity = 1;
+        incomingVisual.Opacity = 0;
         outgoingVisual.Properties.InsertVector3("Translation", Vector3.Zero);
-        incomingVisual.Properties.InsertVector3("Translation", new Vector3(0, incomingOffset, 0));
+        incomingVisual.Properties.InsertVector3("Translation", Vector3.Zero);
 
         CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
 
-        ScalarKeyFrameAnimation outgoingTranslation = compositor.CreateScalarKeyFrameAnimation();
-        outgoingTranslation.InsertKeyFrame(0, 0);
-        outgoingTranslation.InsertKeyFrame(1, outgoingOffset, easing);
-        outgoingTranslation.Duration = TransientPushDuration;
+        ScalarKeyFrameAnimation outgoingOpacity = compositor.CreateScalarKeyFrameAnimation();
+        outgoingOpacity.InsertKeyFrame(0, 1);
+        outgoingOpacity.InsertKeyFrame(1, 0, easing);
+        outgoingOpacity.Duration = TransientCrossFadeDuration;
 
-        ScalarKeyFrameAnimation incomingTranslation = compositor.CreateScalarKeyFrameAnimation();
-        incomingTranslation.InsertKeyFrame(0, incomingOffset);
-        incomingTranslation.InsertKeyFrame(1, 0, easing);
-        incomingTranslation.Duration = TransientPushDuration;
+        ScalarKeyFrameAnimation incomingOpacity = compositor.CreateScalarKeyFrameAnimation();
+        incomingOpacity.InsertKeyFrame(0, 0);
+        incomingOpacity.InsertKeyFrame(1, 1, easing);
+        incomingOpacity.Duration = TransientCrossFadeDuration;
 
-        outgoingVisual.StartAnimation("Translation.Y", outgoingTranslation);
-        incomingVisual.StartAnimation("Translation.Y", incomingTranslation);
+        outgoingVisual.StartAnimation(nameof(Visual.Opacity), outgoingOpacity);
+        incomingVisual.StartAnimation(nameof(Visual.Opacity), incomingOpacity);
 
         batch.Completed += (_, _) => incoming.DispatcherQueue.TryEnqueue(() => completed());
         batch.End();
