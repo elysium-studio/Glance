@@ -62,20 +62,21 @@
                 Foreground="{ThemeResource GlanceNetworkIconBrush}"
                 Glyph="&#xE701;" />
         </Grid>
-        <Grid Grid.Column="1" VerticalAlignment="Center" ColumnSpacing="8">
+        <Grid Grid.Column="1" VerticalAlignment="Center" ColumnSpacing="12">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="4">
                 <TextBlock
                     VerticalAlignment="Center"
                     FontFamily="Segoe UI Variable Text"
-                    FontSize="12"
-                    FontWeight="SemiBold"
+                    FontSize="15"
+                    FontWeight="Bold"
                     Foreground="{ThemeResource GlanceNetworkDownloadBrush}"
                     Text="&#x2193;" />
                 <TextBlock
+                    MinWidth="44"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Style="{StaticResource CaptionTextBlockStyle}"
                     Text="{x:Bind ViewModel.DownloadText, Mode=OneWay}"
@@ -85,11 +86,12 @@
                 <TextBlock
                     VerticalAlignment="Center"
                     FontFamily="Segoe UI Variable Text"
-                    FontSize="12"
-                    FontWeight="SemiBold"
+                    FontSize="15"
+                    FontWeight="Bold"
                     Foreground="{ThemeResource GlanceNetworkUploadBrush}"
                     Text="&#x2191;" />
                 <TextBlock
+                    MinWidth="44"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Style="{StaticResource CaptionTextBlockStyle}"
                     Text="{x:Bind ViewModel.UploadText, Mode=OneWay}"
