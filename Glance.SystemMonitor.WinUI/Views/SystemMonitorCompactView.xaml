@@ -81,6 +81,7 @@
                     TextWrapping="NoWrap"
                     Style="{StaticResource CaptionTextBlockStyle}" />
                 <TextBlock
+                    Width="28"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Style="{StaticResource CaptionTextBlockStyle}"
                     Text="{x:Bind ViewModel.CpuText, Mode=OneWay}"
@@ -94,6 +95,7 @@
                     TextWrapping="NoWrap"
                     Style="{StaticResource CaptionTextBlockStyle}" />
                 <TextBlock
+                    Width="28"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Style="{StaticResource CaptionTextBlockStyle}"
                     Text="{x:Bind ViewModel.MemoryText, Mode=OneWay}"
@@ -107,6 +109,7 @@
                     TextWrapping="NoWrap"
                     Style="{StaticResource CaptionTextBlockStyle}" />
                 <TextBlock
+                    Width="28"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Style="{StaticResource CaptionTextBlockStyle}"
                     Text="{x:Bind ViewModel.GpuText, Mode=OneWay}"
