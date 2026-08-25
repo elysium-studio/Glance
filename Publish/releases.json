@@ -224,5 +224,15 @@
       "Improved compact System Monitor and Network layouts so live values remain stable and readable.",
       "Includes the latest signed installer, full package, and automatic delta update."
     ]
+  },
+  {
+    "version": "1.0.2",
+    "date": "2026-08-25",
+    "releaseNotes": [
+      "Removed distracting module bounce and attention pulse animations throughout the island.",
+      "Corrected drag-routing transitions so module backgrounds remain clipped to the island rounded corners.",
+      "Restores the last selected module when Glance starts.",
+      "Includes the signed installer, full package, and automatic delta update."
+    ]
   }
 ]
