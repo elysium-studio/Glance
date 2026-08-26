@@ -28,8 +28,6 @@ internal sealed class DesktopIslandPresentationController :
     private IDesktopIslandPresentationHost? host;
     private DispatcherQueueTimer? attentionExpansionTimer;
     private DispatcherQueueTimer? startupAttentionTimer;
-    private RectangleGeometry? contentRouteClip;
-    private FrameworkElement? contentRouteClipHost;
     private CompositionGeometricClip? contentRouteCompositionClip;
     private Visual? contentRouteClipVisual;
     private int assistantPresentationTransition;
@@ -775,37 +773,23 @@ internal sealed class DesktopIslandPresentationController :
 
         double horizontalInset = Math.Max(0, (clipHost.ActualWidth - Host.ExpandedContentHost.ActualWidth) / 2);
         double verticalInset = Math.Max(0, (clipHost.ActualHeight - Host.ExpandedContentHost.ActualHeight) / 2);
-        contentRouteClipHost = clipHost;
-        contentRouteClip = new RectangleGeometry
-        {
-            Rect = new Windows.Foundation.Rect(horizontalInset, verticalInset, Host.ExpandedContentHost.ActualWidth, Host.ExpandedContentHost.ActualHeight)
-        };
-        contentRouteClipHost.Clip = contentRouteClip;
-
         contentRouteClipVisual = ElementCompositionPreview.GetElementVisual(clipHost);
         Compositor compositor = contentRouteClipVisual.Compositor;
-        CompositionRoundedRectangleGeometry roundedRectangle = compositor.CreateRoundedRectangleGeometry();
-        roundedRectangle.Offset = new Vector2((float)horizontalInset, (float)verticalInset);
-        roundedRectangle.Size = new Vector2((float)Host.ExpandedContentHost.ActualWidth, (float)Host.ExpandedContentHost.ActualHeight);
-        roundedRectangle.CornerRadius = new Vector2(ExpandedIslandCornerRadius);
-        contentRouteCompositionClip = compositor.CreateGeometricClip(roundedRectangle);
+        CompositionRoundedRectangleGeometry geometry = compositor.CreateRoundedRectangleGeometry();
+        geometry.Offset = new Vector2((float)horizontalInset, (float)verticalInset);
+        geometry.Size = new Vector2((float)Host.ExpandedContentHost.ActualWidth, (float)Host.ExpandedContentHost.ActualHeight);
+        geometry.CornerRadius = new Vector2(ExpandedIslandCornerRadius);
+        contentRouteCompositionClip = compositor.CreateGeometricClip(geometry);
         contentRouteClipVisual.Clip = contentRouteCompositionClip;
     }
 
     private void ClearContentRouteClip()
     {
-        if (contentRouteClipHost is not null && ReferenceEquals(contentRouteClipHost.Clip, contentRouteClip))
-        {
-            contentRouteClipHost.Clip = null;
-        }
-
-        if (contentRouteClipVisual is not null && ReferenceEquals(contentRouteClipVisual.Clip, contentRouteCompositionClip))
+        if (contentRouteClipVisual is not null)
         {
             contentRouteClipVisual.Clip = null;
         }
 
-        contentRouteClip = null;
-        contentRouteClipHost = null;
         contentRouteCompositionClip = null;
         contentRouteClipVisual = null;
     }
