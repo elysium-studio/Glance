@@ -20,7 +20,11 @@ internal sealed class TorrentConfirmationWindow
 {
     private readonly CancellationTokenSource cancellation = new();
     private readonly TorrentAddCoordinator coordinator;
-    private readonly Grid details = new() { Width = 600, MaxHeight = 560 };
+    private readonly Grid details = new()
+    {
+        HorizontalAlignment = HorizontalAlignment.Stretch,
+        VerticalAlignment = VerticalAlignment.Stretch
+    };
     private readonly DispatcherQueue dispatcherQueue;
     private readonly ContentDialogWindow dialog;
     private string downloadPath;
@@ -54,8 +58,12 @@ internal sealed class TorrentConfirmationWindow
         StackPanel loading = new()
         {
             Orientation = Orientation.Horizontal,
-            Spacing = 12
+            Spacing = 12,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
         };
+        progress.VerticalAlignment = VerticalAlignment.Center;
+        status.VerticalAlignment = VerticalAlignment.Center;
         loading.Children.Add(progress);
         loading.Children.Add(status);
         details.Children.Add(loading);
@@ -66,7 +74,7 @@ internal sealed class TorrentConfirmationWindow
         dialog = new ContentDialogWindow
         {
             Width = 680,
-            Height = 756,
+            Height = 680,
             Title = localizer.GetText("ConfirmTitle"),
             Content = details,
             PrimaryButtonText = localizer.GetText("AddDownload"),
@@ -172,7 +180,7 @@ internal sealed class TorrentConfirmationWindow
         details.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         details.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         details.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        details.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+        details.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         details.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
         StackPanel summary = new() { Spacing = 4 };
@@ -192,7 +200,7 @@ internal sealed class TorrentConfirmationWindow
 
         Grid destination = new()
         {
-            Margin = new Thickness(0, 16, 0, 0)
+            Margin = new Thickness(0, 12, 0, 0)
         };
         destination.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         destination.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -230,7 +238,7 @@ internal sealed class TorrentConfirmationWindow
         {
             Text = localizer.GetText("Files"),
             FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
-            Margin = new Thickness(0, 16, 0, 8)
+            Margin = new Thickness(0, 12, 0, 6)
         };
         Grid.SetRow(filesTitle, 2);
         details.Children.Add(filesTitle);
@@ -261,7 +269,7 @@ internal sealed class TorrentConfirmationWindow
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(4),
             Child = fileTable,
-            Height = 320
+            MaxHeight = 320
         };
         Grid.SetRow(tableBorder, 3);
         details.Children.Add(tableBorder);
