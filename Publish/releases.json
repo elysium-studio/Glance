@@ -234,5 +234,14 @@
       "Restores the last selected module when Glance starts.",
       "Includes the signed installer, full package, and automatic delta update."
     ]
+  },
+  {
+    "version": "1.0.3",
+    "date": "2026-08-27",
+    "releaseNotes": [
+      "Fixed crashes when dragging files, images, and torrents into the island while preserving rounded transition clipping.",
+      "Fixed the Nemotron transcription package missing its required OpenAI client dependency.",
+      "Includes the signed installer, full package, and automatic delta update."
+    ]
   }
 ]
